@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="windows-1252" standalone="yes" ?>
+<ClientTags>
+    <Client>
+        <ClientTag>++</ClientTag><!-- Client identification in tag -->
+        <ClientName>DC++</ClientName><!-- Client name -->
+    </Client>
+    <Client>
+        <ClientTag>DCGUI</ClientTag>
+        <ClientName>Valknut</ClientName>
+    </Client>
+    <Client>
+        <ClientTag>DC</ClientTag>
+        <ClientName>NMDC2</ClientName>
+    </Client>
+    <Client>
+        <ClientTag>oDC</ClientTag>
+        <ClientName>oDC</ClientName>
+    </Client>
+    <Client>
+        <ClientTag>DC:PRO</ClientTag>
+        <ClientName>DC:PRO</ClientName>
+    </Client>
+    <Client>
+        <ClientTag>QuickDC</ClientTag>
+        <ClientName>QuickDC</ClientName>
+    </Client>
+    <Client>
+        <ClientTag>LDC++</ClientTag>
+        <ClientName>LDC++</ClientName>
+    </Client>
+    <Client>
+        <ClientTag>R2++</ClientTag>
+        <ClientName>R2++</ClientName>
+    </Client>
+    <Client>
+        <ClientTag>Goofy++</ClientTag>
+        <ClientName>Goofy++</ClientName>
+    </Client>
+    <Client>
+        <ClientTag>PWDC++</ClientTag>
+        <ClientName>PWDC++</ClientName>
+    </Client>
+    <Client>
+        <ClientTag>BDC++</ClientTag>
+        <ClientName>BDC++</ClientName>
+    </Client>
+    <Client>
+        <ClientTag>zK++</ClientTag>
+        <ClientName>zK++</ClientName>
+    </Client>
+</ClientTags>

@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title>PtokaX Lua scripting interface</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="Author" content="PPK">
+        <meta name="Description" content="PtokaX Lua scripting interface doc">
+        <meta name="Keywords" content="PtokaX, Direct Connect, P2P, Peer To Peer, Lua, Scripting">
+        <link rel="Shortcut Icon" href="Spider256-16x16.ico">
+        <link href="style.css" type="text/css" rel="stylesheet">
+    </head>
+    <body>
+        <center>
+    		<h1>Functions called by PtokaX</h1>
+            <table>
+                <tr>
+                    <td>OnStartup()</td><td>- Is called on script startup.</td>
+                </tr>
+                <tr>
+                    <td>OnExit()</td><td>- Is called on script exit.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>OnTimer(nTimerId)</td><td>- Default function called by timer on given interval.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>UserConnected(<a href="user.html">tUser</a>)</td><td>- Is called when user finish login sequence.</td>
+                </tr>
+                <tr>
+                    <td>UserDisconnected(<a href="user.html">tUser</a>)</td><td>- Is called when user disconnect or was disconnected.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>RegConnected(<a href="user.html">tUser</a>)</td><td>- Is called when reg finish login sequence.</td>
+                </tr>
+                <tr>
+                    <td>RegDisconnected(<a href="user.html">tUser</a>)</td><td>- Is called when reg disconnect or was disconnected.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>OpConnected(<a href="user.html">tUser</a>)</td><td>- Is called when operator finish login sequence.</td>
+                </tr>
+                <tr>
+                    <td>OpDisconnected(<a href="user.html">tUser</a>)</td><td>- Is called when operator disconnect or was disconnected.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>OnError(sErrorMsg)</td><td>- Is called when error was found in script.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>SupportsArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming supports from user.</td>
+                </tr>
+                <tr>
+                    <td>ChatArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming chat message from user. If script return true hub don't process data.</td>
+                </tr>
+                <tr>
+                    <td>KeyArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming key from user.</td>
+                </tr>
+                <tr>
+                    <td>ValidateNickArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming validate nick from user.</td>
+                </tr>
+                <tr>
+                    <td>PasswordArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming password from user.</td>
+                </tr>
+                <tr>
+                    <td>VersionArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming version from user.</td>
+                </tr>
+                <tr>
+                    <td>GetNickListArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming get nick list request from user.</td>
+                </tr>
+                <tr>
+                    <td>MyINFOArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming user myinfo.</td>
+                </tr>
+                <tr>
+                    <td>GetINFOArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming get info request from user.</td>
+                </tr>
+                <tr>
+                    <td>SearchArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming search request from user. If script return true hub don't process data.</td>
+                </tr>
+                <tr>
+                    <td>ToArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming private message from user. If script return true hub don't process data.</td>
+                </tr>
+                <tr>
+                    <td>ConnectToMeArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming active connection request from user. If script return true hub don't process data.</td>
+                </tr>
+                <tr>
+                    <td>MultiConnectToMeArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming multi connection request from user. If script return true hub don't process data.</td>
+                </tr>
+                <tr>
+                    <td>RevConnectToMeArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming pasive connection request from user. If script return true hub don't process data.</td>
+                </tr>
+                <tr>
+                    <td>SRArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming search reply from user. If script return true hub don't process data.</td>
+                </tr>
+                <tr>
+                    <td>UDPSRArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming search reply from user. If script return true hub don't process data.</td>
+                </tr>
+                <tr>
+                    <td>KickArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming kick command from user. If script return true hub don't process data.</td>
+                </tr>
+                <tr>
+                    <td>OpForceMoveArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming redirect command from user. If script return true hub don't process data.</td>
+                </tr>
+                <tr>
+                    <td>UnknownArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming unknown command from user. If script return true hub don't process data (don't disconnect user).</td>
+                </tr>
+                <tr>
+                    <td>BotINFOArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming hublist pinger request from user. If script return true hub don't process data.</td>
+                </tr>
+                <tr>
+                    <td>CloseArrival(<a href="user.html">tUser</a>, sData)</td><td>- Incoming close command from user. If script return true hub don't process data.</td>
+                </tr>
+            </table>
+        </center>
+    </body>
+</html>
