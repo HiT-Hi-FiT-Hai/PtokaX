@@ -1,0 +1,177 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title>PtokaX Lua scripting interface</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="Author" content="PPK">
+        <meta name="Description" content="PtokaX Lua scripting interface doc">
+        <meta name="Keywords" content="PtokaX, Direct Connect, P2P, Peer To Peer, Lua, Scripting">
+        <link rel="Shortcut Icon" href="Spider256-16x16.ico">
+        <link href="style.css" type="text/css" rel="stylesheet">
+    </head>
+    <body>
+        <center>
+    		<h1>Core metatable</h1>
+            <table>
+                <tr>
+                    <td>Core.Version</td><td>- Return PtokaX version.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>Core.Restart()</td><td>- Restart hub.</td>
+                </tr>
+                <tr>
+                    <td>Core.Shutdown()</td><td>- Shutdown hub.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>Core.ResumeAccepts()</td><td>- Resume listening thread(s) if they were suspended.</td>
+                </tr>
+                <tr>
+                    <td>Core.SuspendAccepts()</td><td>- Stop listening thread(s). Hub looks in this time like it is not running.</td>
+                </tr>
+                <tr>
+                    <td>Core.SuspendAccepts(nTime)</td><td>- Stop listening thread(s) for given time in seconds. Hub looks in this time like it is not running.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>Core.RegBot(sBotName, sDescription, sEmail, bHaveKey)</td><td>- Chars $|<>:?*"/\ and space not allowed in nick, $| not allowed in Description and Email, max length 64 chars per string. Return nil when failed, true when success.</td>
+                </tr>
+                <tr>
+                    <td>Core.UnregBot(sBotName)</td><td>- Return nil when failed, true when success.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>Core.GetBots()</td><td>- Return table with all bots registered by scripts as tables with sNick, sMyINFO, bIsOP and sScriptName.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetActualUsersPeak()</td><td>- Return actual users peak.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetMaxUsersPeak()</td><td>- Return max users peak.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetCurrentSharedSize()</td><td>- Return total hub share size in bytes.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetHubIP()</td><td>- Return IP if is available, or nil when not.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetHubSecAlias()</td><td>- Return actual Hub-Security alias.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetPtokaXPath()</td><td>- Return PtokaX path.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetUsersCount()</td><td>- Return hub users count.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetUpTime()</td><td>- Return hub uptime in seconds.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetOnlineNonOps()</td><td>- Return table with all logged <a href="user.html">user table</a>s without operator status.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetOnlineNonOps(bAllData)</td><td>- Return table with all logged <a href="user.html">user table</a>s without operator status. Use true for bAllData if you want <a href="user.html">user table</a>s with all data.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetOnlineOps()</td><td>- Return table with all logged <a href="user.html">user table</a>s with operator status.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetOnlineOps(bAllData)</td><td>- Return table with all logged <a href="user.html">user table</a>s with operator status. Use true for bAllData if you want <a href="user.html">user table</a>s with all data.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetOnlineRegs()</td><td>- Return table with all logged and registered (profile > -1) <a href="user.html">user table</a>s.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetOnlineRegs(bAllData)</td><td>- Return table with all logged and registered (profile > -1) <a href="user.html">user table</a>s. Use true for bAllData if you want <a href="user.html">user table</a>s with all data.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetOnlineUsers()</td><td>- Return table with all logged user tables.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetOnlineUsers(bAllData)</td><td>- Return table with all logged user tables. Use true for bAllData if you want user tables with all data.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetOnlineUsers(nProfileNumber)</td><td>- Return table with users of given profile.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetOnlineUsers(nProfileNumber, bAllData)</td><td>- Return table with users of given profile. Use true for bAllData if you want user tables with all data.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetUser(sNick)</td><td>- Return online user of given nick as <a href="user.html">user table</a> or nil when user not exist.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetUser(sNick, bAllData)</td><td>- Return online user of given nick as <a href="user.html">user table</a> or nil when user not exist. Use true for bAllData if you want <a href="user.html">user table</a> with all data.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetUserAllData(<a href="user.html">tUser</a>)</td><td>- Add or update all user data in <a href="user.html">user table</a>. Return nil when failed (user is not online) or true when sucess.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetUserData(<a href="user.html">tUser</a>, <a href="userdataids.html">nValueId</a>)</td><td>- Add or update value of given id in <a href="user.html">user table</a>. Return nil when failed (user is not online) or true when sucess.</td>
+                </tr>
+                <tr>
+                    <td>Core.GetUserValue(<a href="user.html">tUser</a>, <a href="userdataids.html">nValueId</a>)</td><td>- Return value of wanted nValueId or nil when failed (user is not online).</td>
+                </tr>
+                <tr>
+                    <td>GetUsers(sIP)</td><td>- Return online users from given ip as table with <a href="user.html">user tables</a> or nil when no user with that IP is found or invalid IP is given.
+                </tr>
+                <tr>
+                    <td>GetUsers(sIP, bAllData)</td><td>- Return online users from given ip as table with <a href="user.html">user tables</a> or nil when no user with that IP is found or invalid IP is given. Use true for bAllData if you want user table with all data.
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>Core.Disconnect(sNick)</td><td>- Disconnect user with given nick. Return nil when failed, true when success.</td>
+                </tr>
+                <tr>
+                    <td>Core.Disconnect(<a href="user.html">tUser</a>)</td><td>- Disconnect user. Return nil when failed, true when success.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>Core.Kick(<a href="user.html">tUser</a>, sKickerNick, sReason)</td><td>- Kick user. Max KickerNick length 64 chars, max Reason length 128000 chars. Return nil when failed, true when success.</td>
+                </tr>
+                <tr>
+                    <td>Core.Redirect(<a href="user.html">tUser</a>, sAddress, sReason)</td><td>- Redirect user to given address with given reason. Max Address length 1024 chars. Max Reason length 128000 chars. Return nil when failed, true when success.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>Core.DefloodWarn(<a href="user.html">tUser</a>)</td><td>- Warn user on flood. Return nil when failed, true when success.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>Core.SendToAll(sData)</td><td>- Send data to all users. Max sData length 128000 chars. When data don't contains | on end, will be automatically added.</td>
+                </tr>
+                <tr>
+                    <td>Core.SendToNick(sNick, sData)</td><td>- Send data to user with given nick. Max sData length 128000 chars. When data don't contains | on end, will be automatically added.</td>
+                </tr>
+                <tr>
+                    <td>Core.SendToOpChat(sData)</td><td>- Send data as private message in OpChat. Max sData length 128000 chars. If OpChat is not enabled then nothing is sent.</td>
+                </tr>
+                <tr>
+                    <td>Core.SendToOps(sData)</td><td>- Send data to operators. Max sData length 128000 chars. When data don't contains | on end, will be automatically added.</td>
+                </tr>
+                <tr>
+                    <td>Core.SendToProfile(nProfileNumber, sData)</td><td>- Send data to users with given profile. Max sData length 128000 chars. When data don't contains | on end, will be automatically added.</td>
+                </tr>
+                <tr>
+                    <td>Core.SendToUser(<a href="user.html">tUser</a>, sData)</td><td>- Send data to user. Max Data length 128000 chars. When data don't contains | on end, will be automatically added.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>Core.SendPmToAll(sFromNick, sData)</td><td>- Send data as private message to all users. Max FromNick length 64 chars, max Data length 128000 chars.</td>
+                </tr>
+                <tr>
+                    <td>Core.SendPmToNick(sToNick, sFromNick, sData)</td><td>- Send data as private message to user with given nick. Max FromNick length 64 chars, max Data length 128000 chars.</td>
+                </tr>
+                <tr>
+                    <td>Core.SendPmToOps(sFromNick, sData)</td><td>- Send data to operators. Max FromNick length 64 chars, max Data length 128000 chars.</td>
+                </tr>
+                <tr>
+                    <td>Core.SendPmToProfile(nProfileNumber, sFromNick, sData)</td><td>- Send data as private message to users with given profile. Max FromNick length 64 chars, max Data length 128000 chars.</td>
+                </tr>
+                <tr>
+                    <td>Core.SendPmToUser(<a href="user.html">tUser</a>, sFromNick, sData)</td><td>- Send private message to user. Max FromNick length 64 chars, max Data length 128000 chars.</td>
+                </tr>
+            </table>
+        </center>
+    </body>
+</html>

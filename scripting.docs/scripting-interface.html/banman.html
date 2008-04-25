@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title>PtokaX Lua scripting interface</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="Author" content="PPK">
+        <meta name="Description" content="PtokaX Lua scripting interface doc">
+        <meta name="Keywords" content="PtokaX, Direct Connect, P2P, Peer To Peer, Lua, Scripting">
+        <link rel="Shortcut Icon" href="Spider256-16x16.ico">
+        <link href="style.css" type="text/css" rel="stylesheet">
+    </head>
+    <body>
+        <center>
+    		<h1>BanMan metatable</h1>
+            <table>
+                <tr>
+                    <td>BanMan.Save()</td><td>- Save bans.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>BanMan.GetBans()</td><td>- Return table with <a href="ban.html">ban table</a>s.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.GetTempBans()</td><td>- Return table with <a href="ban.html">ban table</a>s.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.GetPermBans()</td><td>- Return table with <a href="ban.html">ban table</a>s.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>BanMan.GetBan(sNick/sIP)</td><td>- Return <a href="ban.html">ban table</a> with ban for given nick or nil when not exist. Return table with <a href="ban.html">ban table</a>(s) with ban(s) for given ip or nil when not exist.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.GetPermBan(sNick/sIP)</td><td>- Return <a href="ban.html">ban table</a> with permban for given nick or nil when not exist. Return table with <a href="ban.html">ban table</a>(s) with permban(s) for given ip or nil when not exist.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.GetTempBan(sNick/sIP)</td><td>- Return <a href="ban.html">ban table</a> with tempban for given nick or nil when not exist. Return table with <a href="ban.html">ban table</a>(s) with tempban(s) for given ip or nil when not exist.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>BanMan.GetRangeBans()</td><td>- Return table with <a href="rangeban.html">range ban table</a>s.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.GetTempRangeBans()</td><td>- Return table with <a href="rangeban.html">range ban table</a>s.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.GetPermRangeBans()</td><td>- Return table with <a href="rangeban.html">range ban table</a>s.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>BanMan.GetRangeBan(sIPFrom, sIPTo)</td><td>- Return <a href="rangeban.html">range ban table</a> with rangeban for given range or nil when not exist.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.GetRangePermBan(sIPFrom, sIPTo)</td><td>- Return <a href="rangeban.html">range ban table</a> with rangepermban for given range or nil when not exist.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.GetRangeTempBan(sIPFrom, sIPTo)</td><td>- Return <a href="rangeban.html">range ban table</a> with rangetempban for given range or nil when not exist.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>BanMan.Unban(sNick/sIP)</td><td>- Unban ban with given nick or ip. Return nil when failed, true if success.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.UnbanPerm(sNick/sIP)</td><td>- Unban permban with given nick or ip. Return nil when failed, true if success.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.UnbanTemp(sNick/sIP)</td><td>- Unban tempban with given nick or ip. Return nil when failed, true if success.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>BanMan.UnbanAll(sIP)</td><td>- Unban all bans with given ip.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.UnbanPermAll(sIP)</td><td>- Unban all permbans with given ip.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.UnbanTempAll(sIP)</td><td>- Unban all tempbans with given ip.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>BanMan.RangeUnban(sIPFrom, sIPTo)</td><td>- Unban range ban with given range. Return nil when failed, true if success.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.RangeUnbanPerm(sIPFrom, sIPTo)</td><td>- Unban permanent range ban with given range. Return nil when failed, true if success.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.RangeUnbanTemp(sIPFrom, sIPTo)</td><td>- Unban temporary range ban with given range. Return nil when failed, true if success.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>BanMan.ClearBans()</td><td>- Clear all bans.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.ClearPermBans()</td><td>- Clear all perm bans.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.ClearTempBans()</td><td>- Clear all temp bans.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>BanMan.ClearRangeBans()</td><td>- Clear all range bans.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.ClearRangePermBans()</td><td>- Clear all range perm bans.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.ClearRangeTempBans()</td><td>- Clear all range temp bans.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>BanMan.Ban(<a href="user.html">tUser</a>, sReason, sBy, bFull)</td><td>- Perm ban user IP and Nick. Return nil when failed, true if success.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.BanIP(sIP, sReason, sBy, bFull)</td><td>- Perm ban given ip. Return nil when failed, true if success.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.BanNick(sNick, sReason, sBy)</td><td>- Perm ban given nick. Return nil when failed, true if success.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>BanMan.TempBan(<a href="user.html">tUser</a>, nTime, sReason, sBy, bFull)</td><td>- Temp ban user IP and Nick. nTime is in minutes (0 = default tempban time from settings) ! Return nil when failed, true if success.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.TempBanIP(sIP, nTime, sReason, sBy, bFull)</td><td>- Temp ban given ip. nTime is in minutes (0 = default tempban time from settings) ! Return nil when failed, true if success.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.TempBanNick(sNick, nTime, sReason, sBy)</td><td>- Temp ban given nick. nTime is in minutes (0 = default tempban time from settings) ! Return nil when failed, true if success.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>BanMan.RangeBan(sIPFrom, sIPTo, sReason, sBy, bFull)</td><td>- Range perm ban given range. Return nil when failed, true if success.</td>
+                </tr>
+                <tr>
+                    <td>BanMan.RangeTempBan(sIPFrom, sIPTo, nTime, sReason, sBy, bFull)</td><td>- Range temp ban given range. nTime is in minutes (0 = default tempban time from settings) ! Return nil when failed, true if success.</td>
+                </tr>
+            </table>
+        </center>
+    </body>
+</html>

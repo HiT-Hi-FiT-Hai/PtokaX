@@ -1,0 +1,63 @@
+/*
+ * PtokaX - hub server for Direct Connect peer to peer network.
+
+ * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
+ * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+//---------------------------------------------------------------------------
+#ifndef UdpDebugH
+#define UdpDebugH
+//---------------------------------------------------------------------------
+struct User;
+//---------------------------------------------------------------------------
+
+class clsUdpDebug {
+private:
+    struct UdpDbgItem {
+        UdpDbgItem() { };
+        ~UdpDbgItem();
+
+        int s;
+        sockaddr_in to;
+        uint32_t ui32Hash;
+        char *Nick;
+        UdpDbgItem *prev, *next;
+        bool bIsScript;
+    };
+
+public:
+    UdpDbgItem *llist, *ScriptList;
+
+	clsUdpDebug();
+	~clsUdpDebug();
+
+	void Broadcast(const char * msg);
+	void Broadcast(const char * msg, const int &iLen);
+    void Broadcast(const string & msg);
+	bool New(User *u, const int &port);
+	bool New(char * sIP, const unsigned short &usPort, const bool &bAllData, char * sScriptName);
+	bool Remove(User * u);
+	void Remove(char * sScriptName);
+	bool CheckUdpSub(User * u, bool bSndMess = false);
+	void Send(char * sScriptName, char * sMsg, const int &iLen);
+	void Cleanup();
+};
+
+//---------------------------------------------------------------------------
+extern clsUdpDebug *UdpDebug;
+//---------------------------------------------------------------------------
+
+#endif

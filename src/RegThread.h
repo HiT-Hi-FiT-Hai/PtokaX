@@ -1,0 +1,74 @@
+/*
+ * PtokaX - hub server for Direct Connect peer to peer network.
+
+ * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
+ * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+//---------------------------------------------------------------------------
+#ifndef RegThreadH
+#define RegThreadH
+//---------------------------------------------------------------------------
+
+class RegThread {
+private:
+    struct RegSocket {
+        RegSocket() { };
+        ~RegSocket();
+    
+        uint64_t iTotalShare;
+    
+        int sock;
+    
+        unsigned int iRecvBufLen, iRecvBufSize, iSendBufLen, iTotalUsers;
+
+        uint32_t ui32AddrLen;
+
+        char *sAddress, *sRecvBuf, *sSendBuf, *sSendBufHead;
+    
+        RegSocket *prev, *next;    
+    };
+
+    pthread_t threadId;
+
+    RegSocket *RegSockListS, *RegSockListE;
+
+    bool bTerminated;
+
+    char sMsg[2048];
+    
+	void AddSock(char * sAddress, const uint32_t &ui32Len);
+	bool Receive(RegSocket * Sock);
+    void Add2SendBuf(RegSocket * Sock, char * sData);
+    bool Send(RegSocket * Sock);
+    void RemoveSock(RegSocket * Sock);
+public:
+    unsigned int iBytesRead, iBytesSent;
+    
+	RegThread();
+	~RegThread();
+	
+	void Setup(char * sAddresses, const uint16_t &ui16AddrsLen);
+	void Resume();
+	void Run();
+	void Close();
+	void WaitFor();
+};
+
+//---------------------------------------------------------------------------
+extern RegThread *RegisterThread;
+//---------------------------------------------------------------------------
+
+#endif

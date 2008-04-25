@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title>PtokaX Lua scripting interface</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="Author" content="PPK">
+        <meta name="Description" content="PtokaX Lua scripting interface doc">
+        <meta name="Keywords" content="PtokaX, Direct Connect, P2P, Peer To Peer, Lua, Scripting">
+        <link rel="Shortcut Icon" href="Spider256-16x16.ico">
+        <link href="style.css" type="text/css" rel="stylesheet">
+    </head>
+    <body>
+        <center>
+    		<h1>Setting bools IDs</h1>
+            <table>
+                <tr>
+                    <td>0</td><td>- Anti MoGlo description</td>
+                </tr>
+                <tr>
+                    <td>1</td><td>- Hub autostart</td>
+                </tr>
+                <tr>
+                    <td>2</td><td>- Redirect all connecting users</td>
+                </tr>
+                <tr>
+                    <td>3</td><td>- Redirect users when hub is full</td>
+                </tr>
+                <tr>
+                    <td>4</td><td>- Automatically register to hublist</td>
+                </tr>
+                <tr>
+                    <td>5</td><td>- Hub for registered users only</td>
+                </tr>
+                <tr>
+                    <td>6</td><td>- Redirect non-registered users when hub is for registered users only</td>
+                </tr>
+                <tr>
+                    <td>7</td><td>- Redirect user when he's don't have share limit</td>
+                </tr>
+                <tr>
+                    <td>8</td><td>- Redirect user when he's don't have slot limit</td>
+                </tr>
+                <tr>
+                    <td>9</td><td>- Redirect user when he's don't have hub/slot ratio limit</td>
+                </tr>
+                <tr>
+                    <td>10</td><td>- Redirect user when he's don't have max hubs limit</td>
+                </tr>
+                <tr>
+                    <td>11</td><td>- Add user mode to MyINFO command.</td>
+                </tr>
+                <tr>
+                    <td>12</td><td>- Add user mode to description.</td>
+                </tr>
+                <tr>
+                    <td>13</td><td>- Strip user description.</td>
+                </tr>
+                <tr>
+                    <td>14</td><td>- Strip user description tag.</td>
+                </tr>
+                <tr>
+                    <td>15</td><td>- Strip user connection.</td>
+                </tr>
+                <tr>
+                    <td>16</td><td>- Strip user email</td>
+                </tr>
+                <tr>
+                    <td>17</td><td>- Register hub bot on hub.</td>
+                </tr>
+                <tr>
+                    <td>18</td><td>- Use hub bot nick instead of Hub-Security.</td>
+                </tr>
+                <tr>
+                    <td>19</td><td>- Register Opchat bot on hub.</td>
+                </tr>
+                <tr>
+                    <td>20</td><td>- Redirect user when is temp banned.</td>
+                </tr>
+                <tr>
+                    <td>21</td><td>- Redirect user when is perm banned.</td>
+                </tr>
+                <tr>
+                    <td>22</td><td>- Enable scripting interface.</td>
+                </tr>
+                <tr>
+                    <td>23</td><td>- Keep slow clients.</td>
+                </tr>
+                <tr>
+                    <td>24</td><td>- Automatically check for new PtokaX releases on startup</td>
+                </tr>
+                <tr>
+                    <td>25</td><td>- Enable tray icon.</td>
+                </tr>
+                <tr>
+                    <td>26</td><td>- Start minimized.</td>
+                </tr>
+                <tr>
+                    <td>27</td><td>- Filter kick messages.</td>
+                </tr>
+                <tr>
+                    <td>28</td><td>- Send kick messages to OPs.</td>
+                </tr>
+                <tr>
+                    <td>29</td><td>- Send status messages to OPs.</td>
+                </tr>
+                <tr>
+                    <td>30</td><td>- Send status messages as private messages.</td>
+                </tr>
+                <tr>
+                    <td>31</td><td>- Enable text files.</td>
+                </tr>
+                <tr>
+                    <td>32</td><td>- Send text files as private messages.</td>
+                </tr>
+                <tr>
+                    <td>33</td><td>- Stop script on error.</td>
+                </tr>
+                <tr>
+                    <td>34</td><td>- Send MOTD as private message.</td>
+                </tr>
+                <tr>
+                    <td>35</td><td>- Report deflood actions.</td>
+                </tr>
+                <tr>
+                    <td>36</td><td>- Reply to hub commands with private messages.</td>
+                </tr>
+                <tr>
+                    <td>37</td><td>- Disable MOTD.</td>
+                </tr>
+                <tr>
+                    <td>38</td><td>- Don't allow hublist pingers.</td>
+                </tr>
+                <tr>
+                    <td>39</td><td>- Report hublist pingers.</td>
+                </tr>
+                <tr>
+                    <td>40</td><td>- Report 3x bad password.</td>
+                </tr>
+                <tr>
+                    <td>41</td><td>- Advanced password protection.</td>
+                </tr>
+                <tr>
+                    <td>42</td><td>- Listen only on single IP.</td>
+                </tr>
+                <tr>
+                    <td>43</td><td>- Resolve hostname to IP.</td>
+                </tr>
+                <tr>
+                    <td>44</td><td>- Redir user when he's don't have nick in length limits.</td>
+                </tr>
+                <tr>
+                    <td>45</td><td>- Send UserIP to user on login.</td>
+                </tr>
+                <tr>
+                    <td>46</td><td>- Send ip in ban message.</td>
+                </tr>
+                <tr>
+                    <td>47</td><td>- Send range in ban message.</td>
+                </tr>
+                <tr>
+                    <td>48</td><td>- Send nick in ban message.</td>
+                </tr>
+                <tr>
+                    <td>49</td><td>- Send reason in ban message.</td>
+                </tr>
+                <tr>
+                    <td>50</td><td>- Send who create ban in ban message.</td>
+                </tr>
+                <tr>
+                    <td>51</td><td>- Report suspicious tag to OPs.</td>
+                </tr>
+                <tr>
+                    <td>52</td><td>- Accept tag from unknown clients.</td>
+                </tr>
+                <tr>
+                    <td>53</td><td>- Check IP in commands.</td>
+                </tr>
+                <tr>
+                    <td>54</td><td>- Popup scripts window on script error.</td>
+                </tr>
+                <tr>
+                    <td>55</td><td>- Save script errors to log.</td>
+                </tr>
+            </table>
+        </center>
+    </body>
+</html>

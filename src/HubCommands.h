@@ -1,0 +1,54 @@
+/*
+ * PtokaX - hub server for Direct Connect peer to peer network.
+
+ * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
+ * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+//---------------------------------------------------------------------------
+#ifndef HubCommandsH
+#define HubCommandsH
+//---------------------------------------------------------------------------
+struct User;
+//---------------------------------------------------------------------------
+
+class HubCommands {
+private:
+    char msg[1024];
+
+    bool Ban(User * curUser, char * sCommand, bool fromPM, bool bFull);
+    bool BanIp(User * curUser, char * sCommand, bool fromPM, bool bFull);
+    bool TempBan(User * curUser, char * sCommand, unsigned int dlen, bool fromPM, bool bFull);
+    bool TempBanIp(User * curUser, char * sCommand, unsigned int dlen, bool fromPM, bool bFull);
+    bool RangeBan(User * curUser, char * sCommand, unsigned int dlen, bool fromPM, bool bFull);
+    bool RangeTempBan(User * curUser, char * sCommand, unsigned int dlen, bool fromPM, bool bFull);
+    bool RangeUnban(User * curUser, char * sCommand, bool fromPM);
+    bool RangeUnban(User * curUser, char * sCommand, bool fromPM, unsigned char cType);
+
+    void SendNoPermission(User * user, const bool &fromPM);
+    int CheckFromPm(User * curUser, const bool &fromPM);
+    void UncountDeflood(User * curUser, const bool &fromPM);
+public:
+	HubCommands();
+    ~HubCommands();
+
+    bool DoCommand(User * curUser, char * sCommand, const int &iCmdLen, bool fromPM = false);
+};
+
+//---------------------------------------------------------------------------
+extern HubCommands *HubCmds;
+//---------------------------------------------------------------------------
+
+#endif
