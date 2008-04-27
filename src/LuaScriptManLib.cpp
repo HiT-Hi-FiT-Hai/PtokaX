@@ -191,7 +191,7 @@ static int StartScript(lua_State * L) {
     if(curScript != NULL) {
         lua_settop(L, 0);
 
-        if(curScript->bEnabled == true && curScript->LUA != NULL) {
+        if(curScript->LUA != NULL) {
     		lua_pushnil(L);
             return 1;
         }
@@ -248,7 +248,7 @@ static int RestartScript(lua_State * L) {
     }
 
     Script * curScript = ScriptManager->FindScript(sName);
-    if(curScript == NULL || curScript->bEnabled == false || curScript->LUA == NULL) {
+    if(curScript == NULL || curScript->LUA == NULL) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -300,7 +300,7 @@ static int StopScript(lua_State * L) {
     }
 
     Script * curScript = ScriptManager->FindScript(sName);
-    if(curScript == NULL || curScript->bEnabled == false || curScript->LUA == NULL) {
+    if(curScript == NULL || curScript->LUA == NULL) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;

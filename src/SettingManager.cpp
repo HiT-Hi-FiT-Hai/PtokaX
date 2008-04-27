@@ -684,6 +684,10 @@ void SetMan::SetShort(size_t iShortId, const short &iValue) {
             }
             break;
         case SETSHORT_MAX_MYINFO_LEN:
+            if(iValue < 64 || iValue > 512) {
+                return;
+            }
+            break;
         case SETSHORT_MAX_CTM_LEN:
         case SETSHORT_MAX_RCTM_LEN:
             if(iValue == 0 || iValue > 512) {
