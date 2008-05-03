@@ -87,7 +87,7 @@ cDcCommands::~cDcCommands() {
 //---------------------------------------------------------------------------
 
 // Process DC data form User
-void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCheck, const unsigned int &iLen) {
+void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCheck, const uint32_t &iLen) {
     // micro spam
     if(iLen < 5 && bCheck) {
     	#ifdef _DEBUG
@@ -925,7 +925,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
 //---------------------------------------------------------------------------
 
 // $BotINFO pinger identification|
-void cDcCommands::BotINFO(User * curUser, char * sData, const unsigned int &iLen) {
+void cDcCommands::BotINFO(User * curUser, char * sData, const uint32_t &iLen) {
 	if(((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == false || ((curUser->ui32BoolBits & User::BIT_HAVE_BOTINFO) == User::BIT_HAVE_BOTINFO) == true) {
         #ifdef _DBG
             int iret = sprintf(msg, "%s (%s) send $BotINFO and not detected as pinger.", curUser->Nick, curUser->IP);
@@ -957,10 +957,10 @@ void cDcCommands::BotINFO(User * curUser, char * sData, const unsigned int &iLen
 		return;
 	}
 
-	int imsgLen = sprintf(msg, "$HubINFO %s$%s:%u$%s.px.$%d$%llu$%d$%d$PtokaX$%s|", SettingManager->sTexts[SETTXT_HUB_NAME],
+	int imsgLen = sprintf(msg, "$HubINFO %s$%s:%u$%s.px.$%d$%" PRIu64 "64$%d$%d$PtokaX$%s|", SettingManager->sTexts[SETTXT_HUB_NAME],
 		SettingManager->sTexts[SETTXT_HUB_ADDRESS], SettingManager->iPortNumbers[0],
 		SettingManager->sTexts[SETTXT_HUB_DESCRIPTION] == NULL ? "" : SettingManager->sTexts[SETTXT_HUB_DESCRIPTION],
-        SettingManager->iShorts[SETSHORT_MAX_USERS], (unsigned long long)SettingManager->ui64MinShare, SettingManager->iShorts[SETSHORT_MIN_SLOTS_LIMIT],
+        SettingManager->iShorts[SETSHORT_MAX_USERS], SettingManager->ui64MinShare, SettingManager->iShorts[SETSHORT_MIN_SLOTS_LIMIT],
 		SettingManager->iShorts[SETSHORT_MAX_HUBS_LIMIT],
 		SettingManager->sTexts[SETTXT_HUB_OWNER_EMAIL] == NULL ? "" : SettingManager->sTexts[SETTXT_HUB_OWNER_EMAIL]);
 	if(CheckSprintf(imsgLen, 1024, "cDcCommands::BotINFO4") == true) {
@@ -975,7 +975,7 @@ void cDcCommands::BotINFO(User * curUser, char * sData, const unsigned int &iLen
 
 // $ConnectToMe <nickname> <ownip>:<ownlistenport>
 // $MultiConnectToMe <nick> <ownip:port> <hub[:port]>
-void cDcCommands::ConnectToMe(User * curUser, char * sData, const unsigned int &iLen, const bool &bCheck, const bool &bMulti) {
+void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck, const bool &bMulti) {
     if((bMulti == false && iLen < 25) || (bMulti == true && iLen < 30)) {
         int imsgLen = sprintf(msg, "[SYS] Bad $%sConnectToMe (%s) from %s (%s) - user closed.", bMulti == false ? "" : "Multi", sData, 
             curUser->Nick, curUser->IP);
@@ -986,7 +986,26 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const unsigned int &
         return;
     }
 
-    if(iLen > (unsigned int)SettingManager->iShorts[SETSHORT_MAX_CTM_LEN]) {
+    // PPK ... check flood ...
+    if(bCheck == true && ProfileMan->IsAllowed(curUser, ProfileManager::NODEFLOODCTM) == false) { 
+        if(SettingManager->iShorts[SETSHORT_CTM_ACTION] != 0) {
+            if(DeFloodCheckForFlood(curUser, DEFLOOD_CTM, SettingManager->iShorts[SETSHORT_CTM_ACTION], 
+              curUser->ui16CTMs, curUser->ui64CTMsTick, SettingManager->iShorts[SETSHORT_CTM_MESSAGES], 
+              (uint32_t)SettingManager->iShorts[SETSHORT_CTM_TIME]) == true) {
+				return;
+            }
+        }
+
+        if(SettingManager->iShorts[SETSHORT_CTM_ACTION2] != 0) {
+            if(DeFloodCheckForFlood(curUser, DEFLOOD_CTM, SettingManager->iShorts[SETSHORT_CTM_ACTION2], 
+              curUser->ui16CTMs2, curUser->ui64CTMsTick2, SettingManager->iShorts[SETSHORT_CTM_MESSAGES2], 
+			  (uint32_t)SettingManager->iShorts[SETSHORT_CTM_TIME2]) == true) {
+                return;
+            }
+        }
+    }
+
+    if(iLen > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_CTM_LEN]) {
         int imsgLen = sprintf(msg, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_CTM_TOO_LONG]);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::ConnectToMe2") == true) {
             UserSendCharDelayed(curUser, msg, imsgLen);
@@ -1015,25 +1034,6 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const unsigned int &
         }
         UserClose(curUser);
 		return;
-    }
-
-    // PPK ... check flood ...
-    if(bCheck == true && ProfileMan->IsAllowed(curUser, ProfileManager::NODEFLOODCTM) == false) { 
-        if(SettingManager->iShorts[SETSHORT_CTM_ACTION] != 0) {
-            if(DeFloodCheckForFlood(curUser, DEFLOOD_CTM, SettingManager->iShorts[SETSHORT_CTM_ACTION], 
-              curUser->ui16CTMs, curUser->ui64CTMsTick, SettingManager->iShorts[SETSHORT_CTM_MESSAGES], 
-              (uint32_t)SettingManager->iShorts[SETSHORT_CTM_TIME]) == true) {
-				return;
-            }
-        }
-
-        if(SettingManager->iShorts[SETSHORT_CTM_ACTION2] != 0) {
-            if(DeFloodCheckForFlood(curUser, DEFLOOD_CTM, SettingManager->iShorts[SETSHORT_CTM_ACTION2], 
-              curUser->ui16CTMs2, curUser->ui64CTMsTick2, SettingManager->iShorts[SETSHORT_CTM_MESSAGES2], 
-			  (uint32_t)SettingManager->iShorts[SETSHORT_CTM_TIME2]) == true) {
-                return;
-            }
-        }
     }
 
     // PPK ... $CTM means user is active ?!? Probably yes, let set it active and use on another places ;)
@@ -1096,7 +1096,7 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const unsigned int &
 //---------------------------------------------------------------------------
 
 // $GetINFO <nickname> <ownnickname>
-void cDcCommands::GetINFO(User * curUser, char * sData, const unsigned int &iLen) {
+void cDcCommands::GetINFO(User * curUser, char * sData, const uint32_t &iLen) {
 	if(((curUser->ui32BoolBits & User::BIT_SUPPORT_NOGETINFO) == User::BIT_SUPPORT_NOGETINFO) == true ||
         ((curUser->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) == true || 
         ((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == true) {
@@ -1158,7 +1158,7 @@ void cDcCommands::GetINFO(User * curUser, char * sData, const unsigned int &iLen
 //---------------------------------------------------------------------------
 
 // $GetNickList
-bool cDcCommands::GetNickList(User * curUser, char * sData, const unsigned int &iLen, const bool &bCheck) {
+bool cDcCommands::GetNickList(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {
     if(((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == true && 
         ((curUser->ui32BoolBits & User::BIT_HAVE_GETNICKLIST) == User::BIT_HAVE_GETNICKLIST) == true) {
         // PPK ... refresh not allowed !
@@ -1323,7 +1323,7 @@ bool cDcCommands::GetNickList(User * curUser, char * sData, const unsigned int &
 //---------------------------------------------------------------------------
 
 // $Key
-void cDcCommands::Key(User * curUser, char * sData, const unsigned int &iLen) {
+void cDcCommands::Key(User * curUser, char * sData, const uint32_t &iLen) {
     if(((curUser->ui32BoolBits & User::BIT_HAVE_KEY) == User::BIT_HAVE_KEY) == true) {
         int imsgLen = sprintf(msg, "[SYS] $Key flood from %s (%s) - user closed.", curUser->Nick, curUser->IP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::Key1") == true) {
@@ -1381,7 +1381,7 @@ void cDcCommands::Key(User * curUser, char * sData, const unsigned int &iLen) {
 //---------------------------------------------------------------------------
 
 // $Kick <name>
-void cDcCommands::Kick(User * curUser, char * sData, const unsigned int &iLen) {
+void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
     if(ProfileMan->IsAllowed(curUser, ProfileManager::KICK) == false) {
         int iLen = sprintf(msg, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_ARE_NOT_ALWD_TO_USE_THIS_CMD]);
         if(CheckSprintf(iLen, 1024, "cDcCommands::Kick1") == true) {
@@ -1511,7 +1511,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const unsigned int &iLen) {
 
                 return;
 			} else if(isdigit(sBanTime[5]) != 0) { // tempban
-				unsigned int i = 6;
+				uint32_t i = 6;
 				while(sBanTime[i] != '\0' && isdigit(sBanTime[i]) != 0) {
                 	i++;
                 }
@@ -1613,7 +1613,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const unsigned int &iLen) {
 //---------------------------------------------------------------------------
 
 // $Search $MultiSearch
-bool cDcCommands::SearchDeflood(User *curUser, char * sData, const unsigned int &iLen, const bool &bCheck, const bool &bMulti) {
+bool cDcCommands::SearchDeflood(User *curUser, char * sData, const uint32_t &iLen, const bool &bCheck, const bool &bMulti) {
     // search flood protection ... modified by PPK ;-)
     if(bCheck == true && ProfileMan->IsAllowed(curUser, ProfileManager::NODEFLOODSEARCH) == false) {
         if(SettingManager->iShorts[SETSHORT_SEARCH_ACTION] != 0) {  
@@ -1654,8 +1654,8 @@ bool cDcCommands::SearchDeflood(User *curUser, char * sData, const unsigned int 
 //---------------------------------------------------------------------------
 
 // $Search $MultiSearch
-void cDcCommands::Search(User *curUser, char * sData, int unsigned iLen, const bool &bCheck, const bool &bMulti) {
-    int iAfterCmd;
+void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool &bCheck, const bool &bMulti) {
+    uint32_t iAfterCmd;
     if(bMulti == false) {
         if(iLen < 10) {
             int imsgLen = sprintf(msg, "[SYS] Bad $Search (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
@@ -1705,7 +1705,7 @@ void cDcCommands::Search(User *curUser, char * sData, int unsigned iLen, const b
                     UdpDebug->Broadcast(msg, imsgLen);
                 }
             } else {
-                int iWantLen = iLen+curUser->NickLen+15+64;
+                size_t iWantLen = iLen+curUser->NickLen+15+64;
                 char *MSG = (char *) malloc(iWantLen);
                 if(MSG == NULL) {
 					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
@@ -1727,8 +1727,8 @@ void cDcCommands::Search(User *curUser, char * sData, int unsigned iLen, const b
             (SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN] != 0 || SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0)) {
             // PPK ... search string len check
             // $Search Hub:PPK F?T?0?2?test|
-            unsigned int iChar = iAfterCmd+8+curUser->NickLen+1;
-            unsigned int iCount = 0;
+            uint32_t iChar = iAfterCmd+8+curUser->NickLen+1;
+            uint32_t iCount = 0;
             for(; iChar < iLen; iChar++) {
                 if(sData[iChar] == '?') {
                     iCount++;
@@ -1738,7 +1738,7 @@ void cDcCommands::Search(User *curUser, char * sData, int unsigned iLen, const b
             }
             iCount = iLen-2-iChar;
 
-            if(iCount < (unsigned int)SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]) {
+            if(iCount < (uint32_t)SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]) {
                 int imsgLen = sprintf(msg, "<%s> %s %d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                     LanguageManager->sTexts[LAN_SORRY_MIN_SEARCH_LEN_IS], SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search5") == true) {
@@ -1746,7 +1746,7 @@ void cDcCommands::Search(User *curUser, char * sData, int unsigned iLen, const b
                 }
                 return;
             }
-            if(SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0 && iCount > (unsigned int)SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]) {
+            if(SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0 && iCount > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]) {
                 int imsgLen = sprintf(msg, "<%s> %s %d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                     LanguageManager->sTexts[LAN_SORRY_MAX_SEARCH_LEN_IS], SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search6") == true) {
@@ -1804,7 +1804,7 @@ void cDcCommands::Search(User *curUser, char * sData, int unsigned iLen, const b
                         UdpDebug->Broadcast(msg, imsgLen);
                     }
                 } else {
-                    int iWantLen = iLen+curUser->NickLen+15+64;
+                    size_t iWantLen = iLen+curUser->NickLen+15+64;
                     char *MSG = (char *) malloc(iWantLen);
                     if(MSG == NULL) {
 						string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
@@ -1829,8 +1829,8 @@ void cDcCommands::Search(User *curUser, char * sData, int unsigned iLen, const b
             (SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN] != 0 || SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0)) {
             // PPK ... search string len check
             // $Search 1.2.3.4:1 F?F?0?2?test|
-            unsigned int iChar = iAfterCmd+11;
-            unsigned int iCount = 0;
+            uint32_t iChar = iAfterCmd+11;
+            uint32_t iCount = 0;
             for(; iChar < iLen; iChar++) {
                 if(sData[iChar] == '?') {
                     iCount++;
@@ -1840,7 +1840,7 @@ void cDcCommands::Search(User *curUser, char * sData, int unsigned iLen, const b
             }
             iCount = iLen-2-iChar;
 
-            if(iCount < (unsigned int)SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]) {
+            if(iCount < (uint32_t)SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]) {
                 int imsgLen = sprintf(msg, "<%s> %s %d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                     LanguageManager->sTexts[LAN_SORRY_MIN_SEARCH_LEN_IS], SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search10") == true) {
@@ -1848,7 +1848,7 @@ void cDcCommands::Search(User *curUser, char * sData, int unsigned iLen, const b
                 }
                 return;
             }
-            if(SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0 && iCount > (unsigned int)SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]) {
+            if(SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0 && iCount > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]) {
                 int imsgLen = sprintf(msg, "<%s> %s %d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                     LanguageManager->sTexts[LAN_SORRY_MAX_SEARCH_LEN_IS], SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search11") == true) {
@@ -1903,7 +1903,7 @@ void cDcCommands::Search(User *curUser, char * sData, int unsigned iLen, const b
 //---------------------------------------------------------------------------
 
 // $MyINFO $ALL  $ $$$$|
-bool cDcCommands::MyINFODeflood(User * curUser, char * sData, const unsigned int &iLen, const bool &bCheck) {
+bool cDcCommands::MyINFODeflood(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {
     if(iLen < (22+curUser->NickLen)) {
         int imsgLen = sprintf(msg, "[SYS] Bad $MyINFO (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyINFODeflood1") == true) {
@@ -1913,37 +1913,6 @@ bool cDcCommands::MyINFODeflood(User * curUser, char * sData, const unsigned int
         return false;
     }
     
-    if(iLen > (unsigned int)SettingManager->iShorts[SETSHORT_MAX_MYINFO_LEN]) {
-        int imsgLen = sprintf(msg, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_MYINFO_TOO_LONG]);
-        if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyINFODeflood2") == true) {
-            UserSendCharDelayed(curUser, msg, imsgLen);
-        }
-
-        if(iLen < 768) {
-            imsgLen = sprintf(msg, "[SYS] Bad $MyINFO (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
-            if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyINFODeflood3") == true) {
-                UdpDebug->Broadcast(msg, imsgLen);
-            }
-        } else {
-            int iWantLen = iLen+curUser->NickLen+15+64;
-            char *MSG = (char *) malloc(iWantLen);
-            if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-					" bytes of memory for DcCommands::MyINFODeflood!";
-				AppendSpecialLog(sDbgstr);
-				return false;
-            }
-            imsgLen = sprintf(MSG, "[SYS] Bad $MyINFO (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
-            if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::MyINFODeflood4") == true) {
-                UdpDebug->Broadcast(MSG, imsgLen);
-            }
-            
-            free(MSG);
-        }
-        UserClose(curUser);
-		return false;
-    }
-
     // PPK ... check flood ...
     if(bCheck == true && ProfileMan->IsAllowed(curUser, ProfileManager::NODEFLOODMYINFO) == false) { 
         if(SettingManager->iShorts[SETSHORT_MYINFO_ACTION] != 0) {
@@ -1962,13 +1931,44 @@ bool cDcCommands::MyINFODeflood(User * curUser, char * sData, const unsigned int
             }
         }
     }
-    
+
+    if(iLen > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_MYINFO_LEN]) {
+        int imsgLen = sprintf(msg, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_MYINFO_TOO_LONG]);
+        if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyINFODeflood2") == true) {
+            UserSendCharDelayed(curUser, msg, imsgLen);
+        }
+
+        if(iLen < 768) {
+            imsgLen = sprintf(msg, "[SYS] Bad $MyINFO (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyINFODeflood3") == true) {
+                UdpDebug->Broadcast(msg, imsgLen);
+            }
+        } else {
+            size_t iWantLen = iLen+curUser->NickLen+15+64;
+            char *MSG = (char *) malloc(iWantLen);
+            if(MSG == NULL) {
+				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
+					" bytes of memory for DcCommands::MyINFODeflood!";
+				AppendSpecialLog(sDbgstr);
+				return false;
+            }
+            imsgLen = sprintf(MSG, "[SYS] Bad $MyINFO (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::MyINFODeflood4") == true) {
+                UdpDebug->Broadcast(MSG, imsgLen);
+            }
+            
+            free(MSG);
+        }
+        UserClose(curUser);
+		return false;
+    }
+
     return true;
 }
 //---------------------------------------------------------------------------
 
 // $MyINFO $ALL  $ $$$$|
-bool cDcCommands::MyINFO(User * curUser, char * sData, const unsigned int &iLen) {
+bool cDcCommands::MyINFO(User * curUser, char * sData, const uint32_t &iLen) {
     // if no change, just return
     // else store MyINFO and perform all checks again
     if(curUser->MyInfoTag != NULL) {
@@ -2038,7 +2038,7 @@ bool cDcCommands::MyINFO(User * curUser, char * sData, const unsigned int &iLen)
 //---------------------------------------------------------------------------
 
 // $MyPass
-void cDcCommands::MyPass(User * curUser, char * sData, const unsigned int &iLen) {
+void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
     if(curUser->uLogInOut->Password == NULL) {
         // no password required
         int imsgLen = sprintf(msg, "[SYS] $MyPass without request from %s (%s) - user closed.", curUser->Nick, curUser->IP);
@@ -2057,7 +2057,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const unsigned int &iLen)
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            int iWantLen = iLen+curUser->NickLen+15+64;
+            size_t iWantLen = iLen+curUser->NickLen+15+64;
             char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
@@ -2243,7 +2243,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const unsigned int &iLen)
 //---------------------------------------------------------------------------
 
 // $OpForceMove $Who:<nickname>$Where:<iptoredirect>$Msg:<a message>
-void cDcCommands::OpForceMove(User * curUser, char * sData, const unsigned int &iLen) {
+void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen) {
     if(ProfileMan->IsAllowed(curUser, ProfileManager::REDIRECT) == false) {
         int iLen = sprintf(msg, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_ARE_NOT_ALWD_TO_USE_THIS_CMD]);
         if(CheckSprintf(iLen, 1024, "cDcCommands::OpForceMove1") == true) {
@@ -2269,21 +2269,21 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const unsigned int &
     sData[iLen-1] = '\0'; // cutoff pipe
 
     char *sCmdParts[] = { NULL, NULL, NULL };
-    unsigned short iCmdPartsLen[] = { 0, 0, 0 };
+    uint16_t iCmdPartsLen[] = { 0, 0, 0 };
                 
-    unsigned char cPart = 0;
+    uint8_t cPart = 0;
                 
     sCmdParts[cPart] = sData+18; // nick start
                 
-    for(unsigned int i = 18; i < iLen; i++) {
+    for(uint32_t i = 18; i < iLen; i++) {
         if(sData[i] == '$') {
             sData[i] = '\0';
-            iCmdPartsLen[cPart] = (unsigned short)((sData+i)-sCmdParts[cPart]);
+            iCmdPartsLen[cPart] = (uint16_t)((sData+i)-sCmdParts[cPart]);
                     
             // are we on last $ ???
             if(cPart == 1) {
                 sCmdParts[2] = sData+i+1;
-                iCmdPartsLen[2] = (unsigned short)(iLen-i-1);
+                iCmdPartsLen[2] = (uint16_t)(iLen-i-1);
                 break;
             }
                     
@@ -2313,7 +2313,7 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const unsigned int &
                     UserSendCharDelayed(OtherUser, msg, imsgLen);
                 }
             } else {
-                int iWantLen = iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64;
+                size_t iWantLen = iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64;
                 char *MSG = (char *) malloc(iWantLen);
                 if(MSG == NULL) {
 					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
@@ -2429,42 +2429,11 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const unsigned int &
 //---------------------------------------------------------------------------
 
 // $RevConnectToMe <ownnick> <nickname>
-void cDcCommands::RevConnectToMe(User * curUser, char * sData, const unsigned int &iLen, const bool &bCheck) {
+void cDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {
     if(iLen < 19) {
         int imsgLen = sprintf(msg, "[SYS] Bad $RevConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::RevConnectToMe1") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
-        }
-        UserClose(curUser);
-        return;
-    }
-
-    if(iLen > (unsigned int)SettingManager->iShorts[SETSHORT_MAX_RCTM_LEN]) {
-        int imsgLen = sprintf(msg, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_RCTM_TOO_LONG]);
-        if(CheckSprintf(imsgLen, 1024, "cDcCommands::RevConnectToMe2") == true) {
-            UserSendCharDelayed(curUser, msg, imsgLen);
-        }
-
-        if(iLen < 768) {
-            imsgLen = sprintf(msg, "[SYS] Long $RevConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
-            if(CheckSprintf(imsgLen, 1024, "cDcCommands::RevConnectToMe3") == true) {
-                UdpDebug->Broadcast(msg, imsgLen);
-            }
-        } else {
-            int iWantLen = iLen+curUser->NickLen+15+64;
-            char *MSG = (char *) malloc(iWantLen);
-            if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-					" bytes of memory for DcCommands::RevConnectToMe!";
-				AppendSpecialLog(sDbgstr);
-				return;
-            }
-            imsgLen = sprintf(MSG, "[SYS] Long $RevConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
-            if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::RevConnectToMe4") == true) {
-                UdpDebug->Broadcast(MSG, imsgLen);
-            }
-            
-            free(MSG);
         }
         UserClose(curUser);
         return;
@@ -2480,7 +2449,7 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const unsigned in
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            int iWantLen = iLen+curUser->NickLen+15+64;
+            size_t iWantLen = iLen+curUser->NickLen+15+64;
             char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
@@ -2518,6 +2487,37 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const unsigned in
         }
     }
 
+    if(iLen > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_RCTM_LEN]) {
+        int imsgLen = sprintf(msg, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_RCTM_TOO_LONG]);
+        if(CheckSprintf(imsgLen, 1024, "cDcCommands::RevConnectToMe2") == true) {
+            UserSendCharDelayed(curUser, msg, imsgLen);
+        }
+
+        if(iLen < 768) {
+            imsgLen = sprintf(msg, "[SYS] Long $RevConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            if(CheckSprintf(imsgLen, 1024, "cDcCommands::RevConnectToMe3") == true) {
+                UdpDebug->Broadcast(msg, imsgLen);
+            }
+        } else {
+            size_t iWantLen = iLen+curUser->NickLen+15+64;
+            char *MSG = (char *) malloc(iWantLen);
+            if(MSG == NULL) {
+				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
+					" bytes of memory for DcCommands::RevConnectToMe!";
+				AppendSpecialLog(sDbgstr);
+				return;
+            }
+            imsgLen = sprintf(MSG, "[SYS] Long $RevConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::RevConnectToMe4") == true) {
+                UdpDebug->Broadcast(MSG, imsgLen);
+            }
+            
+            free(MSG);
+        }
+        UserClose(curUser);
+        return;
+    }
+
     // PPK ... $RCTM means user is pasive ?!? Probably yes, let set it not active and use on another places ;)
     curUser->ui32BoolBits &= ~User::BIT_ACTIVE;
 
@@ -2539,7 +2539,7 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const unsigned in
 //---------------------------------------------------------------------------
 
 // $SR <nickname> - Search Respond for passive users
-void cDcCommands::SR(User * curUser, char * sData, const unsigned int &iLen, const bool &bCheck) {
+void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {
     if(iLen < 6+curUser->NickLen) {
         int imsgLen = sprintf(msg, "[SYS] Bad $SR (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::SR1") == true) {
@@ -2547,37 +2547,6 @@ void cDcCommands::SR(User * curUser, char * sData, const unsigned int &iLen, con
         }
         UserClose(curUser);
         return;
-    }
-
-    if(iLen > (unsigned int)SettingManager->iShorts[SETSHORT_MAX_SR_LEN]) {
-        int imsgLen = sprintf(msg, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SR_TOO_LONG]);
-        if(CheckSprintf(imsgLen, 1024, "cDcCommands::SR2") == true) {
-            UserSendCharDelayed(curUser, msg, imsgLen);
-        }
-
-        if(iLen < 768) {
-            imsgLen = sprintf(msg, "[SYS] Long $SR (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
-            if(CheckSprintf(imsgLen, 1024, "cDcCommands::SR3") == true) {
-                UdpDebug->Broadcast(msg, imsgLen);
-            }
-        } else {
-            int iWantLen = iLen+curUser->NickLen+15+64;
-            char *MSG = (char *) malloc(iWantLen);
-            if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-					" bytes of memory for DcCommands::SR!";
-				AppendSpecialLog(sDbgstr);
-				return;
-            }
-            imsgLen = sprintf(MSG, "[SYS] Long $SR (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
-            if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::SR4") == true) {
-                UdpDebug->Broadcast(MSG, imsgLen);
-            }
-            
-            free(MSG);
-        }
-        UserClose(curUser);
-		return;
     }
 
     // PPK ... check flood ...
@@ -2599,6 +2568,37 @@ void cDcCommands::SR(User * curUser, char * sData, const unsigned int &iLen, con
         }
     }
 
+    if(iLen > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_SR_LEN]) {
+        int imsgLen = sprintf(msg, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SR_TOO_LONG]);
+        if(CheckSprintf(imsgLen, 1024, "cDcCommands::SR2") == true) {
+            UserSendCharDelayed(curUser, msg, imsgLen);
+        }
+
+        if(iLen < 768) {
+            imsgLen = sprintf(msg, "[SYS] Long $SR (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            if(CheckSprintf(imsgLen, 1024, "cDcCommands::SR3") == true) {
+                UdpDebug->Broadcast(msg, imsgLen);
+            }
+        } else {
+            size_t iWantLen = iLen+curUser->NickLen+15+64;
+            char *MSG = (char *) malloc(iWantLen);
+            if(MSG == NULL) {
+				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
+					" bytes of memory for DcCommands::SR!";
+				AppendSpecialLog(sDbgstr);
+				return;
+            }
+            imsgLen = sprintf(MSG, "[SYS] Long $SR (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::SR4") == true) {
+                UdpDebug->Broadcast(MSG, imsgLen);
+            }
+            
+            free(MSG);
+        }
+        UserClose(curUser);
+		return;
+    }
+
     // check $SR spoofing (thanx Fusbar)
     // PPK... added checking for empty space after nick
     if(sData[4+curUser->NickLen] != ' ' ||
@@ -2610,7 +2610,7 @@ void cDcCommands::SR(User * curUser, char * sData, const unsigned int &iLen, con
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            int iWantLen = iLen+curUser->NickLen+15+64;
+            size_t iWantLen = iLen+curUser->NickLen+15+64;
             char *MSG = (char *) malloc(iWantLen);
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
@@ -2669,7 +2669,7 @@ void cDcCommands::SR(User * curUser, char * sData, const unsigned int &iLen, con
     if(OtherUser != NULL && OtherUser != curUser && OtherUser->iState == User::STATE_ADDED) {
         // PPK ... search replies limiting
         if(SettingManager->iShorts[SETSHORT_MAX_PASIVE_SR] != 0) {
-            if(OtherUser->iSR >= SettingManager->iShorts[SETSHORT_MAX_PASIVE_SR])
+			if(OtherUser->iSR >= (uint32_t)SettingManager->iShorts[SETSHORT_MAX_PASIVE_SR])
                 return;
                         
             OtherUser->iSR++;
@@ -2685,7 +2685,7 @@ void cDcCommands::SR(User * curUser, char * sData, const unsigned int &iLen, con
 //---------------------------------------------------------------------------
 
 // $SR <nickname> - Search Respond for active users from UDP
-void cDcCommands::SRFromUDP(User * curUser, char * sData, const unsigned int &iLen) {
+void cDcCommands::SRFromUDP(User * curUser, char * sData, const size_t &iLen) {
 	if(ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::UDP_SR_ARRIVAL) == true ||
 		curUser->iState >= User::STATE_CLOSING) {
 		return;
@@ -2694,7 +2694,7 @@ void cDcCommands::SRFromUDP(User * curUser, char * sData, const unsigned int &iL
 //---------------------------------------------------------------------------
 
 // $Supports item item item... PPK $Supports UserCommand NoGetINFO NoHello UserIP2 QuickList|
-void cDcCommands::Supports(User * curUser, char * sData, const unsigned int &iLen) {
+void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
     if(((curUser->ui32BoolBits & User::BIT_HAVE_SUPPORTS) == User::BIT_HAVE_SUPPORTS) == true) {
         int imsgLen = sprintf(msg, "[SYS] $Supports flood from %s (%s) - user closed.", curUser->Nick, curUser->IP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports1") == true) {
@@ -2722,9 +2722,9 @@ void cDcCommands::Supports(User * curUser, char * sData, const unsigned int &iLe
     }
 
     char *sSupport = sData+10;
-	int iDataLen;
+	size_t iDataLen;
                     
-    for(unsigned int i = 10; i < iLen-1; i++) {
+    for(uint32_t i = 10; i < iLen-1; i++) {
         if(sData[i] == ' ') {
             sData[i] = '\0';
         } else if(i != iLen-2) {
@@ -2819,7 +2819,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const unsigned int &iLe
 //---------------------------------------------------------------------------
 
 // $To: nickname From: ownnickname $<ownnickname> <message>
-void cDcCommands::To(User * curUser, char * sData, const unsigned int &iLen, const bool &bCheck) {
+void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {
     char *cTemp = strchr(sData+5, ' ');
 
     if(iLen < 19 || cTemp == NULL) {
@@ -2830,7 +2830,7 @@ void cDcCommands::To(User * curUser, char * sData, const unsigned int &iLen, con
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            int iWantLen = iLen+curUser->NickLen+15+64;
+            size_t iWantLen = iLen+curUser->NickLen+15+64;
             char *MSG = (char *) malloc(iWantLen);
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
@@ -2849,7 +2849,7 @@ void cDcCommands::To(User * curUser, char * sData, const unsigned int &iLen, con
         return;
     }
     
-    int iNickLen = cTemp-(sData+5);
+    size_t iNickLen = cTemp-(sData+5);
 
     // is the mesg really from us ?
     // PPK ... replaced by better and faster code ;)
@@ -2863,7 +2863,7 @@ void cDcCommands::To(User * curUser, char * sData, const unsigned int &iLen, con
                     UdpDebug->Broadcast(msg, imsgLen);
                 }
             } else {
-                int iWantLen = iLen+curUser->NickLen+15+64;
+                size_t iWantLen = iLen+curUser->NickLen+15+64;
                 char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
                 if(MSG == NULL) {
 					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
@@ -2927,8 +2927,8 @@ void cDcCommands::To(User * curUser, char * sData, const unsigned int &iLen, con
 
     if(ProfileMan->IsAllowed(curUser, ProfileManager::NOCHATLIMITS) == false) {
         // 1st check for length limit for PM message
-        int iMessLen = iLen-(2*curUser->NickLen)-(cTemp-sData)-13;
-        if(SettingManager->iShorts[SETSHORT_MAX_PM_LEN] != 0 && iMessLen > SettingManager->iShorts[SETSHORT_MAX_PM_LEN]) {
+        size_t iMessLen = iLen-(2*curUser->NickLen)-(cTemp-sData)-13;
+        if(SettingManager->iShorts[SETSHORT_MAX_PM_LEN] != 0 && iMessLen > (size_t)SettingManager->iShorts[SETSHORT_MAX_PM_LEN]) {
        	    // PPK ... hubsec alias
        	    cTemp[0] = '\0';
        	   	int imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s!|", curUser->Nick, sData+5, SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
@@ -2943,7 +2943,7 @@ void cDcCommands::To(User * curUser, char * sData, const unsigned int &iLen, con
         if(SettingManager->iShorts[SETSHORT_MAX_PM_LINES] != 0 || SettingManager->iShorts[SETSHORT_SAME_MULTI_PM_ACTION] != 0) {
 			if(curUser->ui16SamePMs < 2) {
 				uint16_t iLines = 1;
-                for(unsigned int i = 9+curUser->NickLen; i < iLen-(cTemp-sData)-1; i++) {
+                for(uint32_t i = 9+curUser->NickLen; i < iLen-(cTemp-sData)-1; i++) {
                     if(cTemp[i] == '\n') {
                         iLines++;
                     }
@@ -3005,8 +3005,10 @@ void cDcCommands::To(User * curUser, char * sData, const unsigned int &iLen, con
     if(SettingManager->bBools[SETBOOL_REG_BOT] == true && strcmp(sData+5, SettingManager->sTexts[SETTXT_BOT_NICK]) == 0) {
         cTemp += 9+curUser->NickLen;
         // PPK ... check message length, return if no mess found
-        unsigned int iLen1 = (iLen-(cTemp-sData))+1;
-        if(iLen1 <= curUser->NickLen+4) return;
+        size_t iLen1 = (iLen-(cTemp-sData))+1;
+        if(iLen1 <= curUser->NickLen+4)
+            return;
+
         // find chat message data
         char *sBuff = cTemp+curUser->NickLen+3;
 
@@ -3032,7 +3034,7 @@ void cDcCommands::To(User * curUser, char * sData, const unsigned int &iLen, con
         // PPK ... if i am here is not textfile request or hub command, try opchat
         if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true && ProfileMan->IsAllowed(curUser, ProfileManager::ALLOWEDOPCHAT) == true && 
             SettingManager->bBotsSameNick == true) {
-            int iOpChatLen = SettingManager->ui16TextsLens[SETTXT_OP_CHAT_NICK];
+            uint32_t iOpChatLen = SettingManager->ui16TextsLens[SETTXT_OP_CHAT_NICK];
             memcpy(cTemp-iOpChatLen-2, SettingManager->sTexts[SETTXT_OP_CHAT_NICK], iOpChatLen);
             UserAddPrcsdCmd(curUser, PrcsdUsrCmd::TO_OP_CHAT, cTemp-iOpChatLen-2, iLen-((cTemp-iOpChatLen-2)-sData), NULL);
         }
@@ -3040,7 +3042,7 @@ void cDcCommands::To(User * curUser, char * sData, const unsigned int &iLen, con
         ProfileMan->IsAllowed(curUser, ProfileManager::ALLOWEDOPCHAT) == true && 
         strcmp(sData+5, SettingManager->sTexts[SETTXT_OP_CHAT_NICK]) == 0) {
         cTemp += 9+curUser->NickLen;
-        int iOpChatLen = SettingManager->ui16TextsLens[SETTXT_OP_CHAT_NICK];
+        uint32_t iOpChatLen = SettingManager->ui16TextsLens[SETTXT_OP_CHAT_NICK];
         memcpy(cTemp-iOpChatLen-2, SettingManager->sTexts[SETTXT_OP_CHAT_NICK], iOpChatLen);
         UserAddPrcsdCmd(curUser, PrcsdUsrCmd::TO_OP_CHAT, cTemp-iOpChatLen-2, (iLen-(cTemp-sData))+iOpChatLen+2, NULL);
     } else {       
@@ -3055,7 +3057,7 @@ void cDcCommands::To(User * curUser, char * sData, const unsigned int &iLen, con
 //---------------------------------------------------------------------------
 
 // $ValidateNick
-void cDcCommands::ValidateNick(User * curUser, char * sData, const unsigned int &iLen) {
+void cDcCommands::ValidateNick(User * curUser, char * sData, const uint32_t &iLen) {
     if(((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == true) {
         int imsgLen = sprintf(msg, "[SYS] $ValidateNick with QuickList support from %s (%s) - user closed.", curUser->Nick, curUser->IP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateNick1") == true) {
@@ -3094,7 +3096,7 @@ void cDcCommands::ValidateNick(User * curUser, char * sData, const unsigned int 
 //---------------------------------------------------------------------------
 
 // $Version
-void cDcCommands::Version(User * curUser, char * sData, const unsigned int &iLen) {
+void cDcCommands::Version(User * curUser, char * sData, const uint32_t &iLen) {
     if(((curUser->ui32BoolBits & User::BIT_HAVE_VERSION) == User::BIT_HAVE_VERSION) == true || 
         ((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == true) {
         #ifdef _DBG
@@ -3136,7 +3138,7 @@ void cDcCommands::Version(User * curUser, char * sData, const unsigned int &iLen
 //---------------------------------------------------------------------------
 
 // Chat message
-bool cDcCommands::ChatDeflood(User * curUser, char * sData, const unsigned int &iLen, const bool &bCheck) {      
+bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {      
 	// if the user is sending chat as other user, kick him
 	if(sData[1+curUser->NickLen] != '>' || sData[2+curUser->NickLen] != ' ' ||
         memcmp(curUser->Nick, sData+1, curUser->NickLen) != 0) {
@@ -3147,7 +3149,7 @@ bool cDcCommands::ChatDeflood(User * curUser, char * sData, const unsigned int &
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            int iWantLen = iLen+curUser->NickLen+15+64;
+            size_t iWantLen = iLen+curUser->NickLen+15+64;
             char *MSG = (char *) malloc(iWantLen);
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
@@ -3210,10 +3212,10 @@ bool cDcCommands::ChatDeflood(User * curUser, char * sData, const unsigned int &
 //---------------------------------------------------------------------------
 
 // Chat message
-void cDcCommands::Chat(User * curUser, char * sData, const unsigned int &iLen, const bool &bCheck) {   
+void cDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {   
     if(bCheck == true && ProfileMan->IsAllowed(curUser, ProfileManager::NOCHATLIMITS) == false) {
     	// PPK ... check for message limit length
- 	    if(SettingManager->iShorts[SETSHORT_MAX_CHAT_LEN] != 0 && (iLen-curUser->NickLen-4) > (unsigned int)SettingManager->iShorts[SETSHORT_MAX_CHAT_LEN]) {
+ 	    if(SettingManager->iShorts[SETSHORT_MAX_CHAT_LEN] != 0 && (iLen-curUser->NickLen-4) > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_CHAT_LEN]) {
      		// PPK ... hubsec alias
 	   		int imsgLen = sprintf(msg, "<%s> %s !|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_THE_MESSAGE_WAS_TOO_LONG]);
 	   		if(CheckSprintf(imsgLen, 1024, "cDcCommands::Chat1") == true) {
@@ -3226,7 +3228,7 @@ void cDcCommands::Chat(User * curUser, char * sData, const unsigned int &iLen, c
         if(SettingManager->iShorts[SETSHORT_MAX_CHAT_LINES] != 0 || SettingManager->iShorts[SETSHORT_SAME_MULTI_MAIN_CHAT_ACTION] != 0) {
             uint16_t iLines = 1;
             if(curUser->ui16SameChatMsgs < 2) {
-                for(unsigned int i = curUser->NickLen+3; i < iLen-1; i++) {
+                for(uint32_t i = curUser->NickLen+3; i < iLen-1; i++) {
                     if(sData[i] == '\n') {
                         iLines++;
                     }
@@ -3312,7 +3314,7 @@ void cDcCommands::Chat(User * curUser, char * sData, const unsigned int &iLen, c
                 if(SettingManager->bBools[SETBOOL_FILTER_KICK_MESSAGES] == true) {
                 	if(SettingManager->bBools[SETBOOL_SEND_KICK_MESSAGES_TO_OPS] == true) {
                			if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-                            int iWantLen = iLen+96;
+                            size_t iWantLen = iLen+96;
                             char *MSG = (char *) malloc(iWantLen);
                             if(MSG == NULL) {
 								string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
@@ -3345,7 +3347,7 @@ void cDcCommands::Chat(User * curUser, char * sData, const unsigned int &iLen, c
 //---------------------------------------------------------------------------
 
 // $Close nick|
-void cDcCommands::Close(User * curUser, char * sData, const unsigned int &iLen) {
+void cDcCommands::Close(User * curUser, char * sData, const uint32_t &iLen) {
     if(ProfileMan->IsAllowed(curUser, ProfileManager::CLOSE) == false) {
         int iLen = sprintf(msg, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
             LanguageManager->sTexts[LAN_YOU_ARE_NOT_ALWD_TO_USE_THIS_CMD]);
@@ -3428,7 +3430,7 @@ void cDcCommands::Close(User * curUser, char * sData, const unsigned int &iLen) 
 }
 //---------------------------------------------------------------------------
 
-void cDcCommands::Unknown(User * curUser, char * sData, const unsigned int &iLen) {
+void cDcCommands::Unknown(User * curUser, char * sData, const uint32_t &iLen) {
     #ifdef _DBG
         Memo(">>> Unimplemented Cmd "+curUser->Nick+" [" + curUser->IP + "]: " + sData);
     #endif
@@ -3444,7 +3446,7 @@ void cDcCommands::Unknown(User * curUser, char * sData, const unsigned int &iLen
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            int iWantLen = iLen+curUser->NickLen+15+64;
+            size_t iWantLen = iLen+curUser->NickLen+15+64;
             char *MSG = (char *) malloc(iWantLen);
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
@@ -3464,9 +3466,9 @@ void cDcCommands::Unknown(User * curUser, char * sData, const unsigned int &iLen
 }
 //---------------------------------------------------------------------------
 
-bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const unsigned int &iNickLen, const bool &ValidateNick) {  
+bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iNickLen, const bool &ValidateNick) {  
     // illegal characters in nick?
-    for(unsigned int i = 0; i < iNickLen; i++) {
+    for(uint32_t i = 0; i < iNickLen; i++) {
         switch(Nick[i]) {
             case ' ':
             case '$':
@@ -3543,8 +3545,8 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const unsigned i
         if(SettingManager->bBools[SETBOOL_ADVANCED_PASS_PROTECTION] == true && Reg->iBadPassCount != 0) {
             time_t acc_time;
             time(&acc_time);
-			int iMinutes2Wait = (int)pow(2, Reg->iBadPassCount-1);
-            if(acc_time < (Reg->tLastBadPass+(60*iMinutes2Wait))) {
+			uint32_t iMinutes2Wait = (uint32_t)pow(2, Reg->iBadPassCount-1);
+            if(acc_time < (time_t)(Reg->tLastBadPass+(60*iMinutes2Wait))) {
                 int imsgLen = sprintf(msg, "<%s> %s %s %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                     LanguageManager->sTexts[LAN_LAST_PASS_WAS_WRONG_YOU_NEED_WAIT], 
                     formatSecTime((Reg->tLastBadPass+(60*iMinutes2Wait))-acc_time), LanguageManager->sTexts[LAN_BEFORE_YOU_TRY_AGAIN]);
@@ -3561,7 +3563,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const unsigned i
             }
         }
             
-        curUser->iProfile = (int)Reg->iProfile;
+        curUser->iProfile = (int32_t)Reg->iProfile;
         UserSetPasswd(curUser, Reg->sPass);
     }
 
@@ -3690,8 +3692,8 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const unsigned i
         // user is NOT registered
         
         // nick length check
-        if((SettingManager->iShorts[SETSHORT_MIN_NICK_LEN] != 0 && iNickLen < (unsigned int)SettingManager->iShorts[SETSHORT_MIN_NICK_LEN]) ||
-            (SettingManager->iShorts[SETSHORT_MAX_NICK_LEN] != 0 && iNickLen > (unsigned int)SettingManager->iShorts[SETSHORT_MAX_NICK_LEN])) {
+        if((SettingManager->iShorts[SETSHORT_MIN_NICK_LEN] != 0 && iNickLen < (uint32_t)SettingManager->iShorts[SETSHORT_MIN_NICK_LEN]) ||
+            (SettingManager->iShorts[SETSHORT_MAX_NICK_LEN] != 0 && iNickLen > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_NICK_LEN])) {
             UserSendChar(curUser, SettingManager->sPreTexts[SetMan::SETPRETXT_NICK_LIMIT_MSG],
                 SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_NICK_LIMIT_MSG]);
             int imsgLen = sprintf(msg, "[SYS] Bad nick length (%s) from %s (%s) - user closed.", Nick, curUser->Nick, curUser->IP);
@@ -3771,7 +3773,7 @@ void cDcCommands::ProcessCmds(User * curUser) {
         switch(cur->cType) {
             case PrcsdUsrCmd::SUPPORTS: {
                 memcpy(msg, "$Supports", 9);
-                int iSupportsLen = 9;
+                uint32_t iSupportsLen = 9;
                 
                 // PPK ... why to send it if client don't need it =)
                 /*if(((curUser->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == true) {
@@ -3808,7 +3810,7 @@ void cDcCommands::ProcessCmds(User * curUser) {
                 break;
             }
             case PrcsdUsrCmd::GETPASS: {
-                int iLen = 9;
+                uint32_t iLen = 9;
                 UserSendCharDelayed(curUser, "$GetPass|", iLen); // query user for password
                 break;
             }

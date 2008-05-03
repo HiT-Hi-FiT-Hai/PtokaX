@@ -552,21 +552,21 @@ void hashBanMan::LoadBanList(void) {
 						continue;
 					}
 
-                    bool nickban = atoi(ban->Value());
+					bool nickban = (atoi(ban->Value()) == 0 ? false : true);
 
 					if((ban = child->FirstChild("IpBan")) == NULL ||
                         (ban = ban->FirstChild()) == NULL) {
 						continue;
 					}
 
-                    bool ipban = atoi(ban->Value());
+                    bool ipban = (atoi(ban->Value()) == 0 ? false : true);
 
 					if((ban = child->FirstChild("FullIpBan")) == NULL ||
                         (ban = ban->FirstChild()) == NULL) {
 						continue;
 					}
 
-                    bool fullipban = atoi(ban->Value());
+                    bool fullipban = (atoi(ban->Value()) == 0 ? false : true);
 
                     BanItem *Ban = new BanItem();
                     if(Ban == NULL) {
@@ -583,7 +583,7 @@ void hashBanMan::LoadBanList(void) {
 
                     // PPK ... ipban
                     if(ipban == true) {
-                        unsigned int a, b, c, d;
+                        uint32_t a, b, c, d;
                         if(GetIpParts((char *)ip, strlen(ip), a, b, c, d) == true) {
                             strcpy(Ban->sIp, ip);
                             Ban->ui32IpHash = 16777216 * a + 65536 * b + 256 * c + d;
@@ -601,7 +601,7 @@ void hashBanMan::LoadBanList(void) {
                     // PPK ... nickban
                     if(nickban == true) {
                         if(nick != NULL) {
-                            int iNickLen = strlen(nick);
+                            size_t iNickLen = strlen(nick);
                             Ban->sNick = (char *) malloc(iNickLen+1);
                             if(Ban->sNick == NULL) {
 								string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
@@ -622,7 +622,7 @@ void hashBanMan::LoadBanList(void) {
                     }
 
                     if(reason != NULL) {
-                        int iReasonLen = strlen(reason);
+                        size_t iReasonLen = strlen(reason);
                         if(iReasonLen > 255) {
                             Ban->sReason = (char *) malloc(256);
                             if(Ban->sReason == NULL) {
@@ -651,7 +651,7 @@ void hashBanMan::LoadBanList(void) {
                     }
 
                     if(by != NULL) {
-                        int iByLen = strlen(by);
+                        size_t iByLen = strlen(by);
                         if(iByLen > 63) {
                             Ban->sBy = (char *) malloc(64);
                             if(Ban->sBy == NULL) {
@@ -747,7 +747,7 @@ void hashBanMan::LoadBanList(void) {
 						continue;
 					}
 
-                    bool fullipban = atoi(rangeban->Value());
+                    bool fullipban = (atoi(rangeban->Value()) == 0 ? false : true);
 
                     RangeBanItem *RangeBan = new RangeBanItem();
                     if(RangeBan == NULL) {
@@ -781,7 +781,7 @@ void hashBanMan::LoadBanList(void) {
                     }
 
                     if(reason != NULL) {
-                        int iReasonLen = strlen(reason);
+                        size_t iReasonLen = strlen(reason);
                         if(iReasonLen > 255) {
                             RangeBan->sReason = (char *) malloc(256);
                             if(RangeBan->sReason == NULL) {
@@ -810,7 +810,7 @@ void hashBanMan::LoadBanList(void) {
                     }
 
                     if(by != NULL) {
-                        int iByLen = strlen(by);
+                        size_t iByLen = strlen(by);
                         if(iByLen > 63) {
                             RangeBan->sBy = (char *) malloc(64);
                             if(RangeBan->sBy == NULL) {
@@ -1074,8 +1074,8 @@ void hashBanMan::SaveBanList(bool bForce/* = false*/) {
 }
 //---------------------------------------------------------------------------
 
-void hashBanMan::CreateTempBan(char * first, char * second, int iTime, const time_t &acc_time) {
-    unsigned int a, b, c, d;
+void hashBanMan::CreateTempBan(char * first, char * second, const uint32_t &iTime, const time_t &acc_time) {
+    uint32_t a, b, c, d;
     if(GetIpParts(first, strlen(first), a, b, c, d) == false)
         return;
     
@@ -1095,7 +1095,7 @@ void hashBanMan::CreateTempBan(char * first, char * second, int iTime, const tim
     Ban->ui8Bits |= IP;
 
     // PPK ... temp ban nick
-    int iNickLen = strlen(second);
+    size_t iNickLen = strlen(second);
     Ban->sNick = (char *) malloc(iNickLen+1);
     if(Ban->sNick == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
@@ -1129,7 +1129,7 @@ void hashBanMan::CreatePermBan(char * first, char * second){
     // PPK ... set ban type to perm
     Ban->ui8Bits |= PERM;
 
-    unsigned int a, b, c, d;
+    uint32_t a, b, c, d;
     if(GetIpParts(first, strlen(first), a, b, c, d) == true) {
         // PPK ... perm ban ip
         strcpy(Ban->sIp, first);
@@ -1138,7 +1138,7 @@ void hashBanMan::CreatePermBan(char * first, char * second){
         
         if(second != NULL) {
             if(strcasecmp(second, "3x bad password") == 0) {
-                int iReasonLen = strlen(second);
+                size_t iReasonLen = strlen(second);
                 Ban->sReason = (char *) malloc(iReasonLen+1);
                 if(Ban->sReason == NULL) {
 					string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen+1)+
@@ -1153,7 +1153,7 @@ void hashBanMan::CreatePermBan(char * first, char * second){
                 Ban->ui8Bits |= FULL;
             } else {
                 // PPK ... perm ban nick
-                int iNickLen = strlen(second);
+                size_t iNickLen = strlen(second);
                 Ban->sNick = (char *) malloc(iNickLen+1);
                 if(Ban->sNick == NULL) {
 					string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
@@ -1171,7 +1171,7 @@ void hashBanMan::CreatePermBan(char * first, char * second){
         }
     } else {
         // PPK ... perm ban nick
-        int iNickLen = strlen(first);
+        size_t iNickLen = strlen(first);
         Ban->sNick = (char *) malloc(iNickLen+1);
         if(Ban->sNick == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
@@ -1487,7 +1487,7 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
 	}
         
     if(sReason != NULL) {
-        int iReasonLen = strlen(sReason);
+        size_t iReasonLen = strlen(sReason);
         Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
         if(Ban->sReason == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen > 255 ? 256 : iReasonLen+1)+
@@ -1511,7 +1511,7 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
     }
 
     if(sBy != NULL) {
-        int iByLen = strlen(sBy);
+        size_t iByLen = strlen(sBy);
         if(iByLen > 63) {
             iByLen = 63;
         }
@@ -1547,7 +1547,7 @@ char hashBanMan::BanIp(User * u, char * sIp, char * sReason, char * sBy, const b
         strcpy(Ban->sIp, u->IP);
         Ban->ui32IpHash = u->ui32IpHash;
     } else {
-        unsigned int a, b, c, d;
+        uint32_t a, b, c, d;
         if(sIp != NULL && GetIpParts(sIp, strlen(sIp), a, b, c, d) == true) {
             strcpy(Ban->sIp, sIp);
             Ban->ui32IpHash = 16777216 * a + 65536 * b + 256 * c + d;
@@ -1596,7 +1596,7 @@ char hashBanMan::BanIp(User * u, char * sIp, char * sReason, char * sBy, const b
     }
 
     if(sReason != NULL) {
-        int iReasonLen = strlen(sReason);
+        size_t iReasonLen = strlen(sReason);
         Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
         if(Ban->sReason == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen > 255 ? 256 : iReasonLen+1)+
@@ -1620,7 +1620,7 @@ char hashBanMan::BanIp(User * u, char * sIp, char * sReason, char * sBy, const b
     }
 
     if(sBy != NULL) {
-        int iByLen = strlen(sBy);
+        size_t iByLen = strlen(sBy);
         if(iByLen > 63) {
             iByLen = 63;
         }
@@ -1667,7 +1667,7 @@ bool hashBanMan::NickBan(User * u, char * sNick, char * sReason, char * sBy) {
             return false;
         }
         
-        int iNickLen = strlen(sNick);
+        size_t iNickLen = strlen(sNick);
         Ban->sNick = (char *) malloc(iNickLen+1);
         if(Ban->sNick == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
@@ -1730,7 +1730,7 @@ bool hashBanMan::NickBan(User * u, char * sNick, char * sReason, char * sBy) {
     }
     
     if(sReason != NULL) {
-        int iReasonLen = strlen(sReason);
+        size_t iReasonLen = strlen(sReason);
         Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
         if(Ban->sReason == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen > 255 ? 256 : iReasonLen+1)+
@@ -1754,7 +1754,7 @@ bool hashBanMan::NickBan(User * u, char * sNick, char * sReason, char * sBy) {
     }
 
     if(sBy != NULL) {
-        int iByLen = strlen(sBy);
+        size_t iByLen = strlen(sBy);
         if(iByLen > 63) {
             iByLen = 63;
         }
@@ -1777,7 +1777,7 @@ bool hashBanMan::NickBan(User * u, char * sNick, char * sReason, char * sBy) {
 }
 //---------------------------------------------------------------------------
 
-void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const unsigned int &minutes, const time_t &expiretime, const bool &bFull) {
+void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint32_t &minutes, const time_t &expiretime, const bool &bFull) {
     time_t acc_time; (&acc_time);
     
     BanItem *Ban = new BanItem();
@@ -1809,7 +1809,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const unsig
     
     // PPK ... check for <unknown> nick -> bad ban from script
     if(u->Nick[0] != '<') {
-        int iNickLen = strlen(u->Nick);
+        size_t iNickLen = strlen(u->Nick);
         Ban->sNick = (char *) malloc(iNickLen+1);
         if(Ban->sNick == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
@@ -1941,7 +1941,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const unsig
 	}
     
     if(sReason != NULL) {
-        int iReasonLen = strlen(sReason);
+        size_t iReasonLen = strlen(sReason);
         Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
         if(Ban->sReason == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen > 255 ? 256 : iReasonLen+1)+
@@ -1965,7 +1965,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const unsig
     }
 
     if(sBy != NULL) {
-        int iByLen = strlen(sBy);
+        size_t iByLen = strlen(sBy);
         if(iByLen > 63) {
             iByLen = 63;
         }
@@ -1987,7 +1987,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const unsig
 }
 //---------------------------------------------------------------------------
 
-char hashBanMan::TempBanIp(User * u, char * sIp, char * sReason, char * sBy, const unsigned int &minutes, const time_t &expiretime, const bool &bFull) {
+char hashBanMan::TempBanIp(User * u, char * sIp, char * sReason, char * sBy, const uint32_t &minutes, const time_t &expiretime, const bool &bFull) {
     BanItem *Ban = new BanItem();
     if(Ban == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate Ban in hashBanMan::TempBanIp!";
@@ -2000,7 +2000,7 @@ char hashBanMan::TempBanIp(User * u, char * sIp, char * sReason, char * sBy, con
         strcpy(Ban->sIp, u->IP);
         Ban->ui32IpHash = u->ui32IpHash;
     } else {
-        unsigned int a, b, c, d;
+        uint32_t a, b, c, d;
         if(sIp != NULL && GetIpParts(sIp, strlen(sIp), a, b, c, d) == true) {
             strcpy(Ban->sIp, sIp);
             Ban->ui32IpHash = 16777216 * a + 65536 * b + 256 * c + d;
@@ -2055,7 +2055,7 @@ char hashBanMan::TempBanIp(User * u, char * sIp, char * sReason, char * sBy, con
     }
     
     if(sReason != NULL) {
-        int iReasonLen = strlen(sReason);
+        size_t iReasonLen = strlen(sReason);
         Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
         if(Ban->sReason == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen > 255 ? 256 : iReasonLen+1)+
@@ -2079,7 +2079,7 @@ char hashBanMan::TempBanIp(User * u, char * sIp, char * sReason, char * sBy, con
     }
 
     if(sBy != NULL) {
-        int iByLen = strlen(sBy);
+        size_t iByLen = strlen(sBy);
         if(iByLen > 63) {
             iByLen = 63;
         }
@@ -2102,7 +2102,7 @@ char hashBanMan::TempBanIp(User * u, char * sIp, char * sReason, char * sBy, con
 }
 //---------------------------------------------------------------------------
 
-bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy, const unsigned int &minutes, const time_t &expiretime) {
+bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy, const uint32_t &minutes, const time_t &expiretime) {
     BanItem *Ban = new BanItem();
     if(Ban == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate Ban in hashBanMan::NickTempBan!";
@@ -2126,7 +2126,7 @@ bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy,
             return false;
         }
         
-        int iNickLen = strlen(sNick);
+        size_t iNickLen = strlen(sNick);
         Ban->sNick = (char *) malloc(iNickLen+1);
         if(Ban->sNick == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
@@ -2207,7 +2207,7 @@ bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy,
     }
 
     if(sReason != NULL) {
-        int iReasonLen = strlen(sReason);
+        size_t iReasonLen = strlen(sReason);
         Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
         if(Ban->sReason == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen > 255 ? 256 : iReasonLen+1)+
@@ -2231,7 +2231,7 @@ bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy,
     }
 
     if(sBy != NULL) {
-        int iByLen = strlen(sBy);
+        size_t iByLen = strlen(sBy);
         if(iByLen > 63) {
             iByLen = 63;
         }
@@ -2374,7 +2374,7 @@ bool hashBanMan::RangeBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char *
     }
 
     if(sReason != NULL) {
-        int iReasonLen = strlen(sReason);
+        size_t iReasonLen = strlen(sReason);
         RangeBan->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
         if(RangeBan->sReason == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen > 255 ? 256 : iReasonLen+1)+
@@ -2398,7 +2398,7 @@ bool hashBanMan::RangeBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char *
     }
 
     if(sBy != NULL) {
-        int iByLen = strlen(sBy);
+        size_t iByLen = strlen(sBy);
         if(iByLen > 63) {
             iByLen = 63;
         }
@@ -2422,7 +2422,7 @@ bool hashBanMan::RangeBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char *
 //---------------------------------------------------------------------------
 
 bool hashBanMan::RangeTempBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char * sIpTo, const uint32_t &ui32ToIpHash, 
-    char * sReason, char * sBy, const unsigned int &minutes, const time_t &expiretime, const bool &bFull) {
+    char * sReason, char * sBy, const uint32_t &minutes, const time_t &expiretime, const bool &bFull) {
     RangeBanItem *RangeBan = new RangeBanItem();
     if(RangeBan == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate RangeBan in hashBanMan::RangeTempBan!";
@@ -2482,7 +2482,7 @@ bool hashBanMan::RangeTempBan(char * sIpFrom, const uint32_t &ui32FromIpHash, ch
     }
     
     if(sReason != NULL) {
-        int iReasonLen = strlen(sReason);
+        size_t iReasonLen = strlen(sReason);
         RangeBan->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
         if(RangeBan->sReason == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen > 255 ? 256 : iReasonLen+1)+
@@ -2506,7 +2506,7 @@ bool hashBanMan::RangeTempBan(char * sIpFrom, const uint32_t &ui32FromIpHash, ch
     }
 
     if(sBy != NULL) {
-        int iByLen = strlen(sBy);
+        size_t iByLen = strlen(sBy);
         if(iByLen > 63) {
             iByLen = 63;
         }

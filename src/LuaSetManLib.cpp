@@ -200,7 +200,7 @@ static int SetNumber(lua_State * L) {
     }
 
     size_t iId = (size_t)lua_tonumber(L, 1);
-    short iValue = (short)lua_tonumber(L, 2);
+    int16_t iValue = (int16_t)lua_tonumber(L, 2);
 
     lua_settop(L, 0);
 
@@ -290,7 +290,7 @@ static int GetMinShare(lua_State * L) {
         return 0;
     }
     
-    lua_pushnumber(L, SettingManager->ui64MinShare);
+    lua_pushnumber(L, (double)SettingManager->ui64MinShare);
 
     return 1;
 }
@@ -309,8 +309,8 @@ static int SetMinShare(lua_State * L) {
 
 		SettingManager->bUpdateLocked = true;
 
-        SettingManager->SetShort(SETSHORT_MIN_SHARE_LIMIT, (short)lua_tonumber(L, 1));
-		SettingManager->SetShort(SETSHORT_MIN_SHARE_UNITS, (short)lua_tonumber(L, 2));
+        SettingManager->SetShort(SETSHORT_MIN_SHARE_LIMIT, (int16_t)lua_tonumber(L, 1));
+		SettingManager->SetShort(SETSHORT_MIN_SHARE_UNITS, (int16_t)lua_tonumber(L, 2));
 
 		SettingManager->bUpdateLocked = false;
     } else if(n == 1) {
@@ -321,14 +321,14 @@ static int SetMinShare(lua_State * L) {
         }
 
 		double dBytes = lua_tonumber(L, 1);
-        short iter = 0;
+        uint16_t iter = 0;
 		for(; dBytes > 1024; iter++) {
 			dBytes /= 1024;
 		}
 
 		SettingManager->bUpdateLocked = true;
 
-        SettingManager->SetShort(SETSHORT_MIN_SHARE_LIMIT, (short)dBytes);
+        SettingManager->SetShort(SETSHORT_MIN_SHARE_LIMIT, (int16_t)dBytes);
 		SettingManager->SetShort(SETSHORT_MIN_SHARE_UNITS, iter);
 
 		SettingManager->bUpdateLocked = false;
@@ -354,7 +354,7 @@ static int GetMaxShare(lua_State * L) {
         return 0;
     }
     
-    lua_pushnumber(L, SettingManager->ui64MaxShare);
+    lua_pushnumber(L, (double)SettingManager->ui64MaxShare);
 
     return 1;
 }
@@ -373,8 +373,8 @@ static int SetMaxShare(lua_State * L) {
 
 		SettingManager->bUpdateLocked = true;
 
-        SettingManager->SetShort(SETSHORT_MAX_SHARE_LIMIT, (short)lua_tonumber(L, 1));
-		SettingManager->SetShort(SETSHORT_MAX_SHARE_UNITS, (short)lua_tonumber(L, 2));
+        SettingManager->SetShort(SETSHORT_MAX_SHARE_LIMIT, (int16_t)lua_tonumber(L, 1));
+		SettingManager->SetShort(SETSHORT_MAX_SHARE_UNITS, (int16_t)lua_tonumber(L, 2));
 
 		SettingManager->bUpdateLocked = false;
     } else if(n == 1) {
@@ -385,14 +385,14 @@ static int SetMaxShare(lua_State * L) {
         }
 
        	double dBytes = (double)lua_tonumber(L, 1);
-        short iter = 0;
+        uint16_t iter = 0;
 		for(; dBytes > 1024; iter++) {
 			dBytes /= 1024;
 		}
 
 		SettingManager->bUpdateLocked = true;
 
-		SettingManager->SetShort(SETSHORT_MAX_SHARE_LIMIT, (short)dBytes);
+		SettingManager->SetShort(SETSHORT_MAX_SHARE_LIMIT, (int16_t)dBytes);
 		SettingManager->SetShort(SETSHORT_MAX_SHARE_UNITS, iter);
 
 		SettingManager->bUpdateLocked = false;
@@ -426,8 +426,8 @@ static int SetHubSlotRatio(lua_State * L) {
 
 	SettingManager->bUpdateLocked = true;
 
-    SettingManager->SetShort(SETSHORT_HUB_SLOT_RATIO_HUBS, (short)lua_tonumber(L, 1));
-	SettingManager->SetShort(SETSHORT_HUB_SLOT_RATIO_SLOTS, (short)lua_tonumber(L, 2));
+    SettingManager->SetShort(SETSHORT_HUB_SLOT_RATIO_HUBS, (int16_t)lua_tonumber(L, 1));
+	SettingManager->SetShort(SETSHORT_HUB_SLOT_RATIO_SLOTS, (int16_t)lua_tonumber(L, 2));
 
 	SettingManager->bUpdateLocked = false;
 

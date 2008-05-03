@@ -75,11 +75,11 @@ void clsUdpDebug::Broadcast(const char * msg) {
 }
 //---------------------------------------------------------------------------
 
-void clsUdpDebug::Broadcast(const char * msg, const int &iLen) {
+void clsUdpDebug::Broadcast(const char * msg, const size_t &iLen) {
     if(llist == NULL)
         return;
 
-    int pktLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iLen;
+    size_t pktLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iLen;
 
     char *full = (char *) malloc(pktLen);
     if(full == NULL) {
@@ -90,8 +90,8 @@ void clsUdpDebug::Broadcast(const char * msg, const int &iLen) {
     }
 
     // create packet
-    ((short int *)full)[0] = (short int)SettingManager->ui16TextsLens[SETTXT_HUB_NAME];
-    ((short int *)full)[1] = (short int)iLen;
+    ((uint16_t *)full)[0] = (uint16_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME];
+    ((uint16_t *)full)[1] = (uint16_t)iLen;
     memcpy(full+4, SettingManager->sTexts[SETTXT_HUB_NAME], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
     memcpy(full+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME], msg, iLen);
      
@@ -112,7 +112,7 @@ void clsUdpDebug::Broadcast(const string & msg) {
 }
 //---------------------------------------------------------------------------
 
-bool clsUdpDebug::New(User * u, const int &port) {
+bool clsUdpDebug::New(User * u, const int32_t &port) {
 	UdpDbgItem *NewDbg = new UdpDbgItem();
     if(NewDbg == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate NewDbg in clsUdpDebug::New!";
@@ -172,7 +172,7 @@ bool clsUdpDebug::New(User * u, const int &port) {
     char msg[128];
     int iLen = sprintf(msg, "[HUB] Subscribed, users online: %u", ui32Logged);
     if(CheckSprintf(iLen, 128, "clsUdpDebug::New") == true) {
-	    int pktLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iLen;
+	    size_t pktLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iLen;
 	
 	    char *full = (char *) malloc(pktLen);
 	    if(full == NULL) {
@@ -183,8 +183,8 @@ bool clsUdpDebug::New(User * u, const int &port) {
 	    }
 	
 	    // create packet
-	    ((short int *)full)[0] = (short int)SettingManager->ui16TextsLens[SETTXT_HUB_NAME];
-	    ((short int *)full)[1] = (short int)iLen;
+	    ((uint16_t *)full)[0] = (uint16_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME];
+	    ((uint16_t *)full)[1] = (uint16_t)iLen;
 	    memcpy(full+4, SettingManager->sTexts[SETTXT_HUB_NAME], SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
 	    memcpy(full+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME], msg, iLen);
 	
@@ -200,7 +200,7 @@ bool clsUdpDebug::New(User * u, const int &port) {
 }
 //---------------------------------------------------------------------------
 
-bool clsUdpDebug::New(char * sIP, const unsigned short &usPort, const bool &bAllData, char * sScriptName) {
+bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, char * sScriptName) {
 	UdpDbgItem *NewDbg = new UdpDbgItem();
     if(NewDbg == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate NewDbg in clsUdpDebug::New!";
@@ -209,7 +209,7 @@ bool clsUdpDebug::New(char * sIP, const unsigned short &usPort, const bool &bAll
     }
 
     // initialize dbg item
-    int iScriptLen = strlen(sScriptName);
+    size_t iScriptLen = strlen(sScriptName);
     NewDbg->Nick = (char *) malloc(iScriptLen+1);
     if(NewDbg->Nick == NULL) {
 		string sDbgstr = "[BUF] "+string(sScriptName)+" Cannot allocate "+string(iScriptLen+1)+
@@ -272,7 +272,7 @@ bool clsUdpDebug::New(char * sIP, const unsigned short &usPort, const bool &bAll
     char msg[128];
     int iLen = sprintf(msg, "[HUB] Subscribed, users online: %u", ui32Logged);
     if(CheckSprintf(iLen, 128, "clsUdpDebug::New") == true) {
-	    int pktLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iLen;
+	    size_t pktLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iLen;
 	    if(bAllData == false) {
             pktLen += iScriptLen+2;
         }
@@ -287,12 +287,12 @@ bool clsUdpDebug::New(char * sIP, const unsigned short &usPort, const bool &bAll
 	
 	    // create packet
 	    if(bAllData == true) {
-	       ((short int *)full)[0] = (short int)SettingManager->ui16TextsLens[SETTXT_HUB_NAME];
+	       ((uint16_t *)full)[0] = (uint16_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME];
         } else {
-            ((short int *)full)[0] = (short int)(SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iScriptLen+2);
+            ((uint16_t *)full)[0] = (uint16_t)(SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iScriptLen+2);
         }
 
-	    ((short int *)full)[1] = (short int)iLen;
+	    ((uint16_t *)full)[1] = (uint16_t)iLen;
 
 	    memcpy(full+4, SettingManager->sTexts[SETTXT_HUB_NAME], SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
 	    if(bAllData == false) {
@@ -418,14 +418,14 @@ bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) {
 }
 //---------------------------------------------------------------------------
 
-void clsUdpDebug::Send(char * sScriptName, char * sMsg, const int &iLen) {
+void clsUdpDebug::Send(char * sScriptName, char * sMsg, const size_t &iLen) {
     UdpDbgItem *next = ScriptList;
 	while(next != NULL) {
         UdpDbgItem *cur = next;
         next = cur->next;
         if(strcasecmp(cur->Nick, sScriptName) == 0) {
-            int iScriptLen = strlen(sScriptName);
-            int pktLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iScriptLen+2+iLen;
+            size_t iScriptLen = strlen(sScriptName);
+            size_t pktLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iScriptLen+2+iLen;
         
             char *full = (char *) malloc(pktLen);
             if(full == NULL) {
@@ -436,8 +436,8 @@ void clsUdpDebug::Send(char * sScriptName, char * sMsg, const int &iLen) {
             }
         
             // create packet
-			((short int *)full)[0] = (short int)(SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iScriptLen+2);
-            ((short int *)full)[1] = (short int)iLen;
+			((uint16_t *)full)[0] = (uint16_t)(SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iScriptLen+2);
+            ((uint16_t *)full)[1] = (uint16_t)iLen;
 
             memcpy(full+4, SettingManager->sTexts[SETTXT_HUB_NAME], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
           

@@ -51,7 +51,7 @@ void ClientTagMan::Load() {
         TiXmlHandle cfg(&doc);
         TiXmlNode *clienttags = cfg.FirstChild("ClientTags").Node();
 		if(clienttags != NULL) {
-        	int i = 0;
+        	uint32_t i = 0;
 			TiXmlNode *child = NULL;
 			while((child = clienttags->IterateChildren(child)) != NULL) {
 				TiXmlNode *clienttag = child->FirstChild("ClientTag");
@@ -82,7 +82,7 @@ void ClientTagMan::Load() {
 		TiXmlElement clienttags("ClientTags");
 		const char* ClientPatts[] = { "++", "DCGUI", "DC", "oDC", "DC:PRO", "QuickDC", "LDC++", "R2++", "Goofy++", "PWDC++", "BDC++", "zK++" };
 		const char* ClientNames[] = { "DC++", "Valknut", "NMDC2", "oDC", "DC:PRO", "QuickDC", "LDC++", "R2++", "Goofy++", "PWDC++", "BDC++", "zK++" };
-		for(unsigned int i = 0; i < 12; i++) {
+		for(uint8_t i = 0; i < 12; i++) {
 			TiXmlElement clientpatt("ClientTag");
 			clientpatt.InsertEndChild(TiXmlText(ClientPatts[i]));
 

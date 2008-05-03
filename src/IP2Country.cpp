@@ -161,9 +161,9 @@ IP2CC::IP2CC() {
         char * sStart = sLine+1;
         uint8_t ui8d = 0;
         
-        int iLineLen = strlen(sLine);
+        size_t iLineLen = strlen(sLine);
 
-		for(uint16_t ui16i = 1; ui16i < iLineLen; ui16i++) {
+		for(size_t ui16i = 1; ui16i < iLineLen; ui16i++) {
             if(sLine[ui16i] == '\"') {
                 sLine[ui16i] = '\0';
                 if(ui8d == 0) {

@@ -30,10 +30,10 @@ private:
 
     bool Ban(User * curUser, char * sCommand, bool fromPM, bool bFull);
     bool BanIp(User * curUser, char * sCommand, bool fromPM, bool bFull);
-    bool TempBan(User * curUser, char * sCommand, unsigned int dlen, bool fromPM, bool bFull);
-    bool TempBanIp(User * curUser, char * sCommand, unsigned int dlen, bool fromPM, bool bFull);
-    bool RangeBan(User * curUser, char * sCommand, unsigned int dlen, bool fromPM, bool bFull);
-    bool RangeTempBan(User * curUser, char * sCommand, unsigned int dlen, bool fromPM, bool bFull);
+    bool TempBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
+    bool TempBanIp(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
+    bool RangeBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
+    bool RangeTempBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
     bool RangeUnban(User * curUser, char * sCommand, bool fromPM);
     bool RangeUnban(User * curUser, char * sCommand, bool fromPM, unsigned char cType);
 
@@ -44,7 +44,7 @@ public:
 	HubCommands();
     ~HubCommands();
 
-    bool DoCommand(User * curUser, char * sCommand, const int &iCmdLen, bool fromPM = false);
+    bool DoCommand(User * curUser, char * sCommand, const size_t &iCmdLen, bool fromPM = false);
 };
 
 //---------------------------------------------------------------------------

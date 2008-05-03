@@ -597,7 +597,7 @@ Setting number IDs for SetMan.(G/S)etNumber
 75	- Secondary myINFO deflood messages count. Higher than 0, max 29999.
 76	- Secondary myINFO deflood time. Higher than 0, max 29999.
 77	- Secondary myINFO deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-78	- Maximum MyINFO length. Higher than 0, max 512.
+78	- Maximum MyINFO length. Min 64, max 512.
 79	- Primary ConnectToMe deflood count. Higher than 0, max 29999.
 80	- Primary ConnectToMe deflood time. Higher than 0, max 29999.
 81	- Primary ConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.

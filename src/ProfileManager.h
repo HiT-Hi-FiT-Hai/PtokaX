@@ -94,24 +94,24 @@ public:		// User declarations
         NOPMINTERVAL, 
         NOSEARCHINTERVAL, 
         NOUSRSAMEIP, 
-        NORECONNTIME, 
+        NORECONNTIME
     };
 
-    unsigned int iProfileCount;
+    uint16_t iProfileCount;
     ProfileItem **ProfilesTable;
 
     ProfileManager();
     ~ProfileManager();
 
-    bool IsAllowed(User * u, const unsigned int &iOption);
-    bool IsProfileAllowed(const int &iProfile, const unsigned int &iOption);
-    int AddProfile(char * name);
-    int GetProfileIndex(const char * name);
-    int RemoveProfileByName(char * name);
-    void MoveProfileDown(const unsigned int &iProfile);
-    void MoveProfileUp(const unsigned int &iProfile);
-    void ChangeProfileName(const unsigned int &iProfile, char * sName, const size_t &iLen);
-    void ChangeProfilePermission(const unsigned int &iProfile, const size_t &iId, const bool &bValue);
+    bool IsAllowed(User * u, const uint32_t &iOption);
+    bool IsProfileAllowed(const int32_t &iProfile, const uint32_t &iOption);
+    int32_t AddProfile(char * name);
+    int32_t GetProfileIndex(const char * name);
+    int32_t RemoveProfileByName(char * name);
+    void MoveProfileDown(const uint16_t &iProfile);
+    void MoveProfileUp(const uint16_t &iProfile);
+    void ChangeProfileName(const uint16_t &iProfile, char * sName, const size_t &iLen);
+    void ChangeProfilePermission(const uint16_t &iProfile, const size_t &iId, const bool &bValue);
     void SaveProfiles();
 };
 

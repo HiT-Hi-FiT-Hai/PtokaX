@@ -23,7 +23,7 @@
 //---------------------------------------------------------------------------
 
 struct ClientTag {
-    int PattLen;
+    size_t PattLen;
     char CliName[32];
     char TagPatt[32];
 };

@@ -27,7 +27,7 @@
 #include "ProfileManager.h"
 //---------------------------------------------------------------------------
 
-static void PushProfilePermissions(lua_State * L, const unsigned int &iProfile) {
+static void PushProfilePermissions(lua_State * L, const uint16_t &iProfile) {
     ProfileItem *Prof = ProfileMan->ProfilesTable[iProfile];
 
     lua_checkstack(L, 3); // we need 3 (1 table, 2 id, 3 value) empty slots in stack, check it to be sure
@@ -261,7 +261,7 @@ static void PushProfilePermissions(lua_State * L, const unsigned int &iProfile) 
 }
 //------------------------------------------------------------------------------
 
-static void PushProfile(lua_State * L, const unsigned int &iProfile) {
+static void PushProfile(lua_State * L, const uint16_t &iProfile) {
 	lua_checkstack(L, 3); // we need 3 (1 table, 2 id, 3 value) empty slots in stack, check it to be sure
 
     lua_newtable(L);
@@ -305,7 +305,7 @@ static int AddProfile(lua_State * L) {
         return 1;
     }
 
-	int idx = ProfileMan->AddProfile(sProfileName);
+	int32_t idx = ProfileMan->AddProfile(sProfileName);
     if(idx == -1 || idx == -2) {
         lua_settop(L, 0);
         lua_pushnil(L);
@@ -344,7 +344,7 @@ static int RemoveProfile(lua_State * L) {
         return 1;
     }
 
-    int result = ProfileMan->RemoveProfileByName(sProfileName);
+    int32_t result = ProfileMan->RemoveProfileByName(sProfileName);
     if(result != 1) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
@@ -375,7 +375,7 @@ static int MoveDown(lua_State * L) {
         return 1;
     }
 
-	unsigned int iProfile = (unsigned int)lua_tonumber(L, 1);
+	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
     
     // if the requested index is out of bounds return nil
     if(iProfile >= ProfileMan->iProfileCount-1) {
@@ -408,7 +408,7 @@ static int MoveUp(lua_State * L) {
         return 1;
     }
 
-	unsigned int iProfile = (unsigned int)lua_tonumber(L, 1);
+	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
     
     // if the requested index is out of bounds return nil
     if(iProfile == 0 || iProfile >= ProfileMan->iProfileCount) {
@@ -442,7 +442,7 @@ static int GetProfile(lua_State * L) {
             return 1;
         }
 
-        int idx = ProfileMan->GetProfileIndex(profName);
+		int32_t idx = ProfileMan->GetProfileIndex(profName);
 
         lua_settop(L, 0);
 
@@ -451,10 +451,10 @@ static int GetProfile(lua_State * L) {
             return 1;
         }
 
-        PushProfile(L, idx);
+        PushProfile(L, (uint16_t)idx);
         return 1;
     } else if(lua_type(L, 1) == LUA_TNUMBER) {
-    	unsigned int idx = (unsigned int)lua_tonumber(L, 1);
+    	uint16_t idx = (uint16_t)lua_tonumber(L, 1);
 
     	lua_settop(L, 0);
     
@@ -486,7 +486,7 @@ static int GetProfiles(lua_State * L) {
     lua_newtable(L);
     int t = lua_gettop(L);
 
-    for(unsigned int i = 0; i < ProfileMan->iProfileCount; i++) {
+    for(uint16_t i = 0; i < ProfileMan->iProfileCount; i++) {
         lua_pushnumber(L, (i+1));
         PushProfile(L, i);
         lua_rawset(L, t);
@@ -512,7 +512,7 @@ static int GetProfilePermission(lua_State * L) {
         return 1;
     }
 
-    unsigned int iProfile = (unsigned int)lua_tonumber(L, 1);
+    uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
     size_t iId = (size_t)lua_tonumber(L, 2);
     
     lua_settop(L, 0);
@@ -550,10 +550,10 @@ static int GetProfilePermissions(lua_State * L) {
         return 1;
     }
 
-	unsigned int iProfile = (unsigned int)lua_tonumber(L, 1);
+	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
     
     // if the requested index is out of bounds return nil
-    if(iProfile >= (unsigned int)ProfileMan->iProfileCount) {
+    if(iProfile >= ProfileMan->iProfileCount) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -581,7 +581,7 @@ static int SetProfileName(lua_State * L) {
         return 1;
     }
 
-    unsigned int iProfile = (unsigned int)lua_tonumber(L, 1);
+    uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
 
     if(iProfile >= ProfileMan->iProfileCount) {
         lua_settop(L, 0);
@@ -623,7 +623,7 @@ static int SetProfilePermission(lua_State * L) {
         return 1;
     }
 
-    unsigned int iProfile = (unsigned int)lua_tonumber(L, 1);
+    uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
 
     size_t iId = (size_t)lua_tonumber(L, 2);
 

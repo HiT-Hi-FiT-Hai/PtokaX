@@ -57,7 +57,7 @@ static void PushBan(lua_State * L, BanItem * b) {
     lua_rawset(L, i);
 
     lua_pushliteral(L, "iExpireTime");
-    ((b->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == false ? lua_pushnil(L) : lua_pushnumber(L, b->tempbanexpire);
+    ((b->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == false ? lua_pushnil(L) : lua_pushnumber(L, (double)b->tempbanexpire);
     lua_rawset(L, i);
 
     lua_pushliteral(L, "bIpBan");
@@ -97,7 +97,7 @@ static void PushRangeBan(lua_State * L, RangeBanItem * rb) {
     lua_rawset(L, i);
 
     lua_pushliteral(L, "iExpireTime");
-    ((rb->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == false ? lua_pushnil(L) : lua_pushnumber(L, rb->tempbanexpire);
+    ((rb->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == false ? lua_pushnil(L) : lua_pushnumber(L, (double)rb->tempbanexpire);
     lua_rawset(L, i);
 
     lua_pushliteral(L, "bFullIpBan");
@@ -1316,7 +1316,7 @@ static int TempBan(lua_State * L) {
         return 1;
     }
 
-	unsigned int iMinutes = (unsigned int)lua_tonumber(L, 2);
+	uint32_t iMinutes = (uint32_t)lua_tonumber(L, 2);
 
 	size_t iReasonLen;
     char *sReason = (char *)lua_tolstring(L, 3, &iReasonLen);
@@ -1375,7 +1375,7 @@ static int TempBanIP(lua_State * L) {
         return 1;
     }
 
-	unsigned int iMinutes = (unsigned int)lua_tonumber(L, 2);
+	uint32_t iMinutes = (uint32_t)lua_tonumber(L, 2);
 
     size_t iReasonLen;
     char *sReason = (char *)lua_tolstring(L, 3, &iReasonLen);
@@ -1429,7 +1429,7 @@ static int TempBanNick(lua_State * L) {
         return 1;
     }
 
-	unsigned int iMinutes = (unsigned int)lua_tonumber(L, 2);
+	uint32_t iMinutes = (uint32_t)lua_tonumber(L, 2);
 
     size_t iReasonLen;
     char *sReason = (char *)lua_tolstring(L, 3, &iReasonLen);
@@ -1554,7 +1554,7 @@ static int RangeTempBan(lua_State * L) {
     size_t iToIpLen;
     char *sToIP = (char *)lua_tolstring(L, 2, &iToIpLen);
 
-    unsigned int iMinutes = (unsigned int)lua_tonumber(L, 3);
+    uint32_t iMinutes = (uint32_t)lua_tonumber(L, 3);
 
     size_t iReasonLen;
     char *sReason = (char *)lua_tolstring(L, 4, &iReasonLen);

@@ -31,8 +31,8 @@
 #include "User.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
-static const int MYINFOLISTSIZE = 1024*256;
-static const int IPLISTSIZE = 1024*64;
+static const uint32_t MYINFOLISTSIZE = 1024*256;
+static const uint32_t IPLISTSIZE = 1024*64;
 //---------------------------------------------------------------------------
 classUsers *colUsers = NULL;
 //---------------------------------------------------------------------------
@@ -257,7 +257,7 @@ void classUsers::RemUser(User * u) {
 //---------------------------------------------------------------------------
 
 void classUsers::DisconnectAll() {
-    int iCloseLoops = 0;
+    uint32_t iCloseLoops = 0;
     while(llist != NULL && iCloseLoops <= 100) {
         User *next = llist;
         while(next != NULL) {
@@ -279,7 +279,7 @@ void classUsers::DisconnectAll() {
                     u->next->prev = u->prev;
                 }
                 
-                shutdown(u->Sck, SHUT_RDWR);
+                shutdown(u->Sck, SHUT_RD);
 				close(u->Sck);
 
 				delete u;
@@ -319,7 +319,7 @@ void classUsers::Add2NickList(char * Nick, const size_t &iNickLen, const bool &i
     }
 
     memcpy(nickList+nickListLen-1, Nick, iNickLen);
-    nickListLen += iNickLen+2;
+    nickListLen += (uint32_t)(iNickLen+2);
 
     nickList[nickListLen-3] = '$';
     nickList[nickListLen-2] = '$';
@@ -343,7 +343,7 @@ void classUsers::Add2NickList(char * Nick, const size_t &iNickLen, const bool &i
     }
 
     memcpy(opList+opListLen-1, Nick, iNickLen);
-    opListLen += iNickLen+2;
+    opListLen += (uint32_t)(iNickLen+2);
 
     opList[opListLen-3] = '$';
     opList[opListLen-2] = '$';
@@ -367,7 +367,7 @@ void classUsers::Add2OpList(char * Nick, const size_t &iNickLen) {
     }
 
     memcpy(opList+opListLen-1, Nick, iNickLen);
-    opListLen += iNickLen+2;
+    opListLen += (uint32_t)(iNickLen+2);
 
     opList[opListLen-3] = '$';
     opList[opListLen-2] = '$';
@@ -427,7 +427,7 @@ void classUsers::DelFromOpList(char * Nick) {
 //---------------------------------------------------------------------------
 
 // PPK ... check global mainchat flood and add to global queue
-void classUsers::SendChat2All(User * cur, char * data, const int &iChatLen) {
+void classUsers::SendChat2All(User * cur, char * data, const size_t &iChatLen) {
     UdpDebug->Broadcast(data, iChatLen);
 
     if(ProfileMan->IsAllowed(cur, ProfileManager::NODEFLOODMAINCHAT) == false && 
@@ -444,7 +444,7 @@ void classUsers::SendChat2All(User * cur, char * data, const int &iChatLen) {
 
         iChatMsgs++;
 
-        if(iChatMsgs > SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_MESSAGES]) {
+        if(iChatMsgs > (uint16_t)SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_MESSAGES]) {
 			iChatLockFromTick = ui64ActualTick;
             if(bChatLocked == false) {
                 if(SettingManager->bBools[SETBOOL_DEFLOOD_REPORT] == true) {
@@ -473,7 +473,7 @@ void classUsers::SendChat2All(User * cur, char * data, const int &iChatLen) {
                 if(SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 1) {
                     return;
                 } else if(SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 2) {
-                    int iWantLen = iChatLen+17;
+                    size_t iWantLen = iChatLen+17;
                     char *MSG = (char *) malloc(iChatLen+17);
                     if(MSG == NULL) {
 						string sDbgstr = "[BUF] Cannot allocate "+string(iWantLen)+" bytes of memory in classUsers::SendChat2All! "+
@@ -484,7 +484,7 @@ void classUsers::SendChat2All(User * cur, char * data, const int &iChatLen) {
                 	int iMsgLen = sprintf(MSG, "%s ", cur->IP);
                 	if(CheckSprintf(iMsgLen, iWantLen, "classUsers::SendChat2All3") == true) {
                         memcpy(MSG+iMsgLen, data, iChatLen);
-                        iMsgLen += iChatLen;
+                        iMsgLen += (uint32_t)iChatLen;
                         MSG[iMsgLen] = '\0';
                         globalQ->OPStore(MSG, iMsgLen);
                     }
@@ -568,7 +568,7 @@ void classUsers::DelFromMyInfosTag(User * u) {
 //---------------------------------------------------------------------------
 
 void classUsers::AddBot2MyInfos(char * MyInfo) {
-	int len = strlen(MyInfo);
+	size_t len = strlen(MyInfo);
 	if(myInfosTag != NULL) {
 	    if(strstr(myInfosTag, MyInfo) == NULL ) {
             if(myInfosTagSize < myInfosTagLen+len) {
@@ -582,7 +582,7 @@ void classUsers::AddBot2MyInfos(char * MyInfo) {
                 myInfosTagSize += MYINFOLISTSIZE;
             }
         	memcpy(myInfosTag+myInfosTagLen, MyInfo, len);
-            myInfosTagLen += len;
+            myInfosTagLen += (uint32_t)len;
             myInfosTag[myInfosTagLen] = '\0';
             iZMyInfosLen = 0;
         }
@@ -600,7 +600,7 @@ void classUsers::AddBot2MyInfos(char * MyInfo) {
                 myInfosSize += MYINFOLISTSIZE;
             }
         	memcpy(myInfos+myInfosLen, MyInfo, len);
-            myInfosLen += len;
+            myInfosLen += (uint32_t)len;
             myInfos[myInfosLen] = '\0';
             iZMyInfosTagLen = 0;
          }
@@ -609,12 +609,12 @@ void classUsers::AddBot2MyInfos(char * MyInfo) {
 //---------------------------------------------------------------------------
 
 void classUsers::DelBotFromMyInfos(char * MyInfo) {
-	int len = strlen(MyInfo);
+	size_t len = strlen(MyInfo);
 	if(myInfosTag) {
 		char *match = strstr(myInfosTag,  MyInfo);
 	    if(match) {
     		memmove(match, match+len, myInfosTagLen-((match+(len-1))-myInfosTag));
-        	myInfosTagLen -= len;
+        	myInfosTagLen -= (uint32_t)len;
         	iZMyInfosTagLen = 0;
          }
     }
@@ -622,7 +622,7 @@ void classUsers::DelBotFromMyInfos(char * MyInfo) {
 		char *match = strstr(myInfos,  MyInfo);
 	    if(match) {
     		memmove(match, match+len, myInfosLen-((match+(len-1))-myInfos));
-        	myInfosLen -= len;
+        	myInfosLen -= (uint32_t)len;
         	iZMyInfosLen = 0;
          }
     }
@@ -749,9 +749,9 @@ bool classUsers::CheckRecTime(User * curUser) {
 
         if(cur->ui32NickHash == curUser->ui32NickHash && cur->ui32IpHash == curUser->ui32IpHash &&
             strcasecmp(cur->sNick, curUser->Nick) == 0) {
-            int imsgLen = sprintf(msg, "<%s> %s %llu %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+            int imsgLen = sprintf(msg, "<%s> %s %" PRIu64 " %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                 LanguageManager->sTexts[LAN_PLEASE_WAIT], 
-                (unsigned long long)(cur->ui64DisConnTick+SettingManager->iShorts[SETSHORT_MIN_RECONN_TIME])-ui64ActualTick, 
+                (cur->ui64DisConnTick+SettingManager->iShorts[SETSHORT_MIN_RECONN_TIME])-ui64ActualTick, 
                 LanguageManager->sTexts[LAN_SECONDS_BEFORE_RECONN]);
             if(CheckSprintf(imsgLen, 1024, "classUsers::CheckRecTime1") == true) {
                 UserSendChar(curUser, msg, imsgLen);

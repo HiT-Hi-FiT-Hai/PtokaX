@@ -79,18 +79,18 @@ public:
     BanItem* FindBanIPTemp(const uint32_t &hash, const time_t &acc_time);
     BanItem* FindBanIPPerm(const uint32_t &hash);
     BanItem* FindBanNick(User* u);
-    BanItem* FindBanNick(char * sNick, int iNickLen);
+    BanItem* FindBanNick(char * sNick, const size_t &iNickLen);
     BanItem* FindBanNick(const uint32_t &hash, const time_t &acc_time, char * sNick);
-    BanItem* FindBanNickTemp(char * sNick, int iNickLen);
+    BanItem* FindBanNickTemp(char * sNick, const size_t &iNickLen);
     BanItem* FindBanNickTemp(const uint32_t &hash, const time_t &acc_time, char * sNick);
-    BanItem* FindBanNickPerm(char * sNick, int iNickLen);
+    BanItem* FindBanNickPerm(char * sNick, const size_t &iNickLen);
     BanItem* FindBanNickPerm(const uint32_t &hash, char * sNick);
 
-    RegUser* FindReg(char * sNick, int iNickLen);
+    RegUser* FindReg(char * sNick, const size_t &iNickLen);
     RegUser* FindReg(User * u);
     RegUser* FindReg(uint32_t hash, char * sNick);
 
-    User * FindUser(char * sNick, const unsigned int &iNickLen);
+    User * FindUser(char * sNick, const size_t &iNickLen);
     User * FindUser(User * u);
     User * FindUser(const uint32_t &ui32IpHash);
 

@@ -32,11 +32,11 @@
 hashRegMan *hashRegManager = NULL;
 //---------------------------------------------------------------------------
 
-RegUser::RegUser(char * Nick, char * Pass, const unsigned int &iRegProfile) {
+RegUser::RegUser(char * Nick, char * Pass, const uint16_t &iRegProfile) {
     prev = NULL;
     next = NULL;
     
-    int iNickLen = strlen(Nick);
+    size_t iNickLen = strlen(Nick);
     sNick = (char *) malloc(iNickLen+1);
     if(sNick == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
@@ -47,7 +47,7 @@ RegUser::RegUser(char * Nick, char * Pass, const unsigned int &iRegProfile) {
     memcpy(sNick, Nick, iNickLen);
     sNick[iNickLen] = '\0';
     
-    int iPassLen = strlen(Pass);
+    size_t iPassLen = strlen(Pass);
     sPass = (char *) malloc(iPassLen+1);
     if(sPass == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
@@ -93,7 +93,7 @@ hashRegMan::~hashRegMan(void) {
 }
 //---------------------------------------------------------------------------
 
-bool hashRegMan::AddNewReg(char * sNick, char * sPasswd, const unsigned int &iProfile) {
+bool hashRegMan::AddNewReg(char * sNick, char * sPasswd, const uint16_t &iProfile) {
     if(hashManager->FindReg(sNick, strlen(sNick)) != NULL) {
         return false;
     }
@@ -153,7 +153,7 @@ void hashRegMan::RemReg(RegUser * Reg) {
 //---------------------------------------------------------------------------
 
 void hashRegMan::LoadRegList(void) {
-    int iProfilesCount = ProfileMan->iProfileCount-1;
+    uint16_t iProfilesCount = (uint16_t)(ProfileMan->iProfileCount-1);
     bool bIsBuggy = false;
 
     TiXmlDocument doc((PATH+"/cfg/RegisteredUsers.xml").c_str());
@@ -183,7 +183,7 @@ void hashRegMan::LoadRegList(void) {
 					continue;
 				}
 
-                int iProfile = atoi(registereduser->Value());
+				uint16_t iProfile = (uint16_t)atoi(registereduser->Value());
 
                 if(iProfile > iProfilesCount) {
                     char msg[1024];

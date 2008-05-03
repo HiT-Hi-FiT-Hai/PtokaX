@@ -58,7 +58,7 @@ public:
 
     double dLoggedUsers, dActualSrvLoopLogins;
 
-    unsigned int iLastSendRest, iSendRestsPeak, iLastRecvRest, iRecvRestsPeak, iLoopsForLogins;
+    uint32_t iLastSendRest, iSendRestsPeak, iLastRecvRest, iRecvRestsPeak, iLoopsForLogins;
     bool bRecv;
 
 	void AcceptSocket(const int &s, const sockaddr_in &addr, const socklen_t &sin_len);

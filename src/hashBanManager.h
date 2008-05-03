@@ -68,7 +68,7 @@ private:
         BanItem * FirstBan;
     };
 
-    int iSaveCalled;
+    uint32_t iSaveCalled;
 public:
     BanItem *TempBanListS, *TempBanListE;
     BanItem *PermBanListS, *PermBanListE;
@@ -109,7 +109,7 @@ public:
     void LoadBanList(void);
     void SaveBanList(bool bForce = false);
     
-    void CreateTempBan(char * first, char * second, int iTime, const time_t &acc_time);
+    void CreateTempBan(char * first, char * second, const uint32_t &iTime, const time_t &acc_time);
     void CreatePermBan(char * first, char * second);
 
     void ClearTempBan(void);
@@ -122,9 +122,9 @@ public:
     char BanIp(User * u, char * sIp, char * sReason, char * sBy, const bool &bFull);
     bool NickBan(User * u, char * sNick, char * sReason, char * sBy);
     
-    void TempBan(User * u, const char * sReason, char * sBy, const unsigned int &minutes, const time_t &expiretime, const bool &bFull);
-    char TempBanIp(User * u, char * sIp, char * sReason, char * sBy, const unsigned int &minutes, const time_t &expiretime, const bool &bFull);
-    bool NickTempBan(User * u, char * sNick, char * sReason, char * sBy, const unsigned int &minutes, const time_t &expiretime);
+    void TempBan(User * u, const char * sReason, char * sBy, const uint32_t &minutes, const time_t &expiretime, const bool &bFull);
+    char TempBanIp(User * u, char * sIp, char * sReason, char * sBy, const uint32_t &minutes, const time_t &expiretime, const bool &bFull);
+    bool NickTempBan(User * u, char * sNick, char * sReason, char * sBy, const uint32_t &minutes, const time_t &expiretime);
     
     bool Unban(char * sWhat);
     bool PermUnban(char * sWhat);
@@ -133,7 +133,7 @@ public:
     bool RangeBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char * sIpTo, const uint32_t &ui32ToIpHash, 
         char * sReason, char * sBy, const bool &bFull);
     bool RangeTempBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char * sIpTo, const uint32_t &ui32ToIpHash,
-        char * sReason, char * sBy, const unsigned int &minutes, const time_t &expiretime, const bool &bFull);
+        char * sReason, char * sBy, const uint32_t &minutes, const time_t &expiretime, const bool &bFull);
         
     bool RangeUnban(const uint32_t &ui32FromIpHash, const uint32_t &ui32ToIpHash);
     bool RangeUnban(const uint32_t &ui32FromIpHash, const uint32_t &ui32ToIpHash, unsigned char cType);

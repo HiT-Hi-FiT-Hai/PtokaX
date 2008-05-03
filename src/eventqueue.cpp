@@ -34,8 +34,6 @@
 #include "LuaScript.h"
 #include "RegThread.h"
 //---------------------------------------------------------------------------
-static const unsigned int MOD = 8009;
-//---------------------------------------------------------------------------
 eventq *eventqueue = NULL;
 //---------------------------------------------------------------------------
 
@@ -104,7 +102,7 @@ void eventq::AddNormal(uint8_t ui8Id, char * sMsg) {
     }
 
     if(sMsg != NULL) {
-        int iLen = strlen(sMsg);
+        size_t iLen = strlen(sMsg);
 		newevent->sMsg = (char *) malloc(iLen+1);
 		if(newevent->sMsg == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string(iLen+1)+
@@ -145,7 +143,7 @@ void eventq::AddThread(uint8_t ui8Id, char * sMsg, const uint32_t &ui32Hash/* = 
     }
 
     if(sMsg != NULL) {
-        int iLen = strlen(sMsg);
+        size_t iLen = strlen(sMsg);
 		newevent->sMsg = (char *) malloc(iLen+1);
 		if(newevent->sMsg == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string(iLen+1)+
@@ -265,7 +263,7 @@ void eventq::ProcessEvents() {
                 UdpDebug->Broadcast(cur->sMsg);
                 break;
             case EVENT_UDP_SR: {
-                unsigned int iMsgLen = strlen(cur->sMsg);
+                size_t iMsgLen = strlen(cur->sMsg);
                 ui64BytesRead += (uint64_t)iMsgLen;
 
                 char *temp = strchr(cur->sMsg+4, ' ');
@@ -273,7 +271,7 @@ void eventq::ProcessEvents() {
                     break;;
                 }
 
-                int iLen = (temp-cur->sMsg)-4;
+                size_t iLen = (temp-cur->sMsg)-4;
                 if(iLen > 64 || iLen == 0) {
                     break;
                 }

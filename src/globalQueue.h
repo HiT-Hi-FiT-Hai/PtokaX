@@ -26,7 +26,7 @@ struct User;
 
 // zbuffer
 struct QzBuf {
-	unsigned int len, size, zlen, zsize;
+	size_t len, size, zlen, zsize;
 	char *buffer, *zbuffer;
 	bool zlined;
 };
@@ -34,7 +34,9 @@ struct QzBuf {
 
 // PPK ... single items like opchat messages
 struct QueueDataItem {
-    int iDataLen, iType, iProfile;
+    size_t iDataLen;
+    uint32_t iType;
+    int32_t iProfile;
     char *sData;
     QueueDataItem *prev, *next;
     User *FromUser;
@@ -45,13 +47,13 @@ class queue {
 private:
     // buffer
     struct QBuf {
-    	int len, size;
+    	size_t len, size;
     	char *buffer;
     };
     
     // PPK ... buffer for userip
     struct QdBuf {
-    	int len, size;
+    	size_t len, size;
     	char *buffer;
     	bool bHaveDollars;
     };
@@ -121,15 +123,15 @@ public:
     ~queue();
 
     void Store(char * sData);
-    void Store(char * sData, const int &iDataLen);
+    void Store(char * sData, const size_t &iDataLen);
     void HStore(char * sData);
-    void HStore(char * sData, const int &iDataLen);
-    void AStore(char * sData, const int &iDataLen);
-    void PStore(char * sData, const int &iDataLen);
-    void InfoStore(char * sData, const int &iDataLen);
-    void StrpInfoStore(char * sData, const int &iDataLen);
-    void FullInfoStore(char * sData, const int &iDataLen);
-    void OPStore(char * sData, const int &iDataLen);
+    void HStore(char * sData, const size_t &iDataLen);
+    void AStore(char * sData, const size_t &iDataLen);
+    void PStore(char * sData, const size_t &iDataLen);
+    void InfoStore(char * sData, const size_t &iDataLen);
+    void StrpInfoStore(char * sData, const size_t &iDataLen);
+    void FullInfoStore(char * sData, const size_t &iDataLen);
+    void OPStore(char * sData, const size_t &iDataLen);
     void OpListStore(char * sNick);
     void UserIPStore(User * curUser);
     void SingleItemsStore(QueueDataItem * NewItem);
@@ -138,7 +140,7 @@ public:
     void ProcessQueues(User * u);
     void ProcessSingleItems(User * u);
     void SendGlobalQ();
-    QueueDataItem * CreateQueueDataItem(char * data, const int &idatalen, User * fromuser, const int &iProfile, const int &type);
+    QueueDataItem * CreateQueueDataItem(char * data, const size_t &idatalen, User * fromuser, const int32_t &iProfile, const uint32_t &type);
 };
 
 //-----------------------------------------------------------------------------

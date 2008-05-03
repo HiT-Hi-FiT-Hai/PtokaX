@@ -45,14 +45,14 @@ public:
 	~clsUdpDebug();
 
 	void Broadcast(const char * msg);
-	void Broadcast(const char * msg, const int &iLen);
+	void Broadcast(const char * msg, const size_t &iLen);
     void Broadcast(const string & msg);
-	bool New(User *u, const int &port);
-	bool New(char * sIP, const unsigned short &usPort, const bool &bAllData, char * sScriptName);
+	bool New(User *u, const int32_t &port);
+	bool New(char * sIP, const uint16_t &usPort, const bool &bAllData, char * sScriptName);
 	bool Remove(User * u);
 	void Remove(char * sScriptName);
 	bool CheckUdpSub(User * u, bool bSndMess = false);
-	void Send(char * sScriptName, char * sMsg, const int &iLen);
+	void Send(char * sScriptName, char * sMsg, const size_t &iLen);
 	void Cleanup();
 };
 

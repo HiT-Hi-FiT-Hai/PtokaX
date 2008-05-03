@@ -23,10 +23,10 @@
 //---------------------------------------------------------------------------
 
 struct UserBan {
-    UserBan(char * sMess, int iMessLen, uint32_t ui32Hash);
+    UserBan(char * sMess, const uint32_t &iMessLen, const uint32_t &ui32Hash);
     ~UserBan();
 
-    unsigned int iLen;
+    uint32_t iLen;
     uint32_t ui32NickHash;
     char * sMessage;
 };
@@ -37,7 +37,7 @@ struct LoginLogout {
     ~LoginLogout();
 
     uint64_t logonClk;
-    unsigned int iToCloseLoops, iUserConnectedLen;
+    uint32_t iToCloseLoops, iUserConnectedLen;
     char *sLockUsrConn, *Password, *sKickMsg;
     UserBan *uBan;
 };
@@ -50,10 +50,10 @@ struct PrcsdUsrCmd {
         LOGINHELLO,
         GETPASS,
         CHAT,
-        TO_OP_CHAT,
+        TO_OP_CHAT
     };
 
-    unsigned int iLen;
+    uint32_t iLen;
     char * sCommand;
     PrcsdUsrCmd *next;
     unsigned char cType;
@@ -65,7 +65,7 @@ struct User; // needed for next struct, and next struct must be defined before u
 //---------------------------------------------------------------------------
 
 struct PrcsdToUsrCmd {
-    unsigned int iLen, iPmCount, iLoops, iToNickLen;
+    uint32_t iLen, iPmCount, iLoops, iToNickLen;
     char * sCommand, * ToNick;
     PrcsdToUsrCmd *next;
     User *To;
@@ -119,7 +119,7 @@ struct User {
     	BIT_SUPPORT_USERIP2        = 0x400000,
     	BIT_SUPPORT_ZPIPE          = 0x800000, 
     	BIT_PRCSD_MYINFO           = 0x1000000, 
-    	BIT_RECV_FLOODER           = 0x2000000, 
+    	BIT_RECV_FLOODER           = 0x2000000
     };
 
     uint64_t sharedSize;
@@ -133,9 +133,8 @@ struct User {
 
     uint32_t ui32Recvs, ui32Recvs2;
 
-    int Hubs, Slots, OLimit, LLimit, DLimit, iNormalHubs, iRegHubs, iOpHubs;
-    int iState, iProfile;
-    int iSendCalled, iRecvCalled, iReceivedPmCount, iSR, iDefloodWarnings;
+    uint32_t Hubs, Slots, OLimit, LLimit, DLimit, iNormalHubs, iRegHubs, iOpHubs;
+    uint32_t iSendCalled, iRecvCalled, iReceivedPmCount, iSR, iDefloodWarnings;
 //    socklen_t sin_len;
 //    int PORT;
 
@@ -144,11 +143,13 @@ struct User {
 
     time_t LoginTime;
 
-    unsigned int NickLen, iMyInfoTagLen, iMyInfoLen, iMyInfoOldLen;
-    unsigned int sendbuflen, recvbuflen, sbdatalen, rbdatalen;
+    uint32_t NickLen, iMyInfoTagLen, iMyInfoLen, iMyInfoOldLen;
+    uint32_t sendbuflen, recvbuflen, sbdatalen, rbdatalen;
 
     uint32_t ui32BoolBits;
     uint32_t ui32NickHash, ui32IpHash;
+
+    int32_t iProfile;
 
     char *sLastChat, *sLastPM, *sendbuf, *recvbuf, *sbplayhead, *sLastSearch;
     char *Nick, *Version, *MyInfo, *MyInfoOld, *Ver, Mode;
@@ -172,7 +173,7 @@ struct User {
     uint16_t ui16ChatIntMsgs, ui16PMsInt, ui16SearchsInt;
 
     uint8_t ui8IpLen, ui8ConnLen, ui8DescrLen, ui8EmailLen, ui8TagLen, ui8ClientLen, ui8VerLen;
-    uint8_t ui8Country;
+    uint8_t ui8Country, iState;
 
     char IP[16];
 };
@@ -186,24 +187,24 @@ void UserMakeLock(User * u);
 
 bool UserDoRecv(User * u);
 
-void UserSendChar(User * u, const char * cText, const int &iTextLen);
+void UserSendChar(User * u, const char * cText, const size_t &iTextLen);
 void UserSendCharDelayed(User * u, const char * cText);
-void UserSendCharDelayed(User * u, const char * cText, const int &iTextLen);
+void UserSendCharDelayed(User * u, const char * cText, const size_t &iTextLen);
 void UserSendText(User * u, const string & sText);
 void UserSendTextDelayed(User * u, const string & sText);
 void UserSendQueue(User * u, QzBuf * Queue, bool bChckActSr = true);
-bool UserPutInSendBuf(User * u, const char * Text, const int &iTxtLen);
+bool UserPutInSendBuf(User * u, const char * Text, const size_t &iTxtLen);
 bool UserTry2Send(User * u);
 
 void UserSetIP(User * u, char * newIP);
-void UserSetNick(User * u, char * newNick, const int &iNewNickLen);
-void UserSetMyInfoTag(User * u, char * newInfoTag, const int &MyInfoTagLen);
+void UserSetNick(User * u, char * newNick, const size_t &iNewNickLen);
+void UserSetMyInfoTag(User * u, char * newInfoTag, const size_t &MyInfoTagLen);
 void UserSetVersion(User * u, char * newVer);
 void UserSetPasswd(User * u, char * newPass);
-void UserSetLastChat(User * u, char * newData, const int &iLen);
-void UserSetLastPM(User * u, char * newData, const int &iLen);
-void UserSetLastSearch(User * u, char * newData, const int &iLen);
-void UserSetKickMsg(User * u, char * kickmsg, int iLen = 0);
+void UserSetLastChat(User * u, char * newData, const size_t &iLen);
+void UserSetLastPM(User * u, char * newData, const size_t &iLen);
+void UserSetLastSearch(User * u, char * newData, const size_t &iLen);
+void UserSetKickMsg(User * u, char * kickmsg, size_t iLen = 0);
 
 void UserClose(User * u, bool bNoQuit = false);
 
@@ -218,7 +219,7 @@ void UserHasSuspiciousTag(User * curUser);
 
 bool UserProcessRules(User * u);
 
-void UserAddPrcsdCmd(User * u, unsigned char cType, char *sCommand, int iCommandLen, User * to, bool bIsPm = false);
+void UserAddPrcsdCmd(User * u, unsigned char cType, char *sCommand, const size_t &iCommandLen, User * to, bool bIsPm = false);
 //---------------------------------------------------------------------------
 
 #endif

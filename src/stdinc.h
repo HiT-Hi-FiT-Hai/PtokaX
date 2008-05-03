@@ -22,6 +22,7 @@
 #define stdincH
 //---------------------------------------------------------------------------
 #define _REENTRANT 1
+#define __STDC_FORMAT_MACROS 1
 //---------------------------------------------------------------------------
 #include <stdlib.h>
 #include <string.h>
@@ -33,6 +34,7 @@
 #include <errno.h>
 #include <dirent.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <limits.h>
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -50,7 +52,7 @@
 #include <tinystr.h>
 #include "pxstring.h"
 //---------------------------------------------------------------------------
-#define PtokaXVersionString "0.4.1.0RC5"
+#define PtokaXVersionString "0.4.1.0RC6"
 #define sErrOutOfMem "[ERR] Out of memory..."
 //---------------------------------------------------------------------------
 static int SIGREGTMR = SIGRTMIN+2;

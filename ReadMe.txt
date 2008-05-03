@@ -1,4 +1,4 @@
-PtokaX 0.4.1.0RC5
+PtokaX 0.4.1.0RC6
 This is developing build (and they have bugs...) for testing ! Use it only at your own risk.
 
 This is PtokaX version without gui able to run from console or as windows service.

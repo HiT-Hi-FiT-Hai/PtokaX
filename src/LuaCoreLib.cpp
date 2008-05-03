@@ -93,7 +93,7 @@ static int SuspendAccepts(lua_State * L) {
             return 0;
         }
     
-    	unsigned int iSec = (unsigned int)lua_tonumber(L, 1);
+    	uint32_t iSec = (uint32_t)lua_tonumber(L, 1);
     
         if(iSec != 0) {
             ServerSuspendAccepts(iSec);
@@ -398,7 +398,7 @@ static int GetCurrentSharedSize(lua_State * L) {
         return 1;
     }
     
-    lua_pushnumber(L, ui64TotalShare);
+    lua_pushnumber(L, (double)ui64TotalShare);
 
     return 1;
 }
@@ -478,7 +478,7 @@ static int GetUpTime(lua_State * L) {
 	time_t t;
     time(&t);
 
-    lua_pushnumber(L, t-starttime);
+    lua_pushnumber(L, (double)(t-starttime));
 
     return 1;
 }
@@ -594,7 +594,7 @@ static int GetOnlineRegs(lua_State * L) {
 static int GetOnlineUsers(lua_State * L) {
     bool bFullTable = false;
 
-    int iProfile = -2;
+    int32_t iProfile = -2;
 
     int n = lua_gettop(L);
 
@@ -609,13 +609,13 @@ static int GetOnlineUsers(lua_State * L) {
             return 1;
         }
 
-        iProfile = (int)lua_tonumber(L, 1);
+        iProfile = (int32_t)lua_tonumber(L, 1);
         bFullTable = lua_toboolean(L, 2) == 0 ? false : true;
 
         lua_settop(L, 0);
     } else if(n == 1) {
         if(lua_type(L, 1) == LUA_TNUMBER) {
-            iProfile = (int)lua_tonumber(L, 1);
+            iProfile = (int32_t)lua_tonumber(L, 1);
         } else if(lua_type(L, 1) == LUA_TBOOLEAN) {
             bFullTable = lua_toboolean(L, 1) == 0 ? false : true;
         } else {
@@ -950,7 +950,7 @@ static int GetUserData(lua_State * L) {
             break;
         case 16:
         	lua_pushliteral(L, "iShareSize");
-        	lua_pushnumber(L, u->sharedSize);
+        	lua_pushnumber(L, (double)u->sharedSize);
         	lua_rawset(L, 1);
             break;
         case 17:
@@ -995,7 +995,7 @@ static int GetUserData(lua_State * L) {
             break;   
         case 25:
         	lua_pushliteral(L, "iLoginTime");
-        	lua_pushnumber(L, u->LoginTime);
+        	lua_pushnumber(L, (double)u->LoginTime);
         	lua_rawset(L, 1);
             break;
         case 26:
@@ -1096,7 +1096,7 @@ static int GetUserValue(lua_State * L) {
         	lua_pushnumber(L, u->iProfile);
         	return 1;
         case 16:
-        	lua_pushnumber(L, u->sharedSize);
+        	lua_pushnumber(L, (double)u->sharedSize);
         	return 1;
         case 17:
         	lua_pushnumber(L, u->Hubs);
@@ -1123,7 +1123,7 @@ static int GetUserValue(lua_State * L) {
         	lua_pushnumber(L, u->MagicByte);
         	return 1;  
         case 25:
-        	lua_pushnumber(L, u->LoginTime);
+        	lua_pushnumber(L, (double)u->LoginTime);
         	return 1;
         case 26:
         	IP2Country->ui32Count != 0 ? lua_pushlstring(L, IP2Country->GetCountry(u->ui8Country, false), 2) : lua_pushnil(L);
@@ -1350,7 +1350,7 @@ static int DefloodWarn(lua_State * L) {
 
     u->iDefloodWarnings++;
 
-    if(u->iDefloodWarnings >= SettingManager->iShorts[SETSHORT_DEFLOOD_WARNING_COUNT]) {
+    if(u->iDefloodWarnings >= (uint32_t)SettingManager->iShorts[SETSHORT_DEFLOOD_WARNING_COUNT]) {
         int imsgLen;
         switch(SettingManager->iShorts[SETSHORT_DEFLOOD_WARNING_ACTION]) {
             case 0:
@@ -1561,7 +1561,7 @@ static int SendToProfile(lua_State * L) {
         return 0;
     }
 
-    int iProfile = (int)lua_tonumber(L, 1);
+    int32_t iProfile = (int32_t)lua_tonumber(L, 1);
 
     size_t iDataLen;
     char *sData = (char *)lua_tolstring(L, 2, &iDataLen);
@@ -1751,7 +1751,7 @@ static int SendPmToProfile(lua_State * L) {
         return 0;
     }
 
-    int iProfile = (int)lua_tonumber(L, 1);
+    int32_t iProfile = (int32_t)lua_tonumber(L, 1);
 
     size_t iFromLen, iDataLen;
     char *sFrom = (char *)lua_tolstring(L, 2, &iFromLen);

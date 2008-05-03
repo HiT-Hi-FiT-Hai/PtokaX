@@ -32,7 +32,7 @@ private:
     
         int sock;
     
-        unsigned int iRecvBufLen, iRecvBufSize, iSendBufLen, iTotalUsers;
+        uint32_t iRecvBufLen, iRecvBufSize, iSendBufLen, iTotalUsers;
 
         uint32_t ui32AddrLen;
 
@@ -49,13 +49,13 @@ private:
 
     char sMsg[2048];
     
-	void AddSock(char * sAddress, const uint32_t &ui32Len);
+	void AddSock(char * sAddress, const size_t &ui32Len);
 	bool Receive(RegSocket * Sock);
     void Add2SendBuf(RegSocket * Sock, char * sData);
     bool Send(RegSocket * Sock);
     void RemoveSock(RegSocket * Sock);
 public:
-    unsigned int iBytesRead, iBytesSent;
+    uint32_t iBytesRead, iBytesSent;
     
 	RegThread();
 	~RegThread();

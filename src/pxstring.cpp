@@ -85,14 +85,14 @@ string::string(const int32_t & i32Number) {
 
 string::string(const uint64_t & ui64Number) {
 	char tmp[32];
-	int iLen = sprintf(tmp, "%llu", (unsigned long long)ui64Number);
+	int iLen = sprintf(tmp, "%" PRIu64, ui64Number);
 	stralloc(tmp, iLen);
 }
 //---------------------------------------------------------------------------
 
 string::string(const int64_t & i64Number) {
 	char tmp[32];
-	int iLen = sprintf(tmp, "%lld", (long long)i64Number);
+	int iLen = sprintf(tmp, "%" PRId64, i64Number);
 	stralloc(tmp, iLen);
 }
 //---------------------------------------------------------------------------

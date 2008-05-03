@@ -83,7 +83,7 @@ static int GetRegsByProfile(lua_State * L) {
         return 1;
     }
 
-    unsigned int iProfile = (unsigned int)lua_tonumber(L, 1);
+    uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
 
     lua_settop(L, 0);
 
@@ -96,7 +96,7 @@ static int GetRegsByProfile(lua_State * L) {
         RegUser *cur = next;
         next = cur->next;
         
-        if(cur->iProfile == iProfile) {
+		if(cur->iProfile == (int32_t)iProfile) {
             lua_pushnumber(L, ++i);
             PushReg(L, cur);
             lua_rawset(L, t);
@@ -236,7 +236,7 @@ static int AddReg(lua_State * L) {
     size_t iNickLen, iPassLen;
     char *sNick = (char *)lua_tolstring(L, 1, &iNickLen);
     char *sPass = (char *)lua_tolstring(L, 2, &iPassLen);
-	unsigned int iProfile = (unsigned int)lua_tonumber(L, 3);
+	uint16_t iProfile = (uint16_t)lua_tonumber(L, 3);
 
     if(iProfile > ProfileMan->iProfileCount-1 || iNickLen == 0 || iNickLen > 64 || iPassLen == 0 || iPassLen > 64 || 
         strpbrk(sNick, " $|<>:?*\"/\\") != NULL || strpbrk(sPass, "$|") != NULL) {
@@ -390,9 +390,9 @@ static int ChangeReg(lua_State * L) {
     size_t iNickLen, iPassLen;
     char *sNick = (char *)lua_tolstring(L, 1, &iNickLen);
     char *sPass = (char *)lua_tolstring(L, 2, &iPassLen);
-	unsigned int iProfile = (unsigned int)lua_tonumber(L, 3);
+	uint16_t iProfile = (uint16_t)lua_tonumber(L, 3);
 
-    if(iProfile > (unsigned int)ProfileMan->iProfileCount-1 || iNickLen == 0 || iNickLen > 64 || iPassLen == 0 || iPassLen > 64 || 
+	if(iProfile > ProfileMan->iProfileCount-1 || iNickLen == 0 || iNickLen > 64 || iPassLen == 0 || iPassLen > 64 ||
         strpbrk(sNick, " $|<>:?*\"/\\") != NULL || strpbrk(sPass, "$|") != NULL) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
@@ -426,10 +426,10 @@ static int ChangeReg(lua_State * L) {
     reg->iProfile = iProfile;
 
     User *ChangedUser = hashManager->FindUser(sNick, iNickLen);
-    if(ChangedUser != NULL && ChangedUser->iProfile != (int)iProfile) {
+    if(ChangedUser != NULL && ChangedUser->iProfile != (int32_t)iProfile) {
         bool bAllowedOpChat = ProfileMan->IsAllowed(ChangedUser, ProfileManager::ALLOWEDOPCHAT);
 
-        ChangedUser->iProfile = (int)iProfile;
+        ChangedUser->iProfile = (int32_t)iProfile;
 
         if(((ChangedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) != 
             ProfileMan->IsAllowed(ChangedUser, ProfileManager::HASKEYICON)) {

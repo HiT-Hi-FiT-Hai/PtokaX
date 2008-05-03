@@ -64,13 +64,13 @@ public:
     char * sPreTexts[SETPRETXT_IDS_END]; //SettingManager->sPreTexts[]
     char * sTexts[SETTXT_IDS_END]; //SettingManager->sTexts[]
 
-    short iShorts[SETSHORT_IDS_END]; //SettingManager->iShorts[]
+    int16_t iShorts[SETSHORT_IDS_END]; //SettingManager->iShorts[]
 
     uint16_t ui16MOTDLen;
     uint16_t ui16PreTextsLens[SETPRETXT_IDS_END]; //SettingManager->ui16PreTextsLens[]
     uint16_t ui16TextsLens[SETTXT_IDS_END]; //SettingManager->ui16TextsLens[]
     
-    unsigned short iPortNumbers[25]; //SettingManager->iPortNumbers[0]
+    uint16_t iPortNumbers[25]; //SettingManager->iPortNumbers[0]
 
     bool bBools[SETBOOL_IDS_END]; //SettingManager->bBools[]
     
@@ -87,13 +87,13 @@ public:
     ~SetMan(void);
 
     bool GetBool(size_t iBoolId);
-    unsigned short GetFirstPort();
-    short GetShort(size_t iShortId);
+    uint16_t GetFirstPort();
+    int16_t GetShort(size_t iShortId);
     void GetText(size_t iTxtId, char * sMsg);
 
     void SetBool(size_t iBoolId, const bool &bValue); //SettingManager->SetBool()
     void SetMOTD(char * sTxt, const size_t &iLen);
-    void SetShort(size_t iShortId, const short &iValue);
+    void SetShort(size_t iShortId, const int16_t &iValue);
     void SetText(size_t iTxtId, char * sTxt);
     void SetText(size_t iTxtId, const char * sTxt);
     void SetText(size_t iTxtId, const char * sTxt, const size_t &iLen);

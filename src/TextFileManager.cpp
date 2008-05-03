@@ -66,8 +66,8 @@ bool TextFileMan::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = fals
 
         if(strcasecmp(cur->sCommand, cmd) == 0) {
             bool bInPM = (SettingManager->bBools[SETBOOL_SEND_TEXT_FILES_AS_PM] == true || fromPM);
-            int iHubSecLen = (int)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC];
-            int iChatLen = 0;
+            size_t iHubSecLen = (size_t)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC];
+            size_t iChatLen = 0;
 
             // PPK ... to chat or to PM ???
             if(bInPM == true) {
@@ -156,7 +156,7 @@ void TextFileMan::RefreshTextFiles() {
 					closedir(p_txtdir);
                     return;
                 }
-    	        int size = fread(newtxtfile->sText, 1, s_buf.st_size, f);
+    	        size_t size = fread(newtxtfile->sText, 1, s_buf.st_size, f);
 				newtxtfile->sText[size] = '|';
                 newtxtfile->sText[size+1] = '\0';
 
