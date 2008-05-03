@@ -28,7 +28,7 @@ ResNickMan *ResNickManager = NULL;
 //---------------------------------------------------------------------------
 
 ResNickMan::ReservedNick::ReservedNick(const char * nick, uint32_t ui32NickHash) {
-    int iNickLen = strlen(nick);
+    size_t iNickLen = strlen(nick);
     sNick = (char *) malloc(iNickLen+1);
     if(sNick == NULL) {
         string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
@@ -62,7 +62,7 @@ ResNickMan::ResNickMan() {
 		doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
 		TiXmlElement reservednicks("ReservedNicks");
 		const char* Nicks[] = { "Hub-Security", "Admin", "Client", "PtokaX", "OpChat" };
-		for(unsigned int i = 0;i < 5;i++) {
+		for(uint8_t i = 0;i < 5; i++) {
 			AddReservedNick(Nicks[i]);
 			TiXmlElement reservednick("ReservedNick");
 			reservednick.InsertEndChild(TiXmlText(Nicks[i]));
@@ -124,7 +124,7 @@ bool ResNickMan::CheckReserved(const char * sNick, const uint32_t &hash) {
 //---------------------------------------------------------------------------
 
 void ResNickMan::AddReservedNick(const char * sNick, const bool &bFromScript/* = false*/) {
-    unsigned long ulHash = HashNick(sNick, strlen(sNick));
+    uint32_t ulHash = HashNick(sNick, strlen(sNick));
 
     if(CheckReserved(sNick, ulHash) == false) {
         ReservedNick *newNick = new ReservedNick(sNick, ulHash);

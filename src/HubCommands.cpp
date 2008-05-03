@@ -54,8 +54,8 @@ HubCommands::~HubCommands() {
 }
 //---------------------------------------------------------------------------
 
-bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen, bool fromPM/* = false*/) {
-	unsigned int dlen;
+bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdLen, bool fromPM/* = false*/) {
+	size_t dlen;
 
     if(fromPM == false) {
     	// Hub commands: !me
@@ -105,7 +105,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                 bool bIsEmpty = true;
 
                 if(hashBanManager->TempBanListS != NULL) {
-                    int iBanNum = 0;
+                    uint32_t iBanNum = 0;
                     time_t acc_time;
                     time(&acc_time);
                     BanItem *nextBan = hashBanManager->TempBanListS;
@@ -167,7 +167,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                 if(hashBanManager->PermBanListS != NULL) {
                     bIsEmpty = false;
 					BanList += string(LanguageManager->sTexts[LAN_PERM_BANS], (size_t)LanguageManager->ui16TextsLens[LAN_PERM_BANS]) + ":\n\n";
-                    int iBanNum = 0;
+                    uint32_t iBanNum = 0;
                     BanItem *nextBan = hashBanManager->PermBanListS;
 
                     while(nextBan != NULL) {
@@ -496,7 +496,11 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
 				string BanList = string(msg, imsglen);
 
                 if(hashBanManager->TempBanListS != NULL) {
-                    int iBanNum = 0; time_t acc_time; time(&acc_time);
+                    uint32_t iBanNum = 0;
+
+                    time_t acc_time;
+                    time(&acc_time);
+
                     BanItem *nextBan = hashBanManager->TempBanListS;
 
                     while(nextBan != NULL) {
@@ -618,7 +622,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
 
                 if(hashBanManager->PermBanListS != NULL) {
 					BanList += string(LanguageManager->sTexts[LAN_PERM_BANS], (size_t)LanguageManager->ui16TextsLens[LAN_PERM_BANS]) + ":\n\n";
-                    int iBanNum = 0;
+                    uint32_t iBanNum = 0;
                     BanItem *nextBan = hashBanManager->PermBanListS;
 
                     while(nextBan != NULL) {
@@ -685,7 +689,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                 bool bIsEmpty = true;
 
                 if(hashBanManager->RangeBanListS != NULL) {
-                    int iBanNum = 0;
+                    uint32_t iBanNum = 0;
                     time_t acc_time;
                     time(&acc_time);
                     RangeBanItem *nextBan = hashBanManager->RangeBanListS;
@@ -804,7 +808,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                 bool bIsEmpty = true;
 
                 if(hashBanManager->RangeBanListS != NULL) {
-                    int iBanNum = 0;
+                    uint32_t iBanNum = 0;
                     RangeBanItem *nextBan = hashBanManager->RangeBanListS;
 
                     while(nextBan != NULL) {
@@ -872,7 +876,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                 bool bIsEmpty = true;
 
                 if(hashBanManager->RangeBanListS != NULL) {
-                    int iBanNum = 0;
+                    uint32_t iBanNum = 0;
                     time_t acc_time;
                     time(&acc_time);
                     RangeBanItem *nextBan = hashBanManager->RangeBanListS;
@@ -958,7 +962,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                 }
 
                 sCommand += 8;
-                int iNickLen;
+                size_t iNickLen;
                 char *reason = strchr(sCommand, ' ');
 
                 if(reason != NULL) {
@@ -1137,21 +1141,21 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
 
                 // Now in sCommand we have nick, time and maybe reason
                 char *sCmdParts[] = { NULL, NULL, NULL };
-                unsigned short iCmdPartsLen[] = { 0, 0, 0 };
+                uint16_t iCmdPartsLen[] = { 0, 0, 0 };
 
-                unsigned char cPart = 0;
+                uint8_t cPart = 0;
 
                 sCmdParts[cPart] = sCommand+12; // nick start
 
-                for(unsigned int i = 12; i < dlen; i++) {
+                for(size_t i = 12; i < dlen; i++) {
                     if(sCommand[i] == ' ') {
                         sCommand[i] = '\0';
-                        iCmdPartsLen[cPart] = (unsigned short)((sCommand+i)-sCmdParts[cPart]);
+                        iCmdPartsLen[cPart] = (uint16_t)((sCommand+i)-sCmdParts[cPart]);
 
                         // are we on last space ???
                         if(cPart == 1) {
                             sCmdParts[2] = sCommand+i+1;
-                            iCmdPartsLen[2] = (unsigned short)(dlen-i-1);
+                            iCmdPartsLen[2] = (uint16_t)(dlen-i-1);
                             break;
                         }
 
@@ -1161,7 +1165,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                 }
 
                 if(sCmdParts[2] == NULL && iCmdPartsLen[1] == 0 && sCmdParts[1] != NULL) {
-                    iCmdPartsLen[1] = (unsigned short)(dlen-(sCmdParts[1]-sCommand));
+                    iCmdPartsLen[1] = (uint16_t)(dlen-(sCmdParts[1]-sCommand));
                 }
 
                 if(sCmdParts[2] != NULL && iCmdPartsLen[2] == 0) {
@@ -1213,7 +1217,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
 
                 char cTime = sCmdParts[1][iCmdPartsLen[1]-1];
                 sCmdParts[1][iCmdPartsLen[1]-1] = '\0';
-                int iTime = atoi(sCmdParts[1]);
+                uint32_t iTime = atoi(sCmdParts[1]);
                 time_t acc_time, ban_time;
 
                 if(iTime <= 0 || GenerateTempBanTime(cTime, iTime, acc_time, ban_time) == false) {
@@ -1594,7 +1598,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                         globalQ->SingleItemsStore(newItem);
                     }
                 } else {
-                    int iWantLen = int(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC])+curUser->NickLen+dlen+32;
+                    size_t iWantLen = size_t(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC])+curUser->NickLen+dlen+32;
                     char *MSG = (char *) malloc(iWantLen);
                     if(MSG == NULL) {
 						string sDbgstr = "[BUF] "+string(curUser->Nick,curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
@@ -1996,7 +2000,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                    	curUser->iChatMsgs--;
                     sCommand += 7; // move to command parameter
 
-                    unsigned int a, b, c, d;
+                    uint32_t a, b, c, d;
                     if(sCommand[0] != 0 && GetIpParts(sCommand, a, b, c, d) == true) {
                         sqldb->GetUsersByIp(sCommand, curUser);
                         return true;
@@ -2031,7 +2035,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                                 SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC]);
                             IpInfo += String(msg, imsglen);
                         }
-                        for(unsigned int actPos=0; actPos<ReturnList->Count; actPos++) {
+                        for(uint32_t actPos=0; actPos<ReturnList->Count; actPos++) {
                             IpInfo += ReturnList->Strings[actPos]+"\n";
                         }
                         IpInfo += "\n|";
@@ -2076,7 +2080,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                                 SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC]);
                             UserInfo += String(msg, imsglen);
                         }
-                        for(unsigned int actPos=0; actPos<ReturnList->Count; actPos++) {
+                        for(uint32_t actPos=0; actPos<ReturnList->Count; actPos++) {
            	                UserInfo += ReturnList->Strings[actPos]+"\n";
                         }
                         UserInfo += "\n|";
@@ -2411,7 +2415,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                         globalQ->SingleItemsStore(newItem);
                     }
                 } else {
-                    int iWantLen = int(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC])+curUser->NickLen+dlen+32;
+                    size_t iWantLen = size_t(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC])+curUser->NickLen+dlen+32;
                     char *MSG = (char *) malloc(iWantLen);
                     if(MSG == NULL) {
 						string sDbgstr = "[BUF] "+string(curUser->Nick,curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
@@ -2463,7 +2467,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                 }
 
                 sCommand += 5;
-                int iNickLen;
+                size_t iNickLen;
 
                 char *reason = strchr(sCommand, ' ');
                 if(reason != NULL) {
@@ -2600,7 +2604,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                 }
 
                 sCommand += 11;
-                int iNickLen = dlen-11;
+                size_t iNickLen = dlen-11;
 
                 // find him
 				RegUser *reg = hashManager->FindReg(sCommand, iNickLen);
@@ -2618,7 +2622,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
 
                 // check hierarchy
                 // deny if curUser is not Master and tries delete equal or higher profile
-                if(curUser->iProfile > 0 && reg->iProfile <= (unsigned int)curUser->iProfile) {
+                if(curUser->iProfile > 0 && reg->iProfile <= curUser->iProfile) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
                	    int iret = sprintf(msg+imsgLen, "<%s> *** %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -3127,7 +3131,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                     }
 
 					string Bans(msg, imsgLen);
-                    int iBanNum = 0;
+                    uint32_t iBanNum = 0;
 
                     while(nxtBan != NULL) {
                         BanItem *curBan = nxtBan;
@@ -3273,7 +3277,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                         }
 
 						string Bans(msg, imsgLen);
-                        int iBanNum = 0;
+                        uint32_t iBanNum = 0;
 
                         while(nxtBan != NULL) {
                             RangeBanItem *curBan = nxtBan;
@@ -3506,21 +3510,21 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                 }
 
                 char *sCmdParts[] = { NULL, NULL, NULL };
-                unsigned short iCmdPartsLen[] = { 0, 0, 0 };
+                uint16_t iCmdPartsLen[] = { 0, 0, 0 };
 
-                unsigned char cPart = 0;
+                uint8_t cPart = 0;
 
                 sCmdParts[cPart] = sCommand+11; // nick start
 
-                for(unsigned int i = 11; i < dlen; i++) {
+                for(size_t i = 11; i < dlen; i++) {
                     if(sCommand[i] == ' ') {
                         sCommand[i] = '\0';
-                        iCmdPartsLen[cPart] = (unsigned short)((sCommand+i)-sCmdParts[cPart]);
+                        iCmdPartsLen[cPart] = (uint16_t)((sCommand+i)-sCmdParts[cPart]);
 
                         // are we on last space ???
                         if(cPart == 1) {
                             sCmdParts[2] = sCommand+i+1;
-                            iCmdPartsLen[2] = (unsigned short)(dlen-i-1);
+                            iCmdPartsLen[2] = (uint16_t)(dlen-i-1);
                             break;
                         }
 
@@ -3595,7 +3599,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                 }
 
                 // try to add the user
-                if(hashRegManager->AddNewReg(sCmdParts[0], sCmdParts[1], (unsigned int)pidx) == false) {
+                if(hashRegManager->AddNewReg(sCmdParts[0], sCmdParts[1], (uint16_t)pidx) == false) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
                     int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -4238,8 +4242,8 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                     uint64_t(rs.ru_stime.tv_sec) + (uint64_t(rs.ru_stime.tv_usec)/1000000);
 
                 char cputime[64];
-				iLen = sprintf(cputime, "%01llu:%02llu:%02llu", (unsigned long long)(ui64cpuSec / (60*60)), 
-                    (unsigned long long)((ui64cpuSec / 60) % 60), (unsigned long long)(ui64cpuSec % 60));
+				iLen = sprintf(cputime, "%01" PRIu64 ":%02" PRIu64 ":%02" PRIu64, ui64cpuSec / (60*60), 
+                    (ui64cpuSec / 60) % 60, ui64cpuSec % 60);
 				if(CheckSprintf(iLen, 64, "HubCommands::DoCommand392") == false) {
 					return true;
 				}
@@ -4619,7 +4623,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const int &iCmdLen,
                 
                 free(reg->sPass);
 
-                int iPassLen = strlen(sCommand+7);
+                size_t iPassLen = strlen(sCommand+7);
                 reg->sPass = (char *) malloc(iPassLen+1);
                 if(reg->sPass == NULL) {
 					string sDbgstr = "[BUF] "+string(curUser->Nick,curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iPassLen+1)+
@@ -5144,23 +5148,23 @@ bool HubCommands::BanIp(User * curUser, char * sCommand, bool fromPM, bool bFull
 }
 //---------------------------------------------------------------------------
 
-bool HubCommands::TempBan(User * curUser, char * sCommand, unsigned int dlen, bool fromPM, bool bFull) {
+bool HubCommands::TempBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull) {
     char *sCmdParts[] = { NULL, NULL, NULL };
-    unsigned short iCmdPartsLen[] = { 0, 0, 0 };
+    uint16_t iCmdPartsLen[] = { 0, 0, 0 };
 
-    unsigned char cPart = 0;
+    uint8_t cPart = 0;
 
     sCmdParts[cPart] = sCommand; // nick start
 
-    for(unsigned int i = 0; i < dlen; i++) {
+    for(size_t i = 0; i < dlen; i++) {
         if(sCommand[i] == ' ') {
             sCommand[i] = '\0';
-            iCmdPartsLen[cPart] = (unsigned short)((sCommand+i)-sCmdParts[cPart]);
+            iCmdPartsLen[cPart] = (uint16_t)((sCommand+i)-sCmdParts[cPart]);
 
             // are we on last space ???
             if(cPart == 1) {
                 sCmdParts[2] = sCommand+i+1;
-                iCmdPartsLen[2] = (unsigned short)(dlen-i-1);
+                iCmdPartsLen[2] = (uint16_t)(dlen-i-1);
                 break;
             }
 
@@ -5170,7 +5174,7 @@ bool HubCommands::TempBan(User * curUser, char * sCommand, unsigned int dlen, bo
     }
 
     if(sCmdParts[2] == NULL && iCmdPartsLen[1] == 0 && sCmdParts[1] != NULL) {
-        iCmdPartsLen[1] = (unsigned short)(dlen-(sCmdParts[1]-sCommand));
+        iCmdPartsLen[1] = (uint16_t)(dlen-(sCmdParts[1]-sCommand));
     }
 
     if(sCmdParts[2] != NULL && iCmdPartsLen[2] == 0) {
@@ -5232,7 +5236,7 @@ bool HubCommands::TempBan(User * curUser, char * sCommand, unsigned int dlen, bo
 
     char cTime = sCmdParts[1][iCmdPartsLen[1]-1];
     sCmdParts[1][iCmdPartsLen[1]-1] = '\0';
-    int iTime = atoi(sCmdParts[1]);
+    uint32_t iTime = atoi(sCmdParts[1]);
     time_t acc_time, ban_time;
 
     if(iTime <= 0 || GenerateTempBanTime(cTime, iTime, acc_time, ban_time) == false) {
@@ -5309,23 +5313,23 @@ bool HubCommands::TempBan(User * curUser, char * sCommand, unsigned int dlen, bo
 }
 //---------------------------------------------------------------------------
 
-bool HubCommands::TempBanIp(User * curUser, char * sCommand, unsigned int dlen, bool fromPM, bool bFull) {
+bool HubCommands::TempBanIp(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull) {
     char *sCmdParts[] = { NULL, NULL, NULL };
-    unsigned short iCmdPartsLen[] = { 0, 0, 0 };
+    uint16_t iCmdPartsLen[] = { 0, 0, 0 };
 
-    unsigned char cPart = 0;
+    uint8_t cPart = 0;
 
     sCmdParts[cPart] = sCommand; // nick start
 
-    for(unsigned int i = 0; i < dlen; i++) {
+    for(size_t i = 0; i < dlen; i++) {
         if(sCommand[i] == ' ') {
             sCommand[i] = '\0';
-            iCmdPartsLen[cPart] = (unsigned short)((sCommand+i)-sCmdParts[cPart]);
+            iCmdPartsLen[cPart] = (uint16_t)((sCommand+i)-sCmdParts[cPart]);
 
             // are we on last space ???
             if(cPart == 1) {
                 sCmdParts[2] = sCommand+i+1;
-                iCmdPartsLen[2] = (unsigned short)(dlen-i-1);
+                iCmdPartsLen[2] = (uint16_t)(dlen-i-1);
                 break;
             }
 
@@ -5335,7 +5339,7 @@ bool HubCommands::TempBanIp(User * curUser, char * sCommand, unsigned int dlen, 
     }
 
     if(sCmdParts[2] == NULL && iCmdPartsLen[1] == 0 && sCmdParts[1] != NULL) {
-        iCmdPartsLen[1] = (unsigned short)(dlen-(sCmdParts[1]-sCommand));
+        iCmdPartsLen[1] = (uint16_t)(dlen-(sCmdParts[1]-sCommand));
     }
 
     if(sCmdParts[2] != NULL && iCmdPartsLen[2] == 0) {
@@ -5358,7 +5362,7 @@ bool HubCommands::TempBanIp(User * curUser, char * sCommand, unsigned int dlen, 
 
     char cTime = sCmdParts[1][iCmdPartsLen[1]-1];
     sCmdParts[1][iCmdPartsLen[1]-1] = '\0';
-    int iTime = atoi(sCmdParts[1]);
+    uint32_t iTime = atoi(sCmdParts[1]);
     time_t acc_time, ban_time;
 
     if(iTime <= 0 || GenerateTempBanTime(cTime, iTime, acc_time, ban_time) == false) {
@@ -5495,23 +5499,23 @@ bool HubCommands::TempBanIp(User * curUser, char * sCommand, unsigned int dlen, 
 }
 //---------------------------------------------------------------------------
 
-bool HubCommands::RangeBan(User * curUser, char * sCommand, unsigned int dlen, bool fromPM, bool bFull) {
+bool HubCommands::RangeBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull) {
     char *sCmdParts[] = { NULL, NULL, NULL };
-    unsigned short iCmdPartsLen[] = { 0, 0, 0 };
+    uint16_t iCmdPartsLen[] = { 0, 0, 0 };
 
-    unsigned char cPart = 0;
+    uint8_t cPart = 0;
 
     sCmdParts[cPart] = sCommand; // nick start
 
-    for(unsigned int i = 0; i < dlen; i++) {
+    for(size_t i = 0; i < dlen; i++) {
         if(sCommand[i] == ' ') {
             sCommand[i] = '\0';
-            iCmdPartsLen[cPart] = (unsigned short)((sCommand+i)-sCmdParts[cPart]);
+            iCmdPartsLen[cPart] = (uint16_t)((sCommand+i)-sCmdParts[cPart]);
 
             // are we on last space ???
             if(cPart == 1) {
                 sCmdParts[2] = sCommand+i+1;
-                iCmdPartsLen[2] = (unsigned short)(dlen-i-1);
+                iCmdPartsLen[2] = (uint16_t)(dlen-i-1);
                 break;
             }
 
@@ -5521,7 +5525,7 @@ bool HubCommands::RangeBan(User * curUser, char * sCommand, unsigned int dlen, b
     }
 
     if(sCmdParts[2] == NULL && iCmdPartsLen[1] == 0 && sCmdParts[1] != NULL) {
-        iCmdPartsLen[1] = (unsigned short)(dlen-(sCmdParts[1]-sCommand));
+        iCmdPartsLen[1] = (uint16_t)(dlen-(sCmdParts[1]-sCommand));
     }
 
     if(sCmdParts[2] != NULL && iCmdPartsLen[2] == 0) {
@@ -5634,23 +5638,23 @@ bool HubCommands::RangeBan(User * curUser, char * sCommand, unsigned int dlen, b
 }
 //---------------------------------------------------------------------------
 
-bool HubCommands::RangeTempBan(User * curUser, char * sCommand, unsigned int dlen, bool fromPM, bool bFull) {
+bool HubCommands::RangeTempBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull) {
     char *sCmdParts[] = { NULL, NULL, NULL, NULL };
-    unsigned short iCmdPartsLen[] = { 0, 0, 0, 0 };
+    uint16_t iCmdPartsLen[] = { 0, 0, 0, 0 };
 
-    unsigned char cPart = 0;
+    uint8_t cPart = 0;
 
     sCmdParts[cPart] = sCommand; // nick start
 
-    for(unsigned int i = 0; i < dlen; i++) {
+    for(size_t i = 0; i < dlen; i++) {
         if(sCommand[i] == ' ') {
             sCommand[i] = '\0';
-            iCmdPartsLen[cPart] = (unsigned short)((sCommand+i)-sCmdParts[cPart]);
+            iCmdPartsLen[cPart] = (uint16_t)((sCommand+i)-sCmdParts[cPart]);
 
             // are we on last space ???
             if(cPart == 2) {
                 sCmdParts[3] = sCommand+i+1;
-                iCmdPartsLen[3] = (unsigned short)(dlen-i-1);
+                iCmdPartsLen[3] = (uint16_t)(dlen-i-1);
                 break;
             }
 
@@ -5660,7 +5664,7 @@ bool HubCommands::RangeTempBan(User * curUser, char * sCommand, unsigned int dle
     }
 
     if(sCmdParts[3] == NULL && iCmdPartsLen[2] == 0 && sCmdParts[2] != NULL) {
-        iCmdPartsLen[2] = (unsigned short)(dlen-(sCmdParts[2]-sCommand));
+        iCmdPartsLen[2] = (uint16_t)(dlen-(sCmdParts[2]-sCommand));
     }
 
     if(sCmdParts[3] != NULL && iCmdPartsLen[3] == 0) {
@@ -5700,7 +5704,7 @@ bool HubCommands::RangeTempBan(User * curUser, char * sCommand, unsigned int dle
 
     char cTime = sCmdParts[2][iCmdPartsLen[2]-1];
     sCmdParts[2][iCmdPartsLen[2]-1] = '\0';
-    int iTime = atoi(sCmdParts[2]);
+    uint32_t iTime = atoi(sCmdParts[2]);
     time_t acc_time, ban_time;
 
     if(iTime <= 0 || GenerateTempBanTime(cTime, iTime, acc_time, ban_time) == false) {

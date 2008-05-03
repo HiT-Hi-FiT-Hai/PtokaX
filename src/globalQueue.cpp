@@ -221,7 +221,7 @@ queue::queue() {
     ipqzbufsb[12] = StrpIpQb; ipqzbufsb[13] = StrpIpActQb; ipqzbufsb[14] = StrpIpPasQb; ipqzbufsb[15] = FullIpQb; ipqzbufsb[16] = FullIpActQb; ipqzbufsb[17] = FullIpPasQb;
     ipqzbufsb[18] = StrpIpOpQb; ipqzbufsb[19] = StrpIpOpActQb; ipqzbufsb[20] = StrpIpOpPasQb; ipqzbufsb[21] = FullIpOpQb; ipqzbufsb[22] = FullIpOpActQb; ipqzbufsb[23] = FullIpOpPasQb;
 
-    for(unsigned int i = 0; i < 54; i++) {
+    for(uint8_t i = 0; i < 54; i++) {
         if(allqzbufsa[i] == NULL) {
 			string sDbgstr = "Memory allocation of qzbufs failed!";
         	AppendSpecialLog(sDbgstr);
@@ -239,7 +239,7 @@ queue::queue() {
         zqueue->zbuffer = NULL;
     }
     
-    for(unsigned int i = 0; i < 54; i++) {
+    for(uint8_t i = 0; i < 54; i++) {
         // active
         QzBuf *zqueue = allqzbufsa[i];
         zqueue->buffer = (char *) calloc(256, 1);
@@ -318,7 +318,7 @@ queue::~queue() {
 		}
     }
         
-    for(unsigned int i = 0; i < 54; i++) {
+    for(uint8_t i = 0; i < 54; i++) {
         // active
         QzBuf *zqueue = allqzbufsa[i];
         if(zqueue->buffer != NULL) {
@@ -351,13 +351,13 @@ queue::~queue() {
 //---------------------------------------------------------------------------
 
 void queue::Store(char * sData) {
-    int iLen = strlen(sData);
+    size_t iLen = strlen(sData);
     Store(sData, iLen);
 }
 //---------------------------------------------------------------------------
 
 // appends data to all global output queues
-void queue::Store(char * sData, const int &iDataLen) {
+void queue::Store(char * sData, const size_t &iDataLen) {
     QzBuf **allqzbufs;
     
     if(bActive) {
@@ -368,10 +368,10 @@ void queue::Store(char * sData, const int &iDataLen) {
         allqzbufs = allqzbufsb;
     }
     
-    for(unsigned int i = 0; i < 54; i++) {
+    for(uint8_t i = 0; i < 54; i++) {
         QzBuf *zqueue = allqzbufs[i];
         if(zqueue->size < zqueue->len+iDataLen) {
-            int iAllignLen = Allign1024(zqueue->len+iDataLen);
+            size_t iAllignLen = Allign1024(zqueue->len+iDataLen);
             zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
             if(zqueue->buffer == NULL) {
 				string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
@@ -379,23 +379,23 @@ void queue::Store(char * sData, const int &iDataLen) {
 				AppendSpecialLog(sDbgstr);
                 return;
             }
-            zqueue->size = iAllignLen-1;
+            zqueue->size = (uint32_t)(iAllignLen-1);
         }
     	memcpy(zqueue->buffer+zqueue->len, sData, iDataLen);
-    	zqueue->len += iDataLen;
+    	zqueue->len += (uint32_t)iDataLen;
     	zqueue->buffer[zqueue->len] = '\0';
     }
 }
 //---------------------------------------------------------------------------
 
 void queue::HStore(char * sData) {
-    int iLen = strlen(sData);
+    size_t iLen = strlen(sData);
     HStore(sData, iLen);
 }
 //---------------------------------------------------------------------------
 
 // appends data to all hello global output queues
-void queue::HStore(char * sData, const int &iDataLen) {
+void queue::HStore(char * sData, const size_t &iDataLen) {
     QzBuf **hlqzbufs;
     
     if(bActive) {
@@ -406,10 +406,10 @@ void queue::HStore(char * sData, const int &iDataLen) {
         hlqzbufs = hlqzbufsb;
     }
     
-    for(unsigned int i = 0; i < 24; i++) {
+    for(uint8_t i = 0; i < 24; i++) {
         QzBuf *zqueue = hlqzbufs[i];
         if(zqueue->size < zqueue->len+iDataLen) {
-            int iAllignLen = Allign1024(zqueue->len+iDataLen);
+            size_t iAllignLen = Allign1024(zqueue->len+iDataLen);
             zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
             if(zqueue->buffer == NULL) {
 				string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
@@ -417,17 +417,17 @@ void queue::HStore(char * sData, const int &iDataLen) {
 				AppendSpecialLog(sDbgstr);
                 return;
             }
-            zqueue->size = iAllignLen-1;
+            zqueue->size = (uint32_t)(iAllignLen-1);
         }
         memcpy(zqueue->buffer+zqueue->len, sData, iDataLen);
-        zqueue->len += iDataLen;
+        zqueue->len += (uint32_t)(iDataLen);
         zqueue->buffer[zqueue->len] = '\0';
     }
 }
 //---------------------------------------------------------------------------
 
 // appends data to all active global output queues
-void queue::AStore(char * sData, const int &iDataLen) {
+void queue::AStore(char * sData, const size_t &iDataLen) {
     QzBuf **srchqzbufs;
     
     if(bActive) {
@@ -438,10 +438,10 @@ void queue::AStore(char * sData, const int &iDataLen) {
         srchqzbufs = srchqzbufsb;
     }
     
-    for(unsigned int i = 0; i < 36; i++) {
+    for(uint8_t i = 0; i < 36; i++) {
         QzBuf *zqueue = srchqzbufs[i];
       	if(zqueue->size < zqueue->len+iDataLen) {
-            int iAllignLen = Allign1024(zqueue->len+iDataLen);
+            size_t iAllignLen = Allign1024(zqueue->len+iDataLen);
             zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
            	if(zqueue->buffer == NULL) {
 				string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
@@ -449,7 +449,7 @@ void queue::AStore(char * sData, const int &iDataLen) {
 				AppendSpecialLog(sDbgstr);
                 return;
             }
-            zqueue->size = iAllignLen-1;
+            zqueue->size = (uint32_t)(iAllignLen-1);
         }
     	memcpy(zqueue->buffer+zqueue->len, sData, iDataLen);
         zqueue->len += iDataLen;
@@ -459,7 +459,7 @@ void queue::AStore(char * sData, const int &iDataLen) {
 //---------------------------------------------------------------------------
 
 // appends data to all passive global output queues
-void queue::PStore(char * sData, const int &iDataLen) {
+void queue::PStore(char * sData, const size_t &iDataLen) {
     QzBuf **actqzbufs;
     
     if(bActive) {
@@ -470,10 +470,10 @@ void queue::PStore(char * sData, const int &iDataLen) {
         actqzbufs = actqzbufsb;
     }
     
-    for(unsigned int i = 0; i < 18; i++) {
+    for(uint8_t i = 0; i < 18; i++) {
         QzBuf *zqueue = actqzbufs[i];
       	if(zqueue->size < zqueue->len+iDataLen) {
-            int iAllignLen = Allign1024(zqueue->len+iDataLen);
+            size_t iAllignLen = Allign1024(zqueue->len+iDataLen);
             zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
            	if(zqueue->buffer == NULL) {
 				string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
@@ -481,7 +481,7 @@ void queue::PStore(char * sData, const int &iDataLen) {
 				AppendSpecialLog(sDbgstr);
                 return;
             }
-            zqueue->size = iAllignLen-1;
+            zqueue->size = (uint32_t)(iAllignLen-1);
         }
     	memcpy(zqueue->buffer+zqueue->len, sData, iDataLen);
         zqueue->len += iDataLen;
@@ -491,7 +491,7 @@ void queue::PStore(char * sData, const int &iDataLen) {
 //---------------------------------------------------------------------------
 
 // appends data to all userlist global output queues
-void queue::InfoStore(char * sData, const int &iDataLen) {
+void queue::InfoStore(char * sData, const size_t &iDataLen) {
     QzBuf **allqzbufs;
     
     if(bActive) {
@@ -502,10 +502,10 @@ void queue::InfoStore(char * sData, const int &iDataLen) {
         allqzbufs = allqzbufsb;
     }
     
-    for(unsigned int i = 6; i < 54; i++) {
+    for(uint8_t i = 6; i < 54; i++) {
         QzBuf *zqueue = allqzbufs[i];
        	if(zqueue->size < zqueue->len+iDataLen) {
-            int iAllignLen = Allign1024(zqueue->len+iDataLen);
+            size_t iAllignLen = Allign1024(zqueue->len+iDataLen);
             zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
             if(zqueue->buffer == NULL) {
 				string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
@@ -513,17 +513,17 @@ void queue::InfoStore(char * sData, const int &iDataLen) {
 				AppendSpecialLog(sDbgstr);
                 return;
             }
-            zqueue->size = iAllignLen-1;
+            zqueue->size = (uint32_t)(iAllignLen-1);
         }
         memcpy(zqueue->buffer+zqueue->len, sData, iDataLen);
-        zqueue->len += iDataLen;
+        zqueue->len += (uint32_t)iDataLen;
         zqueue->buffer[zqueue->len] = '\0';
     }
 }
 //---------------------------------------------------------------------------
 
 // appends data to all striped myinfo global output queues
-void queue::StrpInfoStore(char * sData, const int &iDataLen) {
+void queue::StrpInfoStore(char * sData, const size_t &iDataLen) {
     QzBuf **strpqzbufs;
     
     if(bActive) {
@@ -534,10 +534,10 @@ void queue::StrpInfoStore(char * sData, const int &iDataLen) {
         strpqzbufs = strpqzbufsb;
     }
     
-    for(unsigned int i = 0; i < 24; i++) {
+    for(uint8_t i = 0; i < 24; i++) {
         QzBuf *zqueue = strpqzbufs[i];
        	if(zqueue->size < zqueue->len+iDataLen) {
-            int iAllignLen = Allign1024(zqueue->len+iDataLen);
+            size_t iAllignLen = Allign1024(zqueue->len+iDataLen);
             zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
             if(zqueue->buffer == NULL) {
 				string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
@@ -545,7 +545,7 @@ void queue::StrpInfoStore(char * sData, const int &iDataLen) {
 				AppendSpecialLog(sDbgstr);
                 return;
             }
-            zqueue->size = iAllignLen-1;
+            zqueue->size = (uint32_t)(iAllignLen-1);
         }
         memcpy(zqueue->buffer+zqueue->len, sData, iDataLen);
         zqueue->len += iDataLen;
@@ -555,7 +555,7 @@ void queue::StrpInfoStore(char * sData, const int &iDataLen) {
 //---------------------------------------------------------------------------
 
 // appends data to all full myinfo global output queues
-void queue::FullInfoStore(char * sData, const int &iDataLen) {
+void queue::FullInfoStore(char * sData, const size_t &iDataLen) {
     QzBuf **fullqzbufs;
     
     if(bActive) {
@@ -566,10 +566,10 @@ void queue::FullInfoStore(char * sData, const int &iDataLen) {
         fullqzbufs = fullqzbufsb;
     }
     
-    for(unsigned int i = 0; i < 24; i++) {
+    for(uint8_t i = 0; i < 24; i++) {
         QzBuf *zqueue = fullqzbufs[i];
        	if(zqueue->size < zqueue->len+iDataLen) {
-            int iAllignLen = Allign1024(zqueue->len+iDataLen);
+            size_t iAllignLen = Allign1024(zqueue->len+iDataLen);
             zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
             if(zqueue->buffer == NULL) {
 				string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
@@ -577,7 +577,7 @@ void queue::FullInfoStore(char * sData, const int &iDataLen) {
 				AppendSpecialLog(sDbgstr);
                 return;
             }
-            zqueue->size = iAllignLen-1;
+            zqueue->size = (uint32_t)(iAllignLen-1);
         }
         memcpy(zqueue->buffer+zqueue->len, sData, iDataLen);
         zqueue->len += iDataLen;
@@ -587,7 +587,7 @@ void queue::FullInfoStore(char * sData, const int &iDataLen) {
 //---------------------------------------------------------------------------
 
 // appends data to all OP global output queues
-void queue::OPStore(char * sData, const int &iDataLen) {
+void queue::OPStore(char * sData, const size_t &iDataLen) {
     QzBuf **opqzbufs;
     
     if(bActive) {
@@ -598,10 +598,10 @@ void queue::OPStore(char * sData, const int &iDataLen) {
         opqzbufs = opqzbufsb;
     }
     
-    for(unsigned int i = 0; i < 27; i++) {
+    for(uint8_t i = 0; i < 27; i++) {
         QzBuf *zqueue = opqzbufs[i];
         if(zqueue->size < zqueue->len+iDataLen) {
-            int iAllignLen = Allign1024(zqueue->len+iDataLen);
+            size_t iAllignLen = Allign1024(zqueue->len+iDataLen);
             zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
             if(zqueue->buffer == NULL) {
 				string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
@@ -609,10 +609,10 @@ void queue::OPStore(char * sData, const int &iDataLen) {
 				AppendSpecialLog(sDbgstr);
                 return;
             }
-            zqueue->size = iAllignLen-1;
+            zqueue->size = (uint32_t)(iAllignLen-1);
         }
         memcpy(zqueue->buffer+zqueue->len, sData, iDataLen);
-        zqueue->len += iDataLen;
+        zqueue->len += (uint32_t)iDataLen;
         zqueue->buffer[zqueue->len] = '\0';
     }
 }
@@ -622,12 +622,11 @@ void queue::OPStore(char * sData, const int &iDataLen) {
 void queue::OpListStore(char * sNick) {   
     if(OpListQueue.len == 0) {
         OpListQueue.len = sprintf(OpListQueue.buffer, "$OpList %s$$|", sNick);
-        CheckSprintf(OpListQueue.len, OpListQueue.size, "queue::OpListStore1");
     } else {
         int iDataLen = sprintf(msg, "%s$$|", sNick);
         if(CheckSprintf(iDataLen, 128, "queue::OpListStore2") == true) {
             if(OpListQueue.size < OpListQueue.len+iDataLen) {
-                int iAllignLen = Allign256(OpListQueue.len+iDataLen);
+                size_t iAllignLen = Allign256(OpListQueue.len+iDataLen);
                 OpListQueue.buffer = (char *) realloc(OpListQueue.buffer, iAllignLen);
                 if(OpListQueue.buffer == NULL) {
 					string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(OpListQueue.size)+"/"+string(iAllignLen)+
@@ -635,7 +634,7 @@ void queue::OpListStore(char * sNick) {
                     AppendSpecialLog(sDbgstr);
                     return;
                 }
-                OpListQueue.size = iAllignLen-1;
+                OpListQueue.size = (uint32_t)(iAllignLen-1);
             }
             memcpy(OpListQueue.buffer+OpListQueue.len-1, msg, iDataLen);
             OpListQueue.len += iDataLen-1;
@@ -649,7 +648,6 @@ void queue::OpListStore(char * sNick) {
 void queue::UserIPStore(User * curUser) {   
     if(UserIPQueue.len == 0) {
         UserIPQueue.len = sprintf(UserIPQueue.buffer, "$UserIP %s %s|", curUser->Nick, curUser->IP);
-        CheckSprintf(UserIPQueue.len, UserIPQueue.size, "queue::UserIPStore1");
         UserIPQueue.bHaveDollars = false;
     } else {
         int iDataLen = sprintf(msg, "%s %s$$|", curUser->Nick, curUser->IP);
@@ -661,7 +659,7 @@ void queue::UserIPStore(User * curUser) {
                 UserIPQueue.len += 2;
             }
             if(UserIPQueue.size < UserIPQueue.len+iDataLen) {
-                int iAllignLen = Allign256(UserIPQueue.len+iDataLen);
+                size_t iAllignLen = Allign256(UserIPQueue.len+iDataLen);
                 UserIPQueue.buffer = (char *) realloc(UserIPQueue.buffer, iAllignLen);
                 if(UserIPQueue.buffer == NULL) {
 					string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(UserIPQueue.size)+"/"+string(iAllignLen)+
@@ -669,7 +667,7 @@ void queue::UserIPStore(User * curUser) {
 					AppendSpecialLog(sDbgstr);
                     return;
                 }
-                UserIPQueue.size = iAllignLen-1;
+                UserIPQueue.size = (uint32_t)(iAllignLen-1);
             }
             memcpy(UserIPQueue.buffer+UserIPQueue.len-1, msg, iDataLen);
             UserIPQueue.len += iDataLen-1;
@@ -733,10 +731,10 @@ void queue::FinalizeQueues() {
     }
 
     if(UserIPQueue.len != 0) {
-        for(unsigned int i = 0; i < 24; i++) {
+        for(uint8_t i = 0; i < 24; i++) {
             QzBuf *zqueue = ipqzbufs[i];
             if(zqueue->size < zqueue->len+UserIPQueue.len) {
-                int iAllignLen = Allign1024(zqueue->len+UserIPQueue.len);
+                size_t iAllignLen = Allign1024(zqueue->len+UserIPQueue.len);
                 zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
                 if(zqueue->buffer == NULL) {
 					string sDbgstr = "[BUF] Cannot reallocate "+string(UserIPQueue.len)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
@@ -744,7 +742,7 @@ void queue::FinalizeQueues() {
 					AppendSpecialLog(sDbgstr);
                     return;
                 }
-                zqueue->size = iAllignLen-1;
+                zqueue->size = (uint32_t)(iAllignLen-1);
             }
             memcpy(zqueue->buffer+zqueue->len, UserIPQueue.buffer, UserIPQueue.len);
             zqueue->len += UserIPQueue.len;
@@ -763,7 +761,7 @@ void queue::ClearQueues() {
     if(bActive) {
         SingleItemsQueuebS = NULL;
         SingleItemsQueuebE = NULL;
-        for(unsigned int i = 0; i < 54; i++) {
+        for(uint8_t i = 0; i < 54; i++) {
             QzBuf *zqueue = allqzbufsb[i];
             if(zqueue->len != 0) {
                 zqueue->len = 0;
@@ -787,7 +785,7 @@ void queue::ClearQueues() {
     } else {
         SingleItemsQueueaS = NULL;
         SingleItemsQueueaE = NULL;
-        for(unsigned int i = 0; i < 54; i++) {
+        for(uint8_t i = 0; i < 54; i++) {
             QzBuf *zqueue = allqzbufsa[i];
             if(zqueue->len != 0) {
                 zqueue->len = 0;
@@ -1119,7 +1117,7 @@ void queue::ProcessQueues(User * u) {
 
 void queue::ProcessSingleItems(User * u) {
     char *MSG = NULL;
-    unsigned int MSGLen = 0, MSGSize = 0;
+    uint32_t MSGLen = 0, MSGSize = 0;
     QueueDataItem *qdinxt = SingleItemsQueueS;
 
     while(qdinxt != NULL) {
@@ -1129,7 +1127,7 @@ void queue::ProcessSingleItems(User * u) {
             switch(qdicur->iType) {
                 case queue::PM2ALL: { // send PM to ALL
                     if(MSGSize < MSGLen+qdicur->iDataLen+u->NickLen+13) {
-                        int iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->NickLen+13);
+                        size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->NickLen+13);
                         if(MSG == NULL) {
                             MSG = (char *) malloc(iAllignLen);
                         } else {
@@ -1141,20 +1139,20 @@ void queue::ProcessSingleItems(User * u) {
 							AppendSpecialLog(sDbgstr);
                             return;
                         }
-                        MSGSize = iAllignLen-1;
+                        MSGSize = (uint32_t)(iAllignLen-1);
                     }
                     int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->Nick);
                     MSGLen += iret;
                     CheckSprintf1(iret, MSGLen, MSGSize, "queue::ProcessSingleItems1");
                     memcpy(MSG+MSGLen, qdicur->sData, qdicur->iDataLen);
-                    MSGLen += qdicur->iDataLen;
+                    MSGLen += (int)qdicur->iDataLen;
                     MSG[MSGLen] = '\0';
                     break;
                 }
                 case queue::PM2OPS: { // send PM only to operators
                     if(((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                         if(MSGSize < MSGLen+qdicur->iDataLen+u->NickLen+13) {
-                            int iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->NickLen+13);
+                            size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->NickLen+13);
                             if(MSG == NULL) {
                                 MSG = (char *) malloc(iAllignLen);
                             } else {
@@ -1165,13 +1163,13 @@ void queue::ProcessSingleItems(User * u) {
 									" bytes of memory in queue::ProcessSingleItems1! "+string(qdicur->sData, qdicur->iDataLen);
 								AppendSpecialLog(sDbgstr);
                             }
-                            MSGSize = iAllignLen-1;
+                            MSGSize = (uint32_t)(iAllignLen-1);
                         }
                         int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->Nick);
                         MSGLen += iret;
                         CheckSprintf1(iret, MSGLen, MSGSize, "queue::ProcessSingleItems2");
                         memcpy(MSG+MSGLen, qdicur->sData, qdicur->iDataLen);
-                        MSGLen += qdicur->iDataLen;
+                        MSGLen += (int)qdicur->iDataLen;
                         MSG[MSGLen] = '\0';
                     }
                     break;
@@ -1179,7 +1177,7 @@ void queue::ProcessSingleItems(User * u) {
                 case queue::OPCHAT: { // send OpChat only to allowed users...
                     if(ProfileMan->IsAllowed(u, ProfileManager::ALLOWEDOPCHAT) == true) {
                         if(MSGSize < MSGLen+qdicur->iDataLen+u->NickLen+13) {
-                            int iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->NickLen+13);
+                            size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->NickLen+13);
                             if(MSG == NULL) {
                                 MSG = (char *) malloc(iAllignLen);
                             } else {
@@ -1191,13 +1189,13 @@ void queue::ProcessSingleItems(User * u) {
 								AppendSpecialLog(sDbgstr);
                                 return;
                             }
-                            MSGSize = iAllignLen-1;
+                            MSGSize = (uint32_t)(iAllignLen-1);
                         }
                         int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->Nick);
                         MSGLen += iret;
                         CheckSprintf1(iret, MSGLen, MSGSize, "queue::ProcessSingleItems3");
                         memcpy(MSG+MSGLen, qdicur->sData, qdicur->iDataLen);
-                        MSGLen += qdicur->iDataLen;
+                        MSGLen += (int)qdicur->iDataLen;
                         MSG[MSGLen] = '\0';
                     }
                     break;
@@ -1205,7 +1203,7 @@ void queue::ProcessSingleItems(User * u) {
                 case queue::TOPROFILE: { // send data only to given profile...
                     if(u->iProfile == qdicur->iProfile) {
                         if(MSGSize < MSGLen+qdicur->iDataLen) {
-                            int iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+1);
+                            size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+1);
                             if(MSG == NULL) {
                                 MSG = (char *) malloc(iAllignLen);
                             } else {
@@ -1217,10 +1215,10 @@ void queue::ProcessSingleItems(User * u) {
 								AppendSpecialLog(sDbgstr);
                                 return;
                             }
-                            MSGSize = iAllignLen-1;
+                            MSGSize = (uint32_t)(iAllignLen-1);
                         }
                         memcpy(MSG+MSGLen, qdicur->sData, qdicur->iDataLen);
-                        MSGLen += qdicur->iDataLen;
+                        MSGLen += (int)qdicur->iDataLen;
                         MSG[MSGLen] = '\0';
                     }
                     break;
@@ -1228,7 +1226,7 @@ void queue::ProcessSingleItems(User * u) {
                 case queue::PM2PROFILE: { // send pm only to given profile...
                     if(u->iProfile == qdicur->iProfile) {
                         if(MSGSize < MSGLen+qdicur->iDataLen+u->NickLen+13) {
-                            int iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->NickLen+13);
+                            size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->NickLen+13);
                             if(MSG == NULL) {
                                 MSG = (char *) malloc(iAllignLen);
                             } else {
@@ -1240,13 +1238,13 @@ void queue::ProcessSingleItems(User * u) {
 								AppendSpecialLog(sDbgstr);
                                 return;
                             }
-                            MSGSize = iAllignLen-1;
+                            MSGSize = (uint32_t)(iAllignLen-1);
                         }
                         int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->Nick);
                         MSGLen += iret;
                         CheckSprintf1(iret, MSGLen, MSGSize, "queue::ProcessSingleItems4");
                         memcpy(MSG+MSGLen, qdicur->sData, qdicur->iDataLen);
-                        MSGLen += qdicur->iDataLen;
+                        MSGLen += (int)qdicur->iDataLen;
                         MSG[MSGLen] = '\0';
                     }
                     break;
@@ -1283,7 +1281,7 @@ void queue::SendGlobalQ() {
     }
 }
 //---------------------------------------------------------------------------
-QueueDataItem * queue::CreateQueueDataItem(char * data, const int &idatalen, User * fromuser, const int &iProfile, const int &type) {
+QueueDataItem * queue::CreateQueueDataItem(char * data, const size_t &idatalen, User * fromuser, const int32_t &iProfile, const uint32_t &type) {
     QueueDataItem * newitem = new QueueDataItem();
     if(newitem == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate newitem in queue::CreateQueueDataItem!";
@@ -1305,7 +1303,7 @@ QueueDataItem * queue::CreateQueueDataItem(char * data, const int &idatalen, Use
         newitem->sData = NULL;
     }
 
-	newitem->iDataLen = idatalen;
+	newitem->iDataLen = (uint32_t)idatalen;
 
 	newitem->FromUser = fromuser;
 

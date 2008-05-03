@@ -55,7 +55,7 @@ char * Lock2Key(char * sLock) {
     uint8_t v;
     
 	// first make the crypting stuff
-	for(unsigned int i = 0; i < 46; i++) {
+	for(uint8_t i = 0; i < 46; i++) {
         if(i == 0) {
             v = (uint8_t)(sLock[0] ^ sLock[45] ^ sLock[44] ^ 5);
         } else {
@@ -94,7 +94,7 @@ char * Lock2Key(char * sLock) {
 }
 //---------------------------------------------------------------------------
 
-const char * ErrnoStr(const int &iError) {
+const char * ErrnoStr(const uint32_t &iError) {
 	static const char *errStrings[] = {
         "UNDEFINED", 
         "EADDRINUSE", 
@@ -126,13 +126,13 @@ char * formatBytes(int64_t iBytes) {
     static char sBytes[128];
 
    	if(iBytes < 1024) {
-        int iLen = sprintf(sBytes, "%d %s", (int)(iBytes&0xffffffff), unit[0]);
+        int iLen = sprintf(sBytes, "%d %s", (int32_t)(iBytes&0xffffffff), unit[0]);
         if(CheckSprintf(iLen, 128, "formatBytes1") == false) {
             sBytes[0] = '\0';
         }
    	} else {
        	long double ldBytes = (long double)iBytes;
-        int iter = 0;
+        uint8_t iter = 0;
        	for(; ldBytes > 1024; iter++)
            	ldBytes /= 1024;
            	
@@ -151,13 +151,13 @@ char * formatBytesPerSecond(int64_t iBytes) {
     static char sBytes[128];
 
    	if(iBytes < 1024) {
-        int iLen = sprintf(sBytes, "%d %s", (int)(iBytes&0xffffffff), secondunit[0]);
+        int iLen = sprintf(sBytes, "%d %s", (int32_t)(iBytes&0xffffffff), secondunit[0]);
         if(CheckSprintf(iLen, 128, "formatBytesPerSecond1") == false) {
             sBytes[0] = '\0';
         }
    	} else {
        	long double ldBytes = (long double)iBytes;
-        int iter = 0;
+        uint8_t iter = 0;
        	for(; ldBytes > 1024; iter++)
            	ldBytes /= 1024;
            	
@@ -171,17 +171,17 @@ char * formatBytesPerSecond(int64_t iBytes) {
 }
 //---------------------------------------------------------------------------
 
-char * formatTime(long rest) {
+char * formatTime(uint64_t rest) {
     static char time[256];
     time[0] = '\0';
 
 	char buf[128];
-	long i = 0;
-    long n = rest / 525600;
+	uint8_t i = 0;
+    uint64_t n = rest / 525600;
 	rest -= n*525600;
 
 	if(n != 0) {
-		int iLen = sprintf(buf, "%ld %s", n, n > 1 ? LanguageManager->sTexts[LAN_YEARS_LWR] : LanguageManager->sTexts[LAN_YEAR_LWR]);
+		int iLen = sprintf(buf, "%" PRIu64 " %s", n, n > 1 ? LanguageManager->sTexts[LAN_YEARS_LWR] : LanguageManager->sTexts[LAN_YEAR_LWR]);
 		if(CheckSprintf(iLen, 128, "formatTime1") == false) {
             time[0] = '\0';
             return time;
@@ -194,7 +194,7 @@ char * formatTime(long rest) {
 	rest -= n*43200;
 
 	if(n != 0) {       
-		int iLen = sprintf(buf, "%s%ld %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_MONTHS_LWR] : LanguageManager->sTexts[LAN_MONTH_LWR]);
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_MONTHS_LWR] : LanguageManager->sTexts[LAN_MONTH_LWR]);
 		if(CheckSprintf(iLen, 128, "formatTime3") == false) {
             time[0] = '\0';
             return time;
@@ -208,7 +208,7 @@ char * formatTime(long rest) {
 	rest -= n*1440;
 
 	if(n != 0) {       
-		int iLen = sprintf(buf, "%s%ld %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_DAYS_LWR] : LanguageManager->sTexts[LAN_DAY_LWR]); 
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_DAYS_LWR] : LanguageManager->sTexts[LAN_DAY_LWR]); 
 		if(CheckSprintf(iLen, 128, "formatTime5") == false) {
             time[0] = '\0';
             return time;
@@ -222,7 +222,7 @@ char * formatTime(long rest) {
 	rest -= n*60;
 
 	if(n != 0) {	
-		int iLen = sprintf(buf, "%s%ld %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_HOURS_LWR] : LanguageManager->sTexts[LAN_HOUR_LWR]);
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_HOURS_LWR] : LanguageManager->sTexts[LAN_HOUR_LWR]);
 		if(CheckSprintf(iLen, 128, "formatTime7") == false) {
             time[0] = '\0';
             return time;
@@ -233,7 +233,7 @@ char * formatTime(long rest) {
 	}
 
 	if(rest != 0) {
-		int iLen = sprintf(buf, "%s%ld %s", i > 0 ? " " : "", rest, LanguageManager->sTexts[LAN_MIN_LWR]);
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", rest, LanguageManager->sTexts[LAN_MIN_LWR]);
 		if(CheckSprintf(iLen, 128, "formatTime9") == false) {
             time[0] = '\0';
             return time;
@@ -245,17 +245,17 @@ char * formatTime(long rest) {
 }
 //---------------------------------------------------------------------------
 
-char * formatSecTime(long rest) {
+char * formatSecTime(uint64_t rest) {
     static char time[256];
     time[0] = '\0';
 
 	char buf[128];
-	long i = 0;
-    long n = rest / 31536000;
+	uint8_t i = 0;
+    uint64_t n = rest / 31536000;
 	rest -= n*31536000;
 
 	if(n != 0) {
-		int iLen = sprintf(buf, "%ld %s", n, n > 1 ? LanguageManager->sTexts[LAN_YEARS_LWR] : LanguageManager->sTexts[LAN_YEAR_LWR]);
+		int iLen = sprintf(buf, "%" PRIu64 " %s", n, n > 1 ? LanguageManager->sTexts[LAN_YEARS_LWR] : LanguageManager->sTexts[LAN_YEAR_LWR]);
 		if(CheckSprintf(iLen, 128, "formatSecTime1") == false) {
             time[0] = '\0';
             return time;
@@ -269,7 +269,7 @@ char * formatSecTime(long rest) {
 	rest -= n*2592000;
 
 	if(n != 0) {
-		int iLen = sprintf(buf, "%s%ld %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_MONTHS_LWR] : LanguageManager->sTexts[LAN_MONTH_LWR]);
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_MONTHS_LWR] : LanguageManager->sTexts[LAN_MONTH_LWR]);
 		if(CheckSprintf(iLen, 128, "formatSecTime3") == false) {
             time[0] = '\0';
             return time;
@@ -283,7 +283,7 @@ char * formatSecTime(long rest) {
 	rest -= n*86400;
 
 	if(n != 0) {
-		int iLen = sprintf(buf, "%s%ld %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_DAYS_LWR] : LanguageManager->sTexts[LAN_DAY_LWR]);
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_DAYS_LWR] : LanguageManager->sTexts[LAN_DAY_LWR]);
 		if(CheckSprintf(iLen, 128, "formatSecTime5") == false) {
             time[0] = '\0';
             return time;
@@ -297,7 +297,7 @@ char * formatSecTime(long rest) {
 	rest -= n*3600;
 
 	if(n != 0) {
-		int iLen = sprintf(buf, "%s%ld %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_HOURS_LWR] : LanguageManager->sTexts[LAN_HOUR_LWR]);
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_HOURS_LWR] : LanguageManager->sTexts[LAN_HOUR_LWR]);
 		if(CheckSprintf(iLen, 128, "formatSecTime7") == false) {
             time[0] = '\0';
             return time;
@@ -311,7 +311,7 @@ char * formatSecTime(long rest) {
 	rest -= n*60;
 
 	if(n != 0) {
-		int iLen = sprintf(buf, "%s%ld %s", i > 0 ? " " : "", n, LanguageManager->sTexts[LAN_MIN_LWR]);
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, LanguageManager->sTexts[LAN_MIN_LWR]);
 		if(CheckSprintf(iLen, 128, "formatSecTime9") == false) {
             time[0] = '\0';
             return time;
@@ -322,7 +322,7 @@ char * formatSecTime(long rest) {
 	}
 
 	if(rest != 0) {
-    	int iLen = sprintf(buf, "%s%ld %s", i > 0 ? " " : "", rest, LanguageManager->sTexts[LAN_SEC_LWR]);
+    	int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", rest, LanguageManager->sTexts[LAN_SEC_LWR]);
 		if(CheckSprintf(iLen, 128, "formatSecTime10") == false) {
             time[0] = '\0';
             return time;
@@ -357,8 +357,8 @@ char* stristr(const char *str1, const char *str2) {
 // check IP string.
 // false - no ip
 // true - valid ip
-bool isIP(char * IP, const uint32_t ui32Len) {
-	unsigned int a, b, c, d;
+bool isIP(char * IP, const size_t ui32Len) {
+	uint32_t a, b, c, d;
 	if(GetIpParts(IP, ui32Len, a, b, c, d) == true) {
         return true;
     } else {
@@ -367,12 +367,12 @@ bool isIP(char * IP, const uint32_t ui32Len) {
 }
 //---------------------------------------------------------------------------
 
-bool GetIpParts(char * sIP, const uint32_t ui32Len, unsigned int &a, unsigned int &b, unsigned int &c, unsigned int &d) {
+bool GetIpParts(char * sIP, const size_t ui32Len, uint32_t &a, uint32_t &b, uint32_t &c, uint32_t &d) {
     if(ui32Len < 7 || ui32Len > 15)
         return false;
 
-    int iDots = 0, iChars = 0, iActualChar;
-    int iFirst = 0, iSecond = 0, iThird = 0;
+    uint8_t iDots = 0, iChars = 0, iActualChar;
+    uint16_t iFirst = 0, iSecond = 0, iThird = 0;
 
     for(uint32_t i = 0; i < ui32Len; i++) {
         iChars++;
@@ -505,11 +505,11 @@ bool GetIpParts(char * sIP, const uint32_t ui32Len, unsigned int &a, unsigned in
 }
 //---------------------------------------------------------------------------
 
-uint32_t HashNick(const char * sNick, const unsigned int &iNickLen) {
+uint32_t HashNick(const char * sNick, const size_t &iNickLen) {
 	char c;
     uint32_t h = 5381;
 
-	for(unsigned int i = 0; i < iNickLen; i++) {
+	for(size_t i = 0; i < iNickLen; i++) {
         c = (char)tolower(sNick[i]);
         h += (h << 5);
         h ^= c;
@@ -519,8 +519,8 @@ uint32_t HashNick(const char * sNick, const unsigned int &iNickLen) {
 }
 //---------------------------------------------------------------------------
 
-bool HashIP(char * sIP, const uint32_t ui32Len, uint32_t &ui32Hash) {
-	unsigned int a, b, c, d;
+bool HashIP(char * sIP, const size_t ui32Len, uint32_t &ui32Hash) {
+	uint32_t a, b, c, d;
     if(GetIpParts(sIP, ui32Len, a, b, c, d) == false) {
         return false;
     }
@@ -531,7 +531,7 @@ bool HashIP(char * sIP, const uint32_t ui32Len, uint32_t &ui32Hash) {
 }
 //---------------------------------------------------------------------------
 
-char * GenerateBanMessage(BanItem * Ban, int &iMsgLen, const time_t &acc_time) {
+char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_time) {
     static char banmsg[2048], banmsg1[512];
 
     if(((Ban->ui8Bits & hashBanMan::PERM) == hashBanMan::PERM) == true) {
@@ -626,7 +626,7 @@ char * GenerateBanMessage(BanItem * Ban, int &iMsgLen, const time_t &acc_time) {
 }
 //---------------------------------------------------------------------------
 
-char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int &iMsgLen, const time_t &acc_time) {
+char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const time_t &acc_time) {
     static char banmsg[2048], banmsg1[512];
 
     if(((RangeBan->ui8Bits & hashBanMan::PERM) == hashBanMan::PERM) == true) {
@@ -709,7 +709,7 @@ char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int &iMsgLen, const time
 }
 //---------------------------------------------------------------------------
 
-bool GenerateTempBanTime(const char &cMultiplyer, const int &iTime, time_t &acc_time, time_t &ban_time) {
+bool GenerateTempBanTime(const char &cMultiplyer, const uint32_t &iTime, time_t &acc_time, time_t &ban_time) {
     time(&acc_time);
     struct tm *tm = localtime(&acc_time);
 
@@ -751,7 +751,7 @@ bool HaveOnlyNumbers(char *sData, const uint16_t &ui16Len) {
 //---------------------------------------------------------------------------
 
 int GetWlcmMsg(char * sWlcmMsg) {
-    int iLen =  sprintf(sWlcmMsg, "%s%d %s, %d %s, %d %s / %s: %u)|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_NAME_WLCM],
+    int iLen =  sprintf(sWlcmMsg, "%s%" PRIu64 " %s, %" PRIu64 " %s, %" PRIu64 " %s / %s: %u)|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_NAME_WLCM],
         iDays, LanguageManager->sTexts[LAN_DAYS_LWR], iHours, LanguageManager->sTexts[LAN_HOURS_LWR], 
         iMins, LanguageManager->sTexts[LAN_MINUTES_LWR], 
         LanguageManager->sTexts[LAN_USERS], ui32Logged);
@@ -763,9 +763,9 @@ int GetWlcmMsg(char * sWlcmMsg) {
 }
 //---------------------------------------------------------------------------
 
-bool CheckSprintf(int iRetVal, int iMax, const char * sMsg) {
+bool CheckSprintf(int iRetVal, const size_t &iMax, const char * sMsg) {
     if(iRetVal > 0) {
-        if(iMax != 0 && iRetVal >= iMax) {
+        if(iMax != 0 && iRetVal >= (int)iMax) {
 			string sDbgstr = "sprintf high value "+string(iRetVal)+"/"+string(iMax)+" in "+string(sMsg);
             AppendSpecialLog(sDbgstr);
             return false;
@@ -779,9 +779,9 @@ bool CheckSprintf(int iRetVal, int iMax, const char * sMsg) {
 }
 //---------------------------------------------------------------------------
 
-bool CheckSprintf1(int iRetVal, int iLenVal, int iMax, const char * sMsg) {
+bool CheckSprintf1(int iRetVal, int iLenVal, const size_t &iMax, const char * sMsg) {
     if(iRetVal > 0) {
-        if(iMax != 0 && iLenVal >= iMax) {
+        if(iMax != 0 && iLenVal >= (int)iMax) {
 			string sDbgstr = "sprintf high value "+string(iLenVal)+"/"+string(iMax)+" in "+string(sMsg);
 			AppendSpecialLog(sDbgstr);
             return false;

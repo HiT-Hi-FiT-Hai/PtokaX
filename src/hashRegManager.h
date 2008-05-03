@@ -28,13 +28,13 @@ struct RegUser {
     char *sNick;
     char *sPass;
     time_t tLastBadPass;
-    unsigned int iProfile;
+    uint16_t iProfile;
     uint32_t ui32Hash;
     RegUser *prev, *next;
     RegUser *hashtableprev, *hashtablenext;
     unsigned char iBadPassCount;
 
-    RegUser(char * Nick, char * Pass, const unsigned int &iProfile);
+    RegUser(char * Nick, char * Pass, const uint16_t &iProfile);
     ~RegUser(void);
 }; 
 //---------------------------------------------------------------------------
@@ -47,7 +47,7 @@ public:
     hashRegMan(void);
     ~hashRegMan(void);
 
-    bool AddNewReg(char * sNick, char * sPasswd, const unsigned int &iProfile);
+    bool AddNewReg(char * sNick, char * sPasswd, const uint16_t &iProfile);
 
     void AddReg(RegUser * Reg);
     void RemReg(RegUser * Reg);

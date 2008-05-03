@@ -34,9 +34,9 @@
 static char msg[1024];
 //---------------------------------------------------------------------------
 
-bool DeFloodCheckForFlood(User * u, const uint8_t &ui8DefloodType, const short &ui16Action,
+bool DeFloodCheckForFlood(User * u, const uint8_t &ui8DefloodType, const int16_t &ui16Action,
   uint16_t &ui16Count, uint64_t &ui64LastOkTick, 
-  const short &ui16DefloodCount, const uint32_t &ui32DefloodTime, char * sOtherNick/* = NULL*/) {
+  const int16_t &ui16DefloodCount, const uint32_t &ui32DefloodTime, char * sOtherNick/* = NULL*/) {
     if(ui16Count == 0) {
 		ui64LastOkTick = ui64ActualTick;
     } else if(ui16Count == ui16DefloodCount) {
@@ -73,10 +73,10 @@ bool DeFloodCheckForFlood(User * u, const uint8_t &ui8DefloodType, const short &
 }
 //---------------------------------------------------------------------------
 
-bool DeFloodCheckForSameFlood(User * u, const uint8_t &ui8DefloodType, const short &ui16Action,
+bool DeFloodCheckForSameFlood(User * u, const uint8_t &ui8DefloodType, const int16_t &ui16Action,
   uint16_t &ui16Count, const uint64_t &ui64LastOkTick,
-  const short &ui16DefloodCount, const uint32_t &ui32DefloodTime, 
-  char * sNewData, const uint32_t &ui32NewDataLen, 
+  const int16_t &ui16DefloodCount, const uint32_t &ui32DefloodTime, 
+  char * sNewData, const size_t &ui32NewDataLen, 
   char * sOldData, const uint16_t &ui16OldDataLen, bool &bNewData, char * sOtherNick/* = NULL*/) {
 	if((uint32_t)ui16OldDataLen == ui32NewDataLen && (ui64ActualTick >= ui64LastOkTick &&
       (ui64LastOkTick+ui32DefloodTime) > ui64ActualTick) &&
@@ -112,9 +112,9 @@ bool DeFloodCheckForSameFlood(User * u, const uint8_t &ui8DefloodType, const sho
 }
 //---------------------------------------------------------------------------
 
-bool DeFloodCheckForDataFlood(User * u, const uint8_t &ui8DefloodType, const short &ui16Action,
+bool DeFloodCheckForDataFlood(User * u, const uint8_t &ui8DefloodType, const int16_t &ui16Action,
 	uint32_t &ui32Count, uint64_t &ui64LastOkTick,
-	const short &ui16DefloodCount, const uint32_t &ui32DefloodTime) {
+	const int16_t &ui16DefloodCount, const uint32_t &ui32DefloodTime) {
 	if((uint16_t)(ui32Count/1024) >= ui16DefloodCount) {
 		if((ui64LastOkTick+ui32DefloodTime) > ui64ActualTick) {
         	if((u->ui32BoolBits & User::BIT_RECV_FLOODER) == User::BIT_RECV_FLOODER) {
@@ -141,7 +141,7 @@ bool DeFloodCheckForDataFlood(User * u, const uint8_t &ui8DefloodType, const sho
 }
 //---------------------------------------------------------------------------
 
-void DeFloodDoAction(User * u, const uint8_t &ui8DefloodType, const short &ui16Action,
+void DeFloodDoAction(User * u, const uint8_t &ui8DefloodType, const int16_t &ui16Action,
     uint16_t &ui16Count, char * sOtherNick) {
     int imsgLen = 0;
     if(sOtherNick != NULL) {
@@ -236,7 +236,7 @@ void DeFloodDoAction(User * u, const uint8_t &ui8DefloodType, const short &ui16A
 //---------------------------------------------------------------------------
 
 bool DeFloodCheckForWarn(User * u, const uint8_t &ui8DefloodType, char * sOtherNick) {
-	if(u->iDefloodWarnings < SettingManager->iShorts[SETSHORT_DEFLOOD_WARNING_COUNT]) {
+	if(u->iDefloodWarnings < (uint32_t)SettingManager->iShorts[SETSHORT_DEFLOOD_WARNING_COUNT]) {
         int imsgLen = sprintf(msg, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
             DeFloodGetMessage(ui8DefloodType, 0));
         if(CheckSprintf(imsgLen, 1024, "DeFloodCheckForWarn1") == true) {
@@ -478,7 +478,7 @@ void DeFloodReport(User * u, const uint8_t ui8DefloodType, char *sAction) {
 
 bool DeFloodCheckInterval(User * u, const uint8_t &ui8DefloodType, 
     uint16_t &ui16Count, uint64_t &ui64LastOkTick, 
-    const short &ui16DefloodCount, const uint32_t &ui32DefloodTime, char * sOtherNick/* = NULL*/) {
+    const int16_t &ui16DefloodCount, const uint32_t &ui32DefloodTime, char * sOtherNick/* = NULL*/) {
     if(ui16Count == 0) {
 		ui64LastOkTick = ui64ActualTick;
     } else if(ui16Count >= ui16DefloodCount) {
@@ -493,8 +493,8 @@ bool DeFloodCheckInterval(User * u, const uint8_t &ui8DefloodType,
                 }
             }
 
-            int iret = sprintf(msg+imsgLen, "<%s> %s %llu %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                LanguageManager->sTexts[LAN_PLEASE_WAIT], (unsigned long long)(ui64LastOkTick+ui32DefloodTime)-ui64ActualTick, 
+            int iret = sprintf(msg+imsgLen, "<%s> %s %" PRIu64 " %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+                LanguageManager->sTexts[LAN_PLEASE_WAIT], (ui64LastOkTick+ui32DefloodTime)-ui64ActualTick, 
                 DeFloodGetMessage(ui8DefloodType, 0));
 			imsgLen += iret;
             if(CheckSprintf1(iret, imsgLen, 1024, "DeFloodCheckInterval2") == true) {

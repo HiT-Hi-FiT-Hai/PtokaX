@@ -55,7 +55,7 @@ public:
         SUPPORTS_ARRIVAL,
         BOTINFO_ARRIVAL,
         CLOSE_ARRIVAL, 
-        UNKNOWN_ARRIVAL,
+        UNKNOWN_ARRIVAL
     };
 
     Script *RunningScriptS;
@@ -97,7 +97,7 @@ public:
 
     void OnStartup();
     void OnExit(bool bForce = false);
-    bool Arrival(User * u, char * sData, const int &iLen, const unsigned char &iType);
+    bool Arrival(User * u, char * sData, const size_t &iLen, const unsigned char &iType);
     void UserConnected(User * u);
 	void UserDisconnected(User * u);
 

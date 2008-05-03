@@ -31,7 +31,7 @@ hashMan *hashManager = NULL;
 //---------------------------------------------------------------------------
 
 hashMan::hashMan() {
-    for(unsigned int i = 0; i < 65536; i++) {
+    for(uint32_t i = 0; i < 65536; i++) {
         nicktable[i] = NULL;
         iptable[i] = NULL;
     }
@@ -42,7 +42,7 @@ hashMan::hashMan() {
 
 hashMan::~hashMan() {
     //Memo("hashManager destroyed");
-    for(unsigned int i = 0; i < 65536; i++) {
+    for(uint32_t i = 0; i < 65536; i++) {
         if(nicktable[i] != NULL) {
             delete nicktable[i];
         }
@@ -835,7 +835,7 @@ BanItem* hashMan::FindBanNick(User* u) {
 }
 //---------------------------------------------------------------------------
 
-BanItem* hashMan::FindBanNick(char * sNick, int iNickLen) {
+BanItem* hashMan::FindBanNick(char * sNick, const size_t &iNickLen) {
     uint32_t hash = HashNick(sNick, iNickLen);
     time_t acc_time; time(&acc_time);
 
@@ -874,7 +874,7 @@ BanItem* hashMan::FindBanNick(const uint32_t &ui32Hash, const time_t &acc_time, 
 }
 //---------------------------------------------------------------------------
 
-BanItem* hashMan::FindBanNickTemp(char * sNick, int iNickLen) {
+BanItem* hashMan::FindBanNickTemp(char * sNick, const size_t &iNickLen) {
     uint32_t hash = HashNick(sNick, iNickLen);
     time_t acc_time; time(&acc_time);
 
@@ -913,7 +913,7 @@ BanItem* hashMan::FindBanNickTemp(const uint32_t &ui32Hash,  const time_t &acc_t
 }
 //---------------------------------------------------------------------------
 
-BanItem* hashMan::FindBanNickPerm(char * sNick, int iNickLen) {
+BanItem* hashMan::FindBanNickPerm(char * sNick, const size_t &iNickLen) {
     uint32_t hash = HashNick(sNick, iNickLen);
     
 	return FindBanNickPerm(hash, sNick);
@@ -944,7 +944,7 @@ BanItem* hashMan::FindBanNickPerm(const uint32_t &ui32Hash, char * sNick) {
 }
 //---------------------------------------------------------------------------
 
-RegUser* hashMan::FindReg(char * sNick, int iNickLen) {
+RegUser* hashMan::FindReg(char * sNick, const size_t &iNickLen) {
     uint32_t ui32Hash = HashNick(sNick, iNickLen);
     uint16_t ui16dx = ((uint16_t *)&ui32Hash)[0];
 
@@ -1011,7 +1011,7 @@ RegUser* hashMan::FindReg(uint32_t ui32Hash, char * sNick) {
 }
 //---------------------------------------------------------------------------
 
-User * hashMan::FindUser(char * sNick, const unsigned int &iNickLen) {
+User * hashMan::FindUser(char * sNick, const size_t &iNickLen) {
     uint32_t ui32Hash = HashNick(sNick, iNickLen);
     uint16_t ui16dx = ((uint16_t *)&ui32Hash)[0]; 
 
@@ -1111,7 +1111,7 @@ uint32_t hashMan::GetUserIpCount(User * u) {
 //---------------------------------------------------------------------------
 
 void hashMan::RemoveAllUsers() {
-    for(unsigned int i = 0; i < 65536; i++) {
+    for(uint32_t i = 0; i < 65536; i++) {
         if(nicktable[i] != NULL) {
 			if(nicktable[i]->Bans == NULL && nicktable[i]->Regs == NULL) {
 				delete nicktable[i];

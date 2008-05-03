@@ -216,7 +216,7 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
             int imsglen;
             char *messg = GenerateBanMessage(Ban, imsglen, acc_time);
             send(AccptSocket->s, messg, imsglen, 0);
-            shutdown(AccptSocket->s, SHUT_RDWR);
+            shutdown(AccptSocket->s, SHUT_RD);
             close(AccptSocket->s);
 /*            int imsgLen = sprintf(msg, "[SYS] Banned ip %s - connection closed.", AccptSocket->IP);
             if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser5") == true) {
@@ -233,7 +233,7 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
             int imsglen;
             char *messg = GenerateRangeBanMessage(RangeBan, imsglen, acc_time);
             send(AccptSocket->s, messg, imsglen, 0);
-            shutdown(AccptSocket->s, SHUT_RDWR);
+            shutdown(AccptSocket->s, SHUT_RD);
             close(AccptSocket->s);
 /*            int imsgLen = sprintf(msg, "[SYS] Range Banned ip %s - connection closed.", AccptSocket->IP);
             if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser6") == true) {
@@ -305,7 +305,7 @@ void theLoop::ReceiveLoop() {
     }
 
     // Receiving loop for process all incoming data and store in queues
-    unsigned int iRecvRests = 0;
+    uint32_t iRecvRests = 0;
     
     ui8SrCntr++;
     
@@ -319,12 +319,12 @@ void theLoop::ReceiveLoop() {
         time(&acctime);
         acctime -= starttime;
     
-        unsigned int iValue = acctime / 86400;
-    	acctime -= 86400*iValue;
+        uint64_t iValue = acctime / 86400;
+    	acctime -= (time_t)(86400*iValue);
         iDays = iValue;
     
         iValue = acctime / 3600;
-    	acctime -= 3600*iValue;
+    	acctime -= (time_t)(3600*iValue);
         iHours = iValue;
     
     	iValue = acctime / 60;
@@ -411,7 +411,7 @@ void theLoop::ReceiveLoop() {
                 }
 
                 //New User Connected ... the user is operator ? invoke lua User/OpConnected
-                unsigned int iBeforeLuaLen = curUser->sbdatalen;
+                uint32_t iBeforeLuaLen = curUser->sbdatalen;
 
 				ScriptManager->UserConnected(curUser);
 				if(curUser->iState >= User::STATE_CLOSING) {// connection closed by script?
@@ -419,7 +419,7 @@ void theLoop::ReceiveLoop() {
 				}
 
                 if(iBeforeLuaLen < curUser->sbdatalen) {
-                    int iNdLen = curUser->sbdatalen-iBeforeLuaLen;
+                    size_t iNdLen = curUser->sbdatalen-iBeforeLuaLen;
                     curUser->uLogInOut->sLockUsrConn = (char *) malloc(iNdLen+1);
                     if(curUser->uLogInOut->sLockUsrConn == NULL) {
 						string sDbgstr = "[BUF] Cannot allocate "+string(iNdLen+1)+
@@ -428,7 +428,7 @@ void theLoop::ReceiveLoop() {
                 		return;
                     }
                     memcpy(curUser->uLogInOut->sLockUsrConn, curUser->sendbuf+iBeforeLuaLen, iNdLen);
-                	curUser->uLogInOut->iUserConnectedLen = iNdLen;
+                	curUser->uLogInOut->iUserConnectedLen = (uint32_t)iNdLen;
                 	curUser->uLogInOut->sLockUsrConn[curUser->uLogInOut->iUserConnectedLen] = '\0';
                 	curUser->sbdatalen = iBeforeLuaLen;
                 	curUser->sendbuf[curUser->sbdatalen] = '\0';
@@ -449,8 +449,8 @@ void theLoop::ReceiveLoop() {
                 
                 if(ui32Peak < ui32Logged) {
                     ui32Peak = ui32Logged;
-                    if(SettingManager->iShorts[SETSHORT_MAX_USERS_PEAK] < (short)ui32Peak)
-                        SettingManager->SetShort(SETSHORT_MAX_USERS_PEAK, (short)ui32Peak);
+                    if(SettingManager->iShorts[SETSHORT_MAX_USERS_PEAK] < (int16_t)ui32Peak)
+                        SettingManager->SetShort(SETSHORT_MAX_USERS_PEAK, (int16_t)ui32Peak);
                 }
 
 //                if(sqldb) sqldb->AddVisit(curUser);
@@ -504,7 +504,7 @@ void theLoop::ReceiveLoop() {
                                 } else {
                                     if(cur->To->iReceivedPmCount == 0) {
                                         cur->To->iReceivedPmTick = ui64ActualTick;
-                                    } else if(cur->To->iReceivedPmCount >= SettingManager->iShorts[SETSHORT_MAX_PM_COUNT_TO_USER]) {
+                                    } else if(cur->To->iReceivedPmCount >= (uint32_t)SettingManager->iShorts[SETSHORT_MAX_PM_COUNT_TO_USER]) {
                                         if(cur->To->iReceivedPmTick+60 < ui64ActualTick) {
                                             cur->To->iReceivedPmTick = ui64ActualTick;
                                             cur->To->iReceivedPmCount = 0;
@@ -620,7 +620,7 @@ void theLoop::ReceiveLoop() {
             }
             // if user is marked as dead, remove him
             case User::STATE_REMME: {
-                shutdown(curUser->Sck, SHUT_RDWR);
+                shutdown(curUser->Sck, SHUT_RD);
                 close(curUser->Sck);
 
                 // linked list
@@ -659,7 +659,7 @@ void theLoop::SendLoop() {
     // now logging users get changed myinfo with myinfos
     // old users get it in this loop from queue -> badwith saving !!! no more twice myinfo =)
     // Sending Loop
-    unsigned int iSendRests = 0;
+    uint32_t iSendRests = 0;
 
     // PPK ... now finalize queues
     globalQ->FinalizeQueues();

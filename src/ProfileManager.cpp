@@ -75,17 +75,15 @@ ProfileManager::ProfileManager() {
 			ProfileItem *newProfile = CreateProfile(sName);
 
 			if(strlen(sRights) == 32) {
-				int iPerm = 32;
-				for(unsigned int i = 0; i < 32; i++) {
-					iPerm--;
+				for(uint8_t i = 0; i < 32; i++) {
 					if(sRights[i] == '1') {
-						newProfile->bPermissions[iPerm] = true;
+						newProfile->bPermissions[i] = true;
 					} else {
-						newProfile->bPermissions[iPerm] = false;
+						newProfile->bPermissions[i] = false;
 					}
 				}
 			} else if(strlen(sRights) == 256) {
-				for(unsigned int i = 0; i < 256; i++) {
+				for(uint16_t i = 0; i < 256; i++) {
 					if(sRights[i] == '1') {
 						newProfile->bPermissions[i] = true;
 					} else {
@@ -107,7 +105,7 @@ ProfileManager::ProfileManager() {
 ProfileManager::~ProfileManager() {
     SaveProfiles();
 
-    for(unsigned int i = 0; i < iProfileCount; i++) {
+    for(uint16_t i = 0; i < iProfileCount; i++) {
         delete ProfilesTable[i];
     }
 
@@ -128,7 +126,7 @@ void ProfileManager::CreateDefaultProfiles() {
     doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
     TiXmlElement profiles("Profiles");
 
-    for(unsigned int i = 0; i < 4;i++) {
+    for(uint8_t i = 0; i < 4;i++) {
         TiXmlElement name("Name");
         name.InsertEndChild(TiXmlText(profilenames[i]));
         
@@ -154,7 +152,7 @@ void ProfileManager::SaveProfiles() {
     doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
     TiXmlElement profiles("Profiles");
 
-    for(unsigned int j = 0; j < iProfileCount; j++) {
+    for(uint16_t j = 0; j < iProfileCount; j++) {
         TiXmlElement name("Name");
         name.InsertEndChild(TiXmlText(ProfilesTable[j]->sName));
         
@@ -182,7 +180,7 @@ void ProfileManager::SaveProfiles() {
 }
 //---------------------------------------------------------------------------
 
-bool ProfileManager::IsAllowed(User * u, const unsigned int &iOption) {
+bool ProfileManager::IsAllowed(User * u, const uint32_t &iOption) {
     // profile number -1 = normal user/no profile assigned
     if(u->iProfile == -1)
         return false;
@@ -192,7 +190,7 @@ bool ProfileManager::IsAllowed(User * u, const unsigned int &iOption) {
 }
 //---------------------------------------------------------------------------
 
-bool ProfileManager::IsProfileAllowed(const int &iProfile, const unsigned int &iOption) {
+bool ProfileManager::IsProfileAllowed(const int32_t &iProfile, const uint32_t &iOption) {
     // profile number -1 = normal user/no profile assigned
     if(iProfile == -1)
         return false;
@@ -202,14 +200,14 @@ bool ProfileManager::IsProfileAllowed(const int &iProfile, const unsigned int &i
 }
 //---------------------------------------------------------------------------
 
-int ProfileManager::AddProfile(char * name) {
-    for(unsigned int i = 0; i < iProfileCount; i++) {         
+int32_t ProfileManager::AddProfile(char * name) {
+    for(uint16_t i = 0; i < iProfileCount; i++) {         
         if(strcasecmp(ProfilesTable[i]->sName, name) == 0) {
             return -1;
         }
     }
 
-    unsigned int i = 0;
+    uint32_t i = 0;
     while(true) {
         switch(name[i]) {
             case '\0':
@@ -230,12 +228,12 @@ int ProfileManager::AddProfile(char * name) {
 
 	CreateProfile(name);
 
-    return (int)(iProfileCount-1);
+    return (int32_t)(iProfileCount-1);
 }
 //---------------------------------------------------------------------------
 
-int ProfileManager::GetProfileIndex(const char * name) {
-    for(unsigned int i = 0; i < iProfileCount; i++) {      
+int32_t ProfileManager::GetProfileIndex(const char * name) {
+    for(uint16_t i = 0; i < iProfileCount; i++) {      
         if(strcasecmp(ProfilesTable[i]->sName, name) == 0) {
             return i;
         }
@@ -249,10 +247,10 @@ int ProfileManager::GetProfileIndex(const char * name) {
 // returns: 0 if the name doesnot exists or is a default profile idx 0-3
 //          -1 if the profile is in use
 //          1 on success
-int ProfileManager::RemoveProfileByName(char * name) {
-    int idx = -1;
+int32_t ProfileManager::RemoveProfileByName(char * name) {
+    int32_t idx = -1;
     
-    for(unsigned int i = 0; i < iProfileCount; i++) {      
+    for(uint16_t i = 0; i < iProfileCount; i++) {      
         if(strcasecmp(ProfilesTable[i]->sName, name) == 0) {
             idx = i;
             break;
@@ -267,7 +265,7 @@ int ProfileManager::RemoveProfileByName(char * name) {
     while(next != NULL) {
         RegUser *curReg = next;
 		next = curReg->next;
-		if(curReg->iProfile == (unsigned int)idx) {
+		if(curReg->iProfile == idx) {
             //MessageBox(Application->Handle, "Failed to delete a profile. Profile is in use.", "Failed!", MB_OK|MB_ICONEXCLAMATION);
             return -1;
         }
@@ -277,7 +275,7 @@ int ProfileManager::RemoveProfileByName(char * name) {
     
     delete ProfilesTable[idx];
     
-    for(unsigned int i = idx; i < iProfileCount; i++) {         
+	for(int32_t i = idx; i < iProfileCount; i++) {
         ProfilesTable[i] = ProfilesTable[i+1];
     }
 
@@ -299,7 +297,7 @@ int ProfileManager::RemoveProfileByName(char * name) {
     while(next != NULL) {
         RegUser *curReg = next;
 		next = curReg->next;
-        if(curReg->iProfile > (unsigned int)idx) {
+        if(curReg->iProfile > idx) {
             curReg->iProfile--;
         }
     }
@@ -341,7 +339,7 @@ ProfileItem * ProfileManager::CreateProfile(const char * name) {
         exit(EXIT_FAILURE);
     }
  
-    int iLen = strlen(name);
+    size_t iLen = strlen(name);
     newProfile->sName = (char *) malloc(iLen+1);
     if(newProfile->sName == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate "+string(iLen)+
@@ -352,7 +350,7 @@ ProfileItem * ProfileManager::CreateProfile(const char * name) {
     memcpy(newProfile->sName, name, iLen);
     newProfile->sName[iLen] = '\0';
 
-    for(unsigned int i = 0; i < 256; i++) {
+    for(uint16_t i = 0; i < 256; i++) {
         newProfile->bPermissions[i] = false;
     }
     
@@ -362,7 +360,7 @@ ProfileItem * ProfileManager::CreateProfile(const char * name) {
 }
 //---------------------------------------------------------------------------
 
-void ProfileManager::MoveProfileDown(const unsigned int &iProfile) {
+void ProfileManager::MoveProfileDown(const uint16_t &iProfile) {
     ProfileItem *first = ProfilesTable[iProfile];
     ProfileItem *second = ProfilesTable[iProfile+1];
     
@@ -394,16 +392,16 @@ void ProfileManager::MoveProfileDown(const unsigned int &iProfile) {
         User *curUser = nextUser;
 		nextUser = curUser->next;
 
-		if(curUser->iProfile == (int)iProfile) {
+		if(curUser->iProfile == (int32_t)iProfile) {
 			curUser->iProfile++;
-		} else if(curUser->iProfile == (int)iProfile+1) {
+		} else if(curUser->iProfile == (int32_t)(iProfile+1)) {
 			curUser->iProfile--;
 		}
     }
 }
 //---------------------------------------------------------------------------
 
-void ProfileManager::MoveProfileUp(const unsigned int &iProfile) {
+void ProfileManager::MoveProfileUp(const uint16_t &iProfile) {
     ProfileItem *first = ProfilesTable[iProfile];
     ProfileItem *second = ProfilesTable[iProfile-1];
     
@@ -435,16 +433,16 @@ void ProfileManager::MoveProfileUp(const unsigned int &iProfile) {
         User *curUser = nextUser;
 		nextUser = curUser->next;
 
-		if(curUser->iProfile == (int)iProfile) {
+		if(curUser->iProfile == (int32_t)iProfile) {
 			curUser->iProfile--;
-		} else if(curUser->iProfile == (int)iProfile-1) {
+		} else if(curUser->iProfile == (int32_t)(iProfile-1)) {
 			curUser->iProfile++;
 		}
     }
 }
 //---------------------------------------------------------------------------
 
-void ProfileManager::ChangeProfileName(const unsigned int &iProfile, char * sName, const size_t &iLen) {
+void ProfileManager::ChangeProfileName(const uint16_t &iProfile, char * sName, const size_t &iLen) {
     free(ProfilesTable[iProfile]->sName);
 
     ProfilesTable[iProfile]->sName = NULL;
@@ -461,7 +459,7 @@ void ProfileManager::ChangeProfileName(const unsigned int &iProfile, char * sNam
 }
 //---------------------------------------------------------------------------
 
-void ProfileManager::ChangeProfilePermission(const unsigned int &iProfile, const size_t &iId, const bool &bValue) {
+void ProfileManager::ChangeProfilePermission(const uint16_t &iProfile, const size_t &iId, const bool &bValue) {
     ProfilesTable[iProfile]->bPermissions[iId] = bValue;
 }
 //---------------------------------------------------------------------------

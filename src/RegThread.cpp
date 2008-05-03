@@ -116,7 +116,7 @@ void RegThread::Setup(char * sListAddresses, const uint16_t &ui16AddrsLen) {
 }
 //---------------------------------------------------------------------------
 
-void RegThread::AddSock(char * sAddress, const uint32_t &ui32Len) {
+void RegThread::AddSock(char * sAddress, const size_t &ui32Len) {
     RegSocket * newsock = new RegSocket();
     if(newsock == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate newsock in RegThread::AddSock!";
@@ -182,7 +182,7 @@ void RegThread::AddSock(char * sAddress, const uint32_t &ui32Len) {
         return;
     }
 
-    newsock->ui32AddrLen = ui32Len;
+    newsock->ui32AddrLen = (uint32_t)ui32Len;
 
     memcpy(newsock->sAddress, sAddress, newsock->ui32AddrLen);
     newsock->sAddress[newsock->ui32AddrLen] = '\0';
@@ -246,7 +246,7 @@ void RegThread::Run() {
         char *port = strchr(cur->sAddress, ':');    
         if(port != NULL) {
             port[0] = '\0';
-            int iPort = atoi(port+1);
+                int32_t iPort = atoi(port+1);
             if(iPort >= 0 && iPort <= 65535) {
                 target.sin_port = htons((unsigned short)iPort);
             }
@@ -257,7 +257,7 @@ void RegThread::Run() {
         } else {
             hostent *host = gethostbyname(cur->sAddress);
             if(host != NULL) {
-                target.sin_addr.s_addr = *(unsigned long*)host->h_addr;
+                target.sin_addr.s_addr = *(unsigned long *)host->h_addr;
             } else {
                 int iMsgLen = sprintf(sMsg, "[REG] RegSock resolve error (%s)", cur->sAddress);
                 if(CheckSprintf(iMsgLen, 2048, "RegThread::Execute1") == true) {
@@ -291,7 +291,7 @@ void RegThread::Run() {
         usleep(1000);
     }
 
-    unsigned short iLoops = 0;
+        uint16_t iLoops = 0;
 
     while(RegSockListS != NULL && bTerminated == false && iLoops < 4000) {   
         iLoops++;
@@ -374,7 +374,7 @@ bool RegThread::Receive(RegSocket * Sock) {
         i32bytes = 1024;
     }
 
-    if(Sock->iRecvBufSize < Sock->iRecvBufLen+(long)i32bytes) {
+    if(Sock->iRecvBufSize < Sock->iRecvBufLen+i32bytes) {
         int iAllignLen = ((Sock->iRecvBufLen+i32bytes+1) & 0xFFFFFE00) + 0x200;
         if(iAllignLen > 2048) {
             int iMsgLen = sprintf(sMsg, "[REG] RegSock receive buffer overflow. (%s)", Sock->sAddress);
@@ -443,9 +443,9 @@ bool RegThread::Receive(RegSocket * Sock) {
     Sock->sRecvBuf[Sock->iRecvBufLen] = '\0';
     char *sBuffer = Sock->sRecvBuf;
 
-    for(unsigned int i = 0; i < Sock->iRecvBufLen; i++) {
+    for(uint32_t i = 0; i < Sock->iRecvBufLen; i++) {
         if(Sock->sRecvBuf[i] == '|') {
-            int iCommandLen = ((Sock->sRecvBuf+i)-sBuffer)+1;
+            uint32_t iCommandLen = (uint32_t)(((Sock->sRecvBuf+i)-sBuffer)+1);
             if(strncmp(sBuffer, "$Lock ", 6) == 0) {
                 sockaddr_in addr;
                 socklen_t sin_len = sizeof(addr);
@@ -458,7 +458,7 @@ bool RegThread::Receive(RegSocket * Sock) {
                     return false;
                 }
 
-                unsigned short lport =  ntohs(addr.sin_port);
+                uint16_t lport =  (uint16_t)ntohs(addr.sin_port);
                 char cMagic = (char) ((lport&0xFF)+((lport>>8)&0xFF));
 
                 // strip the Lock data
@@ -470,11 +470,11 @@ bool RegThread::Receive(RegSocket * Sock) {
                 // Compute the key
                 memcpy(sMsg, "$Key ", 5);
                 sMsg[5] = '\0';
-                unsigned int iLen = temp-sBuffer;
+                size_t iLen = temp-sBuffer;
                 char v;
 
                 // first make the crypting stuff
-                for(unsigned int i = 6; i < iLen; i++) {
+                for(size_t i = 6; i < iLen; i++) {
                     if(i == 6) {
                         v = sBuffer[i] ^ sBuffer[iLen] ^ sBuffer[iLen-1] ^ cMagic;
                     } else {
@@ -509,14 +509,14 @@ bool RegThread::Receive(RegSocket * Sock) {
                     }
                 }
 
-                Sock->iTotalUsers = (unsigned int)ui32Logged;
+                Sock->iTotalUsers = ui32Logged;
                 Sock->iTotalShare = ui64TotalShare;
 
                 strcat(sMsg, "|");
                 SettingManager->GetText(SETTXT_HUB_NAME, sMsg);
                 strcat(sMsg, "|");
                 SettingManager->GetText(SETTXT_HUB_ADDRESS, sMsg);
-                unsigned short iFirstPort = SettingManager->GetFirstPort();
+                uint16_t iFirstPort = SettingManager->GetFirstPort();
                 if(iFirstPort != 411) {
                     strcat(sMsg, ":");
                     strcat(sMsg, string(iFirstPort).c_str());
@@ -530,7 +530,7 @@ bool RegThread::Receive(RegSocket * Sock) {
                 *(sMsg+iLen-5) = 'p';
                 *(sMsg+iLen-6) = '.';
                 if(SettingManager->GetBool(SETBOOL_ANTI_MOGLO) == true) {
-                    *(sMsg+iLen-2) = 160;
+                    *(sMsg+iLen-2) = (char)160;
                 }
                 strcat(sMsg, string(Sock->iTotalUsers).c_str());
                 strcat(sMsg, "|");
@@ -548,7 +548,7 @@ bool RegThread::Receive(RegSocket * Sock) {
         }
     }
 
-    Sock->iRecvBufLen -= (sBuffer-Sock->sRecvBuf);
+    Sock->iRecvBufLen -= (uint32_t)(sBuffer-Sock->sRecvBuf);
 
     if(Sock->iRecvBufLen == 0) {
         Sock->sRecvBuf[0] = '\0';
@@ -569,7 +569,7 @@ bool RegThread::Receive(RegSocket * Sock) {
 //---------------------------------------------------------------------------
 
 void RegThread::Add2SendBuf(RegSocket * Sock, char * sData) {
-    int iLen = strlen(sData);
+    size_t iLen = strlen(sData);
     
     Sock->sSendBuf = (char *) malloc(iLen+1);
     if(Sock->sSendBuf == NULL) {
@@ -582,14 +582,14 @@ void RegThread::Add2SendBuf(RegSocket * Sock, char * sData) {
     Sock->sSendBufHead = Sock->sSendBuf;
 
     memcpy(Sock->sSendBuf, sData, iLen);
-    Sock->iSendBufLen = iLen;
+    Sock->iSendBufLen = (uint32_t)iLen;
     Sock->sSendBuf[Sock->iSendBufLen] = '\0';
 }
 //---------------------------------------------------------------------------
 
 bool RegThread::Send(RegSocket * Sock) {
     // compute length of unsent data
-    int iOffset = Sock->sSendBufHead - Sock->sSendBuf;
+    uint32_t iOffset = (uint32_t)(Sock->sSendBufHead - Sock->sSendBuf);
     int iLen = Sock->iSendBufLen - iOffset;
 
     int iBytes = send(Sock->sock, Sock->sSendBufHead, iLen, 0);
@@ -612,8 +612,8 @@ bool RegThread::Send(RegSocket * Sock) {
         Sock->sSendBufHead += iBytes;
 		return true;
 	} else {
-        int iMsgLen = sprintf(sMsg, "[REG] Hub is registered on %s hublist (Users: %u, Share: %llu)", 
-            Sock->sAddress, ui32Logged, (unsigned long long)ui64TotalShare);
+        int iMsgLen = sprintf(sMsg, "[REG] Hub is registered on %s hublist (Users: %u, Share: %" PRIu64 ")", 
+            Sock->sAddress, ui32Logged, ui64TotalShare);
         if(CheckSprintf(iMsgLen, 2048, "RegThread::Send2") == true) {
             eventqueue->AddThread(eventq::EVENT_REGSOCK_MSG, sMsg);
         }

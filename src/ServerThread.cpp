@@ -118,7 +118,7 @@ void ServerThread::Run() {
                 usleep(1000);
             }
         } else {
-            unsigned int iSec = 0;
+            uint32_t iSec = 0;
             while(bTerminated == false) {
                 if(iSuspendTime > iSec) {
                     sleep(1);
@@ -162,7 +162,7 @@ void ServerThread::WaitFor() {
 }
 //---------------------------------------------------------------------------
 
-bool ServerThread::Listen(unsigned short port, bool bSilent/* = false*/) {
+bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
     usPort = port;
 
     server = socket(AF_INET, SOCK_STREAM, 0);
@@ -236,10 +236,10 @@ bool ServerThread::Listen(unsigned short port, bool bSilent/* = false*/) {
 //---------------------------------------------------------------------------
 
 bool ServerThread::isFlooder(const int &s, const sockaddr_in &addr, const socklen_t &sin_len) {
-    unsigned long iAddr = addr.sin_addr.s_addr;
+    uint32_t iAddr = addr.sin_addr.s_addr;
 
-    short iConDefloodCount = SettingManager->GetShort(SETSHORT_NEW_CONNECTIONS_COUNT);
-    short iConDefloodTime = SettingManager->GetShort(SETSHORT_NEW_CONNECTIONS_TIME);
+    int16_t iConDefloodCount = SettingManager->GetShort(SETSHORT_NEW_CONNECTIONS_COUNT);
+    int16_t iConDefloodTime = SettingManager->GetShort(SETSHORT_NEW_CONNECTIONS_TIME);
    
     AntiConFlood *nxt = AntiFloodList;
 	while(nxt != NULL) {
@@ -313,7 +313,7 @@ void ServerThread::ResumeSck() {
 }
 //---------------------------------------------------------------------------
 
-void ServerThread::SuspendSck(const unsigned int &iTime) {
+void ServerThread::SuspendSck(const uint32_t &iTime) {
     if(bActive == true) {
         pthread_mutex_lock(&mtxServerThread);
         if(iTime != 0) {

@@ -28,7 +28,7 @@ void ServerInitialize();
 
 void ServerFinalStop(const bool &bFromServiceLoop);
 void ServerResumeAccepts();
-void ServerSuspendAccepts(const unsigned int &iTime);
+void ServerSuspendAccepts(const uint32_t &iTime);
 void ServerUpdateAutoRegState();
 
 bool ServerStart();
@@ -41,12 +41,12 @@ extern uint64_t ui64ActualTick, ui64TotalShare;
 extern uint64_t ui64BytesRead, ui64BytesSent, ui64BytesSentSaved;
 extern uint64_t iLastBytesRead, iLastBytesSent;
 extern uint32_t ui32Joins, ui32Parts, ui32Logged, ui32Peak;
-extern unsigned long UploadSpeed[60], DownloadSpeed[60];
-extern unsigned long iActualBytesRead, iActualBytesSent;
-extern unsigned long iAverageBytesRead, iAverageBytesSent;
+extern uint32_t UploadSpeed[60], DownloadSpeed[60];
+extern uint32_t iActualBytesRead, iActualBytesSent;
+extern uint32_t iAverageBytesRead, iAverageBytesSent;
 extern ServerThread *ServersS;
 extern time_t starttime;
-extern unsigned int iMins, iHours, iDays;
+extern uint64_t iMins, iHours, iDays;
 extern bool bServerRunning, bServerTerminated, bIsRestart, bIsClose, bDaemon;
 extern char sHubIP[16];
 extern uint8_t ui8SrCntr, ui8MinTick;

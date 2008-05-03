@@ -65,7 +65,7 @@ static int Reg(lua_State * L) {
         return 1;
     }
 
-    unsigned short usPort = (unsigned short)lua_tonumber(L, 2);
+    uint16_t usPort = (uint16_t)lua_tonumber(L, 2);
 
     bool bAllData = lua_toboolean(L, 3) == 0 ? false : true;
 

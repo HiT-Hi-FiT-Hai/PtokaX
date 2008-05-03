@@ -38,7 +38,7 @@
 #include "ClientTagManager.h"
 #include "DeFlood.h"
 //---------------------------------------------------------------------------
-static const int ZMINDATALEN = 128;
+static const size_t ZMINDATALEN = 128;
 static const char * sBadTag = "BAD TAG!"; // 8
 static const char * sOtherNoTag = "OTHER (NO TAG)"; // 14
 static const char * sUnknownTag = "UNKNOWN TAG"; // 11
@@ -47,7 +47,7 @@ static const char * sDefaultNick = "<unknown>"; // 9
 static char msg[1024];
 //---------------------------------------------------------------------------
 
-static bool UserProcessLines(User * u, int iStrtLen) {
+static bool UserProcessLines(User * u, const uint32_t &iStrtLen) {
 	// nothing to process?
 	if(u->recvbuf[0] == '\0')
         return false;
@@ -56,16 +56,16 @@ static bool UserProcessLines(User * u, int iStrtLen) {
     
     char *buffer = u->recvbuf;
 
-    for(unsigned int i = iStrtLen; i < u->rbdatalen; i++) {
+    for(uint32_t i = iStrtLen; i < u->rbdatalen; i++) {
         if(u->recvbuf[i] == '|') {
             // look for pipes in the data - process lines one by one
             c = u->recvbuf[i+1];
             u->recvbuf[i+1] = '\0';
-            int iCommandLen = ((u->recvbuf+i)-buffer)+1;
+            uint32_t iCommandLen = (uint32_t)(((u->recvbuf+i)-buffer)+1);
             if(buffer[0] == '|') {
                 //UdpDebug->Broadcast("[SYS] heartbeat from " + string(u->Nick, u->NickLen));
                 //send(Sck, "|", 1, 0);
-            } else if(iCommandLen < (u->iState < User::STATE_ADDME ? 1024 : 65536)) {
+            } else if(iCommandLen < (u->iState < User::STATE_ADDME ? 1024U : 65536U)) {
         		DcCommands->PreProcessData(u, buffer, true, iCommandLen);
         	} else {
                 int imsgLen = sprintf(msg, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -89,7 +89,7 @@ static bool UserProcessLines(User * u, int iStrtLen) {
         }
 	}
 
-	u->rbdatalen -= (buffer-u->recvbuf);
+	u->rbdatalen -= (uint32_t)(buffer-u->recvbuf);
 
 	if(u->rbdatalen == 0) {
         DcCommands->ProcessCmds(u);
@@ -126,7 +126,7 @@ static bool UserProcessLines(User * u, int iStrtLen) {
 }
 //------------------------------------------------------------------------------
 
-static void UserRemFromSendBuf(User * u, const char * sData, int iLen, int iSbLen) {
+static void UserRemFromSendBuf(User * u, const char * sData, const uint32_t &iLen, const uint32_t &iSbLen) {
 	char *match = strstr(u->sendbuf+iSbLen, sData);
     if(match != NULL) {
         memmove(match, match+iLen, u->sbdatalen-((match+(iLen))-u->sendbuf));
@@ -169,17 +169,17 @@ static void UserParseMyInfo(User * u) {
     memcpy(msg, u->MyInfoTag, u->iMyInfoTagLen);
 
     char *sMyINFOParts[] = { NULL, NULL, NULL, NULL, NULL };
-    unsigned short iMyINFOPartsLen[] = { 0, 0, 0, 0, 0 };
+    uint16_t iMyINFOPartsLen[] = { 0, 0, 0, 0, 0 };
 
     unsigned char cPart = 0;
 
     sMyINFOParts[cPart] = msg+14+u->NickLen; // desription start
 
 
-    for(unsigned int i = 14+u->NickLen; i < u->iMyInfoTagLen-1; i++) {
+    for(uint32_t i = 14+u->NickLen; i < u->iMyInfoTagLen-1; i++) {
         if(msg[i] == '$') {
             msg[i] = '\0';
-            iMyINFOPartsLen[cPart] = (unsigned short)((msg+i)-sMyINFOParts[cPart]);
+            iMyINFOPartsLen[cPart] = (uint16_t)((msg+i)-sMyINFOParts[cPart]);
 
             // are we on end of myinfo ???
             if(cPart == 4)
@@ -267,8 +267,8 @@ static void UserParseMyInfo(User * u) {
                 
             // PPK ... new tag code with customizable tag file support... but only god knows how slow is :(
             // PPK's code replaced with a faster one by Pta.
-            int iTagPattLen = 0;
-            int k = 0;
+            size_t iTagPattLen = 0;
+            uint32_t k = 0;
             while(ClientTagManager->cliTags[k].PattLen) { // PattLen == 0 means end of tags list
                 static const uint16_t ui16V = ((uint16_t *)" V")[0];
                 if(((uint16_t *)(DCTag+ClientTagManager->cliTags[k].PattLen+1))[0] == ui16V &&
@@ -290,7 +290,7 @@ static void UserParseMyInfo(User * u) {
                     sTemp[0] = '\0';
                     u->Client = u->MyInfoTag+((DCTag+1)-msg);
                     u->ui8ClientLen = (uint8_t)((sTemp-DCTag)-1);
-                    iTagPattLen = (sTemp-DCTag)+1;
+                    iTagPattLen = (uint32_t)((sTemp-DCTag)+1);
                 } else {
                     u->Client = (char *)sUnknownTag;
                     u->ui8ClientLen = 11;
@@ -305,9 +305,9 @@ static void UserParseMyInfo(User * u) {
 
             sMyINFOParts[0][iMyINFOPartsLen[0]-1] = ','; // terminate tag end with ',' for easy tag parsing
 
-            int reqVals = 0;
+            uint32_t reqVals = 0;
             char *sTagPart = DCTag+iTagPattLen;
-            for(unsigned int i = 0+iTagPattLen; i < (unsigned int)(iMyINFOPartsLen[0]-(DCTag-sMyINFOParts[0])); i++) {
+            for(size_t i = iTagPattLen; i < (size_t)(iMyINFOPartsLen[0]-(DCTag-sMyINFOParts[0])); i++) {
                 if(DCTag[i] == ',') {
                     DCTag[i] = '\0';
 
@@ -349,17 +349,17 @@ static void UserParseMyInfo(User * u) {
                             DCTag[i] = '/';
 
                             char *sHubsParts[] = { NULL, NULL, NULL };
-                            unsigned short iHubsPartsLen[] = { 0, 0, 0 };
+                            uint16_t iHubsPartsLen[] = { 0, 0, 0 };
 
-                            unsigned char cPart = 0;
+                            uint8_t cPart = 0;
 
                             sHubsParts[cPart] = sTagPart+2;
 
 
-                            for(unsigned int j = 3; j < (unsigned int)((DCTag+i+1)-sTagPart); j++) {
+                            for(uint32_t j = 3; j < (uint32_t)((DCTag+i+1)-sTagPart); j++) {
                                 if(sTagPart[j] == '/') {
                                     sTagPart[j] = '\0';
-                                    iHubsPartsLen[cPart] = (unsigned short)((sTagPart+j)-sHubsParts[cPart]);
+                                    iHubsPartsLen[cPart] = (uint16_t)((sTagPart+j)-sHubsParts[cPart]);
 
                                     // are we on end of hubs tag part ???
                                     if(cPart == 2)
@@ -492,7 +492,7 @@ static void UserParseMyInfo(User * u) {
 }
 //---------------------------------------------------------------------------
 
-UserBan::UserBan(char * sMess, int iMessLen, uint32_t ui32Hash) {
+UserBan::UserBan(char * sMess, const uint32_t &iMessLen, const uint32_t &ui32Hash) {
     sMessage = (char *) malloc(iMessLen+1);
     if(sMessage == NULL) {
 		string sDbgstr = "[BUF] UserBan::UserBann cannot allocate "+string(iMessLen+1)+" bytes of memory for sMessage! "+
@@ -821,7 +821,7 @@ User::~User() {
 //---------------------------------------------------------------------------
 
 void UserMakeLock(User * u) {
-    int iAllignLen = Allign1024(63);
+    size_t iAllignLen = Allign1024(63);
     u->sendbuf = (char *) malloc(iAllignLen);
     if(u->sendbuf == NULL) {              
 		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot allocate 63/"+string(iAllignLen)+
@@ -830,7 +830,7 @@ void UserMakeLock(User * u) {
         u->sbdatalen = 0;
         return;
     }
-    u->sendbuflen = iAllignLen-1;
+    u->sendbuflen = (uint32_t)(iAllignLen-1);
 	u->sbplayhead = u->sendbuf;
 
     // This code computes the valid Lock string including the Pk= string
@@ -926,7 +926,7 @@ bool UserDoRecv(User * u) {
     }
 
     if(u->recvbuf == NULL) {
-        int iAllignLen = Allign512(i32bytes);
+        size_t iAllignLen = Allign512(i32bytes);
     	u->recvbuf = (char *) malloc(iAllignLen);
         if(u->recvbuf == NULL) {
 			string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot allocate "+string(i32bytes)+"/"+string(iAllignLen)+
@@ -935,11 +935,11 @@ bool UserDoRecv(User * u) {
 			u->recvbuflen = 0;
             return false;
         }
-        u->recvbuflen = iAllignLen-1;
+        u->recvbuflen = (uint32_t)(iAllignLen-1);
         u->recvbuf[0] = '\0';
     } else if(u->recvbuflen < u->rbdatalen+i32bytes) {
         // take care of the recvbuf size
-        int iAllignLen = Allign512(u->rbdatalen+i32bytes);
+        size_t iAllignLen = Allign512(u->rbdatalen+i32bytes);
         u->recvbuf = (char *) realloc(u->recvbuf, iAllignLen);
 		if(u->recvbuf == NULL) {
 			string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot reallocate "+string(i32bytes)+"/"+string(u->rbdatalen)+"/"+string(iAllignLen)+
@@ -948,10 +948,10 @@ bool UserDoRecv(User * u) {
             u->recvbuflen = 0;
 			return false;
 		}
-		u->recvbuflen = iAllignLen-1;
+		u->recvbuflen = (uint32_t)(iAllignLen-1);
 	} else if(u->iRecvCalled > 50) {
         if(u->recvbuflen > u->rbdatalen+i32bytes) {
-            unsigned int iAllignLen = Allign512(u->rbdatalen+i32bytes);
+            size_t iAllignLen = Allign512(u->rbdatalen+i32bytes);
             if(u->recvbuflen > iAllignLen-1) {
                 u->recvbuf = (char *) realloc(u->recvbuf, iAllignLen);
         		if(u->recvbuf == NULL) {
@@ -961,7 +961,7 @@ bool UserDoRecv(User * u) {
                     u->recvbuflen = 0;
         	        return false;
         	    }
-        		u->recvbuflen = iAllignLen-1;
+        		u->recvbuflen = (uint32_t)(iAllignLen-1);
                 //UdpDebug->Broadcast( "[SYS] "+string(u->Nick, u->NickLen)+" recv buffer shrinked to "+string(u->recvbuflen+1)+" bytes" );
             }
         }
@@ -1001,7 +1001,7 @@ bool UserDoRecv(User * u) {
 }
 //---------------------------------------------------------------------------
 
-void UserSendChar(User * u, const char * cText, const int &iTextLen) {
+void UserSendChar(User * u, const char * cText, const size_t &iTextLen) {
 	if(u->iState >= User::STATE_CLOSING)
         return;
 
@@ -1010,7 +1010,7 @@ void UserSendChar(User * u, const char * cText, const int &iTextLen) {
             UserTry2Send(u);
         }
     } else {
-        unsigned int iLen = 0;
+        uint32_t iLen = 0;
         char *sData = ZlibUtility->CreateZPipe(cText, iTextLen, iLen);
             
         if(iLen == 0) {
@@ -1032,12 +1032,12 @@ void UserSendCharDelayed(User * u, const char * cText) {
         return;
     }
     
-    int iTxtLen = strlen(cText);
+    size_t iTxtLen = strlen(cText);
 
     if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false || iTxtLen < ZMINDATALEN) {
         UserPutInSendBuf(u, cText, iTxtLen);
     } else {
-        unsigned int iLen = 0;
+        uint32_t iLen = 0;
         char *sData = ZlibUtility->CreateZPipe(cText, iTxtLen, iLen);
             
         if(iLen == 0) {
@@ -1050,7 +1050,7 @@ void UserSendCharDelayed(User * u, const char * cText) {
 }
 //---------------------------------------------------------------------------
 
-void UserSendCharDelayed(User * u, const char * cText, const int &iTextLen) {
+void UserSendCharDelayed(User * u, const char * cText, const size_t &iTextLen) {
 	if(u->iState >= User::STATE_CLOSING) {
         return;
     }
@@ -1058,7 +1058,7 @@ void UserSendCharDelayed(User * u, const char * cText, const int &iTextLen) {
     if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false || iTextLen < ZMINDATALEN) {
         UserPutInSendBuf(u, cText, iTextLen);
     } else {
-        unsigned int iLen = 0;
+        uint32_t iLen = 0;
         char *sPipeData = ZlibUtility->CreateZPipe(cText, iTextLen, iLen);
         
         if(iLen == 0) {
@@ -1076,14 +1076,14 @@ void UserSendText(User * u, const string &sText) {
         return;
     }
     
-	int iTxtLen = sText.size();
+	size_t iTxtLen = sText.size();
 
     if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false || iTxtLen < ZMINDATALEN) {
         if(UserPutInSendBuf(u, sText.c_str(), iTxtLen)) {
             UserTry2Send(u);
         }
     } else {
-        unsigned int iLen = 0;
+        uint32_t iLen = 0;
         char *sData = ZlibUtility->CreateZPipe(sText.c_str(), iTxtLen, iLen);
             
         if(iLen == 0) {
@@ -1105,12 +1105,12 @@ void UserSendTextDelayed(User * u, const string &sText) {
         return;
     }
     
-    int iTxtLen = sText.size();  
+    size_t iTxtLen = sText.size();  
       
     if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false || iTxtLen < ZMINDATALEN) {
         UserPutInSendBuf(u, sText.c_str(), iTxtLen);
     } else {
-        unsigned int iLen = 0;
+        uint32_t iLen = 0;
         char *sData = ZlibUtility->CreateZPipe(sText.c_str(), iTxtLen, iLen);
             
         if(iLen == 0) {
@@ -1127,7 +1127,7 @@ void UserSendQueue(User * u, QzBuf * Queue, bool bChckActSr/* = true*/) {
     if(ui8SrCntr == 0) {
         if(bChckActSr == true) {
             if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false) {
-                unsigned int iSbLen = u->sbdatalen;
+                uint32_t iSbLen = u->sbdatalen;
                 UserPutInSendBuf(u, Queue->buffer, Queue->len);
                                                                   
                 if(u->cmdASearch != NULL) {
@@ -1162,7 +1162,7 @@ void UserSendQueue(User * u, QzBuf * Queue, bool bChckActSr/* = true*/) {
                         u->cmdASearch = NULL;
                     }
                 } else {
-                    unsigned int iSbLen = u->sbdatalen;
+                    uint32_t iSbLen = u->sbdatalen;
                     UserPutInSendBuf(u, Queue->buffer, Queue->len);
                                     
                     if(u->cmdASearch != NULL) {
@@ -1211,12 +1211,12 @@ void UserSendQueue(User * u, QzBuf * Queue, bool bChckActSr/* = true*/) {
 }
 //---------------------------------------------------------------------------
 
-bool UserPutInSendBuf(User * u, const char * Text, const int &iTxtLen) {
+bool UserPutInSendBuf(User * u, const char * Text, const size_t &iTxtLen) {
 	u->iSendCalled++;
 
 	// if no sendbuf, initialize one with double length of new data
 	if(u->sendbuf == NULL) {
-        int iAllignLen = Allign1024(iTxtLen);
+        size_t iAllignLen = Allign1024(iTxtLen);
     	u->sendbuf = (char *) malloc(iAllignLen);
         if(u->sendbuf == NULL) {              
 			string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot allocate "+string(iTxtLen)+"/"+string(iAllignLen)+
@@ -1225,18 +1225,18 @@ bool UserPutInSendBuf(User * u, const char * Text, const int &iTxtLen) {
             u->sbdatalen = 0;
         	return false;
         }
-        u->sendbuflen = iAllignLen-1;
+        u->sendbuflen = (uint32_t)(iAllignLen-1);
 	    u->sbplayhead = u->sendbuf;
     } else if(u->sendbuflen < u->sbdatalen+iTxtLen) {
         // resize buffer if needed
-        if((u->sbplayhead-u->sendbuf) > iTxtLen) {
-            int offset = u->sbplayhead-u->sendbuf;
+        if((size_t)(u->sbplayhead-u->sendbuf) > iTxtLen) {
+            uint32_t offset = (uint32_t)(u->sbplayhead-u->sendbuf);
             memmove(u->sendbuf, u->sbplayhead, (u->sbdatalen-offset));
             u->sbplayhead = u->sendbuf;
             u->sbdatalen = u->sbdatalen-offset;
         } else {
-            int iAllignLen = Allign1024(u->sbdatalen+iTxtLen);
-            int iMaxBufLen = (int)(((u->ui32BoolBits & User::BIT_BIG_SEND_BUFFER) == User::BIT_BIG_SEND_BUFFER) == true ?
+            size_t iAllignLen = Allign1024(u->sbdatalen+iTxtLen);
+			size_t iMaxBufLen = (size_t)(((u->ui32BoolBits & User::BIT_BIG_SEND_BUFFER) == User::BIT_BIG_SEND_BUFFER) == true ?
                 ((colUsers->myInfosTagLen > colUsers->myInfosLen ? colUsers->myInfosTagLen : colUsers->myInfosLen)*2) :
                 (colUsers->myInfosTagLen > colUsers->myInfosLen ? colUsers->myInfosTagLen : colUsers->myInfosLen));
             iMaxBufLen = iMaxBufLen < 131072 ? 131072 : iMaxBufLen;
@@ -1261,26 +1261,26 @@ bool UserPutInSendBuf(User * u, const char * Text, const int &iTxtLen) {
                 // PPK ... i don't want to corrupt last command, get rest of it and add to new buffer ;)
                 char *sTemp = (char *)memchr(u->sbplayhead, '|', u->sbdatalen-(u->sbplayhead-u->sendbuf));
                 if(sTemp != NULL) {
-                    unsigned int iOldSBDataLen = u->sbdatalen;
+                    uint32_t iOldSBDataLen = u->sbdatalen;
 
-                    int iRestCommandLen = (sTemp-u->sbplayhead)+1;
+                    uint32_t iRestCommandLen = (uint32_t)((sTemp-u->sbplayhead)+1);
                     if(u->sendbuf != u->sbplayhead) {
                         memmove(u->sendbuf, u->sbplayhead, iRestCommandLen);
                     }
                     u->sbdatalen = iRestCommandLen;
 
                     // If is not needed then don't lost all data, try to find some space with removing only few oldest commands
-                    if(iTxtLen < iMaxBufLen && iOldSBDataLen > (unsigned int)((sTemp+1)-u->sendbuf) && (iOldSBDataLen-((sTemp+1)-u->sendbuf)) > (unsigned int)iTxtLen) {
+					if(iTxtLen < iMaxBufLen && iOldSBDataLen > (uint32_t)((sTemp+1)-u->sendbuf) && (iOldSBDataLen-((sTemp+1)-u->sendbuf)) > (uint32_t)iTxtLen) {
 						char *sTemp1;
                         // try to remove min half of send bufer
-                        if(iOldSBDataLen > (u->sendbuflen/2) && (unsigned int)((sTemp+1+iTxtLen)-u->sendbuf) < (u->sendbuflen/2)) {
+                        if(iOldSBDataLen > (u->sendbuflen/2) && (uint32_t)((sTemp+1+iTxtLen)-u->sendbuf) < (u->sendbuflen/2)) {
                             sTemp1 = (char *)memchr(u->sendbuf+(u->sendbuflen/2), '|', iOldSBDataLen-(u->sendbuflen/2));
                         } else {
                             sTemp1 = (char *)memchr(sTemp+1+iTxtLen, '|', iOldSBDataLen-((sTemp+1+iTxtLen)-u->sendbuf));
                         }
 
                         if(sTemp1 != NULL) {
-                            iRestCommandLen = iOldSBDataLen-((sTemp1+1)-u->sendbuf);
+                            iRestCommandLen = (uint32_t)(iOldSBDataLen-((sTemp1+1)-u->sendbuf));
                             memmove(u->sendbuf+u->sbdatalen, sTemp1+1, iRestCommandLen);
                             u->sbdatalen += iRestCommandLen;
                         }
@@ -1291,7 +1291,7 @@ bool UserPutInSendBuf(User * u, const char * Text, const int &iTxtLen) {
                     u->sbdatalen = 1;
                 }
 
-                int iAllignTxtLen = Allign1024(iTxtLen+u->sbdatalen);
+                size_t iAllignTxtLen = Allign1024(iTxtLen+u->sbdatalen);
                 u->sendbuf = (char *) realloc(u->sendbuf, iAllignTxtLen);
                 if(u->sendbuf == NULL) {
 					string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot reallocate "+string(iTxtLen)+"/"+string(u->sbdatalen)+"/"+string(iAllignLen)+
@@ -1300,10 +1300,10 @@ bool UserPutInSendBuf(User * u, const char * Text, const int &iTxtLen) {
                     u->sbdatalen = 0;
                     return false;
                 }
-                u->sendbuflen = iAllignTxtLen-1;
+                u->sendbuflen = (uint32_t)(iAllignTxtLen-1);
                 u->sbplayhead = u->sendbuf;
         	} else {
-        		int iOffSet = u->sbplayhead-u->sendbuf;
+        		uint32_t iOffSet = (uint32_t)(u->sbplayhead-u->sendbuf);
                 u->sendbuf = (char *) realloc(u->sendbuf, iAllignLen);
         		if(u->sendbuf == NULL) {
 					string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot reallocate "+string(iTxtLen)+"/"+string(iAllignLen)+
@@ -1312,15 +1312,15 @@ bool UserPutInSendBuf(User * u, const char * Text, const int &iTxtLen) {
                     u->sbdatalen = 0;
         	        return false;
         	    }
-        		u->sendbuflen = iAllignLen-1;
+        		u->sendbuflen = (uint32_t)(iAllignLen-1);
                 u->sbplayhead = u->sendbuf+iOffSet;
             }
         }
     } else if(u->iSendCalled > 100) {
         if(u->sendbuflen > u->sbdatalen+iTxtLen) {
-        	unsigned int iAllignLen = Allign1024(u->sbdatalen+iTxtLen);
+        	size_t iAllignLen = Allign1024(u->sbdatalen+iTxtLen);
             if(u->sendbuflen > iAllignLen-1) {
-            	int offset = u->sbplayhead-u->sendbuf;
+            	uint32_t offset = (uint32_t)(u->sbplayhead-u->sendbuf);
                 u->sendbuf = (char *) realloc(u->sendbuf, iAllignLen);
         		if(u->sendbuf == NULL) {
 					string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot reallocate "+string(iTxtLen)+"/"+string(iAllignLen)+
@@ -1329,7 +1329,7 @@ bool UserPutInSendBuf(User * u, const char * Text, const int &iTxtLen) {
                     u->sbdatalen = 0;
         	        return false;
         	    }
-        		u->sendbuflen = iAllignLen-1;
+        		u->sendbuflen = (uint32_t)(iAllignLen-1);
                 u->sbplayhead = u->sendbuf+offset;
                 //UdpDebug->Broadcast( "[SYS] "+string(u->Nick, u->NickLen)+" send buffer shrinked to "+string(u->sendbuflen+1)+" bytes" );
             }
@@ -1339,7 +1339,7 @@ bool UserPutInSendBuf(User * u, const char * Text, const int &iTxtLen) {
 
     // append data to the buffer
     memcpy(u->sendbuf+u->sbdatalen, Text, iTxtLen);
-    u->sbdatalen += iTxtLen;
+    u->sbdatalen += (uint32_t)iTxtLen;
     u->sendbuf[u->sbdatalen] = '\0';
 
     return true;
@@ -1352,8 +1352,8 @@ bool UserTry2Send(User * u) {
     }
 
     // compute length of unsent data
-    int offset = u->sbplayhead - u->sendbuf;
-    int len = u->sbdatalen - offset;
+    int32_t offset = (int32_t)(u->sbplayhead - u->sendbuf);
+	int32_t len = u->sbdatalen - offset;
 
 	if(offset < 0 || len < 0) {
 		string sDbg = "[ERR] Negative send values!\nSendBuf: " + string((uint64_t)&u->sendbuf)+
@@ -1410,7 +1410,7 @@ void UserSetIP(User * u, char * newIP) {
 }
 //------------------------------------------------------------------------------
 
-void UserSetNick(User * u, char * newNick, const int &iNewNickLen) {
+void UserSetNick(User * u, char * newNick, const size_t &iNewNickLen) {
 	if(u->Nick != sDefaultNick && u->Nick != NULL) {
         free(u->Nick);
         u->Nick = NULL;
@@ -1425,12 +1425,12 @@ void UserSetNick(User * u, char * newNick, const int &iNewNickLen) {
     }   
     memcpy(u->Nick, newNick, iNewNickLen);
     u->Nick[iNewNickLen] = '\0';
-    u->NickLen = iNewNickLen;
+    u->NickLen = (uint32_t)iNewNickLen;
     u->ui32NickHash = HashNick(u->Nick, u->NickLen);
 }
 //------------------------------------------------------------------------------
 
-void UserSetMyInfoTag(User * u, char * newInfoTag, const int &MyInfoTagLen) {
+void UserSetMyInfoTag(User * u, char * newInfoTag, const size_t &MyInfoTagLen) {
 	if(u->MyInfoTag != NULL) {
         if(SettingManager->ui8FullMyINFOOption != 2) {
     	    colUsers->DelFromMyInfosTag(u);
@@ -1448,12 +1448,12 @@ void UserSetMyInfoTag(User * u, char * newInfoTag, const int &MyInfoTagLen) {
     }   
     memcpy(u->MyInfoTag, newInfoTag, MyInfoTagLen);
     u->MyInfoTag[MyInfoTagLen] = '\0';
-    u->iMyInfoTagLen = MyInfoTagLen;
+    u->iMyInfoTagLen = (uint32_t)MyInfoTagLen;
     UserParseMyInfo(u);
 }
 //------------------------------------------------------------------------------
 
-static void UserSetMyInfo(User * u, char * newInfo, const int &MyInfoLen) {
+static void UserSetMyInfo(User * u, char * newInfo, const size_t &MyInfoLen) {
 	if(u->MyInfo != NULL) {
         if(SettingManager->ui8FullMyINFOOption != 0) {
     	    colUsers->DelFromMyInfos(u);
@@ -1472,7 +1472,7 @@ static void UserSetMyInfo(User * u, char * newInfo, const int &MyInfoLen) {
     }   
     memcpy(u->MyInfo, newInfo, MyInfoLen);
     u->MyInfo[MyInfoLen] = '\0';
-    u->iMyInfoLen = MyInfoLen;
+    u->iMyInfoLen = (uint32_t)MyInfoLen;
 }
 //------------------------------------------------------------------------------
 
@@ -1482,7 +1482,7 @@ void UserSetVersion(User * u, char * newVer) {
         u->Version = NULL;
     }
         
-    int iLen = strlen(newVer);
+    size_t iLen = strlen(newVer);
     u->Version = (char *) malloc(iLen+1);
     if(u->Version == NULL) {
 		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetVersion cannot allocate "+string(iLen+1)+
@@ -1501,7 +1501,7 @@ void UserSetPasswd(User * u, char * newPass) {
         u->uLogInOut->Password = NULL;
     }
         
-    int iLen = strlen(newPass);
+    size_t iLen = strlen(newPass);
     u->uLogInOut->Password = (char *) malloc(iLen+1);
     if(u->uLogInOut->Password == NULL) {
 		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetPasswd cannot allocate "+string(iLen+1)+
@@ -1514,7 +1514,7 @@ void UserSetPasswd(User * u, char * newPass) {
 }
 //------------------------------------------------------------------------------
 
-void UserSetLastChat(User * u, char * newData, const int &iLen) {
+void UserSetLastChat(User * u, char * newData, const size_t &iLen) {
     if(u->sLastChat != NULL) {
         free(u->sLastChat);
         u->sLastChat = NULL;
@@ -1537,7 +1537,7 @@ void UserSetLastChat(User * u, char * newData, const int &iLen) {
 }
 //------------------------------------------------------------------------------
 
-void UserSetLastPM(User * u, char * newData, const int &iLen) {
+void UserSetLastPM(User * u, char * newData, const size_t &iLen) {
     if(u->sLastPM != NULL) {
         free(u->sLastPM);
         u->sLastPM = NULL;
@@ -1561,7 +1561,7 @@ void UserSetLastPM(User * u, char * newData, const int &iLen) {
 }
 //------------------------------------------------------------------------------
 
-void UserSetLastSearch(User * u, char * newData, const int &iLen) {
+void UserSetLastSearch(User * u, char * newData, const size_t &iLen) {
     if(u->sLastSearch != NULL) {
         free(u->sLastSearch);
         u->sLastSearch = NULL;
@@ -1582,7 +1582,7 @@ void UserSetLastSearch(User * u, char * newData, const int &iLen) {
 }
 //------------------------------------------------------------------------------
 
-void UserSetKickMsg(User * u, char * kickmsg, int iLen/* = 0*/) {
+void UserSetKickMsg(User * u, char * kickmsg, size_t iLen/* = 0*/) {
     if(iLen == 0) {
         iLen = strlen(kickmsg);
     }
@@ -2061,7 +2061,7 @@ void UserGenerateMyINFO(User *u) {
     }
 
     // Add share and end of myinfo
-    int iRet = sprintf(msg+iLen, "$%llu$|", (unsigned long long)u->sharedSize);
+    int iRet = sprintf(msg+iLen, "$%" PRIu64 "$|", u->sharedSize);
     iLen += iRet;
     if(CheckSprintf1(iRet, iLen, 1024, "UserGenerateMyINFO2") == false) {
         return;
@@ -2126,8 +2126,8 @@ bool UserProcessRules(User * u) {
         if(ProfileMan->IsAllowed(u, ProfileManager::NOSLOTCHECK) == false) {
             // TODO 2 -oPTA -ccheckers: $SR based slots fetching for no_tag users
         
-        	if((SettingManager->iShorts[SETSHORT_MIN_SLOTS_LIMIT] != 0 && u->Slots < SettingManager->iShorts[SETSHORT_MIN_SLOTS_LIMIT]) ||
-                (SettingManager->iShorts[SETSHORT_MAX_SLOTS_LIMIT] != 0 && u->Slots > SettingManager->iShorts[SETSHORT_MAX_SLOTS_LIMIT])) {
+			if((SettingManager->iShorts[SETSHORT_MIN_SLOTS_LIMIT] != 0 && u->Slots < (uint32_t)SettingManager->iShorts[SETSHORT_MIN_SLOTS_LIMIT]) ||
+				(SettingManager->iShorts[SETSHORT_MAX_SLOTS_LIMIT] != 0 && u->Slots > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_SLOTS_LIMIT])) {
                 UserSendChar(u, SettingManager->sPreTexts[SetMan::SETPRETXT_SLOTS_LIMIT_MSG],
                     SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_SLOTS_LIMIT_MSG]);
                 //UdpDebug->Broadcast("[SYS] User with bad slots " + u->Nick + " (" + u->IP + ") disconnected.");
@@ -2138,8 +2138,8 @@ bool UserProcessRules(User * u) {
         // slots/hub ration check
         if(ProfileMan->IsAllowed(u, ProfileManager::NOSLOTHUBRATIO) == false && 
             SettingManager->iShorts[SETSHORT_HUB_SLOT_RATIO_HUBS] != 0 && SettingManager->iShorts[SETSHORT_HUB_SLOT_RATIO_SLOTS] != 0) {
-            int slots = u->Slots;
-            int hubs = u->Hubs > 0 ? u->Hubs : 1;
+            uint32_t slots = u->Slots;
+            uint32_t hubs = u->Hubs > 0 ? u->Hubs : 1;
         	if(((double)slots / hubs) < ((double)SettingManager->iShorts[SETSHORT_HUB_SLOT_RATIO_SLOTS] / SettingManager->iShorts[SETSHORT_HUB_SLOT_RATIO_HUBS])) {
         	    UserSendChar(u, SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SLOT_RATIO_MSG],
                     SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SLOT_RATIO_MSG]);
@@ -2150,7 +2150,7 @@ bool UserProcessRules(User * u) {
     
         // hub checker
         if(ProfileMan->IsAllowed(u, ProfileManager::NOMAXHUBCHECK) == false && SettingManager->iShorts[SETSHORT_MAX_HUBS_LIMIT] != 0) {
-            if(u->Hubs > SettingManager->iShorts[SETSHORT_MAX_HUBS_LIMIT]) {
+            if(u->Hubs > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_HUBS_LIMIT]) {
                 UserSendChar(u, SettingManager->sPreTexts[SetMan::SETPRETXT_MAX_HUBS_LIMIT_MSG],
                     SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MAX_HUBS_LIMIT_MSG]);
                 //UdpDebug->Broadcast("[SYS] User with bad hubs count " + u->Nick + " (" + u->IP + ") disconnected.");
@@ -2164,7 +2164,7 @@ bool UserProcessRules(User * u) {
 
 //------------------------------------------------------------------------------
 
-void UserAddPrcsdCmd(User * u, unsigned char cType, char *sCommand, int iCommandLen, User * to, bool bIsPm/* = false*/) {
+void UserAddPrcsdCmd(User * u, unsigned char cType, char *sCommand, const size_t &iCommandLen, User * to, bool bIsPm/* = false*/) {
     if(cType == PrcsdUsrCmd::CTM_MCTM_RCTM_SR_TO) {
         PrcsdToUsrCmd *next = u->cmdToUserStrt;
         while(next != NULL) {
@@ -2180,7 +2180,7 @@ void UserAddPrcsdCmd(User * u, unsigned char cType, char *sCommand, int iCommand
                 }
                 memcpy(cur->sCommand+cur->iLen, sCommand, iCommandLen);
                 cur->sCommand[cur->iLen+iCommandLen] = '\0';
-                cur->iLen += iCommandLen;
+                cur->iLen += (uint32_t)iCommandLen;
                 cur->iPmCount += bIsPm == true ? 1 : 0;
                 return;
             }
@@ -2204,7 +2204,7 @@ void UserAddPrcsdCmd(User * u, unsigned char cType, char *sCommand, int iCommand
         memcpy(newcmd->sCommand, sCommand, iCommandLen);
         newcmd->sCommand[iCommandLen] = '\0';
 
-        newcmd->iLen = iCommandLen;
+        newcmd->iLen = (uint32_t)iCommandLen;
         newcmd->iPmCount = bIsPm == true ? 1 : 0;
         newcmd->iLoops = 0;
         newcmd->To = to;
@@ -2251,7 +2251,7 @@ void UserAddPrcsdCmd(User * u, unsigned char cType, char *sCommand, int iCommand
     memcpy(newcmd->sCommand, sCommand, iCommandLen);
     newcmd->sCommand[iCommandLen] = '\0';
 
-    newcmd->iLen = iCommandLen;
+    newcmd->iLen = (uint32_t)iCommandLen;
     newcmd->cType = cType;
     newcmd->next = NULL;
 

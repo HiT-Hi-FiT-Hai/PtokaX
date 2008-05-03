@@ -369,7 +369,7 @@ bool ScriptMan::StartScript(Script * curScript) {
 	} else {
 		// previous script
 		if(ui8dx != 0) {
-			for(int i = (int)ui8dx-1; i > -1; i--) {
+			for(int16_t i = (int16_t)(ui8dx-1); i > -1; i--) {
 				if(ScriptTable[i]->bEnabled == true) {
 					ScriptTable[i]->next = curScript;
 					curScript->prev = ScriptTable[i];
@@ -388,7 +388,7 @@ bool ScriptMan::StartScript(Script * curScript) {
 
 		// next script
 		if(ui8dx != ui8ScriptCount-1) {
-			for(int i = (int)ui8dx+1; i < (int)ui8ScriptCount; i++) {
+			for(int16_t i = (int16_t)(ui8dx+1); i < (int16_t)ui8ScriptCount; i++) {
 				if(ScriptTable[i]->bEnabled == true) {
 					ScriptTable[i]->prev = curScript;
 					curScript->next = ScriptTable[i];
@@ -629,12 +629,12 @@ void ScriptMan::OnExit(bool bForce/* = false*/) {
 }
 //------------------------------------------------------------------------------
 
-bool ScriptMan::Arrival(User * u, char * sData, const int &iLen, const unsigned char &iType) {
+bool ScriptMan::Arrival(User * u, char * sData, const size_t &iLen, const unsigned char &iType) {
 	if(SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == false) {
 		return false;
 	}
 
-	static const unsigned long iLuaArrivalBits[] = {
+	static const uint32_t iLuaArrivalBits[] = {
         0x1, 
         0x2, 
         0x4, 
@@ -754,7 +754,7 @@ void ScriptMan::UserConnected(User * u) {
     	Script *cur = next;
         next = cur->next;
 
-		static const unsigned long iConnectedBits[] = { Script::USERCONNECTED, Script::REGCONNECTED, Script::OPCONNECTED };
+		static const uint32_t iConnectedBits[] = { Script::USERCONNECTED, Script::REGCONNECTED, Script::OPCONNECTED };
 
 		if(((cur->ui16Functions & iConnectedBits[ui8Type]) == iConnectedBits[ui8Type]) == true && (bMoved == false || cur->bProcessed == false)) {
             cur->bProcessed = true;
@@ -845,7 +845,7 @@ void ScriptMan::UserDisconnected(User * u) {
     	Script *cur = next;
         next = cur->next;
 
-		static const unsigned long iDisconnectedBits[] = { Script::USERDISCONNECTED, Script::REGDISCONNECTED, Script::OPDISCONNECTED };
+		static const uint32_t iDisconnectedBits[] = { Script::USERDISCONNECTED, Script::REGDISCONNECTED, Script::OPDISCONNECTED };
 
         if(((cur->ui16Functions & iDisconnectedBits[ui8Type]) == iDisconnectedBits[ui8Type]) == true && (bMoved == false || cur->bProcessed == false)) {
             cur->bProcessed = true;

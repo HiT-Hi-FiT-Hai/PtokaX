@@ -46,7 +46,7 @@ public:
         EVENT_SHUTDOWN, 
         EVENT_REGSOCK_MSG, 
         EVENT_SRVTHREAD_MSG, 
-        EVENT_UDP_SR, 
+        EVENT_UDP_SR
 	};
 
     event *NormalS, *ThreadS;

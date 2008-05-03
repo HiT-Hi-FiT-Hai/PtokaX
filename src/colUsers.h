@@ -23,10 +23,10 @@
 //---------------------------------------------------------------------------
 struct User;
 //---------------------------------------------------------------------------
-static const int NICKLISTSIZE = 1024*64;
-static const int OPLISTSIZE = 1024*32;
-static const int ZLISTSIZE = 1024*16;
-static const int ZMYINFOLISTSIZE = 1024*128;
+static const uint32_t NICKLISTSIZE = 1024*64;
+static const uint32_t OPLISTSIZE = 1024*32;
+static const uint32_t ZLISTSIZE = 1024*16;
+static const uint32_t ZMYINFOLISTSIZE = 1024*128;
 //---------------------------------------------------------------------------
 
 class classUsers {
@@ -40,7 +40,7 @@ private:
 
     uint64_t iChatMsgsTick, iChatLockFromTick;
 
-    int iChatMsgs;
+    uint16_t iChatMsgs;
 
     RecTime * RecTimeList;
 
@@ -50,11 +50,11 @@ private:
 
 	char msg[1024];
 public:
-    unsigned int myInfosLen, myInfosSize, iZMyInfosLen, iZMyInfosSize;
-    unsigned int myInfosTagLen, myInfosTagSize, iZMyInfosTagLen, iZMyInfosTagSize;
-    unsigned int nickListLen, nickListSize, iZNickListLen, iZNickListSize;
-    unsigned int opListLen, opListSize, iZOpListLen, iZOpListSize;
-    unsigned int userIPListSize, userIPListLen, iZUserIPListSize, iZUserIPListLen;
+    uint32_t myInfosLen, myInfosSize, iZMyInfosLen, iZMyInfosSize;
+    uint32_t myInfosTagLen, myInfosTagSize, iZMyInfosTagLen, iZMyInfosTagSize;
+    uint32_t nickListLen, nickListSize, iZNickListLen, iZNickListSize;
+    uint32_t opListLen, opListSize, iZOpListLen, iZOpListSize;
+    uint32_t userIPListSize, userIPListLen, iZUserIPListSize, iZUserIPListLen;
 
     char *nickList, *sZNickList, *opList, *sZOpList, *userIPList, *sZUserIPList; 
     char *myInfos, *sZMyInfos, *myInfosTag, *sZMyInfosTag;
@@ -73,7 +73,7 @@ public:
     void Add2OpList(char * Nick, const size_t &iNickLen);
     void DelFromNickList(char * Nick, const bool &isOp);
     void DelFromOpList(char * Nick);
-    void SendChat2All(User * cur, char * data, const int &iChatLen);
+    void SendChat2All(User * cur, char * data, const size_t &iChatLen);
 	void Add2MyInfos(User * u);
 	void DelFromMyInfos(User * u);
     void Add2MyInfosTag(User * u);

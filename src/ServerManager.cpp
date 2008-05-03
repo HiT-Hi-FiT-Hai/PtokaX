@@ -58,12 +58,12 @@ uint64_t ui64ActualTick = 0, ui64TotalShare = 0;
 uint64_t ui64BytesRead = 0, ui64BytesSent = 0, ui64BytesSentSaved = 0;
 uint64_t iLastBytesRead = 0, iLastBytesSent = 0;
 uint32_t ui32Joins = 0, ui32Parts = 0, ui32Logged = 0, ui32Peak = 0;
-unsigned long UploadSpeed[60], DownloadSpeed[60];
-unsigned long iActualBytesRead = 0, iActualBytesSent = 0;
-unsigned long iAverageBytesRead = 0, iAverageBytesSent = 0;
+uint32_t UploadSpeed[60], DownloadSpeed[60];
+uint32_t iActualBytesRead = 0, iActualBytesSent = 0;
+uint32_t iAverageBytesRead = 0, iAverageBytesSent = 0;
 ServerThread *ServersS = NULL;
 time_t starttime = 0;
-unsigned int iMins = 0, iHours = 0, iDays = 0;
+uint64_t iMins = 0, iHours = 0, iDays = 0;
 bool bServerRunning = false, bServerTerminated = false, bIsRestart = false, bIsClose = false, bDaemon = false;
 char sHubIP[16];
 uint8_t ui8SrCntr = 0, ui8MinTick = 0;
@@ -85,8 +85,8 @@ static void SecTimerHandler(int sig) {
 
     ui64ActualTick++;
 
-	iActualBytesRead = (unsigned long)(ui64BytesRead - iLastBytesRead);
-	iActualBytesSent = (unsigned long)(ui64BytesSent - iLastBytesSent);
+	iActualBytesRead = (uint32_t)(ui64BytesRead - iLastBytesRead);
+	iActualBytesSent = (uint32_t)(ui64BytesSent - iLastBytesSent);
 	iLastBytesRead = ui64BytesRead;
 	iLastBytesSent = ui64BytesSent;
 
@@ -178,7 +178,7 @@ void ServerInitialize() {
 
     iLastBytesRead = iLastBytesSent = 0;
 
-	for(unsigned int i = 0 ; i < 60; i++) {
+	for(uint8_t i = 0 ; i < 60; i++) {
 		CpuUsage[i] = 0;
 		UploadSpeed[i] = 0;
 		DownloadSpeed[i] = 0;
@@ -340,7 +340,7 @@ bool ServerStart() {
 				Memo("*** "+string(SettingManager->sTexts[SETTXT_HUB_ADDRESS], (size_t)LanguageManager->ui16TextsLens[SETTXT_HUB_ADDRESS])+" "+
 					string(LanguageManager->sTexts[LAN_RESOLVED_SUCCESSFULLY], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVED_SUCCESSFULLY])+".");
 				sockaddr_in target;
-				target.sin_addr.s_addr = *(unsigned long*)host->h_addr;
+				target.sin_addr.s_addr = *(unsigned long *)host->h_addr;
                 strcpy(sHubIP, inet_ntoa(target.sin_addr));
 				Memo("*** "+string(sHubIP));
             }
@@ -437,7 +437,7 @@ bool ServerStart() {
 
     ResNickManager->AddReservedNick(SettingManager->sTexts[SETTXT_ADMIN_NICK]);
 
-    if((unsigned short)atoi(SettingManager->sTexts[SETTXT_UDP_PORT]) != 0) {
+    if((uint16_t)atoi(SettingManager->sTexts[SETTXT_UDP_PORT]) != 0) {
         UDPThread = new UDPRecvThread();
         if(UDPThread == NULL) {
     		string sDbgstr = "[BUF] Cannot allocate UDPThread!";
@@ -509,8 +509,8 @@ void ServerStop() {
     }
 
     char msg[1024];
-    int iret = sprintf(msg, "Serving stopped (UL: %llu [%llu], DL: %llu)", (unsigned long long)ui64BytesSent, 
-        (unsigned long long)ui64BytesSentSaved, (unsigned long long)ui64BytesRead);
+    int iret = sprintf(msg, "Serving stopped (UL: %" PRIu64 " [%" PRIu64 "], DL: %" PRIu64 ")", ui64BytesSent, 
+        ui64BytesSentSaved, ui64BytesRead);
     if(CheckSprintf(iret, 1024, "ServerMan::StopServer") == true) {
         AppendLog(msg);
     }
@@ -786,7 +786,7 @@ void ServerResumeAccepts() {
 }
 //---------------------------------------------------------------------------
 
-void ServerSuspendAccepts(const unsigned int &iTime) {
+void ServerSuspendAccepts(const uint32_t &iTime) {
 	if(bServerRunning == false) {
         return;
     }
@@ -811,7 +811,6 @@ void ServerUpdateAutoRegState() {
     if(bServerRunning == false) {
         return;
     }
-
 
     if(SettingManager->bBools[SETBOOL_AUTO_REG] == true) {
         struct itimerspec regtmrspec;

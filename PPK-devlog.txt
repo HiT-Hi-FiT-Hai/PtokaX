@@ -19,10 +19,8 @@ Added: IP-to-Country support.
 Added: sCountryCode to user table in lua.
 Added: IP2Country to lua with functions to get country code and country name.
 Added: Country code to string returned by !getinfo command.
-Added: Possibility to run as windows service.
 Added: ScriptMan.Refresh() to lua interface.
 Added: Option to log script errors.
-Added: Possibility to run on Linux (maybe posix).
 Added: -c command line parameter to service/nix version to set config directory.
 Added: -d command line parameter to nix version to run as daemon.
 Added: When PtokaX is terminated on nix by signal then it is saved to log.
@@ -33,6 +31,7 @@ Fixed: Never ending loop caused by multiple script processing when using MoveDow
 Fixed: Lua was able to change language to not existant one (thx CrazyGuy for report).
 Fixed: Crash on exit when default hub-security nick was used (thx ']['yphoon for report).
 Fixed: Crash on loading xml file with comments (thx Rag3Rac3r for report).
+Fixed: Some ScriptMan functions not working in OnStartup (thx CrazyGuy for report).
 Changed: Core.SuspendAccepts can be now used without value to suspend listening thread(s).
 Changed: When user send incorrect ip in CTM/Search is now disconnected.
 Changed: Chat commands to ban ip now cause disconnect of all users with that ip address.
@@ -44,6 +43,9 @@ Rewriten: Nick hashtables (for userlist, reglist, nickbanlist) for better perfor
 Rewriten: Last few borland components in core replaced with winapi calls.
 Rewriten: Receiving of data to UDP port, moved from main thread to new thread.
 Removed: Reading of old ini and dat config files.
+New version: Version for windows without gui running from console or as windows service.
+New version: Version for posix compatible os (tested on Linux x86, Linux x86-64, freeBSD x86).
+New version: x86-64 version for windows without gui running from console or as windows service.
 
 
 ----------------------------------------0.4.0.0 24.Feb.2008------------------------------------

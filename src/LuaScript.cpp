@@ -79,7 +79,7 @@ ScriptBot::ScriptBot(char * Nick, const size_t &iNickLen, char * Description, co
 
     bIsOP = isOP;
 
-    int iWantLen = 24+iNickLen+iDscrLen+iEmlLen;
+    size_t iWantLen = 24+iNickLen+iDscrLen+iEmlLen;
 
     sMyINFO = (char *) malloc(iWantLen);
     if(sMyINFO == NULL) {
@@ -358,7 +358,7 @@ void ScriptOnExit(Script * cur) {
 }
 //------------------------------------------------------------------------------
 
-static bool ScriptOnError(Script * cur, char * ErrorMsg, const int &iLen) {
+static bool ScriptOnError(Script * cur, char * ErrorMsg, const size_t &iLen) {
 	lua_getglobal(cur->LUA, "OnError");
     int i = lua_gettop(cur->LUA);
     if(lua_isnil(cur->LUA, i)) {
@@ -485,7 +485,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iShareSize");
-	lua_pushnumber(L, u->sharedSize);
+	lua_pushnumber(L, (double)u->sharedSize);
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iHubs");
@@ -521,7 +521,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iLoginTime");
-	lua_pushnumber(L, u->LoginTime);
+	lua_pushnumber(L, (double)u->LoginTime);
 	lua_rawset(L, iTable);
 }
 //------------------------------------------------------------------------------

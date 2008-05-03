@@ -30,36 +30,36 @@ void Cout(const string & msg);
 
 char * Lock2Key(char * cLock);
 
-const char * ErrnoStr(const int &iError);
+const char * ErrnoStr(const uint32_t &iError);
 
 char * formatBytes(int64_t iBytes);
 char * formatBytesPerSecond(int64_t iBytes);
-char * formatTime(long rest);
-char * formatSecTime(long rest);
+char * formatTime(uint64_t rest);
+char * formatSecTime(uint64_t rest);
 
 char * stristr(const char *str1, const char *str2);
 
-bool isIP(char * IP, const uint32_t ui32Len);
-bool GetIpParts(char * sIP, const uint32_t ui32Len, unsigned int &a, unsigned int &b, unsigned int &c, unsigned int &d);
+bool isIP(char * IP, const size_t ui32Len);
+bool GetIpParts(char * sIP, const size_t ui32Len, uint32_t &a, uint32_t &b, uint32_t &c, uint32_t &d);
 
-uint32_t HashNick(const char * sNick, const unsigned int &sNickLen);
+uint32_t HashNick(const char * sNick, const size_t &sNickLen);
 
-bool HashIP(char * sIP, const uint32_t ui32Len, uint32_t &ui32Hash);
+bool HashIP(char * sIP, const size_t ui32Len, uint32_t &ui32Hash);
 
-char * GenerateBanMessage(BanItem * Ban, int &iMsgLen, const time_t &acc_time);
-char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int &iMsgLen, const time_t &acc_time);
+char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_time);
+char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const time_t &acc_time);
 
-bool GenerateTempBanTime(const char &cMultiplyer, const int &iTime, time_t &acc_time, time_t &ban_time);
+bool GenerateTempBanTime(const char &cMultiplyer, const uint32_t &iTime, time_t &acc_time, time_t &ban_time);
 
 bool HaveOnlyNumbers(char *sData, const uint16_t &ui16Len);
 int GetWlcmMsg(char * sWlcmMsg);
 
-inline int Allign256(int n) { return ((n+1) & 0xFFFFFF00) + 0x100; }
-inline int Allign512(int n) { return ((n+1) & 0xFFFFFE00) + 0x200; }
-inline int Allign1024(int n) { return ((n+1) & 0xFFFFFC00) + 0x400; }
+inline size_t Allign256(size_t n) { return ((n+1) & 0xFFFFFF00) + 0x100; }
+inline size_t Allign512(size_t n) { return ((n+1) & 0xFFFFFE00) + 0x200; }
+inline size_t Allign1024(size_t n) { return ((n+1) & 0xFFFFFC00) + 0x400; }
 
-bool CheckSprintf(int iRetVal, int iMax, const char * sMsg); // CheckSprintf(imsgLen, 64, "UdpDebug::New");
-bool CheckSprintf1(int iRetVal, int iLenVal, int iMax, const char * sMsg); // CheckSprintf1(iret, imsgLen, 64, "UdpDebug::New");
+bool CheckSprintf(int iRetVal, const size_t &iMax, const char * sMsg); // CheckSprintf(imsgLen, 64, "UdpDebug::New");
+bool CheckSprintf1(int iRetVal, int iLenVal, const size_t &iMax, const char * sMsg); // CheckSprintf1(iret, imsgLen, 64, "UdpDebug::New");
 
 void AppendLog(const string & sData, const bool &bScript = false);
 void AppendSpecialLog(const string & sData);

@@ -81,7 +81,7 @@ bool SetBoolDef[] = {
     false, //LOG_SCRIPT_ERRORS
 };
 
-short SetShortDef[] = {
+int16_t SetShortDef[] = {
     250, //MAX_USERS
     0, //MIN_SHARE_LIMIT
     0, //MIN_SHARE_UNITS

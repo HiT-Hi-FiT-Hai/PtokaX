@@ -26,8 +26,8 @@
 //---------------------------------------------------------------------------
 #include <zlib.h>
 //---------------------------------------------------------------------------
-static const int ZBUFFERLEN = 1024*256;
-static const unsigned int ZMINLEN = 100;
+static const uint32_t ZBUFFERLEN = 1024*256;
+static const uint32_t ZMINLEN = 100;
 //---------------------------------------------------------------------------
 clsZlibUtility *ZlibUtility = NULL;
 //---------------------------------------------------------------------------
@@ -54,7 +54,7 @@ clsZlibUtility::~clsZlibUtility() {
 }
 //---------------------------------------------------------------------------
 
-char * clsZlibUtility::CreateZPipe(const char *sInData, unsigned int sInDataSize, unsigned int &iOutDataLen) {
+char * clsZlibUtility::CreateZPipe(const char *sInData, const size_t &sInDataSize, uint32_t &iOutDataLen) {
     // prepare Zbuffer
     if(uiZbufferSize < sInDataSize + 128) {
         uiZbufferSize += ZBUFFERLEN;
@@ -85,10 +85,10 @@ char * clsZlibUtility::CreateZPipe(const char *sInData, unsigned int sInDataSize
     deflateInit(&stream, Z_BEST_COMPRESSION);
 
     stream.next_in  = (Bytef*)sInData;
-    stream.avail_in = sInDataSize;
+    stream.avail_in = (uint32_t)sInDataSize;
 
     stream.next_out = (Bytef*)sZbuffer+5;
-    stream.avail_out = uiZbufferSize-5;
+    stream.avail_out = (uint32_t)(uiZbufferSize-5);
 
     // compress
     if(deflate(&stream, Z_FINISH) != Z_STREAM_END) {
@@ -112,7 +112,7 @@ char * clsZlibUtility::CreateZPipe(const char *sInData, unsigned int sInDataSize
 }
 //---------------------------------------------------------------------------
 
-char * clsZlibUtility::CreateZPipe(char *sInData, unsigned int sInDataSize, char *sOutData, unsigned int &iOutDataLen, unsigned int &iOutDataSize) {
+char * clsZlibUtility::CreateZPipe(char *sInData, const size_t &sInDataSize, char *sOutData, size_t &iOutDataLen, size_t &iOutDataSize) {
     if(sInDataSize < ZMINLEN)
         return sOutData;
 
@@ -146,10 +146,10 @@ char * clsZlibUtility::CreateZPipe(char *sInData, unsigned int sInDataSize, char
     deflateInit(&stream, Z_BEST_COMPRESSION);
 
     stream.next_in  = (Bytef*)sInData;
-    stream.avail_in = sInDataSize;
+    stream.avail_in = (uint32_t)sInDataSize;
 
     stream.next_out = (Bytef*)sZbuffer+5;
-    stream.avail_out = uiZbufferSize-5;
+    stream.avail_out = (uint32_t)(uiZbufferSize-5);
 
     // compress
     if(deflate(&stream, Z_FINISH) != Z_STREAM_END) {
@@ -170,7 +170,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, unsigned int sInDataSize, char
     
     // prepare out buffer
     if(iOutDataSize < iOutDataLen) {
-        iOutDataSize = Allign1024(iOutDataLen)-1;
+        iOutDataSize = (uint32_t)(Allign1024(iOutDataLen)-1);
         sOutData = (char *) realloc(sOutData, iOutDataSize+1);
         if(sOutData == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string(iOutDataSize+1)+
@@ -186,7 +186,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, unsigned int sInDataSize, char
 }
 //---------------------------------------------------------------------------
 
-char * clsZlibUtility::CreateZPipe(char *sInData, unsigned int sInDataSize, char *sOutData, unsigned int &iOutDataLen, unsigned int &iOutDataSize, unsigned int iOutDataIncrease) {
+char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &sInDataSize, char *sOutData, unsigned int &iOutDataLen, unsigned int &iOutDataSize, unsigned int iOutDataIncrease) {
     if(sInDataSize < ZMINLEN)
         return sOutData;
 
@@ -223,7 +223,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, unsigned int sInDataSize, char
     stream.avail_in = sInDataSize;
 
     stream.next_out = (Bytef*)sZbuffer+5;
-    stream.avail_out = uiZbufferSize-5;
+    stream.avail_out = (uint32_t)(uiZbufferSize-5);
 
     // compress
     if(deflate(&stream, Z_FINISH) != Z_STREAM_END) {

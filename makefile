@@ -22,7 +22,7 @@ CXXFLAGS = -g -Wall
 #*******************************************************************************
 # Include
 #*******************************************************************************
-INCLUDE = -Itinyxml/src -I/usr/include -I/usr/local/include -I/usr/include/lua5.1 -I/usr/pkg/include -I/usr/include/lua
+INCLUDE = -Itinyxml/src -I/usr/include -I/usr/local/include -I/usr/include/lua5.1 -I/usr/pkg/include -I/usr/include/lua -I/usr/include/lua/5.1
 
 #*******************************************************************************
 # Binary to create

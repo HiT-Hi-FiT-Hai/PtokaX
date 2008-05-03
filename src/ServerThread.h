@@ -26,9 +26,9 @@ class ServerThread {
 private:
     struct AntiConFlood {
         uint64_t Time;
-        unsigned long addr;
+        uint32_t addr;
         AntiConFlood *prev, *next;
-        short hits;
+        int16_t hits;
     };
 
     int server;
@@ -45,7 +45,7 @@ private:
 public:
     ServerThread *prev, *next;
 
-    unsigned short usPort;
+    uint16_t usPort;
 
     bool bActive, bSuspended;
 
@@ -56,11 +56,11 @@ public:
 	void Run();
 	void Close();
 	void WaitFor();
-	bool Listen(unsigned short port, bool bSilent = false);
+	bool Listen(const uint16_t &port, bool bSilent = false);
 	bool isFlooder(const int &s, const sockaddr_in &addr, const socklen_t &sin_len);
 	void RemoveConFlood(AntiConFlood * cur);
 	void ResumeSck();
-	void SuspendSck(const unsigned int &iTime);
+	void SuspendSck(const uint32_t &iTime);
 };
 //---------------------------------------------------------------------------
 

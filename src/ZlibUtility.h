@@ -24,15 +24,15 @@
 
 class clsZlibUtility {
 private:
-    unsigned int uiZbufferSize;
+    size_t uiZbufferSize;
     char *sZbuffer;
 public:
 	clsZlibUtility();
 	~clsZlibUtility();
 	
-    char * CreateZPipe(const char *sInData, unsigned int sInDataSize, unsigned int &iOutDataLen);
-    char * CreateZPipe(char *sInData, unsigned int sInDataSize, char *sOutData, unsigned int &iOutDataLen, unsigned int &iOutDataSize);
-    char * CreateZPipe(char *sInData, unsigned int sInDataSize, char *sOutData, unsigned int &iOutDataLen, unsigned int &iOutDataSize, unsigned int iOutDataIncrease);
+    char * CreateZPipe(const char *sInData, const size_t &sInDataSize, uint32_t &iOutDataLen);
+    char * CreateZPipe(char *sInData, const size_t &sInDataSize, char *sOutData, size_t &iOutDataLen, size_t &iOutDataSize);
+    char * CreateZPipe(char *sInData, const unsigned int &sInDataSize, char *sOutData, unsigned int &iOutDataLen, unsigned int &iOutDataSize, unsigned int iOutDataIncrease);
 };
 //---------------------------------------------------------------------------
 extern clsZlibUtility *ZlibUtility;

@@ -153,7 +153,7 @@ void SetMan::LoadMOTD() {
 	FILE *fr = fopen((PATH + "/cfg/Motd.txt").c_str(), "rb");
     if(fr != NULL) {
         fseek(fr, 0, SEEK_END);
-        long ulflen = ftell(fr);
+        uint32_t ulflen = ftell(fr);
         if(ulflen != 0) {
             fseek(fr, 0, SEEK_SET);
             ui16MOTDLen = (uint16_t)(ulflen < 65024 ? ulflen : 65024);
@@ -265,7 +265,7 @@ void SetMan::Load() {
                     continue;
                 }
 
-                int iValue = atoi(SettingValue->ToElement()->GetText());
+                int32_t iValue = atoi(SettingValue->ToElement()->GetText());
                 // Check if is valid value
                 if(iValue < 0 || iValue > 32767) {
                     continue;
@@ -273,7 +273,7 @@ void SetMan::Load() {
 
                 for(size_t i = 0; i < SETSHORT_IDS_END; i++) {
                     if(strcmp(SetShortXmlStr[i], sName) == 0) {
-                        SetShort(i, (short)iValue);
+                        SetShort(i, (int16_t)iValue);
                     }
                 }
             }
@@ -381,10 +381,10 @@ bool SetMan::GetBool(size_t iBoolId) {
     return bValue;
 }
 //---------------------------------------------------------------------------
-unsigned short SetMan::GetFirstPort() {
+uint16_t SetMan::GetFirstPort() {
     pthread_mutex_lock(&mtxSetting);
 
-    unsigned short iValue = iPortNumbers[0];
+    uint16_t iValue = iPortNumbers[0];
 
     pthread_mutex_unlock(&mtxSetting);
     
@@ -392,10 +392,10 @@ unsigned short SetMan::GetFirstPort() {
 }
 //---------------------------------------------------------------------------
 
-short SetMan::GetShort(size_t iShortId) {
+int16_t SetMan::GetShort(size_t iShortId) {
     pthread_mutex_lock(&mtxSetting);
 
-    short iValue = iShorts[iShortId];
+    int16_t iValue = iShorts[iShortId];
 
     pthread_mutex_unlock(&mtxSetting);
     
@@ -534,7 +534,7 @@ void SetMan::SetMOTD(char * sTxt, const size_t &iLen) {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::SetShort(size_t iShortId, const short &iValue) {
+void SetMan::SetShort(size_t iShortId, const int16_t &iValue) {
     if(iValue < 0 || iShorts[iShortId] == iValue) {
         return;
     }
@@ -1552,9 +1552,9 @@ void SetMan::UpdateMaxHubsLimitMessage() {
 
     if(sMatch != NULL) {
         if(sMatch > sTexts[SETTXT_MAX_HUBS_LIMIT_MSG]) {
-            int iLen = sMatch-sTexts[SETTXT_MAX_HUBS_LIMIT_MSG];
+            size_t iLen = sMatch-sTexts[SETTXT_MAX_HUBS_LIMIT_MSG];
             memcpy(msg+imsgLen, sTexts[SETTXT_MAX_HUBS_LIMIT_MSG], iLen);
-            imsgLen += iLen;
+            imsgLen += (int)iLen;
         }
 
         int iret = sprintf(msg+imsgLen, "%d", iShorts[SETSHORT_MAX_HUBS_LIMIT]);
@@ -1564,9 +1564,9 @@ void SetMan::UpdateMaxHubsLimitMessage() {
         }
 
         if(sMatch+7 < sTexts[SETTXT_MAX_HUBS_LIMIT_MSG]+ui16TextsLens[SETTXT_MAX_HUBS_LIMIT_MSG]) {
-            int iLen = (sTexts[SETTXT_MAX_HUBS_LIMIT_MSG]+ui16TextsLens[SETTXT_MAX_HUBS_LIMIT_MSG])-(sMatch+7);
+            size_t iLen = (sTexts[SETTXT_MAX_HUBS_LIMIT_MSG]+ui16TextsLens[SETTXT_MAX_HUBS_LIMIT_MSG])-(sMatch+7);
             memcpy(msg+imsgLen, sMatch+7, iLen);
-            imsgLen += iLen;
+            imsgLen += (int)iLen;
         }
     } else {
         memcpy(msg, sTexts[SETTXT_MAX_HUBS_LIMIT_MSG], ui16TextsLens[SETTXT_MAX_HUBS_LIMIT_MSG]);
@@ -1841,11 +1841,11 @@ void SetMan::UpdateTCPPorts() {
             sTexts[SETTXT_TCP_PORTS][i] = '\0';
 
             if(iActualPort != 0) {
-                iPortNumbers[iActualPort] = (unsigned short)atoi(sPort);
+                iPortNumbers[iActualPort] = (uint16_t)atoi(sPort);
             } else {
                 pthread_mutex_lock(&mtxSetting);
 
-                iPortNumbers[iActualPort] = (unsigned short)atoi(sPort);
+                iPortNumbers[iActualPort] = (uint16_t)atoi(sPort);
 
                 pthread_mutex_unlock(&mtxSetting);
             }
@@ -1859,7 +1859,7 @@ void SetMan::UpdateTCPPorts() {
     }
 
     if(sPort[0] != '\0') {
-        iPortNumbers[iActualPort] = (unsigned short)atoi(sPort);
+        iPortNumbers[iActualPort] = (uint16_t)atoi(sPort);
         iActualPort++;
     }
 
@@ -2126,7 +2126,7 @@ void SetMan::UpdateUDPPort() {
         UDPThread = NULL;
     }
 
-    if((unsigned short)atoi(sTexts[SETTXT_UDP_PORT]) != 0) {
+    if((uint16_t)atoi(sTexts[SETTXT_UDP_PORT]) != 0) {
         UDPThread = new UDPRecvThread();
         if(UDPThread == NULL) {
     		string sDbgstr = "[BUF] Cannot allocate UDPThread!";
