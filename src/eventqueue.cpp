@@ -205,6 +205,8 @@ void eventq::ProcessEvents() {
 
                 ScriptManager->StopScript(curScript);
 
+				ScriptManager->StartScript(curScript);
+
                 break;
             }
 			case EVENT_STOPSCRIPT: {
