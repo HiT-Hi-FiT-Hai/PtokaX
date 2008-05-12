@@ -25,6 +25,7 @@ Added: -c command line parameter to service/nix version to set config directory.
 Added: -d command line parameter to nix version to run as daemon.
 Added: When PtokaX is terminated on nix by signal then it is saved to log.
 Added: Script memory usage to !getscripts.
+Added: Few working hublist register addresses.
 Fixed: Initial temp ban year in gui was always 2007 instead of actual year.
 Fixed: Crash in gui version on ScriptMan.MoveUp and ScriptMan.MoveDown when script use them in OnStartup and scripts window is opened (thx Zÿgð†† and Twisted-devil for report).
 Fixed: Never ending loop caused by multiple script processing when using MoveDown (thx Zÿgð†† for report).
@@ -36,12 +37,13 @@ Changed: Core.SuspendAccepts can be now used without value to suspend listening 
 Changed: When user send incorrect ip in CTM/Search is now disconnected.
 Changed: Chat commands to ban ip now cause disconnect of all users with that ip address.
 Changed: UDP port now can be disabled by set it to 0 and it is disabled by default.
+Changed: Default profile permissions.
 Improved: Message when user send incorrect ip in CTM/Search now contains ip from command, user ip.
-Rewriten: Deflood internals, less code, maybe better performance, fixed multiple bugs in old deflood.
-Rewriten: Threads and critical sections from borland components to clean winapi.
-Rewriten: Nick hashtables (for userlist, reglist, nickbanlist) for better performance.
-Rewriten: Last few borland components in core replaced with winapi calls.
-Rewriten: Receiving of data to UDP port, moved from main thread to new thread.
+Rewritten: Deflood internals, less code, maybe better performance, fixed multiple bugs in old deflood.
+Rewritten: Threads and critical sections from borland components to clean winapi.
+Rewritten: Nick hashtables (for userlist, reglist, nickbanlist) for better performance.
+Rewritten: Last few borland components in core replaced with winapi calls.
+Rewritten: Receiving of data to UDP port, moved from main thread to new thread.
 Removed: Reading of old ini and dat config files.
 New version: Version for windows without gui running from console or as windows service.
 New version: Version for posix compatible os (tested on Linux x86, Linux x86-64, freeBSD x86).

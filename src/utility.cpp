@@ -796,7 +796,7 @@ bool CheckSprintf1(int iRetVal, int iLenVal, const size_t &iMax, const char * sM
 //---------------------------------------------------------------------------
 
 void AppendLog(const string & sData, const bool &bScript/* == false*/) {
-    if(UdpDebug != NULL) {
+    if(UdpDebug != NULL && bScript == false) {
         static char msg[1024];
         if(sData.size() < 1000) {
             int imsgLen = sprintf(msg, "[LOG] %s", sData.c_str());
