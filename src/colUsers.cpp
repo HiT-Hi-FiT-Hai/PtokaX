@@ -676,7 +676,8 @@ void classUsers::DelFromUserIP(User * cur) {
 //---------------------------------------------------------------------------
 
 void classUsers::Add2RecTimes(User * curUser) {
-    time_t acc_time; time(&acc_time);
+    time_t acc_time;
+    time(&acc_time);
 
     if(ProfileMan->IsAllowed(curUser, ProfileManager::NOUSRSAMEIP) == true || 
         (acc_time-curUser->LoginTime) >= SettingManager->iShorts[SETSHORT_MIN_RECONN_TIME]) {

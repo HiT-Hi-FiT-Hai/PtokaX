@@ -41,19 +41,26 @@ struct RegUser {
 
 class hashRegMan {
 private:
+    RegUser *table[65536];
 public:
     RegUser *RegListS, *RegListE;
 
     hashRegMan(void);
     ~hashRegMan(void);
 
-    bool AddNewReg(char * sNick, char * sPasswd, const uint16_t &iProfile);
+    bool AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile);
 
-    void AddReg(RegUser * Reg);
-    void RemReg(RegUser * Reg);
+    void Add(RegUser * Reg);
+    void Add2Table(RegUser * Reg);
+    void Rem(RegUser * Reg);
+    void RemFromTable(RegUser * Reg);
 
-    void LoadRegList(void);
-    void SaveRegList(void);
+    RegUser* Find(char * sNick, const size_t &iNickLen);
+    RegUser* Find(User * u);
+    RegUser* Find(uint32_t hash, char * sNick);
+
+    void Load(void);
+    void Save(void);
 };
 
 //--------------------------------------------------------------------------- 

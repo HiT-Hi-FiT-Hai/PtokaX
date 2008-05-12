@@ -26,7 +26,7 @@
 #include "eventqueue.h"
 #include "globalQueue.h"
 #include "hashBanManager.h"
-#include "hashManager.h"
+#include "hashUsrManager.h"
 #include "LanguageManager.h"
 #include "LuaScriptManager.h"
 #include "ProfileManager.h"
@@ -209,7 +209,7 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
     time_t acc_time;
     time(&acc_time);
 
-	BanItem *Ban = hashManager->FindBanIPFull(hash, acc_time);
+	BanItem *Ban = hashBanManager->FindFull(hash, acc_time);
 
 	if(Ban != NULL) {
         if(((Ban->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
@@ -226,7 +226,7 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
         }
     }
 
-	RangeBanItem *RangeBan = hashBanManager->FindFullRangeBan(hash, acc_time);
+	RangeBanItem *RangeBan = hashBanManager->FindFullRange(hash, acc_time);
 
 	if(RangeBan != NULL) {
         if(((RangeBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {

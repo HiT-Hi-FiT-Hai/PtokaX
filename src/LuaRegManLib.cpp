@@ -27,7 +27,7 @@
 #include "colUsers.h"
 #include "globalQueue.h"
 #include "hashRegManager.h"
-#include "hashManager.h"
+#include "hashUsrManager.h"
 #include "LuaScriptManager.h"
 #include "ProfileManager.h"
 #include "SettingManager.h"
@@ -62,7 +62,7 @@ static int Save(lua_State * L) {
         return 0;
     }
 
-    hashRegManager->SaveRegList();
+    hashRegManager->Save();
 
     return 0;
 }
@@ -173,7 +173,7 @@ static int GetReg(lua_State * L) {
         return 1;
     }
 
-    RegUser * r = hashManager->FindReg(sNick, iLen);
+    RegUser * r = hashRegManager->Find(sNick, iLen);
 
     lua_settop(L, 0);
 
@@ -243,7 +243,7 @@ static int AddReg(lua_State * L) {
         return 0;
     }
 
-	RegUser *reg = hashManager->FindReg(sNick, iNickLen);
+	RegUser *reg = hashRegManager->Find(sNick, iNickLen);
 
     if(reg != NULL) {
 		lua_settop(L, 0);
@@ -262,7 +262,7 @@ static int AddReg(lua_State * L) {
         return 1;
     }
 
-    hashRegManager->AddReg(newUser);
+    hashRegManager->Add(newUser);
 
 	User *AddedUser = hashManager->FindUser(newUser->sNick, iNickLen);
 
@@ -302,7 +302,7 @@ static int AddReg(lua_State * L) {
         }
     }
 
-    hashRegManager->SaveRegList();
+    hashRegManager->Save();
 
     lua_pushboolean(L, 1);
     return 1;
@@ -333,7 +333,7 @@ static int DelReg(lua_State * L) {
         return 1;
     }
 
-	RegUser *reg = hashManager->FindReg(sNick, iNickLen);
+	RegUser *reg = hashRegManager->Find(sNick, iNickLen);
 
     lua_settop(L, 0);
 
@@ -342,7 +342,7 @@ static int DelReg(lua_State * L) {
         return 1;
     }
 
-    hashRegManager->RemReg(reg);
+    hashRegManager->Rem(reg);
 
     User *RemovedUser = hashManager->FindUser(reg->sNick, iNickLen);
 
@@ -363,7 +363,7 @@ static int DelReg(lua_State * L) {
 
     delete reg;
 
-    hashRegManager->SaveRegList();
+    hashRegManager->Save();
 
     lua_pushboolean(L, 1);
     return 1;
@@ -399,7 +399,7 @@ static int ChangeReg(lua_State * L) {
         return 1;
     }
 
-	RegUser *reg = hashManager->FindReg(sNick, iNickLen);
+	RegUser *reg = hashRegManager->Find(sNick, iNickLen);
 
     if(reg == NULL) {
 		lua_settop(L, 0);
@@ -472,7 +472,7 @@ static int ChangeReg(lua_State * L) {
         }
     }
 
-    hashRegManager->SaveRegList();
+    hashRegManager->Save();
 
     lua_settop(L, 0);
 
@@ -500,7 +500,7 @@ static int ClrRegBadPass(lua_State * L) {
     char* sNick = (char*)lua_tolstring(L, 1, &iNickLen);
 
     if(iNickLen != 0) {
-        RegUser *Reg = hashManager->FindReg(sNick, iNickLen);
+        RegUser *Reg = hashRegManager->Find(sNick, iNickLen);
         if(Reg != NULL) {
             Reg->iBadPassCount = 0;
         } else {

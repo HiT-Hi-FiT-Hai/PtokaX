@@ -25,7 +25,7 @@
 #include "LuaSetManLib.h"
 //---------------------------------------------------------------------------
 #include "eventqueue.h"
-#include "hashManager.h"
+#include "hashUsrManager.h"
 #include "LuaScriptManager.h"
 #include "SettingManager.h"
 //---------------------------------------------------------------------------

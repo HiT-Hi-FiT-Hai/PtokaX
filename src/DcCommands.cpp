@@ -26,7 +26,7 @@
 #include "globalQueue.h"
 #include "hashBanManager.h"
 #include "hashRegManager.h"
-#include "hashManager.h"
+#include "hashUsrManager.h"
 #include "LanguageManager.h"
 #include "LuaScriptManager.h"
 #include "ProfileManager.h"
@@ -2081,7 +2081,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
     // if password is wrong, close the connection
     if(strcmp(curUser->uLogInOut->Password, sData+8) != 0) {
         if(SettingManager->bBools[SETBOOL_ADVANCED_PASS_PROTECTION] == true) {
-			RegUser *Reg = hashManager->FindReg(curUser);
+			RegUser *Reg = hashRegManager->Find(curUser);
             if(Reg != NULL) {
                 time(&Reg->tLastBadPass);
                 if(Reg->iBadPassCount < 255)
@@ -2108,7 +2108,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
             } else {
                 if(PassBfItem->iCount == 2) {
                     int imsgLen;
-                    BanItem *Ban = hashManager->FindBanIPFull(curUser->ui32IpHash);
+                    BanItem *Ban = hashBanManager->FindFull(curUser->ui32IpHash);
                     if(Ban == NULL || ((Ban->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false) {
                         int iret = sprintf(msg, "3x bad password for nick %s", curUser->Nick);
                         if(CheckSprintf(iret, 1024, "cDcCommands::MyPass4") == false) {
@@ -2170,7 +2170,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
         UserClose(curUser);
         return;
     } else {
-		RegUser *Reg = hashManager->FindReg(curUser);
+		RegUser *Reg = hashRegManager->Find(curUser);
         if(Reg != NULL) {
             Reg->iBadPassCount = 0;
         }
@@ -2774,6 +2774,14 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
                         int imsgLen = sprintf(msg, "<%s> %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                             LanguageManager->sTexts[LAN_SORRY_THIS_HUB_NOT_ALLOW_PINGERS]);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports3") == true) {
+                            UserSendChar(curUser, msg, imsgLen);
+                        }
+                        UserClose(curUser);
+                        return;
+                    } else if(SettingManager->bBools[SETBOOL_CHECK_IP_IN_COMMANDS] == false) {
+                        int imsgLen = sprintf(msg, "<%s> Sorry, this hub banned yourself from hublist because allow CTM exploit.|", 
+                            SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC]);
+                        if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports4") == true) {
                             UserSendChar(curUser, msg, imsgLen);
                         }
                         UserClose(curUser);
@@ -3512,7 +3520,8 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
         return false;
     }
 
-    time_t acc_time; time(&acc_time);
+    time_t acc_time;
+    time(&acc_time);
 
     // PPK ... check if we already have ban for this user
     if(curUser->uLogInOut->uBan != NULL && curUser->ui32NickHash == curUser->uLogInOut->uBan->ui32NickHash) {
@@ -3526,7 +3535,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
     }
     
     // check for banned nicks
-    BanItem *UserBan = hashManager->FindBanNick(curUser);
+    BanItem *UserBan = hashBanManager->FindNick(curUser);
     if(UserBan != NULL) {
         int imsgLen;
         char *messg = GenerateBanMessage(UserBan, imsgLen, acc_time);
@@ -3540,11 +3549,12 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
     }
 
     // Nick is ok, check for registered nick
-    RegUser *Reg = hashManager->FindReg(curUser);
+    RegUser *Reg = hashRegManager->Find(curUser);
     if(Reg != NULL) {
         if(SettingManager->bBools[SETBOOL_ADVANCED_PASS_PROTECTION] == true && Reg->iBadPassCount != 0) {
             time_t acc_time;
             time(&acc_time);
+
 			uint32_t iMinutes2Wait = (uint32_t)pow(2, Reg->iBadPassCount-1);
             if(acc_time < (time_t)(Reg->tLastBadPass+(60*iMinutes2Wait))) {
                 int imsgLen = sprintf(msg, "<%s> %s %s %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -3612,27 +3622,43 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
     }
 
     // Check for maximum connections from same IP
-    if(ProfileMan->IsAllowed(curUser, ProfileManager::NOUSRSAMEIP) == false &&
-        hashManager->GetUserIpCount(curUser) >= (uint32_t)SettingManager->iShorts[SETSHORT_MAX_CONN_SAME_IP]) {
-        int imsgLen = sprintf(msg, "<%s> %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-            LanguageManager->sTexts[LAN_SORRY_ALREADY_MAX_IP_CONNS]);
-        if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick9") == false) {
-            return false;
-        }
-        if(SettingManager->bBools[SETBOOL_REDIRECT_WHEN_HUB_FULL] == true &&
-            SettingManager->sPreTexts[SetMan::SETPRETXT_REDIRECT_ADDRESS] != NULL) {
-               memcpy(msg+imsgLen, SettingManager->sPreTexts[SetMan::SETPRETXT_REDIRECT_ADDRESS],
-                (size_t)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_REDIRECT_ADDRESS]);
-            imsgLen += SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_REDIRECT_ADDRESS];
-            msg[imsgLen] = '\0';
-        }
-        UserSendChar(curUser, msg, imsgLen);
-        imsgLen = sprintf(msg, "[SYS] Max connections from same IP for %s (%s) - user closed.", curUser->Nick, curUser->IP);
-        if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick10") == true) {
-            UdpDebug->Broadcast(msg, imsgLen);
-        }
-        UserClose(curUser);
-        return false;
+    if(ProfileMan->IsAllowed(curUser, ProfileManager::NOUSRSAMEIP) == false) {
+        uint32_t ui32Count = hashManager->GetUserIpCount(curUser);
+        if(ui32Count >= (uint32_t)SettingManager->iShorts[SETSHORT_MAX_CONN_SAME_IP]) {
+	        int imsgLen = sprintf(msg, "<%s> %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+	            LanguageManager->sTexts[LAN_SORRY_ALREADY_MAX_IP_CONNS]);
+	        if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick9") == false) {
+	            return false;
+	        }
+	        if(SettingManager->bBools[SETBOOL_REDIRECT_WHEN_HUB_FULL] == true &&
+	            SettingManager->sPreTexts[SetMan::SETPRETXT_REDIRECT_ADDRESS] != NULL) {
+	               memcpy(msg+imsgLen, SettingManager->sPreTexts[SetMan::SETPRETXT_REDIRECT_ADDRESS],
+	                (size_t)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_REDIRECT_ADDRESS]);
+	            imsgLen += SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_REDIRECT_ADDRESS];
+	            msg[imsgLen] = '\0';
+	        }
+	        UserSendChar(curUser, msg, imsgLen);
+            imsgLen = sprintf(msg, "[SYS] Max connections from same IP (%d) for %s (%s) - user closed. ", ui32Count, curUser->Nick, curUser->IP);
+            string tmp;
+        	if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick10") == true) {
+                //UdpDebug->Broadcast(msg, imsgLen);
+                tmp = msg;
+            }
+
+            User *nxt = hashManager->FindUser(curUser->ui32IpHash);
+
+            while(nxt != NULL) {
+        		User *cur = nxt;
+                nxt = cur->hashiptablenext;
+
+                tmp += " "+string(cur->Nick, cur->NickLen);
+        	}
+
+            UdpDebug->Broadcast(tmp);
+
+	        UserClose(curUser);
+	        return false;
+	    }
     }
 
     // Check for reconnect time

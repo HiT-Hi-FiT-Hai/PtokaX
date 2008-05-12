@@ -25,7 +25,7 @@
 #include "LuaBanManLib.h"
 //---------------------------------------------------------------------------
 #include "hashBanManager.h"
-#include "hashManager.h"
+#include "hashUsrManager.h"
 #include "LuaScriptManager.h"
 #include "UdpDebug.h"
 #include "User.h"
@@ -113,7 +113,7 @@ static int Save(lua_State * L) {
         return 0;
     }
 
-    hashBanManager->SaveBanList(true);
+    hashBanManager->Save(true);
 
     return 0;
 }
@@ -140,7 +140,7 @@ static int GetBans(lua_State * L) {
 		nextBan = curBan->next;
 
         if(acc_time > curBan->tempbanexpire) {
-            hashBanManager->RemBan(curBan);
+            hashBanManager->Rem(curBan);
             delete curBan;
 
 			continue;
@@ -187,7 +187,7 @@ static int GetTempBans(lua_State * L) {
 		nextBan = curBan->next;
 
         if(acc_time > curBan->tempbanexpire) {
-            hashBanManager->RemBan(curBan);
+            hashBanManager->Rem(curBan);
             delete curBan;
 
 			continue;
@@ -251,7 +251,7 @@ static int GetBan(lua_State * L) {
 
     uint32_t hash;
 
-	BanItem *Ban = hashManager->FindBanNick(sValue, iLen);
+	BanItem *Ban = hashBanManager->FindNick(sValue, iLen);
 
 	if(HashIP(sValue, iLen, hash) == true) {
         lua_settop(L, 0);
@@ -265,7 +265,7 @@ static int GetBan(lua_State * L) {
             lua_rawset(L, t);
         }
 
-		Ban = hashManager->FindBanIP(hash, acc_time);
+		Ban = hashBanManager->FindIP(hash, acc_time);
         if(Ban != NULL) {
             lua_pushnumber(L, ++i);
             PushBan(L, Ban);        
@@ -278,7 +278,7 @@ static int GetBan(lua_State * L) {
 				nextBan = curBan->hashiptablenext;
 
 				if((((curBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) && acc_time > curBan->tempbanexpire) {
-                    hashBanManager->RemBan(curBan);
+                    hashBanManager->Rem(curBan);
                     delete curBan;
 
         			continue;
@@ -324,7 +324,7 @@ static int GetPermBan(lua_State * L) {
 
     uint32_t hash;
 
-	BanItem *Ban = hashManager->FindBanNickPerm(sValue, iLen);
+	BanItem *Ban = hashBanManager->FindPermNick(sValue, iLen);
 
     if(HashIP(sValue, iLen, hash) == true) {
         lua_settop(L, 0);
@@ -338,7 +338,7 @@ static int GetPermBan(lua_State * L) {
             lua_rawset(L, t);
         }
 
-		Ban = hashManager->FindBanIPPerm(hash);
+		Ban = hashBanManager->FindPermIP(hash);
         if(Ban != NULL) {
             lua_pushnumber(L, ++i);
             PushBan(L, Ban);        
@@ -397,7 +397,7 @@ static int GetTempBan(lua_State * L) {
 
     uint32_t hash;
 
-	BanItem *Ban = hashManager->FindBanNickTemp(sValue, iLen);
+	BanItem *Ban = hashBanManager->FindTempNick(sValue, iLen);
 
     if(HashIP(sValue, iLen, hash) == true) {
         lua_settop(L, 0);
@@ -411,7 +411,7 @@ static int GetTempBan(lua_State * L) {
             lua_rawset(L, t);
         }
 
-		Ban = hashManager->FindBanIPTemp(hash, acc_time);
+		Ban = hashBanManager->FindTempIP(hash, acc_time);
         if(Ban != NULL) {
             lua_pushnumber(L, ++i);
             PushBan(L, Ban);        
@@ -425,7 +425,7 @@ static int GetTempBan(lua_State * L) {
 
 				if(((curBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
                     if(acc_time > curBan->tempbanexpire) {
-                        hashBanManager->RemBan(curBan);
+                        hashBanManager->Rem(curBan);
                         delete curBan;
     
             			continue;
@@ -463,7 +463,8 @@ static int GetRangeBans(lua_State * L) {
     lua_newtable(L);
 	int t = lua_gettop(L), i = 0;
 
-    time_t acc_time; time(&acc_time);
+    time_t acc_time;
+    time(&acc_time);
 
     RangeBanItem *nextBan = hashBanManager->RangeBanListS;
 
@@ -472,7 +473,7 @@ static int GetRangeBans(lua_State * L) {
 		nextBan = curBan->next;
         
         if((((curBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) && acc_time > curBan->tempbanexpire) {
-            hashBanManager->RemRangeBan(curBan);
+            hashBanManager->RemRange(curBan);
             delete curBan;
 
 			continue;
@@ -498,7 +499,8 @@ static int GetTempRangeBans(lua_State * L) {
     lua_newtable(L);
 	int t = lua_gettop(L), i = 0;
 
-    time_t acc_time; time(&acc_time);
+    time_t acc_time;
+    time(&acc_time);
 
     RangeBanItem *nextBan = hashBanManager->RangeBanListS;
 
@@ -511,7 +513,7 @@ static int GetTempRangeBans(lua_State * L) {
         }
         
         if(acc_time > curBan->tempbanexpire) {
-            hashBanManager->RemRangeBan(curBan);
+            hashBanManager->RemRange(curBan);
             delete curBan;
 
 			continue;
@@ -599,7 +601,7 @@ static int GetRangeBan(lua_State * L) {
             // PPK ... check if it's temban and then if it's expired
             if(((cur->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
                 if(acc_time >= cur->tempbanexpire) {
-					hashBanManager->RemRangeBan(cur);
+					hashBanManager->RemRange(cur);
                     delete cur;
 
 					continue;
@@ -707,7 +709,7 @@ static int GetRangeTempBan(lua_State * L) {
             // PPK ... check if it's temban and then if it's expired
             if(((cur->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
                 if(acc_time >= cur->tempbanexpire) {
-					hashBanManager->RemRangeBan(cur);
+					hashBanManager->RemRange(cur);
                     delete cur;
 
 					continue;
@@ -857,7 +859,7 @@ static int UnbanAll(lua_State * L) {
 
     lua_settop(L, 0);
 
-	hashManager->RemoveIPAll(hash);
+	hashBanManager->RemoveAllIP(hash);
 
     return 0;
 }
@@ -888,7 +890,7 @@ static int UnbanPermAll(lua_State * L) {
 
     lua_settop(L, 0);
 
-	hashManager->RemoveIPPermAll(hash);
+	hashBanManager->RemovePermAllIP(hash);
 
     return 0;
 }
@@ -919,7 +921,7 @@ static int UnbanTempAll(lua_State * L) {
 
     lua_settop(L, 0);
 
-    hashManager->RemoveIPTempAll(hash);
+    hashBanManager->RemoveTempAllIP(hash);
 
     return 0;
 }
@@ -1038,8 +1040,8 @@ static int ClearBans(lua_State * L) {
         return 1;
     }
 
-    hashBanManager->ClearTempBan();
-    hashBanManager->ClearPermBan();
+    hashBanManager->ClearTemp();
+    hashBanManager->ClearPerm();
 
     return 0;
 }
@@ -1053,7 +1055,7 @@ static int ClearPermBans(lua_State * L) {
         return 1;
     }
 
-    hashBanManager->ClearPermBan();
+    hashBanManager->ClearPerm();
 
     return 0;
 }
@@ -1067,7 +1069,7 @@ static int ClearTempBans(lua_State * L) {
         return 1;
     }
 
-    hashBanManager->ClearTempBan();
+    hashBanManager->ClearTemp();
 
     return 0;
 }
@@ -1081,7 +1083,7 @@ static int ClearRangeBans(lua_State * L) {
         return 1;
     }
 
-    hashBanManager->ClearRangeBans();
+    hashBanManager->ClearRange();
 
     return 0;
 }
@@ -1095,7 +1097,7 @@ static int ClearRangePermBans(lua_State * L) {
         return 1;
     }
 
-    hashBanManager->ClearPermRangeBans();
+    hashBanManager->ClearPermRange();
 
     return 0;
 }
@@ -1109,7 +1111,7 @@ static int ClearRangeTempBans(lua_State * L) {
         return 1;
     }
 
-    hashBanManager->ClearTempRangeBans();
+    hashBanManager->ClearTempRange();
 
     return 0;
 }
