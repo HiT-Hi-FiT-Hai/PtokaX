@@ -137,16 +137,16 @@
         <Integer Name="MyINFOTime2">900</Integer><!-- Secondary myINFO deflood time. Higher than 0, max 29999. -->
         <Integer Name="MyINFOAction2">3</Integer><!-- Secondary myINFO deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6. -->
         <Integer Name="MaxMyINFOLen">256</Integer><!-- Maximum MyINFO length. Higher than 0, max 512. -->
-        <Integer Name="CTMMessages">1000</Integer><!-- Primary ConnectToMe deflood count. Higher than 0, max 29999. -->
+        <Integer Name="CTMMessages">500</Integer><!-- Primary ConnectToMe deflood count. Higher than 0, max 29999. -->
         <Integer Name="CTMTime">60</Integer><!-- Primary ConnectToMe deflood time. Higher than 0, max 29999. -->
         <Integer Name="CTMAction">1</Integer><!-- Primary ConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6. -->
-        <Integer Name="CTMMessages2">10000</Integer><!-- Secondary ConnectToMe deflood count. Higher than 0, max 29999. -->
+        <Integer Name="CTMMessages2">5000</Integer><!-- Secondary ConnectToMe deflood count. Higher than 0, max 29999. -->
         <Integer Name="CTMTime2">600</Integer><!-- Secondary ConnectToMe deflood time. Higher than 0, max 29999. -->
         <Integer Name="CTMAction2">0</Integer><!-- Secondary ConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6. -->
-        <Integer Name="RCTMMessages">500</Integer><!-- Primary RevConnectToMe deflood count. Higher than 0, max 29999. -->
+        <Integer Name="RCTMMessages">250</Integer><!-- Primary RevConnectToMe deflood count. Higher than 0, max 29999. -->
         <Integer Name="RCTMTime">60</Integer><!-- Primary RevConnectToMe deflood time. Higher than 0, max 29999. -->
         <Integer Name="RCTMAction">1</Integer><!-- Primary RevConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6. -->
-        <Integer Name="RCTMMessages2">5000</Integer><!-- Secondary RevConnectToMe deflood count. Higher than 0, max 29999. -->
+        <Integer Name="RCTMMessages2">2500</Integer><!-- Secondary RevConnectToMe deflood count. Higher than 0, max 29999. -->
         <Integer Name="RCTMTime2">600</Integer><!-- Secondary RevConnectToMe deflood time. Higher than 0, max 29999. -->
         <Integer Name="RCTMAction2">3</Integer><!-- Secondary RevConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6. -->
         <Integer Name="MaxCTMLen">128</Integer><!-- Maximum ConnectToMe length. Higher than 0, max 512. -->
@@ -178,10 +178,10 @@
         <String Name="AdminNick">Admin</String><!-- Admin nick. Min length 1, max 64, $ is not allowed. -->
         <String Name="HubAddress">&lt;Enter hub address here&gt;</String><!-- Hub address. Min length 1, max 256. -->
         <String Name="TCPPorts">1209;411</String><!-- TCP ports. Min length 1, max 64. -->
-        <String Name="UDPPort">1209</String><!-- UDP port. Min length 1, max 5. -->
+        <String Name="UDPPort">0</String><!-- UDP port. Min length 1, max 5. -->
         <String Name="HubDescription">&lt;Enter hub description here&gt;</String><!-- Hub description. Max length 256. -->
         <String Name="RedirectAddress"></String><!-- Main redirect address. Max length 256. -->
-        <String Name="RegisterServers">reg.hublist.org;bwhubreg.no-ip.info;zengeday.sytes.net;serv.hubs-list.com;hublist.cz;hublist.dreamland-net.eu</String><!-- Hublist register servers. Max length 1024. -->
+        <String Name="RegisterServers">reg.hublist.org;serv.hubs-list.com;hublist.cz;hublist.dreamland-net.eu;allhublista.myip.hu;hubinfo.myip.hu;publichublist-nl.no-ip.org;reg.hublist.dk</String><!-- Hublist register servers. Max length 1024. -->
         <String Name="RegOnlyMessage">Sorry, this hub is only for registered users.</String><!-- Registered users only message. Min length 1, max 256. -->
         <String Name="RegOnlyRedirAddress"></String><!-- Registered users only redirect address. Max length 256. -->
         <String Name="HubTopic"></String><!-- Hub topic. Max length 256. -->

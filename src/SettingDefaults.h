@@ -161,16 +161,16 @@ int16_t SetShortDef[] = {
     900, //MYINFO_TIME2
     3, //MYINFO_ACTION2
     256, //MAX_MYINFO_LEN
-    1000, //CTM_MESSAGES
+    500, //CTM_MESSAGES
     60, //CTM_TIME
     1, //CTM_ACTION
-    10000, //CTM_MESSAGES2
+    5000, //CTM_MESSAGES2
     600, //CTM_TIME2
     0, //CTM_ACTION2
-    500, //RCTM_MESSAGES
+    250, //RCTM_MESSAGES
     60, //RCTM_TIME
     1, //RCTM_ACTION
-    5000, //RCTM_MESSAGES2
+    2500, //RCTM_MESSAGES2
     600, //RCTM_TIME2
     3, //RCTM_ACTION2
     128, //MAX_CTM_LEN
@@ -207,7 +207,7 @@ const char* SetTxtDef[] = {
     "0", //UDP_PORT
     "<Enter hub description here>", //HUB_DESCRIPTION
     "", //REDIRECT_ADDRESS
-    "reg.hublist.org;bwhubreg.no-ip.info;zengeday.sytes.net;serv.hubs-list.com;hublist.cz;hublist.dreamland-net.eu", //REGISTER_SERVERS
+    "reg.hublist.org;serv.hubs-list.com;hublist.cz;hublist.dreamland-net.eu;allhublista.myip.hu;hubinfo.myip.hu;publichublist-nl.no-ip.org;reg.hublist.dk", //REGISTER_SERVERS
     "Sorry, this hub is only for registered users.", //REG_ONLY_MSG
     "", //REG_ONLY_REDIR_ADDRESS
     "", //HUB_TOPIC

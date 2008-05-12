@@ -27,7 +27,7 @@
 #include "eventqueue.h"
 #include "globalQueue.h"
 #include "hashBanManager.h"
-#include "hashManager.h"
+#include "hashUsrManager.h"
 #include "hashRegManager.h"
 #include "LanguageManager.h"
 #include "LuaScriptManager.h"
@@ -209,13 +209,6 @@ void ServerInitialize() {
     	exit(EXIT_FAILURE);
     }
 
-    hashManager = new hashMan();
-    if(hashManager == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate hashManager!";
-    	AppendSpecialLog(sDbgstr);
-        exit(EXIT_FAILURE);
-    }
-
     hashRegManager = new hashRegMan();
     if(hashRegManager == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate hashRegManager!";
@@ -224,7 +217,7 @@ void ServerInitialize() {
     }
 
     // Load registered users
-    hashRegManager->LoadRegList();
+    hashRegManager->Load();
 
     hashBanManager = new hashBanMan();
     if(hashBanManager == NULL) {
@@ -234,7 +227,7 @@ void ServerInitialize() {
     }
 
     // load banlist
-    hashBanManager->LoadBanList();
+    hashBanManager->Load();
 
     TextFileManager = new TextFileMan();
     if(TextFileManager == NULL) {
@@ -398,7 +391,13 @@ bool ServerStart() {
     	exit(EXIT_FAILURE);
     }
 
-	hashManager->RemoveAllUsers();
+    hashManager = new hashMan();
+    if(hashManager == NULL) {
+    	string sDbgstr = "[BUF] Cannot allocate hashManager!";
+    	AppendSpecialLog(sDbgstr);
+        exit(EXIT_FAILURE);
+    }
+
     colUsers = new classUsers;
 	if(colUsers == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate colUsers!";
@@ -588,6 +587,12 @@ void ServerFinalStop(const bool &bFromServiceLoop) {
         HubCmds = NULL;
     }
 
+	// delete hashed userlist manager
+	if(hashManager != NULL) {
+        delete hashManager;
+        hashManager = NULL;
+    }
+
 	// delete global send queue manager
 	if(globalQ != NULL) {
 		delete globalQ;
@@ -638,9 +643,9 @@ void ServerFinalClose() {
     timer_delete(sectimer);
     timer_delete(regtimer);
 
-    hashBanManager->SaveBanList(true);
+    hashBanManager->Save(true);
 
-    hashRegManager->SaveRegList();
+    hashRegManager->Save();
 
 	ScriptManager->SaveScripts();
 
@@ -664,9 +669,6 @@ void ServerFinalClose() {
 
     delete hashBanManager;
     hashBanManager = NULL;
-
-    delete hashManager;
-    hashManager = NULL;
 
     delete ZlibUtility;
     ZlibUtility = NULL;

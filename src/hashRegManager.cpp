@@ -22,7 +22,6 @@
 //---------------------------------------------------------------------------
 #include "hashRegManager.h"
 //---------------------------------------------------------------------------
-#include "hashManager.h"
 #include "LanguageManager.h"
 #include "ProfileManager.h"
 #include "UdpDebug.h"
@@ -79,6 +78,10 @@ RegUser::~RegUser(void) {
 
 hashRegMan::hashRegMan(void) {
     RegListS = RegListE = NULL;
+
+    for(unsigned int i = 0; i < 65536; i++) {
+        table[i] = NULL;
+    }
 }
 //---------------------------------------------------------------------------
 
@@ -93,8 +96,8 @@ hashRegMan::~hashRegMan(void) {
 }
 //---------------------------------------------------------------------------
 
-bool hashRegMan::AddNewReg(char * sNick, char * sPasswd, const uint16_t &iProfile) {
-    if(hashManager->FindReg(sNick, strlen(sNick)) != NULL) {
+bool hashRegMan::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) {
+    if(Find(sNick, strlen(sNick)) != NULL) {
         return false;
     }
 
@@ -105,15 +108,15 @@ bool hashRegMan::AddNewReg(char * sNick, char * sPasswd, const uint16_t &iProfil
         exit(EXIT_FAILURE);
     }
 
-    AddReg(newUser);
-    SaveRegList();
+    Add(newUser);
+    Save();
 
     return true;
 }
 //---------------------------------------------------------------------------
 
-void hashRegMan::AddReg(RegUser * Reg) {
-    hashManager->Add(Reg);
+void hashRegMan::Add(RegUser * Reg) {
+	Add2Table(Reg);
     
     if(RegListE == NULL) {
     	RegListS = Reg;
@@ -128,8 +131,20 @@ void hashRegMan::AddReg(RegUser * Reg) {
 }
 //---------------------------------------------------------------------------
 
-void hashRegMan::RemReg(RegUser * Reg) {
-    hashManager->Remove(Reg);
+void hashRegMan::Add2Table(RegUser * Reg) {
+    uint16_t ui16dx = ((uint16_t *)&Reg->ui32Hash)[0];
+
+    if(table[ui16dx] != NULL) {
+        table[ui16dx]->hashtableprev = Reg;
+        Reg->hashtablenext = table[ui16dx];
+    }
+    
+    table[ui16dx] = Reg;
+}
+//---------------------------------------------------------------------------
+
+void hashRegMan::Rem(RegUser * Reg) {
+	RemFromTable(Reg);
     
     RegUser *prev, *next;
     prev = Reg->prev; next = Reg->next;
@@ -152,7 +167,84 @@ void hashRegMan::RemReg(RegUser * Reg) {
 }
 //---------------------------------------------------------------------------
 
-void hashRegMan::LoadRegList(void) {
+void hashRegMan::RemFromTable(RegUser * Reg) {
+    if(Reg->hashtableprev == NULL) {
+        uint16_t ui16dx = ((uint16_t *)&Reg->ui32Hash)[0];
+
+        if(Reg->hashtablenext == NULL) {
+            table[ui16dx] = NULL;
+        } else {
+            Reg->hashtablenext->hashtableprev = NULL;
+			table[ui16dx] = Reg->hashtablenext;
+        }
+    } else if(Reg->hashtablenext == NULL) {
+        Reg->hashtableprev->hashtablenext = NULL;
+    } else {
+        Reg->hashtableprev->hashtablenext = Reg->hashtablenext;
+        Reg->hashtablenext->hashtableprev = Reg->hashtableprev;
+    }
+
+	Reg->hashtableprev = NULL;
+    Reg->hashtablenext = NULL;
+}
+//---------------------------------------------------------------------------
+
+RegUser* hashRegMan::Find(char * sNick, const size_t &iNickLen) {
+    uint32_t ui32Hash = HashNick(sNick, iNickLen);
+    uint16_t ui16dx = ((uint16_t *)&ui32Hash)[0];
+
+    RegUser *next = table[ui16dx];
+
+    while(next != NULL) {
+        RegUser *cur = next;
+        next = cur->hashtablenext;
+
+		if(cur->ui32Hash == ui32Hash && strcasecmp(cur->sNick, sNick) == 0) {
+            return cur;
+        }
+    }
+
+    return NULL;
+}
+//---------------------------------------------------------------------------
+
+RegUser* hashRegMan::Find(User * u) {
+    uint16_t ui16dx = ((uint16_t *)&u->ui32NickHash)[0];
+
+	RegUser *next = table[ui16dx];
+
+    while(next != NULL) {
+        RegUser *cur = next;
+        next = cur->hashtablenext;
+
+		if(cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->sNick, u->Nick) == 0) {
+            return cur;
+        }
+    }
+
+    return NULL;
+}
+//---------------------------------------------------------------------------
+
+RegUser* hashRegMan::Find(uint32_t ui32Hash, char * sNick) {
+    uint16_t ui16dx = ((uint16_t *)&ui32Hash)[0];
+
+	RegUser *next = table[ui16dx];
+
+    while(next != NULL) {
+        RegUser *cur = next;
+        next = cur->hashtablenext;
+
+        if(cur->ui32Hash == ui32Hash && strcasecmp(cur->sNick, sNick) == 0) {
+            return cur;
+        }
+    }
+
+    return NULL;
+}
+//---------------------------------------------------------------------------
+
+void hashRegMan::Load(void) {
     uint16_t iProfilesCount = (uint16_t)(ProfileMan->iProfileCount-1);
     bool bIsBuggy = false;
 
@@ -197,14 +289,14 @@ void hashRegMan::LoadRegList(void) {
                     bIsBuggy = true;
                 }
 
-                if(hashManager->FindReg((char*)nick, strlen(nick)) == NULL) {
+                if(Find((char*)nick, strlen(nick)) == NULL) {
                     RegUser *newUser = new RegUser(nick, pass, iProfile);
                     if(newUser == NULL) {
 						string sDbgstr = "[BUF] Cannot allocate newUser in hashRegMan::LoadXmlRegList!";
 						AppendSpecialLog(sDbgstr);
                     	exit(EXIT_FAILURE);
                     }
-                    AddReg(newUser);
+                    Add(newUser);
                 } else {
                     char msg[1024];
                     int imsgLen = sprintf(msg, "%s %s %s! %s.", LanguageManager->sTexts[LAN_USER], nick, LanguageManager->sTexts[LAN_IS_ALREADY_IN_REGS], 
@@ -217,13 +309,13 @@ void hashRegMan::LoadRegList(void) {
                 }
             }
             if(bIsBuggy == true)
-                SaveRegList();
+                Save();
         }
     }
 }
 //---------------------------------------------------------------------------
 
-void hashRegMan::SaveRegList(void) {
+void hashRegMan::Save(void) {
     TiXmlDocument doc((PATH+"/cfg/RegisteredUsers.xml").c_str());
     doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
     TiXmlElement registeredusers("RegisteredUsers");

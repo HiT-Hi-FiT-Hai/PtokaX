@@ -26,7 +26,7 @@
 #include "globalQueue.h"
 #include "hashBanManager.h"
 #include "hashRegManager.h"
-#include "hashManager.h"
+#include "hashUsrManager.h"
 #include "LanguageManager.h"
 #include "LuaScriptManager.h"
 #include "ProfileManager.h"
@@ -108,6 +108,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                     uint32_t iBanNum = 0;
                     time_t acc_time;
                     time(&acc_time);
+
                     BanItem *nextBan = hashBanManager->TempBanListS;
 
                     while(nextBan != NULL) {
@@ -115,7 +116,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
     		            nextBan = curBan->next;
 
                         if(acc_time > curBan->tempbanexpire) {
-                            hashBanManager->RemBan(curBan);
+                            hashBanManager->Rem(curBan);
                             delete curBan;
 
 							continue;
@@ -508,7 +509,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
     		            nextBan = curBan->next;
 
                         if(acc_time > curBan->tempbanexpire) {
-                            hashBanManager->RemBan(curBan);
+                            hashBanManager->Rem(curBan);
                             delete curBan;
 
 							continue;
@@ -690,8 +691,10 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 
                 if(hashBanManager->RangeBanListS != NULL) {
                     uint32_t iBanNum = 0;
+
                     time_t acc_time;
                     time(&acc_time);
+
                     RangeBanItem *nextBan = hashBanManager->RangeBanListS;
 
                     while(nextBan != NULL) {
@@ -702,7 +705,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                             continue;
 
                         if(acc_time > curBan->tempbanexpire) {
-                            hashBanManager->RemRangeBan(curBan);
+                            hashBanManager->RemRange(curBan);
                             delete curBan;
 
 							continue;
@@ -877,8 +880,10 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 
                 if(hashBanManager->RangeBanListS != NULL) {
                     uint32_t iBanNum = 0;
+
                     time_t acc_time;
                     time(&acc_time);
+
                     RangeBanItem *nextBan = hashBanManager->RangeBanListS;
 
                     while(nextBan != NULL) {
@@ -889,7 +894,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                             continue;
 
                         if(acc_time > curBan->tempbanexpire) {
-                            hashBanManager->RemRangeBan(curBan);
+                            hashBanManager->RemRange(curBan);
                             delete curBan;
 
 							continue;
@@ -2607,7 +2612,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 size_t iNickLen = dlen-11;
 
                 // find him
-				RegUser *reg = hashManager->FindReg(sCommand, iNickLen);
+				RegUser *reg = hashRegManager->Find(sCommand, iNickLen);
                 if(reg == NULL) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
@@ -2636,10 +2641,10 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 
 				UncountDeflood(curUser, fromPM);
 
-                hashRegManager->RemReg(reg);
+                hashRegManager->Rem(reg);
                 delete reg;
                 reg = NULL;
-                hashRegManager->SaveRegList();
+                hashRegManager->Save();
 
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
                     if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
@@ -2822,7 +2827,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 }
 
 				UncountDeflood(curUser, fromPM);
-                hashBanManager->ClearTempBan();
+                hashBanManager->ClearTemp();
 
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
                     if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
@@ -2862,7 +2867,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 }
 
 				UncountDeflood(curUser, fromPM);
-                hashBanManager->ClearPermBan();
+                hashBanManager->ClearPerm();
 
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
                     if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
@@ -2902,7 +2907,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 }
 
 				UncountDeflood(curUser, fromPM);
-                hashBanManager->ClearTempRangeBans();
+                hashBanManager->ClearTempRange();
 
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
                     if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
@@ -2942,7 +2947,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 }
 
 				UncountDeflood(curUser, fromPM);
-                hashBanManager->ClearPermRangeBans();
+                hashBanManager->ClearPermRange();
 
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
                     if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
@@ -2999,7 +3004,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 
                 sCommand += 13;
 
-                BanItem * Ban = hashManager->FindBanNick(sCommand, dlen-13);
+                BanItem * Ban = hashBanManager->FindNick(sCommand, dlen-13);
                 if(Ban == NULL) {
                     int imsgLen = CheckFromPm(curUser, fromPM);   
 
@@ -3119,7 +3124,8 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 
                 time_t acc_time;
                 time(&acc_time);
-                BanItem *nxtBan = hashManager->FindBanIP(hash, acc_time);
+
+                BanItem *nxtBan = hashBanManager->FindIP(hash, acc_time);
 
                 if(nxtBan != NULL) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
@@ -3140,7 +3146,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                         if(((curBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
                             // PPK ... check if temban expired
                             if(acc_time >= curBan->tempbanexpire) {
-                                hashBanManager->RemBan(curBan);
+                                hashBanManager->Rem(curBan);
                                 delete curBan;
 
 								continue;
@@ -3206,7 +3212,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                         return true;
                     }
 
-                    RangeBanItem *nxtRangeBan = hashBanManager->FindRangeBan(hash, acc_time);
+                    RangeBanItem *nxtRangeBan = hashBanManager->FindRange(hash, acc_time);
 
                     while(nxtRangeBan != NULL) {
                         RangeBanItem *curRangeBan = nxtRangeBan;
@@ -3216,7 +3222,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                             if(((curRangeBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
                                 // PPK ... check if temban expired
                                 if(acc_time >= curRangeBan->tempbanexpire) {
-                                    hashBanManager->RemRangeBan(curRangeBan);
+                                    hashBanManager->RemRange(curRangeBan);
                                     delete curRangeBan;
 
 									continue;
@@ -3265,7 +3271,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 					UserSendTextDelayed(curUser, Bans);
                     return true;
                 } else if(ProfileMan->IsAllowed(curUser, ProfileManager::GET_RANGE_BANS) == true) {
-                    RangeBanItem *nxtBan = hashBanManager->FindRangeBan(hash, acc_time);
+                    RangeBanItem *nxtBan = hashBanManager->FindRange(hash, acc_time);
 
                     if(nxtBan != NULL) {
                         int imsgLen = CheckFromPm(curUser, fromPM);
@@ -3287,7 +3293,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                                 if(((curBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
                                     // PPK ... check if temban expired
                                     if(acc_time >= curBan->tempbanexpire) {
-                                        hashBanManager->RemRangeBan(curBan);
+                                        hashBanManager->RemRange(curBan);
                                         delete curBan;
 
 										continue;
@@ -3421,8 +3427,10 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                     return true;
                 }
 
-                time_t acc_time; time(&acc_time);
-                RangeBanItem *RangeBan = hashBanManager->FindRangeBan(fromhash, tohash, acc_time);
+                time_t acc_time;
+                time(&acc_time);
+
+                RangeBanItem *RangeBan = hashBanManager->FindRange(fromhash, tohash, acc_time);
                 if(RangeBan == NULL) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
@@ -3599,7 +3607,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 }
 
                 // try to add the user
-                if(hashRegManager->AddNewReg(sCmdParts[0], sCmdParts[1], (uint16_t)pidx) == false) {
+                if(hashRegManager->AddNew(sCmdParts[0], sCmdParts[1], (uint16_t)pidx) == false) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
                     int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -4608,7 +4616,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                     return true;
                 }
 
-                RegUser *reg = hashManager->FindReg(curUser);
+                RegUser *reg = hashRegManager->Find(curUser);
                 if(reg == NULL) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
 

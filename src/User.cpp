@@ -25,7 +25,7 @@
 #include "colUsers.h"
 #include "DcCommands.h"
 #include "globalQueue.h"
-#include "hashManager.h"
+#include "hashUsrManager.h"
 #include "LanguageManager.h"
 #include "LuaScriptManager.h"
 #include "ProfileManager.h"

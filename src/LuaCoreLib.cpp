@@ -28,7 +28,7 @@
 #include "eventqueue.h"
 #include "globalQueue.h"
 #include "hashBanManager.h"
-#include "hashManager.h"
+#include "hashUsrManager.h"
 #include "LanguageManager.h"
 #include "LuaScriptManager.h"
 #include "ServerManager.h"

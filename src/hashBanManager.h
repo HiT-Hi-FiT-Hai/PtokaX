@@ -69,6 +69,9 @@ private:
     };
 
     uint32_t iSaveCalled;
+
+    BanItem *nicktable[65536];
+    IpTableItem *iptable[65536];
 public:
     BanItem *TempBanListS, *TempBanListE;
     BanItem *PermBanListS, *PermBanListE;
@@ -85,38 +88,58 @@ public:
     hashBanMan(void);
     ~hashBanMan(void);
     
-    void AddBan(BanItem *Ban);
-    void AddBan2Table(BanItem *Ban);
-    void RemBan(BanItem *Ban);
-    void RemBanFromTable(BanItem *Ban);
 
-	BanItem* FindBan(BanItem *Ban); // from gui
-	void RemoveBan(BanItem *Ban); // from gui
+    void Add(BanItem *Ban);
+    void Add2Table(BanItem *Ban);
+	void Add2NickTable(BanItem *Ban);
+	void Add2IpTable(BanItem *Ban);
+    void Rem(BanItem *Ban);
+    void RemFromTable(BanItem *Ban);
+    void RemFromNickTable(BanItem *Ban);
+	void RemFromIpTable(BanItem *Ban);
 
-    void AddRangeBan(RangeBanItem *RangeBan);
-	void RemRangeBan(RangeBanItem *RangeBan);
+	BanItem* Find(BanItem *Ban); // from gui
+	void Remove(BanItem *Ban); // from gui
 
-	RangeBanItem* FindRangeBan(RangeBanItem *RangeBan); // from gui
-	void RemoveRangeBan(RangeBanItem *RangeBan); // from gui
+    void AddRange(RangeBanItem *RangeBan);
+	void RemRange(RangeBanItem *RangeBan);
 
+	RangeBanItem* FindRange(RangeBanItem *RangeBan); // from gui
+	void RemoveRange(RangeBanItem *RangeBan); // from gui
+
+    BanItem* FindNick(User* u);
+    BanItem* FindIP(User* u);
     RangeBanItem* FindRange(User* u);
 
-    RangeBanItem* FindFullRangeBan(const uint32_t &hash, const time_t &acc_time);
+	BanItem* FindFull(const uint32_t &hash);
+    BanItem* FindFull(const uint32_t &hash, const time_t &acc_time);
+    RangeBanItem* FindFullRange(const uint32_t &hash, const time_t &acc_time);
 
-    RangeBanItem* FindRangeBan(const uint32_t &hash, const time_t &acc_time);
-    RangeBanItem* FindRangeBan(const uint32_t &fromhash, const uint32_t &tohash, const time_t &acc_time);
-    
-    void LoadBanList(void);
-    void SaveBanList(bool bForce = false);
-    
-    void CreateTempBan(char * first, char * second, const uint32_t &iTime, const time_t &acc_time);
-    void CreatePermBan(char * first, char * second);
+    BanItem* FindNick(char * sNick, const size_t &iNickLen);
+    BanItem* FindNick(const uint32_t &hash, const time_t &acc_time, char * sNick);
+    BanItem* FindIP(const uint32_t &hash, const time_t &acc_time);
+    RangeBanItem* FindRange(const uint32_t &hash, const time_t &acc_time);
+    RangeBanItem* FindRange(const uint32_t &fromhash, const uint32_t &tohash, const time_t &acc_time);
 
-    void ClearTempBan(void);
-    void ClearPermBan(void);
-    void ClearRangeBans(void);
-    void ClearTempRangeBans(void);
-    void ClearPermRangeBans(void);
+    BanItem* FindTempNick(char * sNick, const size_t &iNickLen);
+    BanItem* FindTempNick(const uint32_t &hash, const time_t &acc_time, char * sNick);
+    BanItem* FindTempIP(const uint32_t &hash, const time_t &acc_time);
+    
+    BanItem* FindPermNick(char * sNick, const size_t &iNickLen);
+    BanItem* FindPermNick(const uint32_t &hash, char * sNick);
+    BanItem* FindPermIP(const uint32_t &hash);
+
+    void Load(void);
+    void Save(bool bForce = false);
+    
+    void CreateTemp(char * first, char * second, const uint32_t &iTime, const time_t &acc_time);
+    void CreatePerm(char * first, char * second);
+
+    void ClearTemp(void);
+    void ClearPerm(void);
+    void ClearRange(void);
+    void ClearTempRange(void);
+    void ClearPermRange(void);
 
     void Ban(User * u, const char * sReason, char * sBy, const bool &bFull);
     char BanIp(User * u, char * sIp, char * sReason, char * sBy, const bool &bFull);
@@ -130,6 +153,10 @@ public:
     bool PermUnban(char * sWhat);
     bool TempUnban(char * sWhat);
     
+    void RemoveAllIP(const uint32_t &hash);
+    void RemovePermAllIP(const uint32_t &hash);
+    void RemoveTempAllIP(const uint32_t &hash);
+
     bool RangeBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char * sIpTo, const uint32_t &ui32ToIpHash, 
         char * sReason, char * sBy, const bool &bFull);
     bool RangeTempBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char * sIpTo, const uint32_t &ui32ToIpHash,

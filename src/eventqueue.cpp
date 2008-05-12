@@ -23,7 +23,7 @@
 #include "eventqueue.h"
 //---------------------------------------------------------------------------
 #include "DcCommands.h"
-#include "hashManager.h"
+#include "hashUsrManager.h"
 #include "LuaScriptManager.h"
 #include "ServerManager.h"
 #include "SettingManager.h"
