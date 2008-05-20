@@ -64,7 +64,7 @@ char * clsZlibUtility::CreateZPipe(const char *sInData, const size_t &sInDataSiz
         
         sZbuffer = (char *) realloc(sZbuffer, uiZbufferSize);
         if(sZbuffer == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(uiZbufferSize)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)uiZbufferSize)+
 				" bytes of memory for sZbuffer in clsZlibCreateZPipe!";
 			AppendSpecialLog(sDbgstr);
             uiZbufferSize = 0;
@@ -125,7 +125,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const size_t &sInDataSize, cha
         
         sZbuffer = (char *) realloc(sZbuffer, uiZbufferSize);
         if(sZbuffer == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(uiZbufferSize)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)uiZbufferSize)+
 				" bytes of memory for sZbuffer in clsZlibCreateZPipe1!";
 			AppendSpecialLog(sDbgstr);
             uiZbufferSize = 0;
@@ -173,7 +173,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const size_t &sInDataSize, cha
         iOutDataSize = (uint32_t)(Allign1024(iOutDataLen)-1);
         sOutData = (char *) realloc(sOutData, iOutDataSize+1);
         if(sOutData == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iOutDataSize+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iOutDataSize+1))+
 				" bytes of memory for sOutData in clsZlibCreateZPipe1!";
 			AppendSpecialLog(sDbgstr);
             return sOutData;
@@ -199,7 +199,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &sInDataSiz
         
         sZbuffer = (char *) realloc(sZbuffer, uiZbufferSize);
         if(sZbuffer == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(uiZbufferSize)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)uiZbufferSize)+
 				" bytes of memory for sZbuffer in clsZlibCreateZPipe2!";
 			AppendSpecialLog(sDbgstr);
             uiZbufferSize = 0;

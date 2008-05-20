@@ -374,7 +374,7 @@ void queue::Store(char * sData, const size_t &iDataLen) {
             size_t iAllignLen = Allign1024(zqueue->len+iDataLen);
             zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
             if(zqueue->buffer == NULL) {
-				string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
+				string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)iDataLen)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
 					" bytes of memory in queue::Store! "+string(sData, iDataLen);
 				AppendSpecialLog(sDbgstr);
                 return;
@@ -412,7 +412,7 @@ void queue::HStore(char * sData, const size_t &iDataLen) {
             size_t iAllignLen = Allign1024(zqueue->len+iDataLen);
             zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
             if(zqueue->buffer == NULL) {
-				string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
+				string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)iDataLen)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
 					" bytes of memory in queue::HStore! "+string(sData, iDataLen);
 				AppendSpecialLog(sDbgstr);
                 return;
@@ -444,7 +444,7 @@ void queue::AStore(char * sData, const size_t &iDataLen) {
             size_t iAllignLen = Allign1024(zqueue->len+iDataLen);
             zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
            	if(zqueue->buffer == NULL) {
-				string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
+				string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)iDataLen)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
 					" bytes of memory in queue::AStore! "+string(sData, iDataLen);
 				AppendSpecialLog(sDbgstr);
                 return;
@@ -476,7 +476,7 @@ void queue::PStore(char * sData, const size_t &iDataLen) {
             size_t iAllignLen = Allign1024(zqueue->len+iDataLen);
             zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
            	if(zqueue->buffer == NULL) {
-				string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
+				string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)iDataLen)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
 					" bytes of memory in queue::PStore! "+string(sData, iDataLen);
 				AppendSpecialLog(sDbgstr);
                 return;
@@ -508,7 +508,7 @@ void queue::InfoStore(char * sData, const size_t &iDataLen) {
             size_t iAllignLen = Allign1024(zqueue->len+iDataLen);
             zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
             if(zqueue->buffer == NULL) {
-				string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
+				string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)iDataLen)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
 					" bytes of memory in queue::InfoStore! "+string(sData, iDataLen);
 				AppendSpecialLog(sDbgstr);
                 return;
@@ -540,7 +540,7 @@ void queue::StrpInfoStore(char * sData, const size_t &iDataLen) {
             size_t iAllignLen = Allign1024(zqueue->len+iDataLen);
             zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
             if(zqueue->buffer == NULL) {
-				string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
+				string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)iDataLen)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
 					" bytes of memory in queue::StrpInfoStore! "+string(sData, iDataLen);
 				AppendSpecialLog(sDbgstr);
                 return;
@@ -572,7 +572,7 @@ void queue::FullInfoStore(char * sData, const size_t &iDataLen) {
             size_t iAllignLen = Allign1024(zqueue->len+iDataLen);
             zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
             if(zqueue->buffer == NULL) {
-				string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
+				string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)iDataLen)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
 					" bytes of memory in queue::FullInfoStore! "+string(sData, iDataLen);
 				AppendSpecialLog(sDbgstr);
                 return;
@@ -604,7 +604,7 @@ void queue::OPStore(char * sData, const size_t &iDataLen) {
             size_t iAllignLen = Allign1024(zqueue->len+iDataLen);
             zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
             if(zqueue->buffer == NULL) {
-				string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
+				string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)iDataLen)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
 					" bytes of memory in queue::OPStore! "+string(sData, iDataLen);
 				AppendSpecialLog(sDbgstr);
                 return;
@@ -629,7 +629,7 @@ void queue::OpListStore(char * sNick) {
                 size_t iAllignLen = Allign256(OpListQueue.len+iDataLen);
                 OpListQueue.buffer = (char *) realloc(OpListQueue.buffer, iAllignLen);
                 if(OpListQueue.buffer == NULL) {
-					string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(OpListQueue.size)+"/"+string(iAllignLen)+
+					string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string((uint64_t)OpListQueue.size)+"/"+string((uint64_t)iAllignLen)+
 						" bytes of memory in queue::OpListStore! "+string(msg, iDataLen);
                     AppendSpecialLog(sDbgstr);
                     return;
@@ -662,7 +662,7 @@ void queue::UserIPStore(User * curUser) {
                 size_t iAllignLen = Allign256(UserIPQueue.len+iDataLen);
                 UserIPQueue.buffer = (char *) realloc(UserIPQueue.buffer, iAllignLen);
                 if(UserIPQueue.buffer == NULL) {
-					string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string(UserIPQueue.size)+"/"+string(iAllignLen)+
+					string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string((uint64_t)UserIPQueue.size)+"/"+string((uint64_t)iAllignLen)+
 						" bytes of memory in queue::UserIPStore! "+string(msg, iDataLen);
 					AppendSpecialLog(sDbgstr);
                     return;
@@ -737,7 +737,7 @@ void queue::FinalizeQueues() {
                 size_t iAllignLen = Allign1024(zqueue->len+UserIPQueue.len);
                 zqueue->buffer = (char *) realloc(zqueue->buffer, iAllignLen);
                 if(zqueue->buffer == NULL) {
-					string sDbgstr = "[BUF] Cannot reallocate "+string(UserIPQueue.len)+"/"+string(zqueue->len)+"/"+string(iAllignLen)+
+					string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)UserIPQueue.len)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
 						" bytes of memory in queue::FinalizeQueues!";
 					AppendSpecialLog(sDbgstr);
                     return;
@@ -1117,7 +1117,8 @@ void queue::ProcessQueues(User * u) {
 
 void queue::ProcessSingleItems(User * u) {
     char *MSG = NULL;
-    uint32_t MSGLen = 0, MSGSize = 0;
+    int MSGLen = 0;
+    size_t MSGSize = 0;
     QueueDataItem *qdinxt = SingleItemsQueueS;
 
     while(qdinxt != NULL) {
@@ -1134,7 +1135,8 @@ void queue::ProcessSingleItems(User * u) {
                             MSG = (char *) realloc(MSG, iAllignLen);
 						}
                         if(MSG == NULL) {
-							string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+string(qdicur->iDataLen)+"/"+string(MSGLen)+"/"+string(iAllignLen)+
+							string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+
+                                string((uint64_t)qdicur->iDataLen)+"/"+string((uint64_t)MSGLen)+"/"+string((uint64_t)iAllignLen)+
 								" bytes of memory in queue::ProcessSingleItems! "+string(qdicur->sData, qdicur->iDataLen);
 							AppendSpecialLog(sDbgstr);
                             return;
@@ -1159,7 +1161,8 @@ void queue::ProcessSingleItems(User * u) {
                                 MSG = (char *) realloc(MSG, iAllignLen);
                             }
                             if(MSG == NULL) {
-								string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+string(qdicur->iDataLen)+"/"+string(MSGLen)+"/"+string(iAllignLen)+
+								string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+
+                                    string((uint64_t)qdicur->iDataLen)+"/"+string((uint64_t)MSGLen)+"/"+string((uint64_t)iAllignLen)+
 									" bytes of memory in queue::ProcessSingleItems1! "+string(qdicur->sData, qdicur->iDataLen);
 								AppendSpecialLog(sDbgstr);
                             }
@@ -1184,7 +1187,8 @@ void queue::ProcessSingleItems(User * u) {
                                 MSG = (char *) realloc(MSG, iAllignLen);
                             }
                             if(MSG == NULL) {
-								string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+string(qdicur->iDataLen)+"/"+string(MSGLen)+"/"+string(iAllignLen)+
+								string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+
+                                    string((uint64_t)qdicur->iDataLen)+"/"+string((uint64_t)MSGLen)+"/"+string((uint64_t)iAllignLen)+
 									" bytes of memory in queue::ProcessSingleItems2! "+string(qdicur->sData, qdicur->iDataLen);
 								AppendSpecialLog(sDbgstr);
                                 return;
@@ -1210,7 +1214,8 @@ void queue::ProcessSingleItems(User * u) {
                                 MSG = (char *) realloc(MSG, iAllignLen);
                             }
                             if(MSG == NULL) {
-								string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+string(qdicur->iDataLen)+"/"+string(MSGLen)+"/"+string(iAllignLen)+
+								string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+
+                                    string((uint64_t)qdicur->iDataLen)+"/"+string((uint64_t)MSGLen)+"/"+string((uint64_t)iAllignLen)+
 									" bytes of memory in queue::ProcessSingleItems3! "+string(qdicur->sData, qdicur->iDataLen);
 								AppendSpecialLog(sDbgstr);
                                 return;
@@ -1233,7 +1238,8 @@ void queue::ProcessSingleItems(User * u) {
                                 MSG = (char *) realloc(MSG, iAllignLen);
                             }
                             if(MSG == NULL) {
-								string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+string(qdicur->iDataLen)+"/"+string(MSGLen)+"/"+string(iAllignLen)+
+								string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+
+                                    string((uint64_t)qdicur->iDataLen)+"/"+string((uint64_t)MSGLen)+"/"+string((uint64_t)iAllignLen)+
 									" bytes of memory in queue::ProcessSingleItems4! "+string(qdicur->sData, qdicur->iDataLen);
 								AppendSpecialLog(sDbgstr);
                                 return;
@@ -1292,7 +1298,7 @@ QueueDataItem * queue::CreateQueueDataItem(char * data, const size_t &idatalen, 
     if(data != NULL) {
         newitem->sData = (char *) malloc(idatalen+1);
         if(newitem->sData == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(idatalen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(idatalen+1))+
             	" bytes of memory in queue::CreateQueueDataItem!";
 			AppendSpecialLog(sDbgstr);
             return newitem;

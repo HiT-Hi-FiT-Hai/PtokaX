@@ -766,7 +766,7 @@ int GetWlcmMsg(char * sWlcmMsg) {
 bool CheckSprintf(int iRetVal, const size_t &iMax, const char * sMsg) {
     if(iRetVal > 0) {
         if(iMax != 0 && iRetVal >= (int)iMax) {
-			string sDbgstr = "sprintf high value "+string(iRetVal)+"/"+string(iMax)+" in "+string(sMsg);
+			string sDbgstr = "sprintf high value "+string(iRetVal)+"/"+string((uint64_t)iMax)+" in "+string(sMsg);
             AppendSpecialLog(sDbgstr);
             return false;
         }
@@ -782,7 +782,7 @@ bool CheckSprintf(int iRetVal, const size_t &iMax, const char * sMsg) {
 bool CheckSprintf1(int iRetVal, int iLenVal, const size_t &iMax, const char * sMsg) {
     if(iRetVal > 0) {
         if(iMax != 0 && iLenVal >= (int)iMax) {
-			string sDbgstr = "sprintf high value "+string(iLenVal)+"/"+string(iMax)+" in "+string(sMsg);
+			string sDbgstr = "sprintf high value "+string(iLenVal)+"/"+string((uint64_t)iMax)+" in "+string(sMsg);
 			AppendSpecialLog(sDbgstr);
             return false;
         }
@@ -806,7 +806,7 @@ void AppendLog(const string & sData, const bool &bScript/* == false*/) {
         } else {
             char *MSG = (char *) malloc(sData.size()+64);
             if(MSG == NULL) {
-    			string sDbgstr = "[BUF] Cannot allocate "+string(sData.size()+64)+
+    			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(sData.size()+64))+
     				" bytes of memory in AppendLog!";
     			AppendSpecialLog(sDbgstr);
                 UdpDebug->Broadcast(sDbgstr);

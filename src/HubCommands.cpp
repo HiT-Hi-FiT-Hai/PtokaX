@@ -1606,8 +1606,8 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                     size_t iWantLen = size_t(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC])+curUser->NickLen+dlen+32;
                     char *MSG = (char *) malloc(iWantLen);
                     if(MSG == NULL) {
-						string sDbgstr = "[BUF] "+string(curUser->Nick,curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-							" bytes of memory in HubCommands massmsg!"+string(sCommand+8, dlen-8);
+						string sDbgstr = "[BUF] "+string(curUser->Nick,curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                            string((uint64_t)iWantLen)+" bytes of memory in HubCommands massmsg!"+string(sCommand+8, dlen-8);
                         AppendSpecialLog(sDbgstr);
                         return true;
                     }
@@ -2423,8 +2423,8 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                     size_t iWantLen = size_t(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC])+curUser->NickLen+dlen+32;
                     char *MSG = (char *) malloc(iWantLen);
                     if(MSG == NULL) {
-						string sDbgstr = "[BUF] "+string(curUser->Nick,curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-							" bytes of memory in HubCommands opmassmsg! "+string(sCommand+10, dlen-10);
+						string sDbgstr = "[BUF] "+string(curUser->Nick,curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                            string((uint64_t)iWantLen)+" bytes of memory in HubCommands opmassmsg! "+string(sCommand+10, dlen-10);
 						AppendSpecialLog(sDbgstr);
                         return true;
                     }
@@ -4634,8 +4634,8 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 size_t iPassLen = strlen(sCommand+7);
                 reg->sPass = (char *) malloc(iPassLen+1);
                 if(reg->sPass == NULL) {
-					string sDbgstr = "[BUF] "+string(curUser->Nick,curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iPassLen+1)+
-						" bytes of memory for Hub-Commands passwd!"+string(sCommand+7, iPassLen);
+					string sDbgstr = "[BUF] "+string(curUser->Nick,curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                        string((uint64_t)(iPassLen+1))+" bytes of memory for Hub-Commands passwd!"+string(sCommand+7, iPassLen);
 					AppendSpecialLog(sDbgstr);
                     return true;
                 }   

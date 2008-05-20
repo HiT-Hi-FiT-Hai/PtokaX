@@ -83,7 +83,7 @@ void clsUdpDebug::Broadcast(const char * msg, const size_t &iLen) {
 
     char *full = (char *) malloc(pktLen);
     if(full == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(pktLen)+
+		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)pktLen)+
 			" bytes of memory in clsUdpDebug::Broadcast!";
         AppendSpecialLog(sDbgstr);
 		return;
@@ -176,7 +176,7 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
 	
 	    char *full = (char *) malloc(pktLen);
 	    if(full == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(pktLen)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)pktLen)+
 				" bytes of memory in clsUdpDebug::New1!";
 			AppendSpecialLog(sDbgstr);
 			return false;
@@ -212,7 +212,7 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
     size_t iScriptLen = strlen(sScriptName);
     NewDbg->Nick = (char *) malloc(iScriptLen+1);
     if(NewDbg->Nick == NULL) {
-		string sDbgstr = "[BUF] "+string(sScriptName)+" Cannot allocate "+string(iScriptLen+1)+
+		string sDbgstr = "[BUF] "+string(sScriptName)+" Cannot allocate "+string((uint64_t)(iScriptLen+1))+
             " bytes of memory for Nick in clsUdpDebug::New!";
 		AppendSpecialLog(sDbgstr);
         delete NewDbg;
@@ -279,7 +279,7 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
 	
 	    char *full = (char *) malloc(pktLen);
 	    if(full == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(pktLen)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)pktLen)+
 				" bytes of memory in clsUdpDebug::New1!";
 			AppendSpecialLog(sDbgstr);
 			return false;
@@ -429,7 +429,7 @@ void clsUdpDebug::Send(char * sScriptName, char * sMsg, const size_t &iLen) {
         
             char *full = (char *) malloc(pktLen);
             if(full == NULL) {
-				string sDbgstr = "[BUF] Cannot allocate "+string(pktLen)+
+				string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)pktLen)+
 					" bytes of memory in clsUdpDebug::Send!";
 				AppendSpecialLog(sDbgstr);
         		return;

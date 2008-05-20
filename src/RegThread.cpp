@@ -176,7 +176,7 @@ void RegThread::AddSock(char * sAddress, const size_t &ui32Len) {
 
     newsock->sAddress = (char *) malloc(ui32Len+1);
     if(newsock->sAddress == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(ui32Len+1)+
+		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(ui32Len+1))+
 			" bytes of memory for sAddress in RegThread::AddSock!";
 		AppendSpecialLog(sDbgstr);
         return;
@@ -573,7 +573,7 @@ void RegThread::Add2SendBuf(RegSocket * Sock, char * sData) {
     
     Sock->sSendBuf = (char *) malloc(iLen+1);
     if(Sock->sSendBuf == NULL) {
-        string sDbgstr = "[BUF] Cannot allocate "+string(iLen+1)+
+        string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iLen+1))+
 			" bytes of memory for sSendBuf in RegThread::Add2SendBuf!";
         eventqueue->AddThread(eventq::EVENT_REGSOCK_MSG, sDbgstr.c_str());
         return;

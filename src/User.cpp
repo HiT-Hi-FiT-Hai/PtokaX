@@ -824,7 +824,7 @@ void UserMakeLock(User * u) {
     size_t iAllignLen = Allign1024(63);
     u->sendbuf = (char *) malloc(iAllignLen);
     if(u->sendbuf == NULL) {              
-		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot allocate 63/"+string(iAllignLen)+
+		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot allocate 63/"+string((uint64_t)iAllignLen)+
 			" bytes of memory for new sendbuf in UserPutInSendBuf!";
 		AppendSpecialLog(sDbgstr);
         u->sbdatalen = 0;
@@ -929,7 +929,7 @@ bool UserDoRecv(User * u) {
         size_t iAllignLen = Allign512(i32bytes);
     	u->recvbuf = (char *) malloc(iAllignLen);
         if(u->recvbuf == NULL) {
-			string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot allocate "+string(i32bytes)+"/"+string(iAllignLen)+
+			string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot allocate "+string(i32bytes)+"/"+string((uint64_t)iAllignLen)+
 				" bytes of memory for new recvbuf in UserDoRecv!";
 			AppendSpecialLog(sDbgstr);
 			u->recvbuflen = 0;
@@ -942,8 +942,8 @@ bool UserDoRecv(User * u) {
         size_t iAllignLen = Allign512(u->rbdatalen+i32bytes);
         u->recvbuf = (char *) realloc(u->recvbuf, iAllignLen);
 		if(u->recvbuf == NULL) {
-			string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot reallocate "+string(i32bytes)+"/"+string(u->rbdatalen)+"/"+string(iAllignLen)+
-				" bytes of memory for new recvbuf in UserDoRecv1!";
+			string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot reallocate "+
+                string(i32bytes)+"/"+string(u->rbdatalen)+"/"+string((uint64_t)iAllignLen)+" bytes of memory for new recvbuf in UserDoRecv1!";
 			AppendSpecialLog(sDbgstr);
             u->recvbuflen = 0;
 			return false;
@@ -955,8 +955,8 @@ bool UserDoRecv(User * u) {
             if(u->recvbuflen > iAllignLen-1) {
                 u->recvbuf = (char *) realloc(u->recvbuf, iAllignLen);
         		if(u->recvbuf == NULL) {
-					string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot reallocate "+string(i32bytes)+"/"+string(u->rbdatalen)+"/"+string(iAllignLen)+
-						" bytes of memory for new recvbuf in UserDoRecv2!";
+					string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot reallocate "+
+                        string(i32bytes)+"/"+string(u->rbdatalen)+"/"+string((uint64_t)iAllignLen)+" bytes of memory for new recvbuf in UserDoRecv2!";
 					AppendSpecialLog(sDbgstr);
                     u->recvbuflen = 0;
         	        return false;
@@ -1219,7 +1219,7 @@ bool UserPutInSendBuf(User * u, const char * Text, const size_t &iTxtLen) {
         size_t iAllignLen = Allign1024(iTxtLen);
     	u->sendbuf = (char *) malloc(iAllignLen);
         if(u->sendbuf == NULL) {              
-			string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot allocate "+string(iTxtLen)+"/"+string(iAllignLen)+
+			string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot allocate "+string((uint64_t)iTxtLen)+"/"+string((uint64_t)iAllignLen)+
 				" bytes of memory for new sendbuf in UserPutInSendBuf! "+string(Text, iTxtLen);
 			AppendSpecialLog(sDbgstr);
             u->sbdatalen = 0;
@@ -1247,13 +1247,13 @@ bool UserPutInSendBuf(User * u, const char * Text, const size_t &iTxtLen) {
                     // we want to drop the slow user
                     UserClose(u);
 					UdpDebug->Broadcast("[BUF] " + string(u->Nick, u->NickLen) + " (" + string(u->IP, u->ui8IpLen) +
-						") SendBuffer overflow (AL:"+string(iAllignLen)+"[SL:"+string(u->sbdatalen)+"|NL:"+
-						string(iTxtLen)+"|FL:"+string(u->sbplayhead-u->sendbuf)+"]/ML:"+string(iMaxBufLen)+"). User disconnected.");
+						") SendBuffer overflow (AL:"+string((uint64_t)iAllignLen)+"[SL:"+string(u->sbdatalen)+"|NL:"+
+						string((uint64_t)iTxtLen)+"|FL:"+string((uint64_t)(u->sbplayhead-u->sendbuf))+"]/ML:"+string((uint64_t)iMaxBufLen)+"). User disconnected.");
             		return false;
                 } else {
     				UdpDebug->Broadcast("[BUF] " + string(u->Nick, u->NickLen) + " (" + string(u->IP, u->ui8IpLen) +
-    					") SendBuffer overflow (AL:"+string(iAllignLen)+"[SL:"+string(u->sbdatalen)+"|NL:"+
-                        string(iTxtLen)+"|FL:"+string(u->sbplayhead-u->sendbuf)+"]/ML:"+string(iMaxBufLen)+
+    					") SendBuffer overflow (AL:"+string((uint64_t)iAllignLen)+"[SL:"+string(u->sbdatalen)+"|NL:"+
+                        string((uint64_t)iTxtLen)+"|FL:"+string((uint64_t)(u->sbplayhead-u->sendbuf))+"]/ML:"+string((uint64_t)iMaxBufLen)+
                         "). Buffer cleared - user stays online.");
                 }
 
@@ -1294,8 +1294,8 @@ bool UserPutInSendBuf(User * u, const char * Text, const size_t &iTxtLen) {
                 size_t iAllignTxtLen = Allign1024(iTxtLen+u->sbdatalen);
                 u->sendbuf = (char *) realloc(u->sendbuf, iAllignTxtLen);
                 if(u->sendbuf == NULL) {
-					string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot reallocate "+string(iTxtLen)+"/"+string(u->sbdatalen)+"/"+string(iAllignLen)+
-						" bytes of memory in UserPutInSendBuf-keepslow! "+string(Text, iTxtLen);
+					string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot reallocate "+
+                        string((uint64_t)iTxtLen)+"/"+string(u->sbdatalen)+"/"+string((uint64_t)iAllignLen)+" bytes of memory in UserPutInSendBuf-keepslow! "+string(Text, iTxtLen);
 					AppendSpecialLog(sDbgstr);
                     u->sbdatalen = 0;
                     return false;
@@ -1306,8 +1306,8 @@ bool UserPutInSendBuf(User * u, const char * Text, const size_t &iTxtLen) {
         		uint32_t iOffSet = (uint32_t)(u->sbplayhead-u->sendbuf);
                 u->sendbuf = (char *) realloc(u->sendbuf, iAllignLen);
         		if(u->sendbuf == NULL) {
-					string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot reallocate "+string(iTxtLen)+"/"+string(iAllignLen)+
-						" bytes of memory in UserPutInSendBuf! "+string(Text, iTxtLen);
+					string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot reallocate "+
+                        string((uint64_t)iTxtLen)+"/"+string((uint64_t)iAllignLen)+" bytes of memory in UserPutInSendBuf! "+string(Text, iTxtLen);
 					AppendSpecialLog(sDbgstr);
                     u->sbdatalen = 0;
         	        return false;
@@ -1323,8 +1323,8 @@ bool UserPutInSendBuf(User * u, const char * Text, const size_t &iTxtLen) {
             	uint32_t offset = (uint32_t)(u->sbplayhead-u->sendbuf);
                 u->sendbuf = (char *) realloc(u->sendbuf, iAllignLen);
         		if(u->sendbuf == NULL) {
-					string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot reallocate "+string(iTxtLen)+"/"+string(iAllignLen)+
-						" bytes of memory for new sendbuf in UserPutInSendBuf1! "+string(Text, iTxtLen);
+					string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot reallocate "+
+                        string((uint64_t)iTxtLen)+"/"+string((uint64_t)iAllignLen)+" bytes of memory for new sendbuf in UserPutInSendBuf1! "+string(Text, iTxtLen);
 					AppendSpecialLog(sDbgstr);
                     u->sbdatalen = 0;
         	        return false;
@@ -1356,10 +1356,12 @@ bool UserTry2Send(User * u) {
 	int32_t len = u->sbdatalen - offset;
 
 	if(offset < 0 || len < 0) {
-		string sDbg = "[ERR] Negative send values!\nSendBuf: " + string((uint64_t)&u->sendbuf)+
-			"\nPlayHead: " + string((uint64_t)&u->sbplayhead)+ "\nDataLen: " + string(u->sbdatalen);
-		Memo(sDbg);
-		AppendSpecialLog(sDbg);
+        char msg[128];
+        int imsgLen = sprintf(msg, "[ERR] Negative send values!\nSendBuf: %p\nPlayHead: %p\nDataLen: %u", u->sendbuf, u->sbplayhead, u->sbdatalen);
+        if(CheckSprintf(imsgLen, 128, "UserTry2Send") == true) {
+    		Memo(msg);
+    		AppendSpecialLog(msg);
+        }
         return false;
     }
 
@@ -1418,7 +1420,7 @@ void UserSetNick(User * u, char * newNick, const size_t &iNewNickLen) {
     
     u->Nick = (char *) malloc(iNewNickLen+1);
     if(u->Nick == NULL) {
-		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetNick cannot allocate "+string(iNewNickLen+1)+
+		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetNick cannot allocate "+string((uint64_t)(iNewNickLen+1))+
 			" bytes of memory for Nick! "+string(newNick, iNewNickLen);
 		AppendSpecialLog(sDbgstr);
         return;
@@ -1441,7 +1443,7 @@ void UserSetMyInfoTag(User * u, char * newInfoTag, const size_t &MyInfoTagLen) {
     
     u->MyInfoTag = (char *) malloc(MyInfoTagLen+1);
     if(u->MyInfoTag == NULL) {
-		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetMyInfoTag cannot allocate "+string(MyInfoTagLen+1)+
+		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetMyInfoTag cannot allocate "+string((uint64_t)(MyInfoTagLen+1))+
 			" bytes of memory for MyInfoTag! "+string(newInfoTag, MyInfoTagLen);
 		AppendSpecialLog(sDbgstr);
         return;
@@ -1465,7 +1467,7 @@ static void UserSetMyInfo(User * u, char * newInfo, const size_t &MyInfoLen) {
 
     u->MyInfo = (char *) malloc(MyInfoLen+1);
     if(u->MyInfo == NULL) {
-		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetMyInfo cannot allocate "+string(MyInfoLen+1)+
+		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetMyInfo cannot allocate "+string((uint64_t)(MyInfoLen+1))+
 			" bytes of memory for MyInfo! "+string(newInfo, MyInfoLen);
 		AppendSpecialLog(sDbgstr);
         return;
@@ -1485,7 +1487,7 @@ void UserSetVersion(User * u, char * newVer) {
     size_t iLen = strlen(newVer);
     u->Version = (char *) malloc(iLen+1);
     if(u->Version == NULL) {
-		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetVersion cannot allocate "+string(iLen+1)+
+		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetVersion cannot allocate "+string((uint64_t)(iLen+1))+
 			" bytes of memory for Version! "+string(newVer, iLen);
 		AppendSpecialLog(sDbgstr);
         return;
@@ -1504,7 +1506,7 @@ void UserSetPasswd(User * u, char * newPass) {
     size_t iLen = strlen(newPass);
     u->uLogInOut->Password = (char *) malloc(iLen+1);
     if(u->uLogInOut->Password == NULL) {
-		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetPasswd cannot allocate "+string(iLen+1)+
+		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetPasswd cannot allocate "+string((uint64_t)(iLen+1))+
 			" bytes of memory for Password! "+string(newPass, iLen);
 		AppendSpecialLog(sDbgstr);
         return;
@@ -1522,7 +1524,7 @@ void UserSetLastChat(User * u, char * newData, const size_t &iLen) {
     
     u->sLastChat = (char *) malloc(iLen+1);
     if(u->sLastChat == NULL) {
-		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetLastChat cannot allocate "+string(iLen+1)+
+		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetLastChat cannot allocate "+string((uint64_t)(iLen+1))+
 			" bytes of memory for sLastChat! "+string(newData, iLen);
 		AppendSpecialLog(sDbgstr);
         return;
@@ -1545,7 +1547,7 @@ void UserSetLastPM(User * u, char * newData, const size_t &iLen) {
 
     u->sLastPM = (char *) malloc(iLen+1);
     if(u->sLastPM == NULL) {
-		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetLastPM cannot allocate "+string(iLen+1)+
+		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetLastPM cannot allocate "+string((uint64_t)(iLen+1))+
 			" bytes of memory for sLastPM! "+string(newData, iLen);
 		AppendSpecialLog(sDbgstr);
         return;
@@ -1569,7 +1571,7 @@ void UserSetLastSearch(User * u, char * newData, const size_t &iLen) {
     
     u->sLastSearch = (char *) malloc(iLen+1);
     if(u->sLastSearch == NULL) {
-		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetLastSearch cannot allocate "+string(iLen+1)+
+		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetLastSearch cannot allocate "+string((uint64_t)(iLen+1))+
 			" bytes of memory for sLastSearch! "+string(newData, iLen);
         AppendSpecialLog(sDbgstr);
         return;
@@ -1604,7 +1606,7 @@ void UserSetKickMsg(User * u, char * kickmsg, size_t iLen/* = 0*/) {
     if(iLen < 256) {
         u->uLogInOut->sKickMsg = (char *) malloc(iLen+1);
         if(u->uLogInOut->sKickMsg == NULL) {
-			string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetKickMsg cannot allocate "+string(iLen+1)+
+			string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserSetKickMsg cannot allocate "+string((uint64_t)(iLen+1))+
 				" bytes of memory for sKickMsg! "+string(kickmsg, iLen);
 			AppendSpecialLog(sDbgstr);
             return;
@@ -2173,8 +2175,8 @@ void UserAddPrcsdCmd(User * u, unsigned char cType, char *sCommand, const size_t
             if(cur->To == to) {
                 cur->sCommand = (char *) realloc(cur->sCommand, cur->iLen+iCommandLen+1);
                 if(cur->sCommand == NULL) {
-					string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserAddPrcsdCmd cannot reallocate "+string(iCommandLen)+"/"+string(cur->iLen)+"/"+string(cur->iLen+iCommandLen+1)+
-						" bytes of memory! "+string(sCommand, iCommandLen);
+					string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserAddPrcsdCmd cannot reallocate "+
+                        string((uint64_t)iCommandLen)+"/"+string(cur->iLen)+"/"+string((uint64_t)(cur->iLen+iCommandLen+1))+" bytes of memory! "+string(sCommand, iCommandLen);
 					AppendSpecialLog(sDbgstr);
                     return;
                 }
@@ -2195,7 +2197,7 @@ void UserAddPrcsdCmd(User * u, unsigned char cType, char *sCommand, const size_t
 
         newcmd->sCommand = (char *) malloc(iCommandLen+1);
         if(newcmd->sCommand == NULL) {
-			string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserAddPrcsdCmd cannot allocate "+string(iCommandLen+1)+
+			string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserAddPrcsdCmd cannot allocate "+string((uint64_t)(iCommandLen+1))+
 				" bytes of memory! "+string(sCommand, iCommandLen);
 			AppendSpecialLog(sDbgstr);
             return;
@@ -2242,7 +2244,7 @@ void UserAddPrcsdCmd(User * u, unsigned char cType, char *sCommand, const size_t
 
     newcmd->sCommand = (char *) malloc(iCommandLen+1);
     if(newcmd->sCommand == NULL) {
-		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserAddPrcsdCmd cannot allocate "+string(iCommandLen+1)+
+		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") UserAddPrcsdCmd cannot allocate "+string((uint64_t)(iCommandLen+1))+
 			" bytes of memory! "+string(sCommand, iCommandLen);
 		AppendSpecialLog(sDbgstr);
         return;
