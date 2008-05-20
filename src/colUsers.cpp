@@ -476,7 +476,7 @@ void classUsers::SendChat2All(User * cur, char * data, const size_t &iChatLen) {
                     size_t iWantLen = iChatLen+17;
                     char *MSG = (char *) malloc(iChatLen+17);
                     if(MSG == NULL) {
-						string sDbgstr = "[BUF] Cannot allocate "+string(iWantLen)+" bytes of memory in classUsers::SendChat2All! "+
+						string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)iWantLen)+" bytes of memory in classUsers::SendChat2All! "+
 							string(data, iChatLen);
                         AppendSpecialLog(sDbgstr);
                         return;

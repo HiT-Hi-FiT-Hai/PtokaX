@@ -43,6 +43,7 @@
 #include "IP2Country.h"
 #include "LuaScript.h"
 #include "RegThread.h"
+#include "regtmrinc.h"
 #include "ResNickManager.h"
 #include "ServerThread.h"
 #include "TextFileManager.h"

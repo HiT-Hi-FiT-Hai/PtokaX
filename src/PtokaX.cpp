@@ -26,6 +26,9 @@
 #include "SettingManager.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
+#include "regtmrinc.h"
+#include "scrtmrinc.h"
+//---------------------------------------------------------------------------
 #ifdef TIXML_USE_STL
 	#undef TIXML_USE_STL
 #endif

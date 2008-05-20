@@ -38,7 +38,7 @@ RegUser::RegUser(char * Nick, char * Pass, const uint16_t &iRegProfile) {
     size_t iNickLen = strlen(Nick);
     sNick = (char *) malloc(iNickLen+1);
     if(sNick == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
+		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
 			" bytes of memory for sNick in RegUser::RegUser!";
         AppendSpecialLog(sDbgstr);
         return;
@@ -49,7 +49,7 @@ RegUser::RegUser(char * Nick, char * Pass, const uint16_t &iRegProfile) {
     size_t iPassLen = strlen(Pass);
     sPass = (char *) malloc(iPassLen+1);
     if(sPass == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
+		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iPassLen+1))+
 			" bytes of memory for sPass in RegUser::RegUser!";
 		AppendSpecialLog(sDbgstr);
         return;

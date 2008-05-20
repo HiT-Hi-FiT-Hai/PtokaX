@@ -31,7 +31,7 @@ ResNickMan::ReservedNick::ReservedNick(const char * nick, uint32_t ui32NickHash)
     size_t iNickLen = strlen(nick);
     sNick = (char *) malloc(iNickLen+1);
     if(sNick == NULL) {
-        string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
+        string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
 			" bytes of memory in ReservedNick::ReservedNick!";
         AppendSpecialLog(sDbgstr);
         return;

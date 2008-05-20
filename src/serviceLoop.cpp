@@ -39,6 +39,8 @@
 //---------------------------------------------------------------------------
 #include "LuaScript.h"
 #include "RegThread.h"
+#include "regtmrinc.h"
+#include "scrtmrinc.h"
 //---------------------------------------------------------------------------
 theLoop *srvLoop = NULL;
 //---------------------------------------------------------------------------
@@ -422,7 +424,7 @@ void theLoop::ReceiveLoop() {
                     size_t iNdLen = curUser->sbdatalen-iBeforeLuaLen;
                     curUser->uLogInOut->sLockUsrConn = (char *) malloc(iNdLen+1);
                     if(curUser->uLogInOut->sLockUsrConn == NULL) {
-						string sDbgstr = "[BUF] Cannot allocate "+string(iNdLen+1)+
+						string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNdLen+1))+
 							" bytes of memory for sLockUsrConn in theLoop::ReceiveLoop!";
 						AppendSpecialLog(sDbgstr);
                 		return;

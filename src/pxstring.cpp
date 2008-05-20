@@ -37,7 +37,7 @@ void string::stralloc(const char * sTxt, const size_t & iLen) {
 
 	sData = (char *)malloc(iDataLen+1);
 	if(sData == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(iDataLen+1)+
+		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+1))+
 			" bytes of memory for sData in string::stralloc(const char *, const size_t &)!";
 		AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
@@ -107,7 +107,7 @@ string::string(const string & sStr1, const string & sStr2) {
 
     sData = (char *)malloc(iDataLen+1);
     if(sData == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(iDataLen+1)+
+		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+1))+
             " bytes of memory for sData in string::string(const string &, const string &)!";
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
@@ -130,7 +130,7 @@ string::string(const char * sTxt, const string & sStr) {
 
     sData = (char *)malloc(iDataLen+1);
     if(sData == NULL) {
-        string sDbgstr = "[BUF] Cannot allocate "+string(iDataLen+1)+
+        string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+1))+
             " bytes of memory for sData in string::string(const char *, const string &)!";
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
@@ -153,7 +153,7 @@ string::string(const string & sStr, const char * sTxt) {
 
     sData = (char *)malloc(iDataLen+1);
     if(sData == NULL) {
-        string sDbgstr = "[BUF] Cannot allocate "+string(iDataLen+1)+
+        string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+1))+
             " bytes of memory for sData in string::string(const string &, const char *)!";
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
@@ -209,7 +209,7 @@ string & string::operator+=(const char * sTxt) {
         sData = (char *)realloc(sData, iDataLen+iLen+1);
     }
     if(sData == NULL) {
-        string sDbgstr = "[BUF] Cannot allocate "+string(iDataLen+iLen+1)+
+        string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+iLen+1))+
             " bytes of memory for sData in string::operator+=(const char *)!";
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
@@ -234,7 +234,7 @@ string & string::operator+=(const string & sStr) {
         sData = (char *)realloc(sData, iDataLen+sStr.size()+1);
     }
     if(sData == NULL) {
-        string sDbgstr = "[BUF] Cannot allocate "+string(iDataLen+sStr.size()+1)+
+        string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+sStr.size()+1))+
             " bytes of memory for sData in string::operator+=(const char *)!";
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);

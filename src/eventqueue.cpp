@@ -105,7 +105,7 @@ void eventq::AddNormal(uint8_t ui8Id, char * sMsg) {
         size_t iLen = strlen(sMsg);
 		newevent->sMsg = (char *) malloc(iLen+1);
 		if(newevent->sMsg == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iLen+1))+
 				" bytes of memory for newevent->sMsg in eventq::AddNormal!";
 			AppendSpecialLog(sDbgstr);
             delete newevent;
@@ -146,7 +146,7 @@ void eventq::AddThread(uint8_t ui8Id, char * sMsg, const uint32_t &ui32Hash/* = 
         size_t iLen = strlen(sMsg);
 		newevent->sMsg = (char *) malloc(iLen+1);
 		if(newevent->sMsg == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iLen+1))+
 				" bytes of memory for newevent->sMsg in eventq::AddThread!";
 			AppendSpecialLog(sDbgstr);
             delete newevent;

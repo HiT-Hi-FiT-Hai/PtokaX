@@ -343,7 +343,7 @@ ProfileItem * ProfileManager::CreateProfile(const char * name) {
     size_t iLen = strlen(name);
     newProfile->sName = (char *) malloc(iLen+1);
     if(newProfile->sName == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(iLen)+
+		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)iLen)+
 			" bytes of memory in ProfileManager::CreateProfile for newProfile->sName!";
 		AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
@@ -450,7 +450,7 @@ void ProfileManager::ChangeProfileName(const uint16_t &iProfile, char * sName, c
 
     ProfilesTable[iProfile]->sName = (char *) malloc(iLen+1);
     if(ProfilesTable[iProfile]->sName == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(iLen)+
+		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)iLen)+
             " bytes of memory in ProfileManager::ChangeProfileName for ProfilesTable[iProfile]->sName!";
 		AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);

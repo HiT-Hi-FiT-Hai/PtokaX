@@ -412,7 +412,7 @@ static int ChangeReg(lua_State * L) {
 
         reg->sPass = (char *) malloc(iPassLen+1);
         if(reg->sPass == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iPassLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iPassLen+1))+
                 " bytes of memory for sPass in ChangeReg!";
 			AppendSpecialLog(sDbgstr);
     		lua_settop(L, 0);

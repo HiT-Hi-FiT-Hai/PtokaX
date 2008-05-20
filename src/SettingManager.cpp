@@ -889,7 +889,7 @@ void SetMan::SetText(size_t iTxtId, const char * sTxt, const size_t &iLen) {
     if(iLen != 0) {
         sTexts[iTxtId] = (char *) malloc(iLen+1);
         if(sTexts[iTxtId] == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iLen+1))+
 				" bytes of memory in SetMan::SetText!";
 			AppendSpecialLog(sDbgstr);
             exit(EXIT_FAILURE);
@@ -1093,7 +1093,7 @@ void SetMan::UpdateMOTD() {
 
             sPreTexts[SETPRETXT_MOTD] = (char *) malloc(iNeededMem);
             if(sPreTexts[SETPRETXT_MOTD] == NULL) {
-				string sDbgstr = "[BUF] Cannot allocate "+string(iNeededMem)+
+				string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)iNeededMem)+
 					" bytes of memory in SetMan::UpdateMOTD!";
 				AppendSpecialLog(sDbgstr);
                 exit(EXIT_FAILURE);
@@ -1110,7 +1110,7 @@ void SetMan::UpdateMOTD() {
 
             sPreTexts[SETPRETXT_MOTD] = (char *) malloc(iNeededMem);
             if(sPreTexts[SETPRETXT_MOTD] == NULL) {
-				string sDbgstr = "[BUF] Cannot allocate "+string(iNeededMem)+
+				string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)iNeededMem)+
 					" bytes of memory in SetMan::UpdateMOTD!";
 				AppendSpecialLog(sDbgstr);
                 exit(EXIT_FAILURE);
@@ -1228,7 +1228,7 @@ void SetMan::UpdateRedirectAddress() {
     size_t iNeededLen = 13+ui16TextsLens[SETTXT_REDIRECT_ADDRESS];
     sPreTexts[SETPRETXT_REDIRECT_ADDRESS] = (char *) malloc(iNeededLen);
     if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(iNeededLen)+
+		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)iNeededLen)+
 			" bytes of memory in SetMan::UpdateRedirectAddress!";
 		AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);

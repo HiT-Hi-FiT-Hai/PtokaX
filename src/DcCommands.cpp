@@ -957,7 +957,7 @@ void cDcCommands::BotINFO(User * curUser, char * sData, const uint32_t &iLen) {
 		return;
 	}
 
-	int imsgLen = sprintf(msg, "$HubINFO %s$%s:%u$%s.px.$%d$%" PRIu64 "64$%d$%d$PtokaX$%s|", SettingManager->sTexts[SETTXT_HUB_NAME],
+	int imsgLen = sprintf(msg, "$HubINFO %s$%s:%u$%s.px.$%d$%" PRIu64 "$%d$%d$PtokaX$%s|", SettingManager->sTexts[SETTXT_HUB_NAME],
 		SettingManager->sTexts[SETTXT_HUB_ADDRESS], SettingManager->iPortNumbers[0],
 		SettingManager->sTexts[SETTXT_HUB_DESCRIPTION] == NULL ? "" : SettingManager->sTexts[SETTXT_HUB_DESCRIPTION],
         SettingManager->iShorts[SETSHORT_MAX_USERS], SettingManager->ui64MinShare, SettingManager->iShorts[SETSHORT_MIN_SLOTS_LIMIT],
@@ -1708,8 +1708,8 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
                 size_t iWantLen = iLen+curUser->NickLen+15+64;
                 char *MSG = (char *) malloc(iWantLen);
                 if(MSG == NULL) {
-					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-						" bytes of memory for DcCommands::Search!";
+					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                        string((uint64_t)iWantLen)+ " bytes of memory for DcCommands::Search!";
                     AppendSpecialLog(sDbgstr);
                     return;
                 }
@@ -1807,8 +1807,8 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
                     size_t iWantLen = iLen+curUser->NickLen+15+64;
                     char *MSG = (char *) malloc(iWantLen);
                     if(MSG == NULL) {
-						string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-							" bytes of memory for DcCommands::Search3!";
+						string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                            string((uint64_t)iWantLen)+" bytes of memory for DcCommands::Search3!";
 						AppendSpecialLog(sDbgstr);
                         return;
                     }
@@ -1947,8 +1947,8 @@ bool cDcCommands::MyINFODeflood(User * curUser, char * sData, const uint32_t &iL
             size_t iWantLen = iLen+curUser->NickLen+15+64;
             char *MSG = (char *) malloc(iWantLen);
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-					" bytes of memory for DcCommands::MyINFODeflood!";
+				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::MyINFODeflood!";
 				AppendSpecialLog(sDbgstr);
 				return false;
             }
@@ -2060,8 +2060,8 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
             size_t iWantLen = iLen+curUser->NickLen+15+64;
             char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-					" bytes of memory for DcCommands::MyPass!";
+				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::MyPass!";
 				AppendSpecialLog(sDbgstr);
                 return;
             }
@@ -2316,8 +2316,8 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
                 size_t iWantLen = iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64;
                 char *MSG = (char *) malloc(iWantLen);
                 if(MSG == NULL) {
-					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-						" bytes of memory for DcCommands::OpForceMove!";
+					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                        string((uint64_t)iWantLen)+" bytes of memory for DcCommands::OpForceMove!";
 					AppendSpecialLog(sDbgstr);
                     return;
                 }
@@ -2452,8 +2452,8 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &i
             size_t iWantLen = iLen+curUser->NickLen+15+64;
             char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-					" bytes of memory for DcCommands::RevConnectToMe!";
+				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::RevConnectToMe!";
 				AppendSpecialLog(sDbgstr);
                 return;
             }
@@ -2502,8 +2502,8 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &i
             size_t iWantLen = iLen+curUser->NickLen+15+64;
             char *MSG = (char *) malloc(iWantLen);
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-					" bytes of memory for DcCommands::RevConnectToMe!";
+				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::RevConnectToMe!";
 				AppendSpecialLog(sDbgstr);
 				return;
             }
@@ -2583,8 +2583,8 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
             size_t iWantLen = iLen+curUser->NickLen+15+64;
             char *MSG = (char *) malloc(iWantLen);
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-					" bytes of memory for DcCommands::SR!";
+				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::SR!";
 				AppendSpecialLog(sDbgstr);
 				return;
             }
@@ -2613,8 +2613,8 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
             size_t iWantLen = iLen+curUser->NickLen+15+64;
             char *MSG = (char *) malloc(iWantLen);
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-					" bytes of memory for DcCommands::SR!";
+				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::SR!";
 				AppendSpecialLog(sDbgstr);
                 return;
             }
@@ -2841,8 +2841,8 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
             size_t iWantLen = iLen+curUser->NickLen+15+64;
             char *MSG = (char *) malloc(iWantLen);
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-					" bytes of memory for DcCommands::To!";
+				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::To!";
                 AppendSpecialLog(sDbgstr);
                 return;
             }
@@ -2874,8 +2874,8 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
                 size_t iWantLen = iLen+curUser->NickLen+15+64;
                 char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
                 if(MSG == NULL) {
-					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-						" bytes of memory for DcCommands::To1!";
+					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                        string((uint64_t)iWantLen)+" bytes of memory for DcCommands::To1!";
 					AppendSpecialLog(sDbgstr);
                     return;
                 }
@@ -3160,8 +3160,8 @@ bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen
             size_t iWantLen = iLen+curUser->NickLen+15+64;
             char *MSG = (char *) malloc(iWantLen);
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-					" bytes of memory for DcCommands::ChatDeflood!";
+				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::ChatDeflood!";
 				AppendSpecialLog(sDbgstr);
                 return false;
             }
@@ -3325,8 +3325,8 @@ void cDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, const
                             size_t iWantLen = iLen+96;
                             char *MSG = (char *) malloc(iWantLen);
                             if(MSG == NULL) {
-								string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-									" bytes of memory for DcCommands::Chat!";
+								string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::Chat!";
 								AppendSpecialLog(sDbgstr);
                                 return;
                             }
@@ -3457,8 +3457,8 @@ void cDcCommands::Unknown(User * curUser, char * sData, const uint32_t &iLen) {
             size_t iWantLen = iLen+curUser->NickLen+15+64;
             char *MSG = (char *) malloc(iWantLen);
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
-					" bytes of memory for DcCommands::Unknown!";
+				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::Unknown!";
 				AppendSpecialLog(sDbgstr);
                 return;
             }
@@ -3563,8 +3563,8 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick5") == true) {
                     UserSendChar(curUser, msg, imsgLen);
                 }
-                imsgLen = sprintf(msg, "[SYS] User %s (%s) not allowed to send password (%ld) - user closed.", curUser->Nick, curUser->IP, 
-                    (Reg->tLastBadPass+(60*iMinutes2Wait))-acc_time);
+                imsgLen = sprintf(msg, "[SYS] User %s (%s) not allowed to send password (%" PRIu64 ") - user closed.", curUser->Nick, curUser->IP, 
+                    (uint64_t)((Reg->tLastBadPass+(60*iMinutes2Wait))-acc_time));
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick6") == true) {
                     UdpDebug->Broadcast(msg, imsgLen);
                 }

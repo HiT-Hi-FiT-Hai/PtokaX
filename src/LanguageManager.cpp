@@ -35,7 +35,7 @@ LangMan::LangMan(void) {
         size_t TextLen = strlen(LangStr[i]);
         sTexts[i] = (char *) malloc(TextLen+1);
         if(sTexts[i] == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(TextLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(TextLen+1))+
 				" bytes of memory in LangMan::LangMan!";
             AppendSpecialLog(sDbgstr);
             exit(EXIT_FAILURE);
@@ -64,7 +64,7 @@ void LangMan::LoadLanguage() {
             size_t TextLen = strlen(LangStr[i]);
             sTexts[i] = (char *) malloc(TextLen+1);
             if(sTexts[i] == NULL) {
-				string sDbgstr = "[BUF] Cannot allocate "+string(TextLen+1)+
+				string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(TextLen+1))+
 					" bytes of memory in LangMan::LoadLanguage!";
 				AppendSpecialLog(sDbgstr);
                 return;
@@ -98,7 +98,7 @@ void LangMan::LoadLanguage() {
                                 
                                 sTexts[i] = (char *) malloc(iLen+1);
                                 if(sTexts[i] == NULL) {
-                                    string sDbgstr = "[BUF] Cannot allocate "+string(iLen+1)+
+                                    string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iLen+1))+
 										" bytes of memory in LangMan::LoadLanguage1!";
 									AppendSpecialLog(sDbgstr);
                                     return;

@@ -69,7 +69,7 @@ ScriptBot::ScriptBot(char * Nick, const size_t &iNickLen, char * Description, co
 
     sNick = (char *) malloc(iNickLen+1);
     if(sNick == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
+		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
 			" bytes of memory for sNick in ScriptBot::ScriptBot!";
 		AppendSpecialLog(sDbgstr);
 		return;
@@ -83,7 +83,7 @@ ScriptBot::ScriptBot(char * Nick, const size_t &iNickLen, char * Description, co
 
     sMyINFO = (char *) malloc(iWantLen);
     if(sMyINFO == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(iWantLen)+
+		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)iWantLen)+
 			" bytes of memory for sMyINFO in ScriptBot::ScriptBot!";
 		AppendSpecialLog(sDbgstr);
 		return;
@@ -115,7 +115,7 @@ ScriptTimer::ScriptTimer(char * sFunctName, const size_t &iLen, Script * cur) {
 	if(sFunctName != NULL) {
         sFunctionName = (char *) malloc(iLen+1);
         if(sFunctionName == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iLen+1))+
 				" bytes of memory for sFunctionName in ScriptTimer::ScriptTimer!";
 			AppendSpecialLog(sDbgstr);
 			return;
@@ -156,7 +156,7 @@ Script::Script(char *Name, const bool &enabled) {
 
     sName = (char *) malloc(iLen+1);
     if(sName == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(iLen+1)+
+		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iLen+1))+
 			" bytes of memory in Script::Script!";
         AppendSpecialLog(sDbgstr);
 		UdpDebug->Broadcast(sDbgstr);

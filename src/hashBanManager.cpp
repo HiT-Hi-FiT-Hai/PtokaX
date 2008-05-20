@@ -1076,7 +1076,7 @@ void hashBanMan::Load(void) {
                             size_t iNickLen = strlen(nick);
                             Ban->sNick = (char *) malloc(iNickLen+1);
                             if(Ban->sNick == NULL) {
-								string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
+								string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
 									" bytes of memory for sNick in hashBanMan::LoadXmlBanList!";
 								AppendSpecialLog(sDbgstr);
                                 exit(EXIT_FAILURE);
@@ -1111,7 +1111,7 @@ void hashBanMan::Load(void) {
                         } else {
                             Ban->sReason = (char *) malloc(iReasonLen+1);
                             if(Ban->sReason == NULL) {
-								string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen+1)+
+								string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen+1))+
 									" bytes of memory for sReason1 in hashBanMan::LoadXmlBanList!";
 								AppendSpecialLog(sDbgstr);
                                 exit(EXIT_FAILURE);
@@ -1137,7 +1137,7 @@ void hashBanMan::Load(void) {
                         } else {
                             Ban->sBy = (char *) malloc(iByLen+1);
                             if(Ban->sBy == NULL) {
-								string sDbgstr = "[BUF] Cannot allocate "+string(iByLen+1)+
+								string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
 									" bytes of memory for sBy1 in hashBanMan::LoadXmlBanList!";
                                 AppendSpecialLog(sDbgstr);
                                 exit(EXIT_FAILURE);
@@ -1270,7 +1270,7 @@ void hashBanMan::Load(void) {
                         } else {
                             RangeBan->sReason = (char *) malloc(iReasonLen+1);
                             if(RangeBan->sReason == NULL) {
-								string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen+1)+
+								string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen+1))+
 									" bytes of memory for sReason3 in hashBanMan::LoadXmlBanList!";
 								AppendSpecialLog(sDbgstr);
                                 exit(EXIT_FAILURE);
@@ -1296,7 +1296,7 @@ void hashBanMan::Load(void) {
                         } else {
                             RangeBan->sBy = (char *) malloc(iByLen+1);
                             if(RangeBan->sBy == NULL) {
-								string sDbgstr = "[BUF] Cannot allocate "+string(iByLen+1)+
+								string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
 									" bytes of memory for sBy3 in hashBanMan::LoadXmlBanList!";
 								AppendSpecialLog(sDbgstr);
                                 exit(EXIT_FAILURE);
@@ -1570,7 +1570,7 @@ void hashBanMan::CreateTemp(char * first, char * second, const uint32_t &iTime, 
     size_t iNickLen = strlen(second);
     Ban->sNick = (char *) malloc(iNickLen+1);
     if(Ban->sNick == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
+		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
 			" bytes of memory in hashBanMan::CreateTempBan!";
         AppendSpecialLog(sDbgstr);
         delete Ban;
@@ -1613,7 +1613,7 @@ void hashBanMan::CreatePerm(char * first, char * second){
                 size_t iReasonLen = strlen(second);
                 Ban->sReason = (char *) malloc(iReasonLen+1);
                 if(Ban->sReason == NULL) {
-					string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen+1)+
+					string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen+1))+
 						" bytes of memory for sReason in hashBanMan::CreatePermBan!";
 					AppendSpecialLog(sDbgstr);
                     delete Ban;
@@ -1628,7 +1628,7 @@ void hashBanMan::CreatePerm(char * first, char * second){
                 size_t iNickLen = strlen(second);
                 Ban->sNick = (char *) malloc(iNickLen+1);
                 if(Ban->sNick == NULL) {
-					string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
+					string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
 						" bytes of memory for sNick in hashBanMan::CreatePermBan!";
 					AppendSpecialLog(sDbgstr);
                     delete Ban;
@@ -1646,7 +1646,7 @@ void hashBanMan::CreatePerm(char * first, char * second){
         size_t iNickLen = strlen(first);
         Ban->sNick = (char *) malloc(iNickLen+1);
         if(Ban->sNick == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
 				" bytes of memory for sNick1 in hashBanMan::CreatePermBan!";
 			AppendSpecialLog(sDbgstr);
             delete Ban;
@@ -1964,7 +1964,7 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
         size_t iReasonLen = strlen(sReason);
         Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
         if(Ban->sReason == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen > 255 ? 256 : iReasonLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen > 255 ? 256 : iReasonLen+1))+
 				" bytes of memory for sReason in hashBanMan::Ban!";
             AppendSpecialLog(sDbgstr);
             delete Ban;
@@ -1991,7 +1991,7 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
         }
         Ban->sBy = (char *) malloc(iByLen+1);
         if(Ban->sBy == NULL) {
-            string sDbgstr = "[BUF] Cannot allocate "+string(iByLen+1)+
+            string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
 				" bytes of memory for sBy in hashBanMan::Ban!";
             AppendSpecialLog(sDbgstr);
             delete Ban;
@@ -2075,7 +2075,7 @@ char hashBanMan::BanIp(User * u, char * sIp, char * sReason, char * sBy, const b
         size_t iReasonLen = strlen(sReason);
         Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
         if(Ban->sReason == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen > 255 ? 256 : iReasonLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen > 255 ? 256 : iReasonLen+1))+
 				" bytes of memory for sReason in hashBanMan::BanIp!";
 			AppendSpecialLog(sDbgstr);
             delete Ban;
@@ -2102,7 +2102,7 @@ char hashBanMan::BanIp(User * u, char * sIp, char * sReason, char * sBy, const b
         }
         Ban->sBy = (char *) malloc(iByLen+1);
         if(Ban->sBy == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iByLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
 				" bytes of memory for sBy in hashBanMan::BanIp!";
 			AppendSpecialLog(sDbgstr);
             delete Ban;
@@ -2146,7 +2146,7 @@ bool hashBanMan::NickBan(User * u, char * sNick, char * sReason, char * sBy) {
         size_t iNickLen = strlen(sNick);
         Ban->sNick = (char *) malloc(iNickLen+1);
         if(Ban->sNick == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
 				" bytes of memory for sNick in hashBanMan::NickBan!";
 			AppendSpecialLog(sDbgstr);
             delete Ban;
@@ -2211,7 +2211,7 @@ bool hashBanMan::NickBan(User * u, char * sNick, char * sReason, char * sBy) {
         size_t iReasonLen = strlen(sReason);
         Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
         if(Ban->sReason == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen > 255 ? 256 : iReasonLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen > 255 ? 256 : iReasonLen+1))+
 				" bytes of memory for sReason in hashBanMan::NickBan!";
 			AppendSpecialLog(sDbgstr);
             delete Ban;
@@ -2238,7 +2238,7 @@ bool hashBanMan::NickBan(User * u, char * sNick, char * sReason, char * sBy) {
         }
         Ban->sBy = (char *) malloc(iByLen+1);
         if(Ban->sBy == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iByLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
 				" bytes of memory for sBy in hashBanMan::NickBan!";
 			AppendSpecialLog(sDbgstr);
             delete Ban;
@@ -2289,7 +2289,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
         size_t iNickLen = strlen(u->Nick);
         Ban->sNick = (char *) malloc(iNickLen+1);
         if(Ban->sNick == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
 				" bytes of memory for sNick in hashBanMan::TempBan!";
             AppendSpecialLog(sDbgstr);
             delete Ban;
@@ -2421,7 +2421,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
         size_t iReasonLen = strlen(sReason);
         Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
         if(Ban->sReason == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen > 255 ? 256 : iReasonLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen > 255 ? 256 : iReasonLen+1))+
 				" bytes of memory for sReason in hashBanMan::TempBan!";
 			AppendSpecialLog(sDbgstr);
             delete Ban;
@@ -2448,7 +2448,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
         }
         Ban->sBy = (char *) malloc(iByLen+1);
         if(Ban->sBy == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iByLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
 				" bytes of memory for sBy in hashBanMan::TempBan!";
 			AppendSpecialLog(sDbgstr);
             delete Ban;
@@ -2535,7 +2535,7 @@ char hashBanMan::TempBanIp(User * u, char * sIp, char * sReason, char * sBy, con
         size_t iReasonLen = strlen(sReason);
         Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
         if(Ban->sReason == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen > 255 ? 256 : iReasonLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen > 255 ? 256 : iReasonLen+1))+
 				" bytes of memory for sReason in hashBanMan::TempBanIp!";
 			AppendSpecialLog(sDbgstr);
             delete Ban;
@@ -2562,7 +2562,7 @@ char hashBanMan::TempBanIp(User * u, char * sIp, char * sReason, char * sBy, con
         }
         Ban->sBy = (char *) malloc(iByLen+1);
         if(Ban->sBy == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iByLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
 				" bytes of memory for sBy in hashBanMan::TempBanIp!";
 			AppendSpecialLog(sDbgstr);
             delete Ban;
@@ -2606,7 +2606,7 @@ bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy,
         size_t iNickLen = strlen(sNick);
         Ban->sNick = (char *) malloc(iNickLen+1);
         if(Ban->sNick == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
 				" bytes of memory for sNick in hashBanMan::NickTempBan!";
 			AppendSpecialLog(sDbgstr);
             delete Ban;
@@ -2687,7 +2687,7 @@ bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy,
         size_t iReasonLen = strlen(sReason);
         Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
         if(Ban->sReason == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen > 255 ? 256 : iReasonLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen > 255 ? 256 : iReasonLen+1))+
 				" bytes of memory for sReason in hashBanMan::NickTempBan!";
             AppendSpecialLog(sDbgstr);
             delete Ban;
@@ -2714,7 +2714,7 @@ bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy,
         }
         Ban->sBy = (char *) malloc(iByLen+1);
         if(Ban->sBy == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iByLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
 				" bytes of memory for sBy in hashBanMan::NickTempBan!";
 			AppendSpecialLog(sDbgstr);
             delete Ban;
@@ -2940,7 +2940,7 @@ bool hashBanMan::RangeBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char *
         size_t iReasonLen = strlen(sReason);
         RangeBan->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
         if(RangeBan->sReason == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen > 255 ? 256 : iReasonLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen > 255 ? 256 : iReasonLen+1))+
 				" bytes of memory for sReason in hashBanMan::RangeBan!";
 			AppendSpecialLog(sDbgstr);
             delete RangeBan;
@@ -2967,7 +2967,7 @@ bool hashBanMan::RangeBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char *
         }
         RangeBan->sBy = (char *) malloc(iByLen+1);
         if(RangeBan->sBy == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iByLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
 				" bytes of memory for sBy in hashBanMan::RangeBan!";
 			AppendSpecialLog(sDbgstr);
             delete RangeBan;
@@ -3048,7 +3048,7 @@ bool hashBanMan::RangeTempBan(char * sIpFrom, const uint32_t &ui32FromIpHash, ch
         size_t iReasonLen = strlen(sReason);
         RangeBan->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
         if(RangeBan->sReason == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen > 255 ? 256 : iReasonLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen > 255 ? 256 : iReasonLen+1))+
 				" bytes of memory for sReason in hashBanMan::RangeTempBan!";
 			AppendSpecialLog(sDbgstr);
             delete RangeBan;
@@ -3075,7 +3075,7 @@ bool hashBanMan::RangeTempBan(char * sIpFrom, const uint32_t &ui32FromIpHash, ch
         }
         RangeBan->sBy = (char *) malloc(iByLen+1);
         if(RangeBan->sBy == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(iByLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
                 " bytes of memory for sBy in hashBanMan::RangeTempBan!";
 			AppendSpecialLog(sDbgstr);
             delete RangeBan;

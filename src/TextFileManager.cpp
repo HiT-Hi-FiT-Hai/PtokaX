@@ -78,7 +78,7 @@ bool TextFileMan::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = fals
 
             char *MSG = (char *) malloc(iChatLen);
             if(MSG == NULL) {
-        		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot allocate "+string(iChatLen)+
+        		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot allocate "+string((uint64_t)iChatLen)+
         			" bytes of memory in ThubForm::ProcessTextFilesCmd!";
         		AppendSpecialLog(sDbgstr);
                 return true;
@@ -162,7 +162,7 @@ void TextFileMan::RefreshTextFiles() {
 
 				newtxtfile->sCommand = (char *) malloc(strlen(p_dirent->d_name)-3);
 				if(newtxtfile->sCommand == NULL) {
-					string sDbgstr = "[BUF] Cannot allocate "+string(strlen(p_dirent->d_name)-3)+
+					string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(strlen(p_dirent->d_name)-3))+
                         " bytes of memory for sCommand in ThubForm::RefreshTextFiles!";
 					AppendSpecialLog(sDbgstr);
 					closedir(p_txtdir);

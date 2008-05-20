@@ -162,7 +162,7 @@ $(CURDIR)/obj/LuaSetManLib.o: $(CURDIR)/src/LuaSetManLib.cpp $(CURDIR)/src/stdin
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $(CURDIR)/src/LuaSetManLib.cpp -o $(CURDIR)/obj/LuaSetManLib.o
 
 $(CURDIR)/obj/LuaTmrManLib.o: $(CURDIR)/src/LuaTmrManLib.cpp $(CURDIR)/src/stdinc.h $(CURDIR)/src/pxstring.h $(CURDIR)/src/LuaInc.h \
-  $(CURDIR)/src/LuaTmrManLib.h $(CURDIR)/src/LuaScriptManager.h $(CURDIR)/src/utility.h $(CURDIR)/src/LuaScript.h
+  $(CURDIR)/src/LuaTmrManLib.h $(CURDIR)/src/LuaScriptManager.h $(CURDIR)/src/scrtmrinc.h $(CURDIR)/src/utility.h $(CURDIR)/src/LuaScript.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $(CURDIR)/src/LuaTmrManLib.cpp -o $(CURDIR)/obj/LuaTmrManLib.o
 
 $(CURDIR)/obj/LuaUDPDbgLib.o: $(CURDIR)/src/LuaUDPDbgLib.cpp $(CURDIR)/src/stdinc.h $(CURDIR)/src/pxstring.h $(CURDIR)/src/LuaInc.h \
@@ -175,7 +175,7 @@ $(CURDIR)/obj/ProfileManager.o: $(CURDIR)/src/ProfileManager.cpp $(CURDIR)/src/s
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $(CURDIR)/src/ProfileManager.cpp -o $(CURDIR)/obj/ProfileManager.o
 
 $(CURDIR)/obj/PtokaX.o: $(CURDIR)/src/PtokaX.cpp $(CURDIR)/src/stdinc.h $(CURDIR)/src/pxstring.h $(CURDIR)/src/LanguageManager.h $(CURDIR)/src/LanguageIds.h \
-  $(CURDIR)/src/ServerManager.h $(CURDIR)/src/SettingManager.h $(CURDIR)/src/SettingIds.h $(CURDIR)/src/utility.h
+  $(CURDIR)/src/regtmrinc.h $(CURDIR)/src/scrtmrinc.h $(CURDIR)/src/ServerManager.h $(CURDIR)/src/SettingManager.h $(CURDIR)/src/SettingIds.h $(CURDIR)/src/utility.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $(CURDIR)/src/PtokaX.cpp -o $(CURDIR)/obj/PtokaX.o
 
 $(CURDIR)/obj/pxstring.o: $(CURDIR)/src/pxstring.cpp $(CURDIR)/src/stdinc.h $(CURDIR)/src/pxstring.h $(CURDIR)/src/utility.h
@@ -192,7 +192,7 @@ $(CURDIR)/obj/ResNickManager.o: $(CURDIR)/src/ResNickManager.cpp $(CURDIR)/src/s
 $(CURDIR)/obj/ServerManager.o: $(CURDIR)/src/ServerManager.cpp $(CURDIR)/src/stdinc.h $(CURDIR)/src/pxstring.h $(CURDIR)/src/ServerManager.h \
   $(CURDIR)/src/colUsers.h $(CURDIR)/src/DcCommands.h $(CURDIR)/src/eventqueue.h $(CURDIR)/src/globalQueue.h $(CURDIR)/src/hashBanManager.h \
   $(CURDIR)/src/hashUsrManager.h $(CURDIR)/src/hashRegManager.h $(CURDIR)/src/LanguageManager.h $(CURDIR)/src/LanguageIds.h \
-  $(CURDIR)/src/LuaScriptManager.h $(CURDIR)/src/ProfileManager.h $(CURDIR)/src/serviceLoop.h $(CURDIR)/src/SettingManager.h \
+  $(CURDIR)/src/LuaScriptManager.h $(CURDIR)/src/ProfileManager.h $(CURDIR)/src/regtmrinc.h $(CURDIR)/src/serviceLoop.h $(CURDIR)/src/SettingManager.h \
   $(CURDIR)/src/SettingIds.h $(CURDIR)/src/UdpDebug.h $(CURDIR)/src/utility.h $(CURDIR)/src/ZlibUtility.h $(CURDIR)/src/ClientTagManager.h \
   $(CURDIR)/src/HubCommands.h $(CURDIR)/src/IP2Country.h $(CURDIR)/src/RegThread.h $(CURDIR)/src/ResNickManager.h $(CURDIR)/src/ServerThread.h \
   $(CURDIR)/src/TextFileManager.h $(CURDIR)/src/UDPThread.h
@@ -205,8 +205,8 @@ $(CURDIR)/obj/ServerThread.o: $(CURDIR)/src/ServerThread.cpp $(CURDIR)/src/stdin
 
 $(CURDIR)/obj/serviceLoop.o: $(CURDIR)/src/serviceLoop.cpp $(CURDIR)/src/stdinc.h $(CURDIR)/src/pxstring.h $(CURDIR)/src/serviceLoop.h \
   $(CURDIR)/src/colUsers.h $(CURDIR)/src/eventqueue.h $(CURDIR)/src/globalQueue.h $(CURDIR)/src/hashBanManager.h $(CURDIR)/src/hashUsrManager.h \
-  $(CURDIR)/src/LanguageManager.h $(CURDIR)/src/LanguageIds.h $(CURDIR)/src/LuaScriptManager.h $(CURDIR)/src/ProfileManager.h \
-  $(CURDIR)/src/ServerManager.h $(CURDIR)/src/SettingManager.h $(CURDIR)/src/SettingIds.h $(CURDIR)/src/UdpDebug.h $(CURDIR)/src/User.h \
+  $(CURDIR)/src/LanguageManager.h $(CURDIR)/src/LanguageIds.h $(CURDIR)/src/LuaScriptManager.h $(CURDIR)/src/ProfileManager.h $(CURDIR)/src/regtmrinc.h \
+  $(CURDIR)/src/scrtmrinc.h $(CURDIR)/src/ServerManager.h $(CURDIR)/src/SettingManager.h $(CURDIR)/src/SettingIds.h $(CURDIR)/src/UdpDebug.h $(CURDIR)/src/User.h \
   $(CURDIR)/src/utility.h $(CURDIR)/src/ZlibUtility.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $(CURDIR)/src/serviceLoop.cpp -o $(CURDIR)/obj/serviceLoop.o
 
