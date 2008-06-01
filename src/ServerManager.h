@@ -40,7 +40,7 @@ extern double CpuUsage[60], cpuUsage;
 extern uint64_t ui64ActualTick, ui64TotalShare;
 extern uint64_t ui64BytesRead, ui64BytesSent, ui64BytesSentSaved;
 extern uint64_t iLastBytesRead, iLastBytesSent;
-extern uint32_t ui32Joins, ui32Parts, ui32Logged, ui32Peak;
+extern uint32_t ui32Joins, ui32Parts, ui32Logged, ui32Peak, ui32CpuCount;
 extern uint32_t UploadSpeed[60], DownloadSpeed[60];
 extern uint32_t iActualBytesRead, iActualBytesSent;
 extern uint32_t iAverageBytesRead, iAverageBytesSent;

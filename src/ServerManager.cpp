@@ -58,7 +58,7 @@ double CpuUsage[60], cpuUsage = 0;
 uint64_t ui64ActualTick = 0, ui64TotalShare = 0;
 uint64_t ui64BytesRead = 0, ui64BytesSent = 0, ui64BytesSentSaved = 0;
 uint64_t iLastBytesRead = 0, iLastBytesSent = 0;
-uint32_t ui32Joins = 0, ui32Parts = 0, ui32Logged = 0, ui32Peak = 0;
+uint32_t ui32Joins = 0, ui32Parts = 0, ui32Logged = 0, ui32Peak = 0, ui32CpuCount = 0;
 uint32_t UploadSpeed[60], DownloadSpeed[60];
 uint32_t iActualBytesRead = 0, iActualBytesSent = 0;
 uint32_t iAverageBytesRead = 0, iAverageBytesSent = 0;
@@ -133,6 +133,23 @@ void ServerInitialize() {
     }
 
 	SCRIPT_PATH = PATH + "/scripts/";
+
+    // get cpu count
+    FILE *fp = fopen("/proc/cpuinfo", "r");
+    if(fp != NULL) {
+        char buf[1024];
+        while(fgets(buf, 1024, fp) != NULL) {
+            if(strncasecmp (buf, "model name", 10) == 0 || strncmp (buf, "Processor", 9) == 0 || strncmp (buf, "cpu model", 9) == 0) {
+                ui32CpuCount++;
+            }
+        }
+    
+        fclose(fp);
+    }
+
+    if(ui32CpuCount == 0) {
+        ui32CpuCount = 1;
+    }
 
 	ResNickManager = new ResNickMan();
 	if(ResNickManager == NULL) {

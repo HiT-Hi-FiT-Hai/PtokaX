@@ -1,4 +1,4 @@
-----------------------------------------Next Release...------------------------------------
+----------------------------------------0.4.1.0 1.Jun.2008------------------------------------
 Added: Core.ResumeAccepts() to resume listening thread(s) when they are suspended.
 Added: 2 level limit of received kB of data from user per time.
 Added: Second deflood level for most old defloods.

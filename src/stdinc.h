@@ -52,7 +52,7 @@
 #include <tinystr.h>
 #include "pxstring.h"
 //---------------------------------------------------------------------------
-#define PtokaXVersionString "0.4.1.0RC8"
+#define PtokaXVersionString "0.4.1.0"
 #define sErrOutOfMem "[ERR] Out of memory..."
 //---------------------------------------------------------------------------
 

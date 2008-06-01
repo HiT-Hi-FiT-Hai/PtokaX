@@ -4236,7 +4236,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 Statinfo+="------------------------------------------------------------\n";
 
 				char cpuusage[32];
-				int iLen = sprintf(cpuusage, "%.2f%%\n", cpuUsage/0.6);
+				int iLen = sprintf(cpuusage, "%.2f%%\n", (cpuUsage/0.6)/(double)ui32CpuCount);
 				if(CheckSprintf(iLen, 32, "HubCommands::DoCommand3921") == false) {
 					return true;
 				}
