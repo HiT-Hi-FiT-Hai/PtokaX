@@ -34,6 +34,18 @@
 #include "User.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+//---------------------------------------------------------------------------
+	#ifndef _SERVICE
+		#include "TRegsForm.h"
+	#endif
+//---------------------------------------------------------------------------
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
+//---------------------------------------------------------------------------
 
 static void PushReg(lua_State * L, RegUser * r) {
 	lua_checkstack(L, 3); // we need 3 (1 table, 2 id, 3 value) empty slots in stack, check it to be sure
@@ -62,7 +74,7 @@ static int Save(lua_State * L) {
         return 0;
     }
 
-    hashRegManager->Save();
+	hashRegManager->Save();
 
     return 0;
 }
@@ -256,13 +268,28 @@ static int AddReg(lua_State * L) {
     lua_settop(L, 0);
 
     if(newUser == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate newUser in AddRegUser!";
+    	string sDbgstr = "[BUF] Cannot allocate newUser in AddRegUser!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
 		lua_pushnil(L);
         return 1;
     }
 
-    hashRegManager->Add(newUser);
+	hashRegManager->Add(newUser);
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(RegsForm != NULL) {
+	        TListItem *ListItem = RegsForm->RegList->Items->Add();
+	        ListItem->Caption = newUser->sNick;
+	        ListItem->SubItems->Add(newUser->sPass);
+	        ListItem->SubItems->Add(ProfileMan->ProfilesTable[iProfile]->sName);
+	        ListItem->Data = (void *)newUser;
+		}
+	#endif
+#endif
 
 	User *AddedUser = hashManager->FindUser(newUser->sNick, iNickLen);
 
@@ -302,7 +329,7 @@ static int AddReg(lua_State * L) {
         }
     }
 
-    hashRegManager->Save();
+	hashRegManager->Save();
 
     lua_pushboolean(L, 1);
     return 1;
@@ -342,7 +369,18 @@ static int DelReg(lua_State * L) {
         return 1;
     }
 
-    hashRegManager->Rem(reg);
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(RegsForm != NULL) {
+	        TListItem *ListItem = RegsForm->RegList->FindCaption(0, reg->sNick, false, true, false);
+	        if(ListItem != NULL) {
+	            RegsForm->RegList->Items->Delete(ListItem->Index);
+	        }
+		}
+	#endif
+#endif
+
+	hashRegManager->Rem(reg);
 
     User *RemovedUser = hashManager->FindUser(reg->sNick, iNickLen);
 
@@ -363,7 +401,7 @@ static int DelReg(lua_State * L) {
 
     delete reg;
 
-    hashRegManager->Save();
+	hashRegManager->Save();
 
     lua_pushboolean(L, 1);
     return 1;
@@ -407,13 +445,38 @@ static int ChangeReg(lua_State * L) {
         return 1;
     }
 
-    if(strcmp(reg->sPass, sPass) != 0) {
-        free(reg->sPass);
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(RegsForm != NULL) {
+	        TListItem *ListItem = RegsForm->RegList->FindCaption(0, reg->sNick, false, true, false);
+	        if(ListItem != NULL) {
+	            ListItem->SubItems->Strings[0] = sPass;
+	            ListItem->SubItems->Strings[1] = ProfileMan->ProfilesTable[iProfile]->sName;
+	        }
+		}
+	#endif
+#endif
 
-        reg->sPass = (char *) malloc(iPassLen+1);
+    if(strcmp(reg->sPass, sPass) != 0) {
+#ifdef _WIN32
+        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)reg->sPass) == 0) {
+			string sDbgstr = "[BUF] Cannot deallocate reg->sPass in ChangeReg! "+string((uint32_t)GetLastError())+" "+
+				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+			AppendSpecialLog(sDbgstr);
+        }
+
+        reg->sPass = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iPassLen+1);
+#else
+		free(reg->sPass);
+
+		reg->sPass = (char *) malloc(iPassLen+1);
+#endif
         if(reg->sPass == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iPassLen+1))+
-                " bytes of memory for sPass in ChangeReg!";
+				" bytes of memory for sPass in ChangeReg!";
+#ifdef _WIN32
+			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 			AppendSpecialLog(sDbgstr);
     		lua_settop(L, 0);
     		lua_pushnil(L);

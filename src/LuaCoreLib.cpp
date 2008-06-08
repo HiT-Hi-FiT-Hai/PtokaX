@@ -37,9 +37,19 @@
 #include "User.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+#endif
+//---------------------------------------------------------------------------
 #include "IP2Country.h"
 #include "ResNickManager.h"
 #include "LuaScript.h"
+//---------------------------------------------------------------------------
+#ifdef _WIN32
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
 //---------------------------------------------------------------------------
 
 static int Restart(lua_State * L) {
@@ -157,7 +167,10 @@ static int RegBot(lua_State * L) {
 
     ScriptBot *bot = new ScriptBot(nick, iNickLen, description, iDescrLen, email, iEmailLen, bIsOP);
     if(bot == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate new ScriptBot!";
+    	string sDbgstr = "[BUF] Cannot allocate new ScriptBot!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
 
 		lua_settop(L, 0);
@@ -183,7 +196,11 @@ static int RegBot(lua_State * L) {
         ScriptBot * cur = next;
         next = cur->next;
 
-  	    if(strcasecmp(bot->sNick, cur->sNick) == 0) {
+#ifdef _WIN32
+  	    if(stricmp(bot->sNick, cur->sNick) == 0) {
+#else
+		if(strcasecmp(bot->sNick, cur->sNick) == 0) {
+#endif
             lua_pushnil(L);
             return 1;
         }
@@ -262,7 +279,11 @@ static int UnregBot(lua_State * L) {
         ScriptBot * cur = next;
         next = cur->next;
 
-  	    if(strcasecmp(botnick, cur->sNick) == 0) {
+#ifdef _WIN32
+  	    if(stricmp(botnick, cur->sNick) == 0) {
+#else
+		if(strcasecmp(botnick, cur->sNick) == 0) {
+#endif
             ResNickManager->DelReservedNick(cur->sNick, true);
 
             colUsers->DelFromNickList(cur->sNick, cur->bIsOP);
@@ -443,9 +464,13 @@ static int GetPtokaXPath(lua_State * L) {
         lua_pushnil(L);
         return 1;
     }
-    
+
+#ifdef _WIN32
+    lua_pushlstring(L, PATH_LUA.c_str(), PATH_LUA.size());
+#else
     string path = PATH+"/";
     lua_pushlstring(L, path.c_str(), path.size());
+#endif
 
     return 1;
 }

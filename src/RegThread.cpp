@@ -25,7 +25,17 @@
 #include "SettingManager.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+#endif
+//---------------------------------------------------------------------------
 #include "RegThread.h"
+//---------------------------------------------------------------------------
+#ifdef _WIN32
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
 //---------------------------------------------------------------------------
 RegThread *RegisterThread = NULL;
 //---------------------------------------------------------------------------
@@ -46,8 +56,13 @@ RegThread::RegSocket::~RegSocket() {
         sSendBuf = NULL;
     }
 
+#ifdef _WIN32
+    shutdown(sock, SD_SEND);
+    closesocket(sock);
+#else
     shutdown(sock, SHUT_RDWR);
     close(sock);
+#endif
 }
 //---------------------------------------------------------------------------
 
@@ -55,6 +70,10 @@ RegThread::RegThread() {
     bTerminated = false;
 
     threadId = 0;
+
+#ifdef _WIN32
+    threadHandle = INVALID_HANDLE_VALUE;
+#endif
 
     iBytesRead = 0;
     iBytesSent = 0;
@@ -65,10 +84,12 @@ RegThread::RegThread() {
 //---------------------------------------------------------------------------
 
 RegThread::~RegThread() {
+#ifndef _WIN32
     if(threadId != 0) {
         Close();
         WaitFor();
     }
+#endif
 
 	ui64BytesRead += (uint64_t)iBytesRead;
     ui64BytesSent += (uint64_t)iBytesSent;
@@ -81,6 +102,12 @@ RegThread::~RegThread() {
                        
         delete cur;
     }
+
+#ifdef _WIN32
+    if(threadHandle != INVALID_HANDLE_VALUE) {
+        CloseHandle(threadHandle);
+    }
+#endif
 }
 //---------------------------------------------------------------------------
 
@@ -90,6 +117,9 @@ void RegThread::Setup(char * sListAddresses, const uint16_t &ui16AddrsLen) {
     if(sAddresses == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate "+string(ui16AddrsLen+1)+
 			" bytes of memory for sAddresses in RegThread::Setup!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap(), 0, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
         return;
     }
@@ -119,7 +149,10 @@ void RegThread::Setup(char * sListAddresses, const uint16_t &ui16AddrsLen) {
 void RegThread::AddSock(char * sAddress, const size_t &ui32Len) {
     RegSocket * newsock = new RegSocket();
     if(newsock == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate newsock in RegThread::AddSock!";
+    	string sDbgstr = "[BUF] Cannot allocate newsock in RegThread::AddSock!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
     	return;
     }
@@ -128,8 +161,14 @@ void RegThread::AddSock(char * sAddress, const size_t &ui32Len) {
     newsock->next = NULL;
 
     // Initialise socket we want to use for connect
+#ifdef _WIN32
+    if((newsock->sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET) {
+        int iError = WSAGetLastError();
+        int iMsgLen = sprintf(sMsg, "[REG] RegSock create error %s (%d). (%s)", WSErrorStr(iError), iError, newsock->sAddress);
+#else
     if((newsock->sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         int iMsgLen = sprintf(sMsg, "[REG] RegSock create error %d. (%s)", errno, newsock->sAddress);
+#endif
         if(CheckSprintf(iMsgLen, 2048, "RegThread::AddSock1") == true) {
 			AppendSpecialLog(string(sMsg, iMsgLen));
         }
@@ -139,9 +178,16 @@ void RegThread::AddSock(char * sAddress, const size_t &ui32Len) {
     }
 
     // Set the receive buffer
-    int bufsize = 1024;
+#ifdef _WIN32
+	int32_t bufsize = 1024;
+    if(setsockopt(newsock->sock, SOL_SOCKET, SO_RCVBUF, (char *) &bufsize, sizeof(bufsize)) == SOCKET_ERROR) {
+        int iError = WSAGetLastError();
+        int iMsgLen = sprintf(sMsg, "[REG] RegSock recv buff error %s (%d). (%s)", WSErrorStr(iError), iError, newsock->sAddress);
+#else
+	int bufsize = 1024;
     if(setsockopt(newsock->sock, SOL_SOCKET, SO_RCVBUF, &bufsize, sizeof(bufsize)) == -1) {
         int iMsgLen = sprintf(sMsg, "[REG] RegSock recv buff error %d. (%s)", errno, newsock->sAddress);
+#endif
         if(CheckSprintf(iMsgLen, 2048, "RegThread::AddSock2") == true) {
 			AppendSpecialLog(string(sMsg, iMsgLen));
         }
@@ -152,8 +198,14 @@ void RegThread::AddSock(char * sAddress, const size_t &ui32Len) {
 
     // Set the send buffer
     bufsize = 2048;
+#ifdef _WIN32
+    if(setsockopt(newsock->sock, SOL_SOCKET, SO_SNDBUF, (char *) &bufsize, sizeof(bufsize)) == SOCKET_ERROR) {
+        int iError = WSAGetLastError();
+        int iMsgLen = sprintf(sMsg, "[REG] RegSock send buff error %s (%d). (%s)", WSErrorStr(iError), iError, newsock->sAddress);
+#else
     if(setsockopt(newsock->sock, SOL_SOCKET, SO_SNDBUF, &bufsize, sizeof(bufsize)) == -1) {
         int iMsgLen = sprintf(sMsg, "[REG] RegSock send buff error %d. (%s)", errno, newsock->sAddress);
+#endif
         if(CheckSprintf(iMsgLen, 2048, "RegThread::AddSock3") == true) {
 			AppendSpecialLog(string(sMsg, iMsgLen));
         }
@@ -163,9 +215,16 @@ void RegThread::AddSock(char * sAddress, const size_t &ui32Len) {
     }
 
     // Set non-blocking mode
+#ifdef _WIN32
+    uint32_t block = 1;
+	if(ioctlsocket(newsock->sock, FIONBIO, (unsigned long *)&block) == SOCKET_ERROR) {
+        int iError = WSAGetLastError();
+        int iMsgLen = sprintf(sMsg, "[REG] RegSock non-block error %s (%d). (%s)", WSErrorStr(iError), iError, newsock->sAddress);
+#else
     int oldFlag = fcntl(newsock->sock, F_GETFL, 0);
     if(fcntl(newsock->sock, F_SETFL, oldFlag | O_NONBLOCK) == -1) {
         int iMsgLen = sprintf(sMsg, "[REG] RegSock non-block error %d. (%s)", errno, newsock->sAddress);
+#endif
         if(CheckSprintf(iMsgLen, 2048, "RegThread::AddSock4") == true) {
 			AppendSpecialLog(string(sMsg, iMsgLen));
         }
@@ -178,6 +237,9 @@ void RegThread::AddSock(char * sAddress, const size_t &ui32Len) {
     if(newsock->sAddress == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(ui32Len+1))+
 			" bytes of memory for sAddress in RegThread::AddSock!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap(), 0, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
         return;
     }
@@ -189,7 +251,10 @@ void RegThread::AddSock(char * sAddress, const size_t &ui32Len) {
     
     newsock->sRecvBuf = (char *) malloc(256);
     if(newsock->sRecvBuf == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate 256 bytes of memory for sRecvBuf in RegThread::AddSock!";
+    	string sDbgstr = "[BUF] Cannot allocate 256 bytes of memory for sRecvBuf in RegThread::AddSock!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap(), 0, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
         return;
     }
@@ -218,21 +283,35 @@ void RegThread::AddSock(char * sAddress, const size_t &ui32Len) {
 }
 //---------------------------------------------------------------------------
 
-static void* ExecuteRegThread(void* RThread) {
+#ifdef _WIN32
+	unsigned __stdcall ExecuteRegThread(void* RThread) {
+#else
+	static void* ExecuteRegThread(void* RThread) {
+#endif
 	((RegThread *)RThread)->Run();
 	return 0;
 }
 //---------------------------------------------------------------------------
 
 void RegThread::Resume() {
+#ifdef _WIN32
+    threadHandle = (HANDLE)_beginthreadex(NULL, 0, ExecuteRegThread, this, 0, &threadId);
+    if(threadHandle == 0) {
+#else
     int iRet = pthread_create(&threadId, NULL, ExecuteRegThread, this);
     if(iRet != 0) {
+#endif
 		AppendSpecialLog("[ERR] Failed to create new RegisterThread!");
     }
 }
 //---------------------------------------------------------------------------
 
 void RegThread::Run() {
+#ifdef _WIN32
+	#ifndef _SERVICE
+		try {
+	#endif
+#endif
     RegSocket *next = RegSockListS;
     while(bTerminated == false && next != NULL) {
         RegSocket *cur = next;
@@ -259,7 +338,12 @@ void RegThread::Run() {
             if(host != NULL) {
                 target.sin_addr.s_addr = *(unsigned long *)host->h_addr;
             } else {
-                int iMsgLen = sprintf(sMsg, "[REG] RegSock resolve error (%s)", cur->sAddress);
+#ifdef _WIN32
+				int iError = WSAGetLastError();
+				int iMsgLen = sprintf(sMsg, "[REG] RegSock resolve error %s (%d). (%s)", WSErrorStr(iError), iError, cur->sAddress);
+#else
+				int iMsgLen = sprintf(sMsg, "[REG] RegSock resolve error (%s)", cur->sAddress);
+#endif
                 if(CheckSprintf(iMsgLen, 2048, "RegThread::Execute1") == true) {
                     eventqueue->AddThread(eventq::EVENT_REGSOCK_MSG, sMsg);
                 }
@@ -275,9 +359,16 @@ void RegThread::Run() {
         }
 
         // Finally, time to connect ! ;)
-        if(connect(cur->sock, (sockaddr *)&target, sizeof(target)) == -1) {
-            if(errno != EINPROGRESS) {
-                int iMsgLen = sprintf(sMsg, "[REG] RegSock connect error %s (%d). (%s)", ErrnoStr(errno), errno, cur->sAddress);
+#ifdef _WIN32
+		if(connect(cur->sock, (sockaddr *)&target, sizeof(target)) == SOCKET_ERROR) {
+			int iError = WSAGetLastError();
+			if(iError != WSAEWOULDBLOCK) {
+				int iMsgLen = sprintf(sMsg, "[REG] RegSock connect error %s (%d). (%s)", WSErrorStr(iError), iError, cur->sAddress);
+#else  
+		if(connect(cur->sock, (sockaddr *)&target, sizeof(target)) == -1) {
+			if(errno != EINPROGRESS) {
+				int iMsgLen = sprintf(sMsg, "[REG] RegSock connect error %s (%d). (%s)", ErrnoStr(errno), errno, cur->sAddress);
+#endif
                 if(CheckSprintf(iMsgLen, 2048, "RegThread::Execute2") == true) {
                     eventqueue->AddThread(eventq::EVENT_REGSOCK_MSG, sMsg);
                 }
@@ -288,10 +379,14 @@ void RegThread::Run() {
             }
         }
 
-        usleep(1000);
-    }
+#ifdef _WIN32
+		::Sleep(1);
+#else
+		usleep(1000);
+#endif
+	}
 
-        uint16_t iLoops = 0;
+	uint16_t iLoops = 0;
 
     while(RegSockListS != NULL && bTerminated == false && iLoops < 4000) {   
         iLoops++;
@@ -316,8 +411,12 @@ void RegThread::Run() {
                 }
             }
         }
-        usleep(75000);
-    }
+#ifdef _WIN32
+		::Sleep(75);
+#else
+		usleep(75000);
+#endif
+	}
 
     next = RegSockListS;
     while(next != NULL) {
@@ -336,6 +435,23 @@ void RegThread::Run() {
 
     RegSockListS = NULL;
 	RegSockListE = NULL;
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		} catch(Exception &e) {
+	        AppendSpecialLog("[ERR] Exception in hublist reg thread: "+
+				string(e.Message.c_str(), e.Message.Length()));
+			Application->ShowException(&e);
+	    } catch(...) {
+	        try {
+	            throw Exception("");
+	        }
+	        catch(Exception &exception) {
+	            Application->ShowException(&exception);
+	        }
+		}
+	#endif
+#endif
 }
 //---------------------------------------------------------------------------
 
@@ -345,10 +461,14 @@ void RegThread::Close() {
 //---------------------------------------------------------------------------
 
 void RegThread::WaitFor() {
+#ifdef _WIN32
+    WaitForSingleObject(threadHandle, INFINITE);
+#else
 	if(threadId != 0) {
 		pthread_join(threadId, NULL);
         threadId = 0;
 	}
+#endif
 }
 //---------------------------------------------------------------------------
 
@@ -356,26 +476,51 @@ bool RegThread::Receive(RegSocket * Sock) {
     if(Sock->sRecvBuf == NULL) {
         return true;
     }
-    
+
+#ifdef _WIN32
+	uint32_t ui32bytes = 0;
+	if(ioctlsocket(Sock->sock, FIONREAD, (unsigned long *)&ui32bytes) == SOCKET_ERROR) {
+		int iError = WSAGetLastError();
+	    int iMsgLen = sprintf(sMsg, "[REG] RegSock ioctlsocket(FIONREAD) error %s (%d). (%s)", WSErrorStr(iError), iError, Sock->sAddress);
+#else
 	int32_t i32bytes = 0;
 	if(ioctl(Sock->sock, FIONREAD, &i32bytes) == -1) {
 	    int iMsgLen = sprintf(sMsg, "[REG] RegSock ioctl(FIONREAD) error %s (%d). (%s)", ErrnoStr(errno), errno, Sock->sAddress);
+#endif
         if(CheckSprintf(iMsgLen, 2048, "RegThread::Receive0") == true) {
             eventqueue->AddThread(eventq::EVENT_REGSOCK_MSG, sMsg);
         }
         return false;
     }
-    
-    if(i32bytes == 0) {
+
+#ifdef _WIN32
+    if(ui32bytes == 0) {
+#else
+	if(i32bytes == 0) {
+#endif
         // we need to ry receive to catch connection error, or if user closed connection
-        i32bytes = 16;
+#ifdef _WIN32
+        ui32bytes = 16;
+    } else if(ui32bytes > 1024) {
+#else
+		i32bytes = 16;
     } else if(i32bytes > 1024) {
+#endif
         // receive max. 1024 bytes to receive buffer
-        i32bytes = 1024;
+#ifdef _WIN32
+        ui32bytes = 1024;
+#else
+		i32bytes = 1024;
+#endif
     }
 
+#ifdef _WIN32
+    if(Sock->iRecvBufSize < Sock->iRecvBufLen+ui32bytes) {
+        size_t iAllignLen = ((Sock->iRecvBufLen+ui32bytes+1) & 0xFFFFFE00) + 0x200;
+#else
     if(Sock->iRecvBufSize < Sock->iRecvBufLen+i32bytes) {
         int iAllignLen = ((Sock->iRecvBufLen+i32bytes+1) & 0xFFFFFE00) + 0x200;
+#endif
         if(iAllignLen > 2048) {
             int iMsgLen = sprintf(sMsg, "[REG] RegSock receive buffer overflow. (%s)", Sock->sAddress);
             if(CheckSprintf(iMsgLen, 2048, "RegThread::Receive5") == true) {
@@ -386,32 +531,61 @@ bool RegThread::Receive(RegSocket * Sock) {
 
         Sock->sRecvBuf = (char *) realloc(Sock->sRecvBuf, iAllignLen);
         if(Sock->sRecvBuf == NULL) {
+#ifdef _WIN32
+			string sDbgstr = "[BUF] Cannot reallocate "+string(ui32bytes)+"/"+string(Sock->iRecvBufLen)+"/"+string(iAllignLen)+
+				" bytes of memory for sRecvBuf in RegThread::Receive! "+string(HeapValidate(GetProcessHeap(), 0, 0))+GetMemStat();
+#else
 			string sDbgstr = "[BUF] Cannot reallocate "+string(i32bytes)+"/"+string(Sock->iRecvBufLen)+"/"+string(iAllignLen)+
 				" bytes of memory for sRecvBuf in RegThread::Receive!";
+#endif
 			eventqueue->AddThread(eventq::EVENT_REGSOCK_MSG, sDbgstr.c_str());
             return false;
         }
 
-        Sock->iRecvBufSize = iAllignLen-1;
+#ifdef _WIN32
+        Sock->iRecvBufSize = (uint32_t)(iAllignLen-1);
+#else
+		Sock->iRecvBufSize = iAllignLen-1;
+#endif
     }
 
     int iBytes = recv(Sock->sock, Sock->sRecvBuf+Sock->iRecvBufLen, Sock->iRecvBufSize-Sock->iRecvBufLen, 0);
-
+    
+#ifdef _WIN32
+    if(iBytes == SOCKET_ERROR) {
+        int iError = WSAGetLastError();
+        if(iError != WSAEWOULDBLOCK) {                  
+			if(iError == WSAENOTCONN) {
+#else
     if(iBytes == -1) {
         if(errno != EAGAIN) {
 			if(errno == ENOTCONN) {
+#endif
 				int iErr = 0;
-            	socklen_t iErrLen = sizeof(iErr);
+#ifdef _WIN32
+            	int iErrLen = sizeof(iErr);
+#else
+				socklen_t iErrLen = sizeof(iErr);
+#endif
             	int iRet = getsockopt(Sock->sock, SOL_SOCKET, SO_ERROR, (char *) &iErr, &iErrLen);
+#ifdef _WIN32
+				if(iRet == SOCKET_ERROR) {
+					int iMsgLen = sprintf(sMsg, "[REG] RegSock getsockopt error %s (%d). (%s)", WSErrorStr(iRet), iRet, Sock->sAddress);
+#else
 				if(iRet == -1) {
 					int iMsgLen = sprintf(sMsg, "[REG] RegSock getsockopt error %d. (%s)", iRet, Sock->sAddress);
+#endif
 					if(CheckSprintf(iMsgLen, 2048, "RegThread::Receive1") == true) {
 						eventqueue->AddThread(eventq::EVENT_REGSOCK_MSG, sMsg);
 					}
 
 					return false;
 				} else if(iErr != 0) {
+#ifdef _WIN32
+					int iMsgLen = sprintf(sMsg, "[REG] RegSock connect error %s (%d). (%s)", WSErrorStr(iErr), iErr, Sock->sAddress);
+#else
 					int iMsgLen = sprintf(sMsg, "[REG] RegSock connect error %d. (%s)", iErr, Sock->sAddress);
+#endif
 					if(CheckSprintf(iMsgLen, 2048, "RegThread::Receive2") == true) {
 						eventqueue->AddThread(eventq::EVENT_REGSOCK_MSG, sMsg);
 					}
@@ -421,7 +595,11 @@ bool RegThread::Receive(RegSocket * Sock) {
 				return true;
 			}
 
-            int iMsgLen = sprintf(sMsg, "[REG] RegSock recv error %s (%d). (%s)", ErrnoStr(errno), errno, Sock->sAddress);
+#ifdef _WIN32
+            int iMsgLen = sprintf(sMsg, "[REG] RegSock recv error %s (%d). (%s)", WSErrorStr(iError), iError, Sock->sAddress);
+#else
+			int iMsgLen = sprintf(sMsg, "[REG] RegSock recv error %s (%d). (%s)", ErrnoStr(errno), errno, Sock->sAddress);
+#endif
             if(CheckSprintf(iMsgLen, 2048, "RegThread::Receive3") == true) {
                 eventqueue->AddThread(eventq::EVENT_REGSOCK_MSG, sMsg);
             }
@@ -448,10 +626,18 @@ bool RegThread::Receive(RegSocket * Sock) {
             uint32_t iCommandLen = (uint32_t)(((Sock->sRecvBuf+i)-sBuffer)+1);
             if(strncmp(sBuffer, "$Lock ", 6) == 0) {
                 sockaddr_in addr;
+#ifdef _WIN32
+                int sin_len = sizeof(addr);
+
+                if(getsockname(Sock->sock, (sockaddr *) &addr, &sin_len) == SOCKET_ERROR) {
+                    int iError = WSAGetLastError();
+                    int iMsgLen = sprintf(sMsg, "[REG] RegSock local port error %s (%d). (%s)", WSErrorStr(iError), iError, Sock->sAddress);
+#else
                 socklen_t sin_len = sizeof(addr);
 
                 if(getsockname(Sock->sock, (sockaddr *) &addr, &sin_len) == -1) {
                     int iMsgLen = sprintf(sMsg, "[REG] RegSock local port error %d. (%s)", errno, Sock->sAddress);
+#endif
                     if(CheckSprintf(iMsgLen, 2048, "RegThread::Receive6") == true) {
                         eventqueue->AddThread(eventq::EVENT_REGSOCK_MSG, sMsg);
                     }
@@ -574,7 +760,10 @@ void RegThread::Add2SendBuf(RegSocket * Sock, char * sData) {
     Sock->sSendBuf = (char *) malloc(iLen+1);
     if(Sock->sSendBuf == NULL) {
         string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iLen+1))+
-			" bytes of memory for sSendBuf in RegThread::Add2SendBuf!";
+        	" bytes of memory for sSendBuf in RegThread::Add2SendBuf!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap(), 0, 0))+GetMemStat();
+#endif
         eventqueue->AddThread(eventq::EVENT_REGSOCK_MSG, sDbgstr.c_str());
         return;
     }
@@ -590,13 +779,24 @@ void RegThread::Add2SendBuf(RegSocket * Sock, char * sData) {
 bool RegThread::Send(RegSocket * Sock) {
     // compute length of unsent data
     uint32_t iOffset = (uint32_t)(Sock->sSendBufHead - Sock->sSendBuf);
-    int iLen = Sock->iSendBufLen - iOffset;
+#ifdef _WIN32
+    int32_t iLen = Sock->iSendBufLen - iOffset;
+#else
+	int iLen = Sock->iSendBufLen - iOffset;
+#endif
 
     int iBytes = send(Sock->sock, Sock->sSendBufHead, iLen, 0);
 
+#ifdef _WIN32
+    if(iBytes == SOCKET_ERROR) {
+    	int iError = WSAGetLastError();
+        if(iError != WSAEWOULDBLOCK) {
+            int iMsgLen = sprintf(sMsg, "[REG] RegSock send error %s (%d). (%s)", WSErrorStr(iError), iError, Sock->sAddress);
+#else
     if(iBytes == -1) {
         if(errno != EAGAIN) {
             int iMsgLen = sprintf(sMsg, "[REG] RegSock send error %s (%d). (%s)", ErrnoStr(errno), errno, Sock->sAddress);
+#endif
             if(CheckSprintf(iMsgLen, 2048, "RegThread::Send1") == true) {
                 eventqueue->AddThread(eventq::EVENT_REGSOCK_MSG, sMsg);
             }
@@ -612,7 +812,11 @@ bool RegThread::Send(RegSocket * Sock) {
         Sock->sSendBufHead += iBytes;
 		return true;
 	} else {
-        int iMsgLen = sprintf(sMsg, "[REG] Hub is registered on %s hublist (Users: %u, Share: %" PRIu64 ")", 
+#ifdef _WIN32
+        int iMsgLen = sprintf(sMsg, "[REG] Hub is registered on %s hublist (Users: %I32d, Share: %I64d)", 
+#else
+		int iMsgLen = sprintf(sMsg, "[REG] Hub is registered on %s hublist (Users: %u, Share: %" PRIu64 ")", 
+#endif
             Sock->sAddress, ui32Logged, ui64TotalShare);
         if(CheckSprintf(iMsgLen, 2048, "RegThread::Send2") == true) {
             eventqueue->AddThread(eventq::EVENT_REGSOCK_MSG, sMsg);

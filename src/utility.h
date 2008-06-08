@@ -28,9 +28,21 @@ struct RangeBanItem;
 void Cout(const string & msg);
 //---------------------------------------------------------------------------
 
+#ifdef _WIN32
+	static void preD(char *pat, int M, int D[]);
+	static void suffixes(char *pat, int M, int *suff);
+	static void preDD(char *pat, int M, int DD[]);
+		
+	int BMFind(char *text, int N, char *pat, int M);
+#endif
+
 char * Lock2Key(char * cLock);
 
-const char * ErrnoStr(const uint32_t &iError);
+#ifdef _WIN32
+	char * WSErrorStr(const uint32_t &iError);
+#else
+	const char * ErrnoStr(const uint32_t &iError);
+#endif
 
 char * formatBytes(int64_t iBytes);
 char * formatBytesPerSecond(int64_t iBytes);
@@ -58,19 +70,40 @@ inline size_t Allign256(size_t n) { return ((n+1) & 0xFFFFFF00) + 0x100; }
 inline size_t Allign512(size_t n) { return ((n+1) & 0xFFFFFE00) + 0x200; }
 inline size_t Allign1024(size_t n) { return ((n+1) & 0xFFFFFC00) + 0x400; }
 
+#ifdef _WIN32
+	string GetMemStat();
+#endif
+
 bool CheckSprintf(int iRetVal, const size_t &iMax, const char * sMsg); // CheckSprintf(imsgLen, 64, "UdpDebug::New");
 bool CheckSprintf1(int iRetVal, int iLenVal, const size_t &iMax, const char * sMsg); // CheckSprintf1(iret, imsgLen, 64, "UdpDebug::New");
 
 void AppendLog(const string & sData, const bool &bScript = false);
 void AppendSpecialLog(const string & sData);
 
+#ifdef _WIN32
+	void GetHeapStats(void *hHeap, DWORD &dwCommitted, DWORD &dwUnCommitted);
+#endif
+
 void Memo(const string & sMessage);
+
+#ifdef _WIN32
+	char * ExtractFileName(char * sPath);
+#endif
 
 bool FileExist(char * sPath);
 bool DirExist(char * sPath);
+
+#ifdef _WIN32
+	void SetupOsVersion();
+#endif
 //---------------------------------------------------------------------------
 extern string PATH, SCRIPT_PATH, sTitle;
 extern bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bCmdNoKeyCheck;
+#ifdef _WIN32
+	extern HANDLE hConsole, hPtokaXHeap, hRecvHeap, hSendHeap;
+	extern string PATH_LUA, sOs;
+	extern bool bNT;
+#endif
 //---------------------------------------------------------------------------
 
 #endif

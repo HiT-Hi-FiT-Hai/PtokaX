@@ -24,6 +24,11 @@
 class ServerThread;
 //---------------------------------------------------------------------------
 
+#ifdef _WIN32
+	static VOID CALLBACK SecTimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
+	static VOID CALLBACK RegTimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
+#endif
+//---------------------------------------------------------------------------
 void ServerInitialize();
 
 void ServerFinalStop(const bool &bFromServiceLoop);
@@ -40,14 +45,24 @@ extern double CpuUsage[60], cpuUsage;
 extern uint64_t ui64ActualTick, ui64TotalShare;
 extern uint64_t ui64BytesRead, ui64BytesSent, ui64BytesSentSaved;
 extern uint64_t iLastBytesRead, iLastBytesSent;
-extern uint32_t ui32Joins, ui32Parts, ui32Logged, ui32Peak, ui32CpuCount;
+extern uint32_t ui32Joins, ui32Parts, ui32Logged, ui32Peak;
+#ifndef _WIN32
+	extern uint32_t ui32CpuCount;
+#endif
 extern uint32_t UploadSpeed[60], DownloadSpeed[60];
 extern uint32_t iActualBytesRead, iActualBytesSent;
 extern uint32_t iAverageBytesRead, iAverageBytesSent;
 extern ServerThread *ServersS;
 extern time_t starttime;
 extern uint64_t iMins, iHours, iDays;
-extern bool bServerRunning, bServerTerminated, bIsRestart, bIsClose, bDaemon;
+extern bool bServerRunning, bServerTerminated, bIsRestart, bIsClose;
+#ifdef _WIN32
+	#ifdef _SERVICE
+	    extern bool bService;
+	#endif
+#else
+	extern bool bDaemon;
+#endif
 extern char sHubIP[16];
 extern uint8_t ui8SrCntr, ui8MinTick;
 //--------------------------------------------------------------------------- 

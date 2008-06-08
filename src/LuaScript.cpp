@@ -34,8 +34,18 @@
 #include "User.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+#endif
+//---------------------------------------------------------------------------
 #include "LuaScript.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#include "frmHub.h"
+	#endif
+#endif
+
 #include "IP2Country.h"
 #include "LuaCoreLib.h"
 #include "LuaBanManLib.h"
@@ -47,6 +57,17 @@
 #include "LuaTmrManLib.h"
 #include "LuaUDPDbgLib.h"
 #include "ResNickManager.h"
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#include "TScriptMemoryForm.h"
+		#include "TScriptsForm.h"
+	#endif
+//---------------------------------------------------------------------------
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
 //---------------------------------------------------------------------------
 
 static int ScriptPanic(lua_State * L) {
@@ -67,10 +88,17 @@ ScriptBot::ScriptBot(char * Nick, const size_t &iNickLen, char * Description, co
     prev = NULL;
     next = NULL;
 
-    sNick = (char *) malloc(iNickLen+1);
+#ifdef _WIN32
+    sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
+#else
+	sNick = (char *) malloc(iNickLen+1);
+#endif
     if(sNick == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
 			" bytes of memory for sNick in ScriptBot::ScriptBot!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
 		return;
     }
@@ -81,10 +109,17 @@ ScriptBot::ScriptBot(char * Nick, const size_t &iNickLen, char * Description, co
 
     size_t iWantLen = 24+iNickLen+iDscrLen+iEmlLen;
 
-    sMyINFO = (char *) malloc(iWantLen);
+#ifdef _WIN32
+    sMyINFO = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+	sMyINFO = (char *) malloc(iWantLen);
+#endif
     if(sMyINFO == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)iWantLen)+
 			" bytes of memory for sMyINFO in ScriptBot::ScriptBot!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
 		return;
     }
@@ -101,22 +136,51 @@ ScriptBot::~ScriptBot() {
     prev = NULL;
     next = NULL;
 
-    free(sNick);
+#ifdef _WIN32
+    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
+		string sDbgstr = "[BUF] Cannot deallocate sNick in ~ScriptBot! "+string((uint32_t)GetLastError())+" "+
+			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+		AppendSpecialLog(sDbgstr);
+    }
+#else
+	free(sNick);
+#endif
+
     sNick = NULL;
 
-    free(sMyINFO);
+#ifdef _WIN32
+    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMyINFO) == 0) {
+		string sDbgstr = "[BUF] Cannot deallocate sMyINFO in ~ScriptBot! "+string((uint32_t)GetLastError())+" "+
+			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+		AppendSpecialLog(sDbgstr);
+    }
+#else
+	free(sMyINFO);
+#endif
+
     sMyINFO = NULL;
 
 	ScriptManager->ui8BotsCount--;
 }
 //------------------------------------------------------------------------------
 
-ScriptTimer::ScriptTimer(char * sFunctName, const size_t &iLen, Script * cur) {
+#ifdef _WIN32
+	ScriptTimer::ScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &iLen, Script * cur) {
+#else
+	ScriptTimer::ScriptTimer(char * sFunctName, const size_t &iLen, Script * cur) {
+#endif
 	if(sFunctName != NULL) {
-        sFunctionName = (char *) malloc(iLen+1);
+#ifdef _WIN32
+        sFunctionName = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
+#else
+		sFunctionName = (char *) malloc(iLen+1);
+#endif
         if(sFunctionName == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iLen+1))+
 				" bytes of memory for sFunctionName in ScriptTimer::ScriptTimer!";
+#ifdef _WIN32
+			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 			AppendSpecialLog(sDbgstr);
 			return;
         }
@@ -126,7 +190,11 @@ ScriptTimer::ScriptTimer(char * sFunctName, const size_t &iLen, Script * cur) {
         sFunctionName = NULL;
     }
 
-    TimerId = 0;
+#ifdef _WIN32
+	uiTimerId = uiTmrId;
+#else
+	TimerId = 0;
+#endif
 
     prev = NULL;
 
@@ -143,7 +211,15 @@ ScriptTimer::ScriptTimer(char * sFunctName, const size_t &iLen, Script * cur) {
 
 ScriptTimer::~ScriptTimer() {
 	if(sFunctionName != NULL) {
-        free(sFunctionName);
+#ifdef _WIN32
+        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sFunctionName) == 0) {
+			string sDbgstr = "[BUF] Cannot deallocate sFunctionName in ~ScriptTimer! "+string((uint32_t)GetLastError())+" "+
+				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+			AppendSpecialLog(sDbgstr);
+        }
+#else
+		free(sFunctionName);
+#endif
         sFunctionName = NULL;
     }
 }
@@ -152,18 +228,33 @@ ScriptTimer::~ScriptTimer() {
 Script::Script(char *Name, const bool &enabled) {
     bEnabled = enabled;
 
+#ifdef _WIN32
+	string ExtractedFilename = ExtractFileName(Name);
+    sName = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ExtractedFilename.size()+1);
+#else
     size_t iLen = strlen(Name);
 
     sName = (char *) malloc(iLen+1);
+#endif
     if(sName == NULL) {
+#ifdef _WIN32
+		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(ExtractedFilename.size()+1))+
+			" bytes of memory in Script::Script! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#else
 		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iLen+1))+
 			" bytes of memory in Script::Script!";
+#endif
         AppendSpecialLog(sDbgstr);
 		UdpDebug->Broadcast(sDbgstr);
         return;
     }   
+#ifdef _WIN32
+    memcpy(sName, ExtractedFilename.c_str(), ExtractedFilename.size());
+    sName[ExtractedFilename.size()] = '\0';
+#else
     memcpy(sName, Name, iLen);
     sName[iLen] = '\0';
+#endif
 
     ui16Functions = 65535;
     ui32DataArrivals = 4294967295U;
@@ -194,8 +285,13 @@ Script::~Script() {
         ScriptTimer * tmr = next;
         next = tmr->next;
 
-        if(tmr->TimerId != 0) {
+#ifdef _WIN32
+        if(tmr->uiTimerId != 0) {
+            KillTimer(NULL, tmr->uiTimerId);
+#else
+		if(tmr->TimerId != 0) {
             timer_delete(tmr->TimerId);
+#endif
         }
 
 		delete tmr;
@@ -206,7 +302,15 @@ Script::~Script() {
     }
 
 	if(sName != NULL) {
+#ifdef _WIN32
+		if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sName) == 0) {
+			string sDbgstr = "[BUF] Cannot deallocate sName in ~Script! "+string((uint32_t)GetLastError())+" "+
+				string(HeapValidate(hRecvHeap, HEAP_NO_SERIALIZE, 0));
+			AppendSpecialLog(sDbgstr);
+        }
+#else
 		free(sName);
+#endif
 		sName = NULL;
     }
 }
@@ -214,7 +318,11 @@ Script::~Script() {
 
 bool ScriptStart(Script * cur) {
 	cur->ui16Functions = 65535;
+#ifdef _WIN32
+	cur->ui32DataArrivals = 4294967295;
+#else
 	cur->ui32DataArrivals = 4294967295U;
+#endif
 
 	cur->prev = NULL;
 	cur->next = NULL;
@@ -236,12 +344,37 @@ bool ScriptStart(Script * cur) {
 	RegIP2Country(cur->LUA);
 
 	if(luaL_dofile(cur->LUA, (SCRIPT_PATH+cur->sName).c_str()) == 0) {
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(ScriptsForm != NULL) {
+			ScriptsForm->LuaErrMemo(string(LanguageManager->sTexts[LAN_NO_SYNERR_IN_SCRIPT_FILE], (size_t)LanguageManager->ui16TextsLens[LAN_NO_SYNERR_IN_SCRIPT_FILE]) +
+                " " + string(cur->sName));
+		}
+	#endif
+#endif
+
         return true;
 	} else {
+#ifdef _WIN32
+	#ifndef _SERVICE
+        if(SettingManager->bBools[SETBOOL_POPUP_SCRIPT_WINDOW] == true) {
+			hubForm->ButtonScriptsClick(hubForm);
+		}
+	#endif
+#endif
+
         size_t iLen = 0;
         char * stmp = (char*)lua_tolstring(cur->LUA, -1, &iLen);
 
         string sMsg(stmp, iLen);
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(ScriptsForm != NULL) {
+            ScriptsForm->LuaErrMemo(string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg);
+		}
+	#endif
+#endif
 
 		UdpDebug->Broadcast("[LUA] "+sMsg);
 
@@ -271,8 +404,13 @@ void ScriptStop(Script * cur) {
 		ScriptTimer * tmr = tmrnext;
 		tmrnext = tmr->next;
 
-        if(tmr->TimerId != 0) {
+#ifdef _WIN32
+        if(tmr->uiTimerId != 0) {
+            KillTimer(NULL, tmr->uiTimerId);
+#else
+		if(tmr->TimerId != 0) {
             timer_delete(tmr->TimerId);
+#endif
         }
 
 		delete tmr;
@@ -314,6 +452,24 @@ void ScriptStop(Script * cur) {
 int ScriptGetGC(Script * cur) {
 	return lua_gc(cur->LUA, LUA_GCCOUNT, 0);
 }
+//------------------------------------------------------------------------------
+
+#ifdef _WIN32
+	#ifdef _SERVICE
+	void ScriptGetGC(Script * /*cur*/, const uint32_t &/*i*/) {
+	#else
+	void ScriptGetGC(Script * cur, const uint32_t &i) {
+		if(i >= (uint32_t)ScriptMemoryForm->LuaMem->Items->Count) {
+	    	TListItem *it = ScriptMemoryForm->LuaMem->Items->Add();
+		    it->Caption = cur->sName;
+		    it->SubItems->Add(lua_gc(cur->LUA, LUA_GCCOUNT, 0));
+	    } else {
+	    	ScriptMemoryForm->LuaMem->Items->Item[i]->Caption = cur->sName;
+		    ScriptMemoryForm->LuaMem->Items->Item[i]->SubItems->Strings[0] = String(lua_gc(cur->LUA, LUA_GCCOUNT, 0));
+		}
+	#endif
+	}
+#endif
 //------------------------------------------------------------------------------
 
 void ScriptOnStartup(Script * cur) {
@@ -376,6 +532,21 @@ static bool ScriptOnError(Script * cur, char * ErrorMsg, const size_t &iLen) {
 		char * stmp = (char*)lua_tolstring(cur->LUA, -1, &iLen);
 
 		string sMsg(stmp, iLen);
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+        if(SettingManager->bBools[SETBOOL_POPUP_SCRIPT_WINDOW] == true) {
+			hubForm->ButtonScriptsClick(hubForm);
+        }
+
+		if(ScriptsForm != NULL) {
+            ScriptsForm->LuaErrMemo(string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg);
+            ScriptsForm->LuaErrMemo(string(LanguageManager->sTexts[LAN_FATAL_ERR_SCRIPT], (size_t)LanguageManager->ui16TextsLens[LAN_FATAL_ERR_SCRIPT]) +
+                " " + string(cur->sName) + " ! " +
+                string(LanguageManager->sTexts[LAN_SCRIPT_STOPPED], (size_t)LanguageManager->ui16TextsLens[LAN_SCRIPT_STOPPED]) + "!");
+        }
+	#endif
+#endif
 
 		if(SettingManager->bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true) {
 			AppendLog(sMsg, true);
@@ -563,10 +734,26 @@ User * ScriptGetUser(lua_State * L, const int &iTop, const char * sFunction) {
 //------------------------------------------------------------------------------
 
 void ScriptError(Script * cur) {
+#ifdef _WIN32
+	#ifndef _SERVICE
+	    if(SettingManager->bBools[SETBOOL_POPUP_SCRIPT_WINDOW] == true) {
+			hubForm->ButtonScriptsClick(hubForm);
+		}
+	#endif
+#endif
+
 	size_t iLen = 0;
 	char * stmp = (char*)lua_tolstring(cur->LUA, -1, &iLen);
 
 	string sMsg(stmp, iLen);
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(ScriptsForm != NULL) {
+	        ScriptsForm->LuaErrMemo(string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg);
+		}
+	#endif
+#endif
 
 	UdpDebug->Broadcast("[LUA] " + sMsg);
 
@@ -582,7 +769,11 @@ void ScriptError(Script * cur) {
 }
 //------------------------------------------------------------------------------
 
-void ScriptOnTimer(ScriptTimer * AccTimer) {
+#ifdef _WIN32
+	static void ScriptOnTimer(UINT_PTR uiTimerId, const bool &bCustom) {
+#else
+	void ScriptOnTimer(ScriptTimer * AccTimer) {
+#endif
 	Script *next = ScriptManager->RunningScriptS;
 
     while(next != NULL) {
@@ -590,13 +781,18 @@ void ScriptOnTimer(ScriptTimer * AccTimer) {
         next = cur->next;
 
         ScriptTimer * next = cur->TimerList;
-
+        
         while(next != NULL) {
             ScriptTimer * tmr = next;
             next = tmr->next;
 
+#ifdef _WIN32
+			if(tmr->uiTimerId == uiTimerId) {
+				if(bCustom == false) {
+#else
 			if(tmr == AccTimer) {
 				if(tmr->sFunctionName == NULL) {
+#endif
 					lua_getglobal(cur->LUA, "OnTimer");
 				} else {
 					lua_getglobal(cur->LUA, tmr->sFunctionName);
@@ -606,7 +802,11 @@ void ScriptOnTimer(ScriptTimer * AccTimer) {
 
 				lua_checkstack(cur->LUA, 1); // we need 1 empty slots in stack, check it to be sure
 
+#ifdef _WIN32
+				lua_pushnumber(cur->LUA, (double)uiTimerId);
+#else
 				lua_pushlightuserdata(cur->LUA, (void *)tmr->TimerId);
+#endif
 
 				// 1 passed parameters, 0 returned
 				if(lua_pcall(cur->LUA, 1, 0, 0) != 0) {
@@ -621,5 +821,20 @@ void ScriptOnTimer(ScriptTimer * AccTimer) {
         }
 
 	}
+
+#ifdef _WIN32
+	// PPK .. timer not found ? kill it !
+	KillTimer(NULL, uiTimerId);
+}
+//------------------------------------------------------------------------------
+
+VOID CALLBACK ScriptTimerProc(HWND /*hwnd*/,UINT /*uMsg*/, UINT_PTR idEvent, DWORD /*dwTime*/) {
+	ScriptOnTimer(idEvent, false);
+}
+//------------------------------------------------------------------------------
+
+VOID CALLBACK ScriptTimerCustomProc(HWND /*hwnd*/,UINT /*uMsg*/, UINT_PTR idEvent, DWORD /*dwTime*/) {
+	ScriptOnTimer(idEvent, true);
+#endif
 }
 //------------------------------------------------------------------------------

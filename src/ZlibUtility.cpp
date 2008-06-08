@@ -24,7 +24,17 @@
 //---------------------------------------------------------------------------
 #include "utility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+#endif
+//---------------------------------------------------------------------------
 #include <zlib.h>
+//---------------------------------------------------------------------------
+#ifdef _WIN32
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
 //---------------------------------------------------------------------------
 static const uint32_t ZBUFFERLEN = 1024*256;
 static const uint32_t ZMINLEN = 100;
@@ -34,10 +44,17 @@ clsZlibUtility *ZlibUtility = NULL;
 
 clsZlibUtility::clsZlibUtility() {
 	// allocate buffer for zlib
+#ifdef _WIN32
+	sZbuffer = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ZBUFFERLEN);
+#else
 	sZbuffer = (char *) calloc(ZBUFFERLEN, 1);
+#endif
 	if(sZbuffer == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate "+string(ZBUFFERLEN)+
 			" bytes of memory for sZbuffer in clsZlibclsZlibUtility!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
 		exit(EXIT_FAILURE);
 	}
@@ -48,7 +65,15 @@ clsZlibUtility::clsZlibUtility() {
 	
 clsZlibUtility::~clsZlibUtility() {
     if(sZbuffer != NULL) {
-        free(sZbuffer);
+#ifdef _WIN32
+        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZbuffer) == 0) {
+			string sDbgstr = "[BUF] Cannot deallocate sZbuffer in clsZlib~clsZlibUtility! "+string((uint32_t)GetLastError())+" "+
+				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+			AppendSpecialLog(sDbgstr);
+        }
+#else
+		free(sZbuffer);
+#endif
         sZbuffer = NULL;
     }
 }
@@ -61,11 +86,18 @@ char * clsZlibUtility::CreateZPipe(const char *sInData, const size_t &sInDataSiz
         while(uiZbufferSize < sInDataSize + 128) {
             uiZbufferSize += ZBUFFERLEN;
         }
-        
-        sZbuffer = (char *) realloc(sZbuffer, uiZbufferSize);
+
+#ifdef _WIN32
+        sZbuffer = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZbuffer, uiZbufferSize);
+#else
+		sZbuffer = (char *) realloc(sZbuffer, uiZbufferSize);
+#endif
         if(sZbuffer == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)uiZbufferSize)+
 				" bytes of memory for sZbuffer in clsZlibCreateZPipe!";
+#ifdef _WIN32
+			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 			AppendSpecialLog(sDbgstr);
             uiZbufferSize = 0;
             iOutDataLen = 0;
@@ -122,11 +154,18 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const size_t &sInDataSize, cha
         while(uiZbufferSize < sInDataSize + 128) {
             uiZbufferSize += ZBUFFERLEN;
         }
-        
-        sZbuffer = (char *) realloc(sZbuffer, uiZbufferSize);
+
+#ifdef _WIN32
+        sZbuffer = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZbuffer, uiZbufferSize);
+#else
+		sZbuffer = (char *) realloc(sZbuffer, uiZbufferSize);
+#endif
         if(sZbuffer == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)uiZbufferSize)+
 				" bytes of memory for sZbuffer in clsZlibCreateZPipe1!";
+#ifdef _WIN32
+			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 			AppendSpecialLog(sDbgstr);
             uiZbufferSize = 0;
             iOutDataLen = 0;
@@ -171,10 +210,17 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const size_t &sInDataSize, cha
     // prepare out buffer
     if(iOutDataSize < iOutDataLen) {
         iOutDataSize = (uint32_t)(Allign1024(iOutDataLen)-1);
-        sOutData = (char *) realloc(sOutData, iOutDataSize+1);
+#ifdef _WIN32
+        sOutData = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOutData, iOutDataSize+1);
+#else
+		sOutData = (char *) realloc(sOutData, iOutDataSize+1);
+#endif
         if(sOutData == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iOutDataSize+1))+
 				" bytes of memory for sOutData in clsZlibCreateZPipe1!";
+#ifdef _WIN32
+			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 			AppendSpecialLog(sDbgstr);
             return sOutData;
         }
@@ -196,11 +242,18 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &sInDataSiz
         while(uiZbufferSize < sInDataSize + 128) {
             uiZbufferSize += ZBUFFERLEN;
         }
-        
-        sZbuffer = (char *) realloc(sZbuffer, uiZbufferSize);
+
+#ifdef _WIN32
+        sZbuffer = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZbuffer, uiZbufferSize);
+#else
+		sZbuffer = (char *) realloc(sZbuffer, uiZbufferSize);
+#endif
         if(sZbuffer == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)uiZbufferSize)+
 				" bytes of memory for sZbuffer in clsZlibCreateZPipe2!";
+#ifdef _WIN32
+			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 			AppendSpecialLog(sDbgstr);
             uiZbufferSize = 0;
             iOutDataLen = 0;
@@ -248,11 +301,18 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &sInDataSiz
         while(iOutDataSize < iOutDataLen) {
             iOutDataSize += iOutDataIncrease;
         }
-        
-        sOutData = (char *) realloc(sOutData, iOutDataSize+1);
+
+#ifdef _WIN32
+        sOutData = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOutData, iOutDataSize+1);
+#else
+		sOutData = (char *) realloc(sOutData, iOutDataSize+1);
+#endif
         if(sOutData == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string(iOutDataSize+1)+
-            	" bytes of memory for sOutData in clsZlibCreateZPipe2!";
+				" bytes of memory for sOutData in clsZlibCreateZPipe2!";
+#ifdef _WIN32
+            sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 			AppendSpecialLog(sDbgstr);
             return sOutData;
         }

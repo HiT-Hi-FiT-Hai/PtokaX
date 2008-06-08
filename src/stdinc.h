@@ -21,39 +21,81 @@
 #ifndef stdincH
 #define stdincH
 //---------------------------------------------------------------------------
-#define _REENTRANT 1
-#define __STDC_FORMAT_MACROS 1
+#ifndef _WIN32
+	#define _REENTRANT 1
+	#define __STDC_FORMAT_MACROS 1
+#endif
 //---------------------------------------------------------------------------
 #include <stdlib.h>
+#ifdef _WIN32
+	#include <malloc.h>
+#endif
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
+#ifdef _WIN32
+	#include <dos.h>
+	#ifndef _MSC_VER
+		#include <dir.h>
+	#else
+		#pragma warning(disable: 4996) // Deprecated stricmp
+	
+		typedef signed __int8 int8_t;
+		typedef signed __int16 int16_t;
+		typedef signed __int32 int32_t;
+		typedef signed __int64 int64_t;
+	
+		typedef unsigned __int8 uint8_t;
+		typedef unsigned __int16 uint16_t;
+		typedef unsigned __int32 uint32_t;
+		typedef unsigned __int64 uint64_t;
+	#endif
+	#include <winsock2.h>
+	#include <ws2tcpip.h>
+	#ifndef _SERVICE
+	    #include <vcl.h>
+	#endif
+#endif
 #include <time.h>
-#include <unistd.h>
-#include <errno.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <inttypes.h>
-#include <limits.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <pthread.h>
-#include <signal.h>
-#include <sys/ioctl.h>
-#include <sys/resource.h> 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/stat.h>
-#include <sys/utsname.h>
-#include <syslog.h>
+#ifdef _WIN32
+	#include <process.h>
+#else
+	#include <unistd.h>
+	#include <errno.h>
+	#include <dirent.h>
+	#include <fcntl.h>
+	#include <inttypes.h>
+	#include <limits.h>
+	#include <netdb.h>
+	#include <arpa/inet.h>
+	#include <netinet/in.h>
+	#include <pthread.h>
+	#include <signal.h>
+	#include <sys/ioctl.h>
+	#include <sys/resource.h> 
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <sys/stat.h>
+	#include <sys/utsname.h>
+	#include <syslog.h>
+#endif
 #include <tinyxml.h>
 #include <tinystr.h>
+#ifdef _WIN32
+	#include <psapi.h>
+	#include <io.h>
+#endif
 #include "pxstring.h"
 //---------------------------------------------------------------------------
 #define PtokaXVersionString "0.4.1.0"
 #define sErrOutOfMem "[ERR] Out of memory..."
+
+#ifdef _WIN32
+    #define NEW_LINE_CHARS "\r\n"
+#else
+    #define NEW_LINE_CHARS "\n"
+#endif
 //---------------------------------------------------------------------------
 
 #endif

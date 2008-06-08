@@ -28,6 +28,18 @@
 #include "User.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+//---------------------------------------------------------------------------
+	#ifndef _SERVICE
+	    #include "TRegsForm.h"
+	#endif
+//---------------------------------------------------------------------------
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
+//---------------------------------------------------------------------------
 hashRegMan *hashRegManager = NULL;
 //---------------------------------------------------------------------------
 
@@ -36,10 +48,17 @@ RegUser::RegUser(char * Nick, char * Pass, const uint16_t &iRegProfile) {
     next = NULL;
     
     size_t iNickLen = strlen(Nick);
-    sNick = (char *) malloc(iNickLen+1);
+#ifdef _WIN32
+    sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
+#else
+	sNick = (char *) malloc(iNickLen+1);
+#endif
     if(sNick == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
 			" bytes of memory for sNick in RegUser::RegUser!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
         return;
     }   
@@ -47,10 +66,17 @@ RegUser::RegUser(char * Nick, char * Pass, const uint16_t &iRegProfile) {
     sNick[iNickLen] = '\0';
     
     size_t iPassLen = strlen(Pass);
-    sPass = (char *) malloc(iPassLen+1);
+#ifdef _WIN32
+    sPass = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iPassLen+1);
+#else
+	sPass = (char *) malloc(iPassLen+1);
+#endif
     if(sPass == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iPassLen+1))+
 			" bytes of memory for sPass in RegUser::RegUser!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
         return;
     }   
@@ -68,10 +94,26 @@ RegUser::RegUser(char * Nick, char * Pass, const uint16_t &iRegProfile) {
 //---------------------------------------------------------------------------
 
 RegUser::~RegUser(void) {
-    free(sNick);
+#ifdef _WIN32
+    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
+		string sDbgstr = "[BUF] Cannot deallocate sNick in RegUser::~RegUser! "+string((uint32_t)GetLastError())+" "+
+			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+		AppendSpecialLog(sDbgstr);
+    }
+#else
+	free(sNick);
+#endif
     sNick = NULL;
 
-    free(sPass);
+#ifdef _WIN32
+    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPass) == 0) {
+		string sDbgstr = "[BUF] Cannot deallocate sPass in RegUser::~RegUser! "+string((uint32_t)GetLastError())+" "+
+			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+		AppendSpecialLog(sDbgstr);
+    }
+#else
+	free(sPass);
+#endif
     sPass = NULL;
 }
 //---------------------------------------------------------------------------
@@ -103,13 +145,30 @@ bool hashRegMan::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) 
 
     RegUser *newUser = new RegUser(sNick, sPasswd, iProfile);
     if(newUser == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate newUser in hashRegMan::AddNewReg!";
+    	string sDbgstr = "[BUF] Cannot allocate newUser in hashRegMan::AddNewReg!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }
 
-    Add(newUser);
-    Save();
+	Add(newUser);
+	Save();
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(RegsForm == NULL) {
+	        return true;
+	    }
+	
+	    TListItem *Item = RegsForm->RegList->Items->Add();
+	    Item->Caption = sNick;
+	    Item->SubItems->Add(sPasswd);
+	    Item->SubItems->Add(ProfileMan->ProfilesTable[iProfile]->sName);
+		Item->Data = (void *)newUser;
+	#endif
+#endif
 
     return true;
 }
@@ -199,7 +258,11 @@ RegUser* hashRegMan::Find(char * sNick, const size_t &iNickLen) {
         RegUser *cur = next;
         next = cur->hashtablenext;
 
+#ifdef _WIN32
+		if(cur->ui32Hash == ui32Hash && stricmp(cur->sNick, sNick) == 0) {
+#else
 		if(cur->ui32Hash == ui32Hash && strcasecmp(cur->sNick, sNick) == 0) {
+#endif
             return cur;
         }
     }
@@ -217,7 +280,11 @@ RegUser* hashRegMan::Find(User * u) {
         RegUser *cur = next;
         next = cur->hashtablenext;
 
+#ifdef _WIN32
+		if(cur->ui32Hash == u->ui32NickHash && stricmp(cur->sNick, u->Nick) == 0) {
+#else
 		if(cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->sNick, u->Nick) == 0) {
+#endif
             return cur;
         }
     }
@@ -235,7 +302,11 @@ RegUser* hashRegMan::Find(uint32_t ui32Hash, char * sNick) {
         RegUser *cur = next;
         next = cur->hashtablenext;
 
-        if(cur->ui32Hash == ui32Hash && strcasecmp(cur->sNick, sNick) == 0) {
+#ifdef _WIN32
+        if(cur->ui32Hash == ui32Hash && stricmp(cur->sNick, sNick) == 0) {
+#else
+		if(cur->ui32Hash == ui32Hash && strcasecmp(cur->sNick, sNick) == 0) {
+#endif
             return cur;
         }
     }
@@ -248,7 +319,12 @@ void hashRegMan::Load(void) {
     uint16_t iProfilesCount = (uint16_t)(ProfileMan->iProfileCount-1);
     bool bIsBuggy = false;
 
-    TiXmlDocument doc((PATH+"/cfg/RegisteredUsers.xml").c_str());
+#ifdef _WIN32
+    TiXmlDocument doc((PATH+"\\cfg\\RegisteredUsers.xml").c_str());
+#else
+	TiXmlDocument doc((PATH+"/cfg/RegisteredUsers.xml").c_str());
+#endif
+
     if(doc.LoadFile()) {
         TiXmlHandle cfg(&doc);
         TiXmlNode *registeredusers = cfg.FirstChild("RegisteredUsers").Node();
@@ -277,13 +353,21 @@ void hashRegMan::Load(void) {
 
 				uint16_t iProfile = (uint16_t)atoi(registereduser->Value());
 
-                if(iProfile > iProfilesCount) {
+				if(iProfile > iProfilesCount) {
                     char msg[1024];
                     int imsgLen = sprintf(msg, "%s %s %s! %s %s.", LanguageManager->sTexts[LAN_USER], nick, LanguageManager->sTexts[LAN_HAVE_NOT_EXIST_PROFILE],
                         LanguageManager->sTexts[LAN_CHANGED_PROFILE_TO], ProfileMan->ProfilesTable[iProfilesCount]->sName);
 					CheckSprintf(imsgLen, 1024, "hashRegMan::LoadXmlRegList1");
 
-                    AppendLog(msg);
+#ifdef _WIN32
+	#ifdef _SERVICE
+					AppendLog(msg);
+	#else
+					MessageBox(Application->Handle, msg, LanguageManager->sTexts[LAN_NOTE], MB_OK|MB_ICONEXCLAMATION);
+	#endif
+#else
+					AppendLog(msg);
+#endif
 
                     iProfile = iProfilesCount;
                     bIsBuggy = true;
@@ -292,31 +376,46 @@ void hashRegMan::Load(void) {
                 if(Find((char*)nick, strlen(nick)) == NULL) {
                     RegUser *newUser = new RegUser(nick, pass, iProfile);
                     if(newUser == NULL) {
-						string sDbgstr = "[BUF] Cannot allocate newUser in hashRegMan::LoadXmlRegList!";
+                    	string sDbgstr = "[BUF] Cannot allocate newUser in hashRegMan::LoadXmlRegList!";
+#ifdef _WIN32
+						sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 						AppendSpecialLog(sDbgstr);
                     	exit(EXIT_FAILURE);
                     }
-                    Add(newUser);
+					Add(newUser);
                 } else {
                     char msg[1024];
                     int imsgLen = sprintf(msg, "%s %s %s! %s.", LanguageManager->sTexts[LAN_USER], nick, LanguageManager->sTexts[LAN_IS_ALREADY_IN_REGS], 
                         LanguageManager->sTexts[LAN_USER_DELETED]);
 					CheckSprintf(imsgLen, 1024, "hashRegMan::LoadXmlRegList2");
 
+#ifdef _WIN32
+	#ifdef _SERVICE
                     AppendLog(msg);
+	#else
+					MessageBox(Application->Handle, msg, LanguageManager->sTexts[LAN_NOTE], MB_OK|MB_ICONEXCLAMATION);
+	#endif
+#else
+					AppendLog(msg);
+#endif
 
                     bIsBuggy = true;
                 }
             }
-            if(bIsBuggy == true)
-                Save();
+			if(bIsBuggy == true)
+				Save();
         }
     }
 }
 //---------------------------------------------------------------------------
 
 void hashRegMan::Save(void) {
-    TiXmlDocument doc((PATH+"/cfg/RegisteredUsers.xml").c_str());
+#ifdef _WIN32
+    TiXmlDocument doc((PATH+"\\cfg\\RegisteredUsers.xml").c_str());
+#else
+	TiXmlDocument doc((PATH+"/cfg/RegisteredUsers.xml").c_str());
+#endif
     doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
     TiXmlElement registeredusers("RegisteredUsers");
     RegUser *next = hashRegManager->RegListS;

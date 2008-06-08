@@ -24,9 +24,17 @@
 
 class UDPRecvThread {
 private:
+#ifdef _WIN32
+    SOCKET sock;
+
+    unsigned int threadId;
+
+    HANDLE threadHandle;
+#else
     int sock;
 
     pthread_t threadId;
+#endif
 
     bool bTerminated;
 
@@ -35,6 +43,7 @@ public:
 	UDPRecvThread();
 	~UDPRecvThread();
 
+    bool Listen();
     void Resume();
     void Run();
 	void Close();

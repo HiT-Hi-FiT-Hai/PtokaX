@@ -29,6 +29,14 @@
 #include "LuaScriptManager.h"
 #include "SettingManager.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+//---------------------------------------------------------------------------
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
+//---------------------------------------------------------------------------
 
 static int Save(lua_State * L) {
 	if(lua_gettop(L) != 0) {

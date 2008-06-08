@@ -29,8 +29,26 @@
 #include "User.h"
 #include "utility.h"
 //------------------------------------------------------------------------------
-#include "LuaScript.h"
+#ifdef _WIN32
+	#pragma hdrstop
+#endif
 //------------------------------------------------------------------------------
+#include "LuaScript.h"
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#include "TScriptMemoryForm.h"
+		#include "TScriptsForm.h"
+	#endif
+//------------------------------------------------------------------------------
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+		#pragma link "PXLua.lib"
+	#else
+		#pragma comment(lib, "PXLua-x64")
+	#endif
+	#pragma message("Linking PXLua.lib")
+#endif
+//---------------------------------------------------------------------------
 ScriptMan *ScriptManager = NULL;
 //------------------------------------------------------------------------------
 
@@ -47,8 +65,16 @@ ScriptMan::ScriptMan() {
 
     bMoved = false;
 
+#ifdef _WIN32
+    hLuaHeap = luaL_createheap();
+#endif
+
 	// PPK ... first start all script in order from xml file
+#ifdef _WIN32
+	TiXmlDocument doc((PATH+"\\cfg\\Scripts.xml").c_str());
+#else
 	TiXmlDocument doc((PATH+"/cfg/Scripts.xml").c_str());
+#endif
 	if(doc.LoadFile()) {
 		TiXmlHandle cfg(&doc);
 		TiXmlNode *scripts = cfg.FirstChild("Scripts").Node();
@@ -93,7 +119,16 @@ ScriptMan::~ScriptMan() {
 		delete ScriptTable[i];
     }
 
+#ifdef _WIN32
+	if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ScriptTable) == 0) {
+		string sDbgstr = "[BUF] Cannot deallocate ScriptTable in ScriptMan::~ScriptMan! "+string((uint32_t)GetLastError())+" "+
+			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+		AppendSpecialLog(sDbgstr);
+	}
+#else
 	free(ScriptTable);
+#endif
+
 	ScriptTable = NULL;
 
 	ui8ScriptCount = 0;
@@ -101,6 +136,10 @@ ScriptMan::~ScriptMan() {
     ActualUser = NULL;
 
     ui8BotsCount = 0;
+
+#ifdef _WIN32
+    luaL_destroyheap();
+#endif
 }
 //------------------------------------------------------------------------------
 
@@ -118,6 +157,14 @@ void ScriptMan::Start() {
 		if(ScriptTable[i]->bEnabled == true) {
         	if(ScriptStart(ScriptTable[i]) == true) {
 				AddRunningScript(ScriptTable[i]);
+#ifdef _WIN32
+	#ifndef _SERVICE
+            } else {
+				if(ScriptsForm != NULL && ScriptsForm->ScriptFiles->Count > i) {
+					ScriptsForm->ScriptFiles->State[i] = cbUnchecked;
+				}
+	#endif
+#endif
 			}
 		}
 	}
@@ -132,16 +179,30 @@ bool ScriptMan::AddScript(char * sName, const bool &bEnabled/* = false*/) {
     ui8ScriptCount++;
 
     if(ScriptTable == NULL) {
-        ScriptTable = (Script **) calloc(ui8ScriptCount, sizeof(Script *));
+#ifdef _WIN32
+        ScriptTable = (Script **) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui8ScriptCount*sizeof(Script *));
+#else
+		ScriptTable = (Script **) calloc(ui8ScriptCount, sizeof(Script *));
+#endif
         if(ScriptTable == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate ScriptTable in ScriptMan::AddScript!";
+        	string sDbgstr = "[BUF] Cannot allocate ScriptTable in ScriptMan::AddScript!";
+#ifdef _WIN32
+			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 			AppendSpecialLog(sDbgstr);
             exit(EXIT_FAILURE);
         }
     } else {
+#ifdef _WIN32
+		ScriptTable = (Script **) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ScriptTable, ui8ScriptCount*sizeof(Script *));
+#else
 		ScriptTable = (Script **) realloc(ScriptTable, ui8ScriptCount*sizeof(Script *));
+#endif
 		if(ScriptTable == NULL) {
-            string sDbgstr = "[BUF] Cannot reallocate ScriptTable in ScriptMan::AddScript!";
+			string sDbgstr = "[BUF] Cannot reallocate ScriptTable in ScriptMan::AddScript!";
+#ifdef _WIN32
+            sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 			AppendSpecialLog(sDbgstr);
             exit(EXIT_FAILURE);
         }
@@ -150,7 +211,10 @@ bool ScriptMan::AddScript(char * sName, const bool &bEnabled/* = false*/) {
     ScriptTable[ui8ScriptCount-1] = new Script(sName, bEnabled);
 
     if(ScriptTable[ui8ScriptCount-1] == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate new Script!";
+    	string sDbgstr = "[BUF] Cannot allocate new Script!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
         return false;
     }
@@ -173,6 +237,14 @@ void ScriptMan::Stop() {
 	}
 
 	ActualUser = NULL;
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(ScriptMemoryForm != NULL) {
+			ScriptMemoryForm->LuaMem->Clear();
+		}
+	#endif
+#endif
 }
 //------------------------------------------------------------------------------
 
@@ -218,7 +290,11 @@ void ScriptMan::RemoveRunningScript(Script * curScript) {
 //------------------------------------------------------------------------------
 
 void ScriptMan::SaveScripts() {
-    TiXmlDocument doc((PATH+"/cfg/Scripts.xml").c_str());
+#ifdef _WIN32
+    TiXmlDocument doc((PATH+"\\cfg\\Scripts.xml").c_str());
+#else
+	TiXmlDocument doc((PATH+"/cfg/Scripts.xml").c_str());
+#endif
     doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
     TiXmlElement scripts("Scripts");
 
@@ -270,6 +346,27 @@ void ScriptMan::CheckForDeletedScripts() {
 //------------------------------------------------------------------------------
 
 void ScriptMan::CheckForNewScripts() {
+#ifdef _WIN32
+    struct _finddata_t luafile;
+    intptr_t hFile = _findfirst((SCRIPT_PATH+"\\*.lua").c_str(), &luafile);
+
+    if(hFile != -1) {
+        do {
+			if((luafile.attrib & _A_SUBDIR) != 0 ||
+				stricmp(luafile.name+(strlen(luafile.name)-4), ".lua") != 0) {
+				continue;
+			}
+
+			if(FindScript(luafile.name) != NULL) {
+                continue;
+            }
+
+			AddScript(luafile.name);
+        } while(_findnext(hFile, &luafile) == 0);
+
+		_findclose(hFile);
+	}
+#else
     DIR * p_scriptdir = opendir(SCRIPT_PATH.c_str());
 
     if(p_scriptdir == NULL) {
@@ -294,10 +391,20 @@ void ScriptMan::CheckForNewScripts() {
     }
 
     closedir(p_scriptdir);
+#endif
 }
 //------------------------------------------------------------------------------
 
 void ScriptMan::Restart() {
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(ScriptsForm != NULL) {
+	        ScriptsForm->ScriptFiles->Clear();
+	        ScriptsForm->LUAerr->Clear();
+		}
+	#endif
+#endif
+
 	OnExit();
 	Stop();
 
@@ -305,12 +412,27 @@ void ScriptMan::Restart() {
 
 	Start();
 	OnStartup();
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+	    if(ScriptsForm != NULL) {
+	        for(uint8_t i = 0; i < ScriptManager->ui8ScriptCount; i++) {
+	            int idx = ScriptsForm->ScriptFiles->Items->AddObject(ScriptManager->ScriptTable[i]->sName, NULL);
+	            ScriptsForm->ScriptFiles->State[idx] = ScriptManager->ScriptTable[i]->bEnabled == true ? cbChecked : cbUnchecked;
+			}
+		}
+	#endif
+#endif
 }
 //------------------------------------------------------------------------------
 
 Script * ScriptMan::FindScript(char * sName) {
     for(uint8_t i = 0; i < ui8ScriptCount; i++) {
-        if(strcasecmp(ScriptTable[i]->sName, sName) == 0) {
+#ifdef _WIN32
+        if(stricmp(ScriptTable[i]->sName, sName) == 0) {
+#else
+		if(strcasecmp(ScriptTable[i]->sName, sName) == 0) {
+#endif
             return ScriptTable[i];
         }
     }
@@ -337,13 +459,36 @@ Script * ScriptMan::FindScript(lua_State * L) {
 
 uint8_t ScriptMan::FindScriptIdx(char * sName) {
     for(uint8_t i = 0; i < ui8ScriptCount; i++) {
-        if(strcasecmp(ScriptTable[i]->sName, sName) == 0) {
+#ifdef _WIN32
+        if(stricmp(ScriptTable[i]->sName, sName) == 0) {
+#else
+		if(strcasecmp(ScriptTable[i]->sName, sName) == 0) {
+#endif
             return i;
         }
     }
 
     return ui8ScriptCount;
 }
+//------------------------------------------------------------------------------
+
+#ifdef _WIN32
+	void ScriptMan::GetGCInfo() {
+		if(SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == false) {
+	        return;
+	    }
+		
+	    uint32_t i = 0;
+	    Script *next = RunningScriptS;
+	    
+		while(next != NULL) {
+			Script *cur = next;
+			next = cur->next;
+	
+	        ScriptGetGC(cur, i++);
+	    }
+	}
+#endif
 //------------------------------------------------------------------------------
 
 bool ScriptMan::StartScript(Script * curScript) {
@@ -424,9 +569,25 @@ void ScriptMan::StopScript(Script * curScript) {
         ScriptTimer * tmr = next;
         next = tmr->next;
 
+#ifdef _WIN32
+        KillTimer(NULL, tmr->uiTimerId);
+        tmr->uiTimerId = 0;
+#else
         timer_delete(tmr->TimerId);
         tmr->TimerId = 0;
+#endif
     }
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(ScriptMemoryForm != NULL) {
+	        TListItem *item = ScriptMemoryForm->LuaMem->FindCaption(0, curScript->sName, false, true, false);
+	        if(item != NULL) {
+	            ScriptMemoryForm->LuaMem->Items->Delete(item->Index);
+	        }
+		}
+	#endif
+#endif
 
     if(bServerRunning == true) {
         ScriptOnExit(curScript);
@@ -571,7 +732,11 @@ void ScriptMan::DeleteScript(const uint8_t &ui8ScriptPosInTbl) {
 	}
 
 	if(FileExist((SCRIPT_PATH+string(cur->sName)).c_str()) == true) {
-        unlink((SCRIPT_PATH+string(cur->sName)).c_str());
+#ifdef _WIN32
+        DeleteFile((SCRIPT_PATH+string(cur->sName)).c_str());
+#else
+		unlink((SCRIPT_PATH+string(cur->sName)).c_str());
+#endif
     }
 
     delete cur;

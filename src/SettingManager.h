@@ -26,7 +26,11 @@
 
 class SetMan {
 private:
+#ifdef _WIN32
+	CRITICAL_SECTION csSetting;
+#else
 	pthread_mutex_t mtxSetting;
+#endif
 
     void CreateDefaultMOTD();
     void LoadMOTD();

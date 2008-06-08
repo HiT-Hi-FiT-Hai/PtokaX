@@ -31,6 +31,16 @@ private:
         int16_t hits;
     };
 
+#ifdef _WIN32
+    SOCKET server;
+
+    unsigned int threadId;
+    uint32_t iSuspendTime;
+
+    HANDLE threadHandle;
+
+    CRITICAL_SECTION csServerThread;
+#else
     int server;
 
     unsigned int iSuspendTime;
@@ -38,6 +48,7 @@ private:
     pthread_t threadId;
 
     pthread_mutex_t mtxServerThread;
+#endif
 
 	AntiConFlood *AntiFloodList;
 	
@@ -57,7 +68,11 @@ public:
 	void Close();
 	void WaitFor();
 	bool Listen(const uint16_t &port, bool bSilent = false);
+#ifdef _WIN32
+	bool isFlooder(const SOCKET &s, const sockaddr_in &addr, const int &sin_len);
+#else
 	bool isFlooder(const int &s, const sockaddr_in &addr, const socklen_t &sin_len);
+#endif
 	void RemoveConFlood(AntiConFlood * cur);
 	void ResumeSck();
 	void SuspendSck(const uint32_t &iTime);

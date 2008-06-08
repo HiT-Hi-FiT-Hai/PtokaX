@@ -135,10 +135,18 @@ struct User {
 
     uint32_t Hubs, Slots, OLimit, LLimit, DLimit, iNormalHubs, iRegHubs, iOpHubs;
     uint32_t iSendCalled, iRecvCalled, iReceivedPmCount, iSR, iDefloodWarnings;
+
+#ifdef _WIN32
+//    int sin_len, PORT;
+
+	SOCKET Sck;
+#else
 //    socklen_t sin_len;
 //    int PORT;
 
 	int Sck;
+#endif
+
 //    sockaddr_in addr;
 
     time_t LoginTime;

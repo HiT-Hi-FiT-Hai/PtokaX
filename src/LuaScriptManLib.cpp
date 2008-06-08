@@ -28,7 +28,20 @@
 #include "LuaScriptManager.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+#endif
+//---------------------------------------------------------------------------
 #include "LuaScript.h"
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#include "TScriptsForm.h"
+	#endif
+//---------------------------------------------------------------------------
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
 //---------------------------------------------------------------------------
 
 static int GetScript(lua_State * L) {
@@ -141,6 +154,24 @@ static int Move(lua_State * L, const bool &bUp) {
 
 	ScriptManager->MoveScript(ui8idx, bUp);
 
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(ScriptsForm != NULL && ScriptsForm->ScriptFiles->Count != 0) {
+			int idx = ScriptsForm->ScriptFiles->ItemIndex;
+			ScriptsForm->ScriptFiles->Items->Move(ui8idx, bUp == true ? ui8idx-1 : ui8idx+1);
+			if(idx != -1) {
+				if(idx == (int)ui8idx) {
+					ScriptsForm->ScriptFiles->ItemIndex = (bUp == true ? idx-1 : idx+1);
+				} else if(bUp == true && idx == (int)ui8idx-1) {
+					ScriptsForm->ScriptFiles->ItemIndex = idx+1;
+				} else if(bUp == false && idx == (int)ui8idx+1) {
+					ScriptsForm->ScriptFiles->ItemIndex = idx-1;
+				}
+			}
+		}
+	#endif
+#endif
+
     lua_settop(L, 0);
 	lua_pushboolean(L, 1);
     return 1;
@@ -203,18 +234,45 @@ static int StartScript(lua_State * L) {
 
 		curScript->bEnabled = true;
 
+#ifdef _WIN32
+	#ifndef _SERVICE
+			if(ScriptsForm != NULL) {
+	            int idx = ScriptsForm->ScriptFiles->Items->IndexOf(curScript->sName);
+	            if(idx != -1) {
+	                ScriptsForm->ScriptFiles->State[idx] = cbChecked;
+	            }
+			}
+	#endif
+#endif
+
     	lua_pushboolean(L, 1);
         return 1;
 	}
 
 	if(ScriptManager->AddScript(sName, true) == true && ScriptManager->StartScript(ScriptManager->ScriptTable[ScriptManager->ui8ScriptCount-1]) == true) {
+#ifdef _WIN32
+	#ifndef _SERVICE
+			if(ScriptsForm != NULL && ScriptsForm->ScriptFiles->Count != 0) {
+				int idx = ScriptsForm->ScriptFiles->Items->AddObject(sName, NULL);
+				ScriptsForm->ScriptFiles->State[idx] = cbChecked;
+			}
+	#endif
+#endif
+
         lua_settop(L, 0);
     	lua_pushboolean(L, 1);
         return 1;
     }
 
 	if(ScriptManager->ui8ScriptCount != 0 && strcmp(sName, ScriptManager->ScriptTable[ScriptManager->ui8ScriptCount-1]->sName) == 0) {
-        // ...
+#ifdef _WIN32
+	#ifndef _SERVICE
+			if(ScriptsForm != NULL && ScriptsForm->ScriptFiles->Count != 0) {
+				int idx = ScriptsForm->ScriptFiles->Items->AddObject(sName, NULL);
+				ScriptsForm->ScriptFiles->State[idx] = cbUnchecked;
+			}
+	#endif
+#endif
 	}
 
     lua_settop(L, 0);
@@ -270,6 +328,17 @@ static int RestartScript(lua_State * L) {
         return 1;
     }
 
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(ScriptsForm != NULL) {
+	        int idx = ScriptsForm->ScriptFiles->Items->IndexOf(curScript->sName);
+	        if(idx != -1) {
+	            ScriptsForm->ScriptFiles->State[idx] = cbUnchecked;
+	        }
+		}
+	#endif
+#endif
+
 	lua_pushnil(L);
     return 1;
 }
@@ -319,6 +388,17 @@ static int StopScript(lua_State * L) {
 
     curScript->bEnabled = false;
 
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(ScriptsForm != NULL) {
+	        int idx = ScriptsForm->ScriptFiles->Items->IndexOf(curScript->sName);
+	        if(idx != -1) {
+	            ScriptsForm->ScriptFiles->State[idx] = cbUnchecked;
+	        }
+		}
+	#endif
+#endif
+
 	lua_pushboolean(L, 1);
     return 1;
 }
@@ -344,8 +424,29 @@ static int Refresh(lua_State * L) {
         return 0;
     }
 
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(ScriptsForm != NULL) {
+		   ScriptsForm->ScriptFiles->Clear();
+	    }
+	#endif
+#endif
+
     ScriptManager->CheckForDeletedScripts();
 	ScriptManager->CheckForNewScripts();
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(ScriptsForm != NULL) {
+	    	for(uint8_t i = 0; i < ScriptManager->ui8ScriptCount; i++) {
+	    		int idx = ScriptsForm->ScriptFiles->Items->AddObject(ScriptManager->ScriptTable[i]->sName, NULL);
+	    		ScriptsForm->ScriptFiles->State[idx] = ScriptManager->ScriptTable[i]->bEnabled == true ? cbChecked : cbUnchecked;
+	    	}
+	    
+	    	ScriptsForm->LuaUpDownUpdate();
+	    }
+	#endif
+#endif
 
     return 0;
 }

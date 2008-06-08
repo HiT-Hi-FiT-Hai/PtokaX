@@ -25,6 +25,14 @@
 #include "User.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+//---------------------------------------------------------------------------
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
+//---------------------------------------------------------------------------
 hashMan *hashManager = NULL;
 //---------------------------------------------------------------------------
 
@@ -42,13 +50,13 @@ hashMan::~hashMan() {
     //Memo("hashManager destroyed");
     for(uint32_t i = 0; i < 65536; i++) {
 		IpTableItem * next = iptable[i];
-
+        
         while(next != NULL) {
             IpTableItem * cur = next;
             next = cur->next;
-
-                    delete cur;
-        }
+        
+            delete cur;
+		}
     }
 }
 //---------------------------------------------------------------------------
@@ -70,6 +78,9 @@ void hashMan::Add(User * u) {
 
         if(iptable[ui16dx] == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate IpTableItem in hashMan::Add!";
+#ifdef _WIN32
+			sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 			AppendSpecialLog(sDbgstr);
             exit(EXIT_FAILURE);
         }
@@ -103,6 +114,9 @@ void hashMan::Add(User * u) {
 
     if(cur == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate IpTableItem2 in hashMan::Add!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }
@@ -120,10 +134,10 @@ void hashMan::Add(User * u) {
 
 void hashMan::Remove(User * u) {
     if(u->hashtableprev == NULL) {
-            uint16_t ui16dx = ((uint16_t *)&u->ui32NickHash)[0];
+        uint16_t ui16dx = ((uint16_t *)&u->ui32NickHash)[0];
 
         if(u->hashtablenext == NULL) {
-                nicktable[ui16dx] = NULL;
+            nicktable[ui16dx] = NULL;
         } else {
             u->hashtablenext->hashtableprev = NULL;
             nicktable[ui16dx] = u->hashtablenext;
@@ -214,7 +228,11 @@ User * hashMan::FindUser(char * sNick, const size_t &iNickLen) {
             next = cur->hashtablenext;
 
             // we are looking for duplicate string
+#ifdef _WIN32
+			if(cur->ui32NickHash == ui32Hash && cur->NickLen == iNickLen && stricmp(cur->Nick, sNick) == 0) {
+#else
 			if(cur->ui32NickHash == ui32Hash && cur->NickLen == iNickLen && strcasecmp(cur->Nick, sNick) == 0) {
+#endif
                 return cur;
             }
         }            
@@ -237,7 +255,11 @@ User * hashMan::FindUser(User * u) {
             next = cur->hashtablenext;
 
             // we are looking for duplicate string
-            if(cur->ui32NickHash == u->ui32NickHash && cur->NickLen == u->NickLen && strcasecmp(cur->Nick, u->Nick) == 0) {
+#ifdef _WIN32
+            if(cur->ui32NickHash == u->ui32NickHash && cur->NickLen == u->NickLen && stricmp(cur->Nick, u->Nick) == 0) {
+#else
+			if(cur->ui32NickHash == u->ui32NickHash && cur->NickLen == u->NickLen && strcasecmp(cur->Nick, u->Nick) == 0) {
+#endif
                 return cur;
             }
         }            

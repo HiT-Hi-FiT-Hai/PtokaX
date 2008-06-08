@@ -24,22 +24,43 @@
 struct User;
 //---------------------------------------------------------------------------
 
+#ifdef _WIN32
+    static VOID CALLBACK LooperProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
+#endif
+//---------------------------------------------------------------------------
+
 class theLoop {
 private:
     struct AcceptedSocket {
-        int s;
+#ifdef _WIN32
+        SOCKET s;
+#else
+		int s;
+#endif
+
         sockaddr_in addr;
-        socklen_t sin_len;
+
+#ifdef _WIN32
+        int sin_len;
+#else
+		socklen_t sin_len;
+#endif
+
         AcceptedSocket *next;
         char IP[16];
     };
 
     uint64_t iLstUptmTck;
 
-    pthread_mutex_t mtxAcceptQueue;
+#ifdef _WIN32
+    CRITICAL_SECTION csAcceptQueue;
+#else
+	pthread_mutex_t mtxAcceptQueue;
+#endif
 
 	AcceptedSocket *AcceptedSocketsS, *AcceptedSocketsE;
 
+#ifndef _WIN32
     int iSIG;
 
     siginfo_t info;
@@ -47,6 +68,7 @@ private:
     sigset_t sst;
 
     struct timespec zerotime;
+#endif
 
 	char msg[1024];
 
@@ -58,14 +80,24 @@ public:
 
     double dLoggedUsers, dActualSrvLoopLogins;
 
+#ifdef _WIN32
+    UINT_PTR timer;
+#endif
+
     uint32_t iLastSendRest, iSendRestsPeak, iLastRecvRest, iRecvRestsPeak, iLoopsForLogins;
     bool bRecv;
 
+#ifdef _WIN32
+	void AcceptSocket(const SOCKET &s, const sockaddr_in &addr, const int &sin_len);
+#else
 	void AcceptSocket(const int &s, const sockaddr_in &addr, const socklen_t &sin_len);
+#endif
 	void Terminate();
 	void ReceiveLoop();
 	void SendLoop();
+#ifndef _WIN32
 	void Looper();
+#endif
 };
 //---------------------------------------------------------------------------
 extern theLoop *srvLoop;

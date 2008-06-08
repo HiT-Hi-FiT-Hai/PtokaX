@@ -29,19 +29,29 @@ private:
         ~RegSocket();
     
         uint64_t iTotalShare;
-    
-        int sock;
-    
+
+#ifdef _WIN32
+        SOCKET sock;
+#else
+		int sock;
+#endif
+
         uint32_t iRecvBufLen, iRecvBufSize, iSendBufLen, iTotalUsers;
 
         uint32_t ui32AddrLen;
 
-        char *sAddress, *sRecvBuf, *sSendBuf, *sSendBufHead;
+		char *sAddress, *sRecvBuf, *sSendBuf, *sSendBufHead;
     
         RegSocket *prev, *next;    
     };
 
-    pthread_t threadId;
+#ifdef _WIN32
+    unsigned int threadId;
+
+    HANDLE threadHandle;
+#else
+	pthread_t threadId;
+#endif
 
     RegSocket *RegSockListS, *RegSockListE;
 
