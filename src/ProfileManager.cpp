@@ -30,11 +30,32 @@
 #include "User.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+//---------------------------------------------------------------------------
+	#ifndef _SERVICE
+		#include "TProfileManagerForm.h"
+		#include "TRegsForm.h"
+	#endif
+//---------------------------------------------------------------------------
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
+//---------------------------------------------------------------------------
 ProfileManager *ProfileMan = NULL;
 //---------------------------------------------------------------------------
 
 ProfileItem::~ProfileItem() {
-    free(sName);
+#ifdef _WIN32
+    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sName) == 0) {
+		string sDbgstr = "[BUF] Cannot deallocate sName in ~ProfileItem! "+string((uint32_t)GetLastError())+" "+
+            string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+        AppendSpecialLog(sDbgstr);
+    }
+#else
+	free(sName);
+#endif
 }
 //---------------------------------------------------------------------------
 
@@ -43,11 +64,23 @@ ProfileManager::ProfileManager() {
 
     ProfilesTable = NULL;
 
-    TiXmlDocument doc((PATH+"/cfg/Profiles.xml").c_str());
+#ifdef _WIN32
+    TiXmlDocument doc((PATH+"\\cfg\\Profiles.xml").c_str());
+#else
+	TiXmlDocument doc((PATH+"/cfg/Profiles.xml").c_str());
+#endif
 	if(doc.LoadFile() == false) {
 		CreateDefaultProfiles();
 		if(doc.LoadFile() == false) {
+#ifdef _WIN32
+	#ifdef _SERVICE
             AppendLog(LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL]);
+	#else
+			ShowMessage(LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL]);
+	#endif
+#else
+			AppendLog(LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL]);
+#endif
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -96,7 +129,15 @@ ProfileManager::ProfileManager() {
 			}
 		}
 	} else {
+#ifdef _WIN32
+	#ifdef _SERVICE
         AppendLog(LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL]);
+	#else
+		ShowMessage(LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL]);
+	#endif
+#else
+		AppendLog(LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL]);
+#endif
 		exit(EXIT_FAILURE);
 	}
 }
@@ -109,7 +150,15 @@ ProfileManager::~ProfileManager() {
         delete ProfilesTable[i];
     }
 
-    free(ProfilesTable);
+#ifdef _WIN32
+    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ProfilesTable) == 0) {
+		string sDbgstr = "[BUF] Cannot deallocate ProfilesTable in ProfileManager::~ProfileManager! "+string((uint32_t)GetLastError())+" "+
+			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+        AppendSpecialLog(sDbgstr);
+    }
+#else
+	free(ProfilesTable);
+#endif
     ProfilesTable = NULL;
 }
 //---------------------------------------------------------------------------
@@ -123,7 +172,11 @@ void ProfileManager::CreateDefaultProfiles() {
         "0000000000000000000000000000000110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
     };
 
-    TiXmlDocument doc((PATH+"/cfg/Profiles.xml").c_str());
+#ifdef _WIN32
+    TiXmlDocument doc((PATH+"\\cfg\\Profiles.xml").c_str());
+#else
+	TiXmlDocument doc((PATH+"/cfg/Profiles.xml").c_str());
+#endif
     doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
     TiXmlElement profiles("Profiles");
 
@@ -149,7 +202,11 @@ void ProfileManager::CreateDefaultProfiles() {
 void ProfileManager::SaveProfiles() {
     char permisionsbits[257];
 
-    TiXmlDocument doc((PATH+"/cfg/Profiles.xml").c_str());
+#ifdef _WIN32
+    TiXmlDocument doc((PATH+"\\cfg\\Profiles.xml").c_str());
+#else
+	TiXmlDocument doc((PATH+"/cfg/Profiles.xml").c_str());
+#endif
     doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
     TiXmlElement profiles("Profiles");
 
@@ -203,7 +260,11 @@ bool ProfileManager::IsProfileAllowed(const int32_t &iProfile, const uint32_t &i
 
 int32_t ProfileManager::AddProfile(char * name) {
     for(uint16_t i = 0; i < iProfileCount; i++) {         
-        if(strcasecmp(ProfilesTable[i]->sName, name) == 0) {
+#ifdef _WIN32
+        if(stricmp(ProfilesTable[i]->sName, name) == 0) {
+#else
+		if(strcasecmp(ProfilesTable[i]->sName, name) == 0) {
+#endif
             return -1;
         }
     }
@@ -227,7 +288,19 @@ int32_t ProfileManager::AddProfile(char * name) {
         break;
     }
 
+#ifdef _WIN32
+	#ifdef _SERVICE
+		CreateProfile(name);
+	#else
+		ProfileItem *newProfile = CreateProfile(name);
+	
+		if(ProfileManForm != NULL) {
+	        ProfileManForm->AddProfile(newProfile);
+		}
+	#endif
+#else
 	CreateProfile(name);
+#endif
 
     return (int32_t)(iProfileCount-1);
 }
@@ -235,7 +308,11 @@ int32_t ProfileManager::AddProfile(char * name) {
 
 int32_t ProfileManager::GetProfileIndex(const char * name) {
     for(uint16_t i = 0; i < iProfileCount; i++) {      
-        if(strcasecmp(ProfilesTable[i]->sName, name) == 0) {
+#ifdef _WIN32
+        if(stricmp(ProfilesTable[i]->sName, name) == 0) {
+#else
+		if(strcasecmp(ProfilesTable[i]->sName, name) == 0) {
+#endif
             return i;
         }
     }
@@ -252,7 +329,11 @@ int32_t ProfileManager::RemoveProfileByName(char * name) {
     int32_t idx = -1;
     
     for(uint16_t i = 0; i < iProfileCount; i++) {      
-        if(strcasecmp(ProfilesTable[i]->sName, name) == 0) {
+#ifdef _WIN32
+        if(stricmp(ProfilesTable[i]->sName, name) == 0) {
+#else
+		if(strcasecmp(ProfilesTable[i]->sName, name) == 0) {
+#endif
             idx = i;
             break;
         }
@@ -273,6 +354,15 @@ int32_t ProfileManager::RemoveProfileByName(char * name) {
     }
     
     iProfileCount--;
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		// remove profile from gui...
+		if(ProfileManForm != NULL) {
+	        ProfileManForm->RemoveProfile((uint16_t)idx);
+		}
+	#endif
+#endif
     
     delete ProfilesTable[idx];
     
@@ -303,9 +393,16 @@ int32_t ProfileManager::RemoveProfileByName(char * name) {
         }
     }
 
-    ProfilesTable = (ProfileItem **) realloc(ProfilesTable, iProfileCount*sizeof(ProfileItem *));
+#ifdef _WIN32
+    ProfilesTable = (ProfileItem **) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ProfilesTable, iProfileCount*sizeof(ProfileItem *));
+#else
+	ProfilesTable = (ProfileItem **) realloc(ProfilesTable, iProfileCount*sizeof(ProfileItem *));
+#endif
     if(ProfilesTable == NULL) {
-		string sDbgstr = "[BUF] Cannot reallocate ProfilesTable in ProfileManager::RemoveProfileByName!";
+    	string sDbgstr = "[BUF] Cannot reallocate ProfilesTable in ProfileManager::RemoveProfileByName!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }
@@ -318,16 +415,30 @@ ProfileItem * ProfileManager::CreateProfile(const char * name) {
     iProfileCount++;
     
     if(ProfilesTable == NULL) {
-        ProfilesTable = (ProfileItem **) malloc(iProfileCount*sizeof(ProfileItem *));
+#ifdef _WIN32
+        ProfilesTable = (ProfileItem **) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iProfileCount*sizeof(ProfileItem *));
+#else
+		ProfilesTable = (ProfileItem **) malloc(iProfileCount*sizeof(ProfileItem *));
+#endif
         if(ProfilesTable == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate ProfilesTable in ProfileManager::CreateProfile!";
+        	string sDbgstr = "[BUF] Cannot allocate ProfilesTable in ProfileManager::CreateProfile!";
+#ifdef _WIN32
+			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 			AppendSpecialLog(sDbgstr);
             exit(EXIT_FAILURE);
         }
     } else {
-        ProfilesTable = (ProfileItem **) realloc(ProfilesTable, iProfileCount*sizeof(ProfileItem *));
+#ifdef _WIN32
+        ProfilesTable = (ProfileItem **) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ProfilesTable, iProfileCount*sizeof(ProfileItem *));
+#else
+		ProfilesTable = (ProfileItem **) realloc(ProfilesTable, iProfileCount*sizeof(ProfileItem *));
+#endif
         if(ProfilesTable == NULL) {
-			string sDbgstr = "[BUF] Cannot reallocate ProfilesTable in ProfileManager::CreateProfile!";
+        	string sDbgstr = "[BUF] Cannot reallocate ProfilesTable in ProfileManager::CreateProfile!";
+#ifdef _WIN32
+			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 			AppendSpecialLog(sDbgstr);
             exit(EXIT_FAILURE);
         }
@@ -335,16 +446,26 @@ ProfileItem * ProfileManager::CreateProfile(const char * name) {
 
     ProfileItem *newProfile = new ProfileItem();
     if(newProfile == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate newProfile in ProfileManager::CreateProfile!";
+    	string sDbgstr = "[BUF] Cannot allocate newProfile in ProfileManager::CreateProfile!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }
  
     size_t iLen = strlen(name);
-    newProfile->sName = (char *) malloc(iLen+1);
+#ifdef _WIN32
+    newProfile->sName = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
+#else
+	newProfile->sName = (char *) malloc(iLen+1);
+#endif
     if(newProfile->sName == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)iLen)+
 			" bytes of memory in ProfileManager::CreateProfile for newProfile->sName!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     } 
@@ -444,23 +565,54 @@ void ProfileManager::MoveProfileUp(const uint16_t &iProfile) {
 //---------------------------------------------------------------------------
 
 void ProfileManager::ChangeProfileName(const uint16_t &iProfile, char * sName, const size_t &iLen) {
-    free(ProfilesTable[iProfile]->sName);
+#ifdef _WIN32
+    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ProfilesTable[iProfile]->sName) == 0) {
+		string sDbgstr = "[BUF] Cannot deallocate ProfilesTable[iProfile]->sName in ProfileManager::ChangeProfileName! "+string((uint32_t)GetLastError())+" "+
+			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+		AppendSpecialLog(sDbgstr);
+    }
+#else
+	free(ProfilesTable[iProfile]->sName);
+#endif
 
     ProfilesTable[iProfile]->sName = NULL;
 
-    ProfilesTable[iProfile]->sName = (char *) malloc(iLen+1);
+#ifdef _WIN32
+    ProfilesTable[iProfile]->sName = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
+#else
+	ProfilesTable[iProfile]->sName = (char *) malloc(iLen+1);
+#endif
     if(ProfilesTable[iProfile]->sName == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)iLen)+
-            " bytes of memory in ProfileManager::ChangeProfileName for ProfilesTable[iProfile]->sName!";
+			" bytes of memory in ProfileManager::ChangeProfileName for ProfilesTable[iProfile]->sName!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     } 
 	memcpy(ProfilesTable[iProfile]->sName, sName, iLen);
     ProfilesTable[iProfile]->sName[iLen] = '\0';
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(ProfileManForm != NULL) {
+			ProfileManForm->ProfList->Items->Strings[iProfile] = String(sName, iLen);
+		}
+	#endif
+#endif
 }
 //---------------------------------------------------------------------------
 
 void ProfileManager::ChangeProfilePermission(const uint16_t &iProfile, const size_t &iId, const bool &bValue) {
     ProfilesTable[iProfile]->bPermissions[iId] = bValue;
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(ProfileManForm != NULL) {
+			ProfileManForm->UpdateCheck(iProfile, iId, bValue);
+		}
+	#endif
+#endif
 }
 //---------------------------------------------------------------------------

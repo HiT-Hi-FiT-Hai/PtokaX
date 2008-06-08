@@ -24,13 +24,24 @@
 //---------------------------------------------------------------------------
 #include "utility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+//---------------------------------------------------------------------------
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
+//---------------------------------------------------------------------------
 ClientTagMan *ClientTagManager = NULL;
 //---------------------------------------------------------------------------
 
 ClientTagMan::ClientTagMan() {
     cliTags = (ClientTag *) calloc(256, sizeof(ClientTag));
     if(cliTags == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate cliTags!";
+    	string sDbgstr = "[BUF] Cannot allocate cliTags!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);
     }
@@ -46,7 +57,11 @@ ClientTagMan::~ClientTagMan() {
 //---------------------------------------------------------------------------
 
 void ClientTagMan::Load() {
+#ifdef _WIN32
+	TiXmlDocument doc((PATH+"\\cfg\\ClientTags.xml").c_str());
+#else
 	TiXmlDocument doc((PATH+"/cfg/ClientTags.xml").c_str());
+#endif
     if(doc.LoadFile()) {
         TiXmlHandle cfg(&doc);
         TiXmlNode *clienttags = cfg.FirstChild("ClientTags").Node();
@@ -77,7 +92,11 @@ void ClientTagMan::Load() {
             }
         }
     } else {
+#ifdef _WIN32
+		TiXmlDocument doc((PATH+"\\cfg\\ClientTags.xml").c_str());
+#else
 		TiXmlDocument doc((PATH+"/cfg/ClientTags.xml").c_str());
+#endif
 		doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
 		TiXmlElement clienttags("ClientTags");
 		const char* ClientPatts[] = { "++", "DCGUI", "DC", "oDC", "DC:PRO", "QuickDC", "LDC++", "R2++", "Goofy++", "PWDC++", "BDC++", "zK++" };

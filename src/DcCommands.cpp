@@ -37,11 +37,24 @@
 #include "utility.h"
 #include "ZlibUtility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+#endif
+//---------------------------------------------------------------------------
 #include "DeFlood.h"
 #include "HubCommands.h"
 #include "IP2Country.h"
 #include "ResNickManager.h"
 #include "TextFileManager.h"
+#ifdef _WIN32
+	#ifndef _SERVICE
+	    #include "TUsersChatForm.h"
+	#endif
+//---------------------------------------------------------------------------
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
 //---------------------------------------------------------------------------
 cDcCommands *DcCommands = NULL;
 //---------------------------------------------------------------------------
@@ -88,6 +101,18 @@ cDcCommands::~cDcCommands() {
 
 // Process DC data form User
 void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCheck, const uint32_t &iLen) {
+	// Full raw data trace for better logging
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(UsersChatForm != NULL && UsersChatForm->CmdTrace->Checked == true) {
+	        int imsglen = sprintf(msg, "%s (%s) > ", curUser->Nick, curUser->IP);
+	        if(CheckSprintf(imsglen, 1024, "cDcCommands::PreProcessData1") == true) {
+	            Memo(msg+string(sData, iLen));
+	        }
+		}
+	#endif
+#endif
+
     // micro spam
     if(iLen < 5 && bCheck) {
     	#ifdef _DEBUG
@@ -174,10 +199,18 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                         UdpDebug->Broadcast(msg, imsgLen);
                                     }
                                 } else {
-                                    char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#ifdef _WIN32
+                                    char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+#else
+									char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#endif
                                     if(MSG == NULL) {
 										string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+curUser->NickLen+15+64)+
 											" bytes of memory for DcCommands::StateValidateMyinfo!";
+#ifdef _WIN32
+										sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#else
+#endif
                                         AppendSpecialLog(sDbgstr);
                                 		return;
                                     }
@@ -185,8 +218,15 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData7") == true) {
                                         UdpDebug->Broadcast(MSG, imsgLen);
                                     }
-                                    
-                                    free(MSG);
+#ifdef _WIN32
+                                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+										string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::PreProcessData! "+string((uint32_t)GetLastError())+" "+
+											string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+										AppendSpecialLog(sDbgstr);
+									}
+#else
+									free(MSG);
+#endif
                                 }
                                 UserClose(curUser);
                                 return;
@@ -276,10 +316,17 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                             UdpDebug->Broadcast(msg, imsgLen);
                                         }
                                     } else {
-                                        char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#ifdef _WIN32
+                                        char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+#else
+										char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#endif
 										if(MSG == NULL) {
 											string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+curUser->NickLen+15+64)+
 												" bytes of memory for DcCommands::StateVerPassMyinfo!";
+#ifdef _WIN32
+											sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 											AppendSpecialLog(sDbgstr);
                                             return;
                                         }
@@ -287,8 +334,15 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData11") == true) {
                                             UdpDebug->Broadcast(MSG, imsgLen);
                                         }
-                                        
-                                        free(MSG);
+#ifdef _WIN32
+                                        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+											string sDbgstr = "[BUF] Cannot deallocate MSG1 in cDcCommands::PreProcessData! "+string((uint32_t)GetLastError())+" "+
+												string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+											AppendSpecialLog(sDbgstr);
+										}
+#else
+										free(MSG);
+#endif
                                     }
                                     UserClose(curUser);
                                     return;
@@ -339,10 +393,17 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 UdpDebug->Broadcast(msg, imsgLen);
                             }
                         } else {
-                            char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#ifdef _WIN32
+                            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+#else
+							char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#endif
                             if(MSG == NULL) {
 								string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+curUser->NickLen+15+64)+
 									" bytes of memory for DcCommands::StateNickListMyinfo!";
+#ifdef _WIN32
+								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 								AppendSpecialLog(sDbgstr);
                                 return;
                             }
@@ -350,8 +411,15 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                             if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData13") == true) {
                                 UdpDebug->Broadcast(MSG, imsgLen);
                             }
-                            
-                            free(MSG);
+#ifdef _WIN32
+                            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+								string sDbgstr = "[BUF] Cannot deallocate MSG2 in cDcCommands::PreProcessData! "+string((uint32_t)GetLastError())+" "+
+									string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+								AppendSpecialLog(sDbgstr);
+							}
+#else
+							free(MSG);
+#endif
                         }
                         UserClose(curUser);
                         return;
@@ -399,10 +467,17 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                         UdpDebug->Broadcast(msg, imsgLen);
                                     }
                                 } else {
-                                    char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#ifdef _WIN32
+                                    char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+#else
+									char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#endif
                                     if(MSG == NULL) {
 										string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+curUser->NickLen+15+64)+
 											" bytes of memory for DcCommands::State1LoopMyinfo!";
+#ifdef _WIN32
+										sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 										AppendSpecialLog(sDbgstr);
                                         return;
                                     }
@@ -410,8 +485,15 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData15") == true) {
                                         UdpDebug->Broadcast(MSG, imsgLen);
                                     }
-                                    
-                                    free(MSG);
+#ifdef _WIN32
+                                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+										string sDbgstr = "[BUF] Cannot deallocate MSG3 in cDcCommands::PreProcessData! "+string((uint32_t)GetLastError())+" "+
+											string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+										AppendSpecialLog(sDbgstr);
+									}
+#else
+									free(MSG);
+#endif
 								}
                                 UserClose(curUser);
                                 return;
@@ -497,10 +579,17 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                         UdpDebug->Broadcast(msg, imsgLen);
                                     }
                                 } else {
-                                    char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#ifdef _WIN32
+                                    char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+#else
+									char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#endif
                                     if(MSG == NULL) {
 										string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+curUser->NickLen+15+64)+
 											" bytes of memory for DcCommands::StateAddedMyinfo!";
+#ifdef _WIN32
+										sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 										AppendSpecialLog(sDbgstr);
                                         return;
                                     }
@@ -508,8 +597,15 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData17") == true) {
                                         UdpDebug->Broadcast(MSG, imsgLen);
                                     }
-                                    
-                                    free(MSG);
+#ifdef _WIN32
+                                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+										string sDbgstr = "[BUF] Cannot deallocate MSG4 in cDcCommands::PreProcessData! "+string((uint32_t)GetLastError())+" "+
+											string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+										AppendSpecialLog(sDbgstr);
+									}
+#else
+									free(MSG);
+#endif
                                 }
                                 UserClose(curUser);
                                 return;
@@ -957,7 +1053,11 @@ void cDcCommands::BotINFO(User * curUser, char * sData, const uint32_t &iLen) {
 		return;
 	}
 
+#ifdef _WIN32
+	int imsgLen = sprintf(msg, "$HubINFO %s$%s:%I16u$%s.px.$%I16d$%I64u$%I16d$%I16d$PtokaX$%s|", SettingManager->sTexts[SETTXT_HUB_NAME],
+#else
 	int imsgLen = sprintf(msg, "$HubINFO %s$%s:%u$%s.px.$%d$%" PRIu64 "$%d$%d$PtokaX$%s|", SettingManager->sTexts[SETTXT_HUB_NAME],
+#endif
 		SettingManager->sTexts[SETTXT_HUB_ADDRESS], SettingManager->iPortNumbers[0],
 		SettingManager->sTexts[SETTXT_HUB_DESCRIPTION] == NULL ? "" : SettingManager->sTexts[SETTXT_HUB_DESCRIPTION],
         SettingManager->iShorts[SETSHORT_MAX_USERS], SettingManager->ui64MinShare, SettingManager->iShorts[SETSHORT_MIN_SLOTS_LIMIT],
@@ -1018,10 +1118,17 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
             }
         } else {
             int iWantLen = iLen+curUser->NickLen+15+64;
-            char *MSG = (char *) malloc(iWantLen);
+#ifdef _WIN32
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+			char *MSG = (char *) malloc(iWantLen);
+#endif
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
 					" bytes of memory for DcCommands::ConnectToMe!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
 				return;
             }
@@ -1029,8 +1136,15 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::ConnectToMe4") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
-            
-            free(MSG);
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+				string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::ConnectToMe! "+string((uint32_t)GetLastError())+" "+
+					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+				AppendSpecialLog(sDbgstr);
+			}
+#else
+			free(MSG);
+#endif
         }
         UserClose(curUser);
 		return;
@@ -1061,10 +1175,17 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
                 }
             } else {
                 int iWantLen = iLen+curUser->NickLen+15+64;
-                char *MSG = (char *) malloc(iWantLen);
+#ifdef _WIN32
+                char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+				char *MSG = (char *) malloc(iWantLen);
+#endif
                 if(MSG == NULL) {
 					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
 						" bytes of memory for DcCommands::CTM!";
+#ifdef _WIN32
+					sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
                     AppendSpecialLog(sDbgstr);
                     return;
                 }
@@ -1072,8 +1193,15 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
                 if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::ConnectToMe6") == true) {
                     UdpDebug->Broadcast(MSG, imsgLen);
                 }
-                
-                free(MSG);
+#ifdef _WIN32
+                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+					string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::ConnectToMe! "+string((uint32_t)GetLastError())+" "+
+						string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+					AppendSpecialLog(sDbgstr);
+				}
+#else
+				free(MSG);
+#endif
             }
 
             UserClose(curUser);
@@ -1119,10 +1247,17 @@ void cDcCommands::GetINFO(User * curUser, char * sData, const uint32_t &iLen) {
             }
         } else {
             int iWantLen = iLen+curUser->NickLen+15+64;
-            char *MSG = (char *) malloc(iWantLen);
+#ifdef _WIN32
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+			char *MSG = (char *) malloc(iWantLen);
+#endif
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
 					" bytes of memory for DcCommands::GetINFO!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
                 return;
             }
@@ -1130,8 +1265,15 @@ void cDcCommands::GetINFO(User * curUser, char * sData, const uint32_t &iLen) {
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::GetINFO3") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
-            
-            free(MSG);
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+				string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::GetINFO! "+string((uint32_t)GetLastError())+" "+
+					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+				AppendSpecialLog(sDbgstr);
+			}
+#else
+			free(MSG);
+#endif
         }
         UserClose(curUser);
         return;
@@ -1350,10 +1492,17 @@ void cDcCommands::Key(User * curUser, char * sData, const uint32_t &iLen) {
             }
         } else {
             int iWantLen = iLen+curUser->NickLen+15+64;
-            char *MSG = (char *) malloc(iWantLen);
+#ifdef _WIN32
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+			char *MSG = (char *) malloc(iWantLen);
+#endif
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
 					" bytes of memory for DcCommands::Key!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
                 return;
             }
@@ -1361,8 +1510,15 @@ void cDcCommands::Key(User * curUser, char * sData, const uint32_t &iLen) {
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::Key3") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
-            
-            free(MSG);
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+				string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::Key! "+string((uint32_t)GetLastError())+" "+
+					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+				AppendSpecialLog(sDbgstr);
+			}
+#else
+			free(MSG);
+#endif
         }
         UserClose(curUser);
         return;
@@ -1451,10 +1607,26 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
                         prev->next = cur->next;
                     }
 
+#ifdef _WIN32
+					if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sCommand) == 0) {
+						string sDbgstr = "[BUF] Cannot deallocate cur->sCommand in cDcCommands::Kick! "+string((uint32_t)GetLastError())+" "+
+							string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+						AppendSpecialLog(sDbgstr);
+                    }
+#else
 					free(cur->sCommand);
+#endif
                     cur->sCommand = NULL;
 
-                    free(cur->ToNick);
+#ifdef _WIN32
+                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->ToNick) == 0) {
+						string sDbgstr = "[BUF] Cannot deallocate cur->ToNick in cDcCommands::Kick! "+string((uint32_t)GetLastError())+" "+
+							string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+						AppendSpecialLog(sDbgstr);
+                    }
+#else
+					free(cur->ToNick);
+#endif
                     cur->ToNick = NULL;
 
 					delete cur;
@@ -1706,10 +1878,17 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
                 }
             } else {
                 size_t iWantLen = iLen+curUser->NickLen+15+64;
-                char *MSG = (char *) malloc(iWantLen);
+#ifdef _WIN32
+                char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+				char *MSG = (char *) malloc(iWantLen);
+#endif
                 if(MSG == NULL) {
 					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
-                        string((uint64_t)iWantLen)+ " bytes of memory for DcCommands::Search!";
+						string((uint64_t)iWantLen)+ " bytes of memory for DcCommands::Search!";
+#ifdef _WIN32
+					sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
                     AppendSpecialLog(sDbgstr);
                     return;
                 }
@@ -1717,8 +1896,15 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
                 if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::Search4") == true) {
                     UdpDebug->Broadcast(MSG, imsgLen);
                 }
-                
-                free(MSG);
+#ifdef _WIN32
+                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+					string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::Search! "+string((uint32_t)GetLastError())+" "+
+						string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+                    AppendSpecialLog(sDbgstr);
+				}
+#else
+				free(MSG);
+#endif
             }
             UserClose(curUser);
             return;
@@ -1739,7 +1925,11 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
             iCount = iLen-2-iChar;
 
             if(iCount < (uint32_t)SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]) {
-                int imsgLen = sprintf(msg, "<%s> %s %d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#ifdef _WIN32
+                int imsgLen = sprintf(msg, "<%s> %s %I16d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#else
+				int imsgLen = sprintf(msg, "<%s> %s %d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#endif
                     LanguageManager->sTexts[LAN_SORRY_MIN_SEARCH_LEN_IS], SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search5") == true) {
                     UserSendCharDelayed(curUser, msg, imsgLen);
@@ -1747,7 +1937,11 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
                 return;
             }
             if(SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0 && iCount > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]) {
-                int imsgLen = sprintf(msg, "<%s> %s %d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#ifdef _WIN32
+                int imsgLen = sprintf(msg, "<%s> %s %I16d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#else
+				int imsgLen = sprintf(msg, "<%s> %s %d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#endif
                     LanguageManager->sTexts[LAN_SORRY_MAX_SEARCH_LEN_IS], SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search6") == true) {
                     UserSendCharDelayed(curUser, msg, imsgLen);
@@ -1758,10 +1952,17 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
 
         curUser->iSR = 0;
         if(curUser->cmdPSearch != NULL) {
-            curUser->cmdPSearch->sCommand = (char *) realloc(curUser->cmdPSearch->sCommand, curUser->cmdPSearch->iLen+iLen+1);
+#ifdef _WIN32
+            curUser->cmdPSearch->sCommand = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->cmdPSearch->sCommand, curUser->cmdPSearch->iLen+iLen+1);
+#else
+			curUser->cmdPSearch->sCommand = (char *) realloc(curUser->cmdPSearch->sCommand, curUser->cmdPSearch->iLen+iLen+1);
+#endif
             if(curUser->cmdPSearch->sCommand == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(curUser->cmdPSearch->iLen+iLen+1)+
 					" bytes of memory for DcCommands::Search1!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
                 return;
             }
@@ -1773,15 +1974,25 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
         } else {
             curUser->cmdPSearch = new PrcsdUsrCmd();
             if(curUser->cmdPSearch == NULL) {
-				string sDbgstr = "[BUF] Cannot allocate new curUser->cmdPSearch in cDcCommands::Search!";
+            	string sDbgstr = "[BUF] Cannot allocate new curUser->cmdPSearch in cDcCommands::Search!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
             	return;
             }
 
-            curUser->cmdPSearch->sCommand = (char *) malloc(iLen+1);
+#ifdef _WIN32
+            curUser->cmdPSearch->sCommand = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
+#else
+			curUser->cmdPSearch->sCommand = (char *) malloc(iLen+1);
+#endif
             if(curUser->cmdPSearch->sCommand == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+1)+
 					" bytes of memory for DcCommands::Search2!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
                 return;
             }
@@ -1805,10 +2016,17 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
                     }
                 } else {
                     size_t iWantLen = iLen+curUser->NickLen+15+64;
-                    char *MSG = (char *) malloc(iWantLen);
+#ifdef _WIN32
+                    char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+					char *MSG = (char *) malloc(iWantLen);
+#endif
                     if(MSG == NULL) {
 						string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
-                            string((uint64_t)iWantLen)+" bytes of memory for DcCommands::Search3!";
+							string((uint64_t)iWantLen)+" bytes of memory for DcCommands::Search3!";
+#ifdef _WIN32
+						sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 						AppendSpecialLog(sDbgstr);
                         return;
                     }
@@ -1816,8 +2034,15 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
                     if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::Search9") == true) {
                         UdpDebug->Broadcast(MSG, imsgLen);
                     }
-                    
-                    free(MSG);
+#ifdef _WIN32
+                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+						string sDbgstr = "[BUF] Cannot deallocate MSG1 in cDcCommands::Search! "+string((uint32_t)GetLastError())+" "+
+							string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+						AppendSpecialLog(sDbgstr);
+					}
+#else
+					free(MSG);
+#endif
                 }
 
                 UserClose(curUser);
@@ -1841,7 +2066,11 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
             iCount = iLen-2-iChar;
 
             if(iCount < (uint32_t)SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]) {
-                int imsgLen = sprintf(msg, "<%s> %s %d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#ifdef _WIN32
+                int imsgLen = sprintf(msg, "<%s> %s %I16d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#else
+				int imsgLen = sprintf(msg, "<%s> %s %d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#endif
                     LanguageManager->sTexts[LAN_SORRY_MIN_SEARCH_LEN_IS], SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search10") == true) {
                     UserSendCharDelayed(curUser, msg, imsgLen);
@@ -1849,7 +2078,11 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
                 return;
             }
             if(SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0 && iCount > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]) {
-                int imsgLen = sprintf(msg, "<%s> %s %d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#ifdef _WIN32
+                int imsgLen = sprintf(msg, "<%s> %s %I16d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#else
+				int imsgLen = sprintf(msg, "<%s> %s %d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#endif
                     LanguageManager->sTexts[LAN_SORRY_MAX_SEARCH_LEN_IS], SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search11") == true) {
                     UserSendCharDelayed(curUser, msg, imsgLen);
@@ -1865,10 +2098,17 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
         }
 
         if(curUser->cmdASearch != NULL) {
-            curUser->cmdASearch->sCommand = (char *) realloc(curUser->cmdASearch->sCommand, curUser->cmdASearch->iLen+iLen+1);
+#ifdef _WIN32
+            curUser->cmdASearch->sCommand = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->cmdASearch->sCommand, curUser->cmdASearch->iLen+iLen+1);
+#else
+			curUser->cmdASearch->sCommand = (char *) realloc(curUser->cmdASearch->sCommand, curUser->cmdASearch->iLen+iLen+1);
+#endif
             if(curUser->cmdASearch->sCommand == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(curUser->cmdASearch->iLen+iLen+1)+
 					" bytes of memory for DcCommands::Search4!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
                 return;
             }
@@ -1879,15 +2119,25 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
         } else {
             curUser->cmdASearch = new PrcsdUsrCmd();
             if(curUser->cmdASearch == NULL) {
-				string sDbgstr = "[BUF] Cannot allocate new curUser->cmdASearch in cDcCommands::Search1!";
+            	string sDbgstr = "[BUF] Cannot allocate new curUser->cmdASearch in cDcCommands::Search1!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
             	return;
             }
 
-            curUser->cmdASearch->sCommand = (char *) malloc(iLen+1);
+#ifdef _WIN32
+            curUser->cmdASearch->sCommand = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
+#else
+			curUser->cmdASearch->sCommand = (char *) malloc(iLen+1);
+#endif
 			if(curUser->cmdASearch->sCommand == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+1)+
 					" bytes of memory for DcCommands::Search5!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
                 return;
             }
@@ -1912,7 +2162,7 @@ bool cDcCommands::MyINFODeflood(User * curUser, char * sData, const uint32_t &iL
         UserClose(curUser);
         return false;
     }
-    
+
     // PPK ... check flood ...
     if(bCheck == true && ProfileMan->IsAllowed(curUser, ProfileManager::NODEFLOODMYINFO) == false) { 
         if(SettingManager->iShorts[SETSHORT_MYINFO_ACTION] != 0) {
@@ -1945,10 +2195,17 @@ bool cDcCommands::MyINFODeflood(User * curUser, char * sData, const uint32_t &iL
             }
         } else {
             size_t iWantLen = iLen+curUser->NickLen+15+64;
-            char *MSG = (char *) malloc(iWantLen);
+#ifdef _WIN32
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+			char *MSG = (char *) malloc(iWantLen);
+#endif
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
-                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::MyINFODeflood!";
+					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::MyINFODeflood!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
 				return false;
             }
@@ -1956,13 +2213,20 @@ bool cDcCommands::MyINFODeflood(User * curUser, char * sData, const uint32_t &iL
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::MyINFODeflood4") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
-            
-            free(MSG);
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+				string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::MyINFODeflood! "+string((uint32_t)GetLastError())+" "+
+					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+				AppendSpecialLog(sDbgstr);
+			}
+#else
+			free(MSG);
+#endif
         }
         UserClose(curUser);
 		return false;
     }
-
+    
     return true;
 }
 //---------------------------------------------------------------------------
@@ -1981,16 +2245,31 @@ bool cDcCommands::MyINFO(User * curUser, char * sData, const uint32_t &iLen) {
         if(SettingManager->ui8FullMyINFOOption != 0) {
             if(((curUser->ui32BoolBits & User::BIT_PRCSD_MYINFO) == User::BIT_PRCSD_MYINFO) == false) {
                 if(curUser->MyInfoOld != NULL) {
-                    free(curUser->MyInfoOld);
+#ifdef _WIN32
+                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->MyInfoOld) == 0) {
+						string sDbgstr = "[BUF] Cannot deallocate curUser->MyInfoOld in cDcCommands::MyINFO! "+string((uint32_t)GetLastError())+" "+
+							string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+						AppendSpecialLog(sDbgstr);
+                    }
+#else
+					free(curUser->MyInfoOld);
+#endif
                     curUser->MyInfoOld = NULL;
                     curUser->iMyInfoOldLen = 0;
                 }
 
                 if(curUser->MyInfo != NULL) {
-                    curUser->MyInfoOld = (char *) malloc(curUser->iMyInfoLen+1);
+#ifdef _WIN32
+                    curUser->MyInfoOld = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, curUser->iMyInfoLen+1);
+#else
+					curUser->MyInfoOld = (char *) malloc(curUser->iMyInfoLen+1);
+#endif
                     if(curUser->MyInfoOld == NULL) {
 						string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(curUser->iMyInfoLen+1)+
 							" bytes of memory for DcCommands::MyINFO!";
+#ifdef _WIN32
+						sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 						AppendSpecialLog(sDbgstr);
                         return false;
                     }   
@@ -2058,10 +2337,17 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
             }
         } else {
             size_t iWantLen = iLen+curUser->NickLen+15+64;
-            char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#ifdef _WIN32
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+#else
+			char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#endif
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
-                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::MyPass!";
+					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::MyPass!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
                 return;
             }
@@ -2069,8 +2355,15 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::MyPass3") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
-            
-            free(MSG);
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+				string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::MyPass! "+string((uint32_t)GetLastError())+" "+
+					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+				AppendSpecialLog(sDbgstr);
+			}
+#else
+			free(MSG);
+#endif
         }
         UserClose(curUser);
         return;
@@ -2095,7 +2388,10 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
             if(PassBfItem == NULL) {
                 PassBfItem = new PassBf(curUser->ui32IpHash);
                 if(PassBfItem == NULL) {
-					string sDbgstr = "[BUF] Cannot allocate new PassBfItem in cDcCommands::MyPass!";
+                	string sDbgstr = "[BUF] Cannot allocate new PassBfItem in cDcCommands::MyPass!";
+#ifdef _WIN32
+					sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 					AppendSpecialLog(sDbgstr);
                 	return;
                 }
@@ -2180,7 +2476,15 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
         }
 
         // PPK ... memory clean up, is not needed anymore
-        free(curUser->uLogInOut->Password);
+#ifdef _WIN32
+        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->uLogInOut->Password) == 0) {
+			string sDbgstr = "[BUF] Cannot deallocate curUser->uLogInOut->Password in cDcCommands::MyPass! "+string((uint32_t)GetLastError())+" "+
+				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+			AppendSpecialLog(sDbgstr);
+        }
+#else
+		free(curUser->uLogInOut->Password);
+#endif
         curUser->uLogInOut->Password = NULL;
 
         sData[iLen-1] = '|'; // add back pipe
@@ -2314,10 +2618,17 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
                 }
             } else {
                 size_t iWantLen = iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64;
-                char *MSG = (char *) malloc(iWantLen);
+#ifdef _WIN32
+                char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+				char *MSG = (char *) malloc(iWantLen);
+#endif
                 if(MSG == NULL) {
 					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
-                        string((uint64_t)iWantLen)+" bytes of memory for DcCommands::OpForceMove!";
+						string((uint64_t)iWantLen)+" bytes of memory for DcCommands::OpForceMove!";
+#ifdef _WIN32
+					sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 					AppendSpecialLog(sDbgstr);
                     return;
                 }
@@ -2327,8 +2638,15 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
                 if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::OpForceMove5") == true) {
                     UserSendCharDelayed(OtherUser, MSG, imsgLen);
                 }
-                
-                free(MSG);
+#ifdef _WIN32
+                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+					string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::OpForceMove! "+string((uint32_t)GetLastError())+" "+
+						string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+					AppendSpecialLog(sDbgstr);
+				}
+#else
+				free(MSG);
+#endif
             }
             int imsgLen = sprintf(msg, "$ForceMove %s|", sCmdParts[1]+6);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::OpForceMove6") == true) {
@@ -2346,10 +2664,17 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
                             globalQ->SingleItemsStore(newItem);
                         }
                     } else {
-                        char *MSG = (char *) malloc(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64);
+#ifdef _WIN32
+                        char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64);
+#else
+						char *MSG = (char *) malloc(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64);
+#endif
                         if(MSG == NULL) {
 							string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64)+
 								" bytes of memory for DcCommands::OpForceMove1!";
+#ifdef _WIN32
+							sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
                             AppendSpecialLog(sDbgstr);
                             return;
                         }
@@ -2361,8 +2686,15 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
 							QueueDataItem *newItem = globalQ->CreateQueueDataItem(MSG, imsgLen, NULL, 0, queue::PM2OPS);
                             globalQ->SingleItemsStore(newItem);
                         }
-                        
-                        free(MSG);
+#ifdef _WIN32
+                        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+							string sDbgstr = "[BUF] Cannot deallocate MSG1 in cDcCommands::OpForceMove! "+string((uint32_t)GetLastError())+" "+
+								string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+							AppendSpecialLog(sDbgstr);
+						}
+#else
+						free(MSG);
+#endif
                     }
                 } else {
                     if(iCmdPartsLen[1]+iCmdPartsLen[2] < 768) {
@@ -2373,10 +2705,17 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
                             globalQ->OPStore(msg, imsgLen);
                         }
                     } else {
-                        char *MSG = (char *) malloc(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64);
+#ifdef _WIN32
+                        char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64);
+#else
+						char *MSG = (char *) malloc(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64);
+#endif
                         if(MSG == NULL) {
 							string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64)+
 								" bytes of memory for DcCommands::OpForceMove2!";
+#ifdef _WIN32
+							sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 							AppendSpecialLog(sDbgstr);
                             return;
                         }
@@ -2386,8 +2725,15 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::OpForceMove10") == true) {
                             globalQ->OPStore(MSG, imsgLen);
                         }
-                        
-                        free(MSG);
+#ifdef _WIN32
+                        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+							string sDbgstr = "[BUF] Cannot deallocate MSG2 in cDcCommands::OpForceMove! "+string((uint32_t)GetLastError())+" "+
+								string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+							AppendSpecialLog(sDbgstr);
+						}
+#else
+						free(MSG);
+#endif
                     }
                 }
             }
@@ -2400,10 +2746,17 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
                         UserSendCharDelayed(curUser, msg, imsgLen);
                     }
                 } else {
-                    char *MSG = (char *) malloc(iCmdPartsLen[1]+iCmdPartsLen[2]+128);
+#ifdef _WIN32
+                    char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iCmdPartsLen[1]+iCmdPartsLen[2]+128);
+#else
+					char *MSG = (char *) malloc(iCmdPartsLen[1]+iCmdPartsLen[2]+128);
+#endif
                     if(MSG == NULL) {
 						string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iCmdPartsLen[1]+iCmdPartsLen[2]+128)+
 							" bytes of memory for DcCommands::OpForceMove3!";
+#ifdef _WIN32
+						sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 						AppendSpecialLog(sDbgstr);
                         return;
                     }
@@ -2412,8 +2765,15 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::OpForceMove12") == true) {
                         UserSendCharDelayed(curUser, MSG, imsgLen);
                     }
-                    
-                    free(MSG);
+#ifdef _WIN32
+                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+						string sDbgstr = "[BUF] Cannot deallocate MSG3 in cDcCommands::OpForceMove! "+string((uint32_t)GetLastError())+" "+
+							string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+						AppendSpecialLog(sDbgstr);
+					}
+#else
+					free(MSG);
+#endif
                 }
             }
             
@@ -2450,10 +2810,17 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &i
             }
         } else {
             size_t iWantLen = iLen+curUser->NickLen+15+64;
-            char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#ifdef _WIN32
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+#else
+			char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#endif
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
-                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::RevConnectToMe!";
+					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::RevConnectToMe!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
                 return;
             }
@@ -2461,8 +2828,15 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &i
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::RevConnectToMe6") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
-            
-            free(MSG);
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+				string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::RevConnectToMe! "+string((uint32_t)GetLastError())+" "+
+					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+				AppendSpecialLog(sDbgstr);
+			}
+#else
+			free(MSG);
+#endif
         }
         UserClose(curUser);
         return;
@@ -2500,10 +2874,17 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &i
             }
         } else {
             size_t iWantLen = iLen+curUser->NickLen+15+64;
-            char *MSG = (char *) malloc(iWantLen);
+#ifdef _WIN32
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+			char *MSG = (char *) malloc(iWantLen);
+#endif
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
-                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::RevConnectToMe!";
+					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::RevConnectToMe!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
 				return;
             }
@@ -2511,8 +2892,15 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &i
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::RevConnectToMe4") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
-            
-            free(MSG);
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+				string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::RevConnectToMe! "+string((uint32_t)GetLastError())+" "+
+					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+				AppendSpecialLog(sDbgstr);
+			}
+#else
+			free(MSG);
+#endif
         }
         UserClose(curUser);
         return;
@@ -2581,10 +2969,17 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
             }
         } else {
             size_t iWantLen = iLen+curUser->NickLen+15+64;
-            char *MSG = (char *) malloc(iWantLen);
+#ifdef _WIN32
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+			char *MSG = (char *) malloc(iWantLen);
+#endif
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
-                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::SR!";
+					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::SR!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
 				return;
             }
@@ -2592,8 +2987,15 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::SR4") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
-            
-            free(MSG);
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+				string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::SR! "+string((uint32_t)GetLastError())+" "+
+					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+				AppendSpecialLog(sDbgstr);
+			}
+#else
+			free(MSG);
+#endif
         }
         UserClose(curUser);
 		return;
@@ -2611,10 +3013,17 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
             }
         } else {
             size_t iWantLen = iLen+curUser->NickLen+15+64;
-            char *MSG = (char *) malloc(iWantLen);
+#ifdef _WIN32
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+			char *MSG = (char *) malloc(iWantLen);
+#endif
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
-                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::SR!";
+					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::SR!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
                 return;
             }
@@ -2622,8 +3031,15 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::SR6") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
-            
-            free(MSG);
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+				string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::SR! "+string((uint32_t)GetLastError())+" "+
+					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+				AppendSpecialLog(sDbgstr);
+			}
+#else
+			free(MSG);
+#endif
         }
         UserClose(curUser);
         return;
@@ -2806,7 +3222,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
             case '\0': {
                 // PPK ... corrupted $Supports ???
                 int imsgLen = sprintf(msg, "[SYS] Bad $Supports from %s (%s) - user closed.", curUser->Nick, curUser->IP);
-                if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports4") == true) {
+                if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports5") == true) {
                     UdpDebug->Broadcast(msg, imsgLen);
                 }
                 UserClose(curUser);
@@ -2839,10 +3255,17 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
             }
         } else {
             size_t iWantLen = iLen+curUser->NickLen+15+64;
-            char *MSG = (char *) malloc(iWantLen);
+#ifdef _WIN32
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+			char *MSG = (char *) malloc(iWantLen);
+#endif
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
-                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::To!";
+					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::To!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
                 AppendSpecialLog(sDbgstr);
                 return;
             }
@@ -2850,8 +3273,15 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::To2") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
-            
-            free(MSG);
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+				string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::To! "+string((uint32_t)GetLastError())+" "+
+					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+				AppendSpecialLog(sDbgstr);
+			}
+#else
+			free(MSG);
+#endif
         }
         UserClose(curUser);
         return;
@@ -2872,10 +3302,17 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
                 }
             } else {
                 size_t iWantLen = iLen+curUser->NickLen+15+64;
-                char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#ifdef _WIN32
+                char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+#else
+				char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#endif
                 if(MSG == NULL) {
 					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
-                        string((uint64_t)iWantLen)+" bytes of memory for DcCommands::To1!";
+						string((uint64_t)iWantLen)+" bytes of memory for DcCommands::To1!";
+#ifdef _WIN32
+					sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 					AppendSpecialLog(sDbgstr);
                     return;
                 }
@@ -2883,8 +3320,15 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
                 if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::To5") == true) {
                     UdpDebug->Broadcast(MSG, imsgLen);
                 }
-                
-                free(MSG);
+#ifdef _WIN32
+                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+					string sDbgstr = "[BUF] Cannot deallocate MSG1 in cDcCommands::To! "+string((uint32_t)GetLastError())+" "+
+						string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+					AppendSpecialLog(sDbgstr);
+				}
+#else
+				free(MSG);
+#endif
             }
             UserClose(curUser);
             return;
@@ -3146,7 +3590,15 @@ void cDcCommands::Version(User * curUser, char * sData, const uint32_t &iLen) {
 //---------------------------------------------------------------------------
 
 // Chat message
-bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {      
+bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(UsersChatForm != NULL && UsersChatForm->ChatTrace->Checked == true) {
+	        Memo(sData);
+		}
+	#endif
+#endif
+    
 	// if the user is sending chat as other user, kick him
 	if(sData[1+curUser->NickLen] != '>' || sData[2+curUser->NickLen] != ' ' ||
         memcmp(curUser->Nick, sData+1, curUser->NickLen) != 0) {
@@ -3158,10 +3610,17 @@ bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen
             }
         } else {
             size_t iWantLen = iLen+curUser->NickLen+15+64;
-            char *MSG = (char *) malloc(iWantLen);
+#ifdef _WIN32
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+			char *MSG = (char *) malloc(iWantLen);
+#endif
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
-                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::ChatDeflood!";
+					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::ChatDeflood!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
                 return false;
             }
@@ -3169,8 +3628,15 @@ bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::ChatDeflood2") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
-            
-            free(MSG);
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+				string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::ChatDeflood! "+string((uint32_t)GetLastError())+" "+
+					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+				AppendSpecialLog(sDbgstr);
+			}
+#else
+			free(MSG);
+#endif
         }
 		UserClose(curUser);
 		return false;
@@ -3214,7 +3680,7 @@ bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen
     if(iLen < curUser->NickLen+5) {
         return false;
     }
-    
+
     return true;
 }
 //---------------------------------------------------------------------------
@@ -3323,10 +3789,17 @@ void cDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, const
                 	if(SettingManager->bBools[SETBOOL_SEND_KICK_MESSAGES_TO_OPS] == true) {
                			if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
                             size_t iWantLen = iLen+96;
-                            char *MSG = (char *) malloc(iWantLen);
+#ifdef _WIN32
+                            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+							char *MSG = (char *) malloc(iWantLen);
+#endif
                             if(MSG == NULL) {
 								string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
-                                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::Chat!";
+									string((uint64_t)iWantLen)+" bytes of memory for DcCommands::Chat!";
+#ifdef _WIN32
+								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 								AppendSpecialLog(sDbgstr);
                                 return;
                             }
@@ -3335,8 +3808,15 @@ void cDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, const
 								QueueDataItem *newItem = globalQ->CreateQueueDataItem(MSG, imsgLen, NULL, 0, queue::PM2OPS);
                                 globalQ->SingleItemsStore(newItem);
                             }
-                            
-                            free(MSG);
+#ifdef _WIN32
+                            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+								string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::Chat! "+string((uint32_t)GetLastError())+" "+
+									string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+								AppendSpecialLog(sDbgstr);
+							}
+#else
+							free(MSG);
+#endif
                         } else {
                         	globalQ->OPStore(sData, iLen);
                         }
@@ -3455,10 +3935,17 @@ void cDcCommands::Unknown(User * curUser, char * sData, const uint32_t &iLen) {
             }
         } else {
             size_t iWantLen = iLen+curUser->NickLen+15+64;
-            char *MSG = (char *) malloc(iWantLen);
+#ifdef _WIN32
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+			char *MSG = (char *) malloc(iWantLen);
+#endif
             if(MSG == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
-                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::Unknown!";
+					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::Unknown!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
                 return;
             }
@@ -3466,8 +3953,15 @@ void cDcCommands::Unknown(User * curUser, char * sData, const uint32_t &iLen) {
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::Unknown2") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
-            
-            free(MSG);
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+				string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::Unknown! "+string((uint32_t)GetLastError())+" "+
+					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+				AppendSpecialLog(sDbgstr);
+            }
+#else
+			free(MSG);
+#endif
         }
         UserClose(curUser);
     }
@@ -3555,7 +4049,11 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
             time_t acc_time;
             time(&acc_time);
 
+#ifdef _WIN32
+			uint32_t iMinutes2Wait = (uint32_t)pow((float)2, Reg->iBadPassCount-1);
+#else
 			uint32_t iMinutes2Wait = (uint32_t)pow(2, Reg->iBadPassCount-1);
+#endif
             if(acc_time < (time_t)(Reg->tLastBadPass+(60*iMinutes2Wait))) {
                 int imsgLen = sprintf(msg, "<%s> %s %s %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                     LanguageManager->sTexts[LAN_LAST_PASS_WAS_WRONG_YOU_NEED_WAIT], 
@@ -3563,8 +4061,13 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick5") == true) {
                     UserSendChar(curUser, msg, imsgLen);
                 }
-                imsgLen = sprintf(msg, "[SYS] User %s (%s) not allowed to send password (%" PRIu64 ") - user closed.", curUser->Nick, curUser->IP, 
+#ifdef _WIN32
+                imsgLen = sprintf(msg, "[SYS] User %s (%s) not allowed to send password (%d) - user closed.", curUser->Nick, curUser->IP, 
+                    (Reg->tLastBadPass+(60*iMinutes2Wait))-acc_time);
+#else
+				imsgLen = sprintf(msg, "[SYS] User %s (%s) not allowed to send password (%" PRIu64 ") - user closed.", curUser->Nick, curUser->IP, 
                     (uint64_t)((Reg->tLastBadPass+(60*iMinutes2Wait))-acc_time));
+#endif
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick6") == true) {
                     UdpDebug->Broadcast(msg, imsgLen);
                 }
@@ -3601,7 +4104,11 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
     if(ProfileMan->IsAllowed(curUser, ProfileManager::ENTERFULLHUB) == false && ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == false) {
         // user is NOT allowed enter full hub, check for maxClients
         if(ui32Joins-ui32Parts > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_USERS]) {
-            int imsgLen = sprintf(msg, "$HubIsFull|<%s> %s. %u %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#ifdef _WIN32
+            int imsgLen = sprintf(msg, "$HubIsFull|<%s> %s. %I32d %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#else
+			int imsgLen = sprintf(msg, "$HubIsFull|<%s> %s. %u %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#endif
                 LanguageManager->sTexts[LAN_THIS_HUB_IS_FULL], ui32Logged, LanguageManager->sTexts[LAN_USERS_ONLINE_LWR]);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick8") == false) {
                 return false;
@@ -3625,22 +4132,26 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
     if(ProfileMan->IsAllowed(curUser, ProfileManager::NOUSRSAMEIP) == false) {
         uint32_t ui32Count = hashManager->GetUserIpCount(curUser);
         if(ui32Count >= (uint32_t)SettingManager->iShorts[SETSHORT_MAX_CONN_SAME_IP]) {
-	        int imsgLen = sprintf(msg, "<%s> %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-	            LanguageManager->sTexts[LAN_SORRY_ALREADY_MAX_IP_CONNS]);
-	        if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick9") == false) {
-	            return false;
-	        }
-	        if(SettingManager->bBools[SETBOOL_REDIRECT_WHEN_HUB_FULL] == true &&
-	            SettingManager->sPreTexts[SetMan::SETPRETXT_REDIRECT_ADDRESS] != NULL) {
-	               memcpy(msg+imsgLen, SettingManager->sPreTexts[SetMan::SETPRETXT_REDIRECT_ADDRESS],
-	                (size_t)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_REDIRECT_ADDRESS]);
-	            imsgLen += SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_REDIRECT_ADDRESS];
-	            msg[imsgLen] = '\0';
-	        }
-	        UserSendChar(curUser, msg, imsgLen);
-            imsgLen = sprintf(msg, "[SYS] Max connections from same IP (%d) for %s (%s) - user closed. ", ui32Count, curUser->Nick, curUser->IP);
+            int imsgLen = sprintf(msg, "<%s> %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+                LanguageManager->sTexts[LAN_SORRY_ALREADY_MAX_IP_CONNS]);
+            if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick9") == false) {
+                return false;
+            }
+            if(SettingManager->bBools[SETBOOL_REDIRECT_WHEN_HUB_FULL] == true &&
+                SettingManager->sPreTexts[SetMan::SETPRETXT_REDIRECT_ADDRESS] != NULL) {
+                   memcpy(msg+imsgLen, SettingManager->sPreTexts[SetMan::SETPRETXT_REDIRECT_ADDRESS],
+                    (size_t)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_REDIRECT_ADDRESS]);
+                imsgLen += SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_REDIRECT_ADDRESS];
+                msg[imsgLen] = '\0';
+            }
+            UserSendChar(curUser, msg, imsgLen);
+#ifdef _WIN32
+            imsgLen = sprintf(msg, "[SYS] Max connections from same IP (%I32d) for %s (%s) - user closed. ", ui32Count, curUser->Nick, curUser->IP);
+#else
+			imsgLen = sprintf(msg, "[SYS] Max connections from same IP (%d) for %s (%s) - user closed. ", ui32Count, curUser->Nick, curUser->IP);
+#endif
             string tmp;
-        	if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick10") == true) {
+            if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick10") == true) {
                 //UdpDebug->Broadcast(msg, imsgLen);
                 tmp = msg;
             }
@@ -3652,13 +4163,13 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
                 nxt = cur->hashiptablenext;
 
                 tmp += " "+string(cur->Nick, cur->NickLen);
-        	}
+            }
 
             UdpDebug->Broadcast(tmp);
 
-	        UserClose(curUser);
-	        return false;
-	    }
+            UserClose(curUser);
+            return false;
+        }
     }
 
     // Check for reconnect time
@@ -3684,7 +4195,11 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
             int iRet = recv(OtherUser->Sck, msg, 16, MSG_PEEK);
 
             // if socket error or user closed connection then allow new user to log in
-            if((iRet == -1 && errno != EAGAIN) || iRet == 0) {
+#ifdef _WIN32
+            if((iRet == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK) || iRet == 0) {
+#else
+			if((iRet == -1 && errno != EAGAIN) || iRet == 0) {
+#endif
                 OtherUser->ui32BoolBits |= User::BIT_ERROR;
                 int imsgLen = sprintf(msg, "[SYS] Ghost in validate nick %s (%s) - user closed.", OtherUser->Nick, OtherUser->IP);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick13") == true) {
@@ -3884,8 +4399,16 @@ void cDcCommands::ProcessCmds(User * curUser) {
                 break;
             }
         }
-        
-        free(cur->sCommand);
+
+#ifdef _WIN32
+        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sCommand) == 0) {
+			string sDbgstr = "[BUF] Cannot deallocate cur->sCommand in cDcCommands::ProcessCmds! "+string((uint32_t)GetLastError())+" "+
+				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+            AppendSpecialLog(sDbgstr);
+        }
+#else
+		free(cur->sCommand);
+#endif
         cur->sCommand = NULL;
 
         delete cur;
@@ -3923,13 +4446,28 @@ void cDcCommands::ProcessCmds(User * curUser) {
             // PPK ... optimizations
             if(curUser->MyInfoOld != NULL) {
                 if(curUser->iMyInfoLen == curUser->iMyInfoOldLen && memcmp(curUser->MyInfoOld+14+curUser->NickLen, curUser->MyInfo+14+curUser->NickLen, curUser->iMyInfoOldLen-14-curUser->NickLen) == 0) {
-                    free(curUser->MyInfoOld);
+#ifdef _WIN32
+                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->MyInfoOld) == 0) {
+						string sDbgstr = "[BUF] Cannot deallocate curUser->MyInfoOld in cDcCommands::ProcessCmds! "+string((uint32_t)GetLastError())+" "+
+							string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+						AppendSpecialLog(sDbgstr);
+                    }
+#else
+					free(curUser->MyInfoOld);
+#endif
                     curUser->MyInfoOld = NULL;
                     curUser->iMyInfoOldLen = 0;
                     return;
                 }
-                
-                free(curUser->MyInfoOld);
+#ifdef _WIN32
+                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->MyInfoOld) == 0) {
+					string sDbgstr = "[BUF] Cannot deallocate curUser->MyInfoOld1 in cDcCommands::ProcessCmds! "+string((uint32_t)GetLastError())+" "+
+						string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+					AppendSpecialLog(sDbgstr);
+                }
+#else
+				free(curUser->MyInfoOld);
+#endif
                 curUser->MyInfoOld = NULL;
                 curUser->iMyInfoOldLen = 0;
             }
@@ -3945,13 +4483,28 @@ void cDcCommands::ProcessCmds(User * curUser) {
         // PPK ... optimizations
         if(curUser->MyInfoOld != NULL) {
             if(curUser->iMyInfoLen == curUser->iMyInfoOldLen && memcmp(curUser->MyInfoOld+14+curUser->NickLen, curUser->MyInfo+14+curUser->NickLen, curUser->iMyInfoOldLen-14-curUser->NickLen) == 0) {
-                free(curUser->MyInfoOld);
+#ifdef _WIN32
+                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->MyInfoOld) == 0) {
+					string sDbgstr = "[BUF] Cannot deallocate curUser->MyInfoOld2 in cDcCommands::ProcessCmds! "+string((uint32_t)GetLastError())+" "+
+						string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+					AppendSpecialLog(sDbgstr);
+                }
+#else
+				free(curUser->MyInfoOld);
+#endif
                 curUser->MyInfoOld = NULL;
                 curUser->iMyInfoOldLen = 0;
                 return;
             }
-            
-            free(curUser->MyInfoOld);
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->MyInfoOld) == 0) {
+				string sDbgstr = "[BUF] Cannot deallocate curUser->MyInfoOld3 in cDcCommands::ProcessCmds! "+string((uint32_t)GetLastError())+" "+
+					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+				AppendSpecialLog(sDbgstr);
+            }
+#else
+			free(curUser->MyInfoOld);
+#endif
             curUser->MyInfoOld = NULL;
             curUser->iMyInfoOldLen = 0;
         }

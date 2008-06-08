@@ -29,7 +29,17 @@
 #include "User.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+#endif
+//---------------------------------------------------------------------------
 #include "DeFlood.h"
+//---------------------------------------------------------------------------
+#ifdef _WIN32
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
 //---------------------------------------------------------------------------
 static char msg[1024];
 //---------------------------------------------------------------------------
@@ -469,7 +479,13 @@ void DeFloodReport(User * u, const uint8_t ui8DefloodType, char *sAction) {
             }
         }
     }
+
+#ifdef _WIN32
+	int imsgLen = sprintf(msg, "[SYS] Flood type %I8d from %s (%s) - user closed.", ui8DefloodType, u->Nick, u->IP);
+#else
 	int imsgLen = sprintf(msg, "[SYS] Flood type %u from %s (%s) - user closed.", (uint16_t)ui8DefloodType, u->Nick, u->IP);
+#endif
+
     if(CheckSprintf(imsgLen, 1024, "DeFloodReport3") == true) {
         UdpDebug->Broadcast(msg, imsgLen);
     }
@@ -493,7 +509,11 @@ bool DeFloodCheckInterval(User * u, const uint8_t &ui8DefloodType,
                 }
             }
 
-            int iret = sprintf(msg+imsgLen, "<%s> %s %" PRIu64 " %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#ifdef _WIN32
+            int iret = sprintf(msg+imsgLen, "<%s> %s %I64d %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#else
+			int iret = sprintf(msg+imsgLen, "<%s> %s %" PRIu64 " %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+#endif
                 LanguageManager->sTexts[LAN_PLEASE_WAIT], (ui64LastOkTick+ui32DefloodTime)-ui64ActualTick, 
                 DeFloodGetMessage(ui8DefloodType, 0));
 			imsgLen += iret;

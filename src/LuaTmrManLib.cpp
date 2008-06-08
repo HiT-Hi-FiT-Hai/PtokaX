@@ -27,8 +27,20 @@
 #include "LuaScriptManager.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+#endif
+//---------------------------------------------------------------------------
 #include "LuaScript.h"
-#include "scrtmrinc.h"
+#ifndef _WIN32
+	#include "scrtmrinc.h"
+#endif
+//---------------------------------------------------------------------------
+#ifdef _WIN32
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
 //---------------------------------------------------------------------------
 
 static int AddTimer(lua_State * L) {
@@ -90,15 +102,32 @@ static int AddTimer(lua_State * L) {
         return 1;
     }
 
+#ifdef _WIN32
+	UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tonumber(L, 1),
+		(TIMERPROC) (iLen == 0 ? ScriptTimerProc : ScriptTimerCustomProc));
+
+    if(timer == 0) {
+        lua_settop(L, 0);
+#else
 	ScriptTimer * newtimer = new ScriptTimer(sFunctionName, iLen, cur);
 
     if(newtimer == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate new ScriptTimer!";
         AppendSpecialLog(sDbgstr);
+#endif
 		lua_pushnil(L);
         return 1;
     }
 
+#ifdef _WIN32
+	ScriptTimer * newtimer = new ScriptTimer(timer, sFunctionName, iLen, cur);
+
+    lua_settop(L, 0);
+
+    if(newtimer == NULL) {
+		string sDbgstr = "[BUF] Cannot allocate new ScriptTimer! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+        AppendSpecialLog(sDbgstr);
+#else
     timer_t scrtimer;
 
     struct sigevent sigev;
@@ -131,13 +160,18 @@ static int AddTimer(lua_State * L) {
     if(iRet == -1) {
         timer_delete(scrtimer);
         lua_settop(L, 0);
+#endif
 		lua_pushnil(L);
         return 1;
     }
 
+#ifdef _WIN32
+    lua_pushnumber(L, (double)newtimer->uiTimerId);
+#else
     lua_settop(L, 0);
 
     lua_pushlightuserdata(L, (void *)newtimer->TimerId);
+#endif
 
     return 1;
 }
@@ -150,19 +184,28 @@ static int RemoveTimer(lua_State * L) {
         return 0;
     }
 
+#ifdef _WIN32
+    if(lua_type(L, 1) != LUA_TNUMBER) {
+        luaL_checktype(L, 1, LUA_TNUMBER);
+#else
     if(lua_type(L, 1) != LUA_TLIGHTUSERDATA) {
         luaL_checktype(L, 1, LUA_TLIGHTUSERDATA);
+#endif
 		lua_settop(L, 0);
         return 0;
     }
-
+    
 	Script * cur = ScriptManager->FindScript(L);
     if(cur == NULL) {
 		lua_settop(L, 0);
         return 0;
 	}
 
-    timer_t timer = (timer_t)lua_touserdata(L, 1);
+#ifdef _WIN32
+    UINT_PTR timer = (UINT_PTR)lua_tonumber(L, 1);
+#else
+	timer_t timer = (timer_t)lua_touserdata(L, 1);
+#endif
 
     ScriptTimer * next = cur->TimerList;
     
@@ -170,8 +213,13 @@ static int RemoveTimer(lua_State * L) {
         ScriptTimer * tmr = next;
         next = tmr->next;
 
+#ifdef _WIN32
+        if(tmr->uiTimerId == timer) {
+            KillTimer(NULL, tmr->uiTimerId);
+#else
         if(tmr->TimerId == timer) {
             timer_delete(tmr->TimerId);
+#endif
 
             if(tmr->prev == NULL) {
                 if(tmr->next == NULL) {

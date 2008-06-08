@@ -24,6 +24,14 @@
 //---------------------------------------------------------------------------
 #include "utility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+//---------------------------------------------------------------------------
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
+//---------------------------------------------------------------------------
 static const char * sEmpty = "";
 //---------------------------------------------------------------------------
 
@@ -39,6 +47,9 @@ void string::stralloc(const char * sTxt, const size_t & iLen) {
 	if(sData == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+1))+
 			" bytes of memory for sData in string::stralloc(const char *, const size_t &)!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
 	}
@@ -55,7 +66,7 @@ string::string() {
 //---------------------------------------------------------------------------
 
 string::string(const char * sTxt) {
-    stralloc(sTxt, strlen(sTxt));
+	stralloc(sTxt, strlen(sTxt));
 }
 //---------------------------------------------------------------------------
 
@@ -71,29 +82,49 @@ string::string(const string & sStr) {
 
 string::string(const uint32_t & ui32Number) {
 	char tmp[16];
+#ifdef _WIN32
+	ultoa(ui32Number, tmp, 10);
+	stralloc(tmp, strlen(tmp));
+#else
 	int iLen = sprintf(tmp, "%u", ui32Number);
 	stralloc(tmp, iLen);
+#endif
 }
 //---------------------------------------------------------------------------
 
 string::string(const int32_t & i32Number) {
 	char tmp[16];
+#ifdef _WIN32
+	ltoa(i32Number, tmp, 10);
+	stralloc(tmp, strlen(tmp));
+#else
 	int iLen = sprintf(tmp, "%d", i32Number);
 	stralloc(tmp, iLen);
+#endif
 }
 //---------------------------------------------------------------------------
 
 string::string(const uint64_t & ui64Number) {
 	char tmp[32];
+#ifdef _WIN32
+	_ui64toa(ui64Number, tmp, 10);
+	stralloc(tmp, strlen(tmp));
+#else
 	int iLen = sprintf(tmp, "%" PRIu64, ui64Number);
 	stralloc(tmp, iLen);
+#endif
 }
 //---------------------------------------------------------------------------
 
 string::string(const int64_t & i64Number) {
 	char tmp[32];
+#ifdef _WIN32
+	_i64toa(i64Number, tmp, 10);
+	stralloc(tmp, strlen(tmp));
+#else
 	int iLen = sprintf(tmp, "%" PRId64, i64Number);
 	stralloc(tmp, iLen);
+#endif
 }
 //---------------------------------------------------------------------------
 
@@ -109,6 +140,9 @@ string::string(const string & sStr1, const string & sStr2) {
     if(sData == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+1))+
             " bytes of memory for sData in string::string(const string &, const string &)!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }
@@ -132,6 +166,9 @@ string::string(const char * sTxt, const string & sStr) {
     if(sData == NULL) {
         string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+1))+
             " bytes of memory for sData in string::string(const char *, const string &)!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }
@@ -155,6 +192,9 @@ string::string(const string & sStr, const char * sTxt) {
     if(sData == NULL) {
         string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+1))+
             " bytes of memory for sData in string::string(const string &, const char *)!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }
@@ -211,6 +251,9 @@ string & string::operator+=(const char * sTxt) {
     if(sData == NULL) {
         string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+iLen+1))+
             " bytes of memory for sData in string::operator+=(const char *)!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }
@@ -236,6 +279,9 @@ string & string::operator+=(const string & sStr) {
     if(sData == NULL) {
         string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+sStr.size()+1))+
             " bytes of memory for sData in string::operator+=(const char *)!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }

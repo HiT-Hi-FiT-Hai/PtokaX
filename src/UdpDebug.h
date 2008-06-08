@@ -30,7 +30,11 @@ private:
         UdpDbgItem() { };
         ~UdpDbgItem();
 
-        int s;
+#ifdef _WIN32
+        SOCKET s;
+#else
+		int s;
+#endif
         sockaddr_in to;
         uint32_t ui32Hash;
         char *Nick;

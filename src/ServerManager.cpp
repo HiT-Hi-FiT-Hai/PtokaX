@@ -38,51 +38,107 @@
 #include "utility.h"
 #include "ZlibUtility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+#endif
+//---------------------------------------------------------------------------
 #include "ClientTagManager.h"
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#include "frmHub.h"
+	#endif
+#endif
 #include "HubCommands.h"
 #include "IP2Country.h"
 #include "LuaScript.h"
 #include "RegThread.h"
-#include "regtmrinc.h"
+#ifndef _WIN32
+	#include "regtmrinc.h"
+#endif
 #include "ResNickManager.h"
 #include "ServerThread.h"
 #include "TextFileManager.h"
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#include "TScriptMemoryForm.h"
+		#include "TScriptsForm.h"
+	#endif
+#endif
 #include "UDPThread.h"
 //---------------------------------------------------------------------------
-static int SIGSECTMR = SIGRTMIN+1;
+#ifdef _WIN32
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#else
+	static int SIGSECTMR = SIGRTMIN+1;
+#endif
 //---------------------------------------------------------------------------
 static ServerThread *ServersE = NULL;
-static timer_t sectimer, regtimer;
+#ifdef _WIN32
+	static UINT_PTR sectimer = 0, regtimer = 0;
+#else
+	static timer_t sectimer, regtimer;
+#endif
 //---------------------------------------------------------------------------
 double CpuUsage[60], cpuUsage = 0;
 uint64_t ui64ActualTick = 0, ui64TotalShare = 0;
 uint64_t ui64BytesRead = 0, ui64BytesSent = 0, ui64BytesSentSaved = 0;
 uint64_t iLastBytesRead = 0, iLastBytesSent = 0;
-uint32_t ui32Joins = 0, ui32Parts = 0, ui32Logged = 0, ui32Peak = 0, ui32CpuCount = 0;
+uint32_t ui32Joins = 0, ui32Parts = 0, ui32Logged = 0, ui32Peak = 0;
+#ifndef _WIN32
+	uint32_t ui32CpuCount = 0;
+#endif
 uint32_t UploadSpeed[60], DownloadSpeed[60];
 uint32_t iActualBytesRead = 0, iActualBytesSent = 0;
 uint32_t iAverageBytesRead = 0, iAverageBytesSent = 0;
 ServerThread *ServersS = NULL;
 time_t starttime = 0;
 uint64_t iMins = 0, iHours = 0, iDays = 0;
-bool bServerRunning = false, bServerTerminated = false, bIsRestart = false, bIsClose = false, bDaemon = false;
+bool bServerRunning = false, bServerTerminated = false, bIsRestart = false, bIsClose = false;
+#ifdef _WIN32
+	#ifdef _SERVICE
+	    bool bService = false;
+	#endif
+#else
+	bool bDaemon = false;
+#endif
 char sHubIP[16];
 uint8_t ui8SrCntr = 0, ui8MinTick = 0;
 //---------------------------------------------------------------------------
 
+#ifdef _WIN32
+VOID CALLBACK SecTimerProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*idEvent*/, DWORD /*dwTime*/) {
+	if(bNT == true) {
+		FILETIME tmpa, tmpb, kernelTimeFT, userTimeFT;
+		GetProcessTimes(GetCurrentProcess(), &tmpa, &tmpb, &kernelTimeFT, &userTimeFT);
+		int64_t kernelTime = kernelTimeFT.dwLowDateTime | (((int64_t)kernelTimeFT.dwHighDateTime) << 32);
+		int64_t userTime = userTimeFT.dwLowDateTime | (((int64_t)userTimeFT.dwHighDateTime) << 32);
+		double dcpuSec = double(kernelTime + userTime) / double(10000000I64);
+		cpuUsage = dcpuSec - CpuUsage[ui8MinTick];
+		CpuUsage[ui8MinTick] = dcpuSec;
+	}
+#else
 static void SecTimerHandler(int sig) {
     struct rusage rs;
 
     getrusage(RUSAGE_SELF, &rs);
 
 	double dcpuSec = double(rs.ru_utime.tv_sec) + (double(rs.ru_utime.tv_usec)/1000000) + 
-        double(rs.ru_stime.tv_sec) + (double(rs.ru_stime.tv_usec)/1000000);
+	double(rs.ru_stime.tv_sec) + (double(rs.ru_stime.tv_usec)/1000000);
 	cpuUsage = dcpuSec - CpuUsage[ui8MinTick];
 	CpuUsage[ui8MinTick] = dcpuSec;
+#endif
 
 	if(++ui8MinTick == 60) {
 		ui8MinTick = 0;
     }
+
+#ifdef _WIN32
+	if(bServerRunning == false) {
+		return;
+	}
+#endif
 
     ui64ActualTick++;
 
@@ -99,10 +155,85 @@ static void SecTimerHandler(int sig) {
 
 	iAverageBytesSent += UploadSpeed[ui8MinTick];
 	iAverageBytesRead += DownloadSpeed[ui8MinTick];
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		hubForm->UpdateGui();
+	#endif
+#endif
 }
 //---------------------------------------------------------------------------
 
+#ifdef _WIN32
+	VOID CALLBACK RegTimerProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*idEvent*/, DWORD /*dwTime*/) {
+	    if(SettingManager->bBools[SETBOOL_AUTO_REG] == true && SettingManager->sTexts[SETTXT_REGISTER_SERVERS] != NULL) {
+			// First destroy old hublist reg thread if any
+	        if(RegisterThread != NULL) {
+	            RegisterThread->Close();
+	            RegisterThread->WaitFor();
+	            delete RegisterThread;
+	            RegisterThread = NULL;
+	        }
+	        
+	        // Create hublist reg thread
+	        RegisterThread = new RegThread();
+	        if(RegisterThread == NULL) {
+				string sDbgstr = "[BUF] Cannot allocate RegisterThread! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+	        	AppendSpecialLog(sDbgstr);
+	        	exit(EXIT_FAILURE);
+	        }
+	        
+	        // Setup hublist reg thread
+	        RegisterThread->Setup(SettingManager->sTexts[SETTXT_REGISTER_SERVERS], SettingManager->ui16TextsLens[SETTXT_REGISTER_SERVERS]);
+	        
+	        // Start the hublist reg thread
+	    	RegisterThread->Resume();
+	    }
+	}
+#endif
+//---------------------------------------------------------------------------
+
 void ServerInitialize() {
+#ifdef _WIN32
+	#ifndef _MSC_VER
+	    randomize();
+	#else
+	    time_t acctime;
+	    time(&acctime);
+	    srand((uint32_t)acctime);
+	#endif
+
+	WSADATA wsaData;
+	WSAStartup(MAKEWORD(1, 1), &wsaData);
+
+    hPtokaXHeap = HeapCreate(HEAP_NO_SERIALIZE, 0x100000, 0);
+
+	if(DirExist((PATH+"\\cfg").c_str()) == false) {
+		CreateDirectory((PATH+"\\cfg").c_str(), NULL);
+	}
+	if(DirExist((PATH+"\\logs").c_str()) == false) {
+		CreateDirectory((PATH+"\\logs").c_str(), NULL);
+	}
+	if(DirExist((PATH+"\\scripts").c_str()) == false) {
+		CreateDirectory((PATH+"\\scripts").c_str(), NULL);
+    }
+	if(DirExist((PATH+"\\texts").c_str()) == false) {
+		CreateDirectory((PATH+"\\texts").c_str(), NULL);
+    }
+
+	SCRIPT_PATH = PATH + "\\scripts\\";
+
+	PATH_LUA = PATH + "/";
+
+	char * sLuaPath = PATH_LUA.c_str();
+	for(size_t i = 0; i < PATH.size(); i++) {
+		if(sLuaPath[i] == '\\') {
+			sLuaPath[i] = '/';
+		}
+	}
+
+    SetupOsVersion();
+#else
     time_t acctime;
     time(&acctime);
     srandom(acctime);
@@ -150,10 +281,14 @@ void ServerInitialize() {
     if(ui32CpuCount == 0) {
         ui32CpuCount = 1;
     }
+#endif
 
 	ResNickManager = new ResNickMan();
 	if(ResNickManager == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate ResNickManager!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 	    AppendSpecialLog(sDbgstr);
 	    exit(EXIT_FAILURE);
 	}
@@ -180,17 +315,33 @@ void ServerInitialize() {
 
     ZlibUtility = new clsZlibUtility();
     if(ZlibUtility == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate ZlibUtility!";
+    	string sDbgstr = "[BUF] Cannot allocate ZlibUtility!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);
     }
 
     ClientTagManager = new ClientTagMan();
     if(ClientTagManager == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate ClientTagManager!";
+    	string sDbgstr = "[BUF] Cannot allocate ClientTagManager!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);
     }
+
+#ifdef _WIN32
+    // PPK ... check OS if is NT
+    OSVERSIONINFO osvi;
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+	if(GetVersionEx(&osvi) && osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion > 4) {
+        // PPK ... set bNT to true
+        bNT = true;
+	}
+#endif
 
     ui8MinTick = 0;
 
@@ -204,16 +355,34 @@ void ServerInitialize() {
 
 	cpuUsage = 0.0;
 
+#ifdef _WIN32
+	sectimer = SetTimer(NULL, 0, 1000, (TIMERPROC)SecTimerProc);
+    
+	if(sectimer == 0) {
+		string sDbgstr = "[BUF] Cannot start Timer in ServerThread::ServerThread! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+		AppendSpecialLog(sDbgstr);
+        exit(EXIT_FAILURE);
+    }
+
+    regtimer = 0;
+#endif
+
 	SettingManager = new SetMan();
     if(SettingManager == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate SettingManager!";
+    	string sDbgstr = "[BUF] Cannot allocate SettingManager!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
     	AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);
     }
 
     LanguageManager = new LangMan();
     if(LanguageManager == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate LanguageManager!";
+    	string sDbgstr = "[BUF] Cannot allocate LanguageManager!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }
@@ -222,54 +391,79 @@ void ServerInitialize() {
 
     ProfileMan = new ProfileManager();
     if(ProfileMan == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate ProfileMan!";
+    	string sDbgstr = "[BUF] Cannot allocate ProfileMan!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
     	AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);
     }
 
     hashRegManager = new hashRegMan();
     if(hashRegManager == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate hashRegManager!";
+    	string sDbgstr = "[BUF] Cannot allocate hashRegManager!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
     	AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);
     }
 
     // Load registered users
-    hashRegManager->Load();
+	hashRegManager->Load();
 
     hashBanManager = new hashBanMan();
     if(hashBanManager == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate hashBanManager!";
+    	string sDbgstr = "[BUF] Cannot allocate hashBanManager!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }
 
     // load banlist
-    hashBanManager->Load();
+	hashBanManager->Load();
 
     TextFileManager = new TextFileMan();
     if(TextFileManager == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate TextFileManager!";
+    	string sDbgstr = "[BUF] Cannot allocate TextFileManager!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }
 
     UdpDebug = new clsUdpDebug();
     if(UdpDebug == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate UdpDebug!";
+    	string sDbgstr = "[BUF] Cannot allocate UdpDebug!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }
 
+#ifdef _WIN32
+	#ifndef _SERVICE
+	        Application->CreateForm(__classid(ThubForm), &hubForm);
+	#endif
+#endif
+
     ScriptManager = new ScriptMan();
     if(ScriptManager == NULL) {
-        string sDbgstr = "[BUF] Cannot allocate ScriptManager!";
+    	string sDbgstr = "[BUF] Cannot allocate ScriptManager!";
+#ifdef _WIN32
+        sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }
 
 	SettingManager->UpdateAll();
 
+#ifndef _WIN32
     struct sigaction sigactsec;
     sigactsec.sa_handler = SecTimerHandler;
     sigemptyset(&sigactsec.sa_mask);
@@ -304,12 +498,14 @@ void ServerInitialize() {
 		AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }
+#endif
 }
 //---------------------------------------------------------------------------
 
 bool ServerStart() {
     time(&starttime);
 
+#ifndef _WIN32
     struct itimerspec sectmrspec;
     sectmrspec.it_interval.tv_sec = 1;
     sectmrspec.it_interval.tv_nsec = 0;
@@ -322,10 +518,17 @@ bool ServerStart() {
 		AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);
     }
+#endif
 
     SettingManager->UpdateAll();
 
     TextFileManager->RefreshTextFiles();
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		hubForm->ButtonStart->Enabled = false;
+	#endif
+#endif
 
     ui64ActualTick = ui64TotalShare = 0;
 
@@ -341,11 +544,36 @@ bool ServerStart() {
 
     if(SettingManager->bBools[SETBOOL_RESOLVE_TO_IP] == true) {
         if(isIP(SettingManager->sTexts[SETTXT_HUB_ADDRESS], SettingManager->ui16TextsLens[SETTXT_HUB_ADDRESS]) == false) {
+#ifdef _WIN32
+	#ifndef _SERVICE
+				hubForm->StatusValue->Caption = String(LanguageManager->sTexts[LAN_RESOLVING_HUB_ADDRESS],
+					(size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_HUB_ADDRESS])+"...";
+	#endif
+#endif
             hostent *host = gethostbyname(SettingManager->sTexts[SETTXT_HUB_ADDRESS]);
 			if(host == NULL) {
+#ifdef _WIN32
+            	int err = WSAGetLastError();
+	#ifdef _SERVICE
+                AppendLog(string(LanguageManager->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
+					" '"+string(SettingManager->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(LanguageManager->sTexts[LAN_HAS_FAILED], (size_t)LanguageManager->ui16TextsLens[LAN_HAS_FAILED])+
+					".\n"+string(LanguageManager->sTexts[LAN_ERROR_CODE], (size_t)LanguageManager->ui16TextsLens[LAN_ERROR_CODE])+": "+
+					string(WSErrorStr(err))+" ("+string(err)+")\n\n"+
+					string(LanguageManager->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".");
+	#else
+				MessageBox(Application->Handle,(string(LanguageManager->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
+					" '"+string(SettingManager->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(LanguageManager->sTexts[LAN_HAS_FAILED], (size_t)LanguageManager->ui16TextsLens[LAN_HAS_FAILED])+
+					".\n"+string(LanguageManager->sTexts[LAN_ERROR_CODE], (size_t)LanguageManager->ui16TextsLens[LAN_ERROR_CODE])+": "+
+					string(WSErrorStr(err))+" ("+string(err)+")\n\n"+
+					string(LanguageManager->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".").c_str(),
+					LanguageManager->sTexts[LAN_ERROR], MB_OK|MB_ICONERROR);
+				hubForm->ButtonStart->Enabled = true;
+	#endif
+#else
                 AppendLog(string(LanguageManager->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
 					" '"+string(SettingManager->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(LanguageManager->sTexts[LAN_HAS_FAILED], (size_t)LanguageManager->ui16TextsLens[LAN_HAS_FAILED])+
 					".\n"+string(LanguageManager->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".");
+#endif
                 return false;
             } else {
 				Memo("*** "+string(SettingManager->sTexts[SETTXT_HUB_ADDRESS], (size_t)LanguageManager->ui16TextsLens[SETTXT_HUB_ADDRESS])+" "+
@@ -369,7 +597,10 @@ bool ServerStart() {
 
 		ServerThread *Server = new ServerThread();
         if(Server == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate Server in ServerMan::StartServer!";
+        	string sDbgstr = "[BUF] Cannot allocate Server in ServerMan::StartServer!";
+#ifdef _WIN32
+			sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 			AppendSpecialLog(sDbgstr);
             exit(EXIT_FAILURE);
         }
@@ -389,7 +620,17 @@ bool ServerStart() {
     }
 
 	if(ServersS == NULL) {
+#ifdef _WIN32
+	#ifdef _SERVICE
         AppendLog(LanguageManager->sTexts[LAN_NO_VALID_TCP_PORT_SPECIFIED]);
+	#else
+		MessageBox(Application->Handle, LanguageManager->sTexts[LAN_NO_VALID_TCP_PORT_SPECIFIED],
+			LanguageManager->sTexts[LAN_ERROR], MB_OK|MB_ICONERROR);
+		hubForm->ButtonStart->Enabled = true;
+	#endif
+#else
+		AppendLog(LanguageManager->sTexts[LAN_NO_VALID_TCP_PORT_SPECIFIED]);
+#endif
         return false;
     }
 
@@ -397,14 +638,20 @@ bool ServerStart() {
 
     IP2Country = new IP2CC();
     if(IP2Country == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate IP2Country!";
+    	string sDbgstr = "[BUF] Cannot allocate IP2Country!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);
     }
 
     eventqueue = new eventq();
     if(eventqueue == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate eventqueue!";
+    	string sDbgstr = "[BUF] Cannot allocate eventqueue!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);
     }
@@ -412,6 +659,9 @@ bool ServerStart() {
     hashManager = new hashMan();
     if(hashManager == NULL) {
     	string sDbgstr = "[BUF] Cannot allocate hashManager!";
+#ifdef _WIN32
+    	sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
     	AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }
@@ -419,20 +669,29 @@ bool ServerStart() {
     colUsers = new classUsers;
 	if(colUsers == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate colUsers!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);
     }
 
     globalQ = new queue;
     if(globalQ == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate globalQ!";
+    	string sDbgstr = "[BUF] Cannot allocate globalQ!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
     	AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);
     }
 
     HubCmds = new HubCommands;
     if(HubCmds == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate HubCmds!";
+    	string sDbgstr = "[BUF] Cannot allocate HubCmds!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
     	AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);
     }
@@ -440,6 +699,9 @@ bool ServerStart() {
     DcCommands = new cDcCommands;
     if(DcCommands == NULL) {
     	string sDbgstr = "[BUF] Cannot allocate DcCommands!";
+#ifdef _WIN32
+    	sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
     	AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);
     }
@@ -457,11 +719,20 @@ bool ServerStart() {
     if((uint16_t)atoi(SettingManager->sTexts[SETTXT_UDP_PORT]) != 0) {
         UDPThread = new UDPRecvThread();
         if(UDPThread == NULL) {
-    		string sDbgstr = "[BUF] Cannot allocate UDPThread!";
+        	string sDbgstr = "[BUF] Cannot allocate UDPThread!";
+#ifdef _WIN32
+    		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
         	AppendSpecialLog(sDbgstr);
         	exit(EXIT_FAILURE);
         }
-        UDPThread->Resume();
+
+        if(UDPThread->Listen() == true) {
+            UDPThread->Resume();
+        } else {
+            delete UDPThread;
+            UDPThread = NULL;
+        }
     }
 
 	ScriptManager->SaveScripts();
@@ -472,7 +743,10 @@ bool ServerStart() {
     
     srvLoop = new theLoop();
     if(srvLoop == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate srvLoop!";
+    	string sDbgstr = "[BUF] Cannot allocate srvLoop!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
     	AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);
     }
@@ -491,8 +765,41 @@ bool ServerStart() {
     // Call lua_Main
 	ScriptManager->OnStartup();
 
+#ifdef _WIN32
+	#ifndef _SERVICE
+		hubForm->StatusValue->Caption = String(LanguageManager->sTexts[LAN_RUNNING], (size_t)LanguageManager->ui16TextsLens[LAN_RUNNING])+"...";
+	    hubForm->ButtonStart->Caption = String(LanguageManager->sTexts[LAN_STOP_HUB], (size_t)LanguageManager->ui16TextsLens[LAN_STOP_HUB]);
+		hubForm->ButtonStart->Enabled = true;
+	
+		hubForm->Accepts->Visible = true;
+		hubForm->Parts->Visible = true;
+		hubForm->Total->Visible = true;
+		hubForm->LoggedIn->Visible = true;
+		hubForm->Rx->Visible = true;
+		hubForm->Tx->Visible = true;
+		hubForm->Peak->Visible = true;
+		hubForm->AcceptsNumber->Visible = true;
+		hubForm->PartsNumber->Visible = true;
+		hubForm->TotalNumber->Visible = true;
+		hubForm->LoggedInNumber->Visible = true;
+		hubForm->RxValue->Visible = true;
+		hubForm->TxValue->Visible = true;
+		hubForm->PeakValue->Visible = true;
+	
+		if(ScriptsForm != NULL) {
+			ScriptsForm->LUArst->Enabled = true;
+		}
+	#endif
+#endif
+
     //Start the HubRegistration timer
     if(SettingManager->bBools[SETBOOL_AUTO_REG] == true) {
+#ifdef _WIN32
+    	regtimer = SetTimer(NULL, 0, 901000, (TIMERPROC)RegTimerProc);
+    
+        if(regtimer == 0) {
+			string sDbgstr = "[BUF] Cannot start RegTimer in ServerMan::StartServer! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#else
         struct itimerspec regtmrspec;
         regtmrspec.it_interval.tv_sec = 901;
         regtmrspec.it_interval.tv_nsec = 0;
@@ -502,7 +809,9 @@ bool ServerStart() {
         iRet = timer_settime(regtimer, 0, &regtmrspec, NULL);
         if(iRet == -1) {
     		string sDbgstr = "[BUF] Cannot start regtimer in ServerStart()!";
-    		AppendSpecialLog(sDbgstr);
+#endif
+
+			AppendSpecialLog(sDbgstr);
         	exit(EXIT_FAILURE);
         }
     }
@@ -512,6 +821,11 @@ bool ServerStart() {
 //---------------------------------------------------------------------------
 
 void ServerStop() {
+#ifdef _WIN32
+	#ifndef _SERVICE
+		hubForm->ButtonStart->Enabled = false;
+	#endif
+#else
     struct itimerspec sectmrspec;
     sectmrspec.it_interval.tv_sec = 0;
     sectmrspec.it_interval.tv_nsec = 0;
@@ -524,16 +838,24 @@ void ServerStop() {
 		AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);
     }
+#endif
 
     char msg[1024];
+#ifdef _WIN32
+    int iret = sprintf(msg, "Serving stopped (UL: %I64d [%I64d], DL: %I64d)", ui64BytesSent, ui64BytesSentSaved, ui64BytesRead);
+#else
     int iret = sprintf(msg, "Serving stopped (UL: %" PRIu64 " [%" PRIu64 "], DL: %" PRIu64 ")", ui64BytesSent, 
         ui64BytesSentSaved, ui64BytesRead);
+#endif
     if(CheckSprintf(iret, 1024, "ServerMan::StopServer") == true) {
         AppendLog(msg);
     }
 
 	//Stop the HubRegistration timer
 	if(SettingManager->bBools[SETBOOL_AUTO_REG] == true) {
+#ifdef _WIN32
+	   KillTimer(NULL, regtimer);
+#else
         struct itimerspec regtmrspec;
         regtmrspec.it_interval.tv_sec = 0;
         regtmrspec.it_interval.tv_nsec = 0;
@@ -546,6 +868,7 @@ void ServerStop() {
     		AppendSpecialLog(sDbgstr);
         	exit(EXIT_FAILURE);
         }
+#endif
     }
 
     ServerThread *next = ServersS;
@@ -637,20 +960,63 @@ void ServerFinalStop(const bool &bFromServiceLoop) {
 	//userstat  // better here ;)
 //    sqldb->FinalizeAllVisits();
 
+#ifdef _WIN32
+	#ifndef _SERVICE
+		if(ScriptsForm != NULL) {
+			ScriptsForm->LUArst->Enabled = false;
+		}
+	
+	    hubForm->ButtonStart->Caption = String(LanguageManager->sTexts[LAN_START_HUB], (size_t)LanguageManager->ui16TextsLens[LAN_START_HUB]);
+	    hubForm->ButtonStart->Enabled = true;
+		hubForm->StatusValue->Caption = String(LanguageManager->sTexts[LAN_STOPPED], (size_t)LanguageManager->ui16TextsLens[LAN_STOPPED])+".";
+	
+		hubForm->Accepts->Visible = false;
+		hubForm->Parts->Visible = false;
+		hubForm->Total->Visible = false;
+		hubForm->LoggedIn->Visible = false;
+		hubForm->Rx->Visible = false;
+		hubForm->Tx->Visible = false;
+		hubForm->Peak->Visible = false;
+		hubForm->AcceptsNumber->Visible = false;
+		hubForm->PartsNumber->Visible = false;
+		hubForm->TotalNumber->Visible = false;
+		hubForm->LoggedInNumber->Visible = false;
+		hubForm->RxValue->Visible = false;
+		hubForm->TxValue->Visible = false;
+		hubForm->PeakValue->Visible = false;
+	#endif
+#endif
+
     ui8SrCntr = 0;
     ui32Joins = ui32Parts = ui32Logged = 0;
 
     UdpDebug->Cleanup();
+
+#ifdef _WIN32
+    HeapCompact(GetProcessHeap(), 0);
+    HeapCompact(hPtokaXHeap, 0);
+#endif
 
     bServerRunning = false;
 
     if(bIsRestart == true) {
         bIsRestart = false;
 		// start hub
+#ifdef _WIN32
+	#ifdef _SERVICE
+		if(ServerStart() == false) {
+			AppendLog("Server start failed!");
+			exit(EXIT_FAILURE);
+		}
+	#else
+		hubForm->ButtonStartClick(hubForm);
+	#endif
+#else
 		if(ServerStart() == false) {
             AppendLog("Server start failed!");
             exit(EXIT_FAILURE);
         }
+#endif
     } else if(bIsClose == true) {
 		ServerFinalClose();
     }
@@ -658,10 +1024,14 @@ void ServerFinalStop(const bool &bFromServiceLoop) {
 //---------------------------------------------------------------------------
 
 void ServerFinalClose() {
+#ifdef _WIN32
+    KillTimer(NULL, sectimer);
+#else
     timer_delete(sectimer);
     timer_delete(regtimer);
+#endif
 
-    hashBanManager->Save(true);
+	hashBanManager->Save(true);
 
     hashRegManager->Save();
 
@@ -699,6 +1069,18 @@ void ServerFinalClose() {
 
     delete ResNickManager;
     ResNickManager = NULL;
+
+#ifdef _WIN32
+	HeapDestroy(hPtokaXHeap);
+	
+	WSACleanup();
+	
+	#ifdef _SERVICE
+	    PostMessage(NULL, WM_USER+1, 0, 0);
+	#else
+		Application->Terminate();
+	#endif
+#endif
 }
 //---------------------------------------------------------------------------
 
@@ -767,7 +1149,10 @@ void ServerUpdateServers() {
         if(bFound == false) {
         	ServerThread *Server = new ServerThread();
             if(Server == NULL) {
-				string sDbgstr = "[BUF] Cannot allocate Server in ServerMan::UpdateServers!";
+            	string sDbgstr = "[BUF] Cannot allocate Server in ServerMan::UpdateServers!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 				AppendSpecialLog(sDbgstr);
                 exit(EXIT_FAILURE);
             }
@@ -833,6 +1218,12 @@ void ServerUpdateAutoRegState() {
     }
 
     if(SettingManager->bBools[SETBOOL_AUTO_REG] == true) {
+#ifdef _WIN32
+        regtimer = SetTimer(NULL, 0, 901000, (TIMERPROC)RegTimerProc);
+        
+        if(regtimer == 0) {
+            string sDbgstr = "[BUF] Cannot start RegTimer in ServerMan::UpdateAutoRegState! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#else
         struct itimerspec regtmrspec;
         regtmrspec.it_interval.tv_sec = 901;
         regtmrspec.it_interval.tv_nsec = 0;
@@ -842,10 +1233,14 @@ void ServerUpdateAutoRegState() {
         int iRet = timer_settime(regtimer, 0, &regtmrspec, NULL);
         if(iRet == -1) {
     		string sDbgstr = "[BUF] Cannot start regtimer in ServerUpdateAutoRegState(!";
-    		AppendSpecialLog(sDbgstr);
-        	exit(EXIT_FAILURE);
+#endif
+			AppendSpecialLog(sDbgstr);
+            exit(EXIT_FAILURE);
         }
     } else {
+#ifdef _WIN32
+        KillTimer(NULL, regtimer);
+#else
         struct itimerspec regtmrspec;
         regtmrspec.it_interval.tv_sec = 0;
         regtmrspec.it_interval.tv_nsec = 0;
@@ -858,6 +1253,7 @@ void ServerUpdateAutoRegState() {
     		AppendSpecialLog(sDbgstr);
         	exit(EXIT_FAILURE);
         }
+#endif
     }
 }
 //---------------------------------------------------------------------------

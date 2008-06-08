@@ -28,7 +28,17 @@
 #include "UdpDebug.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+#endif
+//---------------------------------------------------------------------------
 #include "ServerThread.h"
+//---------------------------------------------------------------------------
+#ifdef _WIN32
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
 //---------------------------------------------------------------------------
 
 ServerThread::ServerThread() {
@@ -40,7 +50,13 @@ ServerThread::ServerThread() {
 	iSuspendTime = 0;
 	usPort = 0;
 
+#ifdef _WIN32
+    threadHandle = INVALID_HANDLE_VALUE;
+
+	InitializeCriticalSection(&csServerThread);
+#else
 	pthread_mutex_init(&mtxServerThread, NULL);
+#endif
 
     AntiFloodList = NULL;
 
@@ -50,12 +66,16 @@ ServerThread::ServerThread() {
 //---------------------------------------------------------------------------
 
 ServerThread::~ServerThread() {
+#ifdef _WIN32
+    DeleteCriticalSection(&csServerThread);
+#else
     if(threadId != 0) {
         Close();
         WaitFor();
     }
 
     pthread_mutex_destroy(&mtxServerThread);
+#endif
         
     AntiConFlood *acfnext = AntiFloodList;
         
@@ -64,18 +84,33 @@ ServerThread::~ServerThread() {
         acfnext = acfcur->next;
 		delete acfcur;
     }
+
+#ifdef _WIN32
+    if(threadHandle != INVALID_HANDLE_VALUE) {
+        CloseHandle(threadHandle);
+    }
+#endif
 }
 //---------------------------------------------------------------------------
 
-static void* ExecuteServerThread(void* SrvThread) {
+#ifdef _WIN32
+	unsigned __stdcall ExecuteServerThread(void* SrvThread) {
+#else
+	static void* ExecuteServerThread(void* SrvThread) {
+#endif
 	((ServerThread *)SrvThread)->Run();
 	return 0;
 }
 //---------------------------------------------------------------------------
 
 void ServerThread::Resume() {
+#ifdef _WIN32
+    threadHandle = (HANDLE)_beginthreadex(NULL, 0, ExecuteServerThread, this, 0, &threadId);
+    if(threadHandle == 0) {
+#else
     int iRet = pthread_create(&threadId, NULL, ExecuteServerThread, this);
     if(iRet != 0) {
+#endif
 		AppendSpecialLog("[ERR] Failed to create new ServerThread!");
     }
 }
@@ -83,65 +118,129 @@ void ServerThread::Resume() {
 
 void ServerThread::Run() {
     bActive = true;
-    int s;
+#ifdef _WIN32
+    SOCKET s;
+#else
+	int s;
+#endif
     sockaddr_in addr; //addr.sin_family = AF_INET;
-    socklen_t len = sizeof(addr);
+#ifdef _WIN32
+    int len = sizeof(addr);
+#else
+	socklen_t len = sizeof(addr);
+#endif
     // struct hostent *h; h = gethostbyname("PtokaX.org"); memcpy(&test, h->h_addr_list[0], h->h_length);
 
-    while(bTerminated == false) {
-        s = accept(server, (sockaddr *)&addr, &len);
+#ifdef _WIN32
+	#ifndef _SERVICE
+		try {
+	#endif
+#endif
+	while(bTerminated == false) {
+		s = accept(server, (sockaddr *)&addr, &len);
 
-        if(iSuspendTime == 0) {
-            if(bTerminated == true) {
+		if(iSuspendTime == 0) {
+			if(bTerminated == true) {
+#ifdef _WIN32
+				if(s != INVALID_SOCKET)
+					shutdown(s, SD_SEND);
+                        
+				closesocket(s);
+#else
                 if(s != -1)
                     shutdown(s, SHUT_RDWR);
                         
-                close(s);
-                continue;
-            }
-    
+				close(s);
+#endif
+				continue;
+			}
+
+#ifdef _WIN32
+			if(s == INVALID_SOCKET) {
+				if(WSAEWOULDBLOCK != WSAGetLastError()) {
+#else
             if(s == -1) {
                 if(errno != EWOULDBLOCK) {
                     if(errno == EMFILE) { // max opened file descriptors limit reached
                         sleep(1); // longer sleep give us better chance to have free file descriptor available on next accept call
                     } else {
-                        eventqueue->AddThread(eventq::EVENT_SRVTHREAD_MSG, 
+#endif
+						eventqueue->AddThread(eventq::EVENT_SRVTHREAD_MSG, 
                             ("[ERR] accept() for port "+string(usPort)+" has returned an INVALID_SOCKET.").c_str());
                     }
-                }
-            } else {
-                if(isFlooder(s, addr, len) == true) {
+#ifndef _WIN32
+				}
+#endif
+			} else {
+				if(isFlooder(s, addr, len) == true) {
+#ifdef _WIN32
+					shutdown(s, SD_SEND);
+					closesocket(s);
+#else
                     shutdown(s, SHUT_RDWR);
                     close(s);
-                }
+#endif
+				}
 
+#ifdef _WIN32
+				::Sleep(1);
+#else
                 usleep(1000);
-            }
-        } else {
-            uint32_t iSec = 0;
-            while(bTerminated == false) {
-                if(iSuspendTime > iSec) {
-                    sleep(1);
-                    if(bSuspended == false) {
-                        iSec++;
-                    }
-                    continue;
-                }
+#endif
+			}
+		} else {
+			uint32_t iSec = 0;
+			while(bTerminated == false) {
+				if(iSuspendTime > iSec) {
+#ifdef _WIN32
+					::Sleep(1000);
+#else
+					sleep(1);
+#endif
+					if(bSuspended == false) {
+						iSec++;
+					}
+					continue;
+				}
 
-                pthread_mutex_lock(&mtxServerThread);
-                iSuspendTime = 0;
-                pthread_mutex_unlock(&mtxServerThread);
+#ifdef _WIN32
+				EnterCriticalSection(&csServerThread);
+#else
+				pthread_mutex_lock(&mtxServerThread);
+#endif
+				iSuspendTime = 0;
+#ifdef _WIN32
+				LeaveCriticalSection(&csServerThread);
+#else
+				pthread_mutex_unlock(&mtxServerThread);
+#endif
 
-                if(Listen(usPort, true) == true) {
-                    eventqueue->AddThread(eventq::EVENT_SRVTHREAD_MSG, 
-                        ("[SYS] Server socket for port "+string(usPort)+" sucessfully recovered from suspend state.").c_str());
-                } else {
+				if(Listen(usPort, true) == true) {
+					eventqueue->AddThread(eventq::EVENT_SRVTHREAD_MSG, 
+						("[SYS] Server socket for port "+string(usPort)+" sucessfully recovered from suspend state.").c_str());
+				} else {
 					Close();
-                }
-                break;
-            }
-        }
+				}
+				break;
+			}
+		}
 	}
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		} catch(Exception &e) {
+	        AppendSpecialLog("[ERR] Exception in accept thread: " + string(e.Message.c_str(), e.Message.Length()));
+			Application->ShowException(&e);
+	    } catch(...) {
+	        try {
+	            throw Exception("");
+	        }
+	        catch(Exception &exception) {
+	            Application->ShowException(&exception);
+	        }
+		}
+	#endif
+#endif
 
     bActive = false;
 }
@@ -149,31 +248,60 @@ void ServerThread::Run() {
 
 void ServerThread::Close() {
     bTerminated = true;
+#ifdef _WIN32
+	closesocket(server);
+#else
     shutdown(server, SHUT_RDWR);
 	close(server);
+#endif
 }
 //---------------------------------------------------------------------------
 
 void ServerThread::WaitFor() {
+#ifdef _WIN32
+    WaitForSingleObject(threadHandle, INFINITE);
+#else
 	if(threadId != 0) {
 		pthread_join(threadId, NULL);
         threadId = 0;
 	}
+#endif
 }
 //---------------------------------------------------------------------------
 
 bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
     usPort = port;
 
+#ifdef _WIN32
+    server = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if(server == INVALID_SOCKET) {
+#else
     server = socket(AF_INET, SOCK_STREAM, 0);
     if(server == -1) {
+#endif
         if(bSilent == true) {
             eventqueue->AddThread(eventq::EVENT_SRVTHREAD_MSG, 
-                ("[ERR] Unable to create server socket for port "+string(port)+" ! ErrorCode "+string(errno)).c_str());
+#ifdef _WIN32
+                ("[ERR] Unable to create server socket for port "+string(port)+" ! ErrorCode "+string(WSAGetLastError())).c_str());
+#else
+				("[ERR] Unable to create server socket for port "+string(port)+" ! ErrorCode "+string(errno)).c_str());
+#endif
 		} else {
+#ifdef _WIN32
+	#ifdef _SERVICE
+	            AppendLog(string(LanguageManager->sTexts[LAN_UNB_CRT_SRVR_SCK], (size_t)LanguageManager->ui16TextsLens[LAN_UNB_CRT_SRVR_SCK])+" "+
+					string(port)+" ! "+string(LanguageManager->sTexts[LAN_ERROR_CODE], (size_t)LanguageManager->ui16TextsLens[LAN_ERROR_CODE])+
+					" "+string(WSAGetLastError()));
+	#else
+				ShowMessage(String(LanguageManager->sTexts[LAN_UNB_CRT_SRVR_SCK], (size_t)LanguageManager->ui16TextsLens[LAN_UNB_CRT_SRVR_SCK])+" "+
+					String(port)+" ! "+String(LanguageManager->sTexts[LAN_ERROR_CODE], (size_t)LanguageManager->ui16TextsLens[LAN_ERROR_CODE])+
+					" "+String(WSAGetLastError()));
+	#endif
+#else
             AppendLog(string(LanguageManager->sTexts[LAN_UNB_CRT_SRVR_SCK], (size_t)LanguageManager->ui16TextsLens[LAN_UNB_CRT_SRVR_SCK])+" "+
 				string(port)+" ! "+string(LanguageManager->sTexts[LAN_ERROR_CODE], (size_t)LanguageManager->ui16TextsLens[LAN_ERROR_CODE])+
 				" "+string(errno));
+#endif
         }
         return false;
     }
@@ -181,14 +309,28 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
     // set the socket properties
     sockaddr_in sa;
     sa.sin_family = AF_INET;
-    sa.sin_port = htons(usPort);
+    
+#ifdef _WIN32
+    sa.sin_port = htons((unsigned short)usPort);
+#else
+	sa.sin_port = htons(usPort);
+#endif
 
     if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP[0] != '\0') {
-        sa.sin_addr.s_addr = inet_addr(sHubIP);
+#ifdef _WIN32
+        sa.sin_addr.S_un.S_addr = inet_addr(sHubIP);
+#else
+		sa.sin_addr.s_addr = inet_addr(sHubIP);
+#endif
     } else {
-        sa.sin_addr.s_addr = htonl(INADDR_ANY);
+#ifdef _WIN32
+        sa.sin_addr.S_un.S_addr = INADDR_ANY;
+#else
+		sa.sin_addr.s_addr = htonl(INADDR_ANY);
+#endif
     }
 
+#ifndef _WIN32
     int on = 1;
     if(setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1) {
         if(bSilent == true) {
@@ -202,32 +344,79 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
         close(server);
         return false;
     }
+#endif
 
     // bind it
-    if(bind(server, (sockaddr *)&sa, sizeof(sa)) == -1) {
+#ifdef _WIN32
+    if(bind(server, (sockaddr *)&sa, sizeof(sa)) == SOCKET_ERROR) {
+    	int err = WSAGetLastError();
+#else
+	if(bind(server, (sockaddr *)&sa, sizeof(sa)) == -1) {
+#endif
         if(bSilent == true) {
             eventqueue->AddThread(eventq::EVENT_SRVTHREAD_MSG, 
-                ("[ERR] Server socket bind error: " + string(ErrnoStr(errno))+" ("+string(errno)+") for port: "+string(port)).c_str());
-        } else {
+#ifdef _WIN32
+                ("[ERR] Server socket bind error: " + string(WSErrorStr(err))+" ("+string(err)+") for port: "+string(port)).c_str());
+#else
+				("[ERR] Server socket bind error: " + string(ErrnoStr(errno))+" ("+string(errno)+") for port: "+string(port)).c_str());
+#endif
+		} else {
+#ifdef _WIN32
+	#ifdef _SERVICE
+			AppendLog(string(LanguageManager->sTexts[LAN_SRV_BIND_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_BIND_ERR])+
+				": " + string(WSErrorStr(err))+" ("+string(err)+") "+
+				string(LanguageManager->sTexts[LAN_FOR_PORT_LWR], (size_t)LanguageManager->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+string(port));
+	#else
+			ShowMessage(String(LanguageManager->sTexts[LAN_SRV_BIND_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_BIND_ERR])+
+				": " + String(WSErrorStr(err))+" ("+String(err)+") "+
+			String(LanguageManager->sTexts[LAN_FOR_PORT_LWR], (size_t)LanguageManager->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+String(port));
+	#endif
+		}
+        closesocket(server);
+#else
             AppendLog(string(LanguageManager->sTexts[LAN_SRV_BIND_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_BIND_ERR])+
 				": " + string(ErrnoStr(errno))+" (" + string(errno)+") "+
 				string(LanguageManager->sTexts[LAN_FOR_PORT_LWR], (size_t)LanguageManager->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+string(port));
 		}
         close(server);
+#endif
         return false;
     }
 
     // set listen mode
-    if(listen(server, 512) == -1) {
+#ifdef _WIN32
+    if(listen(server, 512) == SOCKET_ERROR) {
+	    int err = WSAGetLastError();
+#else
+	if(listen(server, 512) == -1) {
+#endif
         if(bSilent == true) {
             eventqueue->AddThread(eventq::EVENT_SRVTHREAD_MSG, 
-                ("[ERR] Server socket listen() error: " + string(errno)+" for port: "+string(port)).c_str());
+#ifdef _WIN32
+                ("[ERR] Server socket listen() error: " + string(WSErrorStr(err))+" ("+string(err)+") for port: "+string(port)).c_str());
+#else
+				("[ERR] Server socket listen() error: " + string(errno)+" for port: "+string(port)).c_str());
+#endif
         } else {
+#ifdef _WIN32
+	#ifdef _SERVICE
+			AppendLog(string(LanguageManager->sTexts[LAN_SRV_LISTEN_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_LISTEN_ERR])+
+				": " + string(WSErrorStr(err))+" ("+string(err)+") "+
+				string(LanguageManager->sTexts[LAN_FOR_PORT_LWR], (size_t)LanguageManager->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+string(port));
+	#else
+			ShowMessage(String(LanguageManager->sTexts[LAN_SRV_LISTEN_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_LISTEN_ERR])+
+				": " + String(WSErrorStr(err))+" ("+String(err)+") "+
+				String(LanguageManager->sTexts[LAN_FOR_PORT_LWR], (size_t)LanguageManager->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+String(port));
+	#endif
+        }
+        closesocket(server);
+#else
             AppendLog(string(LanguageManager->sTexts[LAN_SRV_LISTEN_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_LISTEN_ERR])+
 				": " + string(errno)+" "+
 				string(LanguageManager->sTexts[LAN_FOR_PORT_LWR], (size_t)LanguageManager->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+string(port));
         }
         close(server);
+#endif
         return false;
     }
 
@@ -235,8 +424,13 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
 }
 //---------------------------------------------------------------------------
 
+#ifdef _WIN32
+bool ServerThread::isFlooder(const SOCKET &s, const sockaddr_in &addr, const int &sin_len) {
+    uint32_t iAddr = addr.sin_addr.S_un.S_addr;
+#else
 bool ServerThread::isFlooder(const int &s, const sockaddr_in &addr, const socklen_t &sin_len) {
     uint32_t iAddr = addr.sin_addr.s_addr;
+#endif
 
     int16_t iConDefloodCount = SettingManager->GetShort(SETSHORT_NEW_CONNECTIONS_COUNT);
     int16_t iConDefloodTime = SettingManager->GetShort(SETSHORT_NEW_CONNECTIONS_TIME);
@@ -267,6 +461,9 @@ bool ServerThread::isFlooder(const int &s, const sockaddr_in &addr, const sockle
     AntiConFlood *newItem = new AntiConFlood();
     if(newItem == NULL) {
     	string sDbgstr = "[BUF] Cannot allocate newItem in theLoop::isFlooder!";
+#ifdef _WIN32
+    	sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
     	return true;
     }
@@ -305,25 +502,42 @@ void ServerThread::RemoveConFlood(AntiConFlood *cur) {
 
 void ServerThread::ResumeSck() {
     if(bActive == true) {
-        pthread_mutex_lock(&mtxServerThread);
+#ifdef _WIN32
+        EnterCriticalSection(&csServerThread);
+#else
+		pthread_mutex_lock(&mtxServerThread);
+#endif
         bSuspended = false;
         iSuspendTime = 0;
-        pthread_mutex_unlock(&mtxServerThread);
+#ifdef _WIN32
+        LeaveCriticalSection(&csServerThread);
+#else
+		pthread_mutex_unlock(&mtxServerThread);
+#endif
     }
 }
 //---------------------------------------------------------------------------
 
 void ServerThread::SuspendSck(const uint32_t &iTime) {
     if(bActive == true) {
-        pthread_mutex_lock(&mtxServerThread);
+#ifdef _WIN32
+        EnterCriticalSection(&csServerThread);
+#else
+		pthread_mutex_lock(&mtxServerThread);
+#endif
         if(iTime != 0) {
             iSuspendTime = iTime;
         } else {
             bSuspended = true;
             iSuspendTime = 1;            
         }
+#ifdef _WIN32
+        LeaveCriticalSection(&csServerThread);
+    	closesocket(server);
+#else
         pthread_mutex_unlock(&mtxServerThread);
     	close(server);
+#endif
     }
 }
 //---------------------------------------------------------------------------

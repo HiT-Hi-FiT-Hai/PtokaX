@@ -58,6 +58,10 @@ public:
         UNKNOWN_ARRIVAL
     };
 
+#ifdef _WIN32
+    HANDLE hLuaHeap;
+#endif
+
     Script *RunningScriptS;
 
     Script **ScriptTable;
@@ -85,6 +89,10 @@ public:
     Script * FindScript(char * sName);
     Script * FindScript(lua_State * L);
     uint8_t FindScriptIdx(char * sName);
+
+#ifdef _WIN32
+    void GetGCInfo();
+#endif
 
 	bool AddScript(char * sName, const bool &bEnabled = false);
 

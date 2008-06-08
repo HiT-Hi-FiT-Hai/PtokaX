@@ -24,15 +24,30 @@
 //---------------------------------------------------------------------------
 #include "utility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+//---------------------------------------------------------------------------
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
+//---------------------------------------------------------------------------
 ResNickMan *ResNickManager = NULL;
 //---------------------------------------------------------------------------
 
 ResNickMan::ReservedNick::ReservedNick(const char * nick, uint32_t ui32NickHash) {
     size_t iNickLen = strlen(nick);
-    sNick = (char *) malloc(iNickLen+1);
+#ifdef _WIN32
+    sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
+#else
+	sNick = (char *) malloc(iNickLen+1);
+#endif
     if(sNick == NULL) {
         string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
-			" bytes of memory in ReservedNick::ReservedNick!";
+        	" bytes of memory in ReservedNick::ReservedNick!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
         return;
     }   
@@ -49,7 +64,15 @@ ResNickMan::ReservedNick::ReservedNick(const char * nick, uint32_t ui32NickHash)
 //---------------------------------------------------------------------------
 
 ResNickMan::ReservedNick::~ReservedNick() {
+#ifdef _WIN32
+	if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
+		string sDbgstr = "[BUF] Cannot deallocate sNick in ~ReservedNick! "+string((uint32_t)GetLastError())+" "+
+            string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+        AppendSpecialLog(sDbgstr);
+    }
+#else
 	free(sNick);
+#endif
 }
 //---------------------------------------------------------------------------
 
@@ -57,8 +80,13 @@ ResNickMan::ResNickMan() {
     ReservedNicks = NULL;
 
 	TiXmlDocument doc;
+#ifdef _WIN32
+	if(doc.LoadFile((PATH+"\\cfg\\ReservedNicks.xml").c_str()) == false) {
+		TiXmlDocument doc((PATH+"\\cfg\\ReservedNicks.xml").c_str());
+#else
 	if(doc.LoadFile((PATH+"/cfg/ReservedNicks.xml").c_str()) == false) {
 		TiXmlDocument doc((PATH+"/cfg/ReservedNicks.xml").c_str());
+#endif
 		doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
 		TiXmlElement reservednicks("ReservedNicks");
 		const char* Nicks[] = { "Hub-Security", "Admin", "Client", "PtokaX", "OpChat" };
@@ -73,7 +101,11 @@ ResNickMan::ResNickMan() {
 		doc.SaveFile();
     }
 
+#ifdef _WIN32
+	if(doc.LoadFile((PATH+"\\cfg\\ReservedNicks.xml").c_str())) {
+#else
 	if(doc.LoadFile((PATH+"/cfg/ReservedNicks.xml").c_str())) {
+#endif
 		TiXmlHandle cfg(&doc);
 		TiXmlNode *reservednicks = cfg.FirstChild("ReservedNicks").Node();
 		if(reservednicks != NULL) {
@@ -114,7 +146,11 @@ bool ResNickMan::CheckReserved(const char * sNick, const uint32_t &hash) {
         ReservedNick *cur = next;
         next = cur->next;
 
+#ifdef _WIN32
+		if(cur->ui32Hash == hash && stricmp(cur->sNick, sNick) == 0) {
+#else
 		if(cur->ui32Hash == hash && strcasecmp(cur->sNick, sNick) == 0) {
+#endif
             return true;
         }
     }
@@ -129,7 +165,10 @@ void ResNickMan::AddReservedNick(const char * sNick, const bool &bFromScript/* =
     if(CheckReserved(sNick, ulHash) == false) {
         ReservedNick *newNick = new ReservedNick(sNick, ulHash);
         if(newNick == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate ResNickMan::AddReservedNick!";
+        	string sDbgstr = "[BUF] Cannot allocate ResNickMan::AddReservedNick!";
+#ifdef _WIN32
+			sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 			AppendSpecialLog(sDbgstr);
         	exit(EXIT_FAILURE);
         }

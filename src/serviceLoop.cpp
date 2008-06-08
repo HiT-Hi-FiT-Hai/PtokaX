@@ -37,14 +37,27 @@
 #include "utility.h"
 #include "ZlibUtility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+//---------------------------------------------------------------------------
+	#ifndef _SERVICE
+		#include "TUsersChatForm.h"
+	#endif
+//---------------------------------------------------------------------------
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#else
+	#include "regtmrinc.h"
+	#include "scrtmrinc.h"
+#endif
 #include "LuaScript.h"
 #include "RegThread.h"
-#include "regtmrinc.h"
-#include "scrtmrinc.h"
 //---------------------------------------------------------------------------
 theLoop *srvLoop = NULL;
 //---------------------------------------------------------------------------
 
+#ifndef _WIN32
 static void RegTimerHandler() {
     if(SettingManager->bBools[SETBOOL_AUTO_REG] == true && SettingManager->sTexts[SETTXT_REGISTER_SERVERS] != NULL) {
 		// First destroy old hublist reg thread if any
@@ -70,33 +83,73 @@ static void RegTimerHandler() {
     	RegisterThread->Resume();
     }
 }
+#endif
 //---------------------------------------------------------------------------
 
-void theLoop::Looper() {
-	// PPK ... two loop stategy for saving badwith
-	if(bRecv == true) {
-		ReceiveLoop();
-    } else {
-		SendLoop();
-		eventqueue->ProcessEvents();
-    }
-
-	if(bServerTerminated == false) {
-		bRecv = !bRecv;
-    } else {
-        // tell the scripts about the end
-    	ScriptManager->OnExit();
-
-        // send last possible global data
-        globalQ->SendGlobalQ();
-
-        ServerFinalStop(true);
-    }
-}
+#ifdef _WIN32
+	VOID CALLBACK LooperProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*idEvent*/, DWORD /*dwTime*/) {
+		KillTimer(NULL, srvLoop->timer);
+		
+		// PPK ... two loop stategy for saving badwith
+		if(srvLoop->bRecv == true) {
+			srvLoop->ReceiveLoop();
+	    } else {
+			srvLoop->SendLoop();
+			eventqueue->ProcessEvents();
+	    }
+	
+		if(bServerTerminated == false) {
+			srvLoop->bRecv = !srvLoop->bRecv;
+	
+	    	srvLoop->timer = SetTimer(NULL, 0, 100, (TIMERPROC)LooperProc);
+	    
+	        if(srvLoop->timer == 0) {
+				string sDbgstr = "[BUF] Cannot start Looper in LooperProc! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+	        	AppendSpecialLog(sDbgstr);
+	        	exit(EXIT_FAILURE);
+	        }
+	    } else {
+	        // tell the scripts about the end
+	    	ScriptManager->OnExit();
+	    
+	        // send last possible global data
+	        globalQ->SendGlobalQ();
+	    
+	        ServerFinalStop(true);
+	
+	    }
+	}
+#else
+	void theLoop::Looper() {
+		// PPK ... two loop stategy for saving badwith
+		if(bRecv == true) {
+			ReceiveLoop();
+	    } else {
+			SendLoop();
+			eventqueue->ProcessEvents();
+	    }
+	
+		if(bServerTerminated == false) {
+			bRecv = !bRecv;
+	    } else {
+	        // tell the scripts about the end
+	    	ScriptManager->OnExit();
+	
+	        // send last possible global data
+	        globalQ->SendGlobalQ();
+	
+	        ServerFinalStop(true);
+	    }
+	}
+#endif
 //---------------------------------------------------------------------------
 
 theLoop::theLoop() {
-    pthread_mutex_init(&mtxAcceptQueue, NULL);
+#ifdef _WIN32
+    InitializeCriticalSection(&csAcceptQueue);
+#else
+	pthread_mutex_init(&mtxAcceptQueue, NULL);
+#endif
 
     AcceptedSocketsS = NULL;
     AcceptedSocketsE = NULL;
@@ -109,12 +162,22 @@ theLoop::theLoop() {
 	iSendRestsPeak = iRecvRestsPeak = iLastSendRest = iLastRecvRest = iLoopsForLogins = 0;
 	dLoggedUsers = dActualSrvLoopLogins = 0;
 
+#ifdef _WIN32
+	timer = SetTimer(NULL, 0, 100, (TIMERPROC)LooperProc);
+
+    if(timer == 0) {
+		string sDbgstr = "[BUF] Cannot start Looper in theLoop::theLoop! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+		AppendSpecialLog(sDbgstr);
+    	exit(EXIT_FAILURE);
+    }
+#else
     sigemptyset(&sst);
     sigaddset(&sst, SIGSCRTMR);
     sigaddset(&sst, SIGREGTMR);
 
     zerotime.tv_sec = 0;
     zerotime.tv_nsec = 0;
+#endif
 
 	Cout("MainLoop executed.");
 }
@@ -126,15 +189,24 @@ theLoop::~theLoop() {
     while(nextsck != NULL) {
         AcceptedSocket *cursck = nextsck;
 		nextsck = cursck->next;
+#ifdef _WIN32
+		shutdown(cursck->s, SD_SEND);
+        closesocket(cursck->s);
+#else
 		shutdown(cursck->s, SHUT_RDWR);
         close(cursck->s);
+#endif
         delete cursck;
 	}
    
     AcceptedSocketsS = NULL;
     AcceptedSocketsE = NULL;
 
+#ifdef _WIN32
+	DeleteCriticalSection(&csAcceptQueue);
+#else
 	pthread_mutex_destroy(&mtxAcceptQueue);
+#endif
 
 	Cout("MainLoop terminated.");
 }
@@ -142,32 +214,61 @@ theLoop::~theLoop() {
 
 void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
     // set the recv buffer
+#ifdef _WIN32
+    int32_t bufsize = 8192;
+    if(setsockopt(AccptSocket->s, SOL_SOCKET, SO_RCVBUF, (char *) &bufsize, sizeof(bufsize)) == SOCKET_ERROR) {
+    	int iError = WSAGetLastError();
+    	int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_RCVBUF. IP: %s Err: %s (%d)", 
+            inet_ntoa(AccptSocket->addr.sin_addr), WSErrorStr(iError), iError);
+#else
     int bufsize = 8192;
     if(setsockopt(AccptSocket->s, SOL_SOCKET, SO_RCVBUF, &bufsize, sizeof(bufsize)) == -1) {
     	int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_RCVBUF. IP: %s Err: %d", 
             inet_ntoa(AccptSocket->addr.sin_addr), errno);
+#endif
         if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser1") == true) {
     	   UdpDebug->Broadcast(msg, imsgLen);
         }
+#ifdef _WIN32
+    	shutdown(AccptSocket->s, SD_SEND);
+        closesocket(AccptSocket->s);
+#else
     	shutdown(AccptSocket->s, SHUT_RDWR);
         close(AccptSocket->s);
+#endif
         return;
     }
 
     // set the send buffer
     bufsize = 32768;
+#ifdef _WIN32
+    if(setsockopt(AccptSocket->s, SOL_SOCKET, SO_SNDBUF, (char *) &bufsize, sizeof(bufsize)) == SOCKET_ERROR) {
+        int iError = WSAGetLastError();
+        int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_SNDBUF. IP: %s Err: %s (%d)", 
+            inet_ntoa(AccptSocket->addr.sin_addr), WSErrorStr(iError), iError);
+#else
     if(setsockopt(AccptSocket->s, SOL_SOCKET, SO_SNDBUF, &bufsize, sizeof(bufsize)) == -1) {
         int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_SNDBUF. IP: %s Err: %d", 
             inet_ntoa(AccptSocket->addr.sin_addr), errno);
+#endif
         if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser2") == true) {
 	       UdpDebug->Broadcast(msg, imsgLen);
         }
+#ifdef _WIN32
+	    shutdown(AccptSocket->s, SD_SEND);
+        closesocket(AccptSocket->s);
+#else
 	    shutdown(AccptSocket->s, SHUT_RDWR);
         close(AccptSocket->s);
+#endif
         return;
     }
 
     // set sending of keepalive packets
+#ifdef _WIN32
+    bool bKeepalive = true;
+    setsockopt(AccptSocket->s, SOL_SOCKET, SO_KEEPALIVE, (char *) &bKeepalive, sizeof(bKeepalive));
+#else
     int iKeepAlive = 1;
     if(setsockopt(AccptSocket->s, SOL_SOCKET, SO_KEEPALIVE, &iKeepAlive, sizeof(iKeepAlive)) == -1) {
         int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_KEEPALIVE. IP: %s Err: %d", 
@@ -179,34 +280,63 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
         close(AccptSocket->s);
         return;
     }
+#endif
 
     // set non-blocking mode
+#ifdef _WIN32
+    uint32_t block = 1;
+	if(ioctlsocket(AccptSocket->s, FIONBIO, (unsigned long *)&block) == SOCKET_ERROR) {
+    	int iError = WSAGetLastError();
+    	int imsgLen = sprintf(msg, "[SYS] ioctlsocket failed on attempt to set FIONBIO. IP: %s Err: %s (%d)", 
+            inet_ntoa(AccptSocket->addr.sin_addr), WSErrorStr(iError), iError);
+        if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser3") == true) {
+#else
     int oldFlag = fcntl(AccptSocket->s, F_GETFL, 0);
     if(fcntl(AccptSocket->s, F_SETFL, oldFlag | O_NONBLOCK) == -1) {
     	int imsgLen = sprintf(msg, "[SYS] fcntl failed on attempt to set O_NONBLOCK. IP: %s Err: %d", 
             inet_ntoa(AccptSocket->addr.sin_addr), errno);
         if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser4") == true) {
+#endif
 		  UdpDebug->Broadcast(msg, imsgLen);
 		}
+#ifdef _WIN32
+		shutdown(AccptSocket->s, SD_SEND);
+		closesocket(AccptSocket->s);
+#else
 		shutdown(AccptSocket->s, SHUT_RDWR);
 		close(AccptSocket->s);
+#endif
 		return;
     }
     
     if(SettingManager->bBools[SETBOOL_REDIRECT_ALL] == true) {
        	int imsgLen = sprintf(msg, "<%s> %s %s|%s", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_REDIR_TO],
             SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS], SettingManager->sPreTexts[SetMan::SETPRETXT_REDIRECT_ADDRESS]);
-        if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser5") == true) {
+#ifdef _WIN32
+        if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser4") == true) {
+#else
+		if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser5") == true) {
+#endif
             send(AccptSocket->s, msg, imsgLen, 0);
             ui64BytesSent += imsgLen;
         }
+#ifdef _WIN32
+        shutdown(AccptSocket->s, SD_SEND);
+        closesocket(AccptSocket->s);
+#else
         shutdown(AccptSocket->s, SHUT_RDWR);
         close(AccptSocket->s);
+#endif
 		return;
     }
 
+#ifdef _WIN32
+    uint32_t hash = 16777216 * AccptSocket->addr.sin_addr.S_un.S_un_b.s_b1 + 65536 * AccptSocket->addr.sin_addr.S_un.S_un_b.s_b2
+		+ 256 * AccptSocket->addr.sin_addr.S_un.S_un_b.s_b3 + AccptSocket->addr.sin_addr.S_un.S_un_b.s_b4;
+#else
     uint32_t hash;
     HashIP(AccptSocket->IP, strlen(AccptSocket->IP), hash);
+#endif
 
     time_t acc_time;
     time(&acc_time);
@@ -218,8 +348,13 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
             int imsglen;
             char *messg = GenerateBanMessage(Ban, imsglen, acc_time);
             send(AccptSocket->s, messg, imsglen, 0);
+#ifdef _WIN32
+            shutdown(AccptSocket->s, SD_SEND);
+            closesocket(AccptSocket->s);
+#else
             shutdown(AccptSocket->s, SHUT_RD);
             close(AccptSocket->s);
+#endif
 /*            int imsgLen = sprintf(msg, "[SYS] Banned ip %s - connection closed.", AccptSocket->IP);
             if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser5") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
@@ -235,8 +370,13 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
             int imsglen;
             char *messg = GenerateRangeBanMessage(RangeBan, imsglen, acc_time);
             send(AccptSocket->s, messg, imsglen, 0);
+#ifdef _WIN32
+            shutdown(AccptSocket->s, SD_SEND);
+            closesocket(AccptSocket->s);
+#else
             shutdown(AccptSocket->s, SHUT_RD);
             close(AccptSocket->s);
+#endif
 /*            int imsgLen = sprintf(msg, "[SYS] Range Banned ip %s - connection closed.", AccptSocket->IP);
             if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser6") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
@@ -252,10 +392,17 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 
 	if(u == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate new user!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
-
+#ifdef _WIN32
+		shutdown(AccptSocket->s, SD_SEND);
+		closesocket(AccptSocket->s);
+#else
 		shutdown(AccptSocket->s, SHUT_RDWR);
 		close(AccptSocket->s);
+#endif
 		return;
 	}
 
@@ -279,7 +426,10 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
         char *messg = GenerateBanMessage(Ban, imsglen, acc_time);
         u->uLogInOut->uBan = new UserBan(messg, imsglen, hash);
         if(u->uLogInOut->uBan == NULL) {
-            string sDbgstr = "[BUF] Cannot allocate new uBan!";
+        	string sDbgstr = "[BUF] Cannot allocate new uBan!";
+#ifdef _WIN32
+            sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
         	AppendSpecialLog(sDbgstr);
         }
     } else if(RangeBan != NULL) {
@@ -287,7 +437,10 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
         char *messg = GenerateRangeBanMessage(RangeBan, imsglen, acc_time);
         u->uLogInOut->uBan = new UserBan(messg, imsglen, 0);
         if(u->uLogInOut->uBan == NULL) {
-            string sDbgstr = "[BUF] Cannot allocate new uBan!";
+        	string sDbgstr = "[BUF] Cannot allocate new uBan!";
+#ifdef _WIN32
+            sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
         	AppendSpecialLog(sDbgstr);
         }
     }
@@ -298,6 +451,7 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 //---------------------------------------------------------------------------
 
 void theLoop::ReceiveLoop() {
+#ifndef _WIN32
     while((iSIG = sigtimedwait(&sst, &info, &zerotime)) != -1) {
         if(iSIG == SIGSCRTMR) {
             ScriptOnTimer((ScriptTimer *)info.si_value.sival_ptr);
@@ -305,6 +459,7 @@ void theLoop::ReceiveLoop() {
             RegTimerHandler();
         }
     }
+#endif
 
     // Receiving loop for process all incoming data and store in queues
     uint32_t iRecvRests = 0;
@@ -322,7 +477,7 @@ void theLoop::ReceiveLoop() {
         acctime -= starttime;
     
         uint64_t iValue = acctime / 86400;
-    	acctime -= (time_t)(86400*iValue);
+		acctime -= (time_t)(86400*iValue);
         iDays = iValue;
     
         iValue = acctime / 3600;
@@ -332,12 +487,45 @@ void theLoop::ReceiveLoop() {
     	iValue = acctime / 60;
         iMins = iValue;
 
+#ifdef _WIN32
+        if(iMins == 0 || iMins == 15 || iMins == 30 || iMins == 45) {
+            if(HeapValidate(GetProcessHeap(), 0, 0) == 0) {
+                AppendSpecialLog("Process memory heap corrupted!");
+            }
+            HeapCompact(GetProcessHeap(), 0);
+
+            if(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0) == 0) {
+                AppendSpecialLog("PtokaX memory heap corrupted!");
+            }
+            HeapCompact(hPtokaXHeap, HEAP_NO_SERIALIZE);
+
+            if(HeapValidate(hRecvHeap, HEAP_NO_SERIALIZE, 0) == 0) {
+                AppendSpecialLog("Recv memory heap corrupted!");
+            }
+            HeapCompact(hRecvHeap, HEAP_NO_SERIALIZE);
+
+            if(HeapValidate(hSendHeap, HEAP_NO_SERIALIZE, 0) == 0) {
+                AppendSpecialLog("Send memory heap corrupted!");
+            }
+            HeapCompact(hSendHeap, HEAP_NO_SERIALIZE);
+
+            if(HeapValidate(ScriptManager->hLuaHeap, 0, 0) == 0) {
+                AppendSpecialLog("Lua memory heap corrupted!");
+            }
+            HeapCompact(ScriptManager->hLuaHeap, 0);
+        }
+#endif
+
         iLstUptmTck = ui64ActualTick;
     }
 
     AcceptedSocket *NextSck = NULL;
 
-    pthread_mutex_lock(&mtxAcceptQueue);
+#ifdef _WIN32
+    EnterCriticalSection(&csAcceptQueue);
+#else
+	pthread_mutex_lock(&mtxAcceptQueue);
+#endif
 
     if(AcceptedSocketsS != NULL) {
         NextSck = AcceptedSocketsS;
@@ -345,7 +533,11 @@ void theLoop::ReceiveLoop() {
         AcceptedSocketsE = NULL;
     }
 
-    pthread_mutex_unlock(&mtxAcceptQueue);
+#ifdef _WIN32
+    LeaveCriticalSection(&csAcceptQueue);
+#else
+	pthread_mutex_unlock(&mtxAcceptQueue);
+#endif
 
     while(NextSck != NULL) {
         AcceptedSocket *CurSck = NextSck;
@@ -408,7 +600,15 @@ void theLoop::ReceiveLoop() {
 
                 // PPK ... is not more needed, free mem ;)
                 if(curUser->uLogInOut->sLockUsrConn != NULL) {
-                    free(curUser->uLogInOut->sLockUsrConn);
+#ifdef _WIN32
+                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->uLogInOut->sLockUsrConn) == 0) {
+						string sDbgstr = "[BUF] Cannot deallocate curUser->uLogInOut->sLockUsrConn in theLoop::ReceiveLoop! "+string((uint32_t)GetLastError())+" "+
+							string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+						AppendSpecialLog(sDbgstr);
+                    }
+#else
+					free(curUser->uLogInOut->sLockUsrConn);
+#endif
                     curUser->uLogInOut->sLockUsrConn = NULL;
                 }
 
@@ -422,10 +622,17 @@ void theLoop::ReceiveLoop() {
 
                 if(iBeforeLuaLen < curUser->sbdatalen) {
                     size_t iNdLen = curUser->sbdatalen-iBeforeLuaLen;
-                    curUser->uLogInOut->sLockUsrConn = (char *) malloc(iNdLen+1);
+#ifdef _WIN32
+                    curUser->uLogInOut->sLockUsrConn = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNdLen+1);
+#else
+					curUser->uLogInOut->sLockUsrConn = (char *) malloc(iNdLen+1);
+#endif
                     if(curUser->uLogInOut->sLockUsrConn == NULL) {
 						string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNdLen+1))+
 							" bytes of memory for sLockUsrConn in theLoop::ReceiveLoop!";
+#ifdef _WIN32
+						sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 						AppendSpecialLog(sDbgstr);
                 		return;
                     }
@@ -455,6 +662,22 @@ void theLoop::ReceiveLoop() {
                         SettingManager->SetShort(SETSHORT_MAX_USERS_PEAK, (int16_t)ui32Peak);
                 }
 
+#ifdef _WIN32
+	#ifndef _SERVICE
+					if(UsersChatForm != NULL && UsersChatForm->UsersAutoUpd->Checked == true) {
+	               	    if(curUser->NickLen > 1) {
+	                   	    if(UsersChatForm->userList->Items->IndexOf(curUser->Nick) == -1) {
+	                            UsersChatForm->userList->AddItem(curUser->Nick, NULL);
+	                        }
+	                    } else {
+	                        int imsgLen = sprintf(msg, "[SYS] User nick length == 1, user wasn't added to UserList listbox. %s (%s)", curUser->Nick, curUser->IP);
+	                        if(CheckSprintf(imsgLen, 1024, "theLoop::ReceiveLoop5") == true) {
+	              		        UdpDebug->Broadcast(msg, imsgLen);
+	                        }
+	                    }
+					}
+	#endif
+#endif
 //                if(sqldb) sqldb->AddVisit(curUser);
 
                 // PPK ... change to NoHello supports
@@ -528,11 +751,27 @@ void theLoop::ReceiveLoop() {
                                             if(bSprintfCheck == true) {
                                                 UserSendCharDelayed(curUser, msg, imsgLen);
                                             }
-        
-                                            free(cur->sCommand);
+
+#ifdef _WIN32
+                                            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sCommand) == 0) {
+												string sDbgstr = "[BUF] Cannot deallocate cur->sCommand in theLoop::ReceiveLoop! "+string((uint32_t)GetLastError())+" "+
+													string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+												AppendSpecialLog(sDbgstr);
+                                            }
+#else
+											free(cur->sCommand);
+#endif
                                             cur->sCommand = NULL;
-        
-                                            free(cur->ToNick);
+
+#ifdef _WIN32
+                                            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->ToNick) == 0) {
+												string sDbgstr = "[BUF] Cannot deallocate cur->ToNick in theLoop::ReceiveLoop! "+string((uint32_t)GetLastError())+" "+
+													string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+												AppendSpecialLog(sDbgstr);
+                                            }
+#else
+											free(cur->ToNick);
+#endif
                                             cur->ToNick = NULL;
         
                                             delete cur;
@@ -556,11 +795,27 @@ void theLoop::ReceiveLoop() {
                             }
                             continue;
                         }
-                            
-                        free(cur->sCommand);
+
+#ifdef _WIN32
+                        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sCommand) == 0) {
+							string sDbgstr = "[BUF] Cannot deallocate cur->sCommand1 in theLoop::ReceiveLoop! "+string((uint32_t)GetLastError())+" "+
+								string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+							AppendSpecialLog(sDbgstr);
+                        }
+#else
+						free(cur->sCommand);
+#endif
                         cur->sCommand = NULL;
-        
-                        free(cur->ToNick);
+
+#ifdef _WIN32
+                        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->ToNick) == 0) {
+							string sDbgstr = "[BUF] Cannot deallocate cur->ToNick1 in theLoop::ReceiveLoop! "+string((uint32_t)GetLastError())+" "+
+								string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+							AppendSpecialLog(sDbgstr);
+                        }
+#else
+						free(cur->ToNick);
+#endif
                         cur->ToNick = NULL;
         
                         delete cur;
@@ -573,8 +828,16 @@ void theLoop::ReceiveLoop() {
                     }
                     if(curUser->cmdPSearch != NULL) {
                         globalQ->PStore(curUser->cmdPSearch->sCommand, curUser->cmdPSearch->iLen);
-        
-                        free(curUser->cmdPSearch->sCommand);
+
+#ifdef _WIN32
+                        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->cmdPSearch->sCommand) == 0) {
+							string sDbgstr = "[BUF] Cannot deallocate curUser->cmdPSearch->sCommand in theLoop::ReceiveLoop! "+string((uint32_t)GetLastError())+" "+
+								string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+							AppendSpecialLog(sDbgstr);
+                        }
+#else
+						free(curUser->cmdPSearch->sCommand);
+#endif
                         curUser->cmdPSearch->sCommand = NULL;
         
                         delete curUser->cmdPSearch;
@@ -586,7 +849,15 @@ void theLoop::ReceiveLoop() {
 				if(ui8SrCntr == 0) {
 					if(curUser->sLastChat != NULL && curUser->ui16LastChatLines < 2 && 
                         (curUser->ui64SameChatsTick+SettingManager->iShorts[SETSHORT_SAME_MAIN_CHAT_TIME]) < ui64ActualTick) {
-                        free(curUser->sLastChat);
+#ifdef _WIN32
+                        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->sLastChat) == 0) {
+							string sDbgstr = "[BUF] Cannot deallocate curUser->sLastChat in theLoop::ReceiveLoop! "+string((uint32_t)GetLastError())+" "+
+								string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+                            AppendSpecialLog(sDbgstr);
+                        }
+#else
+						free(curUser->sLastChat);
+#endif
                         curUser->sLastChat = NULL;
 						curUser->ui16LastChatLen = 0;
 						curUser->ui16SameMultiChats = 0;
@@ -595,7 +866,15 @@ void theLoop::ReceiveLoop() {
 
 					if(curUser->sLastPM != NULL && curUser->ui16LastPmLines < 2 && 
                         (curUser->ui64SamePMsTick+SettingManager->iShorts[SETSHORT_SAME_PM_TIME]) < ui64ActualTick) {
+#ifdef _WIN32
+						if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->sLastPM) == 0) {
+							string sDbgstr = "[BUF] Cannot deallocate curUser->sLastPM in theLoop::ReceiveLoop! "+string((uint32_t)GetLastError())+" "+
+								string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+							AppendSpecialLog(sDbgstr);
+                        }
+#else
 						free(curUser->sLastPM);
+#endif
                         curUser->sLastPM = NULL;
                         curUser->ui16LastPMLen = 0;
 						curUser->ui16SameMultiPms = 0;
@@ -603,7 +882,15 @@ void theLoop::ReceiveLoop() {
                     }
                     
 					if(curUser->sLastSearch != NULL && (curUser->ui64SameSearchsTick+SettingManager->iShorts[SETSHORT_SAME_SEARCH_TIME]) < ui64ActualTick) {
-                        free(curUser->sLastSearch);
+#ifdef _WIN32
+                        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->sLastSearch) == 0) {
+							string sDbgstr = "[BUF] Cannot deallocate curUser->sLastSearch in theLoop::ReceiveLoop! "+string((uint32_t)GetLastError())+" "+
+								string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+							AppendSpecialLog(sDbgstr);
+                        }
+#else
+						free(curUser->sLastSearch);
+#endif
                         curUser->sLastSearch = NULL;
                         curUser->ui16LastSearchLen = 0;
                     }
@@ -622,8 +909,13 @@ void theLoop::ReceiveLoop() {
             }
             // if user is marked as dead, remove him
             case User::STATE_REMME: {
+#ifdef _WIN32
+                shutdown(curUser->Sck, SD_SEND);
+                closesocket(curUser->Sck);
+#else
                 shutdown(curUser->Sck, SHUT_RD);
                 close(curUser->Sck);
+#endif
 
                 // linked list
                 colUsers->RemUser(curUser);
@@ -692,10 +984,17 @@ void theLoop::SendLoop() {
                 // PPK ... send motd ???
                 if(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MOTD] != 0) {
                     if(SettingManager->bBools[SETBOOL_MOTD_AS_PM] == true) {
-                        char * sMSG = (char *) malloc(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MOTD]+65);
+#ifdef _WIN32
+                        char * sMSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MOTD]+65);
+#else
+						char * sMSG = (char *) malloc(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MOTD]+65);
+#endif
                         if(sMSG == NULL) {
 							string sDbgstr = "[BUF] Cannot allocate "+string(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MOTD]+65)+
 								" bytes of memory in theLoop::SendLoop!";
+#ifdef _WIN32
+							sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
 							AppendSpecialLog(sDbgstr);
                             exit(EXIT_FAILURE);
                         }
@@ -704,8 +1003,16 @@ void theLoop::SendLoop() {
                         if(CheckSprintf(imsgLen, SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MOTD]+65, "theLoop::SendLoop2") == true) {
                             UserSendCharDelayed(curUser, sMSG, imsgLen);
                         }
-                        
-                        free(sMSG);
+
+#ifdef _WIN32
+                        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMSG) == 0) {
+							string sDbgstr = "[BUF] Cannot deallocate memory in theLoop::SendLoop! "+string((uint32_t)GetLastError())+" "+
+								string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+							AppendSpecialLog(sDbgstr);
+                        }
+#else
+						free(sMSG);
+#endif
                     } else {
                         UserSendCharDelayed(curUser, SettingManager->sPreTexts[SetMan::SETPRETXT_MOTD],
                             SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MOTD]);
@@ -718,7 +1025,15 @@ void theLoop::SendLoop() {
 
                 if(curUser->uLogInOut->iUserConnectedLen != 0) {
                     UserPutInSendBuf(curUser, curUser->uLogInOut->sLockUsrConn, curUser->uLogInOut->iUserConnectedLen);
-                    free(curUser->uLogInOut->sLockUsrConn);
+#ifdef _WIN32
+                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->uLogInOut->sLockUsrConn) == 0) {
+						string sDbgstr = "[BUF] Cannot deallocate curUser->uLogInOut->sLockUsrConn in theLoop::SendLoop! "+string((uint32_t)GetLastError())+" "+
+							string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+						AppendSpecialLog(sDbgstr);
+                    }
+#else
+					free(curUser->uLogInOut->sLockUsrConn);
+#endif
                     curUser->uLogInOut->sLockUsrConn = NULL;
                 }
 
@@ -789,14 +1104,26 @@ void theLoop::Terminate() {
 }
 //---------------------------------------------------------------------------
 
+#ifdef _WIN32
+void theLoop::AcceptSocket(const SOCKET &s, const sockaddr_in &addr, const int &sin_len) {
+    EnterCriticalSection(&csAcceptQueue);
+#else
 void theLoop::AcceptSocket(const int &s, const sockaddr_in &addr, const socklen_t &sin_len) {
     pthread_mutex_lock(&mtxAcceptQueue);
+#endif
     
     AcceptedSocket *newSocket = new AcceptedSocket();
     if(newSocket == NULL) {
     	string sDbgstr = "[BUF] Cannot allocate newSocket in theLoop::AcceptSocket!";
+#ifdef _WIN32
+    	sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
 		AppendSpecialLog(sDbgstr);
-    	pthread_mutex_unlock(&mtxAcceptQueue);
+#ifdef _WIN32
+    	LeaveCriticalSection(&csAcceptQueue);
+#else
+		pthread_mutex_unlock(&mtxAcceptQueue);
+#endif
     	return;
     }
 
@@ -814,6 +1141,10 @@ void theLoop::AcceptSocket(const int &s, const sockaddr_in &addr, const socklen_
         AcceptedSocketsE = newSocket;
     }
 
-    pthread_mutex_unlock(&mtxAcceptQueue);
+#ifdef _WIN32
+    LeaveCriticalSection(&csAcceptQueue);
+#else
+	pthread_mutex_unlock(&mtxAcceptQueue);
+#endif
 }
 //---------------------------------------------------------------------------

@@ -1,3 +1,6 @@
+----------------------------------------Next Release...---------------------------------------
+Fixed: High cpu usage when udp port bin failed (thx §hådýlådý™ for report).
+
 ----------------------------------------0.4.1.0 1.Jun.2008------------------------------------
 Added: Core.ResumeAccepts() to resume listening thread(s) when they are suspended.
 Added: 2 level limit of received kB of data from user per time.

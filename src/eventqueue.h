@@ -35,7 +35,11 @@ private:
 
     event *NormalE, *ThreadE;
 
+#ifdef _WIN32
+	CRITICAL_SECTION csEventQueue;
+#else
 	pthread_mutex_t mtxEventQueue;
+#endif
 public:
 	enum {
         EVENT_RESTART, 

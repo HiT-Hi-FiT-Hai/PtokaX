@@ -26,16 +26,40 @@
 #include "User.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#pragma hdrstop
+//---------------------------------------------------------------------------
+	#ifndef _MSC_VER
+		#pragma package(smart_init)
+	#endif
+#endif
+//---------------------------------------------------------------------------
 TextFileMan *TextFileManager = NULL;
 //---------------------------------------------------------------------------
 
 TextFileMan::TextFile::~TextFile() {
     if(sCommand != NULL) {
-        free(sCommand);
+#ifdef _WIN32
+        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sCommand) == 0) {
+			string sDbgstr = "[BUF] Cannot deallocate sCommand in ~TextFile! "+string((uint32_t)GetLastError())+" "+
+				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+			AppendSpecialLog(sDbgstr);
+        }
+#else
+		free(sCommand);
+#endif
     }
 
     if(sText != NULL) {
-        free(sText);
+#ifdef _WIN32
+        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sText) == 0) {
+			string sDbgstr = "[BUF] Cannot deallocate sText in ~TextFile! "+string((uint32_t)GetLastError())+" "+
+				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+			AppendSpecialLog(sDbgstr);
+        }
+#else
+		free(sText);
+#endif
     }
 }
 //---------------------------------------------------------------------------
@@ -64,7 +88,11 @@ bool TextFileMan::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = fals
         TextFile * cur = next;
         next = cur->next;
 
-        if(strcasecmp(cur->sCommand, cmd) == 0) {
+#ifdef _WIN32
+        if(stricmp(cur->sCommand, cmd) == 0) {
+#else
+		if(strcasecmp(cur->sCommand, cmd) == 0) {
+#endif
             bool bInPM = (SettingManager->bBools[SETBOOL_SEND_TEXT_FILES_AS_PM] == true || fromPM);
             size_t iHubSecLen = (size_t)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC];
             size_t iChatLen = 0;
@@ -76,10 +104,17 @@ bool TextFileMan::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = fals
                 iChatLen = 4+iHubSecLen+strlen(cur->sText);
             }
 
-            char *MSG = (char *) malloc(iChatLen);
+#ifdef _WIN32
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iChatLen);
+#else
+			char *MSG = (char *) malloc(iChatLen);
+#endif
             if(MSG == NULL) {
         		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot allocate "+string((uint64_t)iChatLen)+
         			" bytes of memory in ThubForm::ProcessTextFilesCmd!";
+#ifdef _WIN32
+        		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
         		AppendSpecialLog(sDbgstr);
                 return true;
             }
@@ -99,7 +134,15 @@ bool TextFileMan::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = fals
 
             UserSendCharDelayed(u, MSG, iChatLen-1);
 
-            free(MSG);
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+        		string sDbgstr = "[BUF] Cannot deallocate MSG in ThubForm::ProcessTextFilesCmd! "+string((uint32_t)GetLastError())+" "+
+        			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+        		AppendSpecialLog(sDbgstr);
+            }
+#else
+			free(MSG);
+#endif
 
         	return true;
         }
@@ -124,6 +167,70 @@ void TextFileMan::RefreshTextFiles() {
 
     TextFiles = NULL;
 
+#ifdef _WIN32
+    struct _finddata_t textfile;
+    intptr_t hFile = _findfirst((PATH+"\\texts\\*.txt").c_str(), &textfile);
+
+	if(hFile != -1) {
+		do {
+			if((textfile.attrib & _A_SUBDIR) != 0 ||
+				stricmp(textfile.name+(strlen(textfile.name)-4), ".txt") != 0) {
+				continue;
+			}
+
+        	FILE *f = fopen((PATH+"\\texts\\"+textfile.name).c_str(), "rb");
+			if(f != NULL) {
+				if(textfile.size != 0) {
+					TextFile * newtxtfile = new TextFile();
+
+					newtxtfile->sText = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, textfile.size+2);
+
+					if(newtxtfile->sText == NULL) {
+						string sDbgstr = "[BUF] Cannot allocate "+string((uint32_t)textfile.size+2)+
+	                        " bytes of memory for sText in ThubForm::RefreshTextFiles! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+
+						AppendSpecialLog(sDbgstr);
+
+						return;
+ 					}
+
+					size_t size = fread(newtxtfile->sText, 1, textfile.size, f);
+
+					newtxtfile->sText[size] = '|';
+					newtxtfile->sText[size+1] = '\0';
+
+					newtxtfile->sCommand = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, strlen(textfile.name)-3);
+					if(newtxtfile->sCommand == NULL) {
+						string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(strlen(textfile.name)-3))+
+                        " bytes of memory for sCommand in ThubForm::RefreshTextFiles! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+
+						AppendSpecialLog(sDbgstr);
+
+						return;
+					}
+
+					memcpy(newtxtfile->sCommand, textfile.name, strlen(textfile.name)-4);
+					newtxtfile->sCommand[strlen(textfile.name)-4] = '\0';
+
+					newtxtfile->prev = NULL;
+
+					if(TextFiles == NULL) {
+						newtxtfile->next = NULL;
+					} else {
+						TextFiles->prev = newtxtfile;
+						newtxtfile->next = TextFiles;
+					}
+
+					TextFiles = newtxtfile;
+				}
+
+				fclose(f);
+			}
+	    } while(_findnext(hFile, &textfile) == 0);
+
+		_findclose(hFile);
+    }
+#else
     string txtdir = PATH + "/texts/";
 
     DIR * p_txtdir = opendir(txtdir.c_str());
@@ -189,5 +296,6 @@ void TextFileMan::RefreshTextFiles() {
     }
 
     closedir(p_txtdir);
+#endif
 }
 //---------------------------------------------------------------------------
