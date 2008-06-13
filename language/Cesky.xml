@@ -253,8 +253,8 @@
     <String Name="Note">Upozornìní</String>
     <String Name="NickMustBeSpecified">Pøezdívka musí být vyplnìna!</String>
     <String Name="PassMustBeSpecified">Heslo musí být vyplnìno!</String>
-    <String Name="NoBadCharsInNick">Žádné $|&lt;&gt;:?*&quot;/\ a mezery v pøezdívkách!</String>
-    <String Name="NoBadCharsInPass">Žádné $ | a mezery v heslech!</String>
+    <String Name="NoBadCharsInNick">Žádné $&lt;&gt;:?*&quot;/\ pipe a mezery v pøezdívkách!</String>
+    <String Name="NoPipeInPass">Žádné pipe v heslech!</String>
     <String Name="UserIsAlredyReg">Uživatel již je registrován!</String>
     <String Name="UserWithSameNickAlredyExist">Uživatel se stejnou pøezdívkou jž existuje!</String>
     <String Name="ErrorInScript">Chyba ve skriptu</String>

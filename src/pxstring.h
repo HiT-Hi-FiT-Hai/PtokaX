@@ -24,7 +24,7 @@
 
 class string {
 private:
-    char * sData;
+	char * sData;
 	size_t iDataLen;
 
 	void stralloc(const char * sTxt, const size_t & iLen);
@@ -33,8 +33,8 @@ private:
     string(const string & sStr, const char * sTxt);
 public:
     string();
-    string(const char * sTxt);
-    string(const char * sTxt, const size_t & iLen);
+	string(const char * sTxt);
+	string(const char * sTxt, const size_t & iLen);
 	string(const string & sStr);
 	string(const uint32_t & ui32Number);
 	string(const int32_t & i32Number);
@@ -44,7 +44,7 @@ public:
     ~string();
 
     size_t size() const;
-    char * c_str() const;
+	char * c_str() const;
 
 	string operator+(const char * sTxt) const;
 	string operator+(const string & sStr) const;

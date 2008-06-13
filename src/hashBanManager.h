@@ -87,7 +87,7 @@ public:
 
     hashBanMan(void);
     ~hashBanMan(void);
-    
+
 
     void Add(BanItem *Ban);
     void Add2Table(BanItem *Ban);
@@ -152,7 +152,7 @@ public:
     bool Unban(char * sWhat);
     bool PermUnban(char * sWhat);
     bool TempUnban(char * sWhat);
-    
+
     void RemoveAllIP(const uint32_t &hash);
     void RemovePermAllIP(const uint32_t &hash);
     void RemoveTempAllIP(const uint32_t &hash);
