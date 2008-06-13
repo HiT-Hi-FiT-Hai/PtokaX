@@ -253,8 +253,8 @@
     <String Name="Note">Note</String>
     <String Name="NickMustBeSpecified">Nick must be specified!</String>
     <String Name="PassMustBeSpecified">Password must be specified!</String>
-    <String Name="NoBadCharsInNick">No $|&lt;&gt;:?*&quot;/\ and &lt;space&gt; in NickName!</String>
-    <String Name="NoBadCharsInPass">No $ | and &lt;space&gt; in Password!</String>
+    <String Name="NoBadCharsInNick">No $&lt;&gt;:?*&quot;/\ pipe and &lt;space&gt; in nickname!</String>
+    <String Name="NoPipeInPass">No pipe in Password!</String>
     <String Name="UserIsAlredyReg">User is already registered!</String>
     <String Name="UserWithSameNickAlredyExist">User with same nick already exist!</String>
     <String Name="ErrorInScript">Error in script</String>

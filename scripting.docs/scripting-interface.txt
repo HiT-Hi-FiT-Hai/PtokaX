@@ -145,7 +145,7 @@ GetOps()			- Return table with all registered users with operator status as regi
 GetReg(sNick)			- Return registered user with given nick as registered user table or nil when reg with this nick not exist.
 GetRegs()			- Return table with all registered users as registered user tables.
 
-AddReg(sNick, sPass, nProfileNumber)	- Chars $|<>:?*"/\ and space not allowed in nick. Chars $| not allowed in password. Max nick/pass length 64 chars. Return nil when failed, true if success.
+AddReg(sNick, sPass, nProfileNumber)	- Chars $|<>:?*"/\ and space not allowed in nick. Char | not allowed in password. Max nick/pass length 64 chars. Return nil when failed, true if success.
 DelReg(sNick)				- Return nil when failed, true if success.
 ChangeReg(sNick, sPass, nProfileNumber)	- Return nil when failed, true if success.
 

@@ -3837,20 +3837,33 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 
                 sCmdParts[cPart] = sCommand+11; // nick start
 
-                for(size_t i = 11; i < dlen; i++) {
-                    if(sCommand[i] == ' ') {
-                        sCommand[i] = '\0';
-                        iCmdPartsLen[cPart] = (uint16_t)((sCommand+i)-sCmdParts[cPart]);
+				for(size_t i = 11; i < dlen; i++) {
+					if(sCommand[i] == ' ') {
+						sCommand[i] = '\0';
+						iCmdPartsLen[cPart] = (uint16_t)((sCommand+i)-sCmdParts[cPart]);
 
-                        // are we on last space ???
-                        if(cPart == 1) {
-                            sCmdParts[2] = sCommand+i+1;
-                            iCmdPartsLen[2] = (uint16_t)(dlen-i-1);
-                            break;
+						// are we on last space ???
+						if(cPart == 1) {
+							sCmdParts[2] = sCommand+i+1;
+							iCmdPartsLen[2] = (uint16_t)(dlen-i-1);
+							for(size_t j = dlen; j > i; j--) {
+								if(sCommand[j] == ' ') {
+									sCommand[j] = '\0';
+
+									sCmdParts[2] = sCommand+j+1;
+									iCmdPartsLen[2] = (uint16_t)(dlen-j-1);
+
+									sCommand[i] = ' ';
+									iCmdPartsLen[1] = (uint16_t)((sCommand+j)-sCmdParts[1]);
+
+									break;
+								}
+							}
+							break;
                         }
 
                         cPart++;
-                        sCmdParts[cPart] = sCommand+i+1;
+						sCmdParts[cPart] = sCommand+i+1;
                     }
                 }
 
@@ -3880,6 +3893,18 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                     return true;
                 }
 
+				if(strpbrk(sCmdParts[0], " $|<>:?*\"/\\") != NULL) {
+                    int imsgLen = CheckFromPm(curUser, fromPM);
+
+                    int iret = sprintf(msg+imsgLen, "<%s> *** %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+                        LanguageManager->sTexts[LAN_NO_BAD_CHARS_IN_NICK]);
+                    imsgLen += iret;
+                    if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand416") == true) {
+                        UserSendCharDelayed(curUser, msg, imsgLen);
+                    }
+                    return true;
+                }
+
                 if(iCmdPartsLen[1] > 65) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
@@ -3887,6 +3912,18 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                         LanguageManager->sTexts[LAN_MAX_ALWD_PASS_LEN_64_CHARS]);
                     imsgLen += iret;
                     if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand317") == true) {
+                        UserSendCharDelayed(curUser, msg, imsgLen);
+                    }
+                    return true;
+                }
+
+				if(strchr(sCmdParts[1], '|') != NULL) {
+                    int imsgLen = CheckFromPm(curUser, fromPM);
+
+                    int iret = sprintf(msg+imsgLen, "<%s> *** %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+                        LanguageManager->sTexts[LAN_NO_PIPE_IN_PASS]);
+                    imsgLen += iret;
+                    if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand439") == true) {
                         UserSendCharDelayed(curUser, msg, imsgLen);
                     }
                     return true;
@@ -5055,6 +5092,18 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                         LanguageManager->sTexts[LAN_MAX_ALWD_PASS_LEN_64_CHARS]);
                     imsgLen += iret;
                     if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand438") == true) {
+                        UserSendCharDelayed(curUser, msg, imsgLen);
+                    }
+                    return true;
+                }
+
+            	if(strchr(sCommand+7, '|') != NULL) {
+                    int imsgLen = CheckFromPm(curUser, fromPM);
+
+                    int iret = sprintf(msg+imsgLen, "<%s> *** %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+                        LanguageManager->sTexts[LAN_NO_PIPE_IN_PASS]);
+                    imsgLen += iret;
+                    if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand439") == true) {
                         UserSendCharDelayed(curUser, msg, imsgLen);
                     }
                     return true;
