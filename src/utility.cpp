@@ -358,7 +358,7 @@ char * formatTime(uint64_t rest) {
 
 	if(n != 0) {
 #ifdef _WIN32
-		int iLen = sprintf(buf, "%%I64d %s", n, n > 1 ? LanguageManager->sTexts[LAN_YEARS_LWR] : LanguageManager->sTexts[LAN_YEAR_LWR]);
+		int iLen = sprintf(buf, "%I64d %s", n, n > 1 ? LanguageManager->sTexts[LAN_YEARS_LWR] : LanguageManager->sTexts[LAN_YEAR_LWR]);
 #else
 		int iLen = sprintf(buf, "%" PRIu64 " %s", n, n > 1 ? LanguageManager->sTexts[LAN_YEARS_LWR] : LanguageManager->sTexts[LAN_YEAR_LWR]);
 #endif

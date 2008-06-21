@@ -1,4 +1,4 @@
-PtokaX 0.4.1.0
+PtokaX 0.4.1.1
 ---------------
 
 This is PtokaX version without gui able to run from console or as windows service.

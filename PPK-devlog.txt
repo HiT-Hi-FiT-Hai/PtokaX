@@ -1,7 +1,11 @@
 ----------------------------------------Next Release...---------------------------------------
+
+
+----------------------------------------0.4.1.1 21.Jun.2008-----------------------------------
 Fixed: High cpu usage when udp port bind failed (thx §hådýlådý™ for report).
 Fixed: Missing password checking for not allowed pipe char, removed checking for other chars.
 Fixed: Missing nick checking for not allowed chars in !addreguser command.
+Fixed: Freeze on year or longer tempban in win versions (thx dmvn for report).
 
 ----------------------------------------0.4.1.0 1.Jun.2008------------------------------------
 Added: Core.ResumeAccepts() to resume listening thread(s) when they are suspended.
