@@ -220,6 +220,7 @@ GetProfilePermissions(nProfileNumber)				- Return table with profile permissions
 
 SetProfileName(nProfileNumber, sProfileName)			- Change profile name, return true if success or nil if profile not exist.
 SetProfilePermission(nProfileNumber, nPermissionId, bBoolean)	- Change profile permission, return true if success or nil if profile not exist.
+Save()								- Save profiles.
 
 
 TmrMan.
@@ -515,6 +516,7 @@ Settings bool IDs forSetMan.(G/S)etBool
 53	- Check IP in commands.
 54	- Popup scripts window on script error.
 55	- Save script errors to log.
+56	- Disallow clients sending buggy supports.
 
 
 Setting number IDs for SetMan.(G/S)etNumber

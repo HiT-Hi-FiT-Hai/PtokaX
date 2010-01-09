@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -48,227 +48,227 @@ static void PushProfilePermissions(lua_State * L, const uint16_t &iProfile) {
     int t = lua_gettop(L);
 
     lua_pushliteral(L, "bIsOP");
-    Prof->bPermissions[ProfileManager::HASKEYICON] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::HASKEYICON] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoDefloodGetNickList");
-    Prof->bPermissions[ProfileManager::NODEFLOODGETNICKLIST] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NODEFLOODGETNICKLIST] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoDefloodNMyINFO");
-    Prof->bPermissions[ProfileManager::NODEFLOODMYINFO] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NODEFLOODMYINFO] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoDefloodSearch");
-    Prof->bPermissions[ProfileManager::NODEFLOODSEARCH] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NODEFLOODSEARCH] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoDefloodPM");
-    Prof->bPermissions[ProfileManager::NODEFLOODPM] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NODEFLOODPM] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoDefloodMainChat");
-    Prof->bPermissions[ProfileManager::NODEFLOODMAINCHAT] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NODEFLOODMAINCHAT] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bMassMsg");
-    Prof->bPermissions[ProfileManager::MASSMSG] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::MASSMSG] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bTopic");
-    Prof->bPermissions[ProfileManager::TOPIC] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::TOPIC] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bTempBan");
-    Prof->bPermissions[ProfileManager::TEMP_BAN] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::TEMP_BAN] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bTempUnban");
-    Prof->bPermissions[ProfileManager::TEMP_UNBAN] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::TEMP_UNBAN] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
     
     lua_pushliteral(L, "bRefreshTxt");
-    Prof->bPermissions[ProfileManager::REFRESHTXT] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::REFRESHTXT] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoTagCheck");
-    Prof->bPermissions[ProfileManager::NOTAGCHECK] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NOTAGCHECK] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bDelRegUser");
-    Prof->bPermissions[ProfileManager::DELREGUSER] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::DELREGUSER] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bAddRegUser");
-    Prof->bPermissions[ProfileManager::ADDREGUSER] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::ADDREGUSER] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoChatLimits");
-    Prof->bPermissions[ProfileManager::NOCHATLIMITS] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NOCHATLIMITS] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoMaxHubCheck");
-    Prof->bPermissions[ProfileManager::NOMAXHUBCHECK] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NOMAXHUBCHECK] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoSlotHubRatio");
-    Prof->bPermissions[ProfileManager::NOSLOTHUBRATIO] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NOSLOTHUBRATIO] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoSlotCheck");
-    Prof->bPermissions[ProfileManager::NOSLOTCHECK] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NOSLOTCHECK] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoShareLimit");
-    Prof->bPermissions[ProfileManager::NOSHARELIMIT] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NOSHARELIMIT] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bClrPermBan");
-    Prof->bPermissions[ProfileManager::CLRPERMBAN] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::CLRPERMBAN] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bClrTempBan");
-    Prof->bPermissions[ProfileManager::CLRTEMPBAN] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::CLRTEMPBAN] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bGetInfo");
-    Prof->bPermissions[ProfileManager::GETINFO] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::GETINFO] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bGetBans");
-    Prof->bPermissions[ProfileManager::GETBANLIST] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::GETBANLIST] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bRestartScripts");
-    Prof->bPermissions[ProfileManager::RSTSCRIPTS] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::RSTSCRIPTS] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bRestartHub");
-    Prof->bPermissions[ProfileManager::RSTHUB] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::RSTHUB] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bTempOP");
-    Prof->bPermissions[ProfileManager::TEMPOP] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::TEMPOP] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bGag");
-    Prof->bPermissions[ProfileManager::GAG] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::GAG] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bRedirect");
-    Prof->bPermissions[ProfileManager::REDIRECT] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::REDIRECT] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bBan");
-    Prof->bPermissions[ProfileManager::BAN] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::BAN] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bUnban");
-    Prof->bPermissions[ProfileManager::UNBAN] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::UNBAN] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
     
     lua_pushliteral(L, "bKick");
-    Prof->bPermissions[ProfileManager::KICK] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::KICK] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bDrop");
-    Prof->bPermissions[ProfileManager::DROP] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::DROP] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bEnterFullHub");
-    Prof->bPermissions[ProfileManager::ENTERFULLHUB] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::ENTERFULLHUB] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bEnterIfIPBan");
-    Prof->bPermissions[ProfileManager::ENTERIFIPBAN] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::ENTERIFIPBAN] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bAllowedOPChat");
-    Prof->bPermissions[ProfileManager::ALLOWEDOPCHAT] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::ALLOWEDOPCHAT] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bSendFullMyinfos");
-    Prof->bPermissions[ProfileManager::SENDFULLMYINFOS] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::SENDFULLMYINFOS] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);   
     
     lua_pushliteral(L, "bSendAllUserIP");
-    Prof->bPermissions[ProfileManager::SENDALLUSERIP] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::SENDALLUSERIP] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t); 
     
     lua_pushliteral(L, "bRangeBan");
-    Prof->bPermissions[ProfileManager::RANGE_BAN] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::RANGE_BAN] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
     
     lua_pushliteral(L, "bRangeUnban");
-    Prof->bPermissions[ProfileManager::RANGE_UNBAN] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::RANGE_UNBAN] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bRangeTempBan");
-    Prof->bPermissions[ProfileManager::RANGE_TBAN] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::RANGE_TBAN] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bRangeTempUnban");
-    Prof->bPermissions[ProfileManager::RANGE_TUNBAN] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::RANGE_TUNBAN] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
     
     lua_pushliteral(L, "bGetRangeBans");
-    Prof->bPermissions[ProfileManager::GET_RANGE_BANS] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::GET_RANGE_BANS] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bClearRangePermBans");
-    Prof->bPermissions[ProfileManager::CLR_RANGE_BANS] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::CLR_RANGE_BANS] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bClearRangeTempBans");
-    Prof->bPermissions[ProfileManager::CLR_RANGE_TBANS] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::CLR_RANGE_TBANS] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
     
     lua_pushliteral(L, "bNoIpCheck");
-    Prof->bPermissions[ProfileManager::NOIPCHECK] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NOIPCHECK] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
     
     lua_pushliteral(L, "bClose");
-    Prof->bPermissions[ProfileManager::CLOSE] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::CLOSE] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoSearchLimits");
-    Prof->bPermissions[ProfileManager::NOSEARCHLIMITS] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NOSEARCHLIMITS] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoDefloodCTM");
-    Prof->bPermissions[ProfileManager::NODEFLOODCTM] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NODEFLOODCTM] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoDefloodRCTM");
-    Prof->bPermissions[ProfileManager::NODEFLOODRCTM] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NODEFLOODRCTM] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoDefloodSR");
-    Prof->bPermissions[ProfileManager::NODEFLOODSR] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NODEFLOODSR] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoDefloodRecv");
-    Prof->bPermissions[ProfileManager::NODEFLOODRECV] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NODEFLOODRECV] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoChatInterval");
-    Prof->bPermissions[ProfileManager::NOCHATINTERVAL] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NOCHATINTERVAL] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoPMInterval");
-    Prof->bPermissions[ProfileManager::NOPMINTERVAL] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NOPMINTERVAL] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoSearchInterval");
-    Prof->bPermissions[ProfileManager::NOSEARCHINTERVAL] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NOSEARCHINTERVAL] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoMaxUsersSameIP");
-    Prof->bPermissions[ProfileManager::NOUSRSAMEIP] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NOUSRSAMEIP] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 
     lua_pushliteral(L, "bNoReConnTime");
-    Prof->bPermissions[ProfileManager::NORECONNTIME] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    Prof->bPermissions[ProfileManager::NORECONNTIME] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, t);
 }
 //------------------------------------------------------------------------------
@@ -324,8 +324,6 @@ static int AddProfile(lua_State * L) {
         return 1;
     }
 
-    ProfileMan->SaveProfiles();
-
     lua_settop(L, 0);
     lua_pushnumber(L, idx);
     return 1;
@@ -362,8 +360,6 @@ static int RemoveProfile(lua_State * L) {
 		lua_pushnil(L);
         return 1;
     }
-
-    ProfileMan->SaveProfiles();
 
     lua_settop(L, 0);
     lua_pushboolean(L, 1);
@@ -693,6 +689,19 @@ static int SetProfilePermission(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
+static int Save(lua_State * L) {
+	if(lua_gettop(L) != 0) {
+        luaL_error(L, "bad argument count to 'Save' (0 expected, got %d)", lua_gettop(L));
+        lua_settop(L, 0);
+        return 0;
+    }
+
+	ProfileMan->SaveProfiles();
+
+    return 0;
+}
+//------------------------------------------------------------------------------
+
 static const luaL_reg profman_funcs[] =  {
 	{ "AddProfile", AddProfile }, 
 	{ "RemoveProfile", RemoveProfile }, 
@@ -704,6 +713,7 @@ static const luaL_reg profman_funcs[] =  {
 	{ "GetProfilePermissions", GetProfilePermissions }, 
 	{ "SetProfileName", SetProfileName }, 
 	{ "SetProfilePermission", SetProfilePermission }, 
+	{ "Save", Save },
 	{ NULL, NULL }
 };
 //---------------------------------------------------------------------------

@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -79,6 +79,7 @@ enum SetBoolIds {
     SETBOOL_CHECK_IP_IN_COMMANDS, 
     SETBOOL_POPUP_SCRIPT_WINDOW, 
     SETBOOL_LOG_SCRIPT_ERRORS, 
+    SETBOOL_NO_QUACK_SUPPORTS, 
     SETBOOL_IDS_END
 };//SETBOOL_, 
 

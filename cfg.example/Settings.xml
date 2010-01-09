@@ -56,6 +56,7 @@
         <Bool Name="AcceptUnknownTag">1</Bool><!-- Accept tag from unknown clients. -->
         <Bool Name="PopupScriptsWindow">0</Bool><!-- Popup scripts window on script error. -->
         <Bool Name="LogScriptErrors">0</Bool><!-- Save script errors to log. -->
+        <Bool Name="NoQuackSupports">0</Bool><!-- Disallow clients sending buggy $Supports. -->
     </Booleans>
     <Integers>
         <Integer Name="MaxUsers">250</Integer><!-- Max users limit -->

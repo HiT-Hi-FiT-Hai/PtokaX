@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -48,35 +48,35 @@ static const char * CountryNames[] = { "Andorra", "United Arab Emirates", "Afgha
 	"Brunei Darussalam", "Bolivia", "Brazil", "Bahamas", "Bhutan", "Bouvet Island", "Botswana",
 	"Belarus", "Belize", "Canada", "Cocos (Keeling) Islands", "The Democratic Republic of the Congo", "Central African Republic", "Congo",
 	"Côte D'Ivoire", "Cook Islands", "Chile", "Cameroon", "China", "Colombia", "Costa Rica",
-	"Cuba", "Cape Verde", "Christmas Island", "Cyprus", "Czech Republic", "Germany", "Djibouti", 
-    "Denmark", "Dominica", "Dominican Republic", "Algeria", "Ecuador", "Estonia", "Egypt", 
-    "Western Sahara", "Eritrea", "Spain", "Ethiopia", "Finland", "Fiji", "Falkland Islands (Malvinas)", 
-    "Federated States of Micronesia", "Faroe Islands", "France", "Gabon", "United Kingdom", "Grenada", "Georgia", 
-    "French Guiana", "Guernsey", "Ghana", "Gibraltar", "Greenland", "Gambia", "Guinea", 
-    "Guadeloupe", "Equatorial Guinea", "Greece", "South Georgia and the South Sandwich Islands", "Guatemala", "Guam", "Guinea-Bissau", 
-    "Guyana", "Hong Kong", "Heard Island and McDonald Islands", "Honduras", "Croatia", "Haiti", "Hungary", 
-    "Switzerland", "Indonesia", "Ireland", "Israel", "Isle of Man", "India", "British Indian Ocean Territory", 
-    "Iraq", "Islamic Republic of Iran", "Iceland", "Italy", "Jersey", "Jamaica", "Jordan", 
-    "Japan", "Kenya", "Kyrgyzstan", "Cambodia", "Kiribati", "Comoros", "Saint Kitts and Nevis", 
-    "Democratic People's Republic of Korea", "Republic of Korea", "Kuwait", "Cayman Islands", "Kazakhstan", "Lao People's Democratic Republic", "Lebanon", 
-    "Saint Lucia", "Liechtenstein", "Sri Lanka", "Liberia", "Lesotho", "Lithuania", "Luxembourg", 
-    "Latvia", "Libyan Arab Jamahiriya", "Morocco", "Monaco", "Republic of Moldova", "Montenegro", "Saint Martin", 
-    "Madagascar", "Marshall Islands", "The Former Yugoslav Republic of Macedonia", "Mali", "Myanmar", "Mongolia", "Macao", 
-    "Northern Mariana Islands", "Martinique", "Mauritania", "Montserrat", "Malta", "Mauritius", "Maldives", 
-    "Malawi", "Mexico", "Malaysia", "Mozambique", "Namibia", "New Caledonia", "Niger", 
-    "Norfolk Island", "Nigeria", "Nicaragua", "Netherlands", "Norway", "Nepal", "Nauru", 
-    "Niue", "New Zealand", "Oman", "Panama", "Peru", "French Polynesia", "Papua New Guinea", 
-    "Philippines", "Pakistan", "Poland", "Saint Pierre and Miquelon", "Pitcairn", "Puerto Rico", "Occupied Palestinian Territory", 
-    "Portugal", "Palau", "Paraguay", "Qatar", "Réunion", "Romania", "Serbia", 
-    "Russian Federation", "Rwanda", "Saudi Arabia", "Solomon Islands", "Seychelles", "Sudan", "Sweden", 
-    "Singapore", "Saint Helena", "Slovenia", "Svalbard and Jan Mayen", "Slovakia", "Sierra Leone", "San Marino", 
-    "Senegal", "Somalia", "Suriname", "Sao Tome and Principe", "El Salvador", "Syrian Arab Republic", "Swaziland", 
-    "Turks and Caicos Islands", "Chad", "French Southern Territories", "Togo", "Thailand", "Tajikistan", "Tokelau", 
-    "Timor-Leste", "Turkmenistan", "Tunisia", "Tonga", "Turkey", "Trinidad and Tobago", "Tuvalu", 
-    "Province of China Taiwan", "United Republic of Tanzania", "Ukraine", "Uganda", "United States Minor Outlying Islands", "United States", "Uruguay", 
-    "Uzbekistan", "Holy See (Vatican City State)", "Saint Vincent and the Grenadines", "Venezuela", "British Virgin Islands", "U.S. Virgin Islands", "Viet Nam", 
-    "Vanuatu", "Wallis and Futuna", "Samoa", "Yemen", "Mayotte", "South Africa", "Zambia", 
-    "Zimbabwe", "Unknown", 
+	"Cuba", "Cape Verde", "Christmas Island", "Cyprus", "Czech Republic", "Germany", "Djibouti",
+    "Denmark", "Dominica", "Dominican Republic", "Algeria", "Ecuador", "Estonia", "Egypt",
+    "Western Sahara", "Eritrea", "Spain", "Ethiopia", "Finland", "Fiji", "Falkland Islands (Malvinas)",
+    "Federated States of Micronesia", "Faroe Islands", "France", "Gabon", "United Kingdom", "Grenada", "Georgia",
+    "French Guiana", "Guernsey", "Ghana", "Gibraltar", "Greenland", "Gambia", "Guinea",
+    "Guadeloupe", "Equatorial Guinea", "Greece", "South Georgia and the South Sandwich Islands", "Guatemala", "Guam", "Guinea-Bissau",
+    "Guyana", "Hong Kong", "Heard Island and McDonald Islands", "Honduras", "Croatia", "Haiti", "Hungary",
+    "Switzerland", "Indonesia", "Ireland", "Israel", "Isle of Man", "India", "British Indian Ocean Territory",
+    "Iraq", "Islamic Republic of Iran", "Iceland", "Italy", "Jersey", "Jamaica", "Jordan",
+    "Japan", "Kenya", "Kyrgyzstan", "Cambodia", "Kiribati", "Comoros", "Saint Kitts and Nevis",
+    "Democratic People's Republic of Korea", "Republic of Korea", "Kuwait", "Cayman Islands", "Kazakhstan", "Lao People's Democratic Republic", "Lebanon",
+    "Saint Lucia", "Liechtenstein", "Sri Lanka", "Liberia", "Lesotho", "Lithuania", "Luxembourg",
+    "Latvia", "Libyan Arab Jamahiriya", "Morocco", "Monaco", "Republic of Moldova", "Montenegro", "Saint Martin",
+    "Madagascar", "Marshall Islands", "The Former Yugoslav Republic of Macedonia", "Mali", "Myanmar", "Mongolia", "Macao",
+    "Northern Mariana Islands", "Martinique", "Mauritania", "Montserrat", "Malta", "Mauritius", "Maldives",
+    "Malawi", "Mexico", "Malaysia", "Mozambique", "Namibia", "New Caledonia", "Niger",
+    "Norfolk Island", "Nigeria", "Nicaragua", "Netherlands", "Norway", "Nepal", "Nauru",
+    "Niue", "New Zealand", "Oman", "Panama", "Peru", "French Polynesia", "Papua New Guinea",
+    "Philippines", "Pakistan", "Poland", "Saint Pierre and Miquelon", "Pitcairn", "Puerto Rico", "Palestinian Territory, Occupied",
+    "Portugal", "Palau", "Paraguay", "Qatar", "Réunion", "Romania", "Serbia",
+    "Russian Federation", "Rwanda", "Saudi Arabia", "Solomon Islands", "Seychelles", "Sudan", "Sweden",
+    "Singapore", "Saint Helena", "Slovenia", "Svalbard and Jan Mayen", "Slovakia", "Sierra Leone", "San Marino",
+    "Senegal", "Somalia", "Suriname", "Sao Tome and Principe", "El Salvador", "Syrian Arab Republic", "Swaziland",
+    "Turks and Caicos Islands", "Chad", "French Southern Territories", "Togo", "Thailand", "Tajikistan", "Tokelau",
+    "Timor-Leste", "Turkmenistan", "Tunisia", "Tonga", "Turkey", "Trinidad and Tobago", "Tuvalu",
+    "Taiwan", "United Republic of Tanzania", "Ukraine", "Uganda", "United States Minor Outlying Islands", "United States", "Uruguay",
+    "Uzbekistan", "Holy See (Vatican City State)", "Saint Vincent and the Grenadines", "Venezuela", "Virgin Islands, British", "Virgin Islands, U.S.", "Viet Nam",
+    "Vanuatu", "Wallis and Futuna", "Samoa", "Yemen", "Mayotte", "South Africa", "Zambia",
+    "Zimbabwe", "Unknown",
 };
 
 static const char * CountryCodes[] = { "AD", "AE", "AF", "AG", "AI", "AL", "AM", "AN", "AO", "AQ", "AR", "AS", "AT", "AU", "AW",
@@ -95,7 +95,7 @@ static const char * CountryCodes[] = { "AD", "AE", "AF", "AG", "AI", "AL", "AM",
 	"SE", "SG", "SH", "SI", "SJ", "SK", "SL", "SM", "SN", "SO", "SR", "ST", "SV", "SY", "SZ",
 	"TC", "TD", "TF", "TG", "TH", "TJ", "TK", "TL", "TM", "TN", "TO", "TR", "TT", "TV", "TW",
 	"TZ", "UA", "UG", "UM", "US", "UY", "UZ", "VA", "VC", "VE", "VG", "VI", "VN", "VU", "WF",
-	"WS", "YE", "YT", "ZA", "ZM", "ZW", "??", 
+	"WS", "YE", "YT", "ZA", "ZM", "ZW", "??",
 };
 //---------------------------------------------------------------------------
 

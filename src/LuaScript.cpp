@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -770,7 +770,11 @@ void ScriptError(Script * cur) {
 //------------------------------------------------------------------------------
 
 #ifdef _WIN32
-	static void ScriptOnTimer(UINT_PTR uiTimerId, const bool &bCustom) {
+    #ifndef _SERVICE
+    static void ScriptOnTimer(UINT_PTR uiTimerId, const bool &bCustom) {
+    #else
+    void ScriptOnTimer(const UINT_PTR &uiTimerId) {
+    #endif
 #else
 	void ScriptOnTimer(ScriptTimer * AccTimer) {
 #endif
@@ -787,8 +791,13 @@ void ScriptError(Script * cur) {
             next = tmr->next;
 
 #ifdef _WIN32
+    #ifndef _SERVICE
 			if(tmr->uiTimerId == uiTimerId) {
 				if(bCustom == false) {
+    #else
+            if(tmr->uiTimerId == uiTimerId) {
+				if(tmr->sFunctionName == NULL) {
+    #endif
 #else
 			if(tmr == AccTimer) {
 				if(tmr->sFunctionName == NULL) {
@@ -821,20 +830,18 @@ void ScriptError(Script * cur) {
         }
 
 	}
-
+}
+//------------------------------------------------------------------------------
 #ifdef _WIN32
-	// PPK .. timer not found ? kill it !
-	KillTimer(NULL, uiTimerId);
-}
+    #ifndef _SERVICE
+        VOID CALLBACK ScriptTimerProc(HWND /*hwnd*/,UINT /*uMsg*/, UINT_PTR idEvent, DWORD /*dwTime*/) {
+            ScriptOnTimer(idEvent, false);
+        }
 //------------------------------------------------------------------------------
 
-VOID CALLBACK ScriptTimerProc(HWND /*hwnd*/,UINT /*uMsg*/, UINT_PTR idEvent, DWORD /*dwTime*/) {
-	ScriptOnTimer(idEvent, false);
-}
-//------------------------------------------------------------------------------
-
-VOID CALLBACK ScriptTimerCustomProc(HWND /*hwnd*/,UINT /*uMsg*/, UINT_PTR idEvent, DWORD /*dwTime*/) {
-	ScriptOnTimer(idEvent, true);
+        VOID CALLBACK ScriptTimerCustomProc(HWND /*hwnd*/,UINT /*uMsg*/, UINT_PTR idEvent, DWORD /*dwTime*/) {
+            ScriptOnTimer(idEvent, true);
+        }
+    #endif
 #endif
-}
 //------------------------------------------------------------------------------

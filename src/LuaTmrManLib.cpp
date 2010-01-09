@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -103,8 +103,12 @@ static int AddTimer(lua_State * L) {
     }
 
 #ifdef _WIN32
+    #ifndef _SERVICE
 	UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tonumber(L, 1),
 		(TIMERPROC) (iLen == 0 ? ScriptTimerProc : ScriptTimerCustomProc));
+    #else
+	UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tonumber(L, 1), NULL);
+    #endif
 
     if(timer == 0) {
         lua_settop(L, 0);

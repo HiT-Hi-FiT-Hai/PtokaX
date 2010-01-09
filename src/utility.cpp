@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -48,7 +48,7 @@ bool bCmdAutoStart = false, bCmdNoAutoStart = false, bCmdNoTray = false, bCmdNoK
 #ifdef _WIN32
 	HANDLE hConsole = NULL, hPtokaXHeap = NULL, hRecvHeap = NULL, hSendHeap = NULL;
 	string PATH_LUA = "", sOs = "";
-	bool bNT = false;
+	bool b2K = false;
 #endif
 //---------------------------------------------------------------------------
 
@@ -990,14 +990,19 @@ int GetWlcmMsg(char * sWlcmMsg) {
 #ifdef _WIN32
 	string GetMemStat() {
 		string sStat = "";
-	    if(bNT == true) {
+	    if(b2K == true) {
 	        PROCESS_MEMORY_COUNTERS pmc;
 	        pmc.cb = sizeof(pmc);
-	        typedef bool (CALLBACK* LPFUNC)(HANDLE Process, PPROCESS_MEMORY_COUNTERS ppsmemCounters, DWORD cb);
-	        LPFUNC _GetProcessMemoryInfo = (LPFUNC)GetProcAddress(LoadLibrary("psapi"), "GetProcessMemoryInfo");
-	        _GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));
-			sStat += "\r\nMem usage (Peak): "+string(formatBytes(pmc.WorkingSetSize))+ " ("+string(formatBytes(pmc.PeakWorkingSetSize))+")";
-			sStat += "\r\nVM size (Peak): "+string(formatBytes(pmc.PagefileUsage))+ " ("+string(formatBytes(pmc.PeakPagefileUsage))+")";
+
+			typedef BOOL (WINAPI *PGPMI)(HANDLE, PPROCESS_MEMORY_COUNTERS, DWORD);
+			PGPMI pGPMI = (PGPMI)GetProcAddress(LoadLibrary("psapi.dll"), "GetProcessMemoryInfo");
+
+            if(pGPMI != NULL) {
+				pGPMI(GetCurrentProcess(), &pmc, sizeof(pmc));
+					   
+                sStat += "\r\nMem usage (Peak): "+string(formatBytes(pmc.WorkingSetSize))+ " ("+string(formatBytes(pmc.PeakWorkingSetSize))+")";
+                sStat += "\r\nVM size (Peak): "+string(formatBytes(pmc.PagefileUsage))+ " ("+string(formatBytes(pmc.PeakPagefileUsage))+")";
+            }
 	    }
 		return sStat;
 	}
@@ -1230,14 +1235,44 @@ bool DirExist(char * sPath) {
 		if(ver.dwPlatformId != VER_PLATFORM_WIN32_NT) {
 			sOs = "Windows 9x/ME";
 	    } else if(ver.dwMajorVersion == 6) {
-	        if(ver.wProductType == VER_NT_WORKSTATION) {
-	            sOs = "Windows Vista";
-	        } else {
-	            sOs = "Windows 2008";
-	        }
+            if(ver.dwMinorVersion == 1) {
+	           if(ver.wProductType == VER_NT_WORKSTATION) {
+	               sOs = "Windows 7";
+	           } else {
+	               sOs = "Windows 2008 R2";
+	           }
+            } else {
+	           if(ver.wProductType == VER_NT_WORKSTATION) {
+	               sOs = "Windows Vista";
+	           } else {
+	               sOs = "Windows 2008";
+	           }
+            }
 		} else if(ver.dwMajorVersion == 5) {
 	        if(ver.dwMinorVersion == 2) {
-				sOs = "Windows 2003/XP64";
+                if(ver.wProductType != VER_NT_WORKSTATION) {
+				    sOs = "Windows 2003";
+				    return;
+                } else if(ver.wProductType == VER_NT_WORKSTATION) {
+                    SYSTEM_INFO si;
+                    memset(&si, 0, sizeof(SYSTEM_INFO));
+
+                    typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
+                    PGNSI pGNSI = (PGNSI)GetProcAddress(GetModuleHandle("kernel32.dll"), "GetNativeSystemInfo");
+                    if(pGNSI != NULL) {
+                        pGNSI(&si);
+                    } else {
+                        GetSystemInfo(&si);
+                    }
+
+                    if(si.wProcessorArchitecture==PROCESSOR_ARCHITECTURE_AMD64) {
+                        sOs = "Windows XP x64";
+                        return;
+                    }
+                }
+
+                // should not happen, but for sure...
+                sOs = "Windows 2003/XP64";
 			} else if(ver.dwMinorVersion == 1) {
 				sOs = "Windows XP";
 			} else if(ver.dwMinorVersion == 0) {

@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -87,9 +87,13 @@ static void RegTimerHandler() {
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
+    #ifndef _SERVICE
 	VOID CALLBACK LooperProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*idEvent*/, DWORD /*dwTime*/) {
+    #else
+    void theLoop::Looper() {
+    #endif
 		KillTimer(NULL, srvLoop->timer);
-		
+
 		// PPK ... two loop stategy for saving badwith
 		if(srvLoop->bRecv == true) {
 			srvLoop->ReceiveLoop();
@@ -100,9 +104,11 @@ static void RegTimerHandler() {
 	
 		if(bServerTerminated == false) {
 			srvLoop->bRecv = !srvLoop->bRecv;
-	
+	#ifndef _SERVICE
 	    	srvLoop->timer = SetTimer(NULL, 0, 100, (TIMERPROC)LooperProc);
-	    
+    #else
+            srvLoop->timer = SetTimer(NULL, 0, 100, NULL);
+    #endif
 	        if(srvLoop->timer == 0) {
 				string sDbgstr = "[BUF] Cannot start Looper in LooperProc! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
 	        	AppendSpecialLog(sDbgstr);
@@ -163,7 +169,11 @@ theLoop::theLoop() {
 	dLoggedUsers = dActualSrvLoopLogins = 0;
 
 #ifdef _WIN32
-	timer = SetTimer(NULL, 0, 100, (TIMERPROC)LooperProc);
+    #ifndef _SERVICE
+    timer = SetTimer(NULL, 0, 100, (TIMERPROC)LooperProc);
+    #else
+    timer = SetTimer(NULL, 0, 100, NULL);
+    #endif
 
     if(timer == 0) {
 		string sDbgstr = "[BUF] Cannot start Looper in theLoop::theLoop! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();

@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -117,10 +117,10 @@ char * clsZlibUtility::CreateZPipe(const char *sInData, const size_t &sInDataSiz
     deflateInit(&stream, Z_BEST_COMPRESSION);
 
     stream.next_in  = (Bytef*)sInData;
-    stream.avail_in = (uint32_t)sInDataSize;
+    stream.avail_in = (uInt)sInDataSize;
 
     stream.next_out = (Bytef*)sZbuffer+5;
-    stream.avail_out = (uint32_t)(uiZbufferSize-5);
+    stream.avail_out = (uInt)(uiZbufferSize-5);
 
     // compress
     if(deflate(&stream, Z_FINISH) != Z_STREAM_END) {
@@ -185,10 +185,10 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const size_t &sInDataSize, cha
     deflateInit(&stream, Z_BEST_COMPRESSION);
 
     stream.next_in  = (Bytef*)sInData;
-    stream.avail_in = (uint32_t)sInDataSize;
+    stream.avail_in = (uInt)sInDataSize;
 
     stream.next_out = (Bytef*)sZbuffer+5;
-    stream.avail_out = (uint32_t)(uiZbufferSize-5);
+    stream.avail_out = (uInt)(uiZbufferSize-5);
 
     // compress
     if(deflate(&stream, Z_FINISH) != Z_STREAM_END) {
@@ -273,10 +273,10 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &sInDataSiz
     deflateInit(&stream, Z_BEST_COMPRESSION);
 
     stream.next_in  = (Bytef*)sInData;
-    stream.avail_in = sInDataSize;
+    stream.avail_in = (uInt)sInDataSize;
 
     stream.next_out = (Bytef*)sZbuffer+5;
-    stream.avail_out = (uint32_t)(uiZbufferSize-5);
+    stream.avail_out = (uInt)(uiZbufferSize-5);
 
     // compress
     if(deflate(&stream, Z_FINISH) != Z_STREAM_END) {

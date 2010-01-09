@@ -1,6 +1,19 @@
 ----------------------------------------Next Release...---------------------------------------
 
 
+----------------------------------------0.4.1.2 9.Jan.2010-----------------------------------
+Added: http://board.ptokax.ch/index.php/topic,7477.0.html with default disabled.
+Added: Crash log generation to 64bit windows version.
+Added: Detection of Windows 7, Windows 2008 R2 and improved Windows XP x64 detection.
+Added: ProfMan.Save() to lua interface.
+Added: Missing setlocale.
+Fixed: Numbers instead of boolean in some lua values.
+Fixed: Crash in 64bit windows version.
+Fixed: Wrongly disallowed $ in password, protocol allow it.
+Fixed: Compilation on Nexenta.
+Removed: Auto save of regs after add/change/del Reg.
+
+
 ----------------------------------------0.4.1.1 21.Jun.2008-----------------------------------
 Fixed: High cpu usage when udp port bind failed (thx §hådýlådý™ for report).
 Fixed: Missing password checking for not allowed pipe char, removed checking for other chars.

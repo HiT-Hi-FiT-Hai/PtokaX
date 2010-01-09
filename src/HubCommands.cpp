@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -36,6 +36,7 @@
 #include "UdpDebug.h"
 #include "User.h"
 #include "utility.h"
+//#include "ZlibUtility.h"
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
@@ -340,7 +341,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, 
                             LanguageManager->sTexts[LAN_HAS_GAGGED], user->Nick);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand14") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                             globalQ->SingleItemsStore(newItem);
                         }
                     } else {
@@ -1150,7 +1151,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                                 return true;
                             }
                         }
-						QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+						QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                    	  	globalQ->SingleItemsStore(newItem);
         	        } else {
                         int imsgLen;
@@ -1365,7 +1366,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                             sTime, LanguageManager->sTexts[LAN_BECAUSE_LWR],  
                             sCmdParts[2] == NULL ? LanguageManager->sTexts[LAN_NO_REASON_SPECIFIED] : sCmdParts[2]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand82") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                        	    globalQ->SingleItemsStore(newItem);
                         }
                    	} else {
@@ -1568,7 +1569,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, 
                             LanguageManager->sTexts[LAN_REMOVED_LWR], sCommand, LanguageManager->sTexts[LAN_FROM_TEMP_BANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand100") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
            	        	   globalQ->SingleItemsStore(newItem);
                         }
               	    } else {
@@ -1705,7 +1706,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 if(dlen < 768) {
                     int imsgLen = sprintf(msg, "%s $<%s> %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, sCommand+8);
                     if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand116") == true) {
-						QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, curUser, 0, queue::PM2ALL);
+						QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, curUser, 0, globalqueue::PM2ALL);
                         globalQ->SingleItemsStore(newItem);
                     }
                 } else {
@@ -1726,7 +1727,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                     }
                     int imsgLen = sprintf(MSG, "%s $<%s> %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, sCommand+8);
                     if(CheckSprintf(imsgLen, iWantLen, "HubCommands::DoCommand117") == true) {
-						QueueDataItem *newItem = globalQ->CreateQueueDataItem(MSG, imsgLen, curUser, 0, queue::PM2ALL);
+						QueueDataItem *newItem = globalQ->CreateQueueDataItem(MSG, imsgLen, curUser, 0, globalqueue::PM2ALL);
                         globalQ->SingleItemsStore(newItem);
                     }
 #ifdef _WIN32
@@ -1827,7 +1828,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                         int imsgLen = sprintf(msg, "%s $<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_RESTARTED_SCRIPTS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand122") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
            	                globalQ->SingleItemsStore(newItem);
                         }
            	        } else {
@@ -1911,7 +1912,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
               	      	int imsgLen = sprintf(msg, "%s $<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_RELOAD_TXT_FILES_LWR]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand129") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                             globalQ->SingleItemsStore(newItem);
                         }
         	        } else {
@@ -2000,7 +2001,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                                 SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, 
                                 LanguageManager->sTexts[LAN_RESTARTED_SCRIPT], sCommand);
                             if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand139") == true) {
-								QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+								QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                                	globalQ->SingleItemsStore(newItem);
                             }
                         } else {
@@ -2357,7 +2358,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_REMOVED_LWR], 
                             sCommand, LanguageManager->sTexts[LAN_FROM_BANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand161") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
            	        	   globalQ->SingleItemsStore(newItem);
                         }
               	    } else {
@@ -2450,7 +2451,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, 
                             LanguageManager->sTexts[LAN_HAS_UNGAGGED], user->Nick);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand172") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                             globalQ->SingleItemsStore(newItem);
                         }
          	        } else {
@@ -2590,7 +2591,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, 
                             LanguageManager->sTexts[LAN_SETS_OP_MODE_TO], user->Nick);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand187") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                             globalQ->SingleItemsStore(newItem);
                         }
                     } else {
@@ -2646,7 +2647,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 if(dlen < 768) {
                     int imsgLen = sprintf(msg, "%s $<%s> %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, sCommand+10);
                     if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand193") == true) {
-						QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, curUser, 0, queue::PM2OPS);
+						QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, curUser, 0, globalqueue::PM2OPS);
                         globalQ->SingleItemsStore(newItem);
                     }
                 } else {
@@ -2667,7 +2668,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                     }
                     int imsgLen = sprintf(MSG, "%s $<%s> %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, sCommand+10);
                     if(CheckSprintf(imsgLen, iWantLen, "HubCommands::DoCommand194") == true) {
-						QueueDataItem *newItem = globalQ->CreateQueueDataItem(MSG, imsgLen, curUser, 0, queue::PM2OPS);
+						QueueDataItem *newItem = globalQ->CreateQueueDataItem(MSG, imsgLen, curUser, 0, globalqueue::PM2OPS);
                         globalQ->SingleItemsStore(newItem);
                     }
 #ifdef _WIN32
@@ -2802,7 +2803,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                             LanguageManager->sTexts[LAN_DROP_ADDED_TEMPBAN_BY], curUser->Nick, LanguageManager->sTexts[LAN_BECAUSE_LWR], 
                             reason == NULL ? LanguageManager->sTexts[LAN_NO_REASON_SPECIFIED] : reason);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand207") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                             globalQ->SingleItemsStore(newItem);
                         }
          	    	} else {
@@ -2911,7 +2912,6 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 				hashRegManager->Rem(reg);
                 delete reg;
                 reg = NULL;
-				hashRegManager->Save();
 
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
                     if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
@@ -2919,7 +2919,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_REMOVED_LWR], 
                             sCommand, LanguageManager->sTexts[LAN_FROM_REGS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand219") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                             globalQ->SingleItemsStore(newItem);
                         }
                     } else {
@@ -2928,17 +2928,6 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand220") == true) {
                             globalQ->OPStore(msg, imsgLen);
                         }
-                    }
-                }
-
-                if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == false || ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
-                    int imsgLen = CheckFromPm(curUser, fromPM);
-
-               	    int iret = sprintf(msg+imsgLen, "<%s> %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], sCommand, 
-                        LanguageManager->sTexts[LAN_REMOVED_FROM_REGS]);
-                    imsgLen += iret;
-                    if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand222") == true) {
-                        UserSendCharDelayed(curUser, msg, imsgLen);
                     }
                 }
 
@@ -2957,6 +2946,18 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                         }
                     }
                 }
+
+                if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == false || ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
+                    int imsgLen = CheckFromPm(curUser, fromPM);
+
+               	    int iret = sprintf(msg+imsgLen, "<%s> %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], sCommand, 
+                        LanguageManager->sTexts[LAN_REMOVED_FROM_REGS]);
+                    imsgLen += iret;
+                    if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand222") == true) {
+                        UserSendCharDelayed(curUser, msg, imsgLen);
+                    }
+                }
+
                 return true;
             }
 
@@ -3094,6 +3095,31 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
             return false;
 
         case 'c':
+/*            // !crash
+#ifdef _WIN32
+            if(strnicmp(sCommand+1, "rash", 4) == 0) {
+#else
+			if(strncasecmp(sCommand+1, "rash", 4) == 0) {
+#endif
+                char * sTmp = (char*)calloc(392*1024*1024, 1);
+
+                uint32_t iLen = 0;
+                char *sData = ZlibUtility->CreateZPipe(sTmp, 392*1024*1024, iLen);
+
+                if(iLen == 0) {
+                    printf("0!");
+                } else {
+                    printf("LEN %u", iLen);
+                    if(UserPutInSendBuf(curUser, sData, iLen)) {
+                        UserTry2Send(curUser);
+                    }
+                }
+
+                free(sTmp);
+
+                return true;
+            }
+*/
             // !clrtempbans
 #ifdef _WIN32
             if(dlen == 11 && strnicmp(sCommand+1, "lrtempbans", 10) == 0) {
@@ -3113,7 +3139,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                         int imsgLen = sprintf(msg, "%s $<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_HAS_CLEARED_TEMPBANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand242") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                             globalQ->SingleItemsStore(newItem);
                         }
                     } else {
@@ -3157,7 +3183,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                         int imsgLen = sprintf(msg, "%s $<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, 
                             LanguageManager->sTexts[LAN_HAS_CLEARED_PERMBANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand246") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                             globalQ->SingleItemsStore(newItem);
                         }
                     } else {
@@ -3201,7 +3227,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                         int imsgLen = sprintf(msg, "%s $<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_TEMP_RANGE_BANS_CLEARED]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand250") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                             globalQ->SingleItemsStore(newItem);
                         }
                     } else {
@@ -3246,7 +3272,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, 
                             LanguageManager->sTexts[LAN_HAS_CLEARED_PERM_RANGEBANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand254") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                             globalQ->SingleItemsStore(newItem);
                         }
                     } else {
@@ -3977,7 +4003,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_SUCCESSFULLY_ADDED], 
                             sCmdParts[0], LanguageManager->sTexts[LAN_TO_REGISTERED_USERS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand324") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                             globalQ->SingleItemsStore(newItem);
                         }
                     } else {
@@ -4603,8 +4629,8 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 #else
 				Statinfo+="Version: PtokaX DC Hub "+string(PtokaXVersionString)+" built on "+__DATE__+" "+__TIME__+"\n";
 
-				utsname osname;
-				if(uname(&osname) == 0) {
+				struct utsname osname;
+				if(uname(&osname) >= 0) {
 					Statinfo+="OS: "+string(osname.sysname)+" "+string(osname.release)+" ("+string(osname.machine)+")\n";
 				}
 #endif
@@ -4632,7 +4658,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 				//Statinfo+="ClientSocket Errors: "+string(iStatUserSocketErrors)+" x" NEW_LINE_CHARS;
 				Statinfo+="------------------------------------------------------------" NEW_LINE_CHARS;
 #ifdef _WIN32
-				if(bNT == true) {
+				if(b2K == true) {
 					FILETIME tmpa, tmpb, kernelTimeFT, userTimeFT;
 					GetProcessTimes(GetCurrentProcess(), &tmpa, &tmpb, &kernelTimeFT, &userTimeFT);
 					int64_t kernelTime = kernelTimeFT.dwLowDateTime | (((int64_t)kernelTimeFT.dwHighDateTime) << 32);
@@ -4654,12 +4680,18 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 					Statinfo+="CPU time: "+string(cputime, iLen)+"\r\n";
 
 					PROCESS_MEMORY_COUNTERS pmc;
+					memset(&pmc, 0, sizeof(PROCESS_MEMORY_COUNTERS));
 					pmc.cb = sizeof(pmc);
-					typedef bool (CALLBACK* LPFUNC)(HANDLE Process, PPROCESS_MEMORY_COUNTERS ppsmemCounters, DWORD cb);
-					LPFUNC _GetProcessMemoryInfo = (LPFUNC)GetProcAddress(LoadLibrary("psapi"), "GetProcessMemoryInfo");
-					_GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));
-					Statinfo+="Mem usage (Peak): "+string(formatBytes(pmc.WorkingSetSize))+ " ("+string(formatBytes(pmc.PeakWorkingSetSize))+")\r\n";
-					Statinfo+="VM size (Peak): "+string(formatBytes(pmc.PagefileUsage))+ " ("+string(formatBytes(pmc.PeakPagefileUsage))+")\r\n";
+
+					typedef BOOL (WINAPI *PGPMI)(HANDLE, PPROCESS_MEMORY_COUNTERS, DWORD);
+					PGPMI pGPMI = (PGPMI)GetProcAddress(LoadLibrary("psapi.dll"), "GetProcessMemoryInfo");
+
+                    if(pGPMI != NULL) {
+					   pGPMI(GetCurrentProcess(), &pmc, sizeof(pmc));
+
+					   Statinfo+="Mem usage (Peak): "+string(formatBytes(pmc.WorkingSetSize))+ " ("+string(formatBytes(pmc.PeakWorkingSetSize))+")\r\n";
+					   Statinfo+="VM size (Peak): "+string(formatBytes(pmc.PagefileUsage))+ " ("+string(formatBytes(pmc.PeakPagefileUsage))+")\r\n";
+                    }
 				} else {
 	#ifndef _SERVICE
 					Statinfo+="Mem usage: "+string(AllocMemSize/1024)+" kB\r\n";
@@ -4838,7 +4870,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 							SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick,
 							LanguageManager->sTexts[LAN_STOPPED_SCRIPT], sCommand);
 						if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand405") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
 							globalQ->SingleItemsStore(newItem);
 						}
 					} else {
@@ -4950,7 +4982,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 								int imsgLen = sprintf(msg, "%s $<%s> *** %s %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick,
 									LanguageManager->sTexts[LAN_STARTED_SCRIPT], sCommand);
 								if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand419") == true) {
-									QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+									QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
 									globalQ->SingleItemsStore(newItem);
 								}
 							} else {
@@ -5004,7 +5036,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 								SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick,
 								LanguageManager->sTexts[LAN_STARTED_SCRIPT], sCommand);
 							if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand427") == true) {
-								QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+								QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
 								globalQ->SingleItemsStore(newItem);
 							}
 						} else {
@@ -5218,7 +5250,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, 
                             LanguageManager->sTexts[LAN_REMOVED_LWR], sCommand, LanguageManager->sTexts[LAN_FROM_BANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand447") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
            	        	   globalQ->SingleItemsStore(newItem);
                         }
               	    } else {
@@ -5513,7 +5545,7 @@ bool HubCommands::Ban(User * curUser, char * sCommand, bool fromPM, bool bFull) 
                 LanguageManager->sTexts[LAN_BANNED_LWR], LanguageManager->sTexts[LAN_BY_LWR], curUser->Nick, 
                 LanguageManager->sTexts[LAN_BECAUSE_LWR], reason == NULL ? LanguageManager->sTexts[LAN_NO_REASON_SPECIFIED] : reason);
             if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand472") == true) {
-				QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+				QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                 globalQ->SingleItemsStore(newItem);
             }
         } else {
@@ -5639,7 +5671,7 @@ bool HubCommands::BanIp(User * curUser, char * sCommand, bool fromPM, bool bFull
                             return true;
                         }
                     }
-					QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+					QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                     globalQ->SingleItemsStore(newItem);
                 } else {
                     int imsgLen;
@@ -5838,7 +5870,7 @@ bool HubCommands::TempBan(User * curUser, char * sCommand, const size_t &dlen, b
                 LanguageManager->sTexts[LAN_TO_LWR], sTime, LanguageManager->sTexts[LAN_BECAUSE_LWR], 
                 sCmdParts[2] == NULL ? LanguageManager->sTexts[LAN_NO_REASON_SPECIFIED] : sCmdParts[2]);
             if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand500") == true) {
-				QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+				QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                 globalQ->SingleItemsStore(newItem);
             }
         } else {
@@ -6026,7 +6058,7 @@ bool HubCommands::TempBanIp(User * curUser, char * sCommand, const size_t &dlen,
                 LanguageManager->sTexts[LAN_BY_LWR], curUser->Nick, LanguageManager->sTexts[LAN_TO_LWR], sTime, 
                 LanguageManager->sTexts[LAN_BECAUSE_LWR], sCmdParts[2] == NULL ? LanguageManager->sTexts[LAN_NO_REASON_SPECIFIED] : sCmdParts[2]);
             if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand513") == true) {
-				QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+				QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                 globalQ->SingleItemsStore(newItem);
             }
         } else {
@@ -6160,7 +6192,7 @@ bool HubCommands::RangeBan(User * curUser, char * sCommand, const size_t &dlen, 
                     return true;
                 }
             }
-			QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+			QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
             globalQ->SingleItemsStore(newItem);
         } else {
             int imsgLen;
@@ -6308,7 +6340,7 @@ bool HubCommands::RangeTempBan(User * curUser, char * sCommand, const size_t &dl
             int imsgLen;
             if(sCmdParts[3] == NULL) {
                 imsgLen = sprintf(msg, "%s $<%s> *** %s %s-%s %s %s%s %s %s %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                    LanguageManager->sTexts[LAN_RANGE], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], sCmdParts[0], sCmdParts[1], 
+                    SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_RANGE], sCmdParts[0], sCmdParts[1], 
                     LanguageManager->sTexts[LAN_IS_LWR], bFull == true ? LanguageManager->sTexts[LAN_FULL_LWR] : "", 
                     LanguageManager->sTexts[LAN_TEMP_BANNED],  LanguageManager->sTexts[LAN_BY_LWR], curUser->Nick, 
                     LanguageManager->sTexts[LAN_TO_LWR], sTime);
@@ -6317,7 +6349,7 @@ bool HubCommands::RangeTempBan(User * curUser, char * sCommand, const size_t &dl
                 }
             } else {
                 imsgLen = sprintf(msg, "%s $<%s> *** %s %s-%s %s %s%s %s %s %s: %s %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                    LanguageManager->sTexts[LAN_RANGE], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], sCmdParts[0], sCmdParts[1], 
+                    SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_RANGE], sCmdParts[0], sCmdParts[1], 
                     LanguageManager->sTexts[LAN_IS_LWR], bFull == true ? LanguageManager->sTexts[LAN_FULL_LWR] : "", 
                     LanguageManager->sTexts[LAN_TEMP_BANNED], LanguageManager->sTexts[LAN_BY_LWR], curUser->Nick, 
                     LanguageManager->sTexts[LAN_TO_LWR], sTime, LanguageManager->sTexts[LAN_BECAUSE_LWR], sCmdParts[3]);
@@ -6325,7 +6357,7 @@ bool HubCommands::RangeTempBan(User * curUser, char * sCommand, const size_t &dl
                     return true;
                 }
             }
-			QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+			QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
             globalQ->SingleItemsStore(newItem);
         } else {
             int imsgLen;
@@ -6425,7 +6457,7 @@ bool HubCommands::RangeUnban(User * curUser, char * sCommand, bool fromPM, unsig
                 cType == 1 ? LanguageManager->sTexts[LAN_TEMP_BANS_LWR] : LanguageManager->sTexts[LAN_PERM_BANS_LWR], 
                 LanguageManager->sTexts[LAN_BY_LWR], curUser->Nick);
             if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand550") == true) {
-				QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+				QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                 globalQ->SingleItemsStore(newItem);
             }
         } else {
@@ -6509,7 +6541,7 @@ bool HubCommands::RangeUnban(User * curUser, char * sCommand, bool fromPM) {
                 SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_RANGE], sCommand, toip, 
                 LanguageManager->sTexts[LAN_IS_REMOVED_FROM_RANGE_BANS_BY], curUser->Nick);
             if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand560") == true) {
-                QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+                QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                 globalQ->SingleItemsStore(newItem);
             }
         } else {

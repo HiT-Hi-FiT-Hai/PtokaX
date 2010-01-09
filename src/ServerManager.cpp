@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -58,6 +58,7 @@
 #include "ResNickManager.h"
 #include "ServerThread.h"
 #include "TextFileManager.h"
+//#include "TLSManager.h"
 #ifdef _WIN32
 	#ifndef _SERVICE
 		#include "TScriptMemoryForm.h"
@@ -76,7 +77,12 @@
 //---------------------------------------------------------------------------
 static ServerThread *ServersE = NULL;
 #ifdef _WIN32
-	static UINT_PTR sectimer = 0, regtimer = 0;
+        static UINT_PTR sectimer = 0;
+    #ifndef _SERVICE
+        static UINT_PTR regtimer = 0;
+    #else
+        UINT_PTR regtimer = 0;
+    #endif
 #else
 	static timer_t sectimer, regtimer;
 #endif
@@ -109,7 +115,7 @@ uint8_t ui8SrCntr = 0, ui8MinTick = 0;
 
 #ifdef _WIN32
 VOID CALLBACK SecTimerProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*idEvent*/, DWORD /*dwTime*/) {
-	if(bNT == true) {
+	if(b2K == true) {
 		FILETIME tmpa, tmpb, kernelTimeFT, userTimeFT;
 		GetProcessTimes(GetCurrentProcess(), &tmpa, &tmpb, &kernelTimeFT, &userTimeFT);
 		int64_t kernelTime = kernelTimeFT.dwLowDateTime | (((int64_t)kernelTimeFT.dwHighDateTime) << 32);
@@ -165,7 +171,11 @@ static void SecTimerHandler(int sig) {
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
+    #ifndef _SERVICE
 	VOID CALLBACK RegTimerProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*idEvent*/, DWORD /*dwTime*/) {
+    #else
+    void ServerOnRegTimer() {
+    #endif
 	    if(SettingManager->bBools[SETBOOL_AUTO_REG] == true && SettingManager->sTexts[SETTXT_REGISTER_SERVERS] != NULL) {
 			// First destroy old hublist reg thread if any
 	        if(RegisterThread != NULL) {
@@ -194,6 +204,7 @@ static void SecTimerHandler(int sig) {
 //---------------------------------------------------------------------------
 
 void ServerInitialize() {
+    setlocale(LC_ALL, "");
 #ifdef _WIN32
 	#ifndef _MSC_VER
 	    randomize();
@@ -335,11 +346,12 @@ void ServerInitialize() {
 
 #ifdef _WIN32
     // PPK ... check OS if is NT
-    OSVERSIONINFO osvi;
-	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-	if(GetVersionEx(&osvi) && osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion > 4) {
-        // PPK ... set bNT to true
-        bNT = true;
+    OSVERSIONINFOEX osvi;
+	memset(&osvi, 0, sizeof(OSVERSIONINFOEX));
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+	if(GetVersionEx((OSVERSIONINFO *)&osvi) && osvi.dwMajorVersion >= 5) {
+        // PPK ... set b2K to true
+        b2K = true;
 	}
 #endif
 
@@ -636,6 +648,18 @@ bool ServerStart() {
 
     AppendLog("Serving started");
 
+//  if(tlsenabled == true) {
+/*        TLSManager = new TLSMan();
+        if(TLSManager == NULL) {
+        	string sDbgstr = "[BUF] Cannot allocate TLSManager!";
+#ifdef _WIN32
+    		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
+    		AppendSpecialLog(sDbgstr);
+        	exit(EXIT_FAILURE);
+        }*/
+//  }
+
     IP2Country = new IP2CC();
     if(IP2Country == NULL) {
     	string sDbgstr = "[BUF] Cannot allocate IP2Country!";
@@ -666,7 +690,7 @@ bool ServerStart() {
         exit(EXIT_FAILURE);
     }
 
-    colUsers = new classUsers;
+    colUsers = new classUsers();
 	if(colUsers == NULL) {
 		string sDbgstr = "[BUF] Cannot allocate colUsers!";
 #ifdef _WIN32
@@ -676,7 +700,7 @@ bool ServerStart() {
     	exit(EXIT_FAILURE);
     }
 
-    globalQ = new queue;
+    globalQ = new globalqueue();
     if(globalQ == NULL) {
     	string sDbgstr = "[BUF] Cannot allocate globalQ!";
 #ifdef _WIN32
@@ -686,7 +710,7 @@ bool ServerStart() {
     	exit(EXIT_FAILURE);
     }
 
-    HubCmds = new HubCommands;
+    HubCmds = new HubCommands();
     if(HubCmds == NULL) {
     	string sDbgstr = "[BUF] Cannot allocate HubCmds!";
 #ifdef _WIN32
@@ -696,7 +720,7 @@ bool ServerStart() {
     	exit(EXIT_FAILURE);
     }
 
-    DcCommands = new cDcCommands;
+    DcCommands = new cDcCommands();
     if(DcCommands == NULL) {
     	string sDbgstr = "[BUF] Cannot allocate DcCommands!";
 #ifdef _WIN32
@@ -734,8 +758,6 @@ bool ServerStart() {
             UDPThread = NULL;
         }
     }
-
-	ScriptManager->SaveScripts();
     
     if(SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == true) {
 		ScriptManager->Start();
@@ -795,8 +817,12 @@ bool ServerStart() {
     //Start the HubRegistration timer
     if(SettingManager->bBools[SETBOOL_AUTO_REG] == true) {
 #ifdef _WIN32
+        #ifndef _SERVICE
     	regtimer = SetTimer(NULL, 0, 901000, (TIMERPROC)RegTimerProc);
-    
+        #else
+        regtimer = SetTimer(NULL, 0, 901000, NULL);
+        #endif
+
         if(regtimer == 0) {
 			string sDbgstr = "[BUF] Cannot start RegTimer in ServerMan::StartServer! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
 #else
@@ -957,6 +983,11 @@ void ServerFinalStop(const bool &bFromServiceLoop) {
         IP2Country = NULL;
     }
 
+/*	if(TLSManager != NULL) {
+		delete TLSManager;
+        TLSManager = NULL;
+    }*/
+
 	//userstat  // better here ;)
 //    sqldb->FinalizeAllVisits();
 
@@ -1033,9 +1064,13 @@ void ServerFinalClose() {
 
 	hashBanManager->Save(true);
 
+    ProfileMan->SaveProfiles();
+
     hashRegManager->Save();
 
 	ScriptManager->SaveScripts();
+
+	SettingManager->Save();
 
     delete ScriptManager;
 	ScriptManager = NULL;
@@ -1219,8 +1254,12 @@ void ServerUpdateAutoRegState() {
 
     if(SettingManager->bBools[SETBOOL_AUTO_REG] == true) {
 #ifdef _WIN32
-        regtimer = SetTimer(NULL, 0, 901000, (TIMERPROC)RegTimerProc);
-        
+        #ifndef _SERVICE
+    	regtimer = SetTimer(NULL, 0, 901000, (TIMERPROC)RegTimerProc);
+        #else
+        regtimer = SetTimer(NULL, 0, 901000, NULL);
+        #endif
+
         if(regtimer == 0) {
             string sDbgstr = "[BUF] Cannot start RegTimer in ServerMan::UpdateAutoRegState! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
 #else
