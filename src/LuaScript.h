@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,6 +22,7 @@
 #define LuaScriptH
 //---------------------------------------------------------------------------
 struct User;
+struct Script;
 //---------------------------------------------------------------------------
 
 struct ScriptBot {
@@ -111,8 +112,12 @@ User * ScriptGetUser(lua_State * L, const int &iTop, const char * sFunction);
 void ScriptError(Script * cur);
 
 #ifdef _WIN32
-	VOID CALLBACK ScriptTimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
-	VOID CALLBACK ScriptTimerCustomProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
+    #ifndef _SERVICE
+        VOID CALLBACK ScriptTimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
+        VOID CALLBACK ScriptTimerCustomProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
+    #else
+        void ScriptOnTimer(const UINT_PTR &uiTimerId);
+    #endif
 #else
 	void ScriptOnTimer(ScriptTimer * AccTimer);
 #endif

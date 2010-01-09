@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -57,6 +57,7 @@
 	    #include <vcl.h>
 	#endif
 #endif
+#include <locale.h>
 #include <time.h>
 #ifdef _WIN32
 	#include <process.h>
@@ -73,6 +74,9 @@
 	#include <pthread.h>
 	#include <signal.h>
 	#include <sys/ioctl.h>
+	#if defined (__SVR4) && defined (__sun)
+	   #include <sys/filio.h>
+	#endif
 	#include <sys/resource.h> 
 	#include <sys/types.h>
 	#include <sys/socket.h>
@@ -88,7 +92,7 @@
 #endif
 #include "pxstring.h"
 //---------------------------------------------------------------------------
-#define PtokaXVersionString "0.4.1.1"
+#define PtokaXVersionString "0.4.1.2"
 #define sErrOutOfMem "[ERR] Out of memory..."
 
 #ifdef _WIN32

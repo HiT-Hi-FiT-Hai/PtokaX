@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -1616,7 +1616,9 @@ bool UserPutInSendBuf(User * u, const char * Text, const size_t &iTxtLen) {
                 // PPK ... if we are on maximum but in buffer is empty place for data then use it ! ;o)
                 if(SettingManager->bBools[SETBOOL_KEEP_SLOW_USERS] == false) {
                     // we want to drop the slow user
+                    u->ui32BoolBits |= User::BIT_ERROR;
                     UserClose(u);
+
 					UdpDebug->Broadcast("[BUF] " + string(u->Nick, u->NickLen) + " (" + string(u->IP, u->ui8IpLen) +
 						") SendBuffer overflow (AL:"+string((uint64_t)iAllignLen)+"[SL:"+string(u->sbdatalen)+"|NL:"+
 #ifdef _WIN32
@@ -2724,7 +2726,7 @@ void UserHasSuspiciousTag(User *curUser) {
                 memcpy(msg+imsgLen, curUser->Description, (size_t)curUser->ui8DescrLen);
                 imsgLen += (int)curUser->ui8DescrLen;
                 msg[imsgLen] = '|';
-                QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen+1, NULL, 0, queue::PM2OPS);
+                QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen+1, NULL, 0, globalqueue::PM2OPS);
                 globalQ->SingleItemsStore(newItem);
             }
 		} else {

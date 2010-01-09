@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -36,10 +36,10 @@
 	#endif
 #endif
 //---------------------------------------------------------------------------
-queue *globalQ = NULL;
+globalqueue *globalQ = NULL;
 //---------------------------------------------------------------------------
 
-queue::queue() {
+globalqueue::globalqueue() {
     bActive = true;
 
     bHaveQueue = false;
@@ -315,11 +315,11 @@ queue::queue() {
 }
 //---------------------------------------------------------------------------
 
-queue::~queue() {
+globalqueue::~globalqueue() {
     if(OpListQueue.buffer != NULL) {
 #ifdef _WIN32
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)OpListQueue.buffer) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate OpListQueue.buffer in queue::~queue! "+string((uint32_t)GetLastError())+" "+
+			string sDbgstr = "[BUF] Cannot deallocate OpListQueue.buffer in globalqueue::~globalqueue! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
@@ -332,7 +332,7 @@ queue::~queue() {
     if(UserIPQueue.buffer != NULL) {
 #ifdef _WIN32
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)UserIPQueue.buffer) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate UserIPQueue.buffer in queue::~queue! "+string((uint32_t)GetLastError())+" "+
+			string sDbgstr = "[BUF] Cannot deallocate UserIPQueue.buffer in globalqueue::~globalqueue! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
@@ -350,7 +350,7 @@ queue::~queue() {
             if(cur->sData != NULL) {
 #ifdef _WIN32
                 if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sData) == 0) {
-					string sDbgstr = "[BUF] Cannot deallocate cur->sData in queue::~queue! "+string((uint32_t)GetLastError())+" "+
+					string sDbgstr = "[BUF] Cannot deallocate cur->sData in globalqueue::~globalqueue! "+string((uint32_t)GetLastError())+" "+
 						string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 					AppendSpecialLog(sDbgstr);
                 }
@@ -372,7 +372,7 @@ queue::~queue() {
             if(cur->sData != NULL) {
 #ifdef _WIN32
                 if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sData) == 0) {
-					string sDbgstr = "[BUF] Cannot deallocate cur->sData1 in queue::~queue! "+string((uint32_t)GetLastError())+" "+
+					string sDbgstr = "[BUF] Cannot deallocate cur->sData1 in globalqueue::~globalqueue! "+string((uint32_t)GetLastError())+" "+
 						string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 					AppendSpecialLog(sDbgstr);
                 }
@@ -392,7 +392,7 @@ queue::~queue() {
         if(zqueue->buffer != NULL) {
 #ifdef _WIN32
             if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)zqueue->buffer) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate zqueue->buffer in queue::~queue! "+string((uint32_t)GetLastError())+" "+
+				string sDbgstr = "[BUF] Cannot deallocate zqueue->buffer in globalqueue::~globalqueue! "+string((uint32_t)GetLastError())+" "+
 					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 				AppendSpecialLog(sDbgstr);
             }
@@ -405,7 +405,7 @@ queue::~queue() {
         if(zqueue->zbuffer != NULL) {
 #ifdef _WIN32
             if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)zqueue->zbuffer) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate zqueue->zbuffer in queue::~queue! "+string((uint32_t)GetLastError())+" "+
+				string sDbgstr = "[BUF] Cannot deallocate zqueue->zbuffer in globalqueue::~globalqueue! "+string((uint32_t)GetLastError())+" "+
 					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 				AppendSpecialLog(sDbgstr);
             }
@@ -422,7 +422,7 @@ queue::~queue() {
         if(zqueue->buffer != NULL) {
 #ifdef _WIN32
             if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)zqueue->buffer) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate zqueue->buffer1 in queue::~queue! "+string((uint32_t)GetLastError())+" "+
+				string sDbgstr = "[BUF] Cannot deallocate zqueue->buffer1 in globalqueue::~globalqueue! "+string((uint32_t)GetLastError())+" "+
 					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 				AppendSpecialLog(sDbgstr);
             }
@@ -435,7 +435,7 @@ queue::~queue() {
         if(zqueue->zbuffer != NULL) {
 #ifdef _WIN32
             if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)zqueue->zbuffer) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate zqueue->zbuffer1 in queue::~queue! "+string((uint32_t)GetLastError())+" "+
+				string sDbgstr = "[BUF] Cannot deallocate zqueue->zbuffer1 in globalqueue::~globalqueue! "+string((uint32_t)GetLastError())+" "+
 					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
                 AppendSpecialLog(sDbgstr);
             }
@@ -450,14 +450,14 @@ queue::~queue() {
 }
 //---------------------------------------------------------------------------
 
-void queue::Store(char * sData) {
+void globalqueue::Store(char * sData) {
     size_t iLen = strlen(sData);
     Store(sData, iLen);
 }
 //---------------------------------------------------------------------------
 
 // appends data to all global output queues
-void queue::Store(char * sData, const size_t &iDataLen) {
+void globalqueue::Store(char * sData, const size_t &iDataLen) {
     QzBuf **allqzbufs;
     
     if(bActive) {
@@ -479,7 +479,7 @@ void queue::Store(char * sData, const size_t &iDataLen) {
 #endif
             if(zqueue->buffer == NULL) {
 				string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)iDataLen)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
-					" bytes of memory in queue::Store! "+string(sData, iDataLen);
+					" bytes of memory in globalqueue::Store! "+string(sData, iDataLen);
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -495,14 +495,14 @@ void queue::Store(char * sData, const size_t &iDataLen) {
 }
 //---------------------------------------------------------------------------
 
-void queue::HStore(char * sData) {
+void globalqueue::HStore(char * sData) {
     size_t iLen = strlen(sData);
     HStore(sData, iLen);
 }
 //---------------------------------------------------------------------------
 
 // appends data to all hello global output queues
-void queue::HStore(char * sData, const size_t &iDataLen) {
+void globalqueue::HStore(char * sData, const size_t &iDataLen) {
     QzBuf **hlqzbufs;
     
     if(bActive) {
@@ -524,7 +524,7 @@ void queue::HStore(char * sData, const size_t &iDataLen) {
 #endif
             if(zqueue->buffer == NULL) {
 				string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)iDataLen)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
-					" bytes of memory in queue::HStore! "+string(sData, iDataLen);
+					" bytes of memory in globalqueue::HStore! "+string(sData, iDataLen);
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -541,7 +541,7 @@ void queue::HStore(char * sData, const size_t &iDataLen) {
 //---------------------------------------------------------------------------
 
 // appends data to all active global output queues
-void queue::AStore(char * sData, const size_t &iDataLen) {
+void globalqueue::AStore(char * sData, const size_t &iDataLen) {
     QzBuf **srchqzbufs;
     
     if(bActive) {
@@ -563,7 +563,7 @@ void queue::AStore(char * sData, const size_t &iDataLen) {
 #endif
            	if(zqueue->buffer == NULL) {
 				string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)iDataLen)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
-					" bytes of memory in queue::AStore! "+string(sData, iDataLen);
+					" bytes of memory in globalqueue::AStore! "+string(sData, iDataLen);
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -580,7 +580,7 @@ void queue::AStore(char * sData, const size_t &iDataLen) {
 //---------------------------------------------------------------------------
 
 // appends data to all passive global output queues
-void queue::PStore(char * sData, const size_t &iDataLen) {
+void globalqueue::PStore(char * sData, const size_t &iDataLen) {
     QzBuf **actqzbufs;
     
     if(bActive) {
@@ -602,7 +602,7 @@ void queue::PStore(char * sData, const size_t &iDataLen) {
 #endif
            	if(zqueue->buffer == NULL) {
 				string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)iDataLen)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
-					" bytes of memory in queue::PStore! "+string(sData, iDataLen);
+					" bytes of memory in globalqueue::PStore! "+string(sData, iDataLen);
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -619,7 +619,7 @@ void queue::PStore(char * sData, const size_t &iDataLen) {
 //---------------------------------------------------------------------------
 
 // appends data to all userlist global output queues
-void queue::InfoStore(char * sData, const size_t &iDataLen) {
+void globalqueue::InfoStore(char * sData, const size_t &iDataLen) {
     QzBuf **allqzbufs;
     
     if(bActive) {
@@ -641,7 +641,7 @@ void queue::InfoStore(char * sData, const size_t &iDataLen) {
 #endif
             if(zqueue->buffer == NULL) {
 				string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)iDataLen)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
-					" bytes of memory in queue::InfoStore! "+string(sData, iDataLen);
+					" bytes of memory in globalqueue::InfoStore! "+string(sData, iDataLen);
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -658,7 +658,7 @@ void queue::InfoStore(char * sData, const size_t &iDataLen) {
 //---------------------------------------------------------------------------
 
 // appends data to all striped myinfo global output queues
-void queue::StrpInfoStore(char * sData, const size_t &iDataLen) {
+void globalqueue::StrpInfoStore(char * sData, const size_t &iDataLen) {
     QzBuf **strpqzbufs;
     
     if(bActive) {
@@ -680,7 +680,7 @@ void queue::StrpInfoStore(char * sData, const size_t &iDataLen) {
 #endif
             if(zqueue->buffer == NULL) {
 				string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)iDataLen)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
-					" bytes of memory in queue::StrpInfoStore! "+string(sData, iDataLen);
+					" bytes of memory in globalqueue::StrpInfoStore! "+string(sData, iDataLen);
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -697,7 +697,7 @@ void queue::StrpInfoStore(char * sData, const size_t &iDataLen) {
 //---------------------------------------------------------------------------
 
 // appends data to all full myinfo global output queues
-void queue::FullInfoStore(char * sData, const size_t &iDataLen) {
+void globalqueue::FullInfoStore(char * sData, const size_t &iDataLen) {
     QzBuf **fullqzbufs;
     
     if(bActive) {
@@ -719,7 +719,7 @@ void queue::FullInfoStore(char * sData, const size_t &iDataLen) {
 #endif
             if(zqueue->buffer == NULL) {
 				string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)iDataLen)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
-					" bytes of memory in queue::FullInfoStore! "+string(sData, iDataLen);
+					" bytes of memory in globalqueue::FullInfoStore! "+string(sData, iDataLen);
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -736,7 +736,7 @@ void queue::FullInfoStore(char * sData, const size_t &iDataLen) {
 //---------------------------------------------------------------------------
 
 // appends data to all OP global output queues
-void queue::OPStore(char * sData, const size_t &iDataLen) {
+void globalqueue::OPStore(char * sData, const size_t &iDataLen) {
     QzBuf **opqzbufs;
     
     if(bActive) {
@@ -758,7 +758,7 @@ void queue::OPStore(char * sData, const size_t &iDataLen) {
 #endif
             if(zqueue->buffer == NULL) {
 				string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)iDataLen)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
-					" bytes of memory in queue::OPStore! "+string(sData, iDataLen);
+					" bytes of memory in globalqueue::OPStore! "+string(sData, iDataLen);
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -775,12 +775,12 @@ void queue::OPStore(char * sData, const size_t &iDataLen) {
 //---------------------------------------------------------------------------
 
 // appends data to the OpList queue
-void queue::OpListStore(char * sNick) {   
+void globalqueue::OpListStore(char * sNick) {
     if(OpListQueue.len == 0) {
         OpListQueue.len = sprintf(OpListQueue.buffer, "$OpList %s$$|", sNick);
     } else {
         int iDataLen = sprintf(msg, "%s$$|", sNick);
-        if(CheckSprintf(iDataLen, 128, "queue::OpListStore2") == true) {
+        if(CheckSprintf(iDataLen, 128, "globalqueue::OpListStore2") == true) {
             if(OpListQueue.size < OpListQueue.len+iDataLen) {
                 size_t iAllignLen = Allign256(OpListQueue.len+iDataLen);
 #ifdef _WIN32
@@ -790,7 +790,7 @@ void queue::OpListStore(char * sNick) {
 #endif
                 if(OpListQueue.buffer == NULL) {
 					string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string((uint64_t)OpListQueue.size)+"/"+string((uint64_t)iAllignLen)+
-						" bytes of memory in queue::OpListStore! "+string(msg, iDataLen);
+						" bytes of memory in globalqueue::OpListStore! "+string(msg, iDataLen);
 #ifdef _WIN32
 					sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -808,13 +808,13 @@ void queue::OpListStore(char * sNick) {
 //---------------------------------------------------------------------------
 
 // appends data to the userip queue
-void queue::UserIPStore(User * curUser) {   
+void globalqueue::UserIPStore(User * curUser) {
     if(UserIPQueue.len == 0) {
         UserIPQueue.len = sprintf(UserIPQueue.buffer, "$UserIP %s %s|", curUser->Nick, curUser->IP);
         UserIPQueue.bHaveDollars = false;
     } else {
         int iDataLen = sprintf(msg, "%s %s$$|", curUser->Nick, curUser->IP);
-        if(CheckSprintf(iDataLen, 128, "queue::UserIPStore2") == true) {
+        if(CheckSprintf(iDataLen, 128, "globalqueue::UserIPStore2") == true) {
             if(UserIPQueue.bHaveDollars == false) {
                 UserIPQueue.buffer[UserIPQueue.len-1] = '$';
                 UserIPQueue.buffer[UserIPQueue.len] = '$';
@@ -830,7 +830,7 @@ void queue::UserIPStore(User * curUser) {
 #endif
                 if(UserIPQueue.buffer == NULL) {
 					string sDbgstr = "[BUF] Cannot reallocate "+string(iDataLen)+"/"+string((uint64_t)UserIPQueue.size)+"/"+string((uint64_t)iAllignLen)+
-						" bytes of memory in queue::UserIPStore! "+string(msg, iDataLen);
+						" bytes of memory in globalqueue::UserIPStore! "+string(msg, iDataLen);
 #ifdef _WIN32
 					sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -848,7 +848,7 @@ void queue::UserIPStore(User * curUser) {
 }
 //---------------------------------------------------------------------------
 
-void queue::SingleItemsStore(QueueDataItem * NewItem) {
+void globalqueue::SingleItemsStore(QueueDataItem * NewItem) {
     if(bActive) {
         if(SingleItemsQueueaS == NULL) {
             SingleItemsQueueaS = NewItem;
@@ -871,7 +871,7 @@ void queue::SingleItemsStore(QueueDataItem * NewItem) {
 }
 //---------------------------------------------------------------------------
 
-void queue::FinalizeQueues() {
+void globalqueue::FinalizeQueues() {
     if(OpListQueue.len != 0) {
         InfoStore(OpListQueue.buffer, OpListQueue.len);
         OpListQueue.len = 0;
@@ -912,7 +912,7 @@ void queue::FinalizeQueues() {
 #endif
                 if(zqueue->buffer == NULL) {
 					string sDbgstr = "[BUF] Cannot reallocate "+string((uint64_t)UserIPQueue.len)+"/"+string((uint64_t)zqueue->len)+"/"+string((uint64_t)iAllignLen)+
-						" bytes of memory in queue::FinalizeQueues!";
+						" bytes of memory in globalqueue::FinalizeQueues!";
 #ifdef _WIN32
 					sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -931,7 +931,7 @@ void queue::FinalizeQueues() {
 }
 //---------------------------------------------------------------------------
 
-void queue::ClearQueues() {
+void globalqueue::ClearQueues() {
     bHaveQueue = false;
     bHaveIP = false;
     
@@ -993,7 +993,7 @@ void queue::ClearQueues() {
             if(cur->sData != NULL) {
 #ifdef _WIN32
                 if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sData) == 0) {
-					string sDbgstr = "[BUF] Cannot deallocate cur->sData in queue::ClearQueues! "+string((uint32_t)GetLastError())+" "+
+					string sDbgstr = "[BUF] Cannot deallocate cur->sData in globalqueue::ClearQueues! "+string((uint32_t)GetLastError())+" "+
 						string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 					AppendSpecialLog(sDbgstr);
                 }
@@ -1010,7 +1010,7 @@ void queue::ClearQueues() {
 }
 //---------------------------------------------------------------------------
 
-void queue::ProcessQueues(User * u) {
+void globalqueue::ProcessQueues(User * u) {
     bool bHaveH, bHaveA, bHaveP, bHaveFull, bHaveOp;
     struct QzBuf *Q, *ActQ, *PasQ, *OpQ, *OpActQ, *OpPasQ,
         *HlStrpQ, *HlStrpActQ, *HlStrpPasQ, *HlFullQ, *HlFullActQ, *HlFullPasQ,
@@ -1300,7 +1300,7 @@ void queue::ProcessQueues(User * u) {
 }
 //---------------------------------------------------------------------------
 
-void queue::ProcessSingleItems(User * u) {
+void globalqueue::ProcessSingleItems(User * u) {
     char *MSG = NULL;
     int MSGLen = 0;
     size_t MSGSize = 0;
@@ -1311,7 +1311,7 @@ void queue::ProcessSingleItems(User * u) {
         qdinxt = qdicur->next;
         if(qdicur->FromUser != u) {
             switch(qdicur->iType) {
-                case queue::PM2ALL: { // send PM to ALL
+                case globalqueue::PM2ALL: { // send PM to ALL
                     if(MSGSize < MSGLen+qdicur->iDataLen+u->NickLen+13) {
                         size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->NickLen+13);
                         if(MSG == NULL) {
@@ -1330,7 +1330,7 @@ void queue::ProcessSingleItems(User * u) {
                         if(MSG == NULL) {
 							string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+
                                 string((uint64_t)qdicur->iDataLen)+"/"+string((uint64_t)MSGLen)+"/"+string((uint64_t)iAllignLen)+
-                                " bytes of memory in queue::ProcessSingleItems! "+string(qdicur->sData, qdicur->iDataLen);
+                                " bytes of memory in globalqueue::ProcessSingleItems! "+string(qdicur->sData, qdicur->iDataLen);
 #ifdef _WIN32
 							sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -1341,13 +1341,13 @@ void queue::ProcessSingleItems(User * u) {
                     }
                     int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->Nick);
                     MSGLen += iret;
-                    CheckSprintf1(iret, MSGLen, MSGSize, "queue::ProcessSingleItems1");
+                    CheckSprintf1(iret, MSGLen, MSGSize, "globalqueue::ProcessSingleItems1");
                     memcpy(MSG+MSGLen, qdicur->sData, qdicur->iDataLen);
                     MSGLen += (int)qdicur->iDataLen;
                     MSG[MSGLen] = '\0';
                     break;
                 }
-                case queue::PM2OPS: { // send PM only to operators
+                case globalqueue::PM2OPS: { // send PM only to operators
                     if(((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                         if(MSGSize < MSGLen+qdicur->iDataLen+u->NickLen+13) {
                             size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->NickLen+13);
@@ -1367,7 +1367,7 @@ void queue::ProcessSingleItems(User * u) {
                             if(MSG == NULL) {
 								string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+
                                     string((uint64_t)qdicur->iDataLen)+"/"+string((uint64_t)MSGLen)+"/"+string((uint64_t)iAllignLen)+
-                                    " bytes of memory in queue::ProcessSingleItems1! "+string(qdicur->sData, qdicur->iDataLen);
+                                    " bytes of memory in globalqueue::ProcessSingleItems1! "+string(qdicur->sData, qdicur->iDataLen);
 #ifdef _WIN32
 								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -1377,14 +1377,14 @@ void queue::ProcessSingleItems(User * u) {
                         }
                         int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->Nick);
                         MSGLen += iret;
-                        CheckSprintf1(iret, MSGLen, MSGSize, "queue::ProcessSingleItems2");
+                        CheckSprintf1(iret, MSGLen, MSGSize, "globalqueue::ProcessSingleItems2");
                         memcpy(MSG+MSGLen, qdicur->sData, qdicur->iDataLen);
                         MSGLen += (int)qdicur->iDataLen;
                         MSG[MSGLen] = '\0';
                     }
                     break;
                 }
-                case queue::OPCHAT: { // send OpChat only to allowed users...
+                case globalqueue::OPCHAT: { // send OpChat only to allowed users...
                     if(ProfileMan->IsAllowed(u, ProfileManager::ALLOWEDOPCHAT) == true) {
                         if(MSGSize < MSGLen+qdicur->iDataLen+u->NickLen+13) {
                             size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->NickLen+13);
@@ -1404,7 +1404,7 @@ void queue::ProcessSingleItems(User * u) {
                             if(MSG == NULL) {
 								string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+
                                     string((uint64_t)qdicur->iDataLen)+"/"+string((uint64_t)MSGLen)+"/"+string((uint64_t)iAllignLen)+
-                                    " bytes of memory in queue::ProcessSingleItems2! "+string(qdicur->sData, qdicur->iDataLen);
+                                    " bytes of memory in globalqueue::ProcessSingleItems2! "+string(qdicur->sData, qdicur->iDataLen);
 #ifdef _WIN32
 								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -1415,14 +1415,14 @@ void queue::ProcessSingleItems(User * u) {
                         }
                         int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->Nick);
                         MSGLen += iret;
-                        CheckSprintf1(iret, MSGLen, MSGSize, "queue::ProcessSingleItems3");
+                        CheckSprintf1(iret, MSGLen, MSGSize, "globalqueue::ProcessSingleItems3");
                         memcpy(MSG+MSGLen, qdicur->sData, qdicur->iDataLen);
                         MSGLen += (int)qdicur->iDataLen;
                         MSG[MSGLen] = '\0';
                     }
                     break;
                 }
-                case queue::TOPROFILE: { // send data only to given profile...
+                case globalqueue::TOPROFILE: { // send data only to given profile...
                     if(u->iProfile == qdicur->iProfile) {
                         if(MSGSize < MSGLen+qdicur->iDataLen) {
                             size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+1);
@@ -1442,7 +1442,7 @@ void queue::ProcessSingleItems(User * u) {
                             if(MSG == NULL) {
 								string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+
                                     string((uint64_t)qdicur->iDataLen)+"/"+string((uint64_t)MSGLen)+"/"+string((uint64_t)iAllignLen)+
-                                    " bytes of memory in queue::ProcessSingleItems3! "+string(qdicur->sData, qdicur->iDataLen);
+                                    " bytes of memory in globalqueue::ProcessSingleItems3! "+string(qdicur->sData, qdicur->iDataLen);
 #ifdef _WIN32
 								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -1457,7 +1457,7 @@ void queue::ProcessSingleItems(User * u) {
                     }
                     break;
                 }
-                case queue::PM2PROFILE: { // send pm only to given profile...
+                case globalqueue::PM2PROFILE: { // send pm only to given profile...
                     if(u->iProfile == qdicur->iProfile) {
                         if(MSGSize < MSGLen+qdicur->iDataLen+u->NickLen+13) {
                             size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->NickLen+13);
@@ -1477,7 +1477,7 @@ void queue::ProcessSingleItems(User * u) {
                             if(MSG == NULL) {
 								string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+
                                     string((uint64_t)qdicur->iDataLen)+"/"+string((uint64_t)MSGLen)+"/"+string((uint64_t)iAllignLen)+
-                                    " bytes of memory in queue::ProcessSingleItems4! "+string(qdicur->sData, qdicur->iDataLen);
+                                    " bytes of memory in globalqueue::ProcessSingleItems4! "+string(qdicur->sData, qdicur->iDataLen);
 #ifdef _WIN32
 								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -1488,7 +1488,7 @@ void queue::ProcessSingleItems(User * u) {
                         }
                         int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->Nick);
                         MSGLen += iret;
-                        CheckSprintf1(iret, MSGLen, MSGSize, "queue::ProcessSingleItems4");
+                        CheckSprintf1(iret, MSGLen, MSGSize, "globalqueue::ProcessSingleItems4");
                         memcpy(MSG+MSGLen, qdicur->sData, qdicur->iDataLen);
                         MSGLen += (int)qdicur->iDataLen;
                         MSG[MSGLen] = '\0';
@@ -1504,7 +1504,7 @@ void queue::ProcessSingleItems(User * u) {
         UserSendCharDelayed(u, MSG, MSGLen);
 #ifdef _WIN32
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate MSG in queue::ProcessSingleItems! "+string((uint32_t)GetLastError())+" "+
+			string sDbgstr = "[BUF] Cannot deallocate MSG in globalqueue::ProcessSingleItems! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
             AppendSpecialLog(sDbgstr);
         }
@@ -1515,7 +1515,7 @@ void queue::ProcessSingleItems(User * u) {
 }
 //---------------------------------------------------------------------------
 
-void queue::SendGlobalQ() {
+void globalqueue::SendGlobalQ() {
     if(Qa->len != 0) {
 		User *nxt = colUsers->llist;
         while(nxt != NULL) {
@@ -1535,10 +1535,10 @@ void queue::SendGlobalQ() {
     }
 }
 //---------------------------------------------------------------------------
-QueueDataItem * queue::CreateQueueDataItem(char * data, const size_t &idatalen, User * fromuser, const int32_t &iProfile, const uint32_t &type) {
+QueueDataItem * globalqueue::CreateQueueDataItem(char * data, const size_t &idatalen, User * fromuser, const int32_t &iProfile, const uint32_t &type) {
     QueueDataItem * newitem = new QueueDataItem();
     if(newitem == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate newitem in queue::CreateQueueDataItem!";
+    	string sDbgstr = "[BUF] Cannot allocate newitem in globalqueue::CreateQueueDataItem!";
 #ifdef _WIN32
 		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
 #endif
@@ -1554,7 +1554,7 @@ QueueDataItem * queue::CreateQueueDataItem(char * data, const size_t &idatalen, 
 #endif
         if(newitem->sData == NULL) {
 			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(idatalen+1))+
-				" bytes of memory in queue::CreateQueueDataItem!";
+				" bytes of memory in globalqueue::CreateQueueDataItem!";
 #ifdef _WIN32
             sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif

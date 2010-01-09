@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -476,7 +476,7 @@ static int GetOpChat(lua_State * L) {
 	lua_rawset(L, i);
 
     lua_pushliteral(L, "bEnabled");
-    SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, i);
 
     return 1;
@@ -580,11 +580,11 @@ static int GetHubBot(lua_State * L) {
 	lua_rawset(L, i);
 
     lua_pushliteral(L, "bEnabled");
-    SettingManager->bBools[SETBOOL_REG_BOT] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    SettingManager->bBools[SETBOOL_REG_BOT] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, i);
 
     lua_pushliteral(L, "bUsedAsHubSecAlias");
-    SettingManager->bBools[SETBOOL_USE_BOT_NICK_AS_HUB_SEC] == true ? lua_pushnumber(L, 1) : lua_pushnil(L);
+    SettingManager->bBools[SETBOOL_USE_BOT_NICK_AS_HUB_SEC] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, i);
 
     return 1;

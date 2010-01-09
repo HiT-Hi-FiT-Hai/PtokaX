@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -1629,7 +1629,7 @@ void SetMan::UpdateShareLimitMessage() {
             if(strncmp(sTexts[SETTXT_SHARE_LIMIT_MSG]+i+1, sMin, 5) == 0) {
                 if(ui64MinShare != 0) {
 #ifdef _WIN32
-                    int iret = sprintf(msg+imsgLen, "%I16d %s", iShorts[SETSHORT_MIN_SHARE_LIMIT],
+                    int iret = sprintf(msg+imsgLen, "%hd %s", iShorts[SETSHORT_MIN_SHARE_LIMIT],
 #else
 					int iret = sprintf(msg+imsgLen, "%d %s", iShorts[SETSHORT_MIN_SHARE_LIMIT],
 #endif
@@ -1647,7 +1647,7 @@ void SetMan::UpdateShareLimitMessage() {
             } else if(strncmp(sTexts[SETTXT_SHARE_LIMIT_MSG]+i+1, sMax, 5) == 0) {
                 if(ui64MaxShare != 0) {
 #ifdef _WIN32
-                    int iret = sprintf(msg+imsgLen, "%I16d %s", iShorts[SETSHORT_MAX_SHARE_LIMIT], 
+                    int iret = sprintf(msg+imsgLen, "%hd %s", iShorts[SETSHORT_MAX_SHARE_LIMIT],
 #else
 					int iret = sprintf(msg+imsgLen, "%d %s", iShorts[SETSHORT_MAX_SHARE_LIMIT], 
 #endif
@@ -1736,7 +1736,7 @@ void SetMan::UpdateSlotsLimitMessage() {
             if(strncmp(sTexts[SETTXT_SLOTS_LIMIT_MSG]+i+1, sMin, 5) == 0) {
                 if(iShorts[SETSHORT_MIN_SLOTS_LIMIT] != 0) {
 #ifdef _WIN32
-                    int iret = sprintf(msg+imsgLen, "%I16d", iShorts[SETSHORT_MIN_SLOTS_LIMIT]);
+                    int iret = sprintf(msg+imsgLen, "%hd", iShorts[SETSHORT_MIN_SLOTS_LIMIT]);
 #else
 					int iret = sprintf(msg+imsgLen, "%d", iShorts[SETSHORT_MIN_SLOTS_LIMIT]);
 #endif
@@ -1753,7 +1753,7 @@ void SetMan::UpdateSlotsLimitMessage() {
             } else if(strncmp(sTexts[SETTXT_SLOTS_LIMIT_MSG]+i+1, sMax, 5) == 0) {
                 if(iShorts[SETSHORT_MAX_SLOTS_LIMIT] != 0) {
 #ifdef _WIN32
-                    int iret = sprintf(msg+imsgLen, "%I16d", iShorts[SETSHORT_MAX_SLOTS_LIMIT]);
+                    int iret = sprintf(msg+imsgLen, "%hd", iShorts[SETSHORT_MAX_SLOTS_LIMIT]);
 #else
 					int iret = sprintf(msg+imsgLen, "%d", iShorts[SETSHORT_MAX_SLOTS_LIMIT]);
 #endif
@@ -1843,7 +1843,7 @@ void SetMan::UpdateHubSlotRatioMessage() {
         if(sTexts[SETTXT_HUB_SLOT_RATIO_MSG][i] == '%') {
             if(strncmp(sTexts[SETTXT_HUB_SLOT_RATIO_MSG]+i+1, sHubs, 6) == 0) {
 #ifdef _WIN32
-                int iret = sprintf(msg+imsgLen, "%I16d", iShorts[SETSHORT_HUB_SLOT_RATIO_HUBS]);
+                int iret = sprintf(msg+imsgLen, "%hd", iShorts[SETSHORT_HUB_SLOT_RATIO_HUBS]);
 #else
 				int iret = sprintf(msg+imsgLen, "%d", iShorts[SETSHORT_HUB_SLOT_RATIO_HUBS]);
 #endif
@@ -1855,7 +1855,7 @@ void SetMan::UpdateHubSlotRatioMessage() {
                 continue;
             } else if(strncmp(sTexts[SETTXT_HUB_SLOT_RATIO_MSG]+i+1, sSlots, 7) == 0) {
 #ifdef _WIN32
-                int iret = sprintf(msg+imsgLen, "%I16d", iShorts[SETSHORT_HUB_SLOT_RATIO_SLOTS]);
+                int iret = sprintf(msg+imsgLen, "%hd", iShorts[SETSHORT_HUB_SLOT_RATIO_SLOTS]);
 #else
 				int iret = sprintf(msg+imsgLen, "%d", iShorts[SETSHORT_HUB_SLOT_RATIO_SLOTS]);
 #endif
@@ -1946,7 +1946,7 @@ void SetMan::UpdateMaxHubsLimitMessage() {
         }
 
 #ifdef _WIN32
-        int iret = sprintf(msg+imsgLen, "%I16d", iShorts[SETSHORT_MAX_HUBS_LIMIT]);
+        int iret = sprintf(msg+imsgLen, "%hd", iShorts[SETSHORT_MAX_HUBS_LIMIT]);
 #else
 		int iret = sprintf(msg+imsgLen, "%d", iShorts[SETSHORT_MAX_HUBS_LIMIT]);
 #endif
@@ -2201,7 +2201,7 @@ void SetMan::UpdateNickLimitMessage() {
             if(strncmp(sTexts[SETTXT_NICK_LIMIT_MSG]+i+1, sMin, 5) == 0) {
                 if(iShorts[SETSHORT_MIN_NICK_LEN] != 0) {
 #ifdef _WIN32
-                    int iret = sprintf(msg+imsgLen, "%I16d", iShorts[SETSHORT_MIN_NICK_LEN]);
+                    int iret = sprintf(msg+imsgLen, "%hd", iShorts[SETSHORT_MIN_NICK_LEN]);
 #else
 					int iret = sprintf(msg+imsgLen, "%d", iShorts[SETSHORT_MIN_NICK_LEN]);
 #endif
@@ -2218,7 +2218,7 @@ void SetMan::UpdateNickLimitMessage() {
             } else if(strncmp(sTexts[SETTXT_NICK_LIMIT_MSG]+i+1, sMax, 5) == 0) {
                 if(iShorts[SETSHORT_MAX_NICK_LEN] != 0) {
 #ifdef _WIN32
-                    int iret = sprintf(msg+imsgLen, "%I16d", iShorts[SETSHORT_MAX_NICK_LEN]);
+                    int iret = sprintf(msg+imsgLen, "%hd", iShorts[SETSHORT_MAX_NICK_LEN]);
 #else
 					int iret = sprintf(msg+imsgLen, "%d", iShorts[SETSHORT_MAX_NICK_LEN]);
 #endif

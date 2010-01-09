@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -1267,7 +1267,7 @@ static int Kick(lua_State * L) {
                 u->IP, LanguageManager->sTexts[LAN_WAS_KICKED_BY], sKicker, 
                 LanguageManager->sTexts[LAN_BECAUSE_LWR], sReason);
             if(CheckSprintf(imsgLen, 131072, "Kick6") == true) {
-				QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, imsgLen, NULL, 0, queue::PM2OPS);
+				QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                 globalQ->SingleItemsStore(newItem);
             }
     	} else {
@@ -1402,7 +1402,7 @@ static int DefloodWarn(lua_State * L) {
                     u->Nick, LanguageManager->sTexts[LAN_WITH_IP], u->IP, 
                     LanguageManager->sTexts[LAN_DISCONN_BY_SCRIPT]);
                 if(CheckSprintf(imsgLen, 131072, "DefloodWarn1") == true) {
-                    QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, imsgLen, NULL, 0, queue::PM2OPS);
+                    QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                     globalQ->SingleItemsStore(newItem);
                 }
             } else {
@@ -1527,7 +1527,7 @@ static int SendToOpChat(lua_State * L) {
     if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true) {
         int iLen = sprintf(ScriptManager->lua_msg, "%s $<%s> %s|", SettingManager->sTexts[SETTXT_OP_CHAT_NICK], SettingManager->sTexts[SETTXT_OP_CHAT_NICK], sData);
         if(CheckSprintf(iLen, 131072, "SendToOpChat") == true) {
-			QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, iLen, NULL, 0, queue::OPCHAT);
+			QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, iLen, NULL, 0, globalqueue::OPCHAT);
             globalQ->SingleItemsStore(newItem);
         }
     }
@@ -1600,10 +1600,10 @@ static int SendToProfile(lua_State * L) {
         memcpy(ScriptManager->lua_msg, sData, iDataLen);
 		ScriptManager->lua_msg[iDataLen] = '|';
         ScriptManager->lua_msg[iDataLen+1] = '\0';
-		QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, iDataLen+1, NULL, iProfile, queue::TOPROFILE);
+		QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, iDataLen+1, NULL, iProfile, globalqueue::TOPROFILE);
         globalQ->SingleItemsStore(newItem);
     } else {
-		QueueDataItem *newItem = globalQ->CreateQueueDataItem(sData, iDataLen, NULL, iProfile, queue::TOPROFILE);
+		QueueDataItem *newItem = globalQ->CreateQueueDataItem(sData, iDataLen, NULL, iProfile, globalqueue::TOPROFILE);
 		globalQ->SingleItemsStore(newItem);
     }
 
@@ -1680,7 +1680,7 @@ static int SendPmToAll(lua_State * L) {
 
     int imsgLen = sprintf(ScriptManager->lua_msg, "%s $<%s> %s|", sFrom, sFrom, sData);
     if(CheckSprintf(imsgLen, 131072, "SendPmToAll") == true) {
-		QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, imsgLen, NULL, 0, queue::PM2ALL);
+		QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, imsgLen, NULL, 0, globalqueue::PM2ALL);
         globalQ->SingleItemsStore(newItem);
     }
 
@@ -1752,7 +1752,7 @@ static int SendPmToOps(lua_State * L) {
 
     int imsgLen = sprintf(ScriptManager->lua_msg, "%s $<%s> %s|", sFrom, sFrom, sData);
     if(CheckSprintf(imsgLen, 131072, "SendPmToOps") == true) {
-		QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, imsgLen, NULL, 0, queue::PM2OPS);
+		QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
         globalQ->SingleItemsStore(newItem);
     }
 
@@ -1789,7 +1789,7 @@ static int SendPmToProfile(lua_State * L) {
 
     int imsgLen = sprintf(ScriptManager->lua_msg, "%s $<%s> %s|", sFrom, sFrom, sData);
     if(CheckSprintf(imsgLen, 131072, "SendPmToProfile") == true) {
-		QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, imsgLen, NULL, iProfile, queue::PM2PROFILE);
+		QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, imsgLen, NULL, iProfile, globalqueue::PM2PROFILE);
         globalQ->SingleItemsStore(newItem);
     }
 

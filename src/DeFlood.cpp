@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -467,7 +467,7 @@ void DeFloodReport(User * u, const uint8_t ui8DefloodType, char *sAction) {
                 SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], DeFloodGetMessage(ui8DefloodType, 2), 
 				u->Nick, LanguageManager->sTexts[LAN_WITH_IP], u->IP, sAction);
             if(CheckSprintf(imsgLen, 1024, "DeFloodReport1") == true) {
-				QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+				QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                 globalQ->SingleItemsStore(newItem);
             }
         } else {
@@ -481,7 +481,7 @@ void DeFloodReport(User * u, const uint8_t ui8DefloodType, char *sAction) {
     }
 
 #ifdef _WIN32
-	int imsgLen = sprintf(msg, "[SYS] Flood type %I8d from %s (%s) - user closed.", ui8DefloodType, u->Nick, u->IP);
+	int imsgLen = sprintf(msg, "[SYS] Flood type %hu from %s (%s) - user closed.", (uint16_t)ui8DefloodType, u->Nick, u->IP);
 #else
 	int imsgLen = sprintf(msg, "[SYS] Flood type %u from %s (%s) - user closed.", (uint16_t)ui8DefloodType, u->Nick, u->IP);
 #endif

@@ -2,11 +2,11 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2008  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -1054,7 +1054,7 @@ void cDcCommands::BotINFO(User * curUser, char * sData, const uint32_t &iLen) {
 	}
 
 #ifdef _WIN32
-	int imsgLen = sprintf(msg, "$HubINFO %s$%s:%I16u$%s.px.$%I16d$%I64u$%I16d$%I16d$PtokaX$%s|", SettingManager->sTexts[SETTXT_HUB_NAME],
+	int imsgLen = sprintf(msg, "$HubINFO %s$%s:%hu$%s.px.$%hd$%I64u$%hd$%hd$PtokaX$%s|", SettingManager->sTexts[SETTXT_HUB_NAME],
 #else
 	int imsgLen = sprintf(msg, "$HubINFO %s$%s:%u$%s.px.$%d$%" PRIu64 "$%d$%d$PtokaX$%s|", SettingManager->sTexts[SETTXT_HUB_NAME],
 #endif
@@ -1410,7 +1410,7 @@ bool cDcCommands::GetNickList(User * curUser, char * sData, const uint32_t &iLen
                         curUser->IP, LanguageManager->sTexts[LAN_WITH_NICK], curUser->Nick, 
                         LanguageManager->sTexts[LAN_DETECTED_LWR]);
                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::GetNickList3") == true) {
-						QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+						QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                         globalQ->SingleItemsStore(newItem);
                     }
                     imsgLen = sprintf(msg, "<%s> *** Pinger from IP: %s with nick: %s detected.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -1657,7 +1657,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
 					imsgLen += iret;
                     if(CheckSprintf1(iret, imsgLen, 1024, "cDcCommands::Kick6") == true) {
                         if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-        					QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+        					QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                             globalQ->SingleItemsStore(newItem);
                         } else {
                             globalQ->OPStore(msg, imsgLen);
@@ -1713,7 +1713,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
 						imsgLen += iret;
                         if(CheckSprintf1(iret, imsgLen, 1024, "cDcCommands::Kick10") == true) {
 							if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-            					QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+            					QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                                 globalQ->SingleItemsStore(newItem);
                             } else {
                                 globalQ->OPStore(msg, imsgLen);
@@ -1758,7 +1758,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
             imsgLen += iret;
             if(CheckSprintf1(iret, imsgLen, 1024, "cDcCommands::Kick14") == true) {
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-    				QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+    				QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                     globalQ->SingleItemsStore(newItem);
                 } else {
                     globalQ->OPStore(msg, imsgLen);
@@ -1926,7 +1926,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
 
             if(iCount < (uint32_t)SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]) {
 #ifdef _WIN32
-                int imsgLen = sprintf(msg, "<%s> %s %I16d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+                int imsgLen = sprintf(msg, "<%s> %s %hd.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
 #else
 				int imsgLen = sprintf(msg, "<%s> %s %d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
 #endif
@@ -1938,7 +1938,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
             }
             if(SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0 && iCount > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]) {
 #ifdef _WIN32
-                int imsgLen = sprintf(msg, "<%s> %s %I16d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+                int imsgLen = sprintf(msg, "<%s> %s %hd.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
 #else
 				int imsgLen = sprintf(msg, "<%s> %s %d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
 #endif
@@ -2067,7 +2067,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
 
             if(iCount < (uint32_t)SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]) {
 #ifdef _WIN32
-                int imsgLen = sprintf(msg, "<%s> %s %I16d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+                int imsgLen = sprintf(msg, "<%s> %s %hd.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
 #else
 				int imsgLen = sprintf(msg, "<%s> %s %d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
 #endif
@@ -2079,7 +2079,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
             }
             if(SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0 && iCount > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]) {
 #ifdef _WIN32
-                int imsgLen = sprintf(msg, "<%s> %s %I16d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+                int imsgLen = sprintf(msg, "<%s> %s %hd.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
 #else
 				int imsgLen = sprintf(msg, "<%s> %s %d.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
 #endif
@@ -2433,7 +2433,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
                                 SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_IP], 
                                 curUser->IP, LanguageManager->sTexts[LAN_BANNED_BECAUSE_3X_BAD_PASS_FOR_NICK], curUser->Nick);
                             if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass7") == true) {
-								QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+								QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                                 globalQ->SingleItemsStore(newItem);
                             }
                         } else {
@@ -2660,7 +2660,7 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
                             sCmdParts[1]+6, LanguageManager->sTexts[LAN_BY_LWR], curUser->Nick, 
                             LanguageManager->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::OpForceMove7") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                             globalQ->SingleItemsStore(newItem);
                         }
                     } else {
@@ -2683,7 +2683,7 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
                             sCmdParts[1]+6, LanguageManager->sTexts[LAN_BY_LWR], curUser->Nick, 
                             LanguageManager->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::OpForceMove8") == true) {
-							QueueDataItem *newItem = globalQ->CreateQueueDataItem(MSG, imsgLen, NULL, 0, queue::PM2OPS);
+							QueueDataItem *newItem = globalQ->CreateQueueDataItem(MSG, imsgLen, NULL, 0, globalqueue::PM2OPS);
                             globalQ->SingleItemsStore(newItem);
                         }
 #ifdef _WIN32
@@ -3131,6 +3131,21 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
         return;
     }
 
+    if(SettingManager->bBools[SETBOOL_NO_QUACK_SUPPORTS] == true && sData[iLen-2] == ' ') {
+        int imsgLen = sprintf(msg, "[SYS] Quack $Supports (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+        if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports3") == true) {
+            UdpDebug->Broadcast(msg, imsgLen);
+        }
+
+       	imsgLen = sprintf(msg, "<%s> %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_QUACK_SUPPORTS]);
+        if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports4") == true) {
+            UserSendCharDelayed(curUser, msg, imsgLen);
+        }
+
+        UserClose(curUser);
+        return;
+    }
+
 	ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::SUPPORTS_ARRIVAL);
 
 	if(curUser->iState >= User::STATE_CLOSING) {
@@ -3150,7 +3165,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
         }
 
         iDataLen = (sData+i)-sSupport;
-      
+
         switch(sSupport[0]) {
             case 'N':
                 if(sSupport[1] == 'o') {
@@ -3189,7 +3204,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
                     if(SettingManager->bBools[SETBOOL_DONT_ALLOW_PINGERS] == true) {
                         int imsgLen = sprintf(msg, "<%s> %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                             LanguageManager->sTexts[LAN_SORRY_THIS_HUB_NOT_ALLOW_PINGERS]);
-                        if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports3") == true) {
+                        if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports5") == true) {
                             UserSendChar(curUser, msg, imsgLen);
                         }
                         UserClose(curUser);
@@ -3197,7 +3212,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
                     } else if(SettingManager->bBools[SETBOOL_CHECK_IP_IN_COMMANDS] == false) {
                         int imsgLen = sprintf(msg, "<%s> Sorry, this hub banned yourself from hublist because allow CTM exploit.|", 
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC]);
-                        if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports4") == true) {
+                        if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports5") == true) {
                             UserSendChar(curUser, msg, imsgLen);
                         }
                         UserClose(curUser);
@@ -3222,7 +3237,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
             case '\0': {
                 // PPK ... corrupted $Supports ???
                 int imsgLen = sprintf(msg, "[SYS] Bad $Supports from %s (%s) - user closed.", curUser->Nick, curUser->IP);
-                if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports5") == true) {
+                if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports7") == true) {
                     UdpDebug->Broadcast(msg, imsgLen);
                 }
                 UserClose(curUser);
@@ -3805,7 +3820,7 @@ void cDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, const
                             }
                             int imsgLen = sprintf(MSG, "%s $%s", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], sData);
                             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::Chat3") == true) {
-								QueueDataItem *newItem = globalQ->CreateQueueDataItem(MSG, imsgLen, NULL, 0, queue::PM2OPS);
+								QueueDataItem *newItem = globalQ->CreateQueueDataItem(MSG, imsgLen, NULL, 0, globalqueue::PM2OPS);
                                 globalQ->SingleItemsStore(newItem);
                             }
 #ifdef _WIN32
@@ -3895,7 +3910,7 @@ void cDcCommands::Close(User * curUser, char * sData, const uint32_t &iLen) {
                     SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->Nick, 
                     LanguageManager->sTexts[LAN_WITH_IP], OtherUser->IP, LanguageManager->sTexts[LAN_WAS_CLOSED_BY], curUser->Nick);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::Close6") == true) {
-					QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, queue::PM2OPS);
+					QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                     globalQ->SingleItemsStore(newItem);
                 }
             } else {
@@ -4237,7 +4252,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
             (SettingManager->iShorts[SETSHORT_MAX_NICK_LEN] != 0 && iNickLen > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_NICK_LEN])) {
             UserSendChar(curUser, SettingManager->sPreTexts[SetMan::SETPRETXT_NICK_LIMIT_MSG],
                 SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_NICK_LIMIT_MSG]);
-            int imsgLen = sprintf(msg, "[SYS] Bad nick length (%s) from %s (%s) - user closed.", Nick, curUser->Nick, curUser->IP);
+            int imsgLen = sprintf(msg, "[SYS] Bad nick length (%d) from %s (%s) - user closed.", (int)iNickLen, curUser->Nick, curUser->IP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick16") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
@@ -4394,7 +4409,7 @@ void cDcCommands::ProcessCmds(User * curUser) {
                 break;
             }
             case PrcsdUsrCmd::TO_OP_CHAT: {
-                QueueDataItem *newItem = globalQ->CreateQueueDataItem(cur->sCommand, cur->iLen, curUser, 0, queue::OPCHAT);
+                QueueDataItem *newItem = globalQ->CreateQueueDataItem(cur->sCommand, cur->iLen, curUser, 0, globalqueue::OPCHAT);
                 globalQ->SingleItemsStore(newItem);
                 break;
             }

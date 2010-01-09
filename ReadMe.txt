@@ -1,4 +1,4 @@
-PtokaX 0.4.1.1
+PtokaX 0.4.1.2
 ---------------
 
 This is PtokaX version without gui able to run from console or as windows service.
@@ -20,15 +20,13 @@ Note: This version have new scripting interface incompatible with all scripts fo
 
 Homepage: http://www.PtokaX.org
 
-PtokaX LUA Scripts forums:
-	http://luaboard.sytes.net
-	http://lua.uknnet.com
+PtokaX LUA Scripts forum: http://board.ptokax.ch
 
-PtokaX Wiki: http://wiki.ptokax.ath.cx
+PtokaX Wiki: http://wiki.ptokax.ch
 
 Please report all bugs to PPK@PtokaX.org or to me on my hub PePeK.czdc.org:4861
 
-Latest PtokaX changelog: http://wiki.ptokax.ath.cx/doku.php?id=changelogs:ptokax:changes_after_0.330_15.31
+Latest PtokaX changelog: http://wiki.ptokax.ch/doku.php?id=changelogs:ptokax:changes_after_0.330_15.31
 
 This application uses the IP-to-Country Database
 provided by WebHosting.Info (http://www.webhosting.info),
