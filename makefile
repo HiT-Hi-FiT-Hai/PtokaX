@@ -174,9 +174,9 @@ $(CURDIR)/obj/ProfileManager.o: $(CURDIR)/src/ProfileManager.cpp $(CURDIR)/src/s
   $(CURDIR)/src/ServerManager.h $(CURDIR)/src/UdpDebug.h $(CURDIR)/src/User.h $(CURDIR)/src/utility.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $(CURDIR)/src/ProfileManager.cpp -o $(CURDIR)/obj/ProfileManager.o
 
-$(CURDIR)/obj/PtokaX.o: $(CURDIR)/src/PtokaX.cpp $(CURDIR)/src/stdinc.h $(CURDIR)/src/pxstring.h $(CURDIR)/src/LanguageManager.h $(CURDIR)/src/LanguageIds.h \
+$(CURDIR)/obj/PtokaX.o: $(CURDIR)/src/PtokaX-nix.cpp $(CURDIR)/src/stdinc.h $(CURDIR)/src/pxstring.h $(CURDIR)/src/LanguageManager.h $(CURDIR)/src/LanguageIds.h \
   $(CURDIR)/src/regtmrinc.h $(CURDIR)/src/scrtmrinc.h $(CURDIR)/src/ServerManager.h $(CURDIR)/src/SettingManager.h $(CURDIR)/src/SettingIds.h $(CURDIR)/src/utility.h
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $(CURDIR)/src/PtokaX.cpp -o $(CURDIR)/obj/PtokaX.o
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $(CURDIR)/src/PtokaX-nix.cpp -o $(CURDIR)/obj/PtokaX.o
 
 $(CURDIR)/obj/pxstring.o: $(CURDIR)/src/pxstring.cpp $(CURDIR)/src/stdinc.h $(CURDIR)/src/pxstring.h $(CURDIR)/src/utility.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $(CURDIR)/src/pxstring.cpp -o $(CURDIR)/obj/pxstring.o
