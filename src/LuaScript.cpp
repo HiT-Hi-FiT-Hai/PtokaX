@@ -327,7 +327,7 @@ bool ScriptStart(Script * cur) {
 	cur->prev = NULL;
 	cur->next = NULL;
 
-	cur->LUA = lua_open();
+	cur->LUA = luaL_newstate();
 
 	luaL_openlibs(cur->LUA);
 
@@ -592,43 +592,83 @@ void ScriptPushUser(lua_State * L, User * u, const bool &bFullTable/* = false*/)
 
 void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_pushliteral(L, "sMode");
-	u->Mode != '\0' ? lua_pushlstring(L, (char *)&u->Mode, 1) : lua_pushnil(L);
+	if(u->Mode != '\0') {
+		lua_pushlstring(L, (char *)&u->Mode, 1);
+	} else {
+		lua_pushnil(L);
+	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sMyInfoString");
-	u->MyInfoTag ? lua_pushlstring(L, u->MyInfoTag, u->iMyInfoTagLen) : lua_pushnil(L);
+	if(u->MyInfoTag != NULL) {
+		lua_pushlstring(L, u->MyInfoTag, u->iMyInfoTagLen);
+	} else {
+		lua_pushnil(L);
+	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sDescription");
-	u->Description != NULL ? lua_pushlstring(L, u->Description, (size_t)u->ui8DescrLen) : lua_pushnil(L);
+	if(u->Description != NULL) {
+		lua_pushlstring(L, u->Description, (size_t)u->ui8DescrLen);
+	} else {
+		lua_pushnil(L);
+	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sTag");
-	u->Tag ? lua_pushlstring(L, u->Tag, (size_t)u->ui8TagLen) : lua_pushnil(L);
+	if(u->Tag != NULL) {
+		lua_pushlstring(L, u->Tag, (size_t)u->ui8TagLen);
+	} else {
+		lua_pushnil(L);
+	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sConnection");
-	u->Connection != NULL ? lua_pushlstring(L, u->Connection, (size_t)u->ui8ConnLen) : lua_pushnil(L);
+	if(u->Connection != NULL) {
+		lua_pushlstring(L, u->Connection, (size_t)u->ui8ConnLen);
+	} else {
+		lua_pushnil(L);
+	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sEmail");
-	u->Email != NULL ? lua_pushlstring(L, u->Email, (size_t)u->ui8EmailLen) : lua_pushnil(L);
+	if(u->Email != NULL) {
+		lua_pushlstring(L, u->Email, (size_t)u->ui8EmailLen);
+	} else {
+		lua_pushnil(L);
+	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sClient");
-	u->Client != NULL ? lua_pushlstring(L, u->Client, (size_t)u->ui8ClientLen) : lua_pushnil(L);
+	if(u->Client != NULL) {
+		lua_pushlstring(L, u->Client, (size_t)u->ui8ClientLen);
+	} else {
+		lua_pushnil(L);
+	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sClientVersion");
-	u->Ver != NULL ? lua_pushlstring(L, u->Ver, (size_t)u->ui8VerLen) : lua_pushnil(L);
+	if(u->Ver != NULL) {
+		lua_pushlstring(L, u->Ver, (size_t)u->ui8VerLen);
+	} else {
+		lua_pushnil(L);
+	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sVersion");
-	u->Version ? lua_pushstring(L, u->Version) : lua_pushnil(L);
+	if(u->Version != NULL) {
+		lua_pushstring(L, u->Version);
+	} else {
+		lua_pushnil(L);
+	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sCountryCode");
-	IP2Country->ui32Count != 0 ? lua_pushlstring(L, IP2Country->GetCountry(u->ui8Country, false), 2) : lua_pushnil(L);
+	if(IP2Country->ui32Count != 0) {
+		lua_pushlstring(L, IP2Country->GetCountry(u->ui8Country, false), 2);
+	} else {
+		lua_pushnil(L);
+	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "bConnected");

@@ -51,19 +51,35 @@ static void PushBan(lua_State * L, BanItem * b) {
 	int i = lua_gettop(L);
 
     lua_pushliteral(L, "sIP");
-    b->sIp[0] == '\0' ? lua_pushnil(L) : lua_pushstring(L, b->sIp);
+    if(b->sIp[0] == '\0') {
+		lua_pushnil(L);
+	} else {
+		lua_pushstring(L, b->sIp);
+	}
     lua_rawset(L, i);
 
     lua_pushliteral(L, "sNick");
-    b->sNick == NULL ? lua_pushnil(L) : lua_pushstring(L, b->sNick);
+    if(b->sNick == NULL) {
+		lua_pushnil(L);
+	} else {
+		lua_pushstring(L, b->sNick);
+	}
     lua_rawset(L, i);
 
     lua_pushliteral(L, "sReason");
-    b->sReason == NULL ? lua_pushnil(L) : lua_pushstring(L, b->sReason);
+    if(b->sReason == NULL) {
+		lua_pushnil(L);
+	} else {
+		lua_pushstring(L, b->sReason);
+	}
     lua_rawset(L, i);
 
     lua_pushliteral(L, "sBy");
-    b->sBy == NULL ? lua_pushnil(L) : lua_pushstring(L, b->sBy);
+    if(b->sBy == NULL) {
+		lua_pushnil(L);
+	} else {
+		lua_pushstring(L, b->sBy);
+	}
     lua_rawset(L, i);
 
     lua_pushliteral(L, "iExpireTime");
@@ -99,11 +115,19 @@ static void PushRangeBan(lua_State * L, RangeBanItem * rb) {
     lua_rawset(L, i);
 
     lua_pushliteral(L, "sReason");
-    rb->sReason == NULL ? lua_pushnil(L) : lua_pushstring(L, rb->sReason);
+    if(rb->sReason == NULL) {
+		lua_pushnil(L);
+	} else {
+		lua_pushstring(L, rb->sReason);
+	}
     lua_rawset(L, i);
 
     lua_pushliteral(L, "sBy");
-    rb->sBy == NULL ? lua_pushnil(L) : lua_pushstring(L, rb->sBy);
+    if(rb->sBy == NULL) {
+		lua_pushnil(L);
+	} else {
+		lua_pushstring(L, rb->sBy);
+	}
     lua_rawset(L, i);
 
     lua_pushliteral(L, "iExpireTime");
