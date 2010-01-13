@@ -434,7 +434,11 @@ static int GetHubIP(lua_State * L) {
         return 1;
     }
 
-    sHubIP[0] != '\0' ? lua_pushstring(L, sHubIP) : lua_pushnil(L);
+    if(sHubIP[0] != '\0') {
+		lua_pushstring(L, sHubIP);
+	} else {
+		lua_pushnil(L);
+	}
 
     return 1;
 }
@@ -895,47 +899,83 @@ static int GetUserData(lua_State * L) {
     switch(ui8DataId) {
         case 0:
         	lua_pushliteral(L, "sMode");
-        	u->Mode != '\0' ? lua_pushlstring(L, (char *)&u->Mode, 1) : lua_pushnil(L);
+        	if(u->Mode != '\0') {
+				lua_pushlstring(L, (char *)&u->Mode, 1);
+			} else {
+				lua_pushnil(L);
+			}
         	lua_rawset(L, 1);
             break;
         case 1:
         	lua_pushliteral(L, "sMyInfoString");
-        	u->MyInfoTag ? lua_pushlstring(L, u->MyInfoTag, u->iMyInfoTagLen) : lua_pushnil(L);
+        	if(u->MyInfoTag != NULL) {
+				lua_pushlstring(L, u->MyInfoTag, u->iMyInfoTagLen);
+			} else {
+				lua_pushnil(L);
+			}
         	lua_rawset(L, 1);
             break;
         case 2:
         	lua_pushliteral(L, "sDescription");
-        	u->Description != NULL ? lua_pushlstring(L, u->Description, (size_t)u->ui8DescrLen) : lua_pushnil(L);
+        	if(u->Description != NULL) {
+				lua_pushlstring(L, u->Description, (size_t)u->ui8DescrLen);
+			} else {
+				lua_pushnil(L);
+			}
         	lua_rawset(L, 1);
             break;
         case 3:
         	lua_pushliteral(L, "sTag");
-        	u->Tag ? lua_pushlstring(L, u->Tag, (size_t)u->ui8TagLen) : lua_pushnil(L);
+        	if(u->Tag != NULL) {
+				lua_pushlstring(L, u->Tag, (size_t)u->ui8TagLen);
+			} else {
+				lua_pushnil(L);
+			}
         	lua_rawset(L, 1);
             break;
         case 4:
         	lua_pushliteral(L, "sConnection");
-        	u->Connection != NULL ? lua_pushlstring(L, u->Connection, (size_t)u->ui8ConnLen) : lua_pushnil(L);
+        	if(u->Connection != NULL) {
+				lua_pushlstring(L, u->Connection, (size_t)u->ui8ConnLen);
+			} else {
+				lua_pushnil(L);
+			}
         	lua_rawset(L, 1);
             break;
         case 5:
         	lua_pushliteral(L, "sEmail");
-        	u->Email != NULL ? lua_pushlstring(L, u->Email, (size_t)u->ui8EmailLen) : lua_pushnil(L);
+        	if(u->Email != NULL) {
+				lua_pushlstring(L, u->Email, (size_t)u->ui8EmailLen);
+			} else {
+				lua_pushnil(L);
+			}
         	lua_rawset(L, 1);
             break;
         case 6:
         	lua_pushliteral(L, "sClient");
-        	u->Client != NULL ? lua_pushlstring(L, u->Client, (size_t)u->ui8ClientLen) : lua_pushnil(L);
+        	if(u->Client != NULL) {
+				lua_pushlstring(L, u->Client, (size_t)u->ui8ClientLen);
+			} else {
+				lua_pushnil(L);
+			}
         	lua_rawset(L, 1);
             break;
         case 7:
         	lua_pushliteral(L, "sClientVersion");
-        	u->Ver != NULL ? lua_pushlstring(L, u->Ver, (size_t)u->ui8VerLen) : lua_pushnil(L);
+        	if(u->Ver != NULL) {
+				lua_pushlstring(L, u->Ver, (size_t)u->ui8VerLen);
+			} else {
+				lua_pushnil(L);
+			}
         	lua_rawset(L, 1);
             break;
         case 8:
         	lua_pushliteral(L, "sVersion");
-        	u->Version ? lua_pushstring(L, u->Version) : lua_pushnil(L);
+        	if(u->Version!= NULL) {
+				lua_pushstring(L, u->Version);
+			} else {
+				lua_pushnil(L);
+			}
         	lua_rawset(L, 1);
             break;
         case 9:
@@ -1025,7 +1065,11 @@ static int GetUserData(lua_State * L) {
             break;
         case 26:
         	lua_pushliteral(L, "sCountryCode");
-        	IP2Country->ui32Count != 0 ? lua_pushlstring(L, IP2Country->GetCountry(u->ui8Country, false), 2) : lua_pushnil(L);
+        	if(IP2Country->ui32Count != 0) {
+				lua_pushlstring(L, IP2Country->GetCountry(u->ui8Country, false), 2);
+			} else {
+				lua_pushnil(L);
+			}
         	lua_rawset(L, 1);
             break;
         default:
@@ -1073,31 +1117,67 @@ static int GetUserValue(lua_State * L) {
 
     switch(ui8DataId) {
         case 0:
-        	u->Mode != '\0' ? lua_pushlstring(L, (char *)&u->Mode, 1) : lua_pushnil(L);
+        	if(u->Mode != '\0') {
+				lua_pushlstring(L, (char *)&u->Mode, 1);
+			} else {
+				lua_pushnil(L);
+			}
         	return 1;
         case 1:
-        	u->MyInfoTag ? lua_pushlstring(L, u->MyInfoTag, u->iMyInfoTagLen) : lua_pushnil(L);
+        	if(u->MyInfoTag!= NULL) {
+				lua_pushlstring(L, u->MyInfoTag, u->iMyInfoTagLen);
+			} else {
+				lua_pushnil(L);
+			}
         	return 1;
         case 2:
-        	u->Description != NULL ? lua_pushlstring(L, u->Description, (size_t)u->ui8DescrLen) : lua_pushnil(L);
+        	if(u->Description != NULL) {
+				lua_pushlstring(L, u->Description, (size_t)u->ui8DescrLen);
+			} else {
+				lua_pushnil(L);
+			}
         	return 1;
         case 3:
-        	u->Tag ? lua_pushlstring(L, u->Tag, (size_t)u->ui8TagLen) : lua_pushnil(L);
+        	if(u->Tag != NULL) {
+				lua_pushlstring(L, u->Tag, (size_t)u->ui8TagLen);
+			} else {
+				lua_pushnil(L);
+			}
         	return 1;
         case 4:
-        	u->Connection != NULL ? lua_pushlstring(L, u->Connection, (size_t)u->ui8ConnLen) : lua_pushnil(L);
+        	if(u->Connection != NULL) {
+				lua_pushlstring(L, u->Connection, (size_t)u->ui8ConnLen);
+			} else {
+				lua_pushnil(L);
+			}
         	return 1;
         case 5:
-        	u->Email != NULL ? lua_pushlstring(L, u->Email, (size_t)u->ui8EmailLen) : lua_pushnil(L);
+        	if(u->Email != NULL) {
+				lua_pushlstring(L, u->Email, (size_t)u->ui8EmailLen);
+			} else {
+				lua_pushnil(L);
+			}
         	return 1;
         case 6:
-        	u->Client != NULL ? lua_pushlstring(L, u->Client, (size_t)u->ui8ClientLen) : lua_pushnil(L);
+        	if(u->Client != NULL) {
+				lua_pushlstring(L, u->Client, (size_t)u->ui8ClientLen);
+			} else {
+				lua_pushnil(L);
+			}
         	return 1;
         case 7:
-        	u->Ver != NULL ? lua_pushlstring(L, u->Ver, (size_t)u->ui8VerLen) : lua_pushnil(L);
+        	if(u->Ver != NULL) {
+				lua_pushlstring(L, u->Ver, (size_t)u->ui8VerLen);
+			} else {
+				lua_pushnil(L);
+			}
         	return 1;
         case 8:
-        	u->Version ? lua_pushstring(L, u->Version) : lua_pushnil(L);
+        	if(u->Version != NULL) {
+				lua_pushstring(L, u->Version);
+			} else {
+				lua_pushnil(L);
+			}
         	return 1;
         case 9:
         	u->iState == User::STATE_ADDED ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
@@ -1151,7 +1231,11 @@ static int GetUserValue(lua_State * L) {
         	lua_pushnumber(L, (double)u->LoginTime);
         	return 1;
         case 26:
-        	IP2Country->ui32Count != 0 ? lua_pushlstring(L, IP2Country->GetCountry(u->ui8Country, false), 2) : lua_pushnil(L);
+        	if(IP2Country->ui32Count != 0) {
+				lua_pushlstring(L, IP2Country->GetCountry(u->ui8Country, false), 2);
+			} else {
+				lua_pushnil(L);
+			}
         	return 1;
         default:
             luaL_error(L, "bad argument #2 to 'GetUserValue' (it's not valid id)");

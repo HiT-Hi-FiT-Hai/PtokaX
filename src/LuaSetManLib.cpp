@@ -458,21 +458,30 @@ static int GetOpChat(lua_State * L) {
 	int i = lua_gettop(L);
 
 	lua_pushliteral(L, "sNick");
-    SettingManager->sTexts[SETTXT_OP_CHAT_NICK] == NULL ? lua_pushnil(L) : 
+    if(SettingManager->sTexts[SETTXT_OP_CHAT_NICK] == NULL) {
+		lua_pushnil(L);
+	} else {
         lua_pushlstring(L, SettingManager->sTexts[SETTXT_OP_CHAT_NICK], 
         (size_t)SettingManager->ui16TextsLens[SETTXT_OP_CHAT_NICK]);
+	}
 	lua_rawset(L, i);
 
 	lua_pushliteral(L, "sDescription");
-    SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION] == NULL ? lua_pushnil(L) : 
+    if(SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION] == NULL) {
+		lua_pushnil(L);
+	} else {
         lua_pushlstring(L, SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION], 
         (size_t)SettingManager->ui16TextsLens[SETTXT_OP_CHAT_DESCRIPTION]);
+	}
 	lua_rawset(L, i);
 
 	lua_pushliteral(L, "sEmail");
-    SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL] == NULL ? lua_pushnil(L) : 
+    if(SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL] == NULL) {
+		lua_pushnil(L);
+	} else {
         lua_pushlstring(L, SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL], 
         (size_t)SettingManager->ui16TextsLens[SETTXT_OP_CHAT_EMAIL]);
+	}
 	lua_rawset(L, i);
 
     lua_pushliteral(L, "bEnabled");
@@ -562,21 +571,30 @@ static int GetHubBot(lua_State * L) {
 	int i = lua_gettop(L);
 
 	lua_pushliteral(L, "sNick");
-    SettingManager->sTexts[SETTXT_BOT_NICK] == NULL ? lua_pushnil(L) : 
+    if(SettingManager->sTexts[SETTXT_BOT_NICK] == NULL) {
+		lua_pushnil(L);
+	} else {
         lua_pushlstring(L, SettingManager->sTexts[SETTXT_BOT_NICK],
         (size_t)SettingManager->ui16TextsLens[SETTXT_BOT_NICK]);
+	}
 	lua_rawset(L, i);
 
 	lua_pushliteral(L, "sDescription");
-    SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] == NULL ? lua_pushnil(L) : 
+    if(SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] == NULL) {
+		lua_pushnil(L); 
+	} else {
         lua_pushlstring(L, SettingManager->sTexts[SETTXT_BOT_DESCRIPTION], 
         (size_t)SettingManager->ui16TextsLens[SETTXT_BOT_DESCRIPTION]);
+	}
 	lua_rawset(L, i);
 
 	lua_pushliteral(L, "sEmail");
-    SettingManager->sTexts[SETTXT_BOT_EMAIL] == NULL ? lua_pushnil(L) : 
+    if(SettingManager->sTexts[SETTXT_BOT_EMAIL] == NULL) {
+		lua_pushnil(L); 
+	} else {
         lua_pushlstring(L, SettingManager->sTexts[SETTXT_BOT_EMAIL], 
         (size_t)SettingManager->ui16TextsLens[SETTXT_BOT_EMAIL]);
+	}
 	lua_rawset(L, i);
 
     lua_pushliteral(L, "bEnabled");
