@@ -111,7 +111,7 @@ bool TextFileMan::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = fals
 #endif
             if(MSG == NULL) {
         		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot allocate "+string((uint64_t)iChatLen)+
-        			" bytes of memory in ThubForm::ProcessTextFilesCmd!";
+        			" bytes of memory in TextFileMan::ProcessTextFilesCmd!";
 #ifdef _WIN32
         		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -122,12 +122,12 @@ bool TextFileMan::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = fals
             if(bInPM == true) {
                 int iret = sprintf(MSG, "$To: %s From: %s $<%s> %s", u->Nick, SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                     SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], cur->sText);
-                if(CheckSprintf(iret, iChatLen, "ThubForm::ProcessTextFilesCmd1") == false) {
+                if(CheckSprintf(iret, iChatLen, "TextFileMan::ProcessTextFilesCmd1") == false) {
                     return true;
                 }
             } else {
                 int iret = sprintf(MSG,"<%s> %s", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], cur->sText);
-                if(CheckSprintf(iret, iChatLen, "ThubForm::ProcessTextFilesCmd2") == false) {
+                if(CheckSprintf(iret, iChatLen, "TextFileMan::ProcessTextFilesCmd2") == false) {
                     return true;
                 }
             }
@@ -136,7 +136,7 @@ bool TextFileMan::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = fals
 
 #ifdef _WIN32
             if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
-        		string sDbgstr = "[BUF] Cannot deallocate MSG in ThubForm::ProcessTextFilesCmd! "+string((uint32_t)GetLastError())+" "+
+        		string sDbgstr = "[BUF] Cannot deallocate MSG in TextFileMan::ProcessTextFilesCmd! "+string((uint32_t)GetLastError())+" "+
         			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
         		AppendSpecialLog(sDbgstr);
             }
@@ -187,7 +187,7 @@ void TextFileMan::RefreshTextFiles() {
 
 					if(newtxtfile->sText == NULL) {
 						string sDbgstr = "[BUF] Cannot allocate "+string((uint32_t)textfile.size+2)+
-	                        " bytes of memory for sText in ThubForm::RefreshTextFiles! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+	                        " bytes of memory for sText in TextFileMan::RefreshTextFiles! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 
 						AppendSpecialLog(sDbgstr);
 
@@ -202,7 +202,7 @@ void TextFileMan::RefreshTextFiles() {
 					newtxtfile->sCommand = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, strlen(textfile.name)-3);
 					if(newtxtfile->sCommand == NULL) {
 						string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(strlen(textfile.name)-3))+
-                        " bytes of memory for sCommand in ThubForm::RefreshTextFiles! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+                        " bytes of memory for sCommand in TextFileMan::RefreshTextFiles! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 
 						AppendSpecialLog(sDbgstr);
 
@@ -258,7 +258,7 @@ void TextFileMan::RefreshTextFiles() {
 				newtxtfile->sText = (char *) malloc(s_buf.st_size+2);
 				if(newtxtfile->sText == NULL) {
 					string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)s_buf.st_size+2)+
-                        " bytes of memory for sText in ThubForm::RefreshTextFiles!";
+                        " bytes of memory for sText in TextFileMan::RefreshTextFiles!";
 					AppendSpecialLog(sDbgstr);
 					closedir(p_txtdir);
                     return;
@@ -270,7 +270,7 @@ void TextFileMan::RefreshTextFiles() {
 				newtxtfile->sCommand = (char *) malloc(strlen(p_dirent->d_name)-3);
 				if(newtxtfile->sCommand == NULL) {
 					string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(strlen(p_dirent->d_name)-3))+
-                        " bytes of memory for sCommand in ThubForm::RefreshTextFiles!";
+                        " bytes of memory for sCommand in TextFileMan::RefreshTextFiles!";
 					AppendSpecialLog(sDbgstr);
 					closedir(p_txtdir);
                     return;

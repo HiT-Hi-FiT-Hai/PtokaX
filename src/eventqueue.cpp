@@ -395,7 +395,7 @@ void eventq::ProcessEvents() {
 				if(UsersChatForm != NULL && UsersChatForm->CmdTrace->Checked == true) {
                 	char msg[128];
                     int imsglen = sprintf(msg, "UDP > %s (%s) > ", u->Nick, u->IP);
-                    if(CheckSprintf(imsglen, 1024, "ThubForm::UdpSckEvent") == true) {
+                    if(CheckSprintf(imsglen, 1024, "eventq::ProcessEvents") == true) {
                         Memo(string(msg, imsglen)+cur->sMsg);
                     }
                 }

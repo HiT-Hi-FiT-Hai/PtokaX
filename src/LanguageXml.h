@@ -799,6 +799,9 @@ const char* LangXmlStr[] = {
     "QuackSupports", 
     "ClientsBuggySupports", 
     "DisallowBuggySupports", 
+    "MaxAlwdTopicLen256Chars",
+    "MaxAlwdScriptNameLen256Chars",
+    "MaxAlwdIPLen15Chars",
 };
 //---------------------------------------------------------------------------
 

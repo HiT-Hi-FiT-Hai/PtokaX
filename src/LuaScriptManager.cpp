@@ -44,7 +44,11 @@
 		#pragma package(smart_init)
 		#pragma link "PXLua.lib"
 	#else
-		#pragma comment(lib, "PXLua-x64")
+        #ifndef _M_X64
+            #pragma comment(lib, "PXLua")
+        #else
+			#pragma comment(lib, "PXLua-x64")
+		#endif
 	#endif
 	#pragma message("Linking PXLua.lib")
 #endif

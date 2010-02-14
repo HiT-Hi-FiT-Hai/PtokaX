@@ -55,6 +55,9 @@
 #include "RegThread.h"
 //---------------------------------------------------------------------------
 theLoop *srvLoop = NULL;
+#ifdef _WIN32
+    UINT_PTR srvLoopTimer = 0;
+#endif
 //---------------------------------------------------------------------------
 
 #ifndef _WIN32
@@ -88,11 +91,15 @@ static void RegTimerHandler() {
 
 #ifdef _WIN32
     #ifndef _SERVICE
-	VOID CALLBACK LooperProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*idEvent*/, DWORD /*dwTime*/) {
+        #ifndef _MSC_VER
+            VOID CALLBACK LooperProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*idEvent*/, DWORD /*dwTime*/) {
+        #else
+            void theLoop::Looper() {
+        #endif
     #else
     void theLoop::Looper() {
     #endif
-		KillTimer(NULL, srvLoop->timer);
+		KillTimer(NULL, srvLoopTimer);
 
 		// PPK ... two loop stategy for saving badwith
 		if(srvLoop->bRecv == true) {
@@ -105,11 +112,16 @@ static void RegTimerHandler() {
 		if(bServerTerminated == false) {
 			srvLoop->bRecv = !srvLoop->bRecv;
 	#ifndef _SERVICE
-	    	srvLoop->timer = SetTimer(NULL, 0, 100, (TIMERPROC)LooperProc);
+		#ifndef _MSC_VER
+	    	srvLoopTimer = SetTimer(NULL, 0, 100, (TIMERPROC)LooperProc);
+		#else
+			srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
+		#endif
     #else
-            srvLoop->timer = SetTimer(NULL, 0, 100, NULL);
+            srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
     #endif
-	        if(srvLoop->timer == 0) {
+
+	        if(srvLoopTimer == 0) {
 				string sDbgstr = "[BUF] Cannot start Looper in LooperProc! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
 	        	AppendSpecialLog(sDbgstr);
 	        	exit(EXIT_FAILURE);
@@ -170,12 +182,16 @@ theLoop::theLoop() {
 
 #ifdef _WIN32
     #ifndef _SERVICE
-    timer = SetTimer(NULL, 0, 100, (TIMERPROC)LooperProc);
+		#ifndef _MSC_VER
+			srvLoopTimer = SetTimer(NULL, 0, 100, (TIMERPROC)LooperProc);
+		#else
+			srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
+		#endif
     #else
-    timer = SetTimer(NULL, 0, 100, NULL);
+		srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
     #endif
 
-    if(timer == 0) {
+    if(srvLoopTimer == 0) {
 		string sDbgstr = "[BUF] Cannot start Looper in theLoop::theLoop! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
 		AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);

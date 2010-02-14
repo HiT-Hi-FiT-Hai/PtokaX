@@ -339,14 +339,14 @@ void hashRegMan::Load(void) {
 
                 char *nick = (char *)registereduser->Value();
                 
-				if((registereduser = child->FirstChild("Password")) == NULL ||
+				if(strlen(nick) > 64 || (registereduser = child->FirstChild("Password")) == NULL ||
                     (registereduser = registereduser->FirstChild()) == NULL) {
 					continue;
 				}
 
                 char *pass = (char *)registereduser->Value();
                 
-				if((registereduser = child->FirstChild("Profile")) == NULL ||
+				if(strlen(pass) > 64 || (registereduser = child->FirstChild("Profile")) == NULL ||
                     (registereduser = registereduser->FirstChild()) == NULL) {
 					continue;
 				}
