@@ -1040,7 +1040,7 @@ void UserMakeLock(User * u) {
 
 #ifdef _WIN32
 	#ifdef _SERVICE
-	    #ifndef _WIN64
+	    #ifndef _M_X64
 	        static const char * sLock = "$Lock EXTENDEDPROTOCOL                           wis Pk=PtokaX|"; // 63
 	    #else
 	        static const char * sLock = "$Lock EXTENDEDPROTOCOL                           w64 Pk=PtokaX|"; // 63

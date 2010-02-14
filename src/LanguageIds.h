@@ -799,6 +799,9 @@ enum LangIds {
     LAN_QUACK_SUPPORTS, 
     LAN_CLIENTS_BUGGY_SUPPORTS, 
     LAN_DISALLOW_BUGGY_SUPPORTS, 
+    LAN_MAX_ALWD_TOPIC_LEN_256_CHARS,
+    LAN_MAX_ALWD_SCRIPT_NAME_LEN_256_CHARS,
+    LAN_MAX_ALWD_IP_LEN_15_CHARS,
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------

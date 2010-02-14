@@ -2444,10 +2444,43 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
                             }
                         }
                     }
-                    imsgLen = sprintf(msg, "[SYS] Bad 3x password (%s) from %s (%s) - user banned.", sData, curUser->Nick, curUser->IP);
-                    if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass9") == true) {
-                        UdpDebug->Broadcast(msg, imsgLen);
+
+                    if(iLen < 768) {
+                        int imsgLen = sprintf(msg, "[SYS] Bad 3x password (%s) from %s (%s) - user banned.", sData, curUser->Nick, curUser->IP);
+                        if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass10") == true) {
+                            UdpDebug->Broadcast(msg, imsgLen);
+                        }
+                    } else {
+                        size_t iWantLen = iLen+curUser->NickLen+15+64;
+#ifdef _WIN32
+                        char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+#else
+                        char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#endif
+                        if(MSG == NULL) {
+				            string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                                string((uint64_t)iWantLen)+" bytes of memory for DcCommands::MyPass1!";
+#ifdef _WIN32
+				            sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
+				            AppendSpecialLog(sDbgstr);
+                            return;
+                        }
+                        int imsgLen = sprintf(MSG, "[SYS] Bad 3x password (%s) from %s (%s) - user banned.", sData, curUser->Nick, curUser->IP);
+                        if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::MyPass11") == true) {
+                            UdpDebug->Broadcast(MSG, imsgLen);
+                        }
+#ifdef _WIN32
+                        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+                            string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::MyPass1! "+string((uint32_t)GetLastError())+" "+
+                                string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+                            AppendSpecialLog(sDbgstr);
+                        }
+#else
+                        free(MSG);
+#endif
                     }
+
                     UserClose(curUser);
                     return;
                 } else {
@@ -2455,14 +2488,48 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
                 }
             }
         }
+
         int imsgLen = sprintf(msg, "$BadPass|<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_INCORRECT_PASSWORD]);
-        if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass10") == true) {
+        if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass12") == true) {
             UserSendChar(curUser, msg, imsgLen);
         }
-        imsgLen = sprintf(msg, "[SYS] Bad password (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
-        if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass11") == true) {
-            UdpDebug->Broadcast(msg, imsgLen);
+
+        if(iLen < 768) {
+            imsgLen = sprintf(msg, "[SYS] Bad password (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass13") == true) {
+                UdpDebug->Broadcast(msg, imsgLen);
+            }
+        } else {
+            size_t iWantLen = iLen+curUser->NickLen+15+64;
+#ifdef _WIN32
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+#else
+            char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+#endif
+            if(MSG == NULL) {
+				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+                    string((uint64_t)iWantLen)+" bytes of memory for DcCommands::MyPass2!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
+				AppendSpecialLog(sDbgstr);
+                return;
+            }
+            imsgLen = sprintf(MSG, "[SYS] Bad password (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::MyPass14") == true) {
+                UdpDebug->Broadcast(MSG, imsgLen);
+            }
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+                string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::MyPass2! "+string((uint32_t)GetLastError())+" "+
+                    string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+                AppendSpecialLog(sDbgstr);
+            }
+#else
+            free(MSG);
+#endif
         }
+
         UserClose(curUser);
         return;
     } else {
@@ -2526,12 +2593,12 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
             int imsgLen;
             if(((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                 imsgLen = sprintf(msg, "$Hello %s|$LogedIn %s|", curUser->Nick, curUser->Nick);
-                if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass13") == false) {
+                if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass15") == false) {
                     return;
                 }
             } else {
                 imsgLen = sprintf(msg, "$Hello %s|", curUser->Nick);
-                if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass14") == false) {
+                if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass16") == false) {
                     return;
                 }
             }
@@ -2596,14 +2663,14 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
         }
     }
 
-    if(iCmdPartsLen[0] == 0 || iCmdPartsLen[1] < 7 || iCmdPartsLen[2] < 5)
+    if(iCmdPartsLen[0] == 0 || iCmdPartsLen[1] < 7 || iCmdPartsLen[2] < 5 || iCmdPartsLen[1] > 128 || iCmdPartsLen[2] > 256)
         return;
 
     User *OtherUser = hashManager->FindUser(sCmdParts[0], iCmdPartsLen[0]);
     if(OtherUser) {
    	    if(OtherUser->iProfile != -1 && curUser->iProfile > OtherUser->iProfile) {
             int imsgLen = sprintf(msg, "<%s> %s %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                LanguageManager->sTexts[LAN_YOU_ARE_NOT_ALLOWED_TO_REDIRECT], sCmdParts[0]);
+                LanguageManager->sTexts[LAN_YOU_ARE_NOT_ALLOWED_TO_REDIRECT], OtherUser->Nick);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::OpForceMove3") == true) {
                 UserSendCharDelayed(curUser, msg, imsgLen);
             }
@@ -3132,13 +3199,45 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
     }
 
     if(SettingManager->bBools[SETBOOL_NO_QUACK_SUPPORTS] == true && sData[iLen-2] == ' ') {
-        int imsgLen = sprintf(msg, "[SYS] Quack $Supports (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
-        if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports3") == true) {
-            UdpDebug->Broadcast(msg, imsgLen);
+        int imsgLen;
+        if(iLen < 768) {
+            imsgLen = sprintf(msg, "[SYS] Quack $Supports (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports3") == true) {
+                UdpDebug->Broadcast(msg, imsgLen);
+            }
+        } else {
+            size_t iWantLen = iLen+curUser->NickLen+15+64;
+#ifdef _WIN32
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+#else
+			char *MSG = (char *) malloc(iWantLen);
+#endif
+            if(MSG == NULL) {
+				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+					string((uint64_t)iWantLen)+" bytes of memory for cDcCommands::Supports!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
+				AppendSpecialLog(sDbgstr);
+                return;
+            }
+            imsgLen = sprintf(MSG, "[SYS] Quack $Supports (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::Supports4") == true) {
+                UdpDebug->Broadcast(MSG, imsgLen);
+            }
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+				string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::Supports! "+string((uint32_t)GetLastError())+" "+
+					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+				AppendSpecialLog(sDbgstr);
+			}
+#else
+			free(MSG);
+#endif
         }
 
        	imsgLen = sprintf(msg, "<%s> %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_QUACK_SUPPORTS]);
-        if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports4") == true) {
+        if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports5") == true) {
             UserSendCharDelayed(curUser, msg, imsgLen);
         }
 
@@ -3189,7 +3288,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
                 break;
             }
             case 'U': {
-                if((curUser->ui32BoolBits & User::BIT_SUPPORT_USERCOMMAND) == User::BIT_SUPPORT_USERCOMMAND == false && 
+                if(((curUser->ui32BoolBits & User::BIT_SUPPORT_USERCOMMAND) == User::BIT_SUPPORT_USERCOMMAND) == false &&
                     iDataLen == 11 && memcmp(sSupport+1, "serCommand", 10) == 0) {
                     curUser->ui32BoolBits |= User::BIT_SUPPORT_USERCOMMAND;
                 } else if(((curUser->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == false && 
@@ -3204,7 +3303,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
                     if(SettingManager->bBools[SETBOOL_DONT_ALLOW_PINGERS] == true) {
                         int imsgLen = sprintf(msg, "<%s> %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                             LanguageManager->sTexts[LAN_SORRY_THIS_HUB_NOT_ALLOW_PINGERS]);
-                        if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports5") == true) {
+                        if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports6") == true) {
                             UserSendChar(curUser, msg, imsgLen);
                         }
                         UserClose(curUser);
@@ -3212,7 +3311,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
                     } else if(SettingManager->bBools[SETBOOL_CHECK_IP_IN_COMMANDS] == false) {
                         int imsgLen = sprintf(msg, "<%s> Sorry, this hub banned yourself from hublist because allow CTM exploit.|", 
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC]);
-                        if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports5") == true) {
+                        if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports7") == true) {
                             UserSendChar(curUser, msg, imsgLen);
                         }
                         UserClose(curUser);
@@ -3237,7 +3336,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
             case '\0': {
                 // PPK ... corrupted $Supports ???
                 int imsgLen = sprintf(msg, "[SYS] Bad $Supports from %s (%s) - user closed.", curUser->Nick, curUser->IP);
-                if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports7") == true) {
+                if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports8") == true) {
                     UdpDebug->Broadcast(msg, imsgLen);
                 }
                 UserClose(curUser);
@@ -3304,15 +3403,24 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
     
     size_t iNickLen = cTemp-(sData+5);
 
+    if(iNickLen > 64) {
+        int imsgLen = sprintf(msg, "<%s> *** %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
+            LanguageManager->sTexts[LAN_MAX_ALWD_NICK_LEN_64_CHARS]);
+        if(CheckSprintf(imsgLen, 1024, "cDcCommands::To3") == true) {
+            UserSendCharDelayed(curUser, msg, imsgLen);
+        }
+        return;
+    }
+
     // is the mesg really from us ?
     // PPK ... replaced by better and faster code ;)
     int imsgLen = sprintf(msg, "From: %s $<%s> ", curUser->Nick, curUser->Nick);
-    if(CheckSprintf(imsgLen, 1024, "cDcCommands::To3") == true) {
+    if(CheckSprintf(imsgLen, 1024, "cDcCommands::To4") == true) {
         if(strncmp(cTemp+1, msg, imsgLen) != 0) {
             int imsgLen;
             if(iLen < 768) {
                 imsgLen = sprintf(msg, "[SYS] Nick spoofing in To (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
-                if(CheckSprintf(imsgLen, 1024, "cDcCommands::To4") == true) {
+                if(CheckSprintf(imsgLen, 1024, "cDcCommands::To5") == true) {
                     UdpDebug->Broadcast(msg, imsgLen);
                 }
             } else {
@@ -3332,7 +3440,7 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
                     return;
                 }
                 imsgLen = sprintf(MSG, "[SYS] Nick spoofing in To (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
-                if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::To5") == true) {
+                if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::To6") == true) {
                     UdpDebug->Broadcast(MSG, imsgLen);
                 }
 #ifdef _WIN32

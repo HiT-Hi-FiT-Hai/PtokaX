@@ -139,7 +139,9 @@ void UDPRecvThread::Resume() {
 void UDPRecvThread::Run() {
 #ifdef _WIN32
 	#ifndef _SERVICE
-		try {
+		#ifndef _MSC_VER
+			try {
+		#endif
 	#endif
 #endif
 	sockaddr_in addr;
@@ -173,17 +175,19 @@ void UDPRecvThread::Run() {
 
 #ifdef _WIN32
 	#ifndef _SERVICE
-	    } catch(Exception &e) {
-	        AppendSpecialLog("[ERR] Exception in udp thread: " + string(e.Message.c_str(), e.Message.Length()));
-			Application->ShowException(&e);
-	    } catch(...) {
-	        try {
-	            throw Exception("");
-	        }
-	        catch(Exception &exception) {
-	            Application->ShowException(&exception);
-	        }
-	    }
+		#ifndef _MSC_VER
+			} catch(Exception &e) {
+				AppendSpecialLog("[ERR] Exception in udp thread: " + string(e.Message.c_str(), e.Message.Length()));
+				Application->ShowException(&e);
+			} catch(...) {
+				try {
+					throw Exception("");
+				}
+				catch(Exception &exception) {
+					Application->ShowException(&exception);
+				}
+			}
+		#endif
 	#endif
 #endif
 }

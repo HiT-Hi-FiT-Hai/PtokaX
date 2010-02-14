@@ -77,12 +77,8 @@
 //---------------------------------------------------------------------------
 static ServerThread *ServersE = NULL;
 #ifdef _WIN32
-        static UINT_PTR sectimer = 0;
-    #ifndef _SERVICE
-        static UINT_PTR regtimer = 0;
-    #else
-        UINT_PTR regtimer = 0;
-    #endif
+	UINT_PTR sectimer = 0;
+	UINT_PTR regtimer = 0;
 #else
 	static timer_t sectimer, regtimer;
 #endif
@@ -114,7 +110,16 @@ uint8_t ui8SrCntr = 0, ui8MinTick = 0;
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
-VOID CALLBACK SecTimerProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*idEvent*/, DWORD /*dwTime*/) {
+    #ifndef _SERVICE
+        #ifndef _MSC_VER
+	       VOID CALLBACK SecTimerProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*idEvent*/, DWORD /*dwTime*/) {
+        #else
+            void ServerOnSecTimer() {
+        #endif
+    #else
+        void ServerOnSecTimer() {
+    #endif
+
 	if(b2K == true) {
 		FILETIME tmpa, tmpb, kernelTimeFT, userTimeFT;
 		GetProcessTimes(GetCurrentProcess(), &tmpa, &tmpb, &kernelTimeFT, &userTimeFT);
@@ -172,9 +177,13 @@ static void SecTimerHandler(int sig) {
 
 #ifdef _WIN32
     #ifndef _SERVICE
-	VOID CALLBACK RegTimerProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*idEvent*/, DWORD /*dwTime*/) {
+        #ifndef _MSC_VER
+	       VOID CALLBACK RegTimerProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*idEvent*/, DWORD /*dwTime*/) {
+        #else
+            void ServerOnRegTimer() {
+        #endif
     #else
-    void ServerOnRegTimer() {
+        void ServerOnRegTimer() {
     #endif
 	    if(SettingManager->bBools[SETBOOL_AUTO_REG] == true && SettingManager->sTexts[SETTXT_REGISTER_SERVERS] != NULL) {
 			// First destroy old hublist reg thread if any
@@ -368,7 +377,15 @@ void ServerInitialize() {
 	cpuUsage = 0.0;
 
 #ifdef _WIN32
-	sectimer = SetTimer(NULL, 0, 1000, (TIMERPROC)SecTimerProc);
+    #ifndef _SERVICE
+		#ifndef _MSC_VER
+            sectimer = SetTimer(NULL, 0, 1000, (TIMERPROC)SecTimerProc);
+		#else
+            sectimer = SetTimer(NULL, 0, 1000, NULL);
+		#endif
+    #else
+		sectimer = SetTimer(NULL, 0, 1000, NULL);
+    #endif
     
 	if(sectimer == 0) {
 		string sDbgstr = "[BUF] Cannot start Timer in ServerThread::ServerThread! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
@@ -818,9 +835,13 @@ bool ServerStart() {
     if(SettingManager->bBools[SETBOOL_AUTO_REG] == true) {
 #ifdef _WIN32
         #ifndef _SERVICE
-    	regtimer = SetTimer(NULL, 0, 901000, (TIMERPROC)RegTimerProc);
+			#ifndef _MSC_VER
+    			regtimer = SetTimer(NULL, 0, 901000, (TIMERPROC)RegTimerProc);
+			#else
+				regtimer = SetTimer(NULL, 0, 901000, NULL);
+			#endif
         #else
-        regtimer = SetTimer(NULL, 0, 901000, NULL);
+			regtimer = SetTimer(NULL, 0, 901000, NULL);
         #endif
 
         if(regtimer == 0) {
@@ -1255,9 +1276,13 @@ void ServerUpdateAutoRegState() {
     if(SettingManager->bBools[SETBOOL_AUTO_REG] == true) {
 #ifdef _WIN32
         #ifndef _SERVICE
-    	regtimer = SetTimer(NULL, 0, 901000, (TIMERPROC)RegTimerProc);
+			#ifndef _MSC_VER
+    			regtimer = SetTimer(NULL, 0, 901000, (TIMERPROC)RegTimerProc);
+			#else
+				regtimer = SetTimer(NULL, 0, 901000, NULL);
+			#endif
         #else
-        regtimer = SetTimer(NULL, 0, 901000, NULL);
+			regtimer = SetTimer(NULL, 0, 901000, NULL);
         #endif
 
         if(regtimer == 0) {

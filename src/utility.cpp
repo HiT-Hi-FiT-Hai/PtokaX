@@ -983,6 +983,7 @@ int GetWlcmMsg(char * sWlcmMsg) {
         sWlcmMsg[0] = '\0';
         return 0;
     }
+
     return iLen;
 }
 //---------------------------------------------------------------------------
@@ -1258,7 +1259,7 @@ bool DirExist(char * sPath) {
                     memset(&si, 0, sizeof(SYSTEM_INFO));
 
                     typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
-                    PGNSI pGNSI = (PGNSI)GetProcAddress(GetModuleHandle("kernel32.dll"), "GetNativeSystemInfo");
+                    PGNSI pGNSI = (PGNSI)::GetProcAddress(::GetModuleHandle("kernel32.dll"), "GetNativeSystemInfo");
                     if(pGNSI != NULL) {
                         pGNSI(&si);
                     } else {

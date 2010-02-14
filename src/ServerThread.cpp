@@ -133,7 +133,9 @@ void ServerThread::Run() {
 
 #ifdef _WIN32
 	#ifndef _SERVICE
-		try {
+		#ifndef _MSC_VER
+			try {
+		#endif
 	#endif
 #endif
 	while(bTerminated == false) {
@@ -228,17 +230,19 @@ void ServerThread::Run() {
 
 #ifdef _WIN32
 	#ifndef _SERVICE
-		} catch(Exception &e) {
-	        AppendSpecialLog("[ERR] Exception in accept thread: " + string(e.Message.c_str(), e.Message.Length()));
-			Application->ShowException(&e);
-	    } catch(...) {
-	        try {
-	            throw Exception("");
-	        }
-	        catch(Exception &exception) {
-	            Application->ShowException(&exception);
-	        }
-		}
+		#ifndef _MSC_VER
+			} catch(Exception &e) {
+				AppendSpecialLog("[ERR] Exception in accept thread: " + string(e.Message.c_str(), e.Message.Length()));
+				Application->ShowException(&e);
+			} catch(...) {
+				try {
+					throw Exception("");
+				}
+				catch(Exception &exception) {
+					Application->ShowException(&exception);
+				}
+			}
+		#endif
 	#endif
 #endif
 

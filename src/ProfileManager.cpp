@@ -269,19 +269,19 @@ int32_t ProfileManager::AddProfile(char * name) {
         }
     }
 
-    uint32_t i = 0;
+    uint32_t j = 0;
     while(true) {
-        switch(name[i]) {
+        switch(name[j]) {
             case '\0':
                 break;
             case '|':
                 return -2;
             default:
-                if(name[i] < 33) {
+                if(name[j] < 33) {
                     return -2;
                 }
                 
-                i++;
+                j++;
                 continue;
         }
 

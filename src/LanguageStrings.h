@@ -799,6 +799,9 @@ const char* LangStr[] = {
     "Sorry, this hub does not allow clients sending buggy $Supports command", 
     "Clients with buggy $Supports command", 
     "Disallow clients sending buggy $Supports command", 
+    "Max allowed topic length is 256 characters",
+    "Max allowed script name length is 256 characters",
+    "Max allowed IP length is 15 characters",
 };
 //---------------------------------------------------------------------------
 

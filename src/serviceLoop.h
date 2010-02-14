@@ -25,7 +25,11 @@ struct User;
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
-    static VOID CALLBACK LooperProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
+	#ifndef _SERVICE
+		#ifndef _MSC_VER
+			static VOID CALLBACK LooperProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
+		#endif
+	#endif
 #endif
 //---------------------------------------------------------------------------
 
@@ -80,10 +84,6 @@ public:
 
     double dLoggedUsers, dActualSrvLoopLogins;
 
-#ifdef _WIN32
-    UINT_PTR timer;
-#endif
-
     uint32_t iLastSendRest, iSendRestsPeak, iLastRecvRest, iRecvRestsPeak, iLoopsForLogins;
     bool bRecv;
 
@@ -99,6 +99,9 @@ public:
 };
 //---------------------------------------------------------------------------
 extern theLoop *srvLoop;
+#ifdef _WIN32
+    extern UINT_PTR srvLoopTimer;
+#endif
 //---------------------------------------------------------------------------
 
 #endif
