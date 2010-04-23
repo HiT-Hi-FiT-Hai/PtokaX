@@ -1,0 +1,110 @@
+/*
+ * PtokaX - hub server for Direct Connect peer to peer network.
+
+ * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
+ * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+//---------------------------------------------------------------------------
+#ifndef utilityH
+#define utilityH
+//---------------------------------------------------------------------------
+struct BanItem;
+struct RangeBanItem;
+//---------------------------------------------------------------------------
+
+void Cout(const string & msg);
+//---------------------------------------------------------------------------
+
+#ifdef _WIN32
+	static void preD(char *pat, int M, int D[]);
+	static void suffixes(char *pat, int M, int *suff);
+	static void preDD(char *pat, int M, int DD[]);
+		
+	int BMFind(char *text, int N, char *pat, int M);
+#endif
+
+char * Lock2Key(char * cLock);
+
+#ifdef _WIN32
+	char * WSErrorStr(const uint32_t &iError);
+#else
+	const char * ErrnoStr(const uint32_t &iError);
+#endif
+
+char * formatBytes(int64_t iBytes);
+char * formatBytesPerSecond(int64_t iBytes);
+char * formatTime(uint64_t rest);
+char * formatSecTime(uint64_t rest);
+
+char * stristr(const char *str1, const char *str2);
+
+bool isIP(char * IP, const size_t ui32Len);
+bool GetIpParts(char * sIP, const size_t ui32Len, uint32_t &a, uint32_t &b, uint32_t &c, uint32_t &d);
+
+uint32_t HashNick(const char * sNick, const size_t &sNickLen);
+
+bool HashIP(char * sIP, const size_t ui32Len, uint32_t &ui32Hash);
+
+char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_time);
+char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const time_t &acc_time);
+
+bool GenerateTempBanTime(const char &cMultiplyer, const uint32_t &iTime, time_t &acc_time, time_t &ban_time);
+
+bool HaveOnlyNumbers(char *sData, const uint16_t &ui16Len);
+int GetWlcmMsg(char * sWlcmMsg);
+
+inline size_t Allign256(size_t n) { return ((n+1) & 0xFFFFFF00) + 0x100; }
+inline size_t Allign512(size_t n) { return ((n+1) & 0xFFFFFE00) + 0x200; }
+inline size_t Allign1024(size_t n) { return ((n+1) & 0xFFFFFC00) + 0x400; }
+
+#ifdef _WIN32
+	string GetMemStat();
+#endif
+
+bool CheckSprintf(int iRetVal, const size_t &iMax, const char * sMsg); // CheckSprintf(imsgLen, 64, "UdpDebug::New");
+bool CheckSprintf1(int iRetVal, int iLenVal, const size_t &iMax, const char * sMsg); // CheckSprintf1(iret, imsgLen, 64, "UdpDebug::New");
+
+void AppendLog(const string & sData, const bool &bScript = false);
+void AppendSpecialLog(const string & sData);
+
+#ifdef _WIN32
+	void GetHeapStats(void *hHeap, DWORD &dwCommitted, DWORD &dwUnCommitted);
+#endif
+
+void Memo(const string & sMessage);
+
+#ifdef _WIN32
+	char * ExtractFileName(char * sPath);
+#endif
+
+bool FileExist(char * sPath);
+bool DirExist(char * sPath);
+
+#ifdef _WIN32
+	void SetupOsVersion();
+#endif
+//---------------------------------------------------------------------------
+extern string PATH, SCRIPT_PATH, sTitle;
+extern bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bCmdNoKeyCheck;
+#ifdef _WIN32
+	extern HANDLE hConsole, hPtokaXHeap, hRecvHeap, hSendHeap;
+	extern string PATH_LUA, sOs;
+	extern bool b2K;
+	extern HFONT hfFont;
+#endif
+//---------------------------------------------------------------------------
+
+#endif
