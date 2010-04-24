@@ -18,59 +18,57 @@
  */
 
 //------------------------------------------------------------------------------
-#ifndef SettingPageGeneralH
-#define SettingPageGeneralH
+#ifndef SettingPageAdvancedH
+#define SettingPageAdvancedH
 //------------------------------------------------------------------------------
 #include "SettingPage.h"
 //---------------------------------------------------------------------------
 
-class SettingPageGeneral : public SettingPage {
+class SettingPageAdvanced : public SettingPage {
 public:
-    bool bUpdateHubNameWelcome, bUpdateHubName, bUpdateTCPPorts, bUpdateUDPPort, bUpdateAutoReg, bUpdateLanguage;
+    bool bUpdateSysTray, bUpdateScripting;
 
-    SettingPageGeneral();
-    ~SettingPageGeneral() { };
+    SettingPageAdvanced();
+    ~SettingPageAdvanced() { };
 
     bool CreateSettingPage(HWND hOwner);
 
     void Save();
-    void GetUpdates(bool &bUpdatedHubNameWelcome, bool &bUpdatedHubName, bool &bUpdatedTCPPorts, bool &bUpdatedUDPPort, bool &bUpdatedAutoReg,
+    void GetUpdates(bool & /*bUpdatedHubNameWelcome*/, bool & /*bUpdatedHubName*/, bool & /*bUpdatedTCPPorts*/, bool & /*bUpdatedUDPPort*/, bool & /*bUpdatedAutoReg*/,
         bool & /*bUpdatedMOTD*/, bool & /*bUpdatedHubSec*/, bool & /*bUpdatedRegOnlyMessage*/, bool & /*bUpdatedShareLimitMessage*/,
         bool & /*bUpdatedSlotsLimitMessage*/, bool & /*bUpdatedHubSlotRatioMessage*/, bool & /*bUpdatedMaxHubsLimitMessage*/, bool & /*bUpdatedNoTagMessage*/,
         bool & /*bUpdatedNickLimitMessage*/, bool & /*bUpdatedBotsSameNick*/, bool & /*bUpdatedBotNick*/, bool & /*bUpdatedBot*/, bool & /*bUpdatedOpChatNick*/,
-        bool & /*bUpdatedOpChat*/, bool &bUpdatedLanguage, bool & /*bUpdatedTextFiles*/, bool & /*bUpdatedRedirectAddress*/, bool & /*bUpdatedTempBanRedirAddress*/,
-        bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/);
+        bool & /*bUpdatedOpChat*/, bool & /*bUpdatedLanguage*/, bool & /*bUpdatedTextFiles*/, bool & /*bUpdatedRedirectAddress*/, bool & /*bUpdatedTempBanRedirAddress*/,
+        bool & /*bUpdatedPermBanRedirAddress*/, bool &bUpdatedSysTray, bool &bUpdatedScripting);
 
     char * GetPageName();
 private:
-    HWND hWndPageItems[25];
+    HWND hWndPageItems[23];
     
     enum enmPageItems {
-        GB_LANGUAGE,
-        CB_LANGUAGE,
-        GB_MAX_USERS,
-        EDT_MAX_USERS,
-        UD_MAX_USERS,
-        GB_HUB_NAME,
-        EDT_HUB_NAME,
-        GB_HUB_TOPIC,
-        EDT_HUB_TOPIC,
-        GB_HUB_DESCRIPTION,
-        EDT_HUB_DESCRIPTION,
-        BTN_ANTI_MOGLO,
-        GB_HUB_ADDRESS,
-        EDT_HUB_ADDRESS,
-        BTN_RESOLVE_ADDRESS,
-        BTN_BIND_ADDRESS,
-        GB_TCP_PORTS,
-        EDT_TCP_PORTS,
-        GB_UDP_PORT,
-        EDT_UDP_PORT,
-        GB_ADMIN_NICK,
-        EDT_ADMIN_NICK,
-        GB_HUB_LISTS,
-        EDT_HUB_LISTS,
-        BTN_HUBLIST_AUTO_REG
+        GB_HUB_STARTUP_AND_TRAY,
+        BTN_AUTO_START,
+        BTN_CHECK_FOR_UPDATE,
+        BTN_ENABLE_TRAY_ICON,
+        BTN_MINIMIZE_ON_STARTUP,
+        GB_HUB_COMMANDS,
+        LBL_PREFIXES_FOR_HUB_COMMANDS,
+        EDT_PREFIXES_FOR_HUB_COMMANDS,
+        BTN_REPLY_TO_HUB_COMMANDS_IN_PM,
+        GB_SCRIPTING,
+        BTN_ENABLE_SCRIPTING,
+        BTN_STOP_SCRIPT_ON_ERROR,
+        BTN_POPUP_SCRIPT_WINDOW_ON_ERROR,
+        BTN_SAVE_SCRIPT_ERRORS_TO_LOG,
+        GB_KICK_MESSAGES,
+        BTN_FILTER_KICK_MESSAGES,
+        BTN_SEND_KICK_MESSAGES_TO_OPS,
+        GB_STATUS_MESSAGES,
+        BTN_SEND_STATUS_MESSAGES_TO_OPS,
+        BTN_SEND_STATUS_MESSAGES_IN_PM,
+        GB_PINGER,
+        BTN_DISALLOW_PINGER,
+        BTN_REPORT_PINGER
     };
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);

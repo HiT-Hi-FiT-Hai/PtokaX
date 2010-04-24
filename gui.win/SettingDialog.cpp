@@ -33,6 +33,7 @@
 //---------------------------------------------------------------------------
 #include "MainWindow.h"
 #include "Resources.h"
+#include "SettingPageAdvanced.h"
 #include "SettingPageBans.h"
 #include "SettingPageBots.h"
 #include "SettingPageGeneral.h"
@@ -52,6 +53,7 @@ SettingDialog::SettingDialog() {
     SettingPages[2] = new SettingPageBots();
     SettingPages[3] = new SettingPageMoreGeneral();
     SettingPages[4] = new SettingPageBans();
+    SettingPages[5] = new SettingPageAdvanced();
 }
 //---------------------------------------------------------------------------
 
@@ -140,8 +142,8 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
             ::SendMessage(hWndTree, TVM_INSERTITEM, 0, (LPARAM)&tvIS);
 
             tvIS.hParent = TVI_ROOT;
-            tvIS.item.lParam = NULL;
-            tvIS.item.pszText = LanguageManager->sTexts[LAN_ADVANCED];
+            tvIS.item.lParam = (LPARAM)SettingPages[5];
+            tvIS.item.pszText = SettingPages[5]->GetPageName();
             tvIS.hParent = (HTREEITEM)::SendMessage(hWndTree, TVM_INSERTITEM, 0, (LPARAM)&tvIS);
 
             tvIS.item.lParam = NULL;
@@ -198,7 +200,8 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                         bUpdateSlotsLimitMessage = false, bUpdateHubSlotRatioMessage = false, bUpdateMaxHubsLimitMessage = false,
                         bUpdateNoTagMessage = false, bUpdateNickLimitMessage = false, bUpdateBotsSameNick = false, bUpdateBotNick = false,
                         bUpdateBot = false, bUpdateOpChatNick = false, bUpdateOpChat = false, bUpdateLanguage = false, bUpdateTextFiles = false,
-                        bUpdateRedirectAddress = false, bUpdateTempBanRedirAddress = false, bUpdatePermBanRedirAddress = false;
+                        bUpdateRedirectAddress = false, bUpdateTempBanRedirAddress = false, bUpdatePermBanRedirAddress = false, bUpdateSysTray = false,
+                        bUpdateScripting = false;
 
                     SettingManager->bUpdateLocked = true;
 
@@ -210,7 +213,7 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                                 bUpdateMOTD, bUpdateHubSec, bUpdateRegOnlyMessage, bUpdateShareLimitMessage, bUpdateSlotsLimitMessage,
                                 bUpdateHubSlotRatioMessage, bUpdateMaxHubsLimitMessage, bUpdateNoTagMessage, bUpdateNickLimitMessage,
                                 bUpdateBotsSameNick, bUpdateBotNick, bUpdateBot, bUpdateOpChatNick, bUpdateOpChat, bUpdateLanguage, bUpdateTextFiles,
-                                bUpdateRedirectAddress, bUpdateTempBanRedirAddress, bUpdatePermBanRedirAddress);
+                                bUpdateRedirectAddress, bUpdateTempBanRedirAddress, bUpdatePermBanRedirAddress, bUpdateSysTray, bUpdateScripting);
                         }
                     }
 
@@ -301,8 +304,16 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                         SettingManager->UpdateUDPPort();
                     }
 
+                    if(bUpdateSysTray == true) {
+                        pMainWindow->UpdateSysTray();
+                    }
+
                     if(bUpdateAutoReg == true) {
                         ServerUpdateAutoRegState();
+                    }
+
+                    if(bUpdateScripting == true) {
+                        SettingManager->UpdateScripting();
                     }
                 }
                 case IDCANCEL:

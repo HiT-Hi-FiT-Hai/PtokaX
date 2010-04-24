@@ -41,77 +41,54 @@ SettingPageMoreGeneral::SettingPageMoreGeneral() {
 //---------------------------------------------------------------------------
 
 LRESULT SettingPageMoreGeneral::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    switch(uMsg) {
-        case WM_COMMAND:
-           switch(LOWORD(wParam)) {
-                case EDT_OWNER_EMAIL:
-                case EDT_MAIN_REDIR_ADDR:
-                case EDT_MSG_TO_NON_REGS:
-                case EDT_NON_REG_REDIR_ADDR:
-                    if(HIWORD(wParam) == EN_CHANGE) {
-                        char buf[256];
-                        ::GetWindowText((HWND)lParam, buf, 256);
+    if(uMsg == WM_COMMAND) {
+        switch(LOWORD(wParam)) {
+            case EDT_OWNER_EMAIL:
+            case EDT_MAIN_REDIR_ADDR:
+            case EDT_MSG_TO_NON_REGS:
+            case EDT_NON_REG_REDIR_ADDR:
+                if(HIWORD(wParam) == EN_CHANGE) {
+                    RemovePipes((HWND)lParam);
 
-                        bool bChanged = false;
+                    return 0;
+                }
 
-                        for(uint16_t ui16i = 0; buf[ui16i] != '\0'; ui16i++) {
-                            if(buf[ui16i] == '|') {
-                                strcpy(buf+ui16i, buf+ui16i+1);
-                                bChanged = true;
-                            }
-                        }
-
-                        if(bChanged == true) {
-                            int iStart, iEnd;
-
-                            ::SendMessage((HWND)lParam, EM_GETSEL, (WPARAM)&iStart, (LPARAM)&iEnd);
-
-                            ::SetWindowText((HWND)lParam, buf);
-
-                            ::SendMessage((HWND)lParam, EM_SETSEL, iStart, iEnd);
-                        }
-
-                        return 0;
-                    }
-
-                    break;
-                case BTN_ENABLE_TEXT_FILES:
-                    if(HIWORD(wParam) == BN_CLICKED) {
-                        ::EnableWindow(hWndPageItems[BTN_SEND_TEXT_FILES_AS_PM],
-                            ::SendMessage(hWndPageItems[BTN_ENABLE_TEXT_FILES], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
-                    }
-                    break;
-                case BTN_DONT_ALLOW_PINGER:
-                    if(HIWORD(wParam) == BN_CLICKED) {
-                        BOOL bEnable = ::SendMessage(hWndPageItems[BTN_DONT_ALLOW_PINGER], BM_GETCHECK, 0, 0) == BST_CHECKED ? FALSE : TRUE;
-                        ::EnableWindow(hWndPageItems[BTN_REPORT_PINGER], bEnable);
-                        ::EnableWindow(hWndPageItems[EDT_OWNER_EMAIL], bEnable);
-                    }
-                    break;
-                case BTN_REDIR_ALL:
-                    if(HIWORD(wParam) == BN_CLICKED) {
-                        ::EnableWindow(hWndPageItems[BTN_REDIR_HUB_FULL],
-                            ::SendMessage(hWndPageItems[BTN_REDIR_ALL], BM_GETCHECK, 0, 0) == BST_CHECKED ? FALSE : TRUE);
-                    }
-                    break;
-                case BTN_ALLOW_ONLY_REGS:
-                    if(HIWORD(wParam) == BN_CLICKED) {
-                        BOOL bEnable = ::SendMessage(hWndPageItems[BTN_ALLOW_ONLY_REGS], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE;
-                        ::EnableWindow(hWndPageItems[EDT_MSG_TO_NON_REGS], bEnable);
-                        ::EnableWindow(hWndPageItems[BTN_NON_REG_REDIR_ENABLE], bEnable);
-                        ::EnableWindow(hWndPageItems[EDT_NON_REG_REDIR_ADDR],
-                            (bEnable == TRUE && ::SendMessage(hWndPageItems[BTN_NON_REG_REDIR_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED) ? TRUE : FALSE);
-                    }
-                    break;
-                case BTN_NON_REG_REDIR_ENABLE:
-                    if(HIWORD(wParam) == BN_CLICKED) {
-                        ::EnableWindow(hWndPageItems[EDT_NON_REG_REDIR_ADDR],
-                            ::SendMessage(hWndPageItems[BTN_NON_REG_REDIR_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
-                    }
-                    break;
-            }
-
-            break;
+                break;
+            case BTN_ENABLE_TEXT_FILES:
+                if(HIWORD(wParam) == BN_CLICKED) {
+                    ::EnableWindow(hWndPageItems[BTN_SEND_TEXT_FILES_AS_PM],
+                        ::SendMessage(hWndPageItems[BTN_ENABLE_TEXT_FILES], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
+                }
+                break;
+            case BTN_DONT_ALLOW_PINGER:
+                if(HIWORD(wParam) == BN_CLICKED) {
+                    BOOL bEnable = ::SendMessage(hWndPageItems[BTN_DONT_ALLOW_PINGER], BM_GETCHECK, 0, 0) == BST_CHECKED ? FALSE : TRUE;
+                    ::EnableWindow(hWndPageItems[BTN_REPORT_PINGER], bEnable);
+                    ::EnableWindow(hWndPageItems[EDT_OWNER_EMAIL], bEnable);
+                }
+                break;
+            case BTN_REDIR_ALL:
+                if(HIWORD(wParam) == BN_CLICKED) {
+                    ::EnableWindow(hWndPageItems[BTN_REDIR_HUB_FULL],
+                        ::SendMessage(hWndPageItems[BTN_REDIR_ALL], BM_GETCHECK, 0, 0) == BST_CHECKED ? FALSE : TRUE);
+                }
+                break;
+            case BTN_ALLOW_ONLY_REGS:
+                if(HIWORD(wParam) == BN_CLICKED) {
+                    BOOL bEnable = ::SendMessage(hWndPageItems[BTN_ALLOW_ONLY_REGS], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE;
+                    ::EnableWindow(hWndPageItems[EDT_MSG_TO_NON_REGS], bEnable);
+                    ::EnableWindow(hWndPageItems[BTN_NON_REG_REDIR_ENABLE], bEnable);
+                    ::EnableWindow(hWndPageItems[EDT_NON_REG_REDIR_ADDR],
+                        (bEnable == TRUE && ::SendMessage(hWndPageItems[BTN_NON_REG_REDIR_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED) ? TRUE : FALSE);
+                }
+                break;
+            case BTN_NON_REG_REDIR_ENABLE:
+                if(HIWORD(wParam) == BN_CLICKED) {
+                    ::EnableWindow(hWndPageItems[EDT_NON_REG_REDIR_ADDR],
+                        ::SendMessage(hWndPageItems[BTN_NON_REG_REDIR_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
+                }
+                break;
+        }
     }
 
 
@@ -134,11 +111,11 @@ void SettingPageMoreGeneral::Save() {
     SettingManager->SetBool(SETBOOL_DONT_ALLOW_PINGERS, ::SendMessage(hWndPageItems[BTN_DONT_ALLOW_PINGER], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
     SettingManager->SetBool(SETBOOL_REPORT_PINGERS, ::SendMessage(hWndPageItems[BTN_REPORT_PINGER], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 
-    char buf[256];
-    int iLen = ::GetWindowText(hWndPageItems[EDT_OWNER_EMAIL], buf, 256);
+    char buf[257];
+    int iLen = ::GetWindowText(hWndPageItems[EDT_OWNER_EMAIL], buf, 257);
     SettingManager->SetText(SETTXT_HUB_OWNER_EMAIL, buf, iLen);
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_MAIN_REDIR_ADDR], buf, 256);
+    iLen = ::GetWindowText(hWndPageItems[EDT_MAIN_REDIR_ADDR], buf, 257);
 
     if((SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS] == NULL && iLen != 0) ||
         (SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS] != NULL &&
@@ -162,7 +139,7 @@ void SettingPageMoreGeneral::Save() {
 
     SettingManager->SetBool(SETBOOL_REG_ONLY, ::SendMessage(hWndPageItems[BTN_ALLOW_ONLY_REGS], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_MSG_TO_NON_REGS], buf, 256);
+    iLen = ::GetWindowText(hWndPageItems[EDT_MSG_TO_NON_REGS], buf, 257);
 
     if(bUpdateRegOnlyMessage == false &&
         ((::SendMessage(hWndPageItems[BTN_NON_REG_REDIR_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false) != SettingManager->bBools[SETBOOL_REG_ONLY_REDIR] ||
@@ -174,7 +151,7 @@ void SettingPageMoreGeneral::Save() {
 
     SettingManager->SetBool(SETBOOL_REG_ONLY_REDIR, ::SendMessage(hWndPageItems[BTN_NON_REG_REDIR_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_NON_REG_REDIR_ADDR], buf, 256);
+    iLen = ::GetWindowText(hWndPageItems[EDT_NON_REG_REDIR_ADDR], buf, 257);
 
     if(bUpdateRegOnlyMessage == false &&
         (SettingManager->sTexts[SETTXT_REG_ONLY_REDIR_ADDRESS] == NULL && iLen != 0) ||
@@ -194,7 +171,7 @@ void SettingPageMoreGeneral::GetUpdates(bool & /*bUpdatedHubNameWelcome*/, bool 
     bool &bUpdatedSlotsLimitMessage, bool &bUpdatedHubSlotRatioMessage, bool &bUpdatedMaxHubsLimitMessage, bool &bUpdatedNoTagMessage,
     bool &bUpdatedNickLimitMessage, bool &/*bUpdatedBotsSameNick*/, bool &/*bUpdatedBotNick*/, bool &/*bUpdatedBot*/, bool &/*bUpdatedOpChatNick*/,
     bool &/*bUpdatedOpChat*/, bool & /*bUpdatedLanguage*/, bool &bUpdatedTextFiles, bool &bUpdatedRedirectAddress, bool &bUpdatedTempBanRedirAddress,
-    bool &bUpdatedPermBanRedirAddress) {
+    bool &bUpdatedPermBanRedirAddress, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/) {
     bUpdatedTextFiles = bUpdateTextFiles;
     bUpdatedRedirectAddress = bUpdateRedirectAddress;
     bUpdatedRegOnlyMessage = bUpdateRegOnlyMessage;
@@ -250,7 +227,7 @@ bool SettingPageMoreGeneral::CreateSettingPage(HWND hOwner) {
 
     hWndPageItems[EDT_MAIN_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS], WS_CHILD |
         WS_VISIBLE | ES_AUTOHSCROLL, 7, 166, 433, 18, m_hWnd, (HMENU)EDT_MAIN_REDIR_ADDR, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[EDT_MAIN_REDIR_ADDR], EM_SETLIMITTEXT, 255, 0);
+    ::SendMessage(hWndPageItems[EDT_MAIN_REDIR_ADDR], EM_SETLIMITTEXT, 256, 0);
 
     hWndPageItems[BTN_REDIR_ALL] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ALL_CONN], WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
         7, 188, 433, 16, m_hWnd, (HMENU)BTN_REDIR_ALL, g_hInstance, NULL);
@@ -272,7 +249,7 @@ bool SettingPageMoreGeneral::CreateSettingPage(HWND hOwner) {
 
     hWndPageItems[EDT_MSG_TO_NON_REGS] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_REG_ONLY_MSG], WS_CHILD | WS_VISIBLE |
         ES_AUTOHSCROLL, 12, 274, 423, 18, m_hWnd, (HMENU)EDT_MSG_TO_NON_REGS, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[EDT_MSG_TO_NON_REGS], EM_SETLIMITTEXT, 255, 0);
+    ::SendMessage(hWndPageItems[EDT_MSG_TO_NON_REGS], EM_SETLIMITTEXT, 256, 0);
 
     hWndPageItems[GB_NON_REG_REDIR] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ADDRESS], WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS |
         WS_CLIPCHILDREN | BS_GROUPBOX, 5, 299, 437, 40, m_hWnd, NULL, g_hInstance, NULL);
@@ -283,7 +260,7 @@ bool SettingPageMoreGeneral::CreateSettingPage(HWND hOwner) {
 
     hWndPageItems[EDT_NON_REG_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_REG_ONLY_REDIR_ADDRESS],
         WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 97, 314, 338, 18, m_hWnd, (HMENU)EDT_NON_REG_REDIR_ADDR, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[EDT_NON_REG_REDIR_ADDR], EM_SETLIMITTEXT, 255, 0);
+    ::SendMessage(hWndPageItems[EDT_NON_REG_REDIR_ADDR], EM_SETLIMITTEXT, 256, 0);
 
     hWndPageItems[GB_KILL_THAT_DUCK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_CLIENTS_BUGGY_SUPPORTS], WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS |
         WS_CLIPCHILDREN | BS_GROUPBOX, 0, 346, 447, 40, m_hWnd, NULL, g_hInstance, NULL);

@@ -73,3 +73,49 @@ void SettingPage::CreateHWND(HWND hOwner) {
     }
 }
 //---------------------------------------------------------------------------
+
+void SettingPage::RemovePipes(HWND hWnd) {//RemovePipes((HWND)lParam);
+    char buf[257];
+    ::GetWindowText(hWnd, buf, 257);
+
+    bool bChanged = false;
+
+    for(uint16_t ui16i = 0; buf[ui16i] != '\0'; ui16i++) {
+        if(buf[ui16i] == '|') {
+            strcpy(buf+ui16i, buf+ui16i+1);
+            bChanged = true;
+            ui16i--;
+        }
+    }
+
+    if(bChanged == true) {
+        int iStart, iEnd;
+
+        ::SendMessage(hWnd, EM_GETSEL, (WPARAM)&iStart, (LPARAM)&iEnd);
+
+        ::SetWindowText(hWnd, buf);
+
+        ::SendMessage(hWnd, EM_SETSEL, iStart, iEnd);
+    }
+}
+//---------------------------------------------------------------------------
+
+void SettingPage::MinOneMaxShort(HWND hWnd) {//MinOneMaxShort((HWND)lParam);
+    char buf[6];
+    ::GetWindowText(hWnd, buf, 6);
+
+    int iValue = atoi(buf);
+
+    int iStart, iEnd;
+
+    ::SendMessage(hWnd, EM_GETSEL, (WPARAM)&iStart, (LPARAM)&iEnd);
+
+    if(iValue > 32767) {
+        ::SetWindowText(hWnd, "32767");
+    } else if(iValue == 0) {
+        ::SetWindowText(hWnd, "1");
+    }
+
+    ::SendMessage(hWnd, EM_SETSEL, iStart, iEnd);
+}
+//---------------------------------------------------------------------------

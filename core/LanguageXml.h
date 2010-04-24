@@ -659,7 +659,7 @@ const char* LangXmlStr[] = {
     "MaxMsgsToOneUserPerMin", 
     "Per10Seconds", 
     "TemporaryBanTime", 
-    "ArrowPrefixesForHubCmds", 
+    "PrefixesForHubCmds", 
     "GeneralSettings", 
     "MOTD", 
     "DefaultBots", 
