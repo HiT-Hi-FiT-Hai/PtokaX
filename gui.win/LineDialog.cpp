@@ -137,29 +137,4 @@ LRESULT LineDialog::LineDialogProc(UINT uMsg, WPARAM wParam, LPARAM /*lParam*/) 
 INT_PTR LineDialog::DoModal(HWND hWndParent) {
 	return ::DialogBoxParam(g_hInstance, MAKEINTRESOURCE(IDD_LINE_DIALOG), hWndParent, StaticLineDialogProc, (LPARAM)this);
 }
-
-/*
-HWND LineDialog::CreateEx() {
-    if(atomLineDialog == 0) {
-        WNDCLASSEX m_wc;
-        memset(&m_wc, 0, sizeof(WNDCLASSEX));
-        m_wc.cbSize = sizeof(WNDCLASSEX);
-        m_wc.lpfnWndProc = StaticLineDialogProc;
-        m_wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
-        m_wc.lpszClassName = "PtokaX_LineDialog";
-        m_wc.lpszMenuName = NULL;
-        m_wc.hInstance = g_hInstance;
-    	m_wc.hCursor = ::LoadCursor(m_wc.hInstance, IDC_ARROW);
-        m_wc.style = CS_HREDRAW | CS_VREDRAW;
-    	m_wc.hIcon = NULL;
-        m_wc.hIconSm = NULL;
-
-        atomLineDialog = ::RegisterClassEx(&m_wc);
-    }
-
-    m_hWnd = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomLineDialog), "LineDialog", WS_POPUP | WS_VISIBLE | WS_SYSMENU |
-        WS_CAPTION | DS_MODALFRAME | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, CW_USEDEFAULT, CW_USEDEFAULT, 306, 88, NULL, NULL, g_hInstance, this);
-
-	return m_hWnd;
-}*/
 //---------------------------------------------------------------------------

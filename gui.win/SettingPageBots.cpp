@@ -41,89 +41,88 @@ SettingPageBots::SettingPageBots() {
 //---------------------------------------------------------------------------
 
 LRESULT SettingPageBots::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    switch(uMsg) {
-        case WM_COMMAND:
-           switch(LOWORD(wParam)) {
-                case EDT_HUB_BOT_NICK:
-                case EDT_OP_CHAT_BOT_NICK:
-                    if(HIWORD(wParam) == EN_CHANGE) {
-                        char buf[256];
-                        ::GetWindowText((HWND)lParam, buf, 256);
+    if(uMsg == WM_COMMAND) {
+        switch(LOWORD(wParam)) {
+            case EDT_HUB_BOT_NICK:
+            case EDT_OP_CHAT_BOT_NICK:
+                if(HIWORD(wParam) == EN_CHANGE) {
+                    char buf[65];
+                    ::GetWindowText((HWND)lParam, buf, 65);
 
-                        bool bChanged = false;
+                    bool bChanged = false;
 
-                        for(uint16_t ui16i = 0; buf[ui16i] != '\0'; ui16i++) {
-                            if(buf[ui16i] == '|' || buf[ui16i] == '$' || buf[ui16i] == ' ') {
-                                strcpy(buf+ui16i, buf+ui16i+1);
-                                bChanged = true;
-                            }
+                    for(uint16_t ui16i = 0; buf[ui16i] != '\0'; ui16i++) {
+                        if(buf[ui16i] == '|' || buf[ui16i] == '$' || buf[ui16i] == ' ') {
+                            strcpy(buf+ui16i, buf+ui16i+1);
+                            bChanged = true;
+                            ui16i--;
                         }
-
-                        if(bChanged == true) {
-                            int iStart, iEnd;
-
-                            ::SendMessage((HWND)lParam, EM_GETSEL, (WPARAM)&iStart, (LPARAM)&iEnd);
-
-                            ::SetWindowText((HWND)lParam, buf);
-
-                            ::SendMessage((HWND)lParam, EM_SETSEL, iStart, iEnd);
-                        }
-
-                        return 0;
                     }
 
-                    break;
-                case EDT_HUB_BOT_DESCRIPTION:
-                case EDT_HUB_BOT_EMAIL:
-                case EDT_OP_CHAT_BOT_DESCRIPTION:
-                case EDT_OP_CHAT_BOT_EMAIL:
-                    if(HIWORD(wParam) == EN_CHANGE) {
-                        char buf[256];
-                        ::GetWindowText((HWND)lParam, buf, 256);
+                    if(bChanged == true) {
+                        int iStart, iEnd;
 
-                        bool bChanged = false;
+                        ::SendMessage((HWND)lParam, EM_GETSEL, (WPARAM)&iStart, (LPARAM)&iEnd);
 
-                        for(uint16_t ui16i = 0; buf[ui16i] != '\0'; ui16i++) {
-                            if(buf[ui16i] == '|' || buf[ui16i] == '$') {
-                                strcpy(buf+ui16i, buf+ui16i+1);
-                                bChanged = true;
-                            }
+                        ::SetWindowText((HWND)lParam, buf);
+
+                        ::SendMessage((HWND)lParam, EM_SETSEL, iStart, iEnd);
+                    }
+
+                    return 0;
+                }
+
+                break;
+            case EDT_HUB_BOT_DESCRIPTION:
+            case EDT_HUB_BOT_EMAIL:
+            case EDT_OP_CHAT_BOT_DESCRIPTION:
+            case EDT_OP_CHAT_BOT_EMAIL:
+                if(HIWORD(wParam) == EN_CHANGE) {
+                    char buf[65];
+                    ::GetWindowText((HWND)lParam, buf, 65);
+
+                    bool bChanged = false;
+
+                    for(uint16_t ui16i = 0; buf[ui16i] != '\0'; ui16i++) {
+                        if(buf[ui16i] == '|' || buf[ui16i] == '$') {
+                            strcpy(buf+ui16i, buf+ui16i+1);
+                            bChanged = true;
+                            ui16i--;
                         }
-
-                        if(bChanged == true) {
-                            int iStart, iEnd;
-
-                            ::SendMessage((HWND)lParam, EM_GETSEL, (WPARAM)&iStart, (LPARAM)&iEnd);
-
-                            ::SetWindowText((HWND)lParam, buf);
-
-                            ::SendMessage((HWND)lParam, EM_SETSEL, iStart, iEnd);
-                        }
-
-                        return 0;
                     }
 
-                    break;
-                case BTN_HUB_BOT_ENABLE:
-                    if(HIWORD(wParam) == BN_CLICKED) {
-                        BOOL bEnable = ::SendMessage(hWndPageItems[BTN_HUB_BOT_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE;
-                        ::EnableWindow(hWndPageItems[EDT_HUB_BOT_NICK], bEnable);
-                        ::EnableWindow(hWndPageItems[BTN_HUB_BOT_IS_HUB_SEC], bEnable);
-                        ::EnableWindow(hWndPageItems[EDT_HUB_BOT_DESCRIPTION], bEnable);
-                        ::EnableWindow(hWndPageItems[EDT_HUB_BOT_EMAIL], bEnable);
-                    }
-                    break;
-                case BTN_OP_CHAT_BOT_ENABLE:
-                    if(HIWORD(wParam) == BN_CLICKED) {
-                        BOOL bEnable = ::SendMessage(hWndPageItems[BTN_OP_CHAT_BOT_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE;
-                        ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_NICK], bEnable);
-                        ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION], bEnable);
-                        ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], bEnable);
-                    }
-                    break;
-            }
+                    if(bChanged == true) {
+                        int iStart, iEnd;
 
-            break;
+                        ::SendMessage((HWND)lParam, EM_GETSEL, (WPARAM)&iStart, (LPARAM)&iEnd);
+
+                        ::SetWindowText((HWND)lParam, buf);
+
+                        ::SendMessage((HWND)lParam, EM_SETSEL, iStart, iEnd);
+                    }
+
+                    return 0;
+                }
+
+                break;
+            case BTN_HUB_BOT_ENABLE:
+                if(HIWORD(wParam) == BN_CLICKED) {
+                    BOOL bEnable = ::SendMessage(hWndPageItems[BTN_HUB_BOT_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE;
+                    ::EnableWindow(hWndPageItems[EDT_HUB_BOT_NICK], bEnable);
+                    ::EnableWindow(hWndPageItems[BTN_HUB_BOT_IS_HUB_SEC], bEnable);
+                    ::EnableWindow(hWndPageItems[EDT_HUB_BOT_DESCRIPTION], bEnable);
+                    ::EnableWindow(hWndPageItems[EDT_HUB_BOT_EMAIL], bEnable);
+                }
+                break;
+            case BTN_OP_CHAT_BOT_ENABLE:
+                if(HIWORD(wParam) == BN_CLICKED) {
+                    BOOL bEnable = ::SendMessage(hWndPageItems[BTN_OP_CHAT_BOT_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE;
+                    ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_NICK], bEnable);
+                    ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION], bEnable);
+                    ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], bEnable);
+                }
+                break;
+        }
     }
 
 	return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
@@ -141,8 +140,8 @@ void SettingPageBots::Save() {
 		SettingManager->DisableBot();
 	}
 
-    char buf[256];
-    int iLen = ::GetWindowText(hWndPageItems[EDT_HUB_BOT_NICK], buf, 256);
+    char buf[65];
+    int iLen = ::GetWindowText(hWndPageItems[EDT_HUB_BOT_NICK], buf, 65);
 
     if(strcmp(buf, SettingManager->sTexts[SETTXT_BOT_NICK]) != NULL) {
         bUpdateHubSec = true;
@@ -185,7 +184,7 @@ void SettingPageBots::Save() {
 
     SettingManager->SetBool(SETBOOL_USE_BOT_NICK_AS_HUB_SEC, bHubBotIsHubSec);
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_HUB_BOT_DESCRIPTION], buf, 256);
+    iLen = ::GetWindowText(hWndPageItems[EDT_HUB_BOT_DESCRIPTION], buf, 65);
 
     if(bUpdateBot == false &&
         ((SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] == NULL && iLen != 0) ||
@@ -197,7 +196,7 @@ void SettingPageBots::Save() {
 
     SettingManager->SetText(SETTXT_BOT_DESCRIPTION, buf, iLen);
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_HUB_BOT_EMAIL], buf, 256);
+    iLen = ::GetWindowText(hWndPageItems[EDT_HUB_BOT_EMAIL], buf, 65);
 
     if(bUpdateBot == false &&
         (SettingManager->sTexts[SETTXT_BOT_EMAIL] == NULL && iLen != 0) ||
@@ -211,7 +210,7 @@ void SettingPageBots::Save() {
 
     bool bRegOpChat = ::SendMessage(hWndPageItems[BTN_OP_CHAT_BOT_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false;
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_OP_CHAT_BOT_NICK], buf, 256);
+    iLen = ::GetWindowText(hWndPageItems[EDT_OP_CHAT_BOT_NICK], buf, 65);
 
     if(bUpdateBotsSameNick == false && (bRegBot != SettingManager->bBools[SETBOOL_REG_BOT] ||
         bRegOpChat != SettingManager->bBools[SETBOOL_REG_OP_CHAT] ||
@@ -241,7 +240,7 @@ void SettingPageBots::Save() {
 
     SettingManager->SetBool(SETBOOL_REG_OP_CHAT, bRegOpChat);
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION], buf, 256);
+    iLen = ::GetWindowText(hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION], buf, 65);
 
     if(bUpdateOpChat == false &&
         ((SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION] == NULL && iLen != 0) ||
@@ -253,7 +252,7 @@ void SettingPageBots::Save() {
 
     SettingManager->SetText(SETTXT_OP_CHAT_DESCRIPTION, buf, iLen);
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], buf, 256);
+    iLen = ::GetWindowText(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], buf, 65);
 
     if(bUpdateOpChat == false &&
         (SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL] == NULL && iLen != 0) ||
@@ -272,7 +271,7 @@ void SettingPageBots::GetUpdates(bool &bUpdatedHubNameWelcome, bool & /*bUpdated
 	bool &bUpdatedSlotsLimitMessage, bool &bUpdatedHubSlotRatioMessage, bool &bUpdatedMaxHubsLimitMessage, bool &bUpdatedNoTagMessage, 
 	bool &bUpdatedNickLimitMessage, bool &bUpdatedBotsSameNick, bool &bUpdatedBotNick, bool &bUpdatedBot, bool &bUpdatedOpChatNick,
 	bool &bUpdatedOpChat, bool & /*bUpdatedLanguage*/, bool & /*bUpdatedTextFiles*/, bool & /*bUpdatedRedirectAddress*/, bool & /*bUpdatedTempBanRedirAddress*/,
-    bool & /*bUpdatedPermBanRedirAddress*/) {
+    bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/) {
     bUpdatedHubNameWelcome = bUpdateHubNameWelcome;
 	bUpdatedMOTD = bUpdateMOTD;
 	bUpdatedHubSec = bUpdateHubSec;

@@ -41,11 +41,13 @@ public:
         bool & /*bUpdatedSlotsLimitMessage*/, bool & /*bUpdatedHubSlotRatioMessage*/, bool & /*bUpdatedMaxHubsLimitMessage*/, bool & /*bUpdatedNoTagMessage*/,
         bool & /*bUpdatedNickLimitMessage*/, bool & /*bUpdatedBotsSameNick*/, bool & /*bUpdatedBotNick*/, bool & /*bUpdatedBot*/, bool & /*bUpdatedOpChatNick*/,
         bool & /*bUpdatedOpChat*/, bool & /*bUpdatedLanguage*/, bool & /*bUpdatedTextFiles*/, bool & /*bUpdatedRedirectAddress*/, bool & /*bUpdatedTempBanRedirAddress*/,
-        bool & /*bUpdatedPermBanRedirAddress*/) = NULL;
+        bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/) = NULL;
 
     virtual char * GetPageName() = NULL;
-
+protected:
     void CreateHWND(HWND hOwner);
+    void RemovePipes(HWND hWnd);
+    void MinOneMaxShort(HWND hWnd);
 private:
     virtual LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam) = NULL;
 };

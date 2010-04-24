@@ -316,6 +316,7 @@
     <ClInclude Include="gui.win\Resources.h" />
     <ClInclude Include="gui.win\SettingDialog.h" />
     <ClInclude Include="gui.win\SettingPage.h" />
+    <ClInclude Include="gui.win\SettingPageAdvanced.h" />
     <ClInclude Include="gui.win\SettingPageBans.h" />
     <ClInclude Include="gui.win\SettingPageBots.h" />
     <ClInclude Include="gui.win\SettingPageGeneral.h" />
@@ -373,6 +374,7 @@
     <ClCompile Include="gui.win\PtokaX.cpp" />
     <ClCompile Include="gui.win\SettingDialog.cpp" />
     <ClCompile Include="gui.win\SettingPage.cpp" />
+    <ClCompile Include="gui.win\SettingPageAdvanced.cpp" />
     <ClCompile Include="gui.win\SettingPageBans.cpp" />
     <ClCompile Include="gui.win\SettingPageBots.cpp" />
     <ClCompile Include="gui.win\SettingPageGeneral.cpp" />

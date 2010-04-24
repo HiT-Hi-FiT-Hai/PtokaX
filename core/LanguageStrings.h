@@ -659,7 +659,7 @@ const char* LangStr[] = {
     "Maximal messages to one user per minute", 
     "/ 10 seconds", 
     "Temporary ban time", 
-    "<-- Prefixes for hub commands", 
+    "Prefixes for hub commands",
     "General settings", 
     "MOTD", 
     "Default bots", 

@@ -39,7 +39,7 @@ public:
         bool & /*bUpdatedSlotsLimitMessage*/, bool & /*bUpdatedHubSlotRatioMessage*/, bool & /*bUpdatedMaxHubsLimitMessage*/, bool & /*bUpdatedNoTagMessage*/,
         bool & /*bUpdatedNickLimitMessage*/, bool & /*bUpdatedBotsSameNick*/, bool & /*bUpdatedBotNick*/, bool & /*bUpdatedBot*/, bool & /*bUpdatedOpChatNick*/,
         bool & /*bUpdatedOpChat*/, bool & /*bUpdatedLanguage*/, bool & /*bUpdatedTextFiles*/, bool & /*bUpdatedRedirectAddress*/, bool & bUpdatedTempBanRedirAddress,
-        bool & bUpdatedPermBanRedirAddress);
+        bool & bUpdatedPermBanRedirAddress, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/);
 
     char * GetPageName();
 private:
@@ -60,10 +60,10 @@ private:
         EDT_ADD_MESSAGE,
         GB_TEMP_BAN_REDIR,
         BTN_TEMP_BAN_REDIR_ENABLE,
-        EDIT_TEMP_BAN_REDIR,
+        EDT_TEMP_BAN_REDIR,
         GB_PERM_BAN_REDIR,
         BTN_PERM_BAN_REDIR_ENABLE,
-        EDIT_PERM_BAN_REDIR
+        EDT_PERM_BAN_REDIR
     };
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);

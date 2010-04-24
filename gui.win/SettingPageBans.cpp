@@ -39,77 +39,38 @@ SettingPageBans::SettingPageBans() {
 //---------------------------------------------------------------------------
 
 LRESULT SettingPageBans::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    switch(uMsg) {
-        case WM_COMMAND:
-           switch(LOWORD(wParam)) {
-                case EDT_DEFAULT_TEMPBAN_TIME:
-                    if(HIWORD(wParam) == EN_CHANGE) {
-                        char buf[64];
-                        ::GetWindowText((HWND)lParam, buf, 64);
+    if(uMsg == WM_COMMAND) {
+        switch(LOWORD(wParam)) {
+            case EDT_DEFAULT_TEMPBAN_TIME:
+                if(HIWORD(wParam) == EN_CHANGE) {
+                    MinOneMaxShort((HWND)lParam);
 
-                        int iValue = atoi(buf);
+                    return 0;
+                }
+            case EDT_ADD_MESSAGE:
+            case EDT_TEMP_BAN_REDIR:
+            case EDT_PERM_BAN_REDIR:
+                if(HIWORD(wParam) == EN_CHANGE) {
+                    RemovePipes((HWND)lParam);
 
-                        int iStart, iEnd;
+                    return 0;
+                }
 
-                        ::SendMessage((HWND)lParam, EM_GETSEL, (WPARAM)&iStart, (LPARAM)&iEnd);
-
-                        if(iValue > 32767) {
-                            ::SetWindowText((HWND)lParam, "32767");
-                        } else if(iValue == 0) {
-                            ::SetWindowText((HWND)lParam, "1");
-                        }
-
-                        ::SendMessage((HWND)lParam, EM_SETSEL, iStart, iEnd);
-
-                        return 0;
-                    }
-                case EDT_ADD_MESSAGE:
-                case EDIT_TEMP_BAN_REDIR:
-                case EDIT_PERM_BAN_REDIR:
-                    if(HIWORD(wParam) == EN_CHANGE) {
-                        char buf[256];
-                        ::GetWindowText((HWND)lParam, buf, 256);
-
-                        bool bChanged = false;
-
-                        for(uint16_t ui16i = 0; buf[ui16i] != '\0'; ui16i++) {
-                            if(buf[ui16i] == '|') {
-                                strcpy(buf+ui16i, buf+ui16i+1);
-                                bChanged = true;
-                            }
-                        }
-
-                        if(bChanged == true) {
-                            int iStart, iEnd;
-
-                            ::SendMessage((HWND)lParam, EM_GETSEL, (WPARAM)&iStart, (LPARAM)&iEnd);
-
-                            ::SetWindowText((HWND)lParam, buf);
-
-                            ::SendMessage((HWND)lParam, EM_SETSEL, iStart, iEnd);
-                        }
-
-                        return 0;
-                    }
-
-                    break;
-                case BTN_TEMP_BAN_REDIR_ENABLE:
-                    if(HIWORD(wParam) == BN_CLICKED) {
-                        ::EnableWindow(hWndPageItems[EDIT_TEMP_BAN_REDIR],
-                            ::SendMessage(hWndPageItems[BTN_TEMP_BAN_REDIR_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
-                    }
-                    break;
-                case BTN_PERM_BAN_REDIR_ENABLE:
-                    if(HIWORD(wParam) == BN_CLICKED) {
-                        ::EnableWindow(hWndPageItems[EDIT_PERM_BAN_REDIR],
-                            ::SendMessage(hWndPageItems[BTN_PERM_BAN_REDIR_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
-                    }
-                    break;
-            }
-
-            break;
+                break;
+            case BTN_TEMP_BAN_REDIR_ENABLE:
+                if(HIWORD(wParam) == BN_CLICKED) {
+                    ::EnableWindow(hWndPageItems[EDT_TEMP_BAN_REDIR],
+                        ::SendMessage(hWndPageItems[BTN_TEMP_BAN_REDIR_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
+                }
+                break;
+            case BTN_PERM_BAN_REDIR_ENABLE:
+                if(HIWORD(wParam) == BN_CLICKED) {
+                    ::EnableWindow(hWndPageItems[EDT_PERM_BAN_REDIR],
+                        ::SendMessage(hWndPageItems[BTN_PERM_BAN_REDIR_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
+                }
+                break;
+        }
     }
-
 
 	return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
 }
@@ -129,13 +90,13 @@ void SettingPageBans::Save() {
     SettingManager->SetBool(SETBOOL_BAN_MSG_SHOW_REASON, ::SendMessage(hWndPageItems[BTN_SHOW_REASON], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
     SettingManager->SetBool(SETBOOL_BAN_MSG_SHOW_BY, ::SendMessage(hWndPageItems[BTN_SHOW_BY], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 
-    char buf[256];
-    int iLen = ::GetWindowText(hWndPageItems[EDT_ADD_MESSAGE], buf, 256);
+    char buf[257];
+    int iLen = ::GetWindowText(hWndPageItems[EDT_ADD_MESSAGE], buf, 257);
     SettingManager->SetText(SETTXT_MSG_TO_ADD_TO_BAN_MSG, buf, iLen);
 
     SettingManager->SetBool(SETBOOL_TEMP_BAN_REDIR, ::SendMessage(hWndPageItems[BTN_TEMP_BAN_REDIR_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 
-    iLen = ::GetWindowText(hWndPageItems[EDIT_TEMP_BAN_REDIR], buf, 256);
+    iLen = ::GetWindowText(hWndPageItems[EDT_TEMP_BAN_REDIR], buf, 257);
 
     if((SettingManager->sTexts[SETTXT_TEMP_BAN_REDIR_ADDRESS] == NULL && iLen != 0) ||
         (SettingManager->sTexts[SETTXT_TEMP_BAN_REDIR_ADDRESS] != NULL &&
@@ -147,7 +108,7 @@ void SettingPageBans::Save() {
 
     SettingManager->SetBool(SETBOOL_PERM_BAN_REDIR, ::SendMessage(hWndPageItems[BTN_PERM_BAN_REDIR_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 
-    iLen = ::GetWindowText(hWndPageItems[EDIT_PERM_BAN_REDIR], buf, 256);
+    iLen = ::GetWindowText(hWndPageItems[EDT_PERM_BAN_REDIR], buf, 257);
 
     if((SettingManager->sTexts[SETTXT_PERM_BAN_REDIR_ADDRESS] == NULL && iLen != 0) ||
         (SettingManager->sTexts[SETTXT_PERM_BAN_REDIR_ADDRESS] != NULL &&
@@ -164,7 +125,7 @@ void SettingPageBans::GetUpdates(bool & /*bUpdateHubNameWelcome*/, bool & /*bUpd
         bool & /*bUpdatedSlotsLimitMessage*/, bool & /*bUpdatedHubSlotRatioMessage*/, bool & /*bUpdatedMaxHubsLimitMessage*/, bool & /*bUpdatedNoTagMessage*/,
         bool & /*bUpdatedNickLimitMessage*/, bool & /*bUpdatedBotsSameNick*/, bool & /*bUpdatedBotNick*/, bool & /*bUpdatedBot*/, bool & /*bUpdatedOpChatNick*/,
         bool & /*bUpdatedOpChat*/, bool & /*bUpdatedLanguage*/, bool & /*bUpdatedTextFiles*/, bool & /*bUpdatedRedirectAddress*/, bool & bUpdatedTempBanRedirAddress,
-        bool & bUpdatedPermBanRedirAddress) {
+        bool & bUpdatedPermBanRedirAddress, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/) {
     bUpdatedTempBanRedirAddress = bUpdateTempBanRedirAddress;
     bUpdatedPermBanRedirAddress = bUpdatePermBanRedirAddress;
 }
@@ -221,7 +182,7 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
 
     hWndPageItems[EDT_ADD_MESSAGE] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG],
         WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 12, 161, 423, 18, m_hWnd, (HMENU)EDT_ADD_MESSAGE, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[EDT_ADD_MESSAGE], EM_SETLIMITTEXT, 255, 0);
+    ::SendMessage(hWndPageItems[EDT_ADD_MESSAGE], EM_SETLIMITTEXT, 256, 0);
 
     hWndPageItems[GB_TEMP_BAN_REDIR] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_TEMP_BAN_REDIR_ADDRESS], WS_CHILD |
         WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | BS_GROUPBOX, 0, 193, 447, 40, m_hWnd, NULL, g_hInstance, NULL);
@@ -230,9 +191,9 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
         7, 210, 85, 16, m_hWnd, (HMENU)BTN_TEMP_BAN_REDIR_ENABLE, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_TEMP_BAN_REDIR_ENABLE], BM_SETCHECK, (SettingManager->bBools[SETBOOL_TEMP_BAN_REDIR] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    hWndPageItems[EDIT_TEMP_BAN_REDIR] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_TEMP_BAN_REDIR_ADDRESS],
-        WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 97, 208, 343, 18, m_hWnd, (HMENU)EDIT_TEMP_BAN_REDIR, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[EDIT_TEMP_BAN_REDIR], EM_SETLIMITTEXT, 255, 0);
+    hWndPageItems[EDT_TEMP_BAN_REDIR] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_TEMP_BAN_REDIR_ADDRESS],
+        WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 97, 208, 343, 18, m_hWnd, (HMENU)EDT_TEMP_BAN_REDIR, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[EDT_TEMP_BAN_REDIR], EM_SETLIMITTEXT, 256, 0);
 
     hWndPageItems[GB_PERM_BAN_REDIR] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_PERM_BAN_REDIR_ADDRESS], WS_CHILD |
         WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | BS_GROUPBOX, 0, 233, 447, 40, m_hWnd, NULL, g_hInstance, NULL);
@@ -241,9 +202,9 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
         7, 250, 85, 16, m_hWnd, (HMENU)BTN_PERM_BAN_REDIR_ENABLE, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_PERM_BAN_REDIR_ENABLE], BM_SETCHECK, (SettingManager->bBools[SETBOOL_PERM_BAN_REDIR] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    hWndPageItems[EDIT_PERM_BAN_REDIR] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_PERM_BAN_REDIR_ADDRESS],
-        WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 97, 248, 343, 18, m_hWnd, (HMENU)EDIT_PERM_BAN_REDIR, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[EDIT_PERM_BAN_REDIR], EM_SETLIMITTEXT, 255, 0);
+    hWndPageItems[EDT_PERM_BAN_REDIR] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_PERM_BAN_REDIR_ADDRESS],
+        WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 97, 248, 343, 18, m_hWnd, (HMENU)EDT_PERM_BAN_REDIR, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[EDT_PERM_BAN_REDIR], EM_SETLIMITTEXT, 256, 0);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {
@@ -254,9 +215,9 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
         ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
     }
 
-    ::EnableWindow(hWndPageItems[EDIT_TEMP_BAN_REDIR], SettingManager->bBools[SETBOOL_TEMP_BAN_REDIR] == true ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[EDT_TEMP_BAN_REDIR], SettingManager->bBools[SETBOOL_TEMP_BAN_REDIR] == true ? TRUE : FALSE);
 
-    ::EnableWindow(hWndPageItems[EDIT_PERM_BAN_REDIR], SettingManager->bBools[SETBOOL_PERM_BAN_REDIR] == true ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[EDT_PERM_BAN_REDIR], SettingManager->bBools[SETBOOL_PERM_BAN_REDIR] == true ? TRUE : FALSE);
 
 	return true;
 }
