@@ -43,7 +43,7 @@ public:
 
     char * GetPageName();
 private:
-    HWND hWndPageItems[18];
+    HWND hWndPageItems[27];
     
     enum enmPageItems {
         GB_DEFAULT_TEMPBAN_TIME,
@@ -63,7 +63,16 @@ private:
         EDT_TEMP_BAN_REDIR,
         GB_PERM_BAN_REDIR,
         BTN_PERM_BAN_REDIR_ENABLE,
-        EDT_PERM_BAN_REDIR
+        EDT_PERM_BAN_REDIR,
+        GB_PASSWORD_PROTECTION,
+        BTN_ENABLE_ADVANCED_PASSWORD_PROTECTION,
+        GB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION,
+        CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION,
+        LBL_TEMP_BAN_TIME,
+        EDT_TEMP_BAN_TIME,
+        UD_TEMP_BAN_TIME,
+        LBL_TEMP_BAN_TIME_HOURS,
+        BTN_REPORT_3X_BAD_PASS
     };
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);

@@ -193,7 +193,9 @@ void SettingPageGeneral::Save() {
     }
 
     LRESULT lResult = ::SendMessage(hWndPageItems[UD_MAX_USERS], UDM_GETPOS, 0, 0);
-    SettingManager->SetShort(SETSHORT_MAX_USERS, LOWORD(lResult));
+    if(HIWORD(lResult) == 0) {
+        SettingManager->SetShort(SETSHORT_MAX_USERS, LOWORD(lResult));
+    }
 }
 //------------------------------------------------------------------------------
 
@@ -222,7 +224,7 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_LANGUAGE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_LANGUAGE], WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS |
         WS_CLIPCHILDREN | BS_GROUPBOX, 0, 0, 297, 42, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[CB_LANGUAGE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_COMBOBOX, LanguageManager->sTexts[LAN_LANGUAGE], WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS |
+    hWndPageItems[CB_LANGUAGE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS |
         WS_CLIPCHILDREN | WS_VSCROLL | CBS_DROPDOWNLIST, 7, 15, 283, 20, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[GB_MAX_USERS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MAX_USERS_LIMIT], WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS |
@@ -232,11 +234,8 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
         ES_RIGHT, 309, 15, 109, 20, m_hWnd, (HMENU)EDT_MAX_USERS, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MAX_USERS], EM_SETLIMITTEXT, 5, 0);
 
-    hWndPageItems[UD_MAX_USERS] = ::CreateWindowEx(WS_EX_TRANSPARENT, UPDOWN_CLASS, "", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
-        UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 418, 15, 14, 20, m_hWnd, NULL, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[UD_MAX_USERS], UDM_SETRANGE, 0, (LPARAM)MAKELONG(32767, 1));
-    ::SendMessage(hWndPageItems[UD_MAX_USERS], UDM_SETBUDDY, (WPARAM)hWndPageItems[EDT_MAX_USERS], 0);
-    ::SendMessage(hWndPageItems[UD_MAX_USERS], UDM_SETPOS, 0, (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_USERS], 0));
+    AddUpDown(hWndPageItems[UD_MAX_USERS], 418, 15, 14, 20, (LPARAM)MAKELONG(32767, 1), (WPARAM)hWndPageItems[EDT_MAX_USERS],
+        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_USERS], 0));
 
     hWndPageItems[GB_HUB_NAME] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_HUB_NAME], WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS |
         WS_CLIPCHILDREN | BS_GROUPBOX, 0, 42, 447, 40, m_hWnd, NULL, g_hInstance, NULL);
@@ -284,6 +283,7 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_TCP_PORTS] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_TCP_PORTS], WS_CHILD | WS_VISIBLE |
         ES_AUTOHSCROLL, 7, 271, 348, 18, m_hWnd, (HMENU)EDT_TCP_PORTS, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_TCP_PORTS], EM_SETLIMITTEXT, 64, 0);
+    AddToolTip(hWndPageItems[EDT_TCP_PORTS], LanguageManager->sTexts[LAN_TCP_PORTS_HINT]);
 
     hWndPageItems[GB_UDP_PORT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_UDP_PORT], WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS |
         WS_CLIPCHILDREN | BS_GROUPBOX, 367, 256, 80, 40, m_hWnd, NULL, g_hInstance, NULL);

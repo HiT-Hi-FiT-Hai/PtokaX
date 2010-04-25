@@ -129,10 +129,6 @@ const char* LangXmlStr[] = {
     "ModeToMyINFO",
     "ModeToDescr",
     "MinBeforeNewSend",
-    "StripDescr",
-    "StripTag",
-    "StripConn",
-    "StripMail",
     "RegOnlyHub",
     "Language",
     "SaveSettings",
@@ -812,6 +808,12 @@ const char* LangXmlStr[] = {
     "CheckForUpdate",
     "ReloadTextFiles",
     "RedirectAllUsersTo",
+    "OriginalMyINFO",
+    "OptionsForModifiedMyINFO",
+    "RemoveDescription",
+    "RemoveTag",
+    "RemoveConnection",
+    "RemoveEmail",
 };
 //---------------------------------------------------------------------------
 

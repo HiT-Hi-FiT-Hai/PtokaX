@@ -36,7 +36,7 @@ public:
 
 	INT_PTR DoModal(HWND hWndParent);
 private:
-    SettingPage * SettingPages[13];
+    SettingPage * SettingPages[12];
 
     LRESULT SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 

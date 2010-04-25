@@ -39,6 +39,7 @@
 #include "SettingPageGeneral.h"
 #include "SettingPageMoreGeneral.h"
 #include "SettingPageMOTD.h"
+#include "SettingPageMyINFO.h"
 #include "../core/TextFileManager.h"
 //---------------------------------------------------------------------------
 
@@ -47,18 +48,19 @@ SettingDialog::SettingDialog() {
 
     btnOK = btnCancel = NULL;
 
-    memset(&SettingPages, 0, 13 * sizeof(SettingPage *));
+    memset(&SettingPages, 0, 12 * sizeof(SettingPage *));
     SettingPages[0] = new SettingPageGeneral();
     SettingPages[1] = new SettingPageMOTD();
     SettingPages[2] = new SettingPageBots();
     SettingPages[3] = new SettingPageMoreGeneral();
     SettingPages[4] = new SettingPageBans();
     SettingPages[5] = new SettingPageAdvanced();
+    SettingPages[6] = new SettingPageMyINFO();
 }
 //---------------------------------------------------------------------------
 
 SettingDialog::~SettingDialog() {
-    for(uint8_t ui8i = 0; ui8i < 13; ui8i++) {
+    for(uint8_t ui8i = 0; ui8i < 12; ui8i++) {
         if(SettingPages[ui8i] != NULL) {
             delete SettingPages[ui8i];
         }
@@ -146,12 +148,8 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
             tvIS.item.pszText = SettingPages[5]->GetPageName();
             tvIS.hParent = (HTREEITEM)::SendMessage(hWndTree, TVM_INSERTITEM, 0, (LPARAM)&tvIS);
 
-            tvIS.item.lParam = NULL;
-            tvIS.item.pszText = LanguageManager->sTexts[LAN_MYINFO_PROCESSING];
-            ::SendMessage(hWndTree, TVM_INSERTITEM, 0, (LPARAM)&tvIS);
-
-            tvIS.item.lParam = NULL;
-            tvIS.item.pszText = LanguageManager->sTexts[LAN_ADVANCED_SECURITY];
+            tvIS.item.lParam = (LPARAM)SettingPages[6];
+            tvIS.item.pszText = SettingPages[6]->GetPageName();
             ::SendMessage(hWndTree, TVM_INSERTITEM, 0, (LPARAM)&tvIS);
 
             tvIS.hParent = TVI_ROOT;
@@ -205,7 +203,7 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
 
                     SettingManager->bUpdateLocked = true;
 
-                    for(uint8_t ui8i = 0; ui8i < 13; ui8i++) {
+                    for(uint8_t ui8i = 0; ui8i < 12; ui8i++) {
                         if(SettingPages[ui8i] != NULL) {
                             SettingPages[ui8i]->Save();
 

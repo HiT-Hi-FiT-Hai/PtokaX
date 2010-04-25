@@ -69,6 +69,38 @@ LRESULT SettingPageBans::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                         ::SendMessage(hWndPageItems[BTN_PERM_BAN_REDIR_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
                 }
                 break;
+            case CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION:
+                if(HIWORD(wParam) == CBN_SELCHANGE) {
+                    uint32_t ui32Action = (uint32_t)::SendMessage(hWndPageItems[CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION], CB_GETCURSEL, 0, 0);
+                    ::EnableWindow(hWndPageItems[LBL_TEMP_BAN_TIME], ui32Action == 2 ? TRUE : FALSE);
+                    ::EnableWindow(hWndPageItems[EDT_TEMP_BAN_TIME], ui32Action == 2 ? TRUE : FALSE);
+                    ::EnableWindow(hWndPageItems[UD_TEMP_BAN_TIME], ui32Action == 2 ? TRUE : FALSE);
+                    ::EnableWindow(hWndPageItems[LBL_TEMP_BAN_TIME_HOURS], ui32Action == 2 ? TRUE : FALSE);
+                    ::EnableWindow(hWndPageItems[BTN_REPORT_3X_BAD_PASS], ui32Action == 0 ? FALSE : TRUE);
+                }
+
+                break;
+            case EDT_TEMP_BAN_TIME:
+                if(HIWORD(wParam) == EN_CHANGE) {
+                    char buf[4];
+                    ::GetWindowText((HWND)lParam, buf, 4);
+
+                    int iValue = atoi(buf);
+
+                    int iStart, iEnd;
+
+                    ::SendMessage((HWND)lParam, EM_GETSEL, (WPARAM)&iStart, (LPARAM)&iEnd);
+
+                    if(iValue > 512) {
+                        ::SetWindowText((HWND)lParam, "512");
+                    } else if(iValue == 0) {
+                        ::SetWindowText((HWND)lParam, "1");
+                    }
+
+                    ::SendMessage((HWND)lParam, EM_SETSEL, iStart, iEnd);
+
+                    return 0;
+                }
         }
     }
 
@@ -82,7 +114,9 @@ void SettingPageBans::Save() {
     }
 
     LRESULT lResult = ::SendMessage(hWndPageItems[UD_DEFAULT_TEMPBAN_TIME], UDM_GETPOS, 0, 0);
-    SettingManager->SetShort(SETSHORT_DEFAULT_TEMP_BAN_TIME, LOWORD(lResult));
+    if(HIWORD(lResult) == 0) {
+        SettingManager->SetShort(SETSHORT_DEFAULT_TEMP_BAN_TIME, LOWORD(lResult));
+    }
 
     SettingManager->SetBool(SETBOOL_BAN_MSG_SHOW_IP, ::SendMessage(hWndPageItems[BTN_SHOW_IP], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
     SettingManager->SetBool(SETBOOL_BAN_MSG_SHOW_RANGE, ::SendMessage(hWndPageItems[BTN_SHOW_RANGE], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
@@ -117,6 +151,18 @@ void SettingPageBans::Save() {
     }
 
     SettingManager->SetText(SETTXT_PERM_BAN_REDIR_ADDRESS, buf, iLen);
+
+    SettingManager->SetBool(SETBOOL_ADVANCED_PASS_PROTECTION,
+        ::SendMessage(hWndPageItems[BTN_ENABLE_ADVANCED_PASSWORD_PROTECTION], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
+
+    SettingManager->SetShort(SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE, (int16_t)::SendMessage(hWndPageItems[CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION], CB_GETCURSEL, 0, 0));
+
+    lResult = ::SendMessage(hWndPageItems[UD_TEMP_BAN_TIME], UDM_GETPOS, 0, 0);
+    if(HIWORD(lResult) == 0) {
+        SettingManager->SetShort(SETSHORT_BRUTE_FORCE_PASS_PROTECT_TEMP_BAN_TIME, LOWORD(lResult));
+    }
+
+    SettingManager->SetBool(SETBOOL_REPORT_3X_BAD_PASS, ::SendMessage(hWndPageItems[BTN_REPORT_3X_BAD_PASS], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 }
 //------------------------------------------------------------------------------
 
@@ -145,14 +191,11 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
         ES_AUTOHSCROLL | ES_RIGHT, 7, 15, 110, 20, m_hWnd, (HMENU)EDT_DEFAULT_TEMPBAN_TIME, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_DEFAULT_TEMPBAN_TIME], EM_SETLIMITTEXT, 5, 0);
 
-    hWndPageItems[UD_DEFAULT_TEMPBAN_TIME] = ::CreateWindowEx(WS_EX_TRANSPARENT, UPDOWN_CLASS, "", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
-        UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 117, 15, 14, 20, m_hWnd, NULL, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[UD_DEFAULT_TEMPBAN_TIME], UDM_SETRANGE, 0, (LPARAM)MAKELONG(32767, 1));
-    ::SendMessage(hWndPageItems[UD_DEFAULT_TEMPBAN_TIME], UDM_SETBUDDY, (WPARAM)hWndPageItems[EDT_DEFAULT_TEMPBAN_TIME], 0);
-    ::SendMessage(hWndPageItems[UD_DEFAULT_TEMPBAN_TIME], UDM_SETPOS, 0, (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_DEFAULT_TEMP_BAN_TIME], 0));
+    AddUpDown(hWndPageItems[UD_DEFAULT_TEMPBAN_TIME], 117, 15, 14, 20, (LPARAM)MAKELONG(32767, 1), (WPARAM)hWndPageItems[EDT_DEFAULT_TEMPBAN_TIME],
+        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_DEFAULT_TEMP_BAN_TIME], 0));
 
     hWndPageItems[LBL_DEFAULT_TEMPBAN_TIME_MINUTES] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC, LanguageManager->sTexts[LAN_MINUTES_LWR],
-        WS_CHILD | WS_VISIBLE | SS_LEFT, 136, 17, 110, 16, m_hWnd, NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | SS_LEFT, 136, 19, 110, 16, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[GB_BAN_MESSAGE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_BAN_MSG],
         WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | BS_GROUPBOX, 0, 42, 447, 151, m_hWnd, NULL, g_hInstance, NULL);
@@ -206,6 +249,41 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
         WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 97, 248, 343, 18, m_hWnd, (HMENU)EDT_PERM_BAN_REDIR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_PERM_BAN_REDIR], EM_SETLIMITTEXT, 256, 0);
 
+    hWndPageItems[GB_PASSWORD_PROTECTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_PASSWORD_PROTECTION],
+        WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | BS_GROUPBOX, 0, 273, 447, 127, m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[BTN_ENABLE_ADVANCED_PASSWORD_PROTECTION] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ADV_PASS_PRTCTN], WS_CHILD |
+        WS_VISIBLE | BS_AUTOCHECKBOX, 7, 288, 433, 16, m_hWnd, NULL, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[BTN_ENABLE_ADVANCED_PASSWORD_PROTECTION], BM_SETCHECK,
+        (SettingManager->bBools[SETBOOL_ADVANCED_PASS_PROTECTION] == true ? BST_CHECKED : BST_UNCHECKED), 0);
+
+    hWndPageItems[GB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_BRUTE_FORCE_PASS_PRTC_ACT],
+        WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | BS_GROUPBOX, 5, 305, 437, 88, m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS |
+        WS_CLIPCHILDREN | WS_VSCROLL | CBS_DROPDOWNLIST, 12, 320, 423, 20, m_hWnd, (HMENU)CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_DISABLED]);
+    ::SendMessage(hWndPageItems[CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_PERM_BAN]);
+    ::SendMessage(hWndPageItems[CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_TEMP_BAN]);
+    ::SendMessage(hWndPageItems[CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION], CB_SETCURSEL, SettingManager->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE], 0);
+
+    hWndPageItems[LBL_TEMP_BAN_TIME] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC, LanguageManager->sTexts[LAN_TEMPORARY_BAN_TIME],
+        WS_CHILD | WS_VISIBLE | SS_LEFT, 12, 348, 245, 16, m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[EDT_TEMP_BAN_TIME] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, "", WS_CHILD | WS_VISIBLE |
+        ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT, 262, 344, 80, 20, m_hWnd, (HMENU)EDT_TEMP_BAN_TIME, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[EDT_TEMP_BAN_TIME], EM_SETLIMITTEXT, 3, 0);
+
+    AddUpDown(hWndPageItems[UD_TEMP_BAN_TIME], 342, 344, 14, 20, (LPARAM)MAKELONG(512, 1), (WPARAM)hWndPageItems[EDT_TEMP_BAN_TIME],
+        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_TEMP_BAN_TIME], 0));
+
+    hWndPageItems[LBL_TEMP_BAN_TIME_HOURS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC, LanguageManager->sTexts[LAN_HOURS_LWR],
+        WS_CHILD | WS_VISIBLE | SS_LEFT, 360, 348, 75, 16, m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[BTN_REPORT_3X_BAD_PASS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REPORT_BAD_PASS], WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
+        12, 372, 423, 16, m_hWnd, NULL, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[BTN_REPORT_3X_BAD_PASS], BM_SETCHECK, (SettingManager->bBools[SETBOOL_REPORT_3X_BAD_PASS] == true ? BST_CHECKED : BST_UNCHECKED), 0);
+
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {
             ::MessageBox(m_hWnd, "Setting page creation failed!", GetPageName(), MB_OK);
@@ -218,6 +296,12 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
     ::EnableWindow(hWndPageItems[EDT_TEMP_BAN_REDIR], SettingManager->bBools[SETBOOL_TEMP_BAN_REDIR] == true ? TRUE : FALSE);
 
     ::EnableWindow(hWndPageItems[EDT_PERM_BAN_REDIR], SettingManager->bBools[SETBOOL_PERM_BAN_REDIR] == true ? TRUE : FALSE);
+
+    ::EnableWindow(hWndPageItems[LBL_TEMP_BAN_TIME], SettingManager->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 2 ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[EDT_TEMP_BAN_TIME], SettingManager->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 2 ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[UD_TEMP_BAN_TIME], SettingManager->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 2 ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[LBL_TEMP_BAN_TIME_HOURS], SettingManager->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 2 ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[BTN_REPORT_3X_BAD_PASS], SettingManager->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 0 ? FALSE : TRUE);
 
 	return true;
 }

@@ -129,10 +129,6 @@ const char* LangStr[] = {
     "Add user connection mode to MyINFO (need support in client)",
     "Add user connection mode to user description",
     "Minutes before new MyINFO is accepted for broadcast",
-    "Strip description",
-    "Strip tag",
-    "Strip connection",
-    "Strip email",
     "Registered users only hub",
     "Language",
     "Save settings",
@@ -812,6 +808,12 @@ const char* LangStr[] = {
     "Check for update",
     "Reload text files",
     "Redirect all users to",
+    "Original MyINFO",
+    "Options for modified MyINFO",
+    "Remove description",
+    "Remove tag",
+    "Remove connection",
+    "Remove email",
 };
 //---------------------------------------------------------------------------
 
