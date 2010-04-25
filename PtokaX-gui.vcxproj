@@ -322,6 +322,7 @@
     <ClInclude Include="gui.win\SettingPageGeneral.h" />
     <ClInclude Include="gui.win\SettingPageMoreGeneral.h" />
     <ClInclude Include="gui.win\SettingPageMOTD.h" />
+    <ClInclude Include="gui.win\SettingPageMyINFO.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="gui.win\PtokaX.rc" />
@@ -380,6 +381,7 @@
     <ClCompile Include="gui.win\SettingPageGeneral.cpp" />
     <ClCompile Include="gui.win\SettingPageMoreGeneral.cpp" />
     <ClCompile Include="gui.win\SettingPageMOTD.cpp" />
+    <ClCompile Include="gui.win\SettingPageMyINFO.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="core\PtokaX.Manifest" />

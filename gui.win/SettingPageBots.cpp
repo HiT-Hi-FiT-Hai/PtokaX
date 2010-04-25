@@ -263,6 +263,8 @@ void SettingPageBots::Save() {
     }
 
     SettingManager->SetText(SETTXT_OP_CHAT_EMAIL, buf, iLen);
+
+    SettingManager->SetBool(SETBOOL_KEEP_SLOW_USERS, ::SendMessage(hWndPageItems[BTN_KEEP_SLOW_CLIENTS_ONLINE], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 }
 //------------------------------------------------------------------------------
 
@@ -356,6 +358,15 @@ bool SettingPageBots::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_OP_CHAT_BOT_EMAIL] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL], WS_CHILD | WS_VISIBLE |
         ES_AUTOHSCROLL, 12, 304, 423, 18, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_EMAIL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], EM_SETLIMITTEXT, 64, 0);
+
+
+    hWndPageItems[GB_EXPERTS_ONLY] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_EXPERTS_ONLY], WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS |
+        WS_CLIPCHILDREN | BS_GROUPBOX, 0, 336, 447, 40, m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[BTN_KEEP_SLOW_CLIENTS_ONLINE] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_KEEP_SLOW], WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
+        7, 351, 433, 16, m_hWnd, NULL, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[BTN_KEEP_SLOW_CLIENTS_ONLINE], BM_SETCHECK, (SettingManager->bBools[SETBOOL_KEEP_SLOW_USERS] == true ? BST_CHECKED : BST_UNCHECKED), 0);
+
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {

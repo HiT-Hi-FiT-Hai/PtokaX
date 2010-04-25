@@ -119,3 +119,30 @@ void SettingPage::MinOneMaxShort(HWND hWnd) {//MinOneMaxShort((HWND)lParam);
     ::SendMessage(hWnd, EM_SETSEL, iStart, iEnd);
 }
 //---------------------------------------------------------------------------
+
+void SettingPage::AddUpDown(HWND &hWnd, const int &iX, const int &iY, const int &iWidth, const int &iHeight, const LPARAM &lpRange, const WPARAM &wpBuddy,
+    const LPARAM &lpPos) {
+    hWnd = ::CreateWindowEx(WS_EX_TRANSPARENT, UPDOWN_CLASS, "", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | UDS_NOTHOUSANDS |
+        UDS_SETBUDDYINT, iX, iY, iWidth, iHeight, m_hWnd, NULL, g_hInstance, NULL);
+    ::SendMessage(hWnd, UDM_SETRANGE, 0, lpRange);
+    ::SendMessage(hWnd, UDM_SETBUDDY, wpBuddy, 0);
+    ::SendMessage(hWnd, UDM_SETPOS, 0, lpPos);
+}
+//---------------------------------------------------------------------------
+
+void SettingPage::AddToolTip(const HWND &hWnd, char * sTipText) {
+    HWND hWndTooltip = CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS, NULL, TTS_NOPREFIX | TTS_ALWAYSTIP | TTS_BALLOON, CW_USEDEFAULT, CW_USEDEFAULT,
+        CW_USEDEFAULT, CW_USEDEFAULT, hWnd, NULL, g_hInstance, NULL);
+
+    TOOLINFO ti = { 0 };
+	ti.cbSize = sizeof(TOOLINFO);
+	ti.uFlags = TTF_SUBCLASS | TTF_IDISHWND;
+	ti.hwnd = m_hWnd;
+	ti.uId = (UINT_PTR)hWnd;
+	ti.hinst = g_hInstance;
+	ti.lpszText = sTipText;
+
+    ::SendMessage(hWndTooltip, TTM_ADDTOOL, 0, (LPARAM)&ti);
+    ::SendMessage(hWndTooltip, TTM_SETDELAYTIME, TTDT_AUTOPOP, MAKELPARAM(30000, 0));
+}
+//---------------------------------------------------------------------------
