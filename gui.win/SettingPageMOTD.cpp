@@ -142,6 +142,19 @@ void SettingPageMOTD::GetUpdates(bool & /*bUpdateHubNameWelcome*/, bool & /*bUpd
 }
 
 //------------------------------------------------------------------------------
+
+WNDPROC wpOldEditProc = NULL;
+
+LRESULT CALLBACK EditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return 0;
+    }
+
+    return ::CallWindowProc(wpOldEditProc, hWnd, uMsg, wParam, lParam);
+}
+
+//------------------------------------------------------------------------------
+
 bool SettingPageMOTD::CreateSettingPage(HWND hOwner) {
     CreateHWND(hOwner);
     
@@ -149,19 +162,19 @@ bool SettingPageMOTD::CreateSettingPage(HWND hOwner) {
         return false;
     }
 
-    hWndPageItems[GB_MOTD] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MOTD], WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS |
-        WS_CLIPCHILDREN | BS_GROUPBOX, 0, 0, 447, 421, m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_MOTD] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MOTD], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 3, 447, 418,
+        m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_MOTD] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sMOTD != NULL ? SettingManager->sMOTD : "",
-        WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN, 7, 15, 433, 363, m_hWnd, (HMENU)EDT_MOTD, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN, 8, 18, 431, 357, m_hWnd, (HMENU)EDT_MOTD, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MOTD], EM_SETLIMITTEXT, 64000, 0);
 
-    hWndPageItems[BTN_MOTD_AS_PM] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MOTD_IN_PM], WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
-        7, 382, 433, 16, m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[BTN_MOTD_AS_PM] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MOTD_IN_PM], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+        8, 380, 431, 16, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_MOTD_AS_PM], BM_SETCHECK, (SettingManager->bBools[SETBOOL_MOTD_AS_PM] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    hWndPageItems[BTN_DISABLE_MOTD] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISABLE_MOTD], WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
-        7, 400, 433, 16, m_hWnd, (HMENU)BTN_DISABLE_MOTD, g_hInstance, NULL);
+    hWndPageItems[BTN_DISABLE_MOTD] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISABLE_MOTD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+        8, 399, 431, 16, m_hWnd, (HMENU)BTN_DISABLE_MOTD, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_DISABLE_MOTD], BM_SETCHECK, (SettingManager->bBools[SETBOOL_DISABLE_MOTD] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
@@ -176,11 +189,21 @@ bool SettingPageMOTD::CreateSettingPage(HWND hOwner) {
     ::EnableWindow(hWndPageItems[EDT_MOTD], SettingManager->bBools[SETBOOL_DISABLE_MOTD] == true ? FALSE : TRUE);
     ::EnableWindow(hWndPageItems[BTN_MOTD_AS_PM], SettingManager->bBools[SETBOOL_DISABLE_MOTD] == true ? FALSE : TRUE);
 
+    wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_MOTD], GWLP_WNDPROC, (LONG_PTR)EditProc);
+
+    ::SetWindowLongPtr(hWndPageItems[BTN_DISABLE_MOTD], GWLP_USERDATA, (LONG_PTR)this);
+    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_DISABLE_MOTD], GWLP_WNDPROC, (LONG_PTR)ButtonProc);
+
 	return true;
 }
 //------------------------------------------------------------------------------
 
 char * SettingPageMOTD::GetPageName() {
     return LanguageManager->sTexts[LAN_MOTD_ONLY];
+}
+//------------------------------------------------------------------------------
+
+void SettingPageMOTD::FocusLastItem() {
+    ::SetFocus(hWndPageItems[BTN_DISABLE_MOTD]);
 }
 //------------------------------------------------------------------------------

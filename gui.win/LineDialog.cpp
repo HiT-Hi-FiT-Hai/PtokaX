@@ -80,19 +80,19 @@ LRESULT LineDialog::LineDialogProc(UINT uMsg, WPARAM wParam, LPARAM /*lParam*/) 
             RECT rcMain;
             ::GetClientRect(m_hWnd, &rcMain);
 
-            gbLine = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | BS_GROUPBOX,
-                6, 0, (rcMain.right - rcMain.left)-12, 32, m_hWnd, NULL, g_hInstance, NULL);
+            gbLine = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 6, 0, (rcMain.right - rcMain.left)-12, 32,
+                m_hWnd, NULL, g_hInstance, NULL);
 
             edtLine = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
                 10, 10, (rcMain.right - rcMain.left)-20, 18, m_hWnd, NULL, g_hInstance, NULL);
             ::SetWindowText(edtLine, sLine.c_str());
             ::SendMessage(edtLine, EM_SETSEL, 0, -1);
 
-            btnOK = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
-                WS_TABSTOP | BS_PUSHBUTTON, 5, 37, ((rcMain.right - rcMain.left)/2)-7, 20, m_hWnd, (HMENU)IDOK, g_hInstance, NULL);
+            btnOK = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+                5, 37, ((rcMain.right - rcMain.left)/2)-7, 20, m_hWnd, (HMENU)IDOK, g_hInstance, NULL);
 
-            btnCancel = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
-                WS_TABSTOP | BS_PUSHBUTTON, ((rcMain.right - rcMain.left)/2)+2, 37, ((rcMain.right - rcMain.left)/2)-7, 20, m_hWnd, (HMENU)IDCANCEL, g_hInstance, NULL);
+            btnCancel = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+                ((rcMain.right - rcMain.left)/2)+2, 37, ((rcMain.right - rcMain.left)/2)-7, 20, m_hWnd, (HMENU)IDCANCEL, g_hInstance, NULL);
 
             HWND hWnds[] = { btnOK, btnCancel, gbLine, edtLine };
 

@@ -144,8 +144,8 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             RECT rcMain;
             ::GetClientRect(m_hWnd, &rcMain);
 
-            btnStartStop = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_START_HUB], WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
-                BS_PUSHBUTTON, 4, 3, (rcMain.right - rcMain.left)-8, 20, m_hWnd, (HMENU)IDC_START_STOP, g_hInstance, NULL);
+            btnStartStop = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_START_HUB], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+                4, 3, (rcMain.right - rcMain.left)-8, 20, m_hWnd, (HMENU)IDC_START_STOP, g_hInstance, NULL);
 
             gbStats = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
                 5, 19, (rcMain.right - rcMain.left)-10, 141, m_hWnd, NULL, g_hInstance, NULL);
@@ -208,11 +208,11 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 145, 123, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
 
             btnRedirectAll = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ALL_USERS], WS_CHILD | WS_VISIBLE | WS_DISABLED |
-                WS_CLIPSIBLINGS | WS_CLIPCHILDREN | BS_PUSHBUTTON, 4, 164, (rcMain.right - rcMain.left)-8, 20, m_hWnd, (HMENU)IDC_REDIRECT_ALL,
+                WS_TABSTOP | BS_PUSHBUTTON, 4, 164, (rcMain.right - rcMain.left)-8, 20, m_hWnd, (HMENU)IDC_REDIRECT_ALL,
                 g_hInstance, NULL);
 
-            btnMassMessage = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MASS_MSG], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CLIPSIBLINGS |
-                WS_CLIPCHILDREN | BS_PUSHBUTTON, 4, 187, (rcMain.right - rcMain.left)-8, 20, m_hWnd, (HMENU)IDC_MASS_MESSAGE, g_hInstance, NULL);
+            btnMassMessage = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MASS_MSG], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_TABSTOP |
+                BS_PUSHBUTTON, 4, 187, (rcMain.right - rcMain.left)-8, 20, m_hWnd, (HMENU)IDC_MASS_MESSAGE, g_hInstance, NULL);
 
             HWND hWnds[] = { btnStartStop, lblStatus, lblStatusValue, lblJoins, lblJoinsValue, lblParts, lblPartsValue, lblActive, lblActiveValue,
                 lblOnline, lblOnlineValue, lblPeak, lblPeakValue, lblReceived, lblReceivedValue, lblSent, lblSentValue, btnRedirectAll, btnMassMessage
@@ -419,7 +419,7 @@ HWND MainWindow::CreateEx() {
 
 	ATOM atom = ::RegisterClassEx(&m_wc);
 
-    m_hWnd = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE, MAKEINTATOM(atom),
+    m_hWnd = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE | WS_EX_CONTROLPARENT, MAKEINTATOM(atom),
         (string(SettingManager->sTexts[SETTXT_HUB_NAME], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME]) + " | " + sTitle).c_str(),
         WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
         CW_USEDEFAULT, CW_USEDEFAULT, 306, 259, NULL, NULL, g_hInstance, NULL);
