@@ -26,7 +26,13 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
+#include "SettingDialog.h"
+//---------------------------------------------------------------------------
 static ATOM atomSettingPage = 0;
+//---------------------------------------------------------------------------
+void * pSettingDialog = NULL;
+//---------------------------------------------------------------------------
+WNDPROC wpOldButtonProc = NULL;
 //---------------------------------------------------------------------------
 
 SettingPage::SettingPage() {
@@ -62,7 +68,7 @@ void SettingPage::CreateHWND(HWND hOwner) {
         atomSettingPage = ::RegisterClassEx(&m_wc);
     }
 
-    m_hWnd = ::CreateWindowEx(0, MAKEINTATOM(atomSettingPage), "", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+    m_hWnd = ::CreateWindowEx(WS_EX_CONTROLPARENT, MAKEINTATOM(atomSettingPage), "", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
         160, 0, 452, 426, hOwner, NULL, g_hInstance, NULL);
 
     if(m_hWnd != NULL) {
@@ -122,8 +128,8 @@ void SettingPage::MinOneMaxShort(HWND hWnd) {//MinOneMaxShort((HWND)lParam);
 
 void SettingPage::AddUpDown(HWND &hWnd, const int &iX, const int &iY, const int &iWidth, const int &iHeight, const LPARAM &lpRange, const WPARAM &wpBuddy,
     const LPARAM &lpPos) {
-    hWnd = ::CreateWindowEx(WS_EX_TRANSPARENT, UPDOWN_CLASS, "", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | UDS_NOTHOUSANDS |
-        UDS_SETBUDDYINT, iX, iY, iWidth, iHeight, m_hWnd, NULL, g_hInstance, NULL);
+    hWnd = ::CreateWindowEx(WS_EX_TRANSPARENT, UPDOWN_CLASS, "", WS_CHILD | WS_VISIBLE | UDS_ARROWKEYS | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, iX, iY, iWidth, iHeight,
+        m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWnd, UDM_SETRANGE, 0, lpRange);
     ::SendMessage(hWnd, UDM_SETBUDDY, wpBuddy, 0);
     ::SendMessage(hWnd, UDM_SETPOS, 0, lpPos);
@@ -146,3 +152,25 @@ void SettingPage::AddToolTip(const HWND &hWnd, char * sTipText) {
     ::SendMessage(hWndTooltip, TTM_SETDELAYTIME, TTDT_AUTOPOP, MAKELPARAM(30000, 0));
 }
 //---------------------------------------------------------------------------
+
+LRESULT CALLBACK ButtonProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return DLGC_WANTTAB;
+    } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
+        if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
+            ::SetFocus(((SettingDialog *)pSettingDialog)->hWndTree);
+            return 0;
+        } else {
+            SettingPage * pSettingPage = (SettingPage *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
+
+            if(pSettingPage != NULL) {
+                ::SetFocus(::GetNextDlgTabItem(((SettingDialog *)pSettingDialog)->m_hWnd, hWnd, TRUE));
+                return 0;
+            }
+        }
+    }
+
+    return ::CallWindowProc(wpOldButtonProc, hWnd, uMsg, wParam, lParam);
+}
+
+//------------------------------------------------------------------------------

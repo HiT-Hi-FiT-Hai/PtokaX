@@ -42,10 +42,20 @@ public:
         bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/);
 
     char * GetPageName();
+    void FocusLastItem();
 private:
     HWND hWndPageItems[22];
     
     enum enmPageItems {
+        GB_DESCRIPTION_TAG,
+        BTN_ACCEPT_UNKNOWN,
+        GB_NO_TAG_ACTION,
+        CB_NO_TAG_ACTION,
+        GB_NO_TAG_MESSAGE,
+        EDT_NO_TAG_MESSAGE,
+        GB_NO_TAG_REDIRECT,
+        EDT_NO_TAG_REDIRECT,
+        BTN_REPORT_SUSPICIOUS_TAG,
         GB_MYINFO_PROCESSING,
         LBL_MINUTES_BEFORE_ACCEPT_NEW_MYINFO,
         EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO,
@@ -58,16 +68,7 @@ private:
         BTN_REMOVE_CONNECTION,
         BTN_REMOVE_EMAIL,
         BTN_MODE_TO_MYINFO,
-        BTN_MODE_TO_DESCRIPTION,
-        GB_DESCRIPTION_TAG,
-        BTN_ACCEPT_UNKNOWN,
-        GB_NO_TAG_ACTION,
-        CB_NO_TAG_ACTION,
-        GB_NO_TAG_MESSAGE,
-        EDT_NO_TAG_MESSAGE,
-        GB_NO_TAG_REDIRECT,
-        EDT_NO_TAG_REDIRECT,
-        BTN_REPORT_SUSPICIOUS_TAG
+        BTN_MODE_TO_DESCRIPTION
     };
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);

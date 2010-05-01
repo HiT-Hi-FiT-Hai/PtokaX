@@ -44,6 +44,7 @@ public:
         bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/) = NULL;
 
     virtual char * GetPageName() = NULL;
+    virtual void FocusLastItem() = NULL;
 protected:
     void CreateHWND(HWND hOwner);
     void RemovePipes(HWND hWnd);
@@ -53,6 +54,12 @@ protected:
 private:
     virtual LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam) = NULL;
 };
+//------------------------------------------------------------------------------
+
+LRESULT CALLBACK ButtonProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+//------------------------------------------------------------------------------
+extern void * pSettingDialog;
+extern WNDPROC wpOldButtonProc;
 //------------------------------------------------------------------------------
 
 #endif

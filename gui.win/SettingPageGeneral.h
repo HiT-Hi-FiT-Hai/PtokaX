@@ -42,6 +42,7 @@ public:
         bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/);
 
     char * GetPageName();
+    void FocusLastItem();
 private:
     HWND hWndPageItems[25];
     
