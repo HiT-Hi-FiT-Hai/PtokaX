@@ -151,6 +151,9 @@
     <ClCompile Include="gui.win\SettingPageMyINFO.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
+    <ClCompile Include="gui.win\SettingPageRules.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\eventqueue.h">
@@ -325,6 +328,9 @@
       <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui.win\SettingPageMyINFO.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.win\SettingPageRules.h">
       <Filter>Gui</Filter>
     </ClInclude>
   </ItemGroup>

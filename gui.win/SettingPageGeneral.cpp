@@ -79,7 +79,7 @@ LRESULT SettingPageGeneral::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPa
                 }
             case EDT_MAX_USERS:
                 if(HIWORD(wParam) == EN_CHANGE) {
-                    MinOneMaxShort((HWND)lParam);
+                    MinMaxCheck((HWND)lParam, 1, 32767);
 
                     return 0;
                 }
@@ -204,7 +204,7 @@ void SettingPageGeneral::GetUpdates(bool &bUpdatedHubNameWelcome, bool &bUpdated
     bool & /*bUpdatedSlotsLimitMessage*/, bool & /*bUpdatedHubSlotRatioMessage*/, bool & /*bUpdatedMaxHubsLimitMessage*/, bool & /*bUpdatedNoTagMessage*/,
     bool & /*bUpdatedNickLimitMessage*/, bool & /*bUpdatedBotsSameNick*/, bool & /*bUpdatedBotNick*/, bool & /*bUpdatedBot*/, bool & /*bUpdatedOpChatNick*/,
     bool & /*bUpdatedOpChat*/, bool &bUpdatedLanguage, bool & /*bUpdatedTextFiles*/, bool & /*bUpdatedRedirectAddress*/, bool & /*bUpdatedTempBanRedirAddress*/,
-    bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/) {
+    bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/, bool & /*bUpdatedMinShare*/, bool & /*bUpdatedMaxShare*/) {
     bUpdatedHubNameWelcome = bUpdateHubNameWelcome;
     bUpdatedHubName = bUpdateHubName;
     bUpdatedTCPPorts = bUpdateTCPPorts;
@@ -224,13 +224,13 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_LANGUAGE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_LANGUAGE], WS_CHILD | WS_VISIBLE |
         BS_GROUPBOX, 0, 3, 297, 44, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[CB_LANGUAGE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE |
+    hWndPageItems[CB_LANGUAGE] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE |
         WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST, 8, 18, 281, 21, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[GB_MAX_USERS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MAX_USERS_LIMIT], WS_CHILD | WS_VISIBLE |
         BS_GROUPBOX, 302, 3, 145, 44, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_MAX_USERS] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL |
+    hWndPageItems[EDT_MAX_USERS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL |
         ES_RIGHT, 310, 18, 112, 21, m_hWnd, (HMENU)EDT_MAX_USERS, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MAX_USERS], EM_SETLIMITTEXT, 5, 0);
 
@@ -240,21 +240,21 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_HUB_NAME] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_HUB_NAME], WS_CHILD | WS_VISIBLE |
         BS_GROUPBOX, 0, 47, 447, 41, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_HUB_NAME] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_HUB_NAME], WS_CHILD | WS_VISIBLE |
+    hWndPageItems[EDT_HUB_NAME] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_HUB_NAME], WS_CHILD | WS_VISIBLE |
         WS_TABSTOP | ES_AUTOHSCROLL, 8, 62, 431, 18, m_hWnd, (HMENU)EDT_HUB_NAME, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_NAME], EM_SETLIMITTEXT, 256, 0);
 
     hWndPageItems[GB_HUB_TOPIC] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_HUB_TOPIC], WS_CHILD | WS_VISIBLE |
         BS_GROUPBOX, 0, 88, 447, 41, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_HUB_TOPIC] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_HUB_TOPIC], WS_CHILD | WS_VISIBLE |
+    hWndPageItems[EDT_HUB_TOPIC] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_HUB_TOPIC], WS_CHILD | WS_VISIBLE |
         WS_TABSTOP | ES_AUTOHSCROLL, 8, 103, 431, 18, m_hWnd, (HMENU)EDT_HUB_TOPIC, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_TOPIC], EM_SETLIMITTEXT, 256, 0);
 
     hWndPageItems[GB_HUB_DESCRIPTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_HUB_DESCRIPTION], WS_CHILD | WS_VISIBLE |
         BS_GROUPBOX, 0, 129, 447, 60, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_HUB_DESCRIPTION] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_HUB_DESCRIPTION], WS_CHILD |
+    hWndPageItems[EDT_HUB_DESCRIPTION] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_HUB_DESCRIPTION], WS_CHILD |
         WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL, 8, 144, 431, 18, m_hWnd, (HMENU)EDT_HUB_DESCRIPTION, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_DESCRIPTION], EM_SETLIMITTEXT, 256, 0);
 
@@ -265,7 +265,7 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_HUB_ADDRESS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_HUB_ADDRESS], WS_CHILD | WS_VISIBLE |
         BS_GROUPBOX, 0, 189, 447, 79, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_HUB_ADDRESS] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_HUB_ADDRESS], WS_CHILD |
+    hWndPageItems[EDT_HUB_ADDRESS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_HUB_ADDRESS], WS_CHILD |
         WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL, 8, 204, 431, 18, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_ADDRESS], EM_SETLIMITTEXT, 256, 0);
 
@@ -280,7 +280,7 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_TCP_PORTS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_TCP_PORTS], WS_CHILD | WS_VISIBLE |
         BS_GROUPBOX, 0, 268, 362, 41, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_TCP_PORTS] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_TCP_PORTS], WS_CHILD | WS_VISIBLE |
+    hWndPageItems[EDT_TCP_PORTS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_TCP_PORTS], WS_CHILD | WS_VISIBLE |
         WS_TABSTOP | ES_AUTOHSCROLL, 8, 283, 346, 18, m_hWnd, (HMENU)EDT_TCP_PORTS, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_TCP_PORTS], EM_SETLIMITTEXT, 64, 0);
     AddToolTip(hWndPageItems[EDT_TCP_PORTS], LanguageManager->sTexts[LAN_TCP_PORTS_HINT]);
@@ -288,21 +288,21 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_UDP_PORT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_UDP_PORT], WS_CHILD | WS_VISIBLE |
         BS_GROUPBOX, 367, 268, 80, 41, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_UDP_PORT] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_UDP_PORT], WS_CHILD | WS_VISIBLE |
+    hWndPageItems[EDT_UDP_PORT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_UDP_PORT], WS_CHILD | WS_VISIBLE |
         WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL, 375, 283, 64, 18, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_UDP_PORT], EM_SETLIMITTEXT, 5, 0);
 
     hWndPageItems[GB_ADMIN_NICK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_ADMIN_NICK], WS_CHILD | WS_VISIBLE |
         BS_GROUPBOX, 0, 309, 447, 41, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_ADMIN_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_ADMIN_NICK], WS_CHILD | WS_VISIBLE |
+    hWndPageItems[EDT_ADMIN_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_ADMIN_NICK], WS_CHILD | WS_VISIBLE |
         WS_TABSTOP | ES_AUTOHSCROLL, 8, 324, 431, 18, m_hWnd, (HMENU)EDT_ADMIN_NICK, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_ADMIN_NICK], EM_SETLIMITTEXT, 64, 0);
 
     hWndPageItems[GB_HUB_LISTS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_HUB_REG_ADRS], WS_CHILD | WS_VISIBLE |
         BS_GROUPBOX, 0, 350, 447, 60, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_HUB_LISTS] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_REGISTER_SERVERS], WS_CHILD |
+    hWndPageItems[EDT_HUB_LISTS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_REGISTER_SERVERS], WS_CHILD |
         WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL, 8, 365, 431, 18, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_LISTS], EM_SETLIMITTEXT, 1024, 0);
 

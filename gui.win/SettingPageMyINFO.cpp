@@ -68,20 +68,7 @@ LRESULT SettingPageMyINFO::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPar
                 break;
             case EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO:
                 if(HIWORD(wParam) == EN_CHANGE) {
-                    char buf[6];
-                    ::GetWindowText((HWND)lParam, buf, 6);
-
-                    int iValue = atoi(buf);
-
-                    int iStart, iEnd;
-
-                    ::SendMessage((HWND)lParam, EM_GETSEL, (WPARAM)&iStart, (LPARAM)&iEnd);
-
-                    if(iValue > 999) {
-                        ::SetWindowText((HWND)lParam, "999");
-                    }
-
-                    ::SendMessage((HWND)lParam, EM_SETSEL, iStart, iEnd);
+                    MinMaxCheck((HWND)lParam, 0, 999);
 
                     return 0;
                 }
@@ -158,7 +145,7 @@ void SettingPageMyINFO::GetUpdates(bool & /*bUpdateHubNameWelcome*/, bool & /*bU
     bool & /*bUpdatedSlotsLimitMessage*/, bool & /*bUpdatedHubSlotRatioMessage*/, bool & /*bUpdatedMaxHubsLimitMessage*/, bool & bUpdatedNoTagMessage,
     bool & /*bUpdatedNickLimitMessage*/, bool & /*bUpdatedBotsSameNick*/, bool & /*bUpdatedBotNick*/, bool & /*bUpdatedBot*/, bool & /*bUpdatedOpChatNick*/,
     bool & /*bUpdatedOpChat*/, bool & /*bUpdatedLanguage*/, bool & /*bUpdatedTextFiles*/, bool & /*bUpdatedRedirectAddress*/, bool & /*bUpdatedTempBanRedirAddress*/,
-    bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/) {
+    bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/, bool & /*bUpdatedMinShare*/, bool & /*bUpdatedMaxShare*/) {
     bUpdatedNoTagMessage = bUpdateNoTagMessage;
 }
 
@@ -180,7 +167,7 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_NO_TAG_ACTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_NO_TAG_ACTION], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 34, 437, 126,
         m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[CB_NO_TAG_ACTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
+    hWndPageItems[CB_NO_TAG_ACTION] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
         13, 49, 421, 21, m_hWnd, (HMENU)CB_NO_TAG_ACTION, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[CB_NO_TAG_ACTION], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_ACCEPT]);
     ::SendMessage(hWndPageItems[CB_NO_TAG_ACTION], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_REJECT]);
@@ -190,14 +177,14 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_NO_TAG_MESSAGE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 10, 73, 427, 41,
         m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_NO_TAG_MESSAGE] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_NO_TAG_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
+    hWndPageItems[EDT_NO_TAG_MESSAGE] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_NO_TAG_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
         ES_AUTOHSCROLL, 18, 88, 411, 18, m_hWnd, (HMENU)EDT_NO_TAG_MESSAGE, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_NO_TAG_MESSAGE], EM_SETLIMITTEXT, 256, 0);
 
     hWndPageItems[GB_NO_TAG_REDIRECT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ADDRESS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 10, 114, 427, 41,
         m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_NO_TAG_REDIRECT] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_NO_TAG_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |
+    hWndPageItems[EDT_NO_TAG_REDIRECT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_NO_TAG_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |
         WS_TABSTOP | ES_AUTOHSCROLL, 18, 129, 411, 18, m_hWnd, (HMENU)EDT_NO_TAG_REDIRECT, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_NO_TAG_REDIRECT], EM_SETLIMITTEXT, 256, 0);
 
@@ -208,20 +195,20 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_MYINFO_PROCESSING] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MYINFO_PROCESSING], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         0, 187, 447, 201, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[LBL_MINUTES_BEFORE_ACCEPT_NEW_MYINFO] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC, LanguageManager->sTexts[LAN_MYINFO_DELAY],
+    hWndPageItems[LBL_MINUTES_BEFORE_ACCEPT_NEW_MYINFO] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MYINFO_DELAY],
         WS_CHILD | WS_VISIBLE | SS_LEFT, 8, 206, 299, 16, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER |
+    hWndPageItems[EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER |
         ES_AUTOHSCROLL | ES_RIGHT, 312, 202, 110, 20, m_hWnd, (HMENU)EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO], EM_SETLIMITTEXT, 5, 0);
 
     AddUpDown(hWndPageItems[UD_MINUTES_BEFORE_ACCEPT_NEW_MYINFO], 422, 202, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MYINFO_DELAY], 0));
 
-    hWndPageItems[LBL_ORIGINAL_MYINFO] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC, LanguageManager->sTexts[LAN_ORIGINAL_MYINFO],
+    hWndPageItems[LBL_ORIGINAL_MYINFO] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_ORIGINAL_MYINFO],
         WS_CHILD | WS_VISIBLE | SS_LEFT, 8, 233, 136, 16, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[CB_ORIGINAL_MYINFO_ACTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
+    hWndPageItems[CB_ORIGINAL_MYINFO_ACTION] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
         149, 228, 290, 21, m_hWnd, (HMENU)CB_ORIGINAL_MYINFO_ACTION, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[CB_ORIGINAL_MYINFO_ACTION], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_FULL_MYINFO_ALL]);
     ::SendMessage(hWndPageItems[CB_ORIGINAL_MYINFO_ACTION], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_FULL_MYINFO_PROFILE]);

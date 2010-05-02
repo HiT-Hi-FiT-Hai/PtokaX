@@ -273,7 +273,7 @@ void SettingPageBots::GetUpdates(bool &bUpdatedHubNameWelcome, bool & /*bUpdated
 	bool &bUpdatedSlotsLimitMessage, bool &bUpdatedHubSlotRatioMessage, bool &bUpdatedMaxHubsLimitMessage, bool &bUpdatedNoTagMessage, 
 	bool &bUpdatedNickLimitMessage, bool &bUpdatedBotsSameNick, bool &bUpdatedBotNick, bool &bUpdatedBot, bool &bUpdatedOpChatNick,
 	bool &bUpdatedOpChat, bool & /*bUpdatedLanguage*/, bool & /*bUpdatedTextFiles*/, bool & /*bUpdatedRedirectAddress*/, bool & /*bUpdatedTempBanRedirAddress*/,
-    bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/) {
+    bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/, bool & /*bUpdatedMinShare*/, bool & /*bUpdatedMaxShare*/) {
     bUpdatedHubNameWelcome = bUpdateHubNameWelcome;
 	bUpdatedMOTD = bUpdateMOTD;
 	bUpdatedHubSec = bUpdateHubSec;
@@ -309,7 +309,7 @@ bool SettingPageBots::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_HUB_BOT_NICK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_NICK], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         5, 34, 437, 60, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_HUB_BOT_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_BOT_NICK], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
+    hWndPageItems[EDT_HUB_BOT_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_BOT_NICK], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
         ES_AUTOHSCROLL, 13, 49, 421, 18, m_hWnd, (HMENU)EDT_HUB_BOT_NICK, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_BOT_NICK], EM_SETLIMITTEXT, 64, 0);
 
@@ -320,14 +320,14 @@ bool SettingPageBots::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_HUB_BOT_DESCRIPTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_DESCRIPTION], WS_CHILD | WS_VISIBLE |
         BS_GROUPBOX, 5, 94, 437, 41, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_HUB_BOT_DESCRIPTION] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_BOT_DESCRIPTION], WS_CHILD | WS_VISIBLE |
+    hWndPageItems[EDT_HUB_BOT_DESCRIPTION] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_BOT_DESCRIPTION], WS_CHILD | WS_VISIBLE |
         WS_TABSTOP | ES_AUTOHSCROLL, 13, 109, 421, 18, m_hWnd, (HMENU)EDT_HUB_BOT_DESCRIPTION, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_BOT_DESCRIPTION], EM_SETLIMITTEXT, 64, 0);
 
     hWndPageItems[GB_HUB_BOT_EMAIL] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_EMAIL], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         5, 135, 437, 41, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_HUB_BOT_EMAIL] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_BOT_EMAIL], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
+    hWndPageItems[EDT_HUB_BOT_EMAIL] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_BOT_EMAIL], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
         ES_AUTOHSCROLL, 13, 150, 421, 18, m_hWnd, (HMENU)EDT_HUB_BOT_EMAIL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_BOT_EMAIL], EM_SETLIMITTEXT, 64, 0);
 
@@ -341,21 +341,21 @@ bool SettingPageBots::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_OP_CHAT_BOT_NICK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_NICK], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         5, 212, 437, 41, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_OP_CHAT_BOT_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_OP_CHAT_NICK], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
+    hWndPageItems[EDT_OP_CHAT_BOT_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_OP_CHAT_NICK], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
         ES_AUTOHSCROLL, 13, 227, 421, 18, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_NICK, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_OP_CHAT_BOT_NICK], EM_SETLIMITTEXT, 64, 0);
 
     hWndPageItems[GB_OP_CHAT_BOT_DESCRIPTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_DESCRIPTION], WS_CHILD | WS_VISIBLE |
         BS_GROUPBOX, 5, 253, 437, 41, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION], WS_CHILD | WS_VISIBLE |
+    hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION], WS_CHILD | WS_VISIBLE |
         WS_TABSTOP | ES_AUTOHSCROLL, 13, 268, 421, 18, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_DESCRIPTION, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION], EM_SETLIMITTEXT, 64, 0);
 
     hWndPageItems[GB_OP_CHAT_BOT_EMAIL] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_EMAIL], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 294, 437, 41,
         m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_OP_CHAT_BOT_EMAIL] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
+    hWndPageItems[EDT_OP_CHAT_BOT_EMAIL] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
         ES_AUTOHSCROLL, 13, 309, 421, 18, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_EMAIL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], EM_SETLIMITTEXT, 64, 0);
 
