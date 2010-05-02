@@ -169,7 +169,7 @@ void SettingPageAdvanced::GetUpdates(bool & /*bUpdatedHubNameWelcome*/, bool & /
     bool & /*bUpdatedSlotsLimitMessage*/, bool & /*bUpdatedHubSlotRatioMessage*/, bool & /*bUpdatedMaxHubsLimitMessage*/, bool & /*bUpdatedNoTagMessage*/,
     bool & /*bUpdatedNickLimitMessage*/, bool & /*bUpdatedBotsSameNick*/, bool & /*bUpdatedBotNick*/, bool & /*bUpdatedBot*/, bool & /*bUpdatedOpChatNick*/,
     bool & /*bUpdatedOpChat*/, bool & /*bUpdatedLanguage*/, bool & /*bUpdatedTextFiles*/, bool & /*bUpdatedRedirectAddress*/, bool & /*bUpdatedTempBanRedirAddress*/,
-    bool & /*bUpdatedPermBanRedirAddress*/, bool &bUpdatedSysTray, bool &bUpdatedScripting) {
+    bool & /*bUpdatedPermBanRedirAddress*/, bool &bUpdatedSysTray, bool &bUpdatedScripting, bool & /*bUpdatedMinShare*/, bool & /*bUpdatedMaxShare*/) {
     bUpdatedSysTray = bUpdateSysTray;
     bUpdatedScripting = bUpdateScripting;
 }
@@ -204,10 +204,10 @@ bool SettingPageAdvanced::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_HUB_COMMANDS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_HUB_COMMANDS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         0, 96, 447, 60, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[LBL_PREFIXES_FOR_HUB_COMMANDS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC, LanguageManager->sTexts[LAN_PREFIXES_FOR_HUB_CMDS],
+    hWndPageItems[LBL_PREFIXES_FOR_HUB_COMMANDS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_PREFIXES_FOR_HUB_CMDS],
         WS_CHILD | WS_VISIBLE | SS_LEFT, 8, 113, 360, 16, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_PREFIXES_FOR_HUB_COMMANDS] = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, SettingManager->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES], WS_CHILD |
+    hWndPageItems[EDT_PREFIXES_FOR_HUB_COMMANDS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES], WS_CHILD |
         WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL, 373, 111, 66, 18, m_hWnd, (HMENU)EDT_PREFIXES_FOR_HUB_COMMANDS, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_PREFIXES_FOR_HUB_COMMANDS], EM_SETLIMITTEXT, 5, 0);
 

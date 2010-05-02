@@ -40,6 +40,7 @@
 #include "SettingPageMoreGeneral.h"
 #include "SettingPageMOTD.h"
 #include "SettingPageMyINFO.h"
+#include "SettingPageRules.h"
 #include "../core/TextFileManager.h"
 //---------------------------------------------------------------------------
 
@@ -56,6 +57,7 @@ SettingDialog::SettingDialog() {
     SettingPages[4] = new SettingPageBans();
     SettingPages[5] = new SettingPageAdvanced();
     SettingPages[6] = new SettingPageMyINFO();
+    SettingPages[7] = new SettingPageRules();
 
     pSettingDialog = this;
 }
@@ -170,8 +172,8 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
             ::SendMessage(hWndTree, TVM_INSERTITEM, 0, (LPARAM)&tvIS);
 
             tvIS.hParent = TVI_ROOT;
-            tvIS.item.lParam = NULL;
-            tvIS.item.pszText = LanguageManager->sTexts[LAN_RULES];
+            tvIS.item.lParam = (LPARAM)SettingPages[7];
+            tvIS.item.pszText = SettingPages[7]->GetPageName();
             tvIS.hParent = (HTREEITEM)::SendMessage(hWndTree, TVM_INSERTITEM, 0, (LPARAM)&tvIS);
 
             tvIS.item.lParam = NULL;
@@ -216,7 +218,7 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                         bUpdateNoTagMessage = false, bUpdateNickLimitMessage = false, bUpdateBotsSameNick = false, bUpdateBotNick = false,
                         bUpdateBot = false, bUpdateOpChatNick = false, bUpdateOpChat = false, bUpdateLanguage = false, bUpdateTextFiles = false,
                         bUpdateRedirectAddress = false, bUpdateTempBanRedirAddress = false, bUpdatePermBanRedirAddress = false, bUpdateSysTray = false,
-                        bUpdateScripting = false;
+                        bUpdateScripting = false, bUpdateMinShare = false, bUpdateMaxShare = false;
 
                     SettingManager->bUpdateLocked = true;
 
@@ -228,7 +230,8 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                                 bUpdateMOTD, bUpdateHubSec, bUpdateRegOnlyMessage, bUpdateShareLimitMessage, bUpdateSlotsLimitMessage,
                                 bUpdateHubSlotRatioMessage, bUpdateMaxHubsLimitMessage, bUpdateNoTagMessage, bUpdateNickLimitMessage,
                                 bUpdateBotsSameNick, bUpdateBotNick, bUpdateBot, bUpdateOpChatNick, bUpdateOpChat, bUpdateLanguage, bUpdateTextFiles,
-                                bUpdateRedirectAddress, bUpdateTempBanRedirAddress, bUpdatePermBanRedirAddress, bUpdateSysTray, bUpdateScripting);
+                                bUpdateRedirectAddress, bUpdateTempBanRedirAddress, bUpdatePermBanRedirAddress, bUpdateSysTray, bUpdateScripting, 
+								bUpdateMinShare, bUpdateMaxShare);
                         }
                     }
 
@@ -261,6 +264,14 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
 
                     if(bUpdateRegOnlyMessage == true) {
                         SettingManager->UpdateRegOnlyMessage();
+                    }
+
+                    if(bUpdateMinShare == true) {
+                        SettingManager->UpdateMinShare();
+                    }
+
+                    if(bUpdateMaxShare == true) {
+                        SettingManager->UpdateMaxShare();
                     }
 
                     if(bUpdateShareLimitMessage == true) {

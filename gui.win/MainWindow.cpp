@@ -150,61 +150,61 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             gbStats = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
                 5, 19, (rcMain.right - rcMain.left)-10, 141, m_hWnd, NULL, g_hInstance, NULL);
 
-            lblStatus = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC,
+            lblStatus = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_STATUS], (size_t)LanguageManager->ui16TextsLens[LAN_STATUS])+":").c_str(),
                 WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP, 5, 11, 140, 14, gbStats, NULL, g_hInstance, NULL);
 
-            lblStatusValue = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC,
+            lblStatusValue = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_READY], (size_t)LanguageManager->ui16TextsLens[LAN_READY])+".").c_str(),
                 WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP, 145, 11, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
 
-            lblJoins = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC,
+            lblJoins = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_ACCEPTED_CONNECTIONS], (size_t)LanguageManager->ui16TextsLens[LAN_ACCEPTED_CONNECTIONS])+":").c_str(),
                 WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 5, 27, 140, 14, gbStats, NULL, g_hInstance, NULL);
 
-            lblJoinsValue = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
+            lblJoinsValue = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
                 145, 27, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
 
-            lblParts = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC,
+            lblParts = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_CLOSED_CONNECTIONS], (size_t)LanguageManager->ui16TextsLens[LAN_CLOSED_CONNECTIONS])+":").c_str(),
                 WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 5, 43, 140, 14, gbStats, NULL, g_hInstance, NULL);
 
-            lblPartsValue = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
+            lblPartsValue = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
                 145, 43, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
 
-            lblActive = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC,
+            lblActive = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_ACTIVE_CONNECTIONS], (size_t)LanguageManager->ui16TextsLens[LAN_ACTIVE_CONNECTIONS])+":").c_str(),
                 WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 5, 59, 140, 14, gbStats, NULL, g_hInstance, NULL);
 
-            lblActiveValue = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
+            lblActiveValue = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
                 145, 59, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
 
-            lblOnline = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC,
+            lblOnline = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_USERS_ONLINE], (size_t)LanguageManager->ui16TextsLens[LAN_USERS_ONLINE])+":").c_str(),
                 WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 5, 75, 140, 14, gbStats, NULL, g_hInstance, NULL);
 
-            lblOnlineValue = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
+            lblOnlineValue = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
                 145, 75, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
 
-            lblPeak = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC,
+            lblPeak = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_USERS_PEAK], (size_t)LanguageManager->ui16TextsLens[LAN_USERS_PEAK])+":").c_str(),
                 WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 5, 91, 140, 14, gbStats, NULL, g_hInstance, NULL);
 
-            lblPeakValue = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
+            lblPeakValue = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
                 145, 91, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
 
-            lblReceived = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC,
+            lblReceived = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_RECEIVED], (size_t)LanguageManager->ui16TextsLens[LAN_RECEIVED])+":").c_str(),
                 WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 5, 107, 140, 14, gbStats, NULL, g_hInstance, NULL);
 
-            lblReceivedValue = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC, "0 B (0 B/s)", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
+            lblReceivedValue = ::CreateWindowEx(0, WC_STATIC, "0 B (0 B/s)", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
                 145, 107, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
 
-            lblSent = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC,
+            lblSent = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_SENT], (size_t)LanguageManager->ui16TextsLens[LAN_SENT])+":").c_str(),
                 WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 5, 123, 140, 14, gbStats, NULL, g_hInstance, NULL);
 
-            lblSentValue = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_STATIC, "0 B (0 B/s)", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
+            lblSentValue = ::CreateWindowEx(0, WC_STATIC, "0 B (0 B/s)", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
                 145, 123, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
 
             btnRedirectAll = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ALL_USERS], WS_CHILD | WS_VISIBLE | WS_DISABLED |

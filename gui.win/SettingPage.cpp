@@ -106,7 +106,7 @@ void SettingPage::RemovePipes(HWND hWnd) {//RemovePipes((HWND)lParam);
 }
 //---------------------------------------------------------------------------
 
-void SettingPage::MinOneMaxShort(HWND hWnd) {//MinOneMaxShort((HWND)lParam);
+void SettingPage::MinMaxCheck(HWND hWnd, const int &iMin, const int &iMax) {
     char buf[6];
     ::GetWindowText(hWnd, buf, 6);
 
@@ -116,10 +116,12 @@ void SettingPage::MinOneMaxShort(HWND hWnd) {//MinOneMaxShort((HWND)lParam);
 
     ::SendMessage(hWnd, EM_GETSEL, (WPARAM)&iStart, (LPARAM)&iEnd);
 
-    if(iValue > 32767) {
-        ::SetWindowText(hWnd, "32767");
-    } else if(iValue == 0) {
-        ::SetWindowText(hWnd, "1");
+    if(iValue > iMax) {
+        _itoa(iMax, buf, 10);
+        ::SetWindowText(hWnd, buf);
+    } else if(iValue < iMin || ::GetWindowTextLength(hWnd) == 0) {
+        _itoa(iMin, buf, 10);
+        ::SetWindowText(hWnd, buf);
     }
 
     ::SendMessage(hWnd, EM_SETSEL, iStart, iEnd);
@@ -128,7 +130,7 @@ void SettingPage::MinOneMaxShort(HWND hWnd) {//MinOneMaxShort((HWND)lParam);
 
 void SettingPage::AddUpDown(HWND &hWnd, const int &iX, const int &iY, const int &iWidth, const int &iHeight, const LPARAM &lpRange, const WPARAM &wpBuddy,
     const LPARAM &lpPos) {
-    hWnd = ::CreateWindowEx(WS_EX_TRANSPARENT, UPDOWN_CLASS, "", WS_CHILD | WS_VISIBLE | UDS_ARROWKEYS | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, iX, iY, iWidth, iHeight,
+    hWnd = ::CreateWindowEx(0, UPDOWN_CLASS, "", WS_CHILD | WS_VISIBLE | UDS_ARROWKEYS | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, iX, iY, iWidth, iHeight,
         m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWnd, UDM_SETRANGE, 0, lpRange);
     ::SendMessage(hWnd, UDM_SETBUDDY, wpBuddy, 0);

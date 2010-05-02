@@ -18,39 +18,61 @@
  */
 
 //------------------------------------------------------------------------------
-#ifndef SettingPageMOTDH
-#define SettingPageMOTDH
+#ifndef SettingPageRulesH
+#define SettingPageRulesH
 //------------------------------------------------------------------------------
 #include "SettingPage.h"
 //---------------------------------------------------------------------------
 
-class SettingPageMOTD : public SettingPage {
+class SettingPageRules : public SettingPage {
 public:
-    bool bUpdateMOTD;
+    bool bUpdateNickLimitMessage, bUpdateMinShare, bUpdateMaxShare, bUpdateShareLimitMessage;
 
-    SettingPageMOTD();
-    ~SettingPageMOTD() { };
+    SettingPageRules();
+    ~SettingPageRules() { };
 
     bool CreateSettingPage(HWND hOwner);
 
     void Save();
     void GetUpdates(bool & /*bUpdatedHubNameWelcome*/, bool & /*bUpdatedHubName*/, bool & /*bUpdatedTCPPorts*/, bool & /*bUpdatedUDPPort*/,
-        bool & /*bUpdatedAutoReg*/, bool &bUpdatedMOTD, bool & /*bUpdatedHubSec*/, bool & /*bUpdatedRegOnlyMessage*/, bool & /*bUpdatedShareLimitMessage*/,
+        bool & /*bUpdatedAutoReg*/, bool & /*bUpdatedMOTD*/, bool & /*bUpdatedHubSec*/, bool & /*bUpdatedRegOnlyMessage*/, bool &bUpdatedShareLimitMessage,
         bool & /*bUpdatedSlotsLimitMessage*/, bool & /*bUpdatedHubSlotRatioMessage*/, bool & /*bUpdatedMaxHubsLimitMessage*/, bool & /*bUpdatedNoTagMessage*/,
-        bool & /*bUpdatedNickLimitMessage*/, bool & /*bUpdatedBotsSameNick*/, bool & /*bUpdatedBotNick*/, bool & /*bUpdatedBot*/, bool & /*bUpdatedOpChatNick*/,
+        bool &bUpdatedNickLimitMessage, bool & /*bUpdatedBotsSameNick*/, bool & /*bUpdatedBotNick*/, bool & /*bUpdatedBot*/, bool & /*bUpdatedOpChatNick*/,
         bool & /*bUpdatedOpChat*/, bool & /*bUpdatedLanguage*/, bool & /*bUpdatedTextFiles*/, bool & /*bUpdatedRedirectAddress*/, bool & /*bUpdatedTempBanRedirAddress*/,
-        bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/, bool & /*bUpdatedMinShare*/, bool & /*bUpdatedMaxShare*/);
+        bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/, bool &bUpdatedMinShare, bool &bUpdatedMaxShare);
 
     char * GetPageName();
     void FocusLastItem();
 private:
-    HWND hWndPageItems[4];
+    HWND hWndPageItems[26];
     
     enum enmPageItems {
-        GB_MOTD,
-        EDT_MOTD,
-        BTN_MOTD_AS_PM,
-        BTN_DISABLE_MOTD
+        GB_NICK_LIMITS,
+        EDT_MIN_NICK_LEN,
+        UD_MIN_NICK_LEN,
+        LBL_MIN_NICK_LEN,
+        LBL_MAX_NICK_LEN,
+        EDT_MAX_NICK_LEN,
+        UD_MAX_NICK_LEN,
+        GB_NICK_LEN_MSG,
+        EDT_NICK_LEN_MSG,
+        GB_NICK_LEN_REDIR,
+        BTN_NICK_LEN_REDIR,
+        EDT_NICK_LEN_REDIR_ADDR,
+        GB_SHARE_LIMITS,
+        EDT_MIN_SHARE,
+        UD_MIN_SHARE,
+        CB_MIN_SHARE,
+        LBL_MIN_SHARE,
+        LBL_MAX_SHARE,
+        EDT_MAX_SHARE,
+        UD_MAX_SHARE,
+        CB_MAX_SHARE,
+        GB_SHARE_MSG,
+        EDT_SHARE_MSG,
+        GB_SHARE_REDIR,
+        BTN_SHARE_REDIR,
+        EDT_SHARE_REDIR_ADDR
     };
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);

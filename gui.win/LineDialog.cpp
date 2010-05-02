@@ -83,7 +83,7 @@ LRESULT LineDialog::LineDialogProc(UINT uMsg, WPARAM wParam, LPARAM /*lParam*/) 
             gbLine = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 6, 0, (rcMain.right - rcMain.left)-12, 32,
                 m_hWnd, NULL, g_hInstance, NULL);
 
-            edtLine = ::CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
+            edtLine = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
                 10, 10, (rcMain.right - rcMain.left)-20, 18, m_hWnd, NULL, g_hInstance, NULL);
             ::SetWindowText(edtLine, sLine.c_str());
             ::SendMessage(edtLine, EM_SETSEL, 0, -1);
