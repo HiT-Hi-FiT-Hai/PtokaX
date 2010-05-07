@@ -44,7 +44,7 @@ public:
     char * GetPageName();
     void FocusLastItem();
 private:
-    HWND hWndPageItems[26];
+    HWND hWndPageItems[47];
     
     enum enmPageItems {
         GB_NICK_LIMITS,
@@ -72,7 +72,28 @@ private:
         EDT_SHARE_MSG,
         GB_SHARE_REDIR,
         BTN_SHARE_REDIR,
-        EDT_SHARE_REDIR_ADDR
+        EDT_SHARE_REDIR_ADDR,
+        GB_MAIN_CHAT_LIMITS,
+        EDT_MAIN_CHAT_LEN,
+        UD_MAIN_CHAT_LEN,
+        LBL_MAIN_CHAT_LEN,
+        LBL_MAIN_CHAT_LINES,
+        EDT_MAIN_CHAT_LINES,
+        UD_MAIN_CHAT_LINES,
+        GB_PM_LIMITS,
+        EDT_PM_LEN,
+        UD_PM_LEN,
+        LBL_PM_LEN,
+        LBL_PM_LINES,
+        EDT_PM_LINES,
+        UD_PM_LINES,
+        GB_SEARCH_LIMITS,
+        EDT_SEARCH_MIN_LEN,
+        UD_SEARCH_MIN_LEN,
+        LBL_SEARCH_MIN,
+        LBL_SEARCH_MAX,
+        EDT_SEARCH_MAX_LEN,
+        UD_SEARCH_MAX_LEN,
     };
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
