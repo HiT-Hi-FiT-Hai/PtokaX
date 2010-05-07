@@ -118,6 +118,22 @@ LRESULT SettingPageRules::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPara
                     ::EnableWindow(hWndPageItems[EDT_SHARE_REDIR_ADDR], ::SendMessage(hWndPageItems[BTN_SHARE_REDIR], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
                 }
                 break;
+            case UD_MAIN_CHAT_LEN:
+            case UD_MAIN_CHAT_LINES:
+            case UD_PM_LEN:
+            case UD_PM_LINES:
+                if(HIWORD(wParam) == EN_CHANGE) {
+                    MinMaxCheck((HWND)lParam, 0, 32767);
+                }
+
+                return 0;
+            case UD_SEARCH_MIN_LEN:
+            case UD_SEARCH_MAX_LEN:
+                if(HIWORD(wParam) == EN_CHANGE) {
+                    MinMaxCheck((HWND)lParam, 0, 999);
+                }
+
+                return 0;
         }
     }
 
@@ -234,6 +250,36 @@ void SettingPageRules::Save() {
     }
 
     SettingManager->SetText(SETTXT_SHARE_LIMIT_REDIR_ADDRESS, buf, iLen);
+
+    lResult = ::SendMessage(hWndPageItems[UD_MAIN_CHAT_LEN], UDM_GETPOS, 0, 0);
+    if(HIWORD(lResult) == 0) {
+        SettingManager->SetShort(SETSHORT_MAX_CHAT_LEN, LOWORD(lResult));
+    }
+
+    lResult = ::SendMessage(hWndPageItems[UD_MAIN_CHAT_LINES], UDM_GETPOS, 0, 0);
+    if(HIWORD(lResult) == 0) {
+        SettingManager->SetShort(SETSHORT_MAX_CHAT_LINES, LOWORD(lResult));
+    }
+
+    lResult = ::SendMessage(hWndPageItems[UD_PM_LEN], UDM_GETPOS, 0, 0);
+    if(HIWORD(lResult) == 0) {
+        SettingManager->SetShort(SETSHORT_MAX_PM_LEN, LOWORD(lResult));
+    }
+
+    lResult = ::SendMessage(hWndPageItems[UD_PM_LINES], UDM_GETPOS, 0, 0);
+    if(HIWORD(lResult) == 0) {
+        SettingManager->SetShort(SETSHORT_MAX_PM_LINES, LOWORD(lResult));
+    }
+
+    lResult = ::SendMessage(hWndPageItems[UD_SEARCH_MIN_LEN], UDM_GETPOS, 0, 0);
+    if(HIWORD(lResult) == 0) {
+        SettingManager->SetShort(SETSHORT_MIN_SEARCH_LEN, LOWORD(lResult));
+    }
+
+    lResult = ::SendMessage(hWndPageItems[UD_SEARCH_MAX_LEN], UDM_GETPOS, 0, 0);
+    if(HIWORD(lResult) == 0) {
+        SettingManager->SetShort(SETSHORT_MAX_SEARCH_LEN, LOWORD(lResult));
+    }
 }
 //------------------------------------------------------------------------------
 
@@ -357,6 +403,75 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_SHARE_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_SHARE_LIMIT_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |
         WS_TABSTOP | ES_AUTOHSCROLL, 98, 223, 336, 18, m_hWnd, (HMENU)EDT_NICK_LEN_REDIR_ADDR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SHARE_REDIR_ADDR], EM_SETLIMITTEXT, 256, 0);
+
+    hWndPageItems[GB_MAIN_CHAT_LIMITS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MAIN_CHAT_LIMITS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 254, 447, 43,
+        m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[EDT_MAIN_CHAT_LEN] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
+        8, 269, 40, 20, m_hWnd, (HMENU)EDT_MAIN_CHAT_LEN, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[EDT_MAIN_CHAT_LEN], EM_SETLIMITTEXT, 5, 0);
+
+    AddUpDown(hWndPageItems[UD_MAIN_CHAT_LEN], 48, 269, 17, 20, (LPARAM)MAKELONG(32767, 0), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_LEN],
+        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_CHAT_LEN], 0));
+
+    hWndPageItems[LBL_MAIN_CHAT_LEN] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_LENGTH], WS_CHILD | WS_VISIBLE | SS_LEFT, 70, 273, 151, 16,
+        m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[LBL_MAIN_CHAT_LINES] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_LINES], WS_CHILD | WS_VISIBLE | SS_RIGHT, 226, 273, 151, 16,
+        m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[EDT_MAIN_CHAT_LINES] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
+        382, 269, 40, 20, m_hWnd, (HMENU)EDT_MAIN_CHAT_LINES, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[EDT_MAIN_CHAT_LINES], EM_SETLIMITTEXT, 5, 0);
+
+    AddUpDown(hWndPageItems[UD_MAIN_CHAT_LINES], 422, 269, 17, 20, (LPARAM)MAKELONG(32767, 0), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_LINES],
+        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_CHAT_LINES], 0));
+
+    hWndPageItems[GB_PM_LIMITS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_PM_LIMITS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 297, 447, 43,
+        m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[EDT_PM_LEN] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
+        8, 312, 40, 20, m_hWnd, (HMENU)EDT_PM_LEN, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[EDT_PM_LEN], EM_SETLIMITTEXT, 5, 0);
+
+    AddUpDown(hWndPageItems[UD_PM_LEN], 48, 312, 17, 20, (LPARAM)MAKELONG(32767, 0), (WPARAM)hWndPageItems[EDT_PM_LEN],
+        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_PM_LEN], 0));
+
+    hWndPageItems[LBL_PM_LEN] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_LENGTH], WS_CHILD | WS_VISIBLE | SS_LEFT, 70, 316, 151, 16,
+        m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[LBL_PM_LINES] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_LINES], WS_CHILD | WS_VISIBLE | SS_RIGHT, 226, 316, 151, 16,
+        m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[EDT_PM_LINES] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
+        382, 312, 40, 20, m_hWnd, (HMENU)EDT_PM_LINES, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[EDT_PM_LINES], EM_SETLIMITTEXT, 5, 0);
+
+    AddUpDown(hWndPageItems[UD_PM_LINES], 422, 312, 17, 20, (LPARAM)MAKELONG(32767, 0), (WPARAM)hWndPageItems[EDT_PM_LINES],
+        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_PM_LINES], 0));
+
+    hWndPageItems[GB_SEARCH_LIMITS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_SEARCH_LIMITS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 340, 447, 43,
+        m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[EDT_SEARCH_MIN_LEN] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
+        8, 355, 40, 20, m_hWnd, (HMENU)EDT_SEARCH_MIN_LEN, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[EDT_SEARCH_MIN_LEN], EM_SETLIMITTEXT, 3, 0);
+
+    AddUpDown(hWndPageItems[UD_SEARCH_MIN_LEN], 48, 355, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_SEARCH_MIN_LEN],
+        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN], 0));
+
+    hWndPageItems[LBL_SEARCH_MIN] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MINIMUM], WS_CHILD | WS_VISIBLE | SS_LEFT, 70, 359, 151, 16,
+        m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[LBL_SEARCH_MAX] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MAXIMUM], WS_CHILD | WS_VISIBLE | SS_RIGHT, 226, 359, 151, 16,
+        m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[EDT_SEARCH_MAX_LEN] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
+        382, 355, 40, 20, m_hWnd, (HMENU)EDT_SEARCH_MAX_LEN, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[EDT_SEARCH_MAX_LEN], EM_SETLIMITTEXT, 3, 0);
+
+    AddUpDown(hWndPageItems[UD_SEARCH_MAX_LEN], 422, 355, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_SEARCH_MAX_LEN],
+        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN], 0));
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {
