@@ -93,7 +93,7 @@ private:
         LBL_SEARCH_MIN,
         LBL_SEARCH_MAX,
         EDT_SEARCH_MAX_LEN,
-        UD_SEARCH_MAX_LEN,
+        UD_SEARCH_MAX_LEN
     };
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);

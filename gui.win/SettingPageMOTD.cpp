@@ -143,14 +143,14 @@ void SettingPageMOTD::GetUpdates(bool & /*bUpdateHubNameWelcome*/, bool & /*bUpd
 
 //------------------------------------------------------------------------------
 
-WNDPROC wpOldEditProc = NULL;
+WNDPROC wpOldMultiEditProc = NULL;
 
-LRESULT CALLBACK EditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK MultiEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
         return 0;
     }
 
-    return ::CallWindowProc(wpOldEditProc, hWnd, uMsg, wParam, lParam);
+    return ::CallWindowProc(wpOldMultiEditProc, hWnd, uMsg, wParam, lParam);
 }
 
 //------------------------------------------------------------------------------
@@ -189,7 +189,7 @@ bool SettingPageMOTD::CreateSettingPage(HWND hOwner) {
     ::EnableWindow(hWndPageItems[EDT_MOTD], SettingManager->bBools[SETBOOL_DISABLE_MOTD] == true ? FALSE : TRUE);
     ::EnableWindow(hWndPageItems[BTN_MOTD_AS_PM], SettingManager->bBools[SETBOOL_DISABLE_MOTD] == true ? FALSE : TRUE);
 
-    wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_MOTD], GWLP_WNDPROC, (LONG_PTR)EditProc);
+    wpOldMultiEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_MOTD], GWLP_WNDPROC, (LONG_PTR)MultiEditProc);
 
     ::SetWindowLongPtr(hWndPageItems[BTN_DISABLE_MOTD], GWLP_USERDATA, (LONG_PTR)this);
     wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_DISABLE_MOTD], GWLP_WNDPROC, (LONG_PTR)ButtonProc);

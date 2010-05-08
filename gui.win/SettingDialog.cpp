@@ -41,6 +41,7 @@
 #include "SettingPageMOTD.h"
 #include "SettingPageMyINFO.h"
 #include "SettingPageRules.h"
+#include "SettingPageRules2.h"
 #include "../core/TextFileManager.h"
 //---------------------------------------------------------------------------
 
@@ -58,6 +59,7 @@ SettingDialog::SettingDialog() {
     SettingPages[5] = new SettingPageAdvanced();
     SettingPages[6] = new SettingPageMyINFO();
     SettingPages[7] = new SettingPageRules();
+    SettingPages[8] = new SettingPageRules2();
 
     pSettingDialog = this;
 }
@@ -71,6 +73,7 @@ SettingDialog::~SettingDialog() {
     }
 
     wpOldButtonProc = NULL;
+    wpOldEditProc = NULL;
 
     pSettingDialog = NULL;
 }
@@ -177,7 +180,8 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
             tvIS.hParent = (HTREEITEM)::SendMessage(hWndTree, TVM_INSERTITEM, 0, (LPARAM)&tvIS);
 
             tvIS.item.lParam = NULL;
-            tvIS.item.pszText = LanguageManager->sTexts[LAN_MORE_RULES];
+            tvIS.item.lParam = (LPARAM)SettingPages[8];
+            tvIS.item.pszText = SettingPages[8]->GetPageName();
             ::SendMessage(hWndTree, TVM_INSERTITEM, 0, (LPARAM)&tvIS);
 
             tvIS.hParent = TVI_ROOT;
