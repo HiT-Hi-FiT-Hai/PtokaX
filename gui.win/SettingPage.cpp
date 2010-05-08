@@ -33,6 +33,7 @@ static ATOM atomSettingPage = 0;
 void * pSettingDialog = NULL;
 //---------------------------------------------------------------------------
 WNDPROC wpOldButtonProc = NULL;
+WNDPROC wpOldEditProc = NULL;
 //---------------------------------------------------------------------------
 
 SettingPage::SettingPage() {
@@ -155,7 +156,7 @@ void SettingPage::AddToolTip(const HWND &hWnd, char * sTipText) {
 }
 //---------------------------------------------------------------------------
 
-LRESULT CALLBACK ButtonProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT SettingWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, WNDPROC wpOldProc) {
     if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
         return DLGC_WANTTAB;
     } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
@@ -172,7 +173,18 @@ LRESULT CALLBACK ButtonProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         }
     }
 
-    return ::CallWindowProc(wpOldButtonProc, hWnd, uMsg, wParam, lParam);
+    return ::CallWindowProc(wpOldProc, hWnd, uMsg, wParam, lParam);
+}
+//---------------------------------------------------------------------------
+
+LRESULT CALLBACK ButtonProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    return SettingWindowProc(hWnd, uMsg, wParam, lParam, wpOldButtonProc);
+}
+
+//------------------------------------------------------------------------------
+
+LRESULT CALLBACK EditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    return SettingWindowProc(hWnd, uMsg, wParam, lParam, wpOldEditProc);
 }
 
 //------------------------------------------------------------------------------

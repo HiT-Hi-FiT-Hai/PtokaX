@@ -235,7 +235,7 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_PERM_BAN_REDIR], EM_SETLIMITTEXT, 256, 0);
 
     hWndPageItems[GB_PASSWORD_PROTECTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_PASSWORD_PROTECTION],
-        WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 281, 447, 124, m_hWnd, NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 281, 447, 125, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[BTN_ENABLE_ADVANCED_PASSWORD_PROTECTION] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ADV_PASS_PRTCTN], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
         BS_AUTOCHECKBOX, 8, 295, 431, 16, m_hWnd, NULL, g_hInstance, NULL);
