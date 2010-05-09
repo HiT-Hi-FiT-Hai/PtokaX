@@ -36,6 +36,7 @@
 #include "SettingPageAdvanced.h"
 #include "SettingPageBans.h"
 #include "SettingPageBots.h"
+#include "SettingPageDeflood.h"
 #include "SettingPageGeneral.h"
 #include "SettingPageGeneral2.h"
 #include "SettingPageMOTD.h"
@@ -60,6 +61,7 @@ SettingDialog::SettingDialog() {
     SettingPages[6] = new SettingPageMyINFO();
     SettingPages[7] = new SettingPageRules();
     SettingPages[8] = new SettingPageRules2();
+    SettingPages[9] = new SettingPageDeflood();
 
     pSettingDialog = this;
 }
@@ -185,8 +187,8 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
             ::SendMessage(hWndTree, TVM_INSERTITEM, 0, (LPARAM)&tvIS);
 
             tvIS.hParent = TVI_ROOT;
-            tvIS.item.lParam = NULL;
-            tvIS.item.pszText = LanguageManager->sTexts[LAN_DEFLOOD];
+            tvIS.item.lParam = (LPARAM)SettingPages[9];
+            tvIS.item.pszText = SettingPages[9]->GetPageName();
             tvIS.hParent = (HTREEITEM)::SendMessage(hWndTree, TVM_INSERTITEM, 0, (LPARAM)&tvIS);
 
             tvIS.item.lParam = NULL;
