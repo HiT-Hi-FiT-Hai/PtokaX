@@ -94,7 +94,7 @@
     <ClCompile Include="gui.win\SettingPageGeneral.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
-    <ClCompile Include="gui.win\SettingPageMoreGeneral.cpp">
+    <ClCompile Include="gui.win\SettingPageGeneral2.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
     <ClCompile Include="gui.win\SettingPageMOTD.cpp">
@@ -270,7 +270,7 @@
     <ClInclude Include="gui.win\SettingPageGeneral.h">
       <Filter>Gui</Filter>
     </ClInclude>
-    <ClInclude Include="gui.win\SettingPageMoreGeneral.h">
+    <ClInclude Include="gui.win\SettingPageGeneral2.h">
       <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="core\ZlibUtility.h">

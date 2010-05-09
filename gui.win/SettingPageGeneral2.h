@@ -18,19 +18,19 @@
  */
 
 //------------------------------------------------------------------------------
-#ifndef SettingPageMoreGeneralH
-#define SettingPageMoreGeneralH
+#ifndef SettingPageGeneral2H
+#define SettingPageGeneral2H
 //------------------------------------------------------------------------------
 #include "SettingPage.h"
 //---------------------------------------------------------------------------
 
-class SettingPageMoreGeneral : public SettingPage {
+class SettingPageGeneral2 : public SettingPage {
 public:
     bool bUpdateTextFiles, bUpdateRedirectAddress, bUpdateRegOnlyMessage, bUpdateShareLimitMessage, bUpdateSlotsLimitMessage, bUpdateHubSlotRatioMessage,
         bUpdateMaxHubsLimitMessage, bUpdateNoTagMessage, bUpdateTempBanRedirAddress, bUpdatePermBanRedirAddress, bUpdateNickLimitMessage;
 
-    SettingPageMoreGeneral();
-    ~SettingPageMoreGeneral() { };
+    SettingPageGeneral2();
+    ~SettingPageGeneral2() { };
 
     bool CreateSettingPage(HWND hOwner);
 
