@@ -37,7 +37,7 @@
 #include "SettingPageBans.h"
 #include "SettingPageBots.h"
 #include "SettingPageGeneral.h"
-#include "SettingPageMoreGeneral.h"
+#include "SettingPageGeneral2.h"
 #include "SettingPageMOTD.h"
 #include "SettingPageMyINFO.h"
 #include "SettingPageRules.h"
@@ -54,7 +54,7 @@ SettingDialog::SettingDialog() {
     SettingPages[0] = new SettingPageGeneral();
     SettingPages[1] = new SettingPageMOTD();
     SettingPages[2] = new SettingPageBots();
-    SettingPages[3] = new SettingPageMoreGeneral();
+    SettingPages[3] = new SettingPageGeneral2();
     SettingPages[4] = new SettingPageBans();
     SettingPages[5] = new SettingPageAdvanced();
     SettingPages[6] = new SettingPageMyINFO();

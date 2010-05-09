@@ -20,7 +20,7 @@
 //---------------------------------------------------------------------------
 #include "../core/stdinc.h"
 //---------------------------------------------------------------------------
-#include "SettingPageMoreGeneral.h"
+#include "SettingPageGeneral2.h"
 //---------------------------------------------------------------------------
 #include "../core/LanguageManager.h"
 #include "../core/SettingManager.h"
@@ -31,7 +31,7 @@
 #endif
 //---------------------------------------------------------------------------
 
-SettingPageMoreGeneral::SettingPageMoreGeneral() {
+SettingPageGeneral2::SettingPageGeneral2() {
     bUpdateTextFiles = bUpdateRedirectAddress = bUpdateRegOnlyMessage = bUpdateShareLimitMessage = bUpdateSlotsLimitMessage = false;
     bUpdateHubSlotRatioMessage = bUpdateMaxHubsLimitMessage = bUpdateNoTagMessage = bUpdateTempBanRedirAddress = bUpdatePermBanRedirAddress = false;
     bUpdateNickLimitMessage = false;
@@ -40,7 +40,7 @@ SettingPageMoreGeneral::SettingPageMoreGeneral() {
 }
 //---------------------------------------------------------------------------
 
-LRESULT SettingPageMoreGeneral::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT SettingPageGeneral2::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     if(uMsg == WM_COMMAND) {
         switch(LOWORD(wParam)) {
             case EDT_OWNER_EMAIL:
@@ -96,7 +96,7 @@ LRESULT SettingPageMoreGeneral::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM
 }
 //------------------------------------------------------------------------------
 
-void SettingPageMoreGeneral::Save() {
+void SettingPageGeneral2::Save() {
     if(bCreated == false) {
         return;
     }
@@ -166,7 +166,7 @@ void SettingPageMoreGeneral::Save() {
 }
 //------------------------------------------------------------------------------
 
-void SettingPageMoreGeneral::GetUpdates(bool & /*bUpdatedHubNameWelcome*/, bool & /*bUpdatedHubName*/, bool & /*bUpdatedTCPPorts*/, bool & /*bUpdatedUDPPort*/,
+void SettingPageGeneral2::GetUpdates(bool & /*bUpdatedHubNameWelcome*/, bool & /*bUpdatedHubName*/, bool & /*bUpdatedTCPPorts*/, bool & /*bUpdatedUDPPort*/,
     bool & /*bUpdatedAutoReg*/, bool &/*bUpdatedMOTD*/, bool &/*bUpdatedHubSec*/, bool &bUpdatedRegOnlyMessage, bool &bUpdatedShareLimitMessage,
     bool &bUpdatedSlotsLimitMessage, bool &bUpdatedHubSlotRatioMessage, bool &bUpdatedMaxHubsLimitMessage, bool &bUpdatedNoTagMessage,
     bool &bUpdatedNickLimitMessage, bool &/*bUpdatedBotsSameNick*/, bool &/*bUpdatedBotNick*/, bool &/*bUpdatedBot*/, bool &/*bUpdatedOpChatNick*/,
@@ -186,7 +186,7 @@ void SettingPageMoreGeneral::GetUpdates(bool & /*bUpdatedHubNameWelcome*/, bool 
 }
 
 //------------------------------------------------------------------------------
-bool SettingPageMoreGeneral::CreateSettingPage(HWND hOwner) {
+bool SettingPageGeneral2::CreateSettingPage(HWND hOwner) {
     CreateHWND(hOwner);
     
     if(bCreated == false) {
@@ -297,12 +297,12 @@ bool SettingPageMoreGeneral::CreateSettingPage(HWND hOwner) {
 }
 //------------------------------------------------------------------------------
 
-char * SettingPageMoreGeneral::GetPageName() {
+char * SettingPageGeneral2::GetPageName() {
     return LanguageManager->sTexts[LAN_MORE_GENERAL];
 }
 //------------------------------------------------------------------------------
 
-void SettingPageMoreGeneral::FocusLastItem() {
+void SettingPageGeneral2::FocusLastItem() {
     ::SetFocus(hWndPageItems[BTN_KILL_THAT_DUCK]);
 }
 //------------------------------------------------------------------------------
