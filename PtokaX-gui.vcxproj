@@ -319,6 +319,7 @@
     <ClInclude Include="gui.win\SettingPageAdvanced.h" />
     <ClInclude Include="gui.win\SettingPageBans.h" />
     <ClInclude Include="gui.win\SettingPageBots.h" />
+    <ClInclude Include="gui.win\SettingPageDeflood.h" />
     <ClInclude Include="gui.win\SettingPageGeneral.h" />
     <ClInclude Include="gui.win\SettingPageGeneral2.h" />
     <ClInclude Include="gui.win\SettingPageMOTD.h" />
@@ -380,6 +381,7 @@
     <ClCompile Include="gui.win\SettingPageAdvanced.cpp" />
     <ClCompile Include="gui.win\SettingPageBans.cpp" />
     <ClCompile Include="gui.win\SettingPageBots.cpp" />
+    <ClCompile Include="gui.win\SettingPageDeflood.cpp" />
     <ClCompile Include="gui.win\SettingPageGeneral.cpp" />
     <ClCompile Include="gui.win\SettingPageGeneral2.cpp" />
     <ClCompile Include="gui.win\SettingPageMOTD.cpp" />
