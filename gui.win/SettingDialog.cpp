@@ -389,8 +389,6 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                             return TRUE;
                         }
                     }
-
-                    break;
                 }
             }
 

@@ -47,6 +47,8 @@ LRESULT SettingPageBans::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam
 
                     return 0;
                 }
+
+                break;
             case EDT_ADD_MESSAGE:
             case EDT_TEMP_BAN_REDIR:
             case EDT_PERM_BAN_REDIR:
@@ -62,12 +64,14 @@ LRESULT SettingPageBans::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                     ::EnableWindow(hWndPageItems[EDT_TEMP_BAN_REDIR],
                         ::SendMessage(hWndPageItems[BTN_TEMP_BAN_REDIR_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
                 }
+
                 break;
             case BTN_PERM_BAN_REDIR_ENABLE:
                 if(HIWORD(wParam) == BN_CLICKED) {
                     ::EnableWindow(hWndPageItems[EDT_PERM_BAN_REDIR],
                         ::SendMessage(hWndPageItems[BTN_PERM_BAN_REDIR_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
                 }
+
                 break;
             case CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION:
                 if(HIWORD(wParam) == CBN_SELCHANGE) {
@@ -86,6 +90,8 @@ LRESULT SettingPageBans::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam
 
                     return 0;
                 }
+
+                break;
         }
     }
 

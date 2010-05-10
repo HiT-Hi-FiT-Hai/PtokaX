@@ -50,6 +50,8 @@ LRESULT SettingPageGeneral::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPa
 
                     return 0;
                 }
+
+                break;
             case EDT_TCP_PORTS:
                 if(HIWORD(wParam) == EN_CHANGE) {
                     char buf[65];
@@ -77,12 +79,16 @@ LRESULT SettingPageGeneral::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPa
 
                     return 0;
                 }
+
+                break;
             case EDT_MAX_USERS:
                 if(HIWORD(wParam) == EN_CHANGE) {
                     MinMaxCheck((HWND)lParam, 1, 32767);
 
                     return 0;
                 }
+
+                break;
         }
     }
 
