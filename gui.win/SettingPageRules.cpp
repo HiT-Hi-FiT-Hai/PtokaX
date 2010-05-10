@@ -50,6 +50,8 @@ LRESULT SettingPageRules::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPara
 
                     return 0;
                 }
+
+                break;
             case EDT_MIN_NICK_LEN:
             case EDT_MAX_NICK_LEN:
                 if(HIWORD(wParam) == EN_CHANGE) {
@@ -79,10 +81,13 @@ LRESULT SettingPageRules::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPara
 
                     return 0;
                 }
+
+                break;
             case BTN_NICK_LEN_REDIR:
                 if(HIWORD(wParam) == BN_CLICKED) {
                     ::EnableWindow(hWndPageItems[EDT_NICK_LEN_REDIR_ADDR], ::SendMessage(hWndPageItems[BTN_NICK_LEN_REDIR], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
                 }
+
                 break;
             case EDT_MIN_SHARE:
             case EDT_MAX_SHARE:
@@ -113,10 +118,13 @@ LRESULT SettingPageRules::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPara
 
                     return 0;
                 }
+
+                break;
             case BTN_SHARE_REDIR:
                 if(HIWORD(wParam) == BN_CLICKED) {
                     ::EnableWindow(hWndPageItems[EDT_SHARE_REDIR_ADDR], ::SendMessage(hWndPageItems[BTN_SHARE_REDIR], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
                 }
+
                 break;
             case UD_MAIN_CHAT_LEN:
             case UD_MAIN_CHAT_LINES:
@@ -124,16 +132,20 @@ LRESULT SettingPageRules::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPara
             case UD_PM_LINES:
                 if(HIWORD(wParam) == EN_CHANGE) {
                     MinMaxCheck((HWND)lParam, 0, 32767);
+
+                    return 0;
                 }
 
-                return 0;
+                break;
             case UD_SEARCH_MIN_LEN:
             case UD_SEARCH_MAX_LEN:
                 if(HIWORD(wParam) == EN_CHANGE) {
                     MinMaxCheck((HWND)lParam, 0, 999);
+
+                    return 0;
                 }
 
-                return 0;
+                break;
         }
     }
 

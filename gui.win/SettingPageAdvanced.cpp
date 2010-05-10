@@ -46,6 +46,7 @@ LRESULT SettingPageAdvanced::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lP
                     ::EnableWindow(hWndPageItems[BTN_MINIMIZE_ON_STARTUP],
                         ::SendMessage(hWndPageItems[BTN_ENABLE_TRAY_ICON], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
                 }
+
                 break;
             case BTN_ENABLE_SCRIPTING:
                 if(HIWORD(wParam) == BN_CLICKED) {
@@ -54,24 +55,28 @@ LRESULT SettingPageAdvanced::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lP
                     ::EnableWindow(hWndPageItems[BTN_POPUP_SCRIPT_WINDOW_ON_ERROR], bEnable);
                     ::EnableWindow(hWndPageItems[BTN_SAVE_SCRIPT_ERRORS_TO_LOG], bEnable);
                 }
+
                 break;
             case BTN_FILTER_KICK_MESSAGES:
                 if(HIWORD(wParam) == BN_CLICKED) {
                     ::EnableWindow(hWndPageItems[BTN_SEND_KICK_MESSAGES_TO_OPS],
                         ::SendMessage(hWndPageItems[BTN_FILTER_KICK_MESSAGES], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
                 }
+
                 break;
             case BTN_SEND_STATUS_MESSAGES_TO_OPS:
                 if(HIWORD(wParam) == BN_CLICKED) {
                     ::EnableWindow(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM],
                         ::SendMessage(hWndPageItems[BTN_SEND_STATUS_MESSAGES_TO_OPS], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
                 }
+
                 break;
             case BTN_DISALLOW_PINGER:
                 if(HIWORD(wParam) == BN_CLICKED) {
                     ::EnableWindow(hWndPageItems[BTN_REPORT_PINGER],
                         ::SendMessage(hWndPageItems[BTN_DISALLOW_PINGER], BM_GETCHECK, 0, 0) == BST_CHECKED ? FALSE : TRUE);
                 }
+
                 break;
             case EDT_PREFIXES_FOR_HUB_COMMANDS:
                 if(HIWORD(wParam) == EN_CHANGE) {
@@ -116,6 +121,8 @@ LRESULT SettingPageAdvanced::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lP
 
                     return 0;
                 }
+
+                break;
         }
     }
 

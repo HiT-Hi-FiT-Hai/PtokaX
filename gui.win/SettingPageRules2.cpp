@@ -52,6 +52,8 @@ LRESULT SettingPageRules2::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPar
 
                     return 0;
                 }
+
+                break;
             case EDT_SLOTS_MIN:
             case EDT_SLOTS_MAX:
                 if(HIWORD(wParam) == EN_CHANGE) {
@@ -81,10 +83,13 @@ LRESULT SettingPageRules2::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPar
 
                     return 0;
                 }
+
+                break;
             case BTN_SLOTS_REDIR:
                 if(HIWORD(wParam) == BN_CLICKED) {
                     ::EnableWindow(hWndPageItems[EDT_SLOTS_REDIR_ADDR], ::SendMessage(hWndPageItems[BTN_SLOTS_REDIR], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
                 }
+
                 break;
             case EDT_HUBS:
             case EDT_SLOTS:
@@ -115,10 +120,13 @@ LRESULT SettingPageRules2::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPar
 
                     return 0;
                 }
+
+                break;
             case BTN_HUBS_SLOTS_REDIR:
                 if(HIWORD(wParam) == BN_CLICKED) {
                     ::EnableWindow(hWndPageItems[EDT_HUBS_SLOTS_REDIR_ADDR], ::SendMessage(hWndPageItems[BTN_HUBS_SLOTS_REDIR], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
                 }
+
                 break;
             case EDT_MAX_HUBS:
                 if(HIWORD(wParam) == EN_CHANGE) {
@@ -143,10 +151,13 @@ LRESULT SettingPageRules2::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPar
 
                     return 0;
                 }
+
+                break;
             case BTN_HUBS_REDIR:
                 if(HIWORD(wParam) == BN_CLICKED) {
                     ::EnableWindow(hWndPageItems[EDT_HUBS_REDIR_ADDR], ::SendMessage(hWndPageItems[BTN_HUBS_REDIR], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE);
                 }
+
                 break;
             case EDT_CTM_LEN:
             case EDT_RCTM_LEN:
@@ -155,6 +166,8 @@ LRESULT SettingPageRules2::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPar
 
                     return 0;
                 }
+
+                break;
         }
     }
 

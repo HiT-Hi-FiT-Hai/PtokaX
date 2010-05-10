@@ -113,6 +113,7 @@ LRESULT SettingPageBots::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                     ::EnableWindow(hWndPageItems[EDT_HUB_BOT_DESCRIPTION], bEnable);
                     ::EnableWindow(hWndPageItems[EDT_HUB_BOT_EMAIL], bEnable);
                 }
+
                 break;
             case BTN_OP_CHAT_BOT_ENABLE:
                 if(HIWORD(wParam) == BN_CLICKED) {
@@ -121,6 +122,7 @@ LRESULT SettingPageBots::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                     ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION], bEnable);
                     ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], bEnable);
                 }
+
                 break;
         }
     }
