@@ -160,6 +160,9 @@
     <ClCompile Include="gui.win\SettingPageDeflood.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
+    <ClCompile Include="gui.win\SettingPageDeflood2.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\eventqueue.h">
@@ -343,6 +346,9 @@
       <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui.win\SettingPageDeflood.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.win\SettingPageDeflood2.h">
       <Filter>Gui</Filter>
     </ClInclude>
   </ItemGroup>
