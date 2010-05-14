@@ -50,7 +50,6 @@ LRESULT SettingPageDeflood2::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lP
             case EDT_WARN_COUNT:
             case EDT_NEW_CONNS_FROM_SAME_IP_COUNT:
             case EDT_NEW_CONNS_FROM_SAME_IP_TIME:
-            case EDT_MAX_USERS_FROM_SAME_IP:
                 if(HIWORD(wParam) == EN_CHANGE) {
 					MinMaxCheck((HWND)lParam, 1, 999);
 
@@ -81,6 +80,14 @@ LRESULT SettingPageDeflood2::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lP
             case EDT_RECEIVED_DATA_SECS2:
                 if(HIWORD(wParam) == EN_CHANGE) {
 					MinMaxCheck((HWND)lParam, 1, 9999);
+
+                    return 0;
+                }
+
+                break;
+            case EDT_MAX_USERS_FROM_SAME_IP:
+                if(HIWORD(wParam) == EN_CHANGE) {
+					MinMaxCheck((HWND)lParam, 1, 256);
 
                     return 0;
                 }
@@ -196,12 +203,12 @@ void SettingPageDeflood2::Save() {
 
     lResult = ::SendMessage(hWndPageItems[UD_PM_INTERVAL_MSGS], UDM_GETPOS, 0, 0);
     if(HIWORD(lResult) == 0) {
-        SettingManager->SetShort(SETSHORT_CHAT_INTERVAL_MESSAGES, LOWORD(lResult));
+        SettingManager->SetShort(SETSHORT_PM_INTERVAL_MESSAGES, LOWORD(lResult));
     }
 
     lResult = ::SendMessage(hWndPageItems[UD_PM_INTERVAL_SECS], UDM_GETPOS, 0, 0);
     if(HIWORD(lResult) == 0) {
-        SettingManager->SetShort(SETSHORT_CHAT_INTERVAL_TIME, LOWORD(lResult));
+        SettingManager->SetShort(SETSHORT_PM_INTERVAL_TIME, LOWORD(lResult));
     }
 
     SettingManager->SetShort(SETSHORT_SAME_PM_ACTION, (int16_t)::SendMessage(hWndPageItems[CB_SAME_PM], CB_GETCURSEL, 0, 0));
@@ -372,7 +379,7 @@ bool SettingPageDeflood2::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_PM_INTERVAL_MSGS], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_PM_INTERVAL_MSGS], 223, 72, 17, 20, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_PM_INTERVAL_MSGS],
-        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_CHAT_INTERVAL_MESSAGES], 0));
+        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_PM_INTERVAL_MESSAGES], 0));
 
     hWndPageItems[LBL_PM_INTERVAL_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 76, 5, 16,
         m_hWnd, NULL, g_hInstance, NULL);
@@ -382,7 +389,7 @@ bool SettingPageDeflood2::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_PM_INTERVAL_SECS], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_PM_INTERVAL_SECS], 285, 72, 17, 20, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_PM_INTERVAL_SECS],
-        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_CHAT_INTERVAL_TIME], 0));
+        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_PM_INTERVAL_TIME], 0));
 
     hWndPageItems[LBL_PM_INTERVAL_SECONDS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 76, 132, 16,
         m_hWnd, NULL, g_hInstance, NULL);
@@ -587,7 +594,7 @@ bool SettingPageDeflood2::CreateSettingPage(HWND hOwner) {
         318, 361, 30, 20, m_hWnd, (HMENU)EDT_MAX_USERS_FROM_SAME_IP, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MAX_USERS_FROM_SAME_IP], EM_SETLIMITTEXT, 3, 0);
 
-    AddUpDown(hWndPageItems[UD_MAX_USERS_FROM_SAME_IP], 348, 361, 17, 20, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_MAX_USERS_FROM_SAME_IP],
+    AddUpDown(hWndPageItems[UD_MAX_USERS_FROM_SAME_IP], 348, 361, 17, 20, (LPARAM)MAKELONG(256, 1), (WPARAM)hWndPageItems[EDT_MAX_USERS_FROM_SAME_IP],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_CONN_SAME_IP], 0));
 
     hWndPageItems[BTN_REPORT_FLOOD_TO_OPS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REPORT_FLOOD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,

@@ -162,7 +162,7 @@ LRESULT SettingPageRules2::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPar
             case EDT_CTM_LEN:
             case EDT_RCTM_LEN:
                 if(HIWORD(wParam) == EN_CHANGE) {
-                    MinMaxCheck((HWND)lParam, 0, 999);
+                    MinMaxCheck((HWND)lParam, 1, 512);
 
                     return 0;
                 }
@@ -457,7 +457,7 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
         156, 393, 40, 20, m_hWnd, (HMENU)EDT_CTM_LEN, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_CTM_LEN], EM_SETLIMITTEXT, 3, 0);
 
-    AddUpDown(hWndPageItems[UD_CTM_LEN], 196, 393, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_CTM_LEN],
+    AddUpDown(hWndPageItems[UD_CTM_LEN], 196, 393, 17, 20, (LPARAM)MAKELONG(512, 1), (WPARAM)hWndPageItems[EDT_CTM_LEN],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_CTM_LEN], 0));
 
     hWndPageItems[GB_RCTM_LEN] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_RCTM_LIMIT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
@@ -470,7 +470,7 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
         382, 393, 40, 20, m_hWnd, (HMENU)EDT_RCTM_LEN, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_RCTM_LEN], EM_SETLIMITTEXT, 3, 0);
 
-    AddUpDown(hWndPageItems[UD_RCTM_LEN], 422, 393, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_RCTM_LEN],
+    AddUpDown(hWndPageItems[UD_RCTM_LEN], 422, 393, 17, 20, (LPARAM)MAKELONG(512, 1), (WPARAM)hWndPageItems[EDT_RCTM_LEN],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_RCTM_LEN], 0));
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {

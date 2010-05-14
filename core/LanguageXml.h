@@ -627,7 +627,7 @@ const char* LangXmlStr[] = {
     "HubOwnerEmail", 
     "MainRedirectAddress", 
     "RegOnlyMsg", 
-    "MaxPSRLimit", 
+    "PSRLimit", 
     "OpChatBot", 
     "TempBanRedirAddress", 
     "PermBanRedirAddress", 

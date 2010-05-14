@@ -74,10 +74,24 @@ LRESULT SettingPageDeflood::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPa
             case EDT_RCTM_SECS:
             case EDT_RCTM_MSGS2:
             case EDT_RCTM_SECS2:
-            case EDT_DEFLOOD_TEMP_BAN_TIME:
-            case EDT_MAX_USERS_LOGINS:
                 if(HIWORD(wParam) == EN_CHANGE) {
 					MinMaxCheck((HWND)lParam, 1, 9999);
+
+                    return 0;
+                }
+
+                break;
+            case EDT_DEFLOOD_TEMP_BAN_TIME:
+                if(HIWORD(wParam) == EN_CHANGE) {
+					MinMaxCheck((HWND)lParam, 1, 32767);
+
+                    return 0;
+                }
+
+                break;
+            case EDT_MAX_USERS_LOGINS:
+                if(HIWORD(wParam) == EN_CHANGE) {
+					MinMaxCheck((HWND)lParam, 1, 500);
 
                     return 0;
                 }
@@ -691,13 +705,13 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
         0, 374, 221, 43, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_DEFLOOD_TEMP_BAN_TIME] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
-        8, 389, 30, 20, m_hWnd, (HMENU)EDT_DEFLOOD_TEMP_BAN_TIME, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[EDT_DEFLOOD_TEMP_BAN_TIME], EM_SETLIMITTEXT, 4, 0);
+        8, 389, 40, 20, m_hWnd, (HMENU)EDT_DEFLOOD_TEMP_BAN_TIME, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[EDT_DEFLOOD_TEMP_BAN_TIME], EM_SETLIMITTEXT, 5, 0);
 
-    AddUpDown(hWndPageItems[UD_DEFLOOD_TEMP_BAN_TIME], 38, 389, 17, 20, (LPARAM)MAKELONG(9999, 1), (WPARAM)hWndPageItems[EDT_DEFLOOD_TEMP_BAN_TIME],
+    AddUpDown(hWndPageItems[UD_DEFLOOD_TEMP_BAN_TIME], 48, 389, 17, 20, (LPARAM)MAKELONG(32767, 1), (WPARAM)hWndPageItems[EDT_DEFLOOD_TEMP_BAN_TIME],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME], 0));
 
-    hWndPageItems[LBL_DEFLOOD_TEMP_BAN_TIME_MINUTES] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MINUTES_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 60, 394, 153, 16,
+    hWndPageItems[LBL_DEFLOOD_TEMP_BAN_TIME_MINUTES] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MINUTES_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 70, 394, 153, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[GB_MAX_USERS_LOGINS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MAX_USERS_LOGINS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
@@ -705,9 +719,9 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
 
     hWndPageItems[EDT_MAX_USERS_LOGINS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         234, 389, 30, 20, m_hWnd, (HMENU)EDT_MAX_USERS_LOGINS, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[EDT_MAX_USERS_LOGINS], EM_SETLIMITTEXT, 4, 0);
+    ::SendMessage(hWndPageItems[EDT_MAX_USERS_LOGINS], EM_SETLIMITTEXT, 3, 0);
 
-    AddUpDown(hWndPageItems[UD_MAX_USERS_LOGINS], 264, 389, 17, 20, (LPARAM)MAKELONG(9999, 1), (WPARAM)hWndPageItems[EDT_MAX_USERS_LOGINS],
+    AddUpDown(hWndPageItems[UD_MAX_USERS_LOGINS], 264, 389, 17, 20, (LPARAM)MAKELONG(500, 1), (WPARAM)hWndPageItems[EDT_MAX_USERS_LOGINS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_SIMULTANEOUS_LOGINS], 0));
 
     hWndPageItems[LBL_MAX_USERS_LOGINS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_PER_10_SECONDS], WS_CHILD | WS_VISIBLE | SS_LEFT, 286, 394, 153, 16,

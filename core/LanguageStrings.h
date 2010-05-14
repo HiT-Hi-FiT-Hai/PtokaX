@@ -627,7 +627,7 @@ const char* LangStr[] = {
     "Hub owner email (used for hublist pingers)", 
     "Main redirect address (is used for all redirects where is no address specified)", 
     "Message to send when user is not registered", 
-    "Maximal limit of search replies to passive search", 
+    "Passive search replies limit",
     "Operator chat bot", 
     "Temporary ban redirect address", 
     "Permanent ban redirect address", 

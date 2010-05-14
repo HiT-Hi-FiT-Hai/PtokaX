@@ -86,7 +86,7 @@ LRESULT SettingPageBans::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                 break;
             case EDT_TEMP_BAN_TIME:
                 if(HIWORD(wParam) == EN_CHANGE) {
-                    MinMaxCheck((HWND)lParam, 1, 512);
+                    MinMaxCheck((HWND)lParam, 1, 999);
 
                     return 0;
                 }
@@ -265,7 +265,7 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
         263, 354, 80, 20, m_hWnd, (HMENU)EDT_TEMP_BAN_TIME, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_TEMP_BAN_TIME], EM_SETLIMITTEXT, 3, 0);
 
-    AddUpDown(hWndPageItems[UD_TEMP_BAN_TIME], 343, 354, 17, 20, (LPARAM)MAKELONG(512, 1), (WPARAM)hWndPageItems[EDT_TEMP_BAN_TIME],
+    AddUpDown(hWndPageItems[UD_TEMP_BAN_TIME], 343, 354, 17, 20, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_TEMP_BAN_TIME],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_TEMP_BAN_TIME], 0));
 
     hWndPageItems[LBL_TEMP_BAN_TIME_HOURS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_HOURS_LWR],
