@@ -743,64 +743,84 @@ void SetMan::SetShort(size_t iShortId, const int16_t &iValue) {
                 return;
             }
             break;
+        case SETSHORT_MAX_USERS:
         case SETSHORT_DEFAULT_TEMP_BAN_TIME:
         case SETSHORT_DEFLOOD_TEMP_BAN_TIME:
-        case SETSHORT_BRUTE_FORCE_PASS_PROTECT_TEMP_BAN_TIME:
+        case SETSHORT_SR_MESSAGES:
+        case SETSHORT_SR_MESSAGES2:
             if(iValue == 0) {
                 return;
             }
             break;
+        case SETSHORT_MIN_SLOTS_LIMIT:
+        case SETSHORT_MAX_SLOTS_LIMIT:
+        case SETSHORT_HUB_SLOT_RATIO_HUBS:
+        case SETSHORT_HUB_SLOT_RATIO_SLOTS:
+        case SETSHORT_MAX_HUBS_LIMIT:
+        case SETSHORT_MAX_CHAT_LINES:
+        case SETSHORT_MAX_PM_LINES:
+        case SETSHORT_MYINFO_DELAY:
+        case SETSHORT_MIN_SEARCH_LEN:
+        case SETSHORT_MAX_SEARCH_LEN:
+        case SETSHORT_MAX_PM_COUNT_TO_USER:
+            if(iValue > 999) {
+                return;
+            }
+            break;
         case SETSHORT_MAIN_CHAT_MESSAGES:
-        case SETSHORT_MAIN_CHAT_MESSAGES2:
         case SETSHORT_MAIN_CHAT_TIME:
-        case SETSHORT_MAIN_CHAT_TIME2:
         case SETSHORT_SAME_MAIN_CHAT_MESSAGES:
         case SETSHORT_SAME_MAIN_CHAT_TIME:
         case SETSHORT_PM_MESSAGES:
-        case SETSHORT_PM_MESSAGES2:
         case SETSHORT_PM_TIME:
-        case SETSHORT_PM_TIME2:
         case SETSHORT_SAME_PM_MESSAGES:
         case SETSHORT_SAME_PM_TIME:
         case SETSHORT_SEARCH_MESSAGES:
-        case SETSHORT_SEARCH_MESSAGES2:
         case SETSHORT_SEARCH_TIME:
-        case SETSHORT_SEARCH_TIME2:
         case SETSHORT_SAME_SEARCH_MESSAGES:
         case SETSHORT_SAME_SEARCH_TIME:
         case SETSHORT_MYINFO_MESSAGES:
-        case SETSHORT_MYINFO_MESSAGES2:
         case SETSHORT_MYINFO_TIME:
-        case SETSHORT_MYINFO_TIME2:
         case SETSHORT_GETNICKLIST_MESSAGES:
         case SETSHORT_GETNICKLIST_TIME:
         case SETSHORT_DEFLOOD_WARNING_COUNT:
         case SETSHORT_GLOBAL_MAIN_CHAT_MESSAGES:
         case SETSHORT_GLOBAL_MAIN_CHAT_TIME:
         case SETSHORT_GLOBAL_MAIN_CHAT_TIMEOUT:
-        case SETSHORT_CTM_MESSAGES:
-        case SETSHORT_CTM_MESSAGES2:
-        case SETSHORT_CTM_TIME:
-        case SETSHORT_CTM_TIME2:
-        case SETSHORT_RCTM_MESSAGES:
-        case SETSHORT_RCTM_MESSAGES2:
-        case SETSHORT_RCTM_TIME:
-        case SETSHORT_RCTM_TIME2:
-        case SETSHORT_SR_MESSAGES:
-        case SETSHORT_SR_MESSAGES2:
-        case SETSHORT_SR_TIME:
-        case SETSHORT_SR_TIME2:
-        case SETSHORT_MAX_DOWN_KB:
-        case SETSHORT_MAX_DOWN_KB2:
-        case SETSHORT_MAX_DOWN_TIME:
-        case SETSHORT_MAX_DOWN_TIME2:
+        case SETSHORT_BRUTE_FORCE_PASS_PROTECT_TEMP_BAN_TIME:
+        case SETSHORT_MAIN_CHAT_MESSAGES2:
+        case SETSHORT_MAIN_CHAT_TIME2:
+        case SETSHORT_PM_MESSAGES2:
+        case SETSHORT_PM_TIME2:
+        case SETSHORT_SEARCH_MESSAGES2:
+        case SETSHORT_SEARCH_TIME2:
+        case SETSHORT_MYINFO_MESSAGES2:
+        case SETSHORT_MYINFO_TIME2:
         case SETSHORT_CHAT_INTERVAL_MESSAGES:
         case SETSHORT_CHAT_INTERVAL_TIME:
         case SETSHORT_PM_INTERVAL_MESSAGES:
         case SETSHORT_PM_INTERVAL_TIME:
         case SETSHORT_SEARCH_INTERVAL_MESSAGES:
         case SETSHORT_SEARCH_INTERVAL_TIME:
-            if(iValue == 0 || iValue > 29999) {
+            if(iValue == 0 || iValue > 999) {
+                return;
+            }
+            break;
+        case SETSHORT_CTM_MESSAGES:
+        case SETSHORT_CTM_TIME:
+        case SETSHORT_CTM_MESSAGES2:
+        case SETSHORT_CTM_TIME2:
+        case SETSHORT_RCTM_MESSAGES:
+        case SETSHORT_RCTM_TIME:
+        case SETSHORT_RCTM_MESSAGES2:
+        case SETSHORT_RCTM_TIME2:
+        case SETSHORT_SR_TIME:
+        case SETSHORT_SR_TIME2:
+        case SETSHORT_MAX_DOWN_KB:
+        case SETSHORT_MAX_DOWN_TIME:
+        case SETSHORT_MAX_DOWN_KB2:
+        case SETSHORT_MAX_DOWN_TIME2:
+            if(iValue == 0 || iValue > 9999) {
                 return;
             }
             break;

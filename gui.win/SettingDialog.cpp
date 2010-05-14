@@ -38,6 +38,7 @@
 #include "SettingPageBots.h"
 #include "SettingPageDeflood.h"
 #include "SettingPageDeflood2.h"
+#include "SettingPageDeflood3.h"
 #include "SettingPageGeneral.h"
 #include "SettingPageGeneral2.h"
 #include "SettingPageMOTD.h"
@@ -64,6 +65,7 @@ SettingDialog::SettingDialog() {
     SettingPages[8] = new SettingPageRules2();
     SettingPages[9] = new SettingPageDeflood();
     SettingPages[10] = new SettingPageDeflood2();
+    SettingPages[11] = new SettingPageDeflood3();
 
     pSettingDialog = this;
 }
@@ -197,8 +199,8 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
             tvIS.item.pszText = SettingPages[10]->GetPageName();
             ::SendMessage(hWndTree, TVM_INSERTITEM, 0, (LPARAM)&tvIS);
 
-            tvIS.item.lParam = NULL;
-            tvIS.item.pszText = LanguageManager->sTexts[LAN_MORE_MORE_DEFLOOD];
+            tvIS.item.lParam = (LPARAM)SettingPages[11];
+            tvIS.item.pszText = SettingPages[11]->GetPageName();
             ::SendMessage(hWndTree, TVM_INSERTITEM, 0, (LPARAM)&tvIS);
 
             btnOK = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,

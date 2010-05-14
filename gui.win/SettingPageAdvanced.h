@@ -44,7 +44,7 @@ public:
     char * GetPageName();
     void FocusLastItem();
 private:
-    HWND hWndPageItems[23];
+    HWND hWndPageItems[20];
     
     enum enmPageItems {
         GB_HUB_STARTUP_AND_TRAY,
@@ -66,10 +66,7 @@ private:
         BTN_SEND_KICK_MESSAGES_TO_OPS,
         GB_STATUS_MESSAGES,
         BTN_SEND_STATUS_MESSAGES_TO_OPS,
-        BTN_SEND_STATUS_MESSAGES_IN_PM,
-        GB_PINGER,
-        BTN_DISALLOW_PINGER,
-        BTN_REPORT_PINGER
+        BTN_SEND_STATUS_MESSAGES_IN_PM
     };
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);

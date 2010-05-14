@@ -127,9 +127,7 @@ LRESULT SettingPageRules::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPara
 
                 break;
             case UD_MAIN_CHAT_LEN:
-            case UD_MAIN_CHAT_LINES:
             case UD_PM_LEN:
-            case UD_PM_LINES:
                 if(HIWORD(wParam) == EN_CHANGE) {
                     MinMaxCheck((HWND)lParam, 0, 32767);
 
@@ -137,6 +135,8 @@ LRESULT SettingPageRules::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPara
                 }
 
                 break;
+            case UD_MAIN_CHAT_LINES:
+            case UD_PM_LINES:
             case UD_SEARCH_MIN_LEN:
             case UD_SEARCH_MAX_LEN:
                 if(HIWORD(wParam) == EN_CHANGE) {
@@ -203,7 +203,7 @@ void SettingPageRules::Save() {
 
     lResult = ::SendMessage(hWndPageItems[UD_MIN_SHARE], UDM_GETPOS, 0, 0);
     if(HIWORD(lResult) == 0) {
-        if(LOWORD(lResult) != SettingManager->iShorts[SETSHORT_MIN_SHARE_UNITS]) {
+        if(LOWORD(lResult) != SettingManager->iShorts[SETSHORT_MIN_SHARE_LIMIT]) {
             bUpdateMinShare = true;
             bUpdateShareLimitMessage = true;
         }
@@ -221,7 +221,7 @@ void SettingPageRules::Save() {
 
     lResult = ::SendMessage(hWndPageItems[UD_MAX_SHARE], UDM_GETPOS, 0, 0);
     if(HIWORD(lResult) == 0) {
-        if(LOWORD(lResult) != SettingManager->iShorts[SETSHORT_MAX_SHARE_UNITS]) {
+        if(LOWORD(lResult) != SettingManager->iShorts[SETSHORT_MAX_SHARE_LIMIT]) {
             bUpdateMaxShare = true;
             bUpdateShareLimitMessage = true;
         }
@@ -434,9 +434,9 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
 
     hWndPageItems[EDT_MAIN_CHAT_LINES] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         382, 269, 40, 20, m_hWnd, (HMENU)EDT_MAIN_CHAT_LINES, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[EDT_MAIN_CHAT_LINES], EM_SETLIMITTEXT, 5, 0);
+    ::SendMessage(hWndPageItems[EDT_MAIN_CHAT_LINES], EM_SETLIMITTEXT, 3, 0);
 
-    AddUpDown(hWndPageItems[UD_MAIN_CHAT_LINES], 422, 269, 17, 20, (LPARAM)MAKELONG(32767, 0), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_LINES],
+    AddUpDown(hWndPageItems[UD_MAIN_CHAT_LINES], 422, 269, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_LINES],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_CHAT_LINES], 0));
 
     hWndPageItems[GB_PM_LIMITS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_PM_LIMITS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 297, 447, 43,
@@ -457,9 +457,9 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
 
     hWndPageItems[EDT_PM_LINES] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         382, 312, 40, 20, m_hWnd, (HMENU)EDT_PM_LINES, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[EDT_PM_LINES], EM_SETLIMITTEXT, 5, 0);
+    ::SendMessage(hWndPageItems[EDT_PM_LINES], EM_SETLIMITTEXT, 3, 0);
 
-    AddUpDown(hWndPageItems[UD_PM_LINES], 422, 312, 17, 20, (LPARAM)MAKELONG(32767, 0), (WPARAM)hWndPageItems[EDT_PM_LINES],
+    AddUpDown(hWndPageItems[UD_PM_LINES], 422, 312, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_PM_LINES],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_PM_LINES], 0));
 
     hWndPageItems[GB_SEARCH_LIMITS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_SEARCH_LIMITS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 340, 447, 43,

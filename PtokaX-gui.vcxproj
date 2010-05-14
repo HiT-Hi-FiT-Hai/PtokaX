@@ -321,6 +321,7 @@
     <ClInclude Include="gui.win\SettingPageBots.h" />
     <ClInclude Include="gui.win\SettingPageDeflood.h" />
     <ClInclude Include="gui.win\SettingPageDeflood2.h" />
+    <ClInclude Include="gui.win\SettingPageDeflood3.h" />
     <ClInclude Include="gui.win\SettingPageGeneral.h" />
     <ClInclude Include="gui.win\SettingPageGeneral2.h" />
     <ClInclude Include="gui.win\SettingPageMOTD.h" />
@@ -384,6 +385,7 @@
     <ClCompile Include="gui.win\SettingPageBots.cpp" />
     <ClCompile Include="gui.win\SettingPageDeflood.cpp" />
     <ClCompile Include="gui.win\SettingPageDeflood2.cpp" />
+    <ClCompile Include="gui.win\SettingPageDeflood3.cpp" />
     <ClCompile Include="gui.win\SettingPageGeneral.cpp" />
     <ClCompile Include="gui.win\SettingPageGeneral2.cpp" />
     <ClCompile Include="gui.win\SettingPageMOTD.cpp" />

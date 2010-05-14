@@ -71,13 +71,6 @@ LRESULT SettingPageAdvanced::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lP
                 }
 
                 break;
-            case BTN_DISALLOW_PINGER:
-                if(HIWORD(wParam) == BN_CLICKED) {
-                    ::EnableWindow(hWndPageItems[BTN_REPORT_PINGER],
-                        ::SendMessage(hWndPageItems[BTN_DISALLOW_PINGER], BM_GETCHECK, 0, 0) == BST_CHECKED ? FALSE : TRUE);
-                }
-
-                break;
             case EDT_PREFIXES_FOR_HUB_COMMANDS:
                 if(HIWORD(wParam) == EN_CHANGE) {
                     char buf[6];
@@ -165,9 +158,6 @@ void SettingPageAdvanced::Save() {
 
     SettingManager->SetBool(SETBOOL_SEND_STATUS_MESSAGES, ::SendMessage(hWndPageItems[BTN_SEND_STATUS_MESSAGES_TO_OPS], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
     SettingManager->SetBool(SETBOOL_SEND_STATUS_MESSAGES_AS_PM, ::SendMessage(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
-
-    SettingManager->SetBool(SETBOOL_DONT_ALLOW_PINGERS, ::SendMessage(hWndPageItems[BTN_DISALLOW_PINGER], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
-    SettingManager->SetBool(SETBOOL_REPORT_PINGERS, ::SendMessage(hWndPageItems[BTN_REPORT_PINGER], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 }
 //------------------------------------------------------------------------------
 
@@ -264,17 +254,6 @@ bool SettingPageAdvanced::CreateSettingPage(HWND hOwner) {
         8, 337, 431, 16, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM], BM_SETCHECK, (SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    hWndPageItems[GB_PINGER] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_PINGER], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, 359, 447, 55, m_hWnd, NULL, g_hInstance, NULL);
-
-    hWndPageItems[BTN_DISALLOW_PINGER] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISALLOW_PINGERS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 373, 431, 16, m_hWnd, (HMENU)BTN_DISALLOW_PINGER, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[BTN_DISALLOW_PINGER], BM_SETCHECK, (SettingManager->bBools[SETBOOL_DONT_ALLOW_PINGERS] == true ? BST_CHECKED : BST_UNCHECKED), 0);
-
-    hWndPageItems[BTN_REPORT_PINGER] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REPORT_PINGERS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 392, 431, 16, m_hWnd, NULL, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[BTN_REPORT_PINGER], BM_SETCHECK, (SettingManager->bBools[SETBOOL_REPORT_PINGERS] == true ? BST_CHECKED : BST_UNCHECKED), 0);
-
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {
             ::MessageBox(m_hWnd, "Setting page creation failed!", GetPageName(), MB_OK);
@@ -294,10 +273,8 @@ bool SettingPageAdvanced::CreateSettingPage(HWND hOwner) {
 
     ::EnableWindow(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM], SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true ? TRUE : FALSE);
 
-    ::EnableWindow(hWndPageItems[BTN_REPORT_PINGER], SettingManager->bBools[SETBOOL_DONT_ALLOW_PINGERS] == true ? FALSE : TRUE);
-
-    ::SetWindowLongPtr(hWndPageItems[BTN_REPORT_PINGER], GWLP_USERDATA, (LONG_PTR)this);
-    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_REPORT_PINGER], GWLP_WNDPROC, (LONG_PTR)ButtonProc);
+    ::SetWindowLongPtr(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM], GWLP_USERDATA, (LONG_PTR)this);
+    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM], GWLP_WNDPROC, (LONG_PTR)ButtonProc);
 
 	return true;
 }
@@ -309,6 +286,6 @@ char * SettingPageAdvanced::GetPageName() {
 //------------------------------------------------------------------------------
 
 void SettingPageAdvanced::FocusLastItem() {
-    ::SetFocus(hWndPageItems[BTN_REPORT_PINGER]);
+    ::SetFocus(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM]);
 }
 //------------------------------------------------------------------------------
