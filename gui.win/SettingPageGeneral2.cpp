@@ -266,6 +266,7 @@ bool SettingPageGeneral2::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_NON_REG_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_REG_ONLY_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |
         WS_TABSTOP | ES_AUTOHSCROLL, 98, 320, 336, 18, m_hWnd, (HMENU)EDT_NON_REG_REDIR_ADDR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_NON_REG_REDIR_ADDR], EM_SETLIMITTEXT, 256, 0);
+    AddToolTip(hWndPageItems[EDT_NON_REG_REDIR_ADDR], LanguageManager->sTexts[LAN_REDIRECT_HINT]);
 
     hWndPageItems[GB_KILL_THAT_DUCK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_CLIENTS_BUGGY_SUPPORTS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         0, 352, 447, 36, m_hWnd, NULL, g_hInstance, NULL);

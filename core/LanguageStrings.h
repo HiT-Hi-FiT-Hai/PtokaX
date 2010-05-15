@@ -814,6 +814,7 @@ const char* LangStr[] = {
     "Remove tag",
     "Remove connection",
     "Remove email",
+    "0 = Disabled",
 };
 //---------------------------------------------------------------------------
 

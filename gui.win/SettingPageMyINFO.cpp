@@ -187,6 +187,7 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_NO_TAG_REDIRECT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_NO_TAG_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |
         WS_TABSTOP | ES_AUTOHSCROLL, 18, 129, 411, 18, m_hWnd, (HMENU)EDT_NO_TAG_REDIRECT, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_NO_TAG_REDIRECT], EM_SETLIMITTEXT, 256, 0);
+    AddToolTip(hWndPageItems[EDT_NO_TAG_REDIRECT], LanguageManager->sTexts[LAN_REDIRECT_HINT]);
 
     hWndPageItems[BTN_REPORT_SUSPICIOUS_TAG] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REPORT_BAD_TAGS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
         8, 165, 431, 16, m_hWnd, NULL, g_hInstance, NULL);
@@ -214,6 +215,7 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_ORIGINAL_MYINFO_ACTION], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_FULL_MYINFO_PROFILE]);
     ::SendMessage(hWndPageItems[CB_ORIGINAL_MYINFO_ACTION], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_FULL_MYINFO_NONE]);
     ::SendMessage(hWndPageItems[CB_ORIGINAL_MYINFO_ACTION], CB_SETCURSEL, SettingManager->iShorts[SETSHORT_FULL_MYINFO_OPTION], 0);
+    AddToolTip(hWndPageItems[CB_ORIGINAL_MYINFO_ACTION], LanguageManager->sTexts[LAN_MYINFO_TO_HINT]);
 
     hWndPageItems[GB_MODIFIED_MYINFO_OPTIONS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_OPTIONS_FOR_MODIFIED_MYINFO], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         5, 252, 437, 131, m_hWnd, NULL, g_hInstance, NULL);

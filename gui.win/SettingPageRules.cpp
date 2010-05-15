@@ -322,6 +322,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_MIN_NICK_LEN] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         8, 18, 40, 20, m_hWnd, (HMENU)EDT_MIN_NICK_LEN, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MIN_NICK_LEN], EM_SETLIMITTEXT, 2, 0);
+    AddToolTip(hWndPageItems[EDT_MIN_NICK_LEN], LanguageManager->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_MIN_NICK_LEN], 48, 18, 17, 20, (LPARAM)MAKELONG(64, 0), (WPARAM)hWndPageItems[EDT_MIN_NICK_LEN],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MIN_NICK_LEN], 0));
@@ -335,6 +336,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_MAX_NICK_LEN] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         382, 18, 40, 20, m_hWnd, (HMENU)EDT_MAX_NICK_LEN, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MAX_NICK_LEN], EM_SETLIMITTEXT, 2, 0);
+    AddToolTip(hWndPageItems[EDT_MAX_NICK_LEN], LanguageManager->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_MAX_NICK_LEN], 422, 18, 17, 20, (LPARAM)MAKELONG(64, 0), (WPARAM)hWndPageItems[EDT_MAX_NICK_LEN],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_NICK_LEN], 0));
@@ -345,6 +347,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_NICK_LEN_MSG] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_NICK_LIMIT_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
         ES_AUTOHSCROLL, 13, 56, 421, 18, m_hWnd, (HMENU)EDT_NICK_LEN_MSG, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_NICK_LEN_MSG], EM_SETLIMITTEXT, 256, 0);
+    AddToolTip(hWndPageItems[EDT_NICK_LEN_MSG], LanguageManager->sTexts[LAN_NICK_LIMIT_MSG_HINT]);
 
     hWndPageItems[GB_NICK_LEN_REDIR] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ADDRESS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 82, 437, 41,
         m_hWnd, NULL, g_hInstance, NULL);
@@ -356,6 +359,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_NICK_LEN_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_NICK_LIMIT_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |
         WS_TABSTOP | ES_AUTOHSCROLL, 98, 97, 336, 18, m_hWnd, (HMENU)EDT_NICK_LEN_REDIR_ADDR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_NICK_LEN_REDIR_ADDR], EM_SETLIMITTEXT, 256, 0);
+    AddToolTip(hWndPageItems[EDT_NICK_LEN_REDIR_ADDR], LanguageManager->sTexts[LAN_REDIRECT_HINT]);
 
     hWndPageItems[GB_SHARE_LIMITS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_SHARE_LIMITS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 128, 447, 126,
         m_hWnd, NULL, g_hInstance, NULL);
@@ -363,6 +367,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_MIN_SHARE] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         8, 143, 40, 21, m_hWnd, (HMENU)EDT_MIN_SHARE, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MIN_SHARE], EM_SETLIMITTEXT, 4, 0);
+    AddToolTip(hWndPageItems[EDT_MIN_SHARE], LanguageManager->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_MIN_SHARE], 48, 143, 17, 21, (LPARAM)MAKELONG(9999, 0), (WPARAM)hWndPageItems[EDT_MIN_SHARE],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MIN_SHARE_LIMIT], 0));
@@ -385,6 +390,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_MAX_SHARE] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         327, 143, 40, 21, m_hWnd, (HMENU)EDT_MAX_SHARE, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MAX_SHARE], EM_SETLIMITTEXT, 4, 0);
+    AddToolTip(hWndPageItems[EDT_MAX_SHARE], LanguageManager->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_MAX_SHARE], 367, 143, 17, 21, (LPARAM)MAKELONG(9999, 0), (WPARAM)hWndPageItems[EDT_MAX_SHARE],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_SHARE_LIMIT], 0));
@@ -404,6 +410,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_SHARE_MSG] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_SHARE_LIMIT_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
         ES_AUTOHSCROLL, 13, 182, 421, 18, m_hWnd, (HMENU)EDT_SHARE_MSG, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SHARE_MSG], EM_SETLIMITTEXT, 256, 0);
+    AddToolTip(hWndPageItems[EDT_SHARE_MSG], LanguageManager->sTexts[LAN_SHARE_LIMIT_MSG_HINT]);
 
     hWndPageItems[GB_SHARE_REDIR] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ADDRESS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 208, 437, 41,
         m_hWnd, NULL, g_hInstance, NULL);
@@ -415,6 +422,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_SHARE_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_SHARE_LIMIT_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |
         WS_TABSTOP | ES_AUTOHSCROLL, 98, 223, 336, 18, m_hWnd, (HMENU)EDT_NICK_LEN_REDIR_ADDR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SHARE_REDIR_ADDR], EM_SETLIMITTEXT, 256, 0);
+    AddToolTip(hWndPageItems[EDT_SHARE_REDIR_ADDR], LanguageManager->sTexts[LAN_REDIRECT_HINT]);
 
     hWndPageItems[GB_MAIN_CHAT_LIMITS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MAIN_CHAT_LIMITS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 254, 447, 43,
         m_hWnd, NULL, g_hInstance, NULL);
@@ -422,6 +430,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_MAIN_CHAT_LEN] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         8, 269, 40, 20, m_hWnd, (HMENU)EDT_MAIN_CHAT_LEN, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MAIN_CHAT_LEN], EM_SETLIMITTEXT, 5, 0);
+    AddToolTip(hWndPageItems[EDT_MAIN_CHAT_LEN], LanguageManager->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_MAIN_CHAT_LEN], 48, 269, 17, 20, (LPARAM)MAKELONG(32767, 0), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_LEN],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_CHAT_LEN], 0));
@@ -435,6 +444,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_MAIN_CHAT_LINES] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         382, 269, 40, 20, m_hWnd, (HMENU)EDT_MAIN_CHAT_LINES, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MAIN_CHAT_LINES], EM_SETLIMITTEXT, 3, 0);
+    AddToolTip(hWndPageItems[EDT_MAIN_CHAT_LINES], LanguageManager->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_MAIN_CHAT_LINES], 422, 269, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_LINES],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_CHAT_LINES], 0));
@@ -445,6 +455,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_PM_LEN] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         8, 312, 40, 20, m_hWnd, (HMENU)EDT_PM_LEN, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_PM_LEN], EM_SETLIMITTEXT, 5, 0);
+    AddToolTip(hWndPageItems[EDT_PM_LEN], LanguageManager->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_PM_LEN], 48, 312, 17, 20, (LPARAM)MAKELONG(32767, 0), (WPARAM)hWndPageItems[EDT_PM_LEN],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_PM_LEN], 0));
@@ -458,6 +469,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_PM_LINES] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         382, 312, 40, 20, m_hWnd, (HMENU)EDT_PM_LINES, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_PM_LINES], EM_SETLIMITTEXT, 3, 0);
+    AddToolTip(hWndPageItems[EDT_PM_LINES], LanguageManager->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_PM_LINES], 422, 312, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_PM_LINES],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_PM_LINES], 0));
@@ -468,6 +480,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_SEARCH_MIN_LEN] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         8, 355, 40, 20, m_hWnd, (HMENU)EDT_SEARCH_MIN_LEN, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SEARCH_MIN_LEN], EM_SETLIMITTEXT, 3, 0);
+    AddToolTip(hWndPageItems[EDT_SEARCH_MIN_LEN], LanguageManager->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_SEARCH_MIN_LEN], 48, 355, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_SEARCH_MIN_LEN],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN], 0));
@@ -481,6 +494,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_SEARCH_MAX_LEN] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         382, 355, 40, 20, m_hWnd, (HMENU)EDT_SEARCH_MAX_LEN, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SEARCH_MAX_LEN], EM_SETLIMITTEXT, 3, 0);
+    AddToolTip(hWndPageItems[EDT_SEARCH_MAX_LEN], LanguageManager->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_SEARCH_MAX_LEN], 422, 355, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_SEARCH_MAX_LEN],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN], 0));
