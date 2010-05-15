@@ -246,7 +246,6 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {
-            ::MessageBox(m_hWnd, "Setting page creation failed!", GetPageName(), MB_OK);
             return false;
         }
 

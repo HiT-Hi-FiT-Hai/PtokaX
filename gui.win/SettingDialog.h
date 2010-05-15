@@ -26,15 +26,22 @@
 
 class SettingDialog {
 public:
-    HWND m_hWnd, hWndTree;
-    HWND btnOK, btnCancel;
+    HWND m_hWnd;
+
+    HWND hWndWindowItems[3];
+
+    enum enmWindowItems {
+        TV_TREE,
+        BTN_OK,
+        BTN_CANCEL
+    };
 
     SettingDialog();
     ~SettingDialog();
 
     static INT_PTR CALLBACK StaticSettingDialogProc(HWND hWndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	INT_PTR DoModal(HWND hWndParent);
+	void DoModal(HWND hWndParent);
 private:
     SettingPage * SettingPages[12];
 

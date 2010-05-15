@@ -73,16 +73,13 @@ MainWindow::MainWindow() {
 
     m_hWnd = NULL;
 
-    btnStartStop = btnRedirectAll = btnMassMessage = NULL;
-
-    gbStats = NULL;
-
-    lblStatus = lblStatusValue = lblJoins = lblJoinsValue = lblParts = lblPartsValue = lblActive = lblActiveValue = lblOnline = lblOnlineValue = NULL;
-    lblPeak = lblPeakValue = lblReceived = lblReceivedValue = lblSent = lblSentValue = NULL;
+    memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
 
     uiTaskBarCreated = ::RegisterWindowMessage("TaskbarCreated");
 
     ui64LastTrayMouseMove = 0;
+
+    hMainMenu = NULL;
 
     LOGFONT lfFont;
     ::GetObject((HFONT)::GetStockObject(DEFAULT_GUI_FONT), sizeof(LOGFONT), &lfFont);
@@ -121,6 +118,10 @@ MainWindow::~MainWindow() {
     nid.uID = 0;
     ::Shell_NotifyIcon(NIM_DELETE, &nid);
     ::DeleteObject(hfFont);
+
+    if(hMainMenu != NULL) {
+        ::DestroyMenu(hMainMenu);
+    }
 }
 //---------------------------------------------------------------------------
 
@@ -144,85 +145,79 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             RECT rcMain;
             ::GetClientRect(m_hWnd, &rcMain);
 
-            btnStartStop = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_START_HUB], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-                4, 3, (rcMain.right - rcMain.left)-8, 20, m_hWnd, (HMENU)IDC_START_STOP, g_hInstance, NULL);
+            hWndWindowItems[BTN_START_STOP] = ::CreateWindowEx(0, WC_BUTTON, bServerRunning == false ? LanguageManager->sTexts[LAN_START_HUB] : LanguageManager->sTexts[LAN_STOP_HUB],
+                WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON, 5, 4, (rcMain.right - rcMain.left)-10, 20, m_hWnd, (HMENU)IDC_START_STOP, g_hInstance, NULL);
 
-            gbStats = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-                5, 19, (rcMain.right - rcMain.left)-10, 141, m_hWnd, NULL, g_hInstance, NULL);
+            hWndWindowItems[GB_STATS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+                6, 23, (rcMain.right - rcMain.left)-12, 136, m_hWnd, NULL, g_hInstance, NULL);
 
-            lblStatus = ::CreateWindowEx(0, WC_STATIC,
+            hWndWindowItems[LBL_STATUS] = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_STATUS], (size_t)LanguageManager->ui16TextsLens[LAN_STATUS])+":").c_str(),
-                WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP, 5, 11, 140, 14, gbStats, NULL, g_hInstance, NULL);
+                WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP, 8, 12, 140, 14, hWndWindowItems[GB_STATS], NULL, g_hInstance, NULL);
 
-            lblStatusValue = ::CreateWindowEx(0, WC_STATIC,
+            hWndWindowItems[LBL_STATUS_VALUE] = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_READY], (size_t)LanguageManager->ui16TextsLens[LAN_READY])+".").c_str(),
-                WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP, 145, 11, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
+                WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP, 145, 12, (rcMain.right - rcMain.left)-161, 14, hWndWindowItems[GB_STATS], NULL, g_hInstance, NULL);
 
-            lblJoins = ::CreateWindowEx(0, WC_STATIC,
+            hWndWindowItems[LBL_JOINS] = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_ACCEPTED_CONNECTIONS], (size_t)LanguageManager->ui16TextsLens[LAN_ACCEPTED_CONNECTIONS])+":").c_str(),
-                WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 5, 27, 140, 14, gbStats, NULL, g_hInstance, NULL);
+                WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 8, 27, 140, 14, hWndWindowItems[GB_STATS], NULL, g_hInstance, NULL);
 
-            lblJoinsValue = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-                145, 27, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
+            hWndWindowItems[LBL_JOINS_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
+                145, 27, (rcMain.right - rcMain.left)-161, 14, hWndWindowItems[GB_STATS], NULL, g_hInstance, NULL);
 
-            lblParts = ::CreateWindowEx(0, WC_STATIC,
+            hWndWindowItems[LBL_PARTS] = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_CLOSED_CONNECTIONS], (size_t)LanguageManager->ui16TextsLens[LAN_CLOSED_CONNECTIONS])+":").c_str(),
-                WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 5, 43, 140, 14, gbStats, NULL, g_hInstance, NULL);
+                WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 8, 42, 140, 14, hWndWindowItems[GB_STATS], NULL, g_hInstance, NULL);
 
-            lblPartsValue = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-                145, 43, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
+            hWndWindowItems[LBL_PARTS_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
+                145, 42, (rcMain.right - rcMain.left)-161, 14, hWndWindowItems[GB_STATS], NULL, g_hInstance, NULL);
 
-            lblActive = ::CreateWindowEx(0, WC_STATIC,
+            hWndWindowItems[LBL_ACTIVE] = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_ACTIVE_CONNECTIONS], (size_t)LanguageManager->ui16TextsLens[LAN_ACTIVE_CONNECTIONS])+":").c_str(),
-                WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 5, 59, 140, 14, gbStats, NULL, g_hInstance, NULL);
+                WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 8, 57, 140, 14, hWndWindowItems[GB_STATS], NULL, g_hInstance, NULL);
 
-            lblActiveValue = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-                145, 59, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
+            hWndWindowItems[LBL_ACTIVE_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
+                145, 57, (rcMain.right - rcMain.left)-161, 14, hWndWindowItems[GB_STATS], NULL, g_hInstance, NULL);
 
-            lblOnline = ::CreateWindowEx(0, WC_STATIC,
+            hWndWindowItems[LBL_ONLINE] = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_USERS_ONLINE], (size_t)LanguageManager->ui16TextsLens[LAN_USERS_ONLINE])+":").c_str(),
-                WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 5, 75, 140, 14, gbStats, NULL, g_hInstance, NULL);
+                WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 8, 72, 140, 14, hWndWindowItems[GB_STATS], NULL, g_hInstance, NULL);
 
-            lblOnlineValue = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-                145, 75, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
+            hWndWindowItems[LBL_ONLINE_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
+                145, 72, (rcMain.right - rcMain.left)-161, 14, hWndWindowItems[GB_STATS], NULL, g_hInstance, NULL);
 
-            lblPeak = ::CreateWindowEx(0, WC_STATIC,
+            hWndWindowItems[LBL_PEAK] = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_USERS_PEAK], (size_t)LanguageManager->ui16TextsLens[LAN_USERS_PEAK])+":").c_str(),
-                WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 5, 91, 140, 14, gbStats, NULL, g_hInstance, NULL);
+                WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 8, 87, 140, 14, hWndWindowItems[GB_STATS], NULL, g_hInstance, NULL);
 
-            lblPeakValue = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-                145, 91, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
+            hWndWindowItems[LBL_PEAK_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
+                145, 87, (rcMain.right - rcMain.left)-161, 14, hWndWindowItems[GB_STATS], NULL, g_hInstance, NULL);
 
-            lblReceived = ::CreateWindowEx(0, WC_STATIC,
+            hWndWindowItems[LBL_RECEIVED] = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_RECEIVED], (size_t)LanguageManager->ui16TextsLens[LAN_RECEIVED])+":").c_str(),
-                WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 5, 107, 140, 14, gbStats, NULL, g_hInstance, NULL);
+                WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 8, 102, 140, 14, hWndWindowItems[GB_STATS], NULL, g_hInstance, NULL);
 
-            lblReceivedValue = ::CreateWindowEx(0, WC_STATIC, "0 B (0 B/s)", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-                145, 107, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
+            hWndWindowItems[LBL_RECEIVED_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0 B (0 B/s)", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
+                145, 102, (rcMain.right - rcMain.left)-161, 14, hWndWindowItems[GB_STATS], NULL, g_hInstance, NULL);
 
-            lblSent = ::CreateWindowEx(0, WC_STATIC,
+            hWndWindowItems[LBL_SENT] = ::CreateWindowEx(0, WC_STATIC,
                 (string(LanguageManager->sTexts[LAN_SENT], (size_t)LanguageManager->ui16TextsLens[LAN_SENT])+":").c_str(),
-                WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 5, 123, 140, 14, gbStats, NULL, g_hInstance, NULL);
+                WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 8, 117, 140, 14, hWndWindowItems[GB_STATS], NULL, g_hInstance, NULL);
 
-            lblSentValue = ::CreateWindowEx(0, WC_STATIC, "0 B (0 B/s)", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-                145, 123, (rcMain.right - rcMain.left)-160, 14, gbStats, NULL, g_hInstance, NULL);
+            hWndWindowItems[LBL_SENT_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0 B (0 B/s)", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
+                145, 117, (rcMain.right - rcMain.left)-161, 14, hWndWindowItems[GB_STATS], NULL, g_hInstance, NULL);
 
-            btnRedirectAll = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ALL_USERS], WS_CHILD | WS_VISIBLE | WS_DISABLED |
-                WS_TABSTOP | BS_PUSHBUTTON, 4, 164, (rcMain.right - rcMain.left)-8, 20, m_hWnd, (HMENU)IDC_REDIRECT_ALL,
+            hWndWindowItems[BTN_REDIRECT_ALL] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ALL_USERS], WS_CHILD | WS_VISIBLE | WS_DISABLED |
+                WS_TABSTOP | BS_PUSHBUTTON, 5, 164, (rcMain.right - rcMain.left)-10, 20, m_hWnd, (HMENU)IDC_REDIRECT_ALL,
                 g_hInstance, NULL);
 
-            btnMassMessage = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MASS_MSG], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_TABSTOP |
-                BS_PUSHBUTTON, 4, 187, (rcMain.right - rcMain.left)-8, 20, m_hWnd, (HMENU)IDC_MASS_MESSAGE, g_hInstance, NULL);
+            hWndWindowItems[BTN_MASS_MSG] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MASS_MSG], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_TABSTOP |
+                BS_PUSHBUTTON, 5, 188, (rcMain.right - rcMain.left)-10, 20, m_hWnd, (HMENU)IDC_MASS_MESSAGE, g_hInstance, NULL);
 
-            HWND hWnds[] = { btnStartStop, lblStatus, lblStatusValue, lblJoins, lblJoinsValue, lblParts, lblPartsValue, lblActive, lblActiveValue,
-                lblOnline, lblOnlineValue, lblPeak, lblPeakValue, lblReceived, lblReceivedValue, lblSent, lblSentValue, btnRedirectAll, btnMassMessage
-            };
-
-            for(uint8_t ui8i = 0; ui8i < (sizeof(hWnds) / sizeof(hWnds[0])); ui8i++) {
-                ::SendMessage(hWnds[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+            for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
+                ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
             }
-
-            UpdateLanguage();
 
             return 0;
         }
@@ -366,7 +361,7 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 case IDC_START_STOP:
                     if(bServerRunning == false) {
                         if(ServerStart() == false) {
-                            ::SetWindowText(lblStatusValue,
+                            ::SetWindowText(hWndWindowItems[LBL_STATUS_VALUE],
                                 (string(LanguageManager->sTexts[LAN_READY], (size_t)LanguageManager->ui16TextsLens[LAN_READY])+".").c_str());
                         }
                     } else {
@@ -404,13 +399,50 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 //------------------------------------------------------------------------------
 
 HWND MainWindow::CreateEx() {
+    hMainMenu = ::CreateMenu();
+
+    HMENU hFileMenu = ::CreateMenu();
+    ::AppendMenu(hFileMenu, MF_STRING, IDC_RELOAD_TXTS, (string(LanguageManager->sTexts[LAN_RELOAD_TEXT_FILES], (size_t)LanguageManager->ui16TextsLens[LAN_RELOAD_TEXT_FILES]) + "...").c_str());
+    ::AppendMenu(hFileMenu, MF_SEPARATOR, 0, 0);
+    ::AppendMenu(hFileMenu, MF_STRING, IDC_SETTINGS, (string(LanguageManager->sTexts[LAN_MENU_SETTINGS], (size_t)LanguageManager->ui16TextsLens[LAN_SETTINGS]) + "...").c_str());
+    ::AppendMenu(hFileMenu, MF_STRING, IDC_SAVE_SETTINGS, (string(LanguageManager->sTexts[LAN_SAVE_SETTINGS], (size_t)LanguageManager->ui16TextsLens[LAN_SAVE_SETTINGS]) + "...").c_str());
+    ::AppendMenu(hFileMenu, MF_SEPARATOR, 0, 0);
+    ::AppendMenu(hFileMenu, MF_STRING, IDC_EXIT, LanguageManager->sTexts[LAN_EXIT]);
+
+    ::AppendMenu(hMainMenu, MF_POPUP, (UINT_PTR)hFileMenu, LanguageManager->sTexts[LAN_FILE]);
+
+    HMENU hViewMenu = ::CreateMenu();
+    ::AppendMenu(hViewMenu, MF_STRING, IDC_REG_USERS, LanguageManager->sTexts[LAN_REG_USERS]);
+    ::AppendMenu(hViewMenu, MF_SEPARATOR, 0, 0);
+    ::AppendMenu(hViewMenu, MF_STRING, IDC_PROF_MAN, LanguageManager->sTexts[LAN_PROFILE_MAN]);
+    ::AppendMenu(hViewMenu, MF_SEPARATOR, 0, 0);
+    ::AppendMenu(hViewMenu, MF_STRING, IDC_BANS, LanguageManager->sTexts[LAN_BANS]);
+    ::AppendMenu(hViewMenu, MF_STRING, IDC_RANGE_BANS, LanguageManager->sTexts[LAN_RANGE_BANS]);
+    ::AppendMenu(hViewMenu, MF_SEPARATOR, 0, 0);
+    ::AppendMenu(hViewMenu, MF_STRING, IDC_SCRIPTS, LanguageManager->sTexts[LAN_SCRIPTS]);
+    ::AppendMenu(hViewMenu, MF_STRING, IDC_SCRIPTS_MEM, LanguageManager->sTexts[LAN_SCRIPTS_MEMORY_USAGE]);
+    ::AppendMenu(hViewMenu, MF_SEPARATOR, 0, 0);
+    ::AppendMenu(hViewMenu, MF_STRING, IDC_USERS_CHAT, LanguageManager->sTexts[LAN_USERS_CHAT]);
+
+    ::AppendMenu(hMainMenu, MF_POPUP, (UINT_PTR)hViewMenu, LanguageManager->sTexts[LAN_VIEW]);
+
+    HMENU hHelpMenu = ::CreateMenu();
+    ::AppendMenu(hHelpMenu, MF_STRING, IDC_UPDATE_CHECK, (string(LanguageManager->sTexts[LAN_CHECK_FOR_UPDATE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_FOR_UPDATE]) + "...").c_str());
+    ::AppendMenu(hHelpMenu, MF_SEPARATOR, 0, 0);
+    ::AppendMenu(hHelpMenu, MF_STRING, IDC_HOMEPAGE, (string("PtokaX ") +LanguageManager->sTexts[LAN_WEBSITE]).c_str());
+    ::AppendMenu(hHelpMenu, MF_STRING, IDC_BOARD, (string("PtokaX ") +LanguageManager->sTexts[LAN_BOARD]).c_str());
+    ::AppendMenu(hHelpMenu, MF_STRING, IDC_WIKI, (string("PtokaX ") +LanguageManager->sTexts[LAN_WIKI]).c_str());
+    ::AppendMenu(hHelpMenu, MF_SEPARATOR, 0, 0);
+    ::AppendMenu(hHelpMenu, MF_STRING, IDC_ABOUT, (string(LanguageManager->sTexts[LAN_ABOUT], (size_t)LanguageManager->ui16TextsLens[LAN_ABOUT]) + " PtokaX").c_str());
+
+    ::AppendMenu(hMainMenu, MF_POPUP, (UINT_PTR)hHelpMenu, LanguageManager->sTexts[LAN_HELP]);
+
     WNDCLASSEX m_wc;
     memset(&m_wc, 0, sizeof(WNDCLASSEX));
     m_wc.cbSize = sizeof(WNDCLASSEX);
     m_wc.lpfnWndProc = StaticMainWindowProc;
     m_wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
     m_wc.lpszClassName = sTitle.c_str();
-    m_wc.lpszMenuName = MAKEINTRESOURCE(IDR_MAINMENU);
     m_wc.hInstance = g_hInstance;
 	m_wc.hCursor = ::LoadCursor(m_wc.hInstance, IDC_ARROW);
 	m_wc.style = CS_HREDRAW | CS_VREDRAW;
@@ -422,7 +454,7 @@ HWND MainWindow::CreateEx() {
     m_hWnd = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE | WS_EX_CONTROLPARENT, MAKEINTATOM(atom),
         (string(SettingManager->sTexts[SETTXT_HUB_NAME], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME]) + " | " + sTitle).c_str(),
         WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-        CW_USEDEFAULT, CW_USEDEFAULT, 306, 259, NULL, NULL, g_hInstance, NULL);
+        CW_USEDEFAULT, CW_USEDEFAULT, 306, 261, NULL, hMainMenu, g_hInstance, NULL);
 
 	return m_hWnd;
 }
@@ -449,22 +481,22 @@ void MainWindow::UpdateSysTray() {
 //---------------------------------------------------------------------------
 
 void MainWindow::UpdateStats() {
-    ::SetWindowText(lblJoinsValue, string(ui32Joins).c_str());
-    ::SetWindowText(lblPartsValue, string(ui32Parts).c_str());
-    ::SetWindowText(lblActiveValue, string(ui32Joins - ui32Parts).c_str());
-    ::SetWindowText(lblOnlineValue, string(ui32Logged).c_str());
-    ::SetWindowText(lblPeakValue, string(ui32Peak).c_str());
+    ::SetWindowText(hWndWindowItems[LBL_JOINS_VALUE], string(ui32Joins).c_str());
+    ::SetWindowText(hWndWindowItems[LBL_PARTS_VALUE], string(ui32Parts).c_str());
+    ::SetWindowText(hWndWindowItems[LBL_ACTIVE_VALUE], string(ui32Joins - ui32Parts).c_str());
+    ::SetWindowText(hWndWindowItems[LBL_ONLINE_VALUE], string(ui32Logged).c_str());
+    ::SetWindowText(hWndWindowItems[LBL_PEAK_VALUE], string(ui32Peak).c_str());
 
     char msg[256];
 
 	int imsglen = sprintf(msg, "%s (%s)", formatBytes(ui64BytesRead), formatBytesPerSecond(iActualBytesRead));
     if(CheckSprintf(imsglen, 256, "MainWindow::UpdateStats") == true) {
-        ::SetWindowText(lblReceivedValue, msg);
+        ::SetWindowText(hWndWindowItems[LBL_RECEIVED_VALUE], msg);
 	}
 
 	imsglen = sprintf(msg, "%s (%s)", formatBytes(ui64BytesSent), formatBytesPerSecond(iActualBytesSent));
     if(CheckSprintf(imsglen, 256, "MainWindow::UpdateStats1") == true) {
-		::SetWindowText(lblSentValue, msg);
+		::SetWindowText(hWndWindowItems[LBL_SENT_VALUE], msg);
 	}
 }
 //---------------------------------------------------------------------------
@@ -476,25 +508,24 @@ void MainWindow::UpdateTitleBar() {
 
 void MainWindow::UpdateLanguage() {
 	if(bServerRunning == false) {
-        ::SetWindowText(btnStartStop, LanguageManager->sTexts[LAN_START_HUB]);
-        ::SetWindowText(lblStatusValue, (string(LanguageManager->sTexts[LAN_READY], (size_t)LanguageManager->ui16TextsLens[LAN_READY])+".").c_str());
+        ::SetWindowText(hWndWindowItems[BTN_START_STOP], LanguageManager->sTexts[LAN_START_HUB]);
+        ::SetWindowText(hWndWindowItems[LBL_STATUS_VALUE], (string(LanguageManager->sTexts[LAN_READY], (size_t)LanguageManager->ui16TextsLens[LAN_READY])+".").c_str());
     } else {
-        ::SetWindowText(btnStartStop, LanguageManager->sTexts[LAN_STOP_HUB]);
-        ::SetWindowText(lblStatusValue, (string(LanguageManager->sTexts[LAN_RUNNING], (size_t)LanguageManager->ui16TextsLens[LAN_RUNNING])+"...").c_str());
+        ::SetWindowText(hWndWindowItems[BTN_START_STOP], LanguageManager->sTexts[LAN_STOP_HUB]);
+        ::SetWindowText(hWndWindowItems[LBL_STATUS_VALUE], (string(LanguageManager->sTexts[LAN_RUNNING], (size_t)LanguageManager->ui16TextsLens[LAN_RUNNING])+"...").c_str());
     }
 
-    HWND hWnds[] = { lblStatus, lblJoins, lblParts, lblActive, lblOnline, lblPeak, lblReceived, lblSent };
-    size_t szhWndStringIds[] = { LAN_STATUS, LAN_ACCEPTED_CONNECTIONS, LAN_CLOSED_CONNECTIONS, LAN_ACTIVE_CONNECTIONS, LAN_USERS_ONLINE, LAN_USERS_PEAK,
-        LAN_RECEIVED, LAN_SENT
-    };
+    ::SetWindowText(hWndWindowItems[LBL_STATUS], (string(LanguageManager->sTexts[LAN_STATUS], (size_t)LanguageManager->ui16TextsLens[LAN_STATUS])+":").c_str());
+    ::SetWindowText(hWndWindowItems[LBL_JOINS], (string(LanguageManager->sTexts[LAN_ACCEPTED_CONNECTIONS], (size_t)LanguageManager->ui16TextsLens[LAN_ACCEPTED_CONNECTIONS])+":").c_str());
+    ::SetWindowText(hWndWindowItems[LBL_PARTS], (string(LanguageManager->sTexts[LAN_CLOSED_CONNECTIONS], (size_t)LanguageManager->ui16TextsLens[LAN_CLOSED_CONNECTIONS])+":").c_str());
+    ::SetWindowText(hWndWindowItems[LBL_ACTIVE], (string(LanguageManager->sTexts[LAN_ACTIVE_CONNECTIONS], (size_t)LanguageManager->ui16TextsLens[LAN_ACTIVE_CONNECTIONS])+":").c_str());
+    ::SetWindowText(hWndWindowItems[LBL_ONLINE], (string(LanguageManager->sTexts[LAN_USERS_ONLINE], (size_t)LanguageManager->ui16TextsLens[LAN_USERS_ONLINE])+":").c_str());
+    ::SetWindowText(hWndWindowItems[LBL_PEAK], (string(LanguageManager->sTexts[LAN_USERS_PEAK], (size_t)LanguageManager->ui16TextsLens[LAN_USERS_PEAK])+":").c_str());
+    ::SetWindowText(hWndWindowItems[LBL_RECEIVED], (string(LanguageManager->sTexts[LAN_RECEIVED], (size_t)LanguageManager->ui16TextsLens[LAN_RECEIVED])+":").c_str());
+    ::SetWindowText(hWndWindowItems[LBL_SENT], (string(LanguageManager->sTexts[LAN_SENT], (size_t)LanguageManager->ui16TextsLens[LAN_SENT])+":").c_str());
 
-    for(uint8_t ui8i = 0; ui8i < (sizeof(hWnds) / sizeof(hWnds[0])); ui8i++) {
-        ::SetWindowText(hWnds[ui8i],
-            (string(LanguageManager->sTexts[szhWndStringIds[ui8i]], (size_t)LanguageManager->ui16TextsLens[szhWndStringIds[ui8i]])+":").c_str());
-    }
-
-    ::SetWindowText(btnRedirectAll, LanguageManager->sTexts[LAN_REDIRECT_ALL_USERS]);
-    ::SetWindowText(btnMassMessage, LanguageManager->sTexts[LAN_MASS_MSG]);
+    ::SetWindowText(hWndWindowItems[BTN_REDIRECT_ALL], LanguageManager->sTexts[LAN_REDIRECT_ALL_USERS]);
+    ::SetWindowText(hWndWindowItems[BTN_MASS_MSG], LanguageManager->sTexts[LAN_MASS_MSG]);
 
     HMENU hMenu = ::GetMenu(m_hWnd);
 
@@ -523,7 +554,7 @@ void MainWindow::UpdateLanguage() {
     ::ModifyMenu(hMenu, IDC_RELOAD_TXTS, MF_BYCOMMAND, IDC_RELOAD_TXTS,
         (string(LanguageManager->sTexts[LAN_RELOAD_TEXT_FILES], (size_t)LanguageManager->ui16TextsLens[LAN_RELOAD_TEXT_FILES]) + "...").c_str());
     ::ModifyMenu(hMenu, IDC_SETTINGS, MF_BYCOMMAND, IDC_SETTINGS,
-        (string(LanguageManager->sTexts[LAN_SETTINGS], (size_t)LanguageManager->ui16TextsLens[LAN_SETTINGS]) + "...").c_str());
+        (string(LanguageManager->sTexts[LAN_MENU_SETTINGS], (size_t)LanguageManager->ui16TextsLens[LAN_MENU_SETTINGS]) + "...").c_str());
     ::ModifyMenu(hMenu, IDC_SAVE_SETTINGS, MF_BYCOMMAND, IDC_SAVE_SETTINGS,
         (string(LanguageManager->sTexts[LAN_SAVE_SETTINGS], (size_t)LanguageManager->ui16TextsLens[LAN_SAVE_SETTINGS]) + "...").c_str());
 }

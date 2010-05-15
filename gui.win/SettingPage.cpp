@@ -161,7 +161,7 @@ LRESULT SettingWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, WN
         return DLGC_WANTTAB;
     } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
         if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
-            ::SetFocus(((SettingDialog *)pSettingDialog)->hWndTree);
+            ::SetFocus(((SettingDialog *)pSettingDialog)->hWndWindowItems[((SettingDialog *)pSettingDialog)->TV_TREE]);
             return 0;
         } else {
             SettingPage * pSettingPage = (SettingPage *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);

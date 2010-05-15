@@ -815,6 +815,13 @@ const char* LangXmlStr[] = {
     "RemoveConnection",
     "RemoveEmail",
     "0Disabled",
+    "LwrKiloBytes",
+    "Bytes",
+    "KiloBytes",
+    "MegaBytes",
+    "GigaBytes",
+    "TeraBytes",
+    "MenuSettings",
 };
 //---------------------------------------------------------------------------
 

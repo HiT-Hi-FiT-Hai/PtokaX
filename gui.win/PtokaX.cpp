@@ -185,7 +185,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 	// If autostart is checked (or commandline /autostart given), then start the server
 	if((SettingManager->bBools[SETBOOL_AUTO_START] == true || bCmdAutoStart == true) && bCmdNoAutoStart == false) {
 	    if(ServerStart() == false) {
-            ::SetWindowText(pMainWindow->lblStatusValue,
+            ::SetWindowText(pMainWindow->hWndWindowItems[pMainWindow->LBL_STATUS_VALUE],
                 (string(LanguageManager->sTexts[LAN_READY], (size_t)LanguageManager->ui16TextsLens[LAN_READY])+".").c_str());
 		}
 	}
@@ -199,7 +199,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 	MSG msg;
 	BOOL bRet;
 
-	while((bRet = GetMessage(&msg, NULL, 0, 0)) != 0) {
+	while((bRet = ::GetMessage(&msg, NULL, 0, 0)) != 0) {
 	    if(bRet == -1) {
 	        // handle the error and possibly exit
 	    } else {
@@ -218,8 +218,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
                 }
             }
 	
-	    	TranslateMessage(&msg);
-	        DispatchMessage(&msg);
+	    	::TranslateMessage(&msg);
+	        ::DispatchMessage(&msg);
 	    }
 	}
 

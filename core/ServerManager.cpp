@@ -581,7 +581,7 @@ bool ServerStart() {
 		#ifndef _MSC_VER
 			hubForm->ButtonStart->Enabled = false;
 		#else
-            ::EnableWindow(pMainWindow->btnStartStop, FALSE);
+            ::EnableWindow(pMainWindow->hWndWindowItems[pMainWindow->BTN_START_STOP], FALSE);
 		#endif
 	#endif
 #endif
@@ -606,7 +606,7 @@ bool ServerStart() {
 				hubForm->StatusValue->Caption = String(LanguageManager->sTexts[LAN_RESOLVING_HUB_ADDRESS],
 					(size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_HUB_ADDRESS])+"...";
         #else
-                ::SetWindowText(pMainWindow->lblStatusValue,
+                ::SetWindowText(pMainWindow->hWndWindowItems[pMainWindow->LBL_STATUS_VALUE],
                     (string(LanguageManager->sTexts[LAN_RESOLVING_HUB_ADDRESS],
                     (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_HUB_ADDRESS])+"...").c_str());
 		#endif
@@ -638,7 +638,7 @@ bool ServerStart() {
 					string(WSErrorStr(err))+" ("+string(err)+")\n\n"+
 					string(LanguageManager->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".").c_str(),
 					LanguageManager->sTexts[LAN_ERROR], MB_OK|MB_ICONERROR);
-                ::EnableWindow(pMainWindow->btnStartStop, TRUE);
+                ::EnableWindow(pMainWindow->hWndWindowItems[pMainWindow->BTN_START_STOP], TRUE);
 		#endif
 	#endif
 #else
@@ -703,7 +703,7 @@ bool ServerStart() {
 		#else
 			::MessageBox(pMainWindow->m_hWnd, LanguageManager->sTexts[LAN_NO_VALID_TCP_PORT_SPECIFIED], LanguageManager->sTexts[LAN_ERROR],
                 MB_OK|MB_ICONERROR);
-            ::EnableWindow(pMainWindow->btnStartStop, TRUE);
+            ::EnableWindow(pMainWindow->hWndWindowItems[pMainWindow->BTN_START_STOP], TRUE);
 		#endif
 	#endif
 #else
@@ -879,15 +879,17 @@ bool ServerStart() {
 				ScriptsForm->LUArst->Enabled = true;
 			}
 		#else
-            ::SetWindowText(pMainWindow->lblStatusValue,
+            ::SetWindowText(pMainWindow->hWndWindowItems[pMainWindow->LBL_STATUS_VALUE],
                 (string(LanguageManager->sTexts[LAN_RUNNING], (size_t)LanguageManager->ui16TextsLens[LAN_RUNNING])+"...").c_str());
-            ::SetWindowText(pMainWindow->btnStartStop, LanguageManager->sTexts[LAN_STOP_HUB]);
-            ::EnableWindow(pMainWindow->btnStartStop, TRUE);
+            ::SetWindowText(pMainWindow->hWndWindowItems[pMainWindow->BTN_START_STOP], LanguageManager->sTexts[LAN_STOP_HUB]);
+            ::EnableWindow(pMainWindow->hWndWindowItems[pMainWindow->BTN_START_STOP], TRUE);
 
-            HWND hWnds[] = { pMainWindow->lblJoins, pMainWindow->lblJoinsValue, pMainWindow->lblParts, pMainWindow->lblPartsValue,
-                pMainWindow->lblActive, pMainWindow->lblActiveValue, pMainWindow->lblOnline, pMainWindow->lblOnlineValue,
-                pMainWindow->lblPeak, pMainWindow->lblPeakValue, pMainWindow->lblReceived, pMainWindow->lblReceivedValue,
-                pMainWindow->lblSent, pMainWindow->lblSentValue, pMainWindow->btnRedirectAll, pMainWindow->btnMassMessage
+            HWND hWnds[] = { pMainWindow->hWndWindowItems[pMainWindow->LBL_JOINS], pMainWindow->hWndWindowItems[pMainWindow->LBL_JOINS_VALUE],
+                pMainWindow->hWndWindowItems[pMainWindow->LBL_PARTS], pMainWindow->hWndWindowItems[pMainWindow->LBL_PARTS_VALUE], pMainWindow->hWndWindowItems[pMainWindow->LBL_ACTIVE],
+                pMainWindow->hWndWindowItems[pMainWindow->LBL_ACTIVE_VALUE], pMainWindow->hWndWindowItems[pMainWindow->LBL_ONLINE], pMainWindow->hWndWindowItems[pMainWindow->LBL_ONLINE_VALUE],
+                pMainWindow->hWndWindowItems[pMainWindow->LBL_PEAK], pMainWindow->hWndWindowItems[pMainWindow->LBL_PEAK_VALUE], pMainWindow->hWndWindowItems[pMainWindow->LBL_RECEIVED],
+                pMainWindow->hWndWindowItems[pMainWindow->LBL_RECEIVED_VALUE], pMainWindow->hWndWindowItems[pMainWindow->LBL_SENT], pMainWindow->hWndWindowItems[pMainWindow->LBL_SENT_VALUE],
+                pMainWindow->hWndWindowItems[pMainWindow->BTN_REDIRECT_ALL], pMainWindow->hWndWindowItems[pMainWindow->BTN_MASS_MSG]
             };
 
             for(uint8_t ui8i = 0; ui8i < (sizeof(hWnds) / sizeof(hWnds[0])); ui8i++) {
@@ -939,7 +941,7 @@ void ServerStop() {
 		#ifndef _MSC_VER
 			hubForm->ButtonStart->Enabled = false;
 		#else
-            ::EnableWindow(pMainWindow->btnStartStop, FALSE);
+            ::EnableWindow(pMainWindow->hWndWindowItems[pMainWindow->BTN_START_STOP], FALSE);
 		#endif
 	#endif
 #else
@@ -1108,15 +1110,17 @@ void ServerFinalStop(const bool &bFromServiceLoop) {
 			hubForm->TxValue->Visible = false;
 			hubForm->PeakValue->Visible = false;
         #else
-            ::SetWindowText(pMainWindow->lblStatusValue,
+            ::SetWindowText(pMainWindow->hWndWindowItems[pMainWindow->LBL_STATUS_VALUE],
                 (string(LanguageManager->sTexts[LAN_STOPPED], (size_t)LanguageManager->ui16TextsLens[LAN_STOPPED])+".").c_str());
-            ::SetWindowText(pMainWindow->btnStartStop, LanguageManager->sTexts[LAN_START_HUB]);
-            ::EnableWindow(pMainWindow->btnStartStop, TRUE);
+            ::SetWindowText(pMainWindow->hWndWindowItems[pMainWindow->BTN_START_STOP], LanguageManager->sTexts[LAN_START_HUB]);
+            ::EnableWindow(pMainWindow->hWndWindowItems[pMainWindow->BTN_START_STOP], TRUE);
 
-            HWND hWnds[] = { pMainWindow->lblJoins, pMainWindow->lblJoinsValue, pMainWindow->lblParts, pMainWindow->lblPartsValue,
-                pMainWindow->lblActive, pMainWindow->lblActiveValue, pMainWindow->lblOnline, pMainWindow->lblOnlineValue,
-                pMainWindow->lblPeak, pMainWindow->lblPeakValue, pMainWindow->lblReceived, pMainWindow->lblReceivedValue,
-                pMainWindow->lblSent, pMainWindow->lblSentValue, pMainWindow->btnRedirectAll, pMainWindow->btnMassMessage
+            HWND hWnds[] = { pMainWindow->hWndWindowItems[pMainWindow->LBL_JOINS], pMainWindow->hWndWindowItems[pMainWindow->LBL_JOINS_VALUE],
+                pMainWindow->hWndWindowItems[pMainWindow->LBL_PARTS], pMainWindow->hWndWindowItems[pMainWindow->LBL_PARTS_VALUE], pMainWindow->hWndWindowItems[pMainWindow->LBL_ACTIVE],
+                pMainWindow->hWndWindowItems[pMainWindow->LBL_ACTIVE_VALUE], pMainWindow->hWndWindowItems[pMainWindow->LBL_ONLINE], pMainWindow->hWndWindowItems[pMainWindow->LBL_ONLINE_VALUE],
+                pMainWindow->hWndWindowItems[pMainWindow->LBL_PEAK], pMainWindow->hWndWindowItems[pMainWindow->LBL_PEAK_VALUE], pMainWindow->hWndWindowItems[pMainWindow->LBL_RECEIVED],
+                pMainWindow->hWndWindowItems[pMainWindow->LBL_RECEIVED_VALUE], pMainWindow->hWndWindowItems[pMainWindow->LBL_SENT], pMainWindow->hWndWindowItems[pMainWindow->LBL_SENT_VALUE],
+                pMainWindow->hWndWindowItems[pMainWindow->BTN_REDIRECT_ALL], pMainWindow->hWndWindowItems[pMainWindow->BTN_MASS_MSG]
             };
 
             for(uint8_t ui8i = 0; ui8i < (sizeof(hWnds) / sizeof(hWnds[0])); ui8i++) {
@@ -1152,7 +1156,7 @@ void ServerFinalStop(const bool &bFromServiceLoop) {
 			hubForm->ButtonStartClick(hubForm);
 		#else
             if(ServerStart() == false) {
-                ::SetWindowText(pMainWindow->lblStatusValue,
+                ::SetWindowText(pMainWindow->hWndWindowItems[pMainWindow->LBL_STATUS_VALUE],
                     (string(LanguageManager->sTexts[LAN_READY], (size_t)LanguageManager->ui16TextsLens[LAN_READY])+".").c_str());
             }
 		#endif

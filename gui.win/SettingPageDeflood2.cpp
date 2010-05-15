@@ -497,7 +497,8 @@ bool SettingPageDeflood2::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_RECEIVED_DATA_KB], 223, 246, 17, 21, (LPARAM)MAKELONG(9999, 1), (WPARAM)hWndPageItems[EDT_RECEIVED_DATA_KB],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_DOWN_KB], 0));
 
-    hWndPageItems[LBL_RECEIVED_DATA_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "kB /", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 251, 30, 16,
+    hWndPageItems[LBL_RECEIVED_DATA_DIVIDER] = ::CreateWindowEx(0, WC_STATIC,
+        (string(LanguageManager->sTexts[LAN_LWR_KILO_BYTES], (size_t)LanguageManager->ui16TextsLens[LAN_LWR_KILO_BYTES])+" /").c_str(), WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 251, 30, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_RECEIVED_DATA_SECS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
@@ -528,7 +529,8 @@ bool SettingPageDeflood2::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_RECEIVED_DATA_KB2], 223, 273, 17, 21, (LPARAM)MAKELONG(9999, 1), (WPARAM)hWndPageItems[EDT_RECEIVED_DATA_KB2],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_DOWN_KB2], 0));
 
-    hWndPageItems[LBL_RECEIVED_DATA_DIVIDER2] = ::CreateWindowEx(0, WC_STATIC, "kB /", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 278, 30, 16,
+    hWndPageItems[LBL_RECEIVED_DATA_DIVIDER2] = ::CreateWindowEx(0, WC_STATIC,
+        (string(LanguageManager->sTexts[LAN_LWR_KILO_BYTES], (size_t)LanguageManager->ui16TextsLens[LAN_LWR_KILO_BYTES])+" /").c_str(), WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 278, 30, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_RECEIVED_DATA_SECS2] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
@@ -604,7 +606,6 @@ bool SettingPageDeflood2::CreateSettingPage(HWND hOwner) {
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {
-            ::MessageBox(m_hWnd, "Setting page creation failed!", GetPageName(), MB_OK);
             return false;
         }
 
