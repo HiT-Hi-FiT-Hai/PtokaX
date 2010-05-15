@@ -356,7 +356,7 @@ int WINAPI main(int argc, char* argv[]) {
 	    MSG msg;
 	    BOOL bRet;
 
-	    while((bRet = GetMessage(&msg, NULL, 0, 0)) != 0) {
+	    while((bRet = ::GetMessage(&msg, NULL, 0, 0)) != 0) {
 	        if(bRet == -1) {
 	            // handle the error and possibly exit
 	        } else {
@@ -373,8 +373,8 @@ int WINAPI main(int argc, char* argv[]) {
                     }
                 }
 	
-	    		TranslateMessage(&msg);
-	            DispatchMessage(&msg);
+	    		::TranslateMessage(&msg);
+	            ::DispatchMessage(&msg);
 	        }
 	    }
 

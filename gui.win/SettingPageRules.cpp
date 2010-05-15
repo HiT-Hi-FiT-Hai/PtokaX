@@ -374,11 +374,11 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
 
     hWndPageItems[CB_MIN_SHARE] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
         70, 143, 50, 21, m_hWnd, NULL, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_ADDSTRING, 0, (LPARAM)/*LanguageManager->sTexts[]*/"B");
-    ::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_ADDSTRING, 0, (LPARAM)/*LanguageManager->sTexts[]*/"KB");
-    ::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_ADDSTRING, 0, (LPARAM)/*LanguageManager->sTexts[]*/"MB");
-    ::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_ADDSTRING, 0, (LPARAM)/*LanguageManager->sTexts[]*/"GB");
-    ::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_ADDSTRING, 0, (LPARAM)/*LanguageManager->sTexts[]*/"TB");
+    ::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_BYTES]);
+    ::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_KILO_BYTES]);
+    ::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_MEGA_BYTES]);
+    ::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_GIGA_BYTES]);
+    ::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_TERA_BYTES]);
     ::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_SETCURSEL, SettingManager->iShorts[SETSHORT_MIN_SHARE_UNITS], 0);
 
     hWndPageItems[LBL_MIN_SHARE] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MIN_SHARE], WS_CHILD | WS_VISIBLE | SS_LEFT, 125, 148, 96, 16,
@@ -397,11 +397,11 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
 
     hWndPageItems[CB_MAX_SHARE] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
         389, 143, 50, 21, m_hWnd, NULL, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_ADDSTRING, 0, (LPARAM)/*LanguageManager->sTexts[]*/"B");
-    ::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_ADDSTRING, 0, (LPARAM)/*LanguageManager->sTexts[]*/"KB");
-    ::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_ADDSTRING, 0, (LPARAM)/*LanguageManager->sTexts[]*/"MB");
-    ::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_ADDSTRING, 0, (LPARAM)/*LanguageManager->sTexts[]*/"GB");
-    ::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_ADDSTRING, 0, (LPARAM)/*LanguageManager->sTexts[]*/"TB");
+    ::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_BYTES]);
+    ::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_KILO_BYTES]);
+    ::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_MEGA_BYTES]);
+    ::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_GIGA_BYTES]);
+    ::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_TERA_BYTES]);
     ::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_SETCURSEL, SettingManager->iShorts[SETSHORT_MAX_SHARE_UNITS], 0);
 
     hWndPageItems[GB_SHARE_MSG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 167, 437, 41,
@@ -501,7 +501,6 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {
-            ::MessageBox(m_hWnd, "Setting page creation failed!", GetPageName(), MB_OK);
             return false;
         }
 

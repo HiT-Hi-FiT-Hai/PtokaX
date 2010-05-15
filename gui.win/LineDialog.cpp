@@ -35,11 +35,7 @@
 LineDialog::LineDialog(char * Caption, char * Line) {
     m_hWnd = NULL;
 
-    btnOK = btnCancel = NULL;
-
-    gbLine = NULL;
-
-    edtLine = NULL;
+    memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
 
     sCaption = string(Caption) + ":";
     sLine = Line;
@@ -80,24 +76,22 @@ LRESULT LineDialog::LineDialogProc(UINT uMsg, WPARAM wParam, LPARAM /*lParam*/) 
             RECT rcMain;
             ::GetClientRect(m_hWnd, &rcMain);
 
-            gbLine = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 6, 0, (rcMain.right - rcMain.left)-12, 32,
+            hWndWindowItems[GB_LINE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 6, 0, (rcMain.right - rcMain.left)-12, 42,
                 m_hWnd, NULL, g_hInstance, NULL);
 
-            edtLine = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-                10, 10, (rcMain.right - rcMain.left)-20, 18, m_hWnd, NULL, g_hInstance, NULL);
-            ::SetWindowText(edtLine, sLine.c_str());
-            ::SendMessage(edtLine, EM_SETSEL, 0, -1);
+            hWndWindowItems[EDT_LINE] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
+                14, 14, (rcMain.right - rcMain.left)-28, 20, m_hWnd, NULL, g_hInstance, NULL);
+            ::SetWindowText(hWndWindowItems[EDT_LINE], sLine.c_str());
+            ::SendMessage(hWndWindowItems[EDT_LINE], EM_SETSEL, 0, -1);
 
-            btnOK = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-                5, 37, ((rcMain.right - rcMain.left)/2)-7, 20, m_hWnd, (HMENU)IDOK, g_hInstance, NULL);
+            hWndWindowItems[BTN_OK] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+                5, 47, ((rcMain.right - rcMain.left)/2)-7, 20, m_hWnd, (HMENU)IDOK, g_hInstance, NULL);
 
-            btnCancel = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-                ((rcMain.right - rcMain.left)/2)+2, 37, ((rcMain.right - rcMain.left)/2)-7, 20, m_hWnd, (HMENU)IDCANCEL, g_hInstance, NULL);
+            hWndWindowItems[BTN_CANCEL] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+                ((rcMain.right - rcMain.left)/2)+2, 47, ((rcMain.right - rcMain.left)/2)-7, 20, m_hWnd, (HMENU)IDCANCEL, g_hInstance, NULL);
 
-            HWND hWnds[] = { btnOK, btnCancel, gbLine, edtLine };
-
-            for(uint8_t ui8i = 0; ui8i < (sizeof(hWnds) / sizeof(hWnds[0])); ui8i++) {
-                ::SendMessage(hWnds[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+            for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
+                ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
             }
 
             RECT rcParent;
@@ -110,15 +104,15 @@ LRESULT LineDialog::LineDialogProc(UINT uMsg, WPARAM wParam, LPARAM /*lParam*/) 
             return TRUE;
         }
         case WM_SETFOCUS:
-            ::SetFocus(edtLine);
+            ::SetFocus(hWndWindowItems[EDT_LINE]);
 
             return TRUE;
         case WM_COMMAND:
            switch(LOWORD(wParam)) {
                 case IDOK: {
-                    int iLen = ::GetWindowTextLength(edtLine) + 1;
+                    int iLen = ::GetWindowTextLength(hWndWindowItems[EDT_LINE]) + 1;
                     char * sBuf = new char[iLen];
-                    ::GetWindowText(edtLine, sBuf, iLen);
+                    ::GetWindowText(hWndWindowItems[EDT_LINE], sBuf, iLen);
                     sLine = sBuf;
                     delete [] sBuf;
                 }

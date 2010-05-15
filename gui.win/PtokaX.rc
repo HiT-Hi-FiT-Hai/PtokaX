@@ -27,45 +27,7 @@ IDR_MAINICON            ICON            "ico\\Spider16M-32x32.ico"
 IDR_MAINICONSMALL       ICON            "ico\\Spider256-16x16.ico"
 //------------------------------------------------------------------------------
 
-IDR_MAINMENU            MENU            DISCARDABLE
-BEGIN
-    POPUP "&File"
-    BEGIN
-		MENUITEM  "Reload text files...", IDC_RELOAD_TXTS
-		MENUITEM  SEPARATOR
-		MENUITEM  "Settings...", IDC_SETTINGS
-		MENUITEM  "Save settings...", IDC_SAVE_SETTINGS
-		MENUITEM  SEPARATOR
-		MENUITEM  "Exit", IDC_EXIT
-    END
-    POPUP "&View"
-    BEGIN
-        MENUITEM "Registered users", IDC_REG_USERS
-		MENUITEM SEPARATOR
-		MENUITEM "Profile manager", IDC_PROF_MAN
-		MENUITEM SEPARATOR
-		MENUITEM "Bans", IDC_BANS
-		MENUITEM "Range bans", IDC_RANGE_BANS
-		MENUITEM SEPARATOR
-		MENUITEM "Scripts", IDC_SCRIPTS
-		MENUITEM "Scripts memory usage", IDC_SCRIPTS_MEM
-		MENUITEM SEPARATOR
-		MENUITEM "Users / Chat", IDC_USERS_CHAT
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "Check for update...", IDC_UPDATE_CHECK
-        MENUITEM SEPARATOR
-        MENUITEM "PtokaX website", IDC_HOMEPAGE
-        MENUITEM "PtokaX board", IDC_BOARD
-        MENUITEM "PtokaX wiki", IDC_WIKI
-        MENUITEM SEPARATOR
-        MENUITEM "About PtokaX", IDC_ABOUT
-    END
-END
-//------------------------------------------------------------------------------
-
-IDD_LINE_DIALOG DIALOGEX 0, 0, 150, 31
+IDD_LINE_DIALOG DIALOGEX 0, 0, 150, 36
 EXSTYLE WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE | WS_EX_CONTROLPARENT
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS
 BEGIN

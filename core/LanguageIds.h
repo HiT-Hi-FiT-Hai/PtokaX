@@ -815,6 +815,13 @@ enum LangIds {
     LAN_REMOVE_CONNECTION,
     LAN_REMOVE_EMAIL,
     LAN_ZERO_DISABLED,
+    LAN_LWR_KILO_BYTES,
+    LAN_BYTES,
+    LAN_KILO_BYTES,
+    LAN_MEGA_BYTES,
+    LAN_GIGA_BYTES,
+    LAN_TERA_BYTES,
+    LAN_MENU_SETTINGS,
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------

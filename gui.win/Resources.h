@@ -24,7 +24,6 @@
 
 #define IDR_MAINICON                100
 #define IDR_MAINICONSMALL           101
-#define IDR_MAINMENU                102
 //---------------------------------------------------------------------------
 
 #define IDD_LINE_DIALOG             500

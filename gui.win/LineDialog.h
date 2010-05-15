@@ -35,9 +35,14 @@ public:
 
 	INT_PTR DoModal(HWND hWndParent);
 private:
-    HWND btnOK, btnCancel;
-    HWND gbLine;
-    HWND edtLine;
+    HWND hWndWindowItems[4];
+
+    enum enmWindowItems {
+        GB_LINE,
+        EDT_LINE,
+        BTN_OK,
+        BTN_CANCEL
+    };
 
     string sCaption;
 

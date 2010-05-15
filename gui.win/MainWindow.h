@@ -25,10 +25,31 @@
 class MainWindow {
 public:
     HWND m_hWnd;
-    HWND btnStartStop, btnRedirectAll, btnMassMessage;
-    HWND gbStats;
-    HWND lblStatus, lblStatusValue, lblJoins, lblJoinsValue, lblParts, lblPartsValue, lblActive, lblActiveValue, lblOnline, lblOnlineValue;
-    HWND lblPeak, lblPeakValue, lblReceived, lblReceivedValue, lblSent, lblSentValue;
+
+    HWND hWndWindowItems[20];
+
+    enum enmWindowItems {
+        BTN_START_STOP,
+        GB_STATS,
+        LBL_STATUS,
+        LBL_STATUS_VALUE,
+        LBL_JOINS,
+        LBL_JOINS_VALUE,
+        LBL_PARTS,
+        LBL_PARTS_VALUE,
+        LBL_ACTIVE,
+        LBL_ACTIVE_VALUE,
+        LBL_ONLINE,
+        LBL_ONLINE_VALUE,
+        LBL_PEAK,
+        LBL_PEAK_VALUE,
+        LBL_RECEIVED,
+        LBL_RECEIVED_VALUE,
+        LBL_SENT,
+        LBL_SENT_VALUE,
+        BTN_REDIRECT_ALL,
+        BTN_MASS_MSG,
+    };
 
     MainWindow();
     ~MainWindow();
@@ -44,6 +65,8 @@ public:
 private:
     UINT uiTaskBarCreated;
     uint64_t ui64LastTrayMouseMove;
+
+    HMENU hMainMenu;
 
     LRESULT MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
