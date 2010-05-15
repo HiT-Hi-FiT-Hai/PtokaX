@@ -220,7 +220,7 @@ static void WINAPI StartService(DWORD /*argc*/, char* argv[]) {
 	        } else if(msg.message == WM_TIMER) {
                 if(msg.wParam == sectimer) {
                     ServerOnSecTimer();
-                } else if(msg.wParam == srvLoop->timer) {
+                } else if(msg.wParam == srvLoopTimer) {
                     srvLoop->Looper();
                 } else if(msg.wParam == regtimer) {
                     ServerOnRegTimer();
@@ -244,7 +244,7 @@ static void WINAPI StartService(DWORD /*argc*/, char* argv[]) {
 }
 //---------------------------------------------------------------------------
 
-int WINAPI main(int argc, char* argv[]) {
+int __cdecl main(int argc, char* argv[]) {
 	sTitle = "PtokaX DC Hub " + string(PtokaXVersionString);
 #ifdef _DEBUG
 	sTitle += " [debug]";
@@ -363,7 +363,7 @@ int WINAPI main(int argc, char* argv[]) {
 	            if(msg.message == WM_USER+1) {
 	                break;
 	            } else if(msg.message == WM_TIMER) {
-                    if(msg.wParam == srvLoop->timer) {
+                    if(msg.wParam == srvLoopTimer) {
                         srvLoop->Looper();
                     } else if(msg.wParam == regtimer) {
                         ServerOnRegTimer();
