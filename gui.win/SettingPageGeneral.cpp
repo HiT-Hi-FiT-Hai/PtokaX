@@ -81,6 +81,14 @@ LRESULT SettingPageGeneral::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPa
                 }
 
                 break;
+            case EDT_UDP_PORT:
+                if(HIWORD(wParam) == EN_CHANGE) {
+                    MinMaxCheck((HWND)lParam, 0, 65535);
+
+                    return 0;
+                }
+
+                break;
             case EDT_MAX_USERS:
                 if(HIWORD(wParam) == EN_CHANGE) {
                     MinMaxCheck((HWND)lParam, 1, 32767);
@@ -295,8 +303,9 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
         BS_GROUPBOX, 367, 268, 80, 41, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_UDP_PORT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_UDP_PORT], WS_CHILD | WS_VISIBLE |
-        WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL, 375, 283, 64, 18, m_hWnd, NULL, g_hInstance, NULL);
+        WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL, 375, 283, 64, 18, m_hWnd, (HMENU)EDT_UDP_PORT, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_UDP_PORT], EM_SETLIMITTEXT, 5, 0);
+    AddToolTip(hWndPageItems[EDT_UDP_PORT], LanguageManager->sTexts[LAN_ZERO_DISABLED]);
 
     hWndPageItems[GB_ADMIN_NICK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_ADMIN_NICK], WS_CHILD | WS_VISIBLE |
         BS_GROUPBOX, 0, 309, 447, 41, m_hWnd, NULL, g_hInstance, NULL);
@@ -311,6 +320,7 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_HUB_LISTS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_REGISTER_SERVERS], WS_CHILD |
         WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL, 8, 365, 431, 18, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_LISTS], EM_SETLIMITTEXT, 1024, 0);
+    AddToolTip(hWndPageItems[EDT_HUB_LISTS], LanguageManager->sTexts[LAN_HUB_LIST_REGS_HINT]);
 
     hWndPageItems[BTN_HUBLIST_AUTO_REG] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_AUTO_REG], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
         8, 388, 431, 16, m_hWnd, NULL, g_hInstance, NULL);

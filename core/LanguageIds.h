@@ -814,6 +814,7 @@ enum LangIds {
     LAN_REMOVE_TAG,
     LAN_REMOVE_CONNECTION,
     LAN_REMOVE_EMAIL,
+    LAN_ZERO_DISABLED,
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------

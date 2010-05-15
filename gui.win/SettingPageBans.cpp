@@ -228,6 +228,7 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_TEMP_BAN_REDIR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_TEMP_BAN_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |
         WS_TABSTOP | ES_AUTOHSCROLL, 98, 214, 341, 18, m_hWnd, (HMENU)EDT_TEMP_BAN_REDIR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_TEMP_BAN_REDIR], EM_SETLIMITTEXT, 256, 0);
+    AddToolTip(hWndPageItems[EDT_TEMP_BAN_REDIR], LanguageManager->sTexts[LAN_REDIRECT_HINT]);
 
     hWndPageItems[GB_PERM_BAN_REDIR] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_PERM_BAN_REDIR_ADDRESS], WS_CHILD |
         WS_VISIBLE | BS_GROUPBOX, 0, 240, 447, 41, m_hWnd, NULL, g_hInstance, NULL);
@@ -239,6 +240,7 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_PERM_BAN_REDIR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_PERM_BAN_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |
         WS_TABSTOP | ES_AUTOHSCROLL, 98, 255, 341, 18, m_hWnd, (HMENU)EDT_PERM_BAN_REDIR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_PERM_BAN_REDIR], EM_SETLIMITTEXT, 256, 0);
+    AddToolTip(hWndPageItems[EDT_PERM_BAN_REDIR], LanguageManager->sTexts[LAN_REDIRECT_HINT]);
 
     hWndPageItems[GB_PASSWORD_PROTECTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_PASSWORD_PROTECTION],
         WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 281, 447, 125, m_hWnd, NULL, g_hInstance, NULL);

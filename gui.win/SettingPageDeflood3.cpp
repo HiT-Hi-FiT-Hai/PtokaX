@@ -555,6 +555,7 @@ bool SettingPageDeflood3::CreateSettingPage(HWND hOwner) {
     hWndPageItems[EDT_SR_TO_PASSIVE_LIMIT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         82, 230, 40, 20, m_hWnd, (HMENU)EDT_SR_TO_PASSIVE_LIMIT, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SR_TO_PASSIVE_LIMIT], EM_SETLIMITTEXT, 5, 0);
+    AddToolTip(hWndPageItems[EDT_SR_TO_PASSIVE_LIMIT], LanguageManager->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_SR_TO_PASSIVE_LIMIT], 122, 230, 17, 20, (LPARAM)MAKELONG(32767, 0), (WPARAM)hWndPageItems[EDT_SR_TO_PASSIVE_LIMIT],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_PASIVE_SR], 0));
