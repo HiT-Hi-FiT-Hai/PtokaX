@@ -81,7 +81,8 @@
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">PtokaX</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PtokaX</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PtokaX-x64</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PtokaX-x64</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -270,6 +271,7 @@
     <ClInclude Include="core\DcCommands.h" />
     <ClInclude Include="core\DeFlood.h" />
     <ClInclude Include="core\eventqueue.h" />
+    <ClInclude Include="core\ExceptionHandling.h" />
     <ClInclude Include="core\globalQueue.h" />
     <ClInclude Include="core\hashBanManager.h" />
     <ClInclude Include="core\hashRegManager.h" />
@@ -310,7 +312,6 @@
     <ClInclude Include="core\User.h" />
     <ClInclude Include="core\utility.h" />
     <ClInclude Include="core\ZlibUtility.h" />
-    <ClInclude Include="gui.win\ExceptionHandling.h" />
     <ClInclude Include="gui.win\LineDialog.h" />
     <ClInclude Include="gui.win\MainWindow.h" />
     <ClInclude Include="gui.win\Resources.h" />
@@ -342,6 +343,7 @@
     <ClCompile Include="core\DcCommands.cpp" />
     <ClCompile Include="core\DeFlood.cpp" />
     <ClCompile Include="core\eventqueue.cpp" />
+    <ClCompile Include="core\ExceptionHandling.cpp" />
     <ClCompile Include="core\globalQueue.cpp" />
     <ClCompile Include="core\hashBanManager.cpp" />
     <ClCompile Include="core\hashRegManager.cpp" />
@@ -374,7 +376,6 @@
     <ClCompile Include="core\User.cpp" />
     <ClCompile Include="core\utility.cpp" />
     <ClCompile Include="core\ZlibUtility.cpp" />
-    <ClCompile Include="gui.win\ExceptionHandling.cpp" />
     <ClCompile Include="gui.win\LineDialog.cpp" />
     <ClCompile Include="gui.win\MainWindow.cpp" />
     <ClCompile Include="gui.win\PtokaX.cpp" />

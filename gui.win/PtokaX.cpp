@@ -31,7 +31,7 @@
 #pragma hdrstop
 //---------------------------------------------------------------------------
 #ifdef _MSC_VER
-	#include "ExceptionHandling.h"
+	#include "../core/ExceptionHandling.h"
 #endif
 #include "../core/LuaScript.h"
 #include "MainWindow.h"

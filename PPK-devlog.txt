@@ -1,4 +1,10 @@
 ----------------------------------------Next Release...---------------------------------------
+Added: Missing PtokaX icon to 64bit service binary.
+Added: Project files for visual studio 2010.
+Fixed: Compile with Lua 5.2.0 (work 1)
+Fixed: Missing user input length checking in some commands (thx Rahim for report).
+Changed: Windows GUI, from GUI created with Borland VCL to WinAPI GUI.
+Changed: Some min/max setting values.
 
 
 ----------------------------------------0.4.1.2 9.Jan.2010-----------------------------------
