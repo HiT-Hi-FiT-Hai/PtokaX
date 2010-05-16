@@ -16,9 +16,6 @@
     <ClCompile Include="core\eventqueue.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="gui.win\ExceptionHandling.cpp">
-      <Filter>Gui</Filter>
-    </ClCompile>
     <ClCompile Include="gui.win\LineDialog.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
@@ -166,6 +163,9 @@
     <ClCompile Include="gui.win\SettingPageDeflood3.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
+    <ClCompile Include="core\ExceptionHandling.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\eventqueue.h">
@@ -182,9 +182,6 @@
     </ClInclude>
     <ClInclude Include="core\DeFlood.h">
       <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="gui.win\ExceptionHandling.h">
-      <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui.win\LineDialog.h">
       <Filter>Gui</Filter>
@@ -356,6 +353,9 @@
     </ClInclude>
     <ClInclude Include="gui.win\SettingPageDeflood3.h">
       <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ExceptionHandling.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
