@@ -601,7 +601,7 @@ void MainWindow::OnMassMessage() {
 void MainWindow::OnRedirectAll() {
     UdpDebug->Broadcast("[SYS] Redirect All.");
 
-    LineDialog LineDlg(LanguageManager->sTexts[LAN_REDIRECT_ALL_USERS_TO], SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS]);
+    LineDialog LineDlg(LanguageManager->sTexts[LAN_REDIRECT_ALL_USERS_TO], SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS] == NULL ? "" : SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS]);
     if(LineDlg.DoModal(m_hWnd) == IDCANCEL) {
         return;
     }
