@@ -301,8 +301,8 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     ::PostMessage(m_hWnd, WM_CLOSE, 0, 0);
                     return 0;
                 case IDC_SETTINGS: {
-                    SettingDialog SettingDlg;
-                    SettingDlg.DoModal(m_hWnd);
+                    SettingDialog * SettingDlg = new SettingDialog();
+                    SettingDlg->DoModal(m_hWnd);
 
                     return 0;
                 }
@@ -560,19 +560,10 @@ void MainWindow::UpdateLanguage() {
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::OnMassMessage() {
-    LineDialog LineDlg(LanguageManager->sTexts[LAN_MASS_MSG], "");
-    if(LineDlg.DoModal(m_hWnd) == IDCANCEL) {
-        return;
-    }
-
-    if(LineDlg.sLine.size() == 0) {
-        return;
-    }
-
-    char *sMSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, LineDlg.sLine.size()+256);
+void OnMassMessageOk(const char * Line, const int &iLen) {
+    char *sMSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+256);
     if(sMSG == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(LineDlg.sLine.size()+256)+
+		string sDbgstr = "[BUF] Cannot allocate "+string(iLen+256)+
 			" bytes of memory for sMSG in MainWindow::OnMassMessage! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 		AppendSpecialLog(sDbgstr);
         return;
@@ -581,8 +572,8 @@ void MainWindow::OnMassMessage() {
     int imsgLen = sprintf(sMSG, "%s $<%s> %s|",
         SettingManager->bBools[SETBOOL_REG_BOT] == false ? SettingManager->sTexts[SETTXT_ADMIN_NICK] : SettingManager->sTexts[SETTXT_BOT_NICK],
         SettingManager->bBools[SETBOOL_REG_BOT] == false ? SettingManager->sTexts[SETTXT_ADMIN_NICK] : SettingManager->sTexts[SETTXT_BOT_NICK],
-        LineDlg.sLine.c_str());
-    if(CheckSprintf(imsgLen, LineDlg.sLine.size()+256, "MainWindow::OnMassMessage1") == false) {
+        Line);
+    if(CheckSprintf(imsgLen, iLen+256, "MainWindow::OnMassMessage1") == false) {
         return;
     }
 
@@ -596,30 +587,26 @@ void MainWindow::OnMassMessage() {
 
     globalQ->SingleItemsStore(newItem);
 }
+
 //---------------------------------------------------------------------------
 
-void MainWindow::OnRedirectAll() {
-    UdpDebug->Broadcast("[SYS] Redirect All.");
+void MainWindow::OnMassMessage() {
+	LineDialog * MassMsgDlg = new LineDialog(&OnMassMessageOk);
+	MassMsgDlg->DoModal(m_hWnd, LanguageManager->sTexts[LAN_MASS_MSG], "");
+}
+//---------------------------------------------------------------------------
 
-    LineDialog LineDlg(LanguageManager->sTexts[LAN_REDIRECT_ALL_USERS_TO], SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS] == NULL ? "" : SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS]);
-    if(LineDlg.DoModal(m_hWnd) == IDCANCEL) {
-        return;
-    }
-
-    if(LineDlg.sLine.size() == 0) {
-        return;
-    }
-
-    char *sMSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, LineDlg.sLine.size()+16);
+void OnRedirectAllOk(const char * Line, const int &iLen) {
+    char *sMSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+16);
     if(sMSG == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(LineDlg.sLine.size()+16)+
+		string sDbgstr = "[BUF] Cannot allocate "+string(iLen+16)+
 			" bytes of memory for sMSG in MainWindow::OnRedirectAll! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 		AppendSpecialLog(sDbgstr);
         return;
     }
 
-    int imsgLen = sprintf(sMSG, "$ForceMove %s|", LineDlg.sLine.c_str());
-    if(CheckSprintf(imsgLen, LineDlg.sLine.size()+16, "MainWindow::OnRedirectAll") == false) {
+    int imsgLen = sprintf(sMSG, "$ForceMove %s|", Line);
+    if(CheckSprintf(imsgLen, iLen+16, "MainWindow::OnRedirectAll") == false) {
         return;
     }
 
@@ -637,5 +624,14 @@ void MainWindow::OnRedirectAll() {
 			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 		AppendSpecialLog(sDbgstr);
 	}
+}
+//---------------------------------------------------------------------------
+
+void MainWindow::OnRedirectAll() {
+    UdpDebug->Broadcast("[SYS] Redirect All.");
+
+	LineDialog * RedirectAllDlg = new LineDialog(&OnRedirectAllOk);
+	RedirectAllDlg->DoModal(m_hWnd, LanguageManager->sTexts[LAN_REDIRECT_ALL_USERS_TO],
+        SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS] == NULL ? "" : SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS]);
 }
 //---------------------------------------------------------------------------

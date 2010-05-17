@@ -39,7 +39,7 @@ public:
     SettingDialog();
     ~SettingDialog();
 
-    static INT_PTR CALLBACK StaticSettingDialogProc(HWND hWndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+    static LRESULT CALLBACK StaticSettingDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	void DoModal(HWND hWndParent);
 private:

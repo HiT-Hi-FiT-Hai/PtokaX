@@ -47,6 +47,8 @@
 #include "SettingPageRules2.h"
 #include "../core/TextFileManager.h"
 //---------------------------------------------------------------------------
+static ATOM atomSettingDialog = 0;
+//---------------------------------------------------------------------------
 
 SettingDialog::SettingDialog() {
     m_hWnd = NULL;
@@ -86,22 +88,12 @@ SettingDialog::~SettingDialog() {
 }
 //---------------------------------------------------------------------------
 
-INT_PTR CALLBACK SettingDialog::StaticSettingDialogProc(HWND hWndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	SettingDialog * pParent;
+LRESULT CALLBACK SettingDialog::StaticSettingDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    SettingDialog * pParent = (SettingDialog *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
-	if(uMsg == WM_INITDIALOG) {
-		pParent = (SettingDialog *)lParam;
-		::SetWindowLongPtr(hWndDlg, GWLP_USERDATA, (LONG_PTR)pParent);
-
-        pParent->m_hWnd = hWndDlg;
-	} else {
-		pParent = (SettingDialog *)::GetWindowLongPtr(hWndDlg, GWLP_USERDATA);
-		if(pParent == NULL) {
-			return FALSE;
-		}
-	}
-
-    SetWindowLongPtr(hWndDlg, DWLP_MSGRESULT, 0);
+    if(pParent == NULL) {
+        return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+    }
 
 	return pParent->SettingDialogProc(uMsg, wParam, lParam);
 }
@@ -120,67 +112,10 @@ LRESULT CALLBACK TreeProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch(uMsg) {
-        case WM_INITDIALOG: {
-            ::SetWindowText(m_hWnd, LanguageManager->sTexts[LAN_SETTINGS]);
+        case WM_SETFOCUS:
+            ::SetFocus(hWndWindowItems[TV_TREE]);
 
-            RECT rcParent;
-            ::GetWindowRect(::GetParent(m_hWnd), &rcParent);
-
-            if((rcParent.left-153) >= 5) {
-                rcParent.left -= 153;
-            } else {
-                rcParent.left = 5;
-            }
-
-            if((rcParent.top-84) >= 5) {
-                rcParent.top -= 84;
-            } else {
-                rcParent.top = 5;
-            }
-
-            ::SetWindowPos(m_hWnd, NULL, rcParent.left, rcParent.top, -1, -1, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
-
-            hWndWindowItems[TV_TREE] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_TREEVIEW, NULL, WS_CHILD | WS_VISIBLE | WS_TABSTOP | TVS_HASBUTTONS | TVS_LINESATROOT |
-                TVS_HASLINES | TVS_SHOWSELALWAYS | TVS_DISABLEDRAGDROP, 5, 5, 150, 370, m_hWnd, NULL, g_hInstance, NULL);
-
-            TVINSERTSTRUCT tvIS;
-            memset(&tvIS, 0, sizeof(TVINSERTSTRUCT));
-            tvIS.hInsertAfter = TVI_LAST;
-            tvIS.item.mask = TVIF_PARAM | TVIF_TEXT;
-            tvIS.itemex.mask |= TVIF_STATE;
-            tvIS.itemex.state = TVIS_EXPANDED;
-            tvIS.itemex.stateMask = TVIS_EXPANDED;
-
-            tvIS.hParent = TVI_ROOT;
-
-            for(uint8_t ui8i = 0; ui8i < 12; ui8i++) {
-                if(ui8i == 5 || ui8i == 7 || ui8i == 9) {
-                    tvIS.hParent = TVI_ROOT;
-                }
-
-                tvIS.item.lParam = (LPARAM)SettingPages[ui8i];
-                tvIS.item.pszText = SettingPages[ui8i]->GetPageName();
-                if(ui8i == 0 || ui8i == 5 || ui8i == 7 || ui8i == 9) {
-                    tvIS.hParent = (HTREEITEM)::SendMessage(hWndWindowItems[TV_TREE], TVM_INSERTITEM, 0, (LPARAM)&tvIS);
-                } else {
-                    ::SendMessage(hWndWindowItems[TV_TREE], TVM_INSERTITEM, 0, (LPARAM)&tvIS);
-                }
-            }
-
-            hWndWindowItems[BTN_OK] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-                4, 379, 152, 20, m_hWnd, (HMENU)IDOK, g_hInstance, NULL);
-
-            hWndWindowItems[BTN_CANCEL] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-                4, 402, 152, 20, m_hWnd, (HMENU)IDCANCEL, g_hInstance, NULL);
-
-            for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
-                ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
-            }
-
-            wpOldTreeProc = (WNDPROC)::SetWindowLongPtr(hWndWindowItems[TV_TREE], GWLP_WNDPROC, (LONG_PTR)TreeProc);
-
-            return TRUE;
-        }
+            return 0;
         case WM_COMMAND:
            switch(LOWORD(wParam)) {
                 case IDOK: {
@@ -315,8 +250,10 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                     }
                 }
                 case IDCANCEL:
-                    ::EndDialog(m_hWnd, LOWORD(wParam));
-                    return TRUE;
+                    ::EnableWindow(::GetParent(m_hWnd), TRUE);
+                    g_hWndActiveDialog = NULL;
+                    ::DestroyWindow(m_hWnd);
+					return 0;
             }
 
             break;
@@ -324,7 +261,7 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
             if(((LPNMHDR)lParam)->hwndFrom == hWndWindowItems[TV_TREE]) {
                 if(((LPNMHDR)lParam)->code == TVN_SELCHANGED) {
                     OnSelChanged();
-                    return TRUE;
+                    return 0;
                 } else if(((LPNMHDR)lParam)->code == TVN_KEYDOWN) {
                     NMTVKEYDOWN * ptvkd = (LPNMTVKEYDOWN)lParam;
                     if(ptvkd->wVKey == VK_TAB) {
@@ -348,25 +285,103 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
 
                             curSetPage->FocusLastItem();
 
-                            return TRUE;
+                            return 0;
                         } else {
                             ::SetFocus(hWndWindowItems[BTN_OK]);
 
-                            return TRUE;
+                            return 0;
                         }
                     }
                 }
             }
 
             break;
+        case WM_CLOSE:
+            ::EnableWindow(::GetParent(m_hWnd), TRUE);
+            g_hWndActiveDialog = NULL;
+            break;
+        case WM_NCDESTROY:
+            delete this;
+            return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
     }
 
-	return FALSE;
+	return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
 }
 //------------------------------------------------------------------------------
 
 void SettingDialog::DoModal(HWND hWndParent) {
-	::DialogBoxParam(g_hInstance, MAKEINTRESOURCE(IDD_SETTINGS_DIALOG), hWndParent, StaticSettingDialogProc, (LPARAM)this);
+    if(atomSettingDialog == 0) {
+        WNDCLASSEX m_wc;
+        memset(&m_wc, 0, sizeof(WNDCLASSEX));
+        m_wc.cbSize = sizeof(WNDCLASSEX);
+        m_wc.lpfnWndProc = ::DefWindowProc;
+        m_wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
+        m_wc.lpszClassName = "PtokaX_SettingDialog";
+        m_wc.hInstance = g_hInstance;
+        m_wc.hCursor = ::LoadCursor(m_wc.hInstance, IDC_ARROW);
+        m_wc.style = CS_HREDRAW | CS_VREDRAW;
+
+        atomSettingDialog = ::RegisterClassEx(&m_wc);
+    }
+
+    RECT rcParent;
+    ::GetWindowRect(hWndParent, &rcParent);
+
+    m_hWnd = ::CreateWindowEx(WS_EX_CONTROLPARENT | WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomSettingDialog), LanguageManager->sTexts[LAN_SETTINGS],
+        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, (rcParent.left-153) >= 5 ? rcParent.left-153 : 5, (rcParent.top-84) >= 5 ? rcParent.top-84 : 5, 618, 454,
+        hWndParent, NULL, g_hInstance, NULL);
+
+    if(m_hWnd == NULL) {
+        return;
+    }
+
+    g_hWndActiveDialog = m_hWnd;
+
+    ::SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
+    ::SetWindowLongPtr(m_hWnd, GWLP_WNDPROC, (LONG_PTR)StaticSettingDialogProc);
+
+    hWndWindowItems[TV_TREE] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_TREEVIEW, NULL, WS_CHILD | WS_VISIBLE | WS_TABSTOP | TVS_HASBUTTONS | TVS_LINESATROOT |
+        TVS_HASLINES | TVS_SHOWSELALWAYS | TVS_DISABLEDRAGDROP, 5, 5, 150, 370, m_hWnd, NULL, g_hInstance, NULL);
+
+    TVINSERTSTRUCT tvIS;
+    memset(&tvIS, 0, sizeof(TVINSERTSTRUCT));
+    tvIS.hInsertAfter = TVI_LAST;
+    tvIS.item.mask = TVIF_PARAM | TVIF_TEXT;
+    tvIS.itemex.mask |= TVIF_STATE;
+    tvIS.itemex.state = TVIS_EXPANDED;
+    tvIS.itemex.stateMask = TVIS_EXPANDED;
+
+    tvIS.hParent = TVI_ROOT;
+
+    for(uint8_t ui8i = 0; ui8i < 12; ui8i++) {
+        if(ui8i == 5 || ui8i == 7 || ui8i == 9) {
+            tvIS.hParent = TVI_ROOT;
+        }
+
+        tvIS.item.lParam = (LPARAM)SettingPages[ui8i];
+        tvIS.item.pszText = SettingPages[ui8i]->GetPageName();
+        if(ui8i == 0 || ui8i == 5 || ui8i == 7 || ui8i == 9) {
+            tvIS.hParent = (HTREEITEM)::SendMessage(hWndWindowItems[TV_TREE], TVM_INSERTITEM, 0, (LPARAM)&tvIS);
+        } else {
+            ::SendMessage(hWndWindowItems[TV_TREE], TVM_INSERTITEM, 0, (LPARAM)&tvIS);
+        }
+    }
+
+    hWndWindowItems[BTN_OK] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+        4, 379, 152, 20, m_hWnd, (HMENU)IDOK, g_hInstance, NULL);
+
+    hWndWindowItems[BTN_CANCEL] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+        4, 402, 152, 20, m_hWnd, (HMENU)IDCANCEL, g_hInstance, NULL);
+
+    for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
+        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+    }
+
+    wpOldTreeProc = (WNDPROC)::SetWindowLongPtr(hWndWindowItems[TV_TREE], GWLP_WNDPROC, (LONG_PTR)TreeProc);
+
+    ::EnableWindow(hWndParent, FALSE);
+
+    ::ShowWindow(m_hWnd, SW_SHOW);
 }
 //---------------------------------------------------------------------------
 

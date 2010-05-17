@@ -26,10 +26,6 @@
 #define IDR_MAINICONSMALL           101
 //---------------------------------------------------------------------------
 
-#define IDD_LINE_DIALOG             500
-#define IDD_SETTINGS_DIALOG         501
-//---------------------------------------------------------------------------
-
 #define IDC_SETTINGS                1000
 #define IDC_EXIT                    1001
 #define IDC_REG_USERS               1002

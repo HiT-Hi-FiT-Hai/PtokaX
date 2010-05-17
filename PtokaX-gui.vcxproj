@@ -331,7 +331,7 @@
     <ClInclude Include="gui.win\SettingPageRules2.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="gui.win\PtokaX.rc" />
+    <ResourceCompile Include="core\PtokaX.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ico\Spider16M-32x32.ico" />
