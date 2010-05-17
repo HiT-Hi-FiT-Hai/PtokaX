@@ -26,14 +26,12 @@ class LineDialog {
 public:
     HWND m_hWnd;
 
-    string sLine;
-
-    LineDialog(char * Caption, char * Line);
+    LineDialog(void (*pOnOkFunction)(const char * Line, const int &iLen));
     ~LineDialog();
 
-    static INT_PTR CALLBACK StaticLineDialogProc(HWND hWndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+    static LRESULT CALLBACK StaticLineDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	INT_PTR DoModal(HWND hWndParent);
+	void DoModal(HWND hWndParent, char * Caption, char * Line);
 private:
     HWND hWndWindowItems[4];
 
@@ -44,9 +42,7 @@ private:
         BTN_CANCEL
     };
 
-    string sCaption;
-
-    LRESULT LineDialogProc(UINT uMsg, WPARAM wParam, LPARAM /*lParam*/);
+    LRESULT LineDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 //------------------------------------------------------------------------------
 

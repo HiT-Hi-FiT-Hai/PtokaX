@@ -109,6 +109,7 @@
 	#ifndef _SERVICE
         #ifdef _MSC_VER
             extern HINSTANCE g_hInstance;
+            extern HWND g_hWndActiveDialog;
         #endif
     #endif
 #endif

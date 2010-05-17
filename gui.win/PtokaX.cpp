@@ -74,7 +74,8 @@
     #pragma message("Linking zlib.lib")
 #endif
 //---------------------------------------------------------------------------
-HINSTANCE g_hInstance;
+HINSTANCE g_hInstance = NULL;
+HWND g_hWndActiveDialog = NULL;
 //---------------------------------------------------------------------------
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmdLine, int nCmdShow) {
@@ -203,7 +204,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 	    if(bRet == -1) {
 	        // handle the error and possibly exit
 	    } else {
-	        if(msg.message == WM_USER+1) {
+            if(msg.message == WM_USER+1) {
 	            break;
 	        } else if(msg.message == WM_TIMER) {
                 if(msg.wParam == sectimer) {
@@ -218,6 +219,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
                 }
             }
 	
+	        if(g_hWndActiveDialog != NULL && ::IsDialogMessage(g_hWndActiveDialog, &msg) != 0) {
+                continue;
+            }
+
 	    	::TranslateMessage(&msg);
 	        ::DispatchMessage(&msg);
 	    }
