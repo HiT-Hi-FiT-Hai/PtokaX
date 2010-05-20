@@ -804,7 +804,7 @@ const char* LangXmlStr[] = {
     "website",
     "board",
     "wiki",
-    "About",
+    "MenuAbout",
     "CheckForUpdate",
     "ReloadTextFiles",
     "RedirectAllUsersTo",
@@ -822,6 +822,7 @@ const char* LangXmlStr[] = {
     "GigaBytes",
     "TeraBytes",
     "MenuSettings",
+    "About",
 };
 //---------------------------------------------------------------------------
 

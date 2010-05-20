@@ -58,6 +58,7 @@
 			#include <vcl.h>
 		#else
 			#include <commctrl.h>
+			#include <RichEdit.h>
 		#endif
 	#endif
 #endif
