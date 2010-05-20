@@ -804,7 +804,7 @@ enum LangIds {
     LAN_WEBSITE,
     LAN_BOARD,
     LAN_WIKI,
-    LAN_ABOUT,
+    LAN_MENU_ABOUT,
     LAN_CHECK_FOR_UPDATE,
     LAN_RELOAD_TEXT_FILES,
     LAN_REDIRECT_ALL_USERS_TO,
@@ -822,6 +822,7 @@ enum LangIds {
     LAN_GIGA_BYTES,
     LAN_TERA_BYTES,
     LAN_MENU_SETTINGS,
+    LAN_ABOUT,
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------

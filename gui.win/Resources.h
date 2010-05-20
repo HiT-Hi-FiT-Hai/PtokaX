@@ -24,6 +24,8 @@
 
 #define IDR_MAINICON                100
 #define IDR_MAINICONSMALL           101
+#define IDR_MAINICONBIG             102
+#define IDR_LUAICON                 103
 //---------------------------------------------------------------------------
 
 #define IDC_SETTINGS                1000

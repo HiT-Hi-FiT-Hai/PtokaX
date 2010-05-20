@@ -312,6 +312,7 @@
     <ClInclude Include="core\User.h" />
     <ClInclude Include="core\utility.h" />
     <ClInclude Include="core\ZlibUtility.h" />
+    <ClInclude Include="gui.win\AboutDialog.h" />
     <ClInclude Include="gui.win\LineDialog.h" />
     <ClInclude Include="gui.win\MainWindow.h" />
     <ClInclude Include="gui.win\Resources.h" />
@@ -331,11 +332,13 @@
     <ClInclude Include="gui.win\SettingPageRules2.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="core\PtokaX.rc" />
+    <ResourceCompile Include="gui.win\PtokaX.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ico\Spider16M-32x32.ico" />
     <None Include="ico\Spider256-16x16.ico" />
+    <None Include="ico\Spider-64x64x32.ico" />
+    <None Include="ico\Lua-64x64x32.ico" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\ClientTagManager.cpp" />
@@ -376,6 +379,7 @@
     <ClCompile Include="core\User.cpp" />
     <ClCompile Include="core\utility.cpp" />
     <ClCompile Include="core\ZlibUtility.cpp" />
+    <ClCompile Include="gui.win\AboutDialog.cpp" />
     <ClCompile Include="gui.win\LineDialog.cpp" />
     <ClCompile Include="gui.win\MainWindow.cpp" />
     <ClCompile Include="gui.win\PtokaX.cpp" />

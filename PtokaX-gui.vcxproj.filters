@@ -166,6 +166,9 @@
     <ClCompile Include="core\ExceptionHandling.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="gui.win\AboutDialog.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\eventqueue.h">
@@ -357,12 +360,21 @@
     <ClInclude Include="core\ExceptionHandling.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="gui.win\AboutDialog.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ico\Spider16M-32x32.ico">
       <Filter>Resources</Filter>
     </None>
     <None Include="ico\Spider256-16x16.ico">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="ico\Spider-64x64x32.ico">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="ico\Lua-64x64x32.ico">
       <Filter>Resources</Filter>
     </None>
   </ItemGroup>
@@ -383,7 +395,7 @@
     </Manifest>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="core\PtokaX.rc">
+    <ResourceCompile Include="gui.win\PtokaX.rc">
       <Filter>Resources</Filter>
     </ResourceCompile>
   </ItemGroup>

@@ -39,6 +39,7 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
+#include "AboutDialog.h"
 #include "LineDialog.h"
 #include "Resources.h"
 #include "SettingDialog.h"
@@ -67,8 +68,8 @@ uint64_t PXGetTickCount64() {
 //---------------------------------------------------------------------------
 
 MainWindow::MainWindow() {
-	INITCOMMONCONTROLSEX iccx = { sizeof(INITCOMMONCONTROLSEX), ICC_COOL_CLASSES | ICC_BAR_CLASSES | ICC_LISTVIEW_CLASSES | ICC_TREEVIEW_CLASSES |
-        ICC_PROGRESS_CLASS | ICC_STANDARD_CLASSES | ICC_TAB_CLASSES | ICC_UPDOWN_CLASS | ICC_USEREX_CLASSES };
+	INITCOMMONCONTROLSEX iccx = { sizeof(INITCOMMONCONTROLSEX), ICC_BAR_CLASSES | ICC_COOL_CLASSES | ICC_LINK_CLASS | ICC_LISTVIEW_CLASSES |
+        ICC_STANDARD_CLASSES | ICC_TAB_CLASSES | ICC_TREEVIEW_CLASSES | ICC_UPDOWN_CLASS };
 	InitCommonControlsEx(&iccx);
 
     m_hWnd = NULL;
@@ -252,7 +253,7 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     nid.hWnd = m_hWnd;
                     nid.uID = 0;
                     nid.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE;
-                    nid.hIcon = (HICON)::LoadImage(g_hInstance, MAKEINTRESOURCE(IDR_MAINICONSMALL), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR);
+                    nid.hIcon = (HICON)::LoadImage(g_hInstance, MAKEINTRESOURCE(IDR_MAINICONSMALL), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR | LR_SHARED);
                     nid.uCallbackMessage = WM_TRAYICON;
 
 					char msg[256];
@@ -327,9 +328,12 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 case IDC_USERS_CHAT:
                     ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
                     return 0;
-                case IDC_ABOUT:
-                    ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
+                case IDC_ABOUT: {
+                    AboutDialog * AboutDlg = new AboutDialog();
+                    AboutDlg->DoModal(m_hWnd);
+
                     return 0;
+                }
                 case IDC_HOMEPAGE:
                     ::ShellExecute(NULL, NULL, "http://www.PtokaX.org", NULL, NULL, SW_SHOWNORMAL);
                     return 0;
@@ -433,7 +437,7 @@ HWND MainWindow::CreateEx() {
     ::AppendMenu(hHelpMenu, MF_STRING, IDC_BOARD, (string("PtokaX ") +LanguageManager->sTexts[LAN_BOARD]).c_str());
     ::AppendMenu(hHelpMenu, MF_STRING, IDC_WIKI, (string("PtokaX ") +LanguageManager->sTexts[LAN_WIKI]).c_str());
     ::AppendMenu(hHelpMenu, MF_SEPARATOR, 0, 0);
-    ::AppendMenu(hHelpMenu, MF_STRING, IDC_ABOUT, (string(LanguageManager->sTexts[LAN_ABOUT], (size_t)LanguageManager->ui16TextsLens[LAN_ABOUT]) + " PtokaX").c_str());
+    ::AppendMenu(hHelpMenu, MF_STRING, IDC_ABOUT, (string(LanguageManager->sTexts[LAN_MENU_ABOUT], (size_t)LanguageManager->ui16TextsLens[LAN_MENU_ABOUT]) + " PtokaX").c_str());
 
     ::AppendMenu(hMainMenu, MF_POPUP, (UINT_PTR)hHelpMenu, LanguageManager->sTexts[LAN_HELP]);
 
@@ -446,8 +450,8 @@ HWND MainWindow::CreateEx() {
     m_wc.hInstance = g_hInstance;
 	m_wc.hCursor = ::LoadCursor(m_wc.hInstance, IDC_ARROW);
 	m_wc.style = CS_HREDRAW | CS_VREDRAW;
-	m_wc.hIcon = (HICON)::LoadImage(m_wc.hInstance, MAKEINTRESOURCE(IDR_MAINICON), IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR);
-	m_wc.hIconSm = (HICON)::LoadImage(m_wc.hInstance, MAKEINTRESOURCE(IDR_MAINICONSMALL), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR);
+	m_wc.hIcon = (HICON)::LoadImage(m_wc.hInstance, MAKEINTRESOURCE(IDR_MAINICON), IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR | LR_SHARED);
+	m_wc.hIconSm = (HICON)::LoadImage(m_wc.hInstance, MAKEINTRESOURCE(IDR_MAINICONSMALL), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR | LR_SHARED);
 
 	ATOM atom = ::RegisterClassEx(&m_wc);
 
@@ -468,7 +472,7 @@ void MainWindow::UpdateSysTray() {
         nid.hWnd = m_hWnd;
         nid.uID = 0;
         nid.uFlags = NIF_ICON | NIF_MESSAGE;
-        nid.hIcon = (HICON)::LoadImage(g_hInstance, MAKEINTRESOURCE(IDR_MAINICONSMALL), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR);
+        nid.hIcon = (HICON)::LoadImage(g_hInstance, MAKEINTRESOURCE(IDR_MAINICONSMALL), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR | LR_SHARED);
         nid.uCallbackMessage = WM_TRAYICON;
 
         if(SettingManager->bBools[SETBOOL_ENABLE_TRAY_ICON] == true) {
@@ -547,7 +551,7 @@ void MainWindow::UpdateLanguage() {
     ::ModifyMenu(hMenu, IDC_WIKI, MF_BYCOMMAND, IDC_WIKI, (string("PtokaX ") +LanguageManager->sTexts[LAN_WIKI]).c_str());
 
     ::ModifyMenu(hMenu, IDC_ABOUT, MF_BYCOMMAND, IDC_ABOUT,
-        (string(LanguageManager->sTexts[LAN_ABOUT], (size_t)LanguageManager->ui16TextsLens[LAN_ABOUT]) + " PtokaX").c_str());
+        (string(LanguageManager->sTexts[LAN_MENU_ABOUT], (size_t)LanguageManager->ui16TextsLens[LAN_MENU_ABOUT]) + " PtokaX").c_str());
 
     ::ModifyMenu(hMenu, IDC_UPDATE_CHECK, MF_BYCOMMAND, IDC_UPDATE_CHECK,
         (string(LanguageManager->sTexts[LAN_CHECK_FOR_UPDATE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_FOR_UPDATE]) + "...").c_str());
