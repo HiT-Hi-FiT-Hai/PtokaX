@@ -117,8 +117,11 @@ void LineDialog::DoModal(HWND hWndParent, char * Caption, char * Line) {
     RECT rcParent;
     ::GetWindowRect(hWndParent, &rcParent);
 
+    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2))-153;
+    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2))-50;
+
     m_hWnd = ::CreateWindowEx(WS_EX_CONTROLPARENT | WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomLineDialog), (string(Caption) + ":").c_str(),
-        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, rcParent.left, rcParent.top+86, 306, 100, hWndParent, NULL, g_hInstance, NULL);
+        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX, iY, 306, 100, hWndParent, NULL, g_hInstance, NULL);
 
     if(m_hWnd == NULL) {
         return;

@@ -823,6 +823,7 @@ enum LangIds {
     LAN_TERA_BYTES,
     LAN_MENU_SETTINGS,
     LAN_ABOUT,
+    LAN_STATS,
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------

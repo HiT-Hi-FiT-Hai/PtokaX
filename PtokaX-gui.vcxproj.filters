@@ -169,6 +169,15 @@
     <ClCompile Include="gui.win\AboutDialog.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
+    <ClCompile Include="gui.win\MainWindowPage.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
+    <ClCompile Include="gui.win\MainWindowPageStats.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
+    <ClCompile Include="gui.win\MainWindowPageUsersChat.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\eventqueue.h">
@@ -361,6 +370,15 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="gui.win\AboutDialog.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.win\MainWindowPageStats.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.win\MainWindowPage.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.win\MainWindowPageUsersChat.h">
       <Filter>Gui</Filter>
     </ClInclude>
   </ItemGroup>

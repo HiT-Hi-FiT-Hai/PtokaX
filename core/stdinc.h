@@ -59,6 +59,7 @@
 		#else
 			#include <commctrl.h>
 			#include <RichEdit.h>
+			#include <Windowsx.h>
 		#endif
 	#endif
 #endif

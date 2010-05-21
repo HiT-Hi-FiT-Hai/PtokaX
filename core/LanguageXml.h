@@ -823,6 +823,7 @@ const char* LangXmlStr[] = {
     "TeraBytes",
     "MenuSettings",
     "About",
+    "Stats",
 };
 //---------------------------------------------------------------------------
 

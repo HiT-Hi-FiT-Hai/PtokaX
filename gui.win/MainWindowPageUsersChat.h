@@ -18,51 +18,29 @@
  */
 
 //------------------------------------------------------------------------------
-#ifndef MainWindowH
-#define MainWindowH
+#ifndef MainWindowPageUsersChatH
+#define MainWindowPageUsersChatH
 //------------------------------------------------------------------------------
 #include "MainWindowPage.h"
 //------------------------------------------------------------------------------
 
-class MainWindow {
+class MainWindowPageUsersChat : public MainWindowPage {
 public:
-    HWND m_hWnd;
+    HWND hWndPageItems[1];
 
-    HWND hWndWindowItems[1];
-
-    enum enmWindowItems {
-        TC_TABS
+    enum enmPageItems {
+        REDT_CHAT,
     };
 
-    MainWindow();
-    ~MainWindow();
+    MainWindowPageUsersChat();
+    ~MainWindowPageUsersChat() { };
 
-    static LRESULT CALLBACK StaticMainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-    HWND CreateEx();
-
-    void UpdateSysTray();
-    void UpdateStats();
-    void UpdateTitleBar();
+    bool CreateMainWindowPage(HWND hOwner);
     void UpdateLanguage();
-    void EnableStartButton(const BOOL &bEnable);
-    void SetStartButtonText(const char * sText);
-    void SetStatusValue(const char * sText);
-    void EnableStatsItems(const BOOL &bEnable);
+    char * GetPageName();
 private:
-    MainWindowPage * MainWindowPages[2];
-
-    UINT uiTaskBarCreated;
-    uint64_t ui64LastTrayMouseMove;
-
-    HMENU hMainMenu;
-
-    LRESULT MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-    void OnSelChanged();
+    LRESULT MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
-//------------------------------------------------------------------------------
-extern MainWindow *pMainWindow;
 //------------------------------------------------------------------------------
 
 #endif

@@ -186,8 +186,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 	// If autostart is checked (or commandline /autostart given), then start the server
 	if((SettingManager->bBools[SETBOOL_AUTO_START] == true || bCmdAutoStart == true) && bCmdNoAutoStart == false) {
 	    if(ServerStart() == false) {
-            ::SetWindowText(pMainWindow->hWndWindowItems[pMainWindow->LBL_STATUS_VALUE],
-                (string(LanguageManager->sTexts[LAN_READY], (size_t)LanguageManager->ui16TextsLens[LAN_READY])+".").c_str());
+            pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_READY], (size_t)LanguageManager->ui16TextsLens[LAN_READY])+".").c_str());
 		}
 	}
 

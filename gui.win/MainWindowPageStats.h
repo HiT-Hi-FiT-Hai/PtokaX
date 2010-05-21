@@ -18,51 +18,51 @@
  */
 
 //------------------------------------------------------------------------------
-#ifndef MainWindowH
-#define MainWindowH
+#ifndef MainWindowPageStatsH
+#define MainWindowPageStatsH
 //------------------------------------------------------------------------------
 #include "MainWindowPage.h"
 //------------------------------------------------------------------------------
 
-class MainWindow {
+class MainWindowPageStats : public MainWindowPage {
 public:
-    HWND m_hWnd;
+    HWND hWndPageItems[20];
 
-    HWND hWndWindowItems[1];
-
-    enum enmWindowItems {
-        TC_TABS
+    enum enmPageItems {
+        BTN_START_STOP,
+        GB_STATS,
+        LBL_STATUS,
+        LBL_STATUS_VALUE,
+        LBL_JOINS,
+        LBL_JOINS_VALUE,
+        LBL_PARTS,
+        LBL_PARTS_VALUE,
+        LBL_ACTIVE,
+        LBL_ACTIVE_VALUE,
+        LBL_ONLINE,
+        LBL_ONLINE_VALUE,
+        LBL_PEAK,
+        LBL_PEAK_VALUE,
+        LBL_RECEIVED,
+        LBL_RECEIVED_VALUE,
+        LBL_SENT,
+        LBL_SENT_VALUE,
+        BTN_REDIRECT_ALL,
+        BTN_MASS_MSG,
     };
 
-    MainWindow();
-    ~MainWindow();
+    MainWindowPageStats();
+    ~MainWindowPageStats() { };
 
-    static LRESULT CALLBACK StaticMainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-    HWND CreateEx();
-
-    void UpdateSysTray();
-    void UpdateStats();
-    void UpdateTitleBar();
+    bool CreateMainWindowPage(HWND hOwner);
     void UpdateLanguage();
-    void EnableStartButton(const BOOL &bEnable);
-    void SetStartButtonText(const char * sText);
-    void SetStatusValue(const char * sText);
-    void EnableStatsItems(const BOOL &bEnable);
+    char * GetPageName();
 private:
-    MainWindowPage * MainWindowPages[2];
+    LRESULT MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    UINT uiTaskBarCreated;
-    uint64_t ui64LastTrayMouseMove;
-
-    HMENU hMainMenu;
-
-    LRESULT MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-    void OnSelChanged();
+    void OnRedirectAll();
+    void OnMassMessage();
 };
-//------------------------------------------------------------------------------
-extern MainWindow *pMainWindow;
 //------------------------------------------------------------------------------
 
 #endif

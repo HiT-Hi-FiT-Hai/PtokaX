@@ -41,12 +41,9 @@
 #define IDC_HOMEPAGE                1010
 #define IDC_BOARD                   1011
 #define IDC_WIKI                    1012
-#define IDC_START_STOP              1013
 #define IDC_UPDATE_CHECK            1014
 #define IDC_SAVE_SETTINGS           1015
 #define IDC_RELOAD_TXTS             1016
-#define IDC_REDIRECT_ALL            1017
-#define IDC_MASS_MESSAGE            1018
 //---------------------------------------------------------------------------
 
 #endif
