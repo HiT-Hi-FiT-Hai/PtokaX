@@ -141,9 +141,12 @@ void AboutDialog::DoModal(HWND hWndParent) {
     RECT rcParent;
     ::GetWindowRect(hWndParent, &rcParent);
 
+    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2))-221;
+    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2))-227;
+
     m_hWnd = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomAboutDialog),
         (string(LanguageManager->sTexts[LAN_ABOUT], (size_t)LanguageManager->ui16TextsLens[LAN_ABOUT]) + " PtokaX").c_str(),
-        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, (rcParent.left-68) >= 5 ? rcParent.left-68 : 5, (rcParent.top-96) >= 5 ? rcParent.top-96 : 5, 443, 454,
+        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, 443, 454,
         hWndParent, NULL, g_hInstance, NULL);
 
     if(m_hWnd == NULL) {

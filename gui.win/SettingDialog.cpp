@@ -327,8 +327,11 @@ void SettingDialog::DoModal(HWND hWndParent) {
     RECT rcParent;
     ::GetWindowRect(hWndParent, &rcParent);
 
+    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2))-309;
+    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2))-227;
+
     m_hWnd = ::CreateWindowEx(WS_EX_CONTROLPARENT | WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomSettingDialog), LanguageManager->sTexts[LAN_SETTINGS],
-        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, (rcParent.left-153) >= 5 ? rcParent.left-153 : 5, (rcParent.top-84) >= 5 ? rcParent.top-84 : 5, 618, 454,
+        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, 618, 454,
         hWndParent, NULL, g_hInstance, NULL);
 
     if(m_hWnd == NULL) {

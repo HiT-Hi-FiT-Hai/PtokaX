@@ -315,6 +315,9 @@
     <ClInclude Include="gui.win\AboutDialog.h" />
     <ClInclude Include="gui.win\LineDialog.h" />
     <ClInclude Include="gui.win\MainWindow.h" />
+    <ClInclude Include="gui.win\MainWindowPage.h" />
+    <ClInclude Include="gui.win\MainWindowPageStats.h" />
+    <ClInclude Include="gui.win\MainWindowPageUsersChat.h" />
     <ClInclude Include="gui.win\Resources.h" />
     <ClInclude Include="gui.win\SettingDialog.h" />
     <ClInclude Include="gui.win\SettingPage.h" />
@@ -382,6 +385,9 @@
     <ClCompile Include="gui.win\AboutDialog.cpp" />
     <ClCompile Include="gui.win\LineDialog.cpp" />
     <ClCompile Include="gui.win\MainWindow.cpp" />
+    <ClCompile Include="gui.win\MainWindowPage.cpp" />
+    <ClCompile Include="gui.win\MainWindowPageStats.cpp" />
+    <ClCompile Include="gui.win\MainWindowPageUsersChat.cpp" />
     <ClCompile Include="gui.win\PtokaX.cpp" />
     <ClCompile Include="gui.win\SettingDialog.cpp" />
     <ClCompile Include="gui.win\SettingPage.cpp" />
