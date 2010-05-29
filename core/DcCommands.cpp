@@ -3735,7 +3735,9 @@ bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen
 			}
         #else
             if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_CHAT], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+                sData[iLen - 1] = '\0';
                 pMainWindowPageUsersChat->AppendText(sData);
+                sData[iLen - 1] = '|';
             }
 		#endif
 	#endif
