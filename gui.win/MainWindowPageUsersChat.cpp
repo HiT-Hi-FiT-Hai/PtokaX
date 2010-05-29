@@ -98,6 +98,66 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
 
                     delete[] sURL;
                 }
+            } else if(((LPNMHDR)lParam)->hwndFrom == hWndPageItems[LV_USERS] && ((LPNMHDR)lParam)->code == LVN_GETINFOTIP) {
+                NMLVGETINFOTIP * pGetInfoTip = (LPNMLVGETINFOTIP)lParam;
+
+                char msg[1024];
+
+                LVITEM lvItem = { 0 };
+                lvItem.mask = LVIF_PARAM | LVIF_TEXT;
+                lvItem.iItem = pGetInfoTip->iItem;
+                lvItem.pszText = msg;
+                lvItem.cchTextMax = 1024;
+
+                if((BOOL)::SendMessage(hWndPageItems[LV_USERS], LVM_GETITEM, 0, (LPARAM)&lvItem) == FALSE) {
+                    return 0;
+                }
+
+                User * curUser = (User *)lvItem.lParam;
+
+                if(::SendMessage(hWndPageItems[BTN_AUTO_UPDATE_USERLIST], BM_GETCHECK, 0, 0) == BST_UNCHECKED) {
+                    User * testUser = hashManager->FindUser(lvItem.pszText, strlen(lvItem.pszText));
+
+                    if(testUser == NULL || testUser != curUser) {
+                        return 0;
+                    }
+                }
+
+                string sInfoTip = string(LanguageManager->sTexts[LAN_NICK], (size_t)LanguageManager->ui16TextsLens[LAN_NICK]) + ": " + string(curUser->Nick, curUser->NickLen) +
+                    "\n" + string(LanguageManager->sTexts[LAN_IP], (size_t)LanguageManager->ui16TextsLens[LAN_IP]) + ": " + string(curUser->IP);
+
+                sInfoTip += "\n\n" + string(LanguageManager->sTexts[LAN_CLIENT], (size_t)LanguageManager->ui16TextsLens[LAN_CLIENT]) + ": " +
+                    string(curUser->Client, (size_t)curUser->ui8ClientLen) +
+                    "\n" + string(LanguageManager->sTexts[LAN_VERSION], (size_t)LanguageManager->ui16TextsLens[LAN_VERSION]) + ": " + string(curUser->Ver, (size_t)curUser->ui8VerLen);
+
+                char sMode[2];
+                sMode[0] = curUser->Mode;
+                sMode[1] = '\0';
+                sInfoTip += "\n\n" + string(LanguageManager->sTexts[LAN_MODE], (size_t)LanguageManager->ui16TextsLens[LAN_MODE]) + ": " + string(sMode) +
+                    "\n" + string(LanguageManager->sTexts[LAN_SLOTS], (size_t)LanguageManager->ui16TextsLens[LAN_SLOTS]) + ": " + string(curUser->Slots) +
+                    "\n" + string(LanguageManager->sTexts[LAN_HUBS], (size_t)LanguageManager->ui16TextsLens[LAN_HUBS]) + ": " + string(curUser->Hubs);
+
+                if(curUser->OLimit != 0) {
+                    sInfoTip += "\n" + string(LanguageManager->sTexts[LAN_AUTO_OPEN_SLOT_WHEN_UP_UNDER], (size_t)LanguageManager->ui16TextsLens[LAN_AUTO_OPEN_SLOT_WHEN_UP_UNDER]) + " " +
+                    string(curUser->OLimit)+" kB/s";
+                }
+
+                if(curUser->DLimit != 0) {
+                    sInfoTip += "\nLimiter D:" + string(curUser->DLimit) + " kB/s";
+                }
+
+                if(curUser->LLimit != 0) {
+                    sInfoTip += "\nLimiter L:" + string(curUser->LLimit) + " kB/s";
+                }
+
+                sInfoTip += "\n\nRecvBuf: " + string(curUser->recvbuflen) + " bytes";
+                sInfoTip += "\nSendBuf: " + string(curUser->sendbuflen) + " bytes";
+
+                pGetInfoTip->cchTextMax = (int)(sInfoTip.size() > INFOTIPSIZE ? INFOTIPSIZE : sInfoTip.size());
+                memcpy(pGetInfoTip->pszText, sInfoTip.c_str(), sInfoTip.size() > INFOTIPSIZE ? INFOTIPSIZE : sInfoTip.size());
+                pGetInfoTip->pszText[(sInfoTip.size() > INFOTIPSIZE ? INFOTIPSIZE : sInfoTip.size()) - 1] = '\0';
+
+                return 0;
             }
             break;
         case WM_COMMAND:
@@ -242,9 +302,9 @@ bool MainWindowPageUsersChat::CreateMainWindowPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[REDT_CHAT], EM_AUTOURLDETECT, TRUE, 0);
     ::SendMessage(hWndPageItems[REDT_CHAT], EM_SETEVENTMASK, 0, (LPARAM)::SendMessage(hWndPageItems[REDT_CHAT], EM_GETEVENTMASK, 0, 0) | ENM_LINK);
 
-    hWndPageItems[LV_USERS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, NULL, WS_CHILD | WS_VISIBLE | LVS_NOCOLUMNHEADER /*| LVS_NOSORTHEADER*/| LVS_REPORT | LVS_SHOWSELALWAYS |
-        LVS_SINGLESEL | LVS_SORTASCENDING, rcMain.right-148, 16, (rcMain.right-(rcMain.right-148))-2, rcMain.bottom-43, m_hWnd, NULL, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[LV_USERS], LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES /*| LVS_EX_INFOTIP*/| LVS_EX_LABELTIP);
+    hWndPageItems[LV_USERS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, NULL, WS_CHILD | WS_VISIBLE | LVS_NOCOLUMNHEADER | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL |
+        LVS_SORTASCENDING, rcMain.right-148, 16, (rcMain.right-(rcMain.right-148))-2, rcMain.bottom-43, m_hWnd, NULL, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[LV_USERS], LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_INFOTIP);
 
     hWndPageItems[EDT_CHAT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, NULL, WS_CHILD | WS_VISIBLE | WS_TABSTOP/*| ES_AUTOHSCROLL*/| ES_AUTOVSCROLL | ES_MULTILINE,
         2, rcMain.bottom-25, rcMain.right-152, 23, m_hWnd, (HMENU)EDT_CHAT, g_hInstance, NULL);

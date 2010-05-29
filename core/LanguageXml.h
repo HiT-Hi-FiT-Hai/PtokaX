@@ -519,7 +519,7 @@ const char* LangXmlStr[] = {
     "Mem", 
     "Users", 
     "Client", 
-    "Ver", 
+    "Version",
     "Mode", 
     "Slots", 
     "Hubs", 
