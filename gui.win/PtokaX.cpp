@@ -172,6 +172,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 		}
 	}
 
+    HINSTANCE hRichEdit = ::LoadLibrary("Riched20.dll");
+
 #ifdef _MSC_VER
     ExceptionHandlingInitialize(PATH, sBuf);
 #endif
@@ -232,6 +234,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 #ifdef _MSC_VER
     ExceptionHandlingUnitialize();
 #endif
+
+    ::FreeLibrary(hRichEdit);
 
     return EXIT_SUCCESS;
 }

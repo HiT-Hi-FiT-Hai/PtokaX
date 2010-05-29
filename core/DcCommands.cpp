@@ -50,6 +50,8 @@
 	#ifndef _SERVICE
 		#ifndef _MSC_VER
 			#include "TUsersChatForm.h"
+        #else
+            #include "../gui.win/MainWindowPageUsersChat.h"
 		#endif
 	#endif
 //---------------------------------------------------------------------------
@@ -113,6 +115,13 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
 					Memo(msg+string(sData, iLen));
 				}
 			}
+        #else
+            if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+				int imsglen = sprintf(msg, "%s (%s) > ", curUser->Nick, curUser->IP);
+				if(CheckSprintf(imsglen, 1024, "cDcCommands::PreProcessData1") == true) {
+					pMainWindowPageUsersChat->AppendText((msg+string(sData, iLen)).c_str());
+				}
+            }
 		#endif
 	#endif
 #endif
@@ -1668,7 +1677,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
                         }
                     }
                 }
-            
+
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == false || ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
                     int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                         OtherUser->Nick, LanguageManager->sTexts[LAN_WITH_IP], OtherUser->IP, 
@@ -3724,6 +3733,10 @@ bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen
 			if(UsersChatForm != NULL && UsersChatForm->ChatTrace->Checked == true) {
 				Memo(sData);
 			}
+        #else
+            if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_CHAT], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+                pMainWindowPageUsersChat->AppendText(sData);
+            }
 		#endif
 	#endif
 #endif

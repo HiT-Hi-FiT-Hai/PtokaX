@@ -824,6 +824,17 @@ enum LangIds {
     LAN_MENU_SETTINGS,
     LAN_ABOUT,
     LAN_STATS,
+    LAN_MENU_COPY,
+    LAN_MENU_SELECT_ALL,
+    LAN_MENU_CLEAR_CHAT,
+    LAN_MENU_REG_USER,
+    LAN_MENU_DISCONNECT_USER,
+    LAN_MENU_KICK_USER,
+    LAN_MENU_BAN_USER,
+    LAN_MENU_REDIRECT_USER,
+    LAN_PLEASE_ENTER_REASON,
+    LAN_WAS_REDIRECTED_TO,
+    LAN_PLEASE_ENTER_REDIRECT_ADDRESS,
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------

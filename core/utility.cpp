@@ -34,6 +34,8 @@
 	#ifndef _SERVICE
 		#ifndef _MSC_VER
 			#include "TUsersChatForm.h"
+		#else
+            #include "../gui.win/MainWindowPageUsersChat.h"
 		#endif
 	#endif
 //---------------------------------------------------------------------------
@@ -1188,6 +1190,8 @@ void AppendSpecialLog(const string & sData) {
 				if(UsersChatForm != NULL) {
 					UsersChatForm->Memo(sMessage);
 				}
+            #else
+                pMainWindowPageUsersChat->AppendText(sMessage.c_str());
 			#endif
 	#endif
 	}

@@ -43,6 +43,8 @@
 	#ifndef _SERVICE
 		#ifndef _MSC_VER
 			#include "TUsersChatForm.h"
+		#else
+            #include "../gui.win/MainWindowPageUsersChat.h"
 		#endif
 	#endif
 //---------------------------------------------------------------------------
@@ -705,6 +707,10 @@ void theLoop::ReceiveLoop() {
 	                        }
 	                    }
 					}
+        #else
+                    if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_AUTO_UPDATE_USERLIST], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+                        pMainWindowPageUsersChat->AddUser(curUser);
+                    }
 		#endif
 	#endif
 #endif

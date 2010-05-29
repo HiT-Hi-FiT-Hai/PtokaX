@@ -48,7 +48,7 @@ public:
     void EnableStartButton(const BOOL &bEnable);
     void SetStartButtonText(const char * sText);
     void SetStatusValue(const char * sText);
-    void EnableStatsItems(const BOOL &bEnable);
+    void EnableGuiItems(const BOOL &bEnable);
 private:
     MainWindowPage * MainWindowPages[2];
 

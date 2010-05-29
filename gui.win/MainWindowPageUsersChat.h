@@ -23,24 +23,46 @@
 //------------------------------------------------------------------------------
 #include "MainWindowPage.h"
 //------------------------------------------------------------------------------
+struct User;
+//---------------------------------------------------------------------------
 
 class MainWindowPageUsersChat : public MainWindowPage {
 public:
-    HWND hWndPageItems[1];
+    HWND hWndPageItems[7];
 
     enum enmPageItems {
+        BTN_SHOW_CHAT,
+        BTN_SHOW_COMMANDS,
+        BTN_AUTO_UPDATE_USERLIST,
         REDT_CHAT,
+        LV_USERS,
+        EDT_CHAT,
+        BTN_UPDATE_USERS
     };
 
     MainWindowPageUsersChat();
-    ~MainWindowPageUsersChat() { };
+    ~MainWindowPageUsersChat();
 
     bool CreateMainWindowPage(HWND hOwner);
     void UpdateLanguage();
     char * GetPageName();
+    bool OnEditEnter();
+    void AppendText(const char * sText);
+    void AddUser(const User * curUser);
+    void RemoveUser(const User * curUser);
+    User * GetUser();
 private:
     LRESULT MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+    void UpdateUserList();
+    void OnContextMenu(HWND hWindow, LPARAM lParam);
+    void DisconnectUser();
+    void KickUser();
+    void BanUser();
+    void RedirectUser();
 };
 //------------------------------------------------------------------------------
+extern MainWindowPageUsersChat *pMainWindowPageUsersChat;
+//---------------------------------------------------------------------------
 
 #endif

@@ -277,8 +277,8 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             return 0;
         case WM_GETMINMAXINFO: {
             MINMAXINFO *mminfo = (MINMAXINFO*)lParam;
-            mminfo->ptMinTrackSize.x = 306;
-            mminfo->ptMinTrackSize.y = 295;
+            mminfo->ptMinTrackSize.x = 400;
+            mminfo->ptMinTrackSize.y = 321;
 
             return 0;
         }
@@ -318,9 +318,6 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
                     return 0;
                 case IDC_SCRIPTS_MEM:
-                    ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
-                    return 0;
-                case IDC_USERS_CHAT:
                     ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
                     return 0;
                 case IDC_ABOUT: {
@@ -404,8 +401,6 @@ HWND MainWindow::CreateEx() {
     ::AppendMenu(hViewMenu, MF_SEPARATOR, 0, 0);
     ::AppendMenu(hViewMenu, MF_STRING, IDC_SCRIPTS, LanguageManager->sTexts[LAN_SCRIPTS]);
     ::AppendMenu(hViewMenu, MF_STRING, IDC_SCRIPTS_MEM, LanguageManager->sTexts[LAN_SCRIPTS_MEMORY_USAGE]);
-    ::AppendMenu(hViewMenu, MF_SEPARATOR, 0, 0);
-    ::AppendMenu(hViewMenu, MF_STRING, IDC_USERS_CHAT, LanguageManager->sTexts[LAN_USERS_CHAT]);
 
     ::AppendMenu(hMainMenu, MF_POPUP, (UINT_PTR)hViewMenu, LanguageManager->sTexts[LAN_VIEW]);
 
@@ -437,7 +432,7 @@ HWND MainWindow::CreateEx() {
     m_hWnd = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE | WS_EX_CONTROLPARENT, MAKEINTATOM(atom),
         (string(SettingManager->sTexts[SETTXT_HUB_NAME], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME]) + " | " + sTitle).c_str(),
         WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-        CW_USEDEFAULT, CW_USEDEFAULT, 306, 295, NULL, hMainMenu, g_hInstance, NULL);
+        CW_USEDEFAULT, CW_USEDEFAULT, 400, 321, NULL, hMainMenu, g_hInstance, NULL);
 
 	return m_hWnd;
 }
@@ -493,6 +488,12 @@ void MainWindow::UpdateLanguage() {
     for(uint8_t ui8i = 0; ui8i < 2; ui8i++) {
         if(MainWindowPages[ui8i] != NULL) {
             MainWindowPages[ui8i]->UpdateLanguage();
+
+            TCITEM tcItem = { 0 };
+            tcItem.mask = TCIF_TEXT;
+
+            tcItem.pszText = MainWindowPages[ui8i]->GetPageName();
+            ::SendMessage(hWndWindowItems[TC_TABS], TCM_SETITEM, ui8i, (LPARAM)&tcItem);
         }
     }
 
@@ -509,7 +510,6 @@ void MainWindow::UpdateLanguage() {
     ::ModifyMenu(hMenu, IDC_RANGE_BANS, MF_BYCOMMAND, IDC_RANGE_BANS, LanguageManager->sTexts[LAN_RANGE_BANS]);
     ::ModifyMenu(hMenu, IDC_SCRIPTS, MF_BYCOMMAND, IDC_SCRIPTS, LanguageManager->sTexts[LAN_SCRIPTS]);
     ::ModifyMenu(hMenu, IDC_SCRIPTS_MEM, MF_BYCOMMAND, IDC_SCRIPTS_MEM, LanguageManager->sTexts[LAN_SCRIPTS_MEMORY_USAGE]);
-    ::ModifyMenu(hMenu, IDC_USERS_CHAT, MF_BYCOMMAND, IDC_USERS_CHAT, LanguageManager->sTexts[LAN_USERS_CHAT]);
 
     ::ModifyMenu(hMenu, IDC_HOMEPAGE, MF_BYCOMMAND, IDC_HOMEPAGE, (string("PtokaX ") +LanguageManager->sTexts[LAN_WEBSITE]).c_str());
     ::ModifyMenu(hMenu, IDC_BOARD, MF_BYCOMMAND, IDC_BOARD, (string("PtokaX ") +LanguageManager->sTexts[LAN_BOARD]).c_str());
@@ -544,9 +544,19 @@ void MainWindow::SetStatusValue(const char * sText) {
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::EnableStatsItems(const BOOL &bEnable) {
+void MainWindow::EnableGuiItems(const BOOL &bEnable) {
     for(uint8_t ui8i = 2; ui8i < 20; ui8i++) {
         ::EnableWindow(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[ui8i], bEnable);
+    }
+
+    if(bEnable == FALSE || ::SendMessage(((MainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[MainWindowPageUsersChat::BTN_AUTO_UPDATE_USERLIST], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+        ::EnableWindow(((MainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[MainWindowPageUsersChat::BTN_UPDATE_USERS], FALSE);
+    } else {
+        ::EnableWindow(((MainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[MainWindowPageUsersChat::BTN_UPDATE_USERS], TRUE);
+    }
+
+    if(bEnable == FALSE) {
+        ::SendMessage(((MainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[MainWindowPageUsersChat::LV_USERS], LVM_DELETEALLITEMS, 0, 0);
     }
 }
 //---------------------------------------------------------------------------

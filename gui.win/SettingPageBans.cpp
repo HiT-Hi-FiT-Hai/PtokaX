@@ -186,7 +186,7 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_DEFAULT_TEMP_BAN_TIME], 0));
 
     hWndPageItems[LBL_DEFAULT_TEMPBAN_TIME_MINUTES] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MINUTES_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
-        140, 22, 299, 16, m_hWnd, NULL, g_hInstance, NULL);
+        140, 21, 299, 16, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[GB_BAN_MESSAGE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_BAN_MSG], WS_CHILD | WS_VISIBLE |
         BS_GROUPBOX, 0, 46, 447, 153, m_hWnd, NULL, g_hInstance, NULL);
@@ -222,7 +222,7 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
         WS_VISIBLE | BS_GROUPBOX, 0, 199, 447, 41, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[BTN_TEMP_BAN_REDIR_ENABLE] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ENABLE_W_ARROW], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 216, 85, 16, m_hWnd, (HMENU)BTN_TEMP_BAN_REDIR_ENABLE, g_hInstance, NULL);
+        8, 215, 85, 16, m_hWnd, (HMENU)BTN_TEMP_BAN_REDIR_ENABLE, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_TEMP_BAN_REDIR_ENABLE], BM_SETCHECK, (SettingManager->bBools[SETBOOL_TEMP_BAN_REDIR] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[EDT_TEMP_BAN_REDIR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_TEMP_BAN_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |
@@ -234,7 +234,7 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
         WS_VISIBLE | BS_GROUPBOX, 0, 240, 447, 41, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[BTN_PERM_BAN_REDIR_ENABLE] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ENABLE_W_ARROW], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 257, 85, 16, m_hWnd, (HMENU)BTN_PERM_BAN_REDIR_ENABLE, g_hInstance, NULL);
+        8, 256, 85, 16, m_hWnd, (HMENU)BTN_PERM_BAN_REDIR_ENABLE, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_PERM_BAN_REDIR_ENABLE], BM_SETCHECK, (SettingManager->bBools[SETBOOL_PERM_BAN_REDIR] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[EDT_PERM_BAN_REDIR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_PERM_BAN_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |
@@ -261,7 +261,7 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION], CB_SETCURSEL, SettingManager->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE], 0);
 
     hWndPageItems[LBL_TEMP_BAN_TIME] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_TEMPORARY_BAN_TIME],
-        WS_CHILD | WS_VISIBLE | SS_LEFT, 13, 358, 245, 16, m_hWnd, NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | SS_LEFT, 13, 357, 245, 16, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_TEMP_BAN_TIME] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         263, 354, 80, 20, m_hWnd, (HMENU)EDT_TEMP_BAN_TIME, g_hInstance, NULL);
@@ -271,7 +271,7 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_TEMP_BAN_TIME], 0));
 
     hWndPageItems[LBL_TEMP_BAN_TIME_HOURS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_HOURS_LWR],
-        WS_CHILD | WS_VISIBLE | SS_LEFT, 365, 358, 69, 16, m_hWnd, NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | SS_LEFT, 365, 357, 69, 16, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[BTN_REPORT_3X_BAD_PASS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REPORT_BAD_PASS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
         13, 379, 421, 16, m_hWnd, NULL, g_hInstance, NULL);

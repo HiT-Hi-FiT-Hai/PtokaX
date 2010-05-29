@@ -260,7 +260,7 @@ bool SettingPageGeneral2::CreateSettingPage(HWND hOwner) {
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[BTN_NON_REG_REDIR_ENABLE] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ENABLE_W_ARROW], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        13, 322, 80, 16, m_hWnd, (HMENU)BTN_NON_REG_REDIR_ENABLE, g_hInstance, NULL);
+        13, 321, 80, 16, m_hWnd, (HMENU)BTN_NON_REG_REDIR_ENABLE, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_NON_REG_REDIR_ENABLE], BM_SETCHECK, (SettingManager->bBools[SETBOOL_REG_ONLY_REDIR] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[EDT_NON_REG_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_REG_ONLY_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |

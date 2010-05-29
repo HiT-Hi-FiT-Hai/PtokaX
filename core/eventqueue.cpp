@@ -42,6 +42,8 @@
 		#ifndef _MSC_VER
 			#include "TScriptsForm.h"
 			#include "TUsersChatForm.h"
+        #else
+            #include "../gui.win/MainWindowPageUsersChat.h"
 		#endif
 	#endif
 //---------------------------------------------------------------------------
@@ -402,8 +404,16 @@ void eventq::ProcessEvents() {
 				if(UsersChatForm != NULL && UsersChatForm->CmdTrace->Checked == true) {
                 	char msg[128];
                     int imsglen = sprintf(msg, "UDP > %s (%s) > ", u->Nick, u->IP);
-                    if(CheckSprintf(imsglen, 1024, "eventq::ProcessEvents") == true) {
+                    if(CheckSprintf(imsglen, 128, "eventq::ProcessEvents") == true) {
                         Memo(string(msg, imsglen)+cur->sMsg);
+                    }
+                }
+        #else
+                if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+                	char msg[128];
+                    int imsglen = sprintf(msg, "UDP > %s (%s) > ", u->Nick, u->IP);
+                    if(CheckSprintf(imsglen, 128, "eventq::ProcessEvents") == true) {
+                        pMainWindowPageUsersChat->AppendText((string(msg, imsglen)+cur->sMsg).c_str());
                     }
                 }
 		#endif
