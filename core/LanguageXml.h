@@ -835,6 +835,7 @@ const char* LangXmlStr[] = {
     "PleaseEnterReason",
     "WasRedirectedTo",
     "PleaseEnterRedirectAddress",
+    "Limiter",
 };
 //---------------------------------------------------------------------------
 

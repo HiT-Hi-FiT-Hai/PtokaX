@@ -835,6 +835,7 @@ enum LangIds {
     LAN_PLEASE_ENTER_REASON,
     LAN_WAS_REDIRECTED_TO,
     LAN_PLEASE_ENTER_REDIRECT_ADDRESS,
+    LAN_LIMITER,
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------

@@ -143,11 +143,11 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
                 }
 
                 if(curUser->DLimit != 0) {
-                    sInfoTip += "\nLimiter D:" + string(curUser->DLimit) + " kB/s";
+                    sInfoTip += "\n" + string(LanguageManager->sTexts[LAN_LIMITER], (size_t)LanguageManager->ui16TextsLens[LAN_LIMITER])+ " D:" + string(curUser->DLimit) + " kB/s";
                 }
 
                 if(curUser->LLimit != 0) {
-                    sInfoTip += "\nLimiter L:" + string(curUser->LLimit) + " kB/s";
+                    sInfoTip += "\n" + string(LanguageManager->sTexts[LAN_LIMITER], (size_t)LanguageManager->ui16TextsLens[LAN_LIMITER])+ " L:" + string(curUser->LLimit) + " kB/s";
                 }
 
                 sInfoTip += "\n\nRecvBuf: " + string(curUser->recvbuflen) + " bytes";

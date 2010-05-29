@@ -835,6 +835,7 @@ const char* LangStr[] = {
     "Please enter reason",
     "was redirected to",
     "Please enter redirect address",
+    "Limiter",
 };
 //---------------------------------------------------------------------------
 
