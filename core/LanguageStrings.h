@@ -519,7 +519,7 @@ const char* LangStr[] = {
     "Mem", 
     "Users", 
     "Client", 
-    "Ver", 
+    "Version",
     "Mode", 
     "Slots", 
     "Hubs",

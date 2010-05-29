@@ -519,7 +519,7 @@ enum LangIds {
     LAN_MEM, 
     LAN_USERS, 
     LAN_CLIENT, 
-    LAN_VER, 
+    LAN_VERSION,
     LAN_MODE, 
     LAN_SLOTS, 
     LAN_HUBS,
