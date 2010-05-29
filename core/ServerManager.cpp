@@ -880,7 +880,7 @@ bool ServerStart() {
             pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_RUNNING], (size_t)LanguageManager->ui16TextsLens[LAN_RUNNING])+"...").c_str());
             pMainWindow->SetStartButtonText(LanguageManager->sTexts[LAN_STOP_HUB]);
             pMainWindow->EnableStartButton(TRUE);
-            pMainWindow->EnableStatsItems(TRUE);
+            pMainWindow->EnableGuiItems(TRUE);
 		#endif
 	#endif
 #endif
@@ -1099,7 +1099,7 @@ void ServerFinalStop(const bool &bFromServiceLoop) {
             pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_STOPPED], (size_t)LanguageManager->ui16TextsLens[LAN_STOPPED])+".").c_str());
             pMainWindow->SetStartButtonText(LanguageManager->sTexts[LAN_START_HUB]);
             pMainWindow->EnableStartButton(TRUE);
-            pMainWindow->EnableStatsItems(FALSE);
+            pMainWindow->EnableGuiItems(FALSE);
 		#endif
 	#endif
 #endif

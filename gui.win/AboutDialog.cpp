@@ -41,8 +41,6 @@ AboutDialog::AboutDialog() {
 
     memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
 
-    hRichEdit = ::LoadLibrary("Riched20.dll");
-
     hiSpider = (HICON)::LoadImage(g_hInstance, MAKEINTRESOURCE(IDR_MAINICONBIG), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
     hiLua = (HICON)::LoadImage(g_hInstance, MAKEINTRESOURCE(IDR_LUAICON), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
 
@@ -62,8 +60,6 @@ AboutDialog::AboutDialog() {
 //---------------------------------------------------------------------------
 
 AboutDialog::~AboutDialog() {
-    ::FreeLibrary(hRichEdit);
-
     ::DeleteObject(hiSpider);
     ::DeleteObject(hiLua);
 
@@ -96,9 +92,11 @@ LRESULT AboutDialog::AboutDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             if(((LPNMHDR)lParam)->hwndFrom == hWndWindowItems[REDT_ABOUT] && ((LPNMHDR)lParam)->code == EN_LINK) {
                 if(((ENLINK *)lParam)->msg == WM_LBUTTONUP) {
                     TCHAR* sURL = new TCHAR[(((ENLINK *)lParam)->chrg.cpMax - ((ENLINK *)lParam)->chrg.cpMin)+1];
+
                     if(sURL == NULL) {
                         break;
                     }
+
                     TEXTRANGE tr = { 0 };
                     tr.chrg.cpMin = ((ENLINK *)lParam)->chrg.cpMin;
                     tr.chrg.cpMax = ((ENLINK *)lParam)->chrg.cpMax;
@@ -107,6 +105,7 @@ LRESULT AboutDialog::AboutDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     ::SendMessage(hWndWindowItems[REDT_ABOUT], EM_GETTEXTRANGE, 0, (LPARAM)&tr);
 
                     ::ShellExecute(NULL, NULL, sURL, NULL, NULL, SW_SHOWNORMAL);
+
                     delete[] sURL;
                 }
             }

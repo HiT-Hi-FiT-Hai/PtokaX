@@ -824,6 +824,17 @@ const char* LangStr[] = {
     "&Settings",
     "About",
     "Stats",
+    "&Copy",
+    "&Select all",
+    "C&lear chat",
+    "&Register user",
+    "&Disconnect user",
+    "&Kick user",
+    "&Ban user",
+    "R&edirect user",
+    "Please enter reason",
+    "was redirected to",
+    "Please enter redirect address",
 };
 //---------------------------------------------------------------------------
 

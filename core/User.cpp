@@ -45,6 +45,8 @@
 	#ifndef _SERVICE
 		#ifndef _MSC_VER
 			#include "TUsersChatForm.h"
+        #else
+            #include "../gui.win/MainWindowPageUsersChat.h"
 		#endif
 	#endif
 //---------------------------------------------------------------------------
@@ -901,6 +903,10 @@ User::~User() {
 			if(UsersChatForm != NULL && UsersChatForm->CmdTrace->Checked == true) {
 				Memo("x User removed: " + string(Nick, NickLen) + " (Socket " + string(Sck) + ")");
 			}
+        #else
+            if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+                pMainWindowPageUsersChat->AppendText(("x User removed: " + string(Nick, NickLen) + " (Socket " + string(Sck) + ")").c_str());
+            }
 		#endif
 	#endif
 #endif
@@ -1317,6 +1323,13 @@ bool UserDoRecv(User * u) {
 						Memo(msg);
 					}
 				}
+            #else
+                if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+					int iret = sprintf(msg, "- User has closed the connection: %s (%s)", u->Nick, u->IP);
+					if(CheckSprintf(iret, 1024, "UserDoRecv") == true) {
+						pMainWindowPageUsersChat->AppendText(msg);
+					}
+                }
 			#endif
 		#endif
 #endif
@@ -2235,6 +2248,10 @@ void UserClose(User * u, bool bNoQuit/* = false*/) {
 					UsersChatForm->userList->Items->Delete(idx);
 				}
 			}
+        #else
+            if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_AUTO_UPDATE_USERLIST], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+                pMainWindowPageUsersChat->RemoveUser(u);
+            }
 		#endif
 	#endif
 #endif

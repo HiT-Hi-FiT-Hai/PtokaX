@@ -382,7 +382,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_GLOBAL_MAIN_CHAT_MSGS], 38, 18, 17, 21, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_GLOBAL_MAIN_CHAT_MSGS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_MESSAGES], 0));
 
-    hWndPageItems[LBL_GLOBAL_MAIN_CHAT_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 60, 23, 5, 16,
+    hWndPageItems[LBL_GLOBAL_MAIN_CHAT_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 60, 21, 5, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
@@ -392,7 +392,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_GLOBAL_MAIN_CHAT_SECS], 100, 18, 17, 21, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_TIME], 0));
 
-    hWndPageItems[LBL_GLOBAL_MAIN_CHAT_SEC] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SEC_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 122, 23, 25, 16,
+    hWndPageItems[LBL_GLOBAL_MAIN_CHAT_SEC] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SEC_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 122, 21, 25, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[CB_GLOBAL_MAIN_CHAT] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
@@ -402,7 +402,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_GLOBAL_MAIN_CHAT], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_ONLY_TO_OPS_WITH_IP]);
     ::SendMessage(hWndPageItems[CB_GLOBAL_MAIN_CHAT], CB_SETCURSEL, SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION], 0);
 
-    hWndPageItems[LBL_GLOBAL_MAIN_CHAT_FOR] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_FOR], WS_CHILD | WS_VISIBLE | SS_CENTER, 332, 23, 25, 16,
+    hWndPageItems[LBL_GLOBAL_MAIN_CHAT_FOR] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_FOR], WS_CHILD | WS_VISIBLE | SS_CENTER, 332, 21, 25, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS2] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
@@ -412,7 +412,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_GLOBAL_MAIN_CHAT_SECS2], 392, 18, 17, 21, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS2],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_TIMEOUT], 0));
 
-    hWndPageItems[LBL_GLOBAL_MAIN_CHAT_SEC2] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SEC_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 414, 23, 25, 16,
+    hWndPageItems[LBL_GLOBAL_MAIN_CHAT_SEC2] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SEC_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 414, 21, 25, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[GB_MAIN_CHAT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MAIN_CHAT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 47, 447, 97,
@@ -436,7 +436,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_MAIN_CHAT_MSGS], 223, 62, 17, 21, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_MSGS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAIN_CHAT_MESSAGES], 0));
 
-    hWndPageItems[LBL_MAIN_CHAT_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 67, 5, 16,
+    hWndPageItems[LBL_MAIN_CHAT_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 65, 5, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_MAIN_CHAT_SECS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
@@ -446,7 +446,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_MAIN_CHAT_SECS], 285, 62, 17, 21, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_SECS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAIN_CHAT_TIME], 0));
 
-    hWndPageItems[LBL_MAIN_CHAT_SECONDS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 67, 132, 16,
+    hWndPageItems[LBL_MAIN_CHAT_SECONDS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 65, 132, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[CB_MAIN_CHAT2] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
@@ -467,7 +467,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_MAIN_CHAT_MSGS2], 223, 89, 17, 21, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_MSGS2],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAIN_CHAT_MESSAGES2], 0));
 
-    hWndPageItems[LBL_MAIN_CHAT_DIVIDER2] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 94, 5, 16,
+    hWndPageItems[LBL_MAIN_CHAT_DIVIDER2] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 92, 5, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_MAIN_CHAT_SECS2] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
@@ -477,10 +477,10 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_MAIN_CHAT_SECS2], 285, 89, 17, 21, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_SECS2],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAIN_CHAT_TIME2], 0));
 
-    hWndPageItems[LBL_MAIN_CHAT_SECONDS2] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 94, 132, 16,
+    hWndPageItems[LBL_MAIN_CHAT_SECONDS2] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 92, 132, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[LBL_MAIN_CHAT_INTERVAL] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_INTERVAL], WS_CHILD | WS_VISIBLE | SS_RIGHT, 8, 120, 180, 16,
+    hWndPageItems[LBL_MAIN_CHAT_INTERVAL] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_INTERVAL], WS_CHILD | WS_VISIBLE | SS_RIGHT, 8, 119, 180, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_MAIN_CHAT_INTERVAL_MSGS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
@@ -490,7 +490,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_MAIN_CHAT_INTERVAL_MSGS], 223, 116, 17, 20, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_INTERVAL_MSGS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_CHAT_INTERVAL_MESSAGES], 0));
 
-    hWndPageItems[LBL_MAIN_CHAT_INTERVAL_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 120, 5, 16,
+    hWndPageItems[LBL_MAIN_CHAT_INTERVAL_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 119, 5, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_MAIN_CHAT_INTERVAL_SECS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
@@ -500,7 +500,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_MAIN_CHAT_INTERVAL_SECS], 285, 116, 17, 20, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_INTERVAL_SECS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_CHAT_INTERVAL_TIME], 0));
 
-    hWndPageItems[LBL_MAIN_CHAT_INTERVAL_SECONDS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 120, 132, 16,
+    hWndPageItems[LBL_MAIN_CHAT_INTERVAL_SECONDS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 119, 132, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[GB_SAME_MAIN_CHAT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_SAME_MAIN_CHAT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 144, 447, 44,
@@ -524,7 +524,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_SAME_MAIN_CHAT_MSGS], 223, 159, 17, 21, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_SAME_MAIN_CHAT_MSGS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_SAME_MAIN_CHAT_MESSAGES], 0));
 
-    hWndPageItems[LBL_SAME_MAIN_CHAT_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 164, 5, 16,
+    hWndPageItems[LBL_SAME_MAIN_CHAT_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 162, 5, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_SAME_MAIN_CHAT_SECS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
@@ -534,7 +534,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_SAME_MAIN_CHAT_SECS], 285, 159, 17, 21, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_SAME_MAIN_CHAT_SECS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_SAME_MAIN_CHAT_TIME], 0));
 
-    hWndPageItems[LBL_SAME_MAIN_CHAT_SECONDS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 164, 132, 16,
+    hWndPageItems[LBL_SAME_MAIN_CHAT_SECONDS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 162, 132, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[GB_SAME_MULTI_MAIN_CHAT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_SAME_MULTI_MAIN_CHAT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 188, 447, 44,
@@ -558,7 +558,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_SAME_MULTI_MAIN_CHAT_MSGS], 223, 203, 17, 21, (LPARAM)MAKELONG(999, 2), (WPARAM)hWndPageItems[EDT_SAME_MULTI_MAIN_CHAT_MSGS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_SAME_MULTI_MAIN_CHAT_MESSAGES], 0));
 
-    hWndPageItems[LBL_SAME_MULTI_MAIN_CHAT_WITH] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_WITH_LWR], WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 208, 30, 16,
+    hWndPageItems[LBL_SAME_MULTI_MAIN_CHAT_WITH] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_WITH_LWR], WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 206, 30, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_SAME_MULTI_MAIN_CHAT_LINES] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
@@ -568,7 +568,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_SAME_MULTI_MAIN_CHAT_LINES], 310, 203, 17, 21, (LPARAM)MAKELONG(999, 2), (WPARAM)hWndPageItems[EDT_SAME_MULTI_MAIN_CHAT_LINES],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_SAME_MULTI_MAIN_CHAT_LINES], 0));
 
-    hWndPageItems[LBL_SAME_MULTI_MAIN_CHAT_LINES] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_LINES_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 332, 208, 107, 16,
+    hWndPageItems[LBL_SAME_MULTI_MAIN_CHAT_LINES] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_LINES_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 332, 206, 107, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[GB_CTM] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_CONNECTTOME], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 232, 447, 71,
@@ -592,7 +592,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_CTM_MSGS], 223, 247, 17, 21, (LPARAM)MAKELONG(9999, 1), (WPARAM)hWndPageItems[EDT_CTM_MSGS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_CTM_MESSAGES], 0));
 
-    hWndPageItems[LBL_CTM_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 252, 5, 16,
+    hWndPageItems[LBL_CTM_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 250, 5, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_CTM_SECS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
@@ -602,7 +602,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_CTM_SECS], 285, 247, 17, 21, (LPARAM)MAKELONG(9999, 1), (WPARAM)hWndPageItems[EDT_CTM_SECS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_CTM_TIME], 0));
 
-    hWndPageItems[LBL_CTM_SECONDS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 252, 132, 16,
+    hWndPageItems[LBL_CTM_SECONDS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 250, 132, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[CB_CTM2] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
@@ -623,7 +623,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_CTM_MSGS2], 223, 274, 17, 21, (LPARAM)MAKELONG(9999, 1), (WPARAM)hWndPageItems[EDT_CTM_MSGS2],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_CTM_MESSAGES2], 0));
 
-    hWndPageItems[LBL_CTM_DIVIDER2] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 279, 5, 16,
+    hWndPageItems[LBL_CTM_DIVIDER2] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 277, 5, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_CTM_SECS2] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
@@ -633,7 +633,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_CTM_SECS2], 285, 274, 17, 21, (LPARAM)MAKELONG(9999, 1), (WPARAM)hWndPageItems[EDT_CTM_SECS2],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_CTM_TIME2], 0));
 
-    hWndPageItems[LBL_CTM_SECONDS2] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 279, 132, 16,
+    hWndPageItems[LBL_CTM_SECONDS2] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 277, 132, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[GB_RCTM] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_REVCONNECTTOME], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 303, 447, 71,
@@ -657,7 +657,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_RCTM_MSGS], 223, 318, 17, 21, (LPARAM)MAKELONG(9999, 1), (WPARAM)hWndPageItems[EDT_RCTM_MSGS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_RCTM_MESSAGES], 0));
 
-    hWndPageItems[LBL_RCTM_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 323, 5, 16,
+    hWndPageItems[LBL_RCTM_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 321, 5, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_RCTM_SECS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
@@ -667,7 +667,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_RCTM_SECS], 285, 318, 17, 21, (LPARAM)MAKELONG(9999, 1), (WPARAM)hWndPageItems[EDT_RCTM_SECS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_RCTM_TIME], 0));
 
-    hWndPageItems[LBL_RCTM_SECONDS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 323, 132, 16,
+    hWndPageItems[LBL_RCTM_SECONDS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 321, 132, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[CB_RCTM2] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
@@ -688,7 +688,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_RCTM_MSGS2], 223, 345, 17, 21, (LPARAM)MAKELONG(9999, 1), (WPARAM)hWndPageItems[EDT_RCTM_MSGS2],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_RCTM_MESSAGES2], 0));
 
-    hWndPageItems[LBL_RCTM_DIVIDER2] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 350, 5, 16,
+    hWndPageItems[LBL_RCTM_DIVIDER2] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 348, 5, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_RCTM_SECS2] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
@@ -698,7 +698,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_RCTM_SECS2], 285, 345, 17, 21, (LPARAM)MAKELONG(9999, 1), (WPARAM)hWndPageItems[EDT_RCTM_SECS2],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_RCTM_TIME2], 0));
 
-    hWndPageItems[LBL_RCTM_SECONDS2] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 350, 132, 16,
+    hWndPageItems[LBL_RCTM_SECONDS2] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 307, 348, 132, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[GB_DEFLOOD_TEMP_BAN_TIME] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_DEFLOOD_TEMP_BAN_TIME], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
@@ -711,7 +711,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_DEFLOOD_TEMP_BAN_TIME], 48, 389, 17, 20, (LPARAM)MAKELONG(32767, 1), (WPARAM)hWndPageItems[EDT_DEFLOOD_TEMP_BAN_TIME],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME], 0));
 
-    hWndPageItems[LBL_DEFLOOD_TEMP_BAN_TIME_MINUTES] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MINUTES_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 70, 394, 153, 16,
+    hWndPageItems[LBL_DEFLOOD_TEMP_BAN_TIME_MINUTES] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MINUTES_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT, 70, 392, 153, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[GB_MAX_USERS_LOGINS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MAX_USERS_LOGINS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
@@ -724,7 +724,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_MAX_USERS_LOGINS], 264, 389, 17, 20, (LPARAM)MAKELONG(500, 1), (WPARAM)hWndPageItems[EDT_MAX_USERS_LOGINS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_SIMULTANEOUS_LOGINS], 0));
 
-    hWndPageItems[LBL_MAX_USERS_LOGINS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_PER_10_SECONDS], WS_CHILD | WS_VISIBLE | SS_LEFT, 286, 394, 153, 16,
+    hWndPageItems[LBL_MAX_USERS_LOGINS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_PER_10_SECONDS], WS_CHILD | WS_VISIBLE | SS_LEFT, 286, 392, 153, 16,
         m_hWnd, NULL, g_hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {

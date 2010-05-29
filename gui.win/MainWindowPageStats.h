@@ -48,7 +48,7 @@ public:
         LBL_SENT,
         LBL_SENT_VALUE,
         BTN_REDIRECT_ALL,
-        BTN_MASS_MSG,
+        BTN_MASS_MSG
     };
 
     MainWindowPageStats();

@@ -33,8 +33,6 @@ public:
 
 	void DoModal(HWND hWndParent);
 private:
-    HINSTANCE hRichEdit;
-
     HICON hiSpider, hiLua;
 
     HFONT hfBigFont;

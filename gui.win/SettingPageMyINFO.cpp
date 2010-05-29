@@ -197,7 +197,7 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
         0, 187, 447, 201, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_MINUTES_BEFORE_ACCEPT_NEW_MYINFO] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MYINFO_DELAY],
-        WS_CHILD | WS_VISIBLE | SS_LEFT, 8, 206, 299, 16, m_hWnd, NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | SS_LEFT, 8, 205, 299, 16, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER |
         ES_AUTOHSCROLL | ES_RIGHT, 312, 202, 110, 20, m_hWnd, (HMENU)EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO, g_hInstance, NULL);

@@ -33,10 +33,10 @@
 //---------------------------------------------------------------------------
 static ATOM atomLineDialog = 0;
 //---------------------------------------------------------------------------
-void (*pOnOk)(const char * Line, const int &iLen) = NULL;
+void (*pOnOk)(char * Line, const int &iLen) = NULL;
 //---------------------------------------------------------------------------
 
-LineDialog::LineDialog(void (*pOnOkFunction)(const char * Line, const int &iLen)) {
+LineDialog::LineDialog(void (*pOnOkFunction)(char * Line, const int &iLen)) {
     m_hWnd = NULL;
 
     memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));

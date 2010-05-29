@@ -824,6 +824,17 @@ const char* LangXmlStr[] = {
     "MenuSettings",
     "About",
     "Stats",
+    "MenuCopy",
+    "MenuSelectAll",
+    "MenuClearChat",
+    "MenuRegisterUser",
+    "MenuDisconnectUser",
+    "MenuKickUser",
+    "MenuBanUser",
+    "MenuRedirectUser",
+    "PleaseEnterReason",
+    "WasRedirectedTo",
+    "PleaseEnterRedirectAddress",
 };
 //---------------------------------------------------------------------------
 
