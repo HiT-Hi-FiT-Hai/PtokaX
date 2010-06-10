@@ -327,8 +327,7 @@ bool SettingPageDeflood2::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_PM_MSGS], 223, 18, 17, 21, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_PM_MSGS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_PM_MESSAGES], 0));
 
-    hWndPageItems[LBL_PM_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 21, 5, 16,
-        m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[LBL_PM_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 21, 5, 16, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_PM_SECS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         255, 18, 30, 21, m_hWnd, (HMENU)EDT_PM_SECS, g_hInstance, NULL);
@@ -358,8 +357,7 @@ bool SettingPageDeflood2::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_PM_MSGS2], 223, 45, 17, 21, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_PM_MSGS2],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_PM_MESSAGES2], 0));
 
-    hWndPageItems[LBL_PM_DIVIDER2] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 48, 5, 16,
-        m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[LBL_PM_DIVIDER2] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 48, 5, 16, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_PM_SECS2] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         255, 45, 30, 21, m_hWnd, (HMENU)EDT_PM_SECS2, g_hInstance, NULL);
@@ -381,8 +379,7 @@ bool SettingPageDeflood2::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_PM_INTERVAL_MSGS], 223, 72, 17, 20, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_PM_INTERVAL_MSGS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_PM_INTERVAL_MESSAGES], 0));
 
-    hWndPageItems[LBL_PM_INTERVAL_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 75, 5, 16,
-        m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[LBL_PM_INTERVAL_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 75, 5, 16, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_PM_INTERVAL_SECS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         255, 72, 30, 20, m_hWnd, (HMENU)EDT_PM_INTERVAL_SECS, g_hInstance, NULL);
@@ -415,8 +412,7 @@ bool SettingPageDeflood2::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_SAME_PM_MSGS], 223, 115, 17, 21, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_SAME_PM_MSGS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_SAME_PM_MESSAGES], 0));
 
-    hWndPageItems[LBL_SAME_PM_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 118, 5, 16,
-        m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[LBL_SAME_PM_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 245, 118, 5, 16, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_SAME_PM_SECS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         255, 115, 30, 21, m_hWnd, (HMENU)EDT_SAME_PM_SECS, g_hInstance, NULL);
@@ -577,8 +573,7 @@ bool SettingPageDeflood2::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_NEW_CONNS_FROM_SAME_IP_COUNT], 38, 361, 17, 21, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_NEW_CONNS_FROM_SAME_IP_COUNT],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_NEW_CONNECTIONS_COUNT], 0));
 
-    hWndPageItems[LBL_NEW_CONNS_FROM_SAME_IP_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 60, 364, 5, 16,
-        m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[LBL_NEW_CONNS_FROM_SAME_IP_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 60, 364, 5, 16, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_NEW_CONNS_FROM_SAME_IP_TIME] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         70, 361, 30, 20, m_hWnd, (HMENU)EDT_NEW_CONNS_FROM_SAME_IP_TIME, g_hInstance, NULL);

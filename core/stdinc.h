@@ -98,7 +98,7 @@
 #endif
 #include "pxstring.h"
 //---------------------------------------------------------------------------
-#define PtokaXVersionString "0.4.1.2b"
+#define PtokaXVersionString "0.4.1.2c"
 #define sErrOutOfMem "[ERR] Out of memory..."
 
 #ifdef _WIN32

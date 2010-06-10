@@ -359,8 +359,8 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_SLOTS_MSG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 41, 437, 41,
         m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_SLOTS_MSG] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_SLOTS_LIMIT_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
-        ES_AUTOHSCROLL, 13, 56, 421, 18, m_hWnd, (HMENU)EDT_SLOTS_MSG, g_hInstance, NULL);
+    hWndPageItems[EDT_SLOTS_MSG] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_SLOTS_LIMIT_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
+        13, 56, 421, 18, m_hWnd, (HMENU)EDT_SLOTS_MSG, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SLOTS_MSG], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_SLOTS_MSG], LanguageManager->sTexts[LAN_SLOT_LIMIT_MSG_HINT]);
 
@@ -371,8 +371,8 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
         13, 98, 80, 16, m_hWnd, (HMENU)BTN_SLOTS_REDIR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_SLOTS_REDIR], BM_SETCHECK, (SettingManager->bBools[SETBOOL_SLOTS_LIMIT_REDIR] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    hWndPageItems[EDT_SLOTS_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_SLOTS_LIMIT_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |
-        WS_TABSTOP | ES_AUTOHSCROLL, 98, 97, 336, 18, m_hWnd, (HMENU)EDT_SLOTS_REDIR_ADDR, g_hInstance, NULL);
+    hWndPageItems[EDT_SLOTS_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_SLOTS_LIMIT_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
+        ES_AUTOHSCROLL, 98, 97, 336, 18, m_hWnd, (HMENU)EDT_SLOTS_REDIR_ADDR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SLOTS_REDIR_ADDR], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_SLOTS_REDIR_ADDR], LanguageManager->sTexts[LAN_REDIRECT_HINT]);
 
@@ -390,8 +390,7 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
     AddUpDown(hWndPageItems[UD_HUBS], 199, 143, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_HUBS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_HUB_SLOT_RATIO_HUBS], 0));
 
-    hWndPageItems[LBL_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 221, 146, 5, 16,
-        m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[LBL_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 221, 146, 5, 16, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_SLOTS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         231, 143, 40, 20, m_hWnd, (HMENU)EDT_SLOTS, g_hInstance, NULL);
@@ -407,8 +406,8 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_HUBS_SLOTS_MSG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 166, 437, 41,
         m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_HUBS_SLOTS_MSG] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_HUB_SLOT_RATIO_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
-        ES_AUTOHSCROLL, 13, 181, 421, 18, m_hWnd, (HMENU)EDT_HUBS_SLOTS_MSG, g_hInstance, NULL);
+    hWndPageItems[EDT_HUBS_SLOTS_MSG] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_HUB_SLOT_RATIO_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
+        13, 181, 421, 18, m_hWnd, (HMENU)EDT_HUBS_SLOTS_MSG, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUBS_SLOTS_MSG], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_HUBS_SLOTS_MSG], LanguageManager->sTexts[LAN_HUB_SLOT_RATIO_MSG_HINT]);
 
@@ -419,8 +418,8 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
         13, 223, 80, 16, m_hWnd, (HMENU)BTN_HUBS_SLOTS_REDIR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_HUBS_SLOTS_REDIR], BM_SETCHECK, (SettingManager->bBools[SETBOOL_HUB_SLOT_RATIO_REDIR] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    hWndPageItems[EDT_HUBS_SLOTS_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_HUB_SLOT_RATIO_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |
-        WS_TABSTOP | ES_AUTOHSCROLL, 98, 222, 336, 18, m_hWnd, (HMENU)EDT_HUBS_SLOTS_REDIR_ADDR, g_hInstance, NULL);
+    hWndPageItems[EDT_HUBS_SLOTS_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_HUB_SLOT_RATIO_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
+        ES_AUTOHSCROLL, 98, 222, 336, 18, m_hWnd, (HMENU)EDT_HUBS_SLOTS_REDIR_ADDR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUBS_SLOTS_REDIR_ADDR], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_HUBS_SLOTS_REDIR_ADDR], LanguageManager->sTexts[LAN_REDIRECT_HINT]);
 
@@ -441,8 +440,8 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_HUBS_MSG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 291, 437, 41,
         m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_HUBS_MSG] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_MAX_HUBS_LIMIT_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
-        ES_AUTOHSCROLL, 13, 306, 421, 18, m_hWnd, (HMENU)EDT_HUBS_MSG, g_hInstance, NULL);
+    hWndPageItems[EDT_HUBS_MSG] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_MAX_HUBS_LIMIT_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
+        13, 306, 421, 18, m_hWnd, (HMENU)EDT_HUBS_MSG, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUBS_MSG], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_HUBS_MSG], LanguageManager->sTexts[LAN_HUB_LIMIT_MSG_HINT]);
 
@@ -453,8 +452,8 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
         13, 348, 80, 16, m_hWnd, (HMENU)BTN_HUBS_REDIR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_HUBS_REDIR], BM_SETCHECK, (SettingManager->bBools[SETBOOL_MAX_HUBS_LIMIT_REDIR] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    hWndPageItems[EDT_HUBS_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_MAX_HUBS_LIMIT_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |
-        WS_TABSTOP | ES_AUTOHSCROLL, 98, 347, 336, 18, m_hWnd, (HMENU)EDT_HUBS_REDIR_ADDR, g_hInstance, NULL);
+    hWndPageItems[EDT_HUBS_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_MAX_HUBS_LIMIT_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
+        ES_AUTOHSCROLL, 98, 347, 336, 18, m_hWnd, (HMENU)EDT_HUBS_REDIR_ADDR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUBS_REDIR_ADDR], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_HUBS_REDIR_ADDR], LanguageManager->sTexts[LAN_REDIRECT_HINT]);
 

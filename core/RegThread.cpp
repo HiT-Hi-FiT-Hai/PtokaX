@@ -336,9 +336,14 @@ void RegThread::Run() {
         if(isIP(cur->sAddress, cur->ui32AddrLen) == true) {
             target.sin_addr.s_addr = inet_addr(cur->sAddress);
         } else {
-            hostent *host = gethostbyname(cur->sAddress);
-            if(host != NULL) {
-                target.sin_addr.s_addr = *(unsigned long *)host->h_addr;
+            struct addrinfo hints = { 0 };
+            hints.ai_family = AF_INET;
+
+            struct addrinfo *res;
+
+            if(::getaddrinfo(cur->sAddress, NULL, &hints, &res) == 0 && res->ai_family == AF_INET) {
+                target.sin_addr.s_addr = ((sockaddr_in *)(res->ai_addr))->sin_addr.s_addr;
+                freeaddrinfo(res);
             } else {
 #ifdef _WIN32
 				int iError = WSAGetLastError();

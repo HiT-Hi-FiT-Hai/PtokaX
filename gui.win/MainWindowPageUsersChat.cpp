@@ -297,16 +297,16 @@ bool MainWindowPageUsersChat::CreateMainWindowPage(HWND hOwner) {
     hWndPageItems[BTN_AUTO_UPDATE_USERLIST] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_AUTO], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
         rcMain.right-148, 0, (rcMain.right-(rcMain.right-150))-4, 16, m_hWnd, (HMENU)BTN_AUTO_UPDATE_USERLIST, g_hInstance, NULL);
 
-    hWndPageItems[REDT_CHAT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, NULL,
-        WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_READONLY, 2, 16, rcMain.right-152, rcMain.bottom-43, m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[REDT_CHAT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_READONLY,
+        2, 16, rcMain.right-152, rcMain.bottom-43, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[REDT_CHAT], EM_AUTOURLDETECT, TRUE, 0);
     ::SendMessage(hWndPageItems[REDT_CHAT], EM_SETEVENTMASK, 0, (LPARAM)::SendMessage(hWndPageItems[REDT_CHAT], EM_GETEVENTMASK, 0, 0) | ENM_LINK);
 
-    hWndPageItems[LV_USERS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, NULL, WS_CHILD | WS_VISIBLE | LVS_NOCOLUMNHEADER | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL |
+    hWndPageItems[LV_USERS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, "", WS_CHILD | WS_VISIBLE | LVS_NOCOLUMNHEADER | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL |
         LVS_SORTASCENDING, rcMain.right-148, 16, (rcMain.right-(rcMain.right-148))-2, rcMain.bottom-43, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[LV_USERS], LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_INFOTIP);
 
-    hWndPageItems[EDT_CHAT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, NULL, WS_CHILD | WS_VISIBLE | WS_TABSTOP/*| ES_AUTOHSCROLL*/| ES_AUTOVSCROLL | ES_MULTILINE,
+    hWndPageItems[EDT_CHAT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOVSCROLL | ES_MULTILINE,
         2, rcMain.bottom-25, rcMain.right-152, 23, m_hWnd, (HMENU)EDT_CHAT, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_CHAT], EM_SETLIMITTEXT, 8192, 0);
 
@@ -545,14 +545,25 @@ void MainWindowPageUsersChat::OnContextMenu(HWND hWindow, LPARAM lParam) {
 
         // -1, -1 is menu created by key. We need few tricks to show menu on correct position ;o)
         if(iX == -1 && iY == -1) {
+            POINT pt = { 0 };
             if((BOOL)::SendMessage(hWndPageItems[LV_USERS], LVM_ISITEMVISIBLE, (WPARAM)iSel, 0) == FALSE) {
-                iSel = (int)::SendMessage(hWndPageItems[LV_USERS], LVM_GETTOPINDEX, 0, 0);
+                RECT rcList;
+                ::GetClientRect(hWndPageItems[LV_USERS], &rcList);
+
+                ::SendMessage(hWndPageItems[LV_USERS], LVM_GETITEMPOSITION, (WPARAM)iSel, (LPARAM)&pt);
+
+                pt.y = (pt.y < rcList.top) ? rcList.top : rcList.bottom;
+            } else {
+                RECT rcItem;
+                rcItem.left = LVIR_LABEL;
+                ::SendMessage(hWndPageItems[LV_USERS], LVM_GETITEMRECT, (WPARAM)iSel, (LPARAM)&rcItem);
+
+                pt.x = rcItem.left;
+                pt.y = rcItem.top + ((rcItem.bottom - rcItem.top) / 2);
             }
 
-            POINT pt = { 0 };
-            ::SendMessage(hWndPageItems[LV_USERS], LVM_GETITEMPOSITION, (WPARAM)iSel, (LPARAM)&pt);
-
             ::ClientToScreen(hWndPageItems[LV_USERS], &pt);
+
             iX = pt.x;
             iY = pt.y;
         }
