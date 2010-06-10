@@ -55,8 +55,6 @@ private:
     UINT uiTaskBarCreated;
     uint64_t ui64LastTrayMouseMove;
 
-    HMENU hMainMenu;
-
     LRESULT MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     void OnSelChanged();

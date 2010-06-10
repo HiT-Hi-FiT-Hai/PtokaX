@@ -82,8 +82,6 @@ MainWindow::MainWindow() {
 
     ui64LastTrayMouseMove = 0;
 
-    hMainMenu = NULL;
-
     LOGFONT lfFont;
     ::GetObject((HFONT)::GetStockObject(DEFAULT_GUI_FONT), sizeof(LOGFONT), &lfFont);
 
@@ -127,10 +125,6 @@ MainWindow::~MainWindow() {
     nid.uID = 0;
     ::Shell_NotifyIcon(NIM_DELETE, &nid);
     ::DeleteObject(hfFont);
-
-    if(hMainMenu != NULL) {
-        ::DestroyMenu(hMainMenu);
-    }
 }
 //---------------------------------------------------------------------------
 
@@ -163,8 +157,7 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 dwTabsStyle |= TCS_HOTTRACK;
             }
 
-            hWndWindowItems[TC_TABS] = ::CreateWindowEx(0, WC_TABCONTROL, "", /*WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | TCS_TABS | TCS_FOCUSNEVER | TCS_HOTTRACK*/dwTabsStyle,
-                0, 0, rcMain.right, 21, m_hWnd, NULL, g_hInstance, NULL);
+            hWndWindowItems[TC_TABS] = ::CreateWindowEx(0, WC_TABCONTROL, "", dwTabsStyle, 0, 0, rcMain.right, 21, m_hWnd, NULL, g_hInstance, NULL);
             ::SendMessage(hWndWindowItems[TC_TABS], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
 
             TCITEM tcItem = { 0 };
@@ -379,9 +372,9 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 //------------------------------------------------------------------------------
 
 HWND MainWindow::CreateEx() {
-    hMainMenu = ::CreateMenu();
+    HMENU hMainMenu = ::CreateMenu();
 
-    HMENU hFileMenu = ::CreateMenu();
+    HMENU hFileMenu = ::CreatePopupMenu();
     ::AppendMenu(hFileMenu, MF_STRING, IDC_RELOAD_TXTS, (string(LanguageManager->sTexts[LAN_RELOAD_TEXT_FILES], (size_t)LanguageManager->ui16TextsLens[LAN_RELOAD_TEXT_FILES]) + "...").c_str());
     ::AppendMenu(hFileMenu, MF_SEPARATOR, 0, 0);
     ::AppendMenu(hFileMenu, MF_STRING, IDC_SETTINGS, (string(LanguageManager->sTexts[LAN_MENU_SETTINGS], (size_t)LanguageManager->ui16TextsLens[LAN_SETTINGS]) + "...").c_str());
@@ -391,7 +384,7 @@ HWND MainWindow::CreateEx() {
 
     ::AppendMenu(hMainMenu, MF_POPUP, (UINT_PTR)hFileMenu, LanguageManager->sTexts[LAN_FILE]);
 
-    HMENU hViewMenu = ::CreateMenu();
+    HMENU hViewMenu = ::CreatePopupMenu();
     ::AppendMenu(hViewMenu, MF_STRING, IDC_REG_USERS, LanguageManager->sTexts[LAN_REG_USERS]);
     ::AppendMenu(hViewMenu, MF_SEPARATOR, 0, 0);
     ::AppendMenu(hViewMenu, MF_STRING, IDC_PROF_MAN, LanguageManager->sTexts[LAN_PROFILE_MAN]);
@@ -404,7 +397,7 @@ HWND MainWindow::CreateEx() {
 
     ::AppendMenu(hMainMenu, MF_POPUP, (UINT_PTR)hViewMenu, LanguageManager->sTexts[LAN_VIEW]);
 
-    HMENU hHelpMenu = ::CreateMenu();
+    HMENU hHelpMenu = ::CreatePopupMenu();
     ::AppendMenu(hHelpMenu, MF_STRING, IDC_UPDATE_CHECK, (string(LanguageManager->sTexts[LAN_CHECK_FOR_UPDATE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_FOR_UPDATE]) + "...").c_str());
     ::AppendMenu(hHelpMenu, MF_SEPARATOR, 0, 0);
     ::AppendMenu(hHelpMenu, MF_STRING, IDC_HOMEPAGE, (string("PtokaX ") +LanguageManager->sTexts[LAN_WEBSITE]).c_str());

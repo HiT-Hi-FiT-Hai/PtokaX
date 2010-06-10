@@ -163,8 +163,8 @@ void AboutDialog::DoModal(HWND hWndParent) {
         m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[LBL_LUA_VERSION], WM_SETFONT, (WPARAM)hfBigFont, MAKELPARAM(TRUE, 0));
 
-    hWndWindowItems[REDT_ABOUT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, NULL,
-        WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_CENTER | ES_READONLY, 5, 74, 427, 347, m_hWnd, NULL, g_hInstance, NULL);
+    hWndWindowItems[REDT_ABOUT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_CENTER | ES_READONLY,
+        5, 74, 427, 347, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[REDT_ABOUT], EM_SETBKGNDCOLOR, 0, ::GetSysColor(COLOR_3DFACE));
     ::SendMessage(hWndWindowItems[REDT_ABOUT], EM_AUTOURLDETECT, TRUE, 0);
     ::SendMessage(hWndWindowItems[REDT_ABOUT], EM_SETEVENTMASK, 0, (LPARAM)::SendMessage(hWndWindowItems[REDT_ABOUT], EM_GETEVENTMASK, 0, 0) | ENM_LINK);

@@ -610,8 +610,12 @@ bool ServerStart() {
 		#endif
 	#endif
 #endif
-            hostent *host = gethostbyname(SettingManager->sTexts[SETTXT_HUB_ADDRESS]);
-			if(host == NULL) {
+            struct addrinfo hints = { 0 };
+            hints.ai_family = AF_INET;
+
+            struct addrinfo *res;
+
+            if(::getaddrinfo(SettingManager->sTexts[SETTXT_HUB_ADDRESS], NULL, &hints, &res) != 0 || res->ai_family != AF_INET) {
 #ifdef _WIN32
             	int err = WSAGetLastError();
 	#ifdef _SERVICE
@@ -648,10 +652,9 @@ bool ServerStart() {
             } else {
 				Memo("*** "+string(SettingManager->sTexts[SETTXT_HUB_ADDRESS], (size_t)LanguageManager->ui16TextsLens[SETTXT_HUB_ADDRESS])+" "+
 					string(LanguageManager->sTexts[LAN_RESOLVED_SUCCESSFULLY], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVED_SUCCESSFULLY])+".");
-				sockaddr_in target;
-				target.sin_addr.s_addr = *(unsigned long *)host->h_addr;
-                strcpy(sHubIP, inet_ntoa(target.sin_addr));
+                strcpy(sHubIP, inet_ntoa(((sockaddr_in *)(res->ai_addr))->sin_addr));
 				Memo("*** "+string(sHubIP));
+				freeaddrinfo(res);
             }
         } else {
             strcpy(sHubIP, SettingManager->sTexts[SETTXT_HUB_ADDRESS]);

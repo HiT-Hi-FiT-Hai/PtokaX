@@ -344,8 +344,8 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_NICK_LEN_MSG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 41, 437, 41,
         m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_NICK_LEN_MSG] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_NICK_LIMIT_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
-        ES_AUTOHSCROLL, 13, 56, 421, 18, m_hWnd, (HMENU)EDT_NICK_LEN_MSG, g_hInstance, NULL);
+    hWndPageItems[EDT_NICK_LEN_MSG] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_NICK_LIMIT_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
+        13, 56, 421, 18, m_hWnd, (HMENU)EDT_NICK_LEN_MSG, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_NICK_LEN_MSG], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_NICK_LEN_MSG], LanguageManager->sTexts[LAN_NICK_LIMIT_MSG_HINT]);
 
@@ -356,8 +356,8 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
         13, 98, 80, 16, m_hWnd, (HMENU)BTN_NICK_LEN_REDIR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_NICK_LEN_REDIR], BM_SETCHECK, (SettingManager->bBools[SETBOOL_NICK_LIMIT_REDIR] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    hWndPageItems[EDT_NICK_LEN_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_NICK_LIMIT_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |
-        WS_TABSTOP | ES_AUTOHSCROLL, 98, 97, 336, 18, m_hWnd, (HMENU)EDT_NICK_LEN_REDIR_ADDR, g_hInstance, NULL);
+    hWndPageItems[EDT_NICK_LEN_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_NICK_LIMIT_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
+        ES_AUTOHSCROLL, 98, 97, 336, 18, m_hWnd, (HMENU)EDT_NICK_LEN_REDIR_ADDR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_NICK_LEN_REDIR_ADDR], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_NICK_LEN_REDIR_ADDR], LanguageManager->sTexts[LAN_REDIRECT_HINT]);
 
@@ -407,8 +407,8 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_SHARE_MSG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 167, 437, 41,
         m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_SHARE_MSG] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_SHARE_LIMIT_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
-        ES_AUTOHSCROLL, 13, 182, 421, 18, m_hWnd, (HMENU)EDT_SHARE_MSG, g_hInstance, NULL);
+    hWndPageItems[EDT_SHARE_MSG] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_SHARE_LIMIT_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
+        13, 182, 421, 18, m_hWnd, (HMENU)EDT_SHARE_MSG, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SHARE_MSG], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_SHARE_MSG], LanguageManager->sTexts[LAN_SHARE_LIMIT_MSG_HINT]);
 
@@ -419,8 +419,8 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
         13, 224, 80, 16, m_hWnd, (HMENU)BTN_SHARE_REDIR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_SHARE_REDIR], BM_SETCHECK, (SettingManager->bBools[SETBOOL_SHARE_LIMIT_REDIR] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    hWndPageItems[EDT_SHARE_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_SHARE_LIMIT_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE |
-        WS_TABSTOP | ES_AUTOHSCROLL, 98, 223, 336, 18, m_hWnd, (HMENU)EDT_NICK_LEN_REDIR_ADDR, g_hInstance, NULL);
+    hWndPageItems[EDT_SHARE_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_SHARE_LIMIT_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
+        ES_AUTOHSCROLL, 98, 223, 336, 18, m_hWnd, (HMENU)EDT_NICK_LEN_REDIR_ADDR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SHARE_REDIR_ADDR], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_SHARE_REDIR_ADDR], LanguageManager->sTexts[LAN_REDIRECT_HINT]);
 

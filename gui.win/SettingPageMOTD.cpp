@@ -165,8 +165,8 @@ bool SettingPageMOTD::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_MOTD] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MOTD], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 3, 447, 418,
         m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[EDT_MOTD] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sMOTD != NULL ? SettingManager->sMOTD : "",
-        WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN, 8, 18, 431, 357, m_hWnd, (HMENU)EDT_MOTD, g_hInstance, NULL);
+    hWndPageItems[EDT_MOTD] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sMOTD != NULL ? SettingManager->sMOTD : "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP |
+        ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN, 8, 18, 431, 357, m_hWnd, (HMENU)EDT_MOTD, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MOTD], EM_SETLIMITTEXT, 64000, 0);
 
     hWndPageItems[BTN_MOTD_AS_PM] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MOTD_IN_PM], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,

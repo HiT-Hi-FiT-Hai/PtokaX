@@ -129,7 +129,6 @@ void ServerThread::Run() {
 #else
 	socklen_t len = sizeof(addr);
 #endif
-    // struct hostent *h; h = gethostbyname("PtokaX.org"); memcpy(&test, h->h_addr_list[0], h->h_length);
 
 #ifdef _WIN32
 	#ifndef _SERVICE

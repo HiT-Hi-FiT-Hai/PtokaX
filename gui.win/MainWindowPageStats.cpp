@@ -104,12 +104,10 @@ bool MainWindowPageStats::CreateMainWindowPage(HWND hOwner) {
     hWndPageItems[GB_STATS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         6, 43, rcMain.right-12, 138, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[LBL_STATUS] = ::CreateWindowEx(0, WC_STATIC,
-        (string(LanguageManager->sTexts[LAN_STATUS], (size_t)LanguageManager->ui16TextsLens[LAN_STATUS])+":").c_str(),
+    hWndPageItems[LBL_STATUS] = ::CreateWindowEx(0, WC_STATIC, (string(LanguageManager->sTexts[LAN_STATUS], (size_t)LanguageManager->ui16TextsLens[LAN_STATUS])+":").c_str(),
         WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP, 6, 12, 140, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
 
-    hWndPageItems[LBL_STATUS_VALUE] = ::CreateWindowEx(0, WC_STATIC,
-        (string(LanguageManager->sTexts[LAN_READY], (size_t)LanguageManager->ui16TextsLens[LAN_READY])+".").c_str(),
+    hWndPageItems[LBL_STATUS_VALUE] = ::CreateWindowEx(0, WC_STATIC, (string(LanguageManager->sTexts[LAN_READY], (size_t)LanguageManager->ui16TextsLens[LAN_READY])+".").c_str(),
         WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP, 151, 12, rcMain.right-169, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_JOINS] = ::CreateWindowEx(0, WC_STATIC,
