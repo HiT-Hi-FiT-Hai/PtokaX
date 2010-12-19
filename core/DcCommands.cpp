@@ -87,6 +87,7 @@ cDcCommands::cDcCommands() {
     iStatCmdOpForceMove = iStatCmdMyPass = iStatCmdValidate = iStatCmdKey = iStatCmdGetInfo = iStatCmdGetNickList = 0;
 	iStatCmdConnectToMe = iStatCmdVersion = iStatCmdKick = iStatCmdSupports = iStatBotINFO = iStatZPipe = 0;
     iStatCmdMultiSearch = iStatCmdMultiConnectToMe = iStatCmdClose = 0;
+    msg[0] = '\0';
 }
 //---------------------------------------------------------------------------
 
@@ -869,7 +870,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                         iStatCmdOpForceMove++;
                         #ifdef _DBG
                             int iret = sprintf(msg, "%s (%s) bad state in case $OpForceMove: %d", curUser->Nick, curUser->IP, curUser->iState);
-                            if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData38") == true) {
+                            if(CheckSprintf(iret, 1024, "cDcCommands::PreProcessData38") == true) {
                                 Memo(msg);
                             }
                         #endif
@@ -1965,16 +1966,20 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
 
         curUser->iSR = 0;
         if(curUser->cmdPSearch != NULL) {
+            char * oldbuf = curUser->cmdPSearch->sCommand;
 #ifdef _WIN32
-            curUser->cmdPSearch->sCommand = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->cmdPSearch->sCommand, curUser->cmdPSearch->iLen+iLen+1);
+            curUser->cmdPSearch->sCommand = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, curUser->cmdPSearch->iLen+iLen+1);
 #else
-			curUser->cmdPSearch->sCommand = (char *) realloc(curUser->cmdPSearch->sCommand, curUser->cmdPSearch->iLen+iLen+1);
+			curUser->cmdPSearch->sCommand = (char *) realloc(oldbuf, curUser->cmdPSearch->iLen+iLen+1);
 #endif
             if(curUser->cmdPSearch->sCommand == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(curUser->cmdPSearch->iLen+iLen+1)+
 					" bytes of memory for DcCommands::Search1!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+                HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
+#else
+                free(oldbuf);
 #endif
 				AppendSpecialLog(sDbgstr);
                 return;
@@ -2111,16 +2116,20 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
         }
 
         if(curUser->cmdASearch != NULL) {
+            char * oldbuf = curUser->cmdASearch->sCommand;
 #ifdef _WIN32
-            curUser->cmdASearch->sCommand = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->cmdASearch->sCommand, curUser->cmdASearch->iLen+iLen+1);
+            curUser->cmdASearch->sCommand = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, curUser->cmdASearch->iLen+iLen+1);
 #else
-			curUser->cmdASearch->sCommand = (char *) realloc(curUser->cmdASearch->sCommand, curUser->cmdASearch->iLen+iLen+1);
+			curUser->cmdASearch->sCommand = (char *) realloc(oldbuf, curUser->cmdASearch->iLen+iLen+1);
 #endif
             if(curUser->cmdASearch->sCommand == NULL) {
 				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(curUser->cmdASearch->iLen+iLen+1)+
 					" bytes of memory for DcCommands::Search4!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+                HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
+#else
+                free(oldbuf);
 #endif
 				AppendSpecialLog(sDbgstr);
                 return;
@@ -3844,8 +3853,9 @@ void cDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, const
 
         // PPK ... check for message lines limit
         if(SettingManager->iShorts[SETSHORT_MAX_CHAT_LINES] != 0 || SettingManager->iShorts[SETSHORT_SAME_MULTI_MAIN_CHAT_ACTION] != 0) {
-            uint16_t iLines = 1;
             if(curUser->ui16SameChatMsgs < 2) {
+                uint16_t iLines = 1;
+
                 for(uint32_t i = curUser->NickLen+3; i < iLen-1; i++) {
                     if(sData[i] == '\n') {
                         iLines++;

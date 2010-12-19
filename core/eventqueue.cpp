@@ -77,17 +77,17 @@ eventq::~eventq() {
         event * cur = next;
         next = cur->next;
 
-        if(cur->sMsg != NULL) {
 #ifdef _WIN32
+        if(cur->sMsg != NULL) {
             if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sMsg) == 0) {
 				string sDbgstr = "[BUF] Cannot deallocate cur->sMsg in eventq::~eventq! "+string((uint32_t)GetLastError())+" "+
 					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 				AppendSpecialLog(sDbgstr);
             }
-#else
-			free(cur->sMsg);
-#endif
         }
+#else
+		free(cur->sMsg);
+#endif
 
         delete cur;
     }
@@ -98,9 +98,7 @@ eventq::~eventq() {
         event * cur = next;
         next = cur->next;
 
-        if(cur->sMsg != NULL) {
-            free(cur->sMsg);
-        }
+        free(cur->sMsg);
 
         delete cur;
     }
@@ -322,17 +320,17 @@ void eventq::ProcessEvents() {
                 break;
         }
 
-        if(cur->sMsg != NULL) {
 #ifdef _WIN32
+        if(cur->sMsg != NULL) {
             if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sMsg) == 0) {
 				string sDbgstr = "[BUF] Cannot deallocate cur->sMsg in eventq::ProcessEvents! "+string((uint32_t)GetLastError())+" "+
 					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 				AppendSpecialLog(sDbgstr);
             }
-#else
-			free(cur->sMsg);
-#endif
         }
+#else
+		free(cur->sMsg);
+#endif
 
         delete cur;
     }
@@ -427,9 +425,7 @@ void eventq::ProcessEvents() {
                 break;
         }
 
-        if(cur->sMsg != NULL) {
-            free(cur->sMsg);
-        }
+        free(cur->sMsg);
 
         delete cur;
     }

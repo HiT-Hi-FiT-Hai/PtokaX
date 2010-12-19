@@ -79,6 +79,8 @@ HWND g_hWndActiveDialog = NULL;
 //---------------------------------------------------------------------------
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmdLine, int nCmdShow) {
+    ::SetDllDirectory("");
+
     g_hInstance = hInstance;
 
 	sTitle = "PtokaX DC Hub " + string(PtokaXVersionString);

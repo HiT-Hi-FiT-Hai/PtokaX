@@ -25,7 +25,7 @@ struct User;
 //---------------------------------------------------------------------------
 
 struct ProfileItem {
-    ProfileItem() { };
+    ProfileItem();
     ~ProfileItem();
 
     char *sName;

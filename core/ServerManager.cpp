@@ -995,7 +995,7 @@ void ServerStop() {
 
 	// stop the main hub loop
 	if(srvLoop != NULL) {
-		srvLoop->Terminate();
+		bServerTerminated = true;
 	} else {
 		ServerFinalStop(false);
     }
@@ -1026,27 +1026,18 @@ void ServerFinalStop(const bool &bFromServiceLoop) {
 		colUsers = NULL;
     }
 
-	if(DcCommands != NULL) {
-		delete DcCommands;
-        DcCommands = NULL;
-    }
+	delete DcCommands;
+    DcCommands = NULL;
 
-    if(HubCmds != NULL) {
-        delete HubCmds;
-        HubCmds = NULL;
-    }
+    delete HubCmds;
+    HubCmds = NULL;
 
 	// delete hashed userlist manager
-	if(hashManager != NULL) {
-        delete hashManager;
-        hashManager = NULL;
-    }
+    delete hashManager;
+    hashManager = NULL;
 
-	// delete global send queue manager
-	if(globalQ != NULL) {
-		delete globalQ;
-        globalQ = NULL;
-    }
+	delete globalQ;
+    globalQ = NULL;
 
     if(RegisterThread != NULL) {
         RegisterThread->Close();
@@ -1055,15 +1046,11 @@ void ServerFinalStop(const bool &bFromServiceLoop) {
         RegisterThread = NULL;
     }
 
-	if(eventqueue != NULL) {
-		delete eventqueue;
-        eventqueue = NULL;
-    }
+	delete eventqueue;
+    eventqueue = NULL;
 
-	if(IP2Country != NULL) {
-		delete IP2Country;
-        IP2Country = NULL;
-    }
+	delete IP2Country;
+    IP2Country = NULL;
 
 /*	if(TLSManager != NULL) {
 		delete TLSManager;

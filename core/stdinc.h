@@ -95,6 +95,7 @@
 #ifdef _WIN32
 	#include <psapi.h>
 	#include <io.h>
+	#include <Iphlpapi.h>
 #endif
 #include "pxstring.h"
 //---------------------------------------------------------------------------

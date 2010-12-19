@@ -40,21 +40,36 @@
 RegThread *RegisterThread = NULL;
 //---------------------------------------------------------------------------
 
+RegThread::RegSocket::RegSocket() {
+#ifdef _WIN32
+    sock = INVALID_SOCKET;
+#else
+    sock = -1;
+#endif
+
+    sAddress = NULL;
+    sRecvBuf = NULL;
+    sSendBuf = NULL;
+    sSendBufHead = NULL;
+
+    prev = NULL;
+    next = NULL;
+
+    iTotalShare = 0;
+
+    iRecvBufLen = 0;
+    iRecvBufSize = 0;
+    iSendBufLen = 0;
+    iTotalUsers = 0;
+
+    ui32AddrLen = 0;
+}
+//---------------------------------------------------------------------------
+
 RegThread::RegSocket::~RegSocket() {
-    if(sAddress != NULL) {
-        free(sAddress);
-        sAddress = NULL;
-    }
-
-    if(sRecvBuf != NULL) {
-        free(sRecvBuf);
-        sRecvBuf = NULL;
-    }
-
-    if(sSendBuf != NULL) {
-        free(sSendBuf);
-        sSendBuf = NULL;
-    }
+    free(sAddress);
+    free(sRecvBuf);
+    free(sSendBuf);
 
 #ifdef _WIN32
     shutdown(sock, SD_SEND);
@@ -67,6 +82,8 @@ RegThread::RegSocket::~RegSocket() {
 //---------------------------------------------------------------------------
 
 RegThread::RegThread() {  
+    sMsg[0] = '\0';
+
     bTerminated = false;
 
     threadId = 0;
@@ -314,6 +331,13 @@ void RegThread::Run() {
 		#endif
 	#endif
 #endif
+
+#ifndef _WIN32
+    struct timespec sleeptime = { 0 };
+    sleeptime.tv_sec = 0;
+    sleeptime.tv_nsec = 1000000;
+#endif
+
     RegSocket *next = RegSockListS;
     while(bTerminated == false && next != NULL) {
         RegSocket *cur = next;
@@ -389,11 +413,16 @@ void RegThread::Run() {
 #ifdef _WIN32
 		::Sleep(1);
 #else
-		usleep(1000);
+//		usleep(1000);
+        nanosleep(&sleeptime, NULL);
 #endif
 	}
 
 	uint16_t iLoops = 0;
+
+#ifndef _WIN32
+    sleeptime.tv_nsec = 75000000;
+#endif
 
     while(RegSockListS != NULL && bTerminated == false && iLoops < 4000) {   
         iLoops++;
@@ -421,7 +450,8 @@ void RegThread::Run() {
 #ifdef _WIN32
 		::Sleep(75);
 #else
-		usleep(75000);
+//		usleep(75000);
+        nanosleep(&sleeptime, NULL);
 #endif
 	}
 
@@ -538,7 +568,9 @@ bool RegThread::Receive(RegSocket * Sock) {
             return false;
         }
 
-        Sock->sRecvBuf = (char *) realloc(Sock->sRecvBuf, iAllignLen);
+        char * oldbuf = Sock->sRecvBuf;
+
+        Sock->sRecvBuf = (char *) realloc(oldbuf, iAllignLen);
         if(Sock->sRecvBuf == NULL) {
 #ifdef _WIN32
 			string sDbgstr = "[BUF] Cannot reallocate "+string(ui32bytes)+"/"+string(Sock->iRecvBufLen)+"/"+string(iAllignLen)+
@@ -547,6 +579,8 @@ bool RegThread::Receive(RegSocket * Sock) {
 			string sDbgstr = "[BUF] Cannot reallocate "+string(i32bytes)+"/"+string(Sock->iRecvBufLen)+"/"+string(iAllignLen)+
 				" bytes of memory for sRecvBuf in RegThread::Receive!";
 #endif
+            free(oldbuf);
+
 			eventqueue->AddThread(eventq::EVENT_REGSOCK_MSG, sDbgstr.c_str());
             return false;
         }

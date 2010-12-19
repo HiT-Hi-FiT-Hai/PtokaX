@@ -245,6 +245,8 @@ static void WINAPI StartService(DWORD /*argc*/, char* argv[]) {
 //---------------------------------------------------------------------------
 
 int __cdecl main(int argc, char* argv[]) {
+    ::SetDllDirectory("");
+
 	sTitle = "PtokaX DC Hub " + string(PtokaXVersionString);
 #ifdef _DEBUG
 	sTitle += " [debug]";

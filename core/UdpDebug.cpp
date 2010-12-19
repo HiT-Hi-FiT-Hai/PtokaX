@@ -39,19 +39,36 @@
 clsUdpDebug *UdpDebug = NULL;
 //---------------------------------------------------------------------------
 
-clsUdpDebug::UdpDbgItem::~UdpDbgItem() {
-    if(Nick != NULL) {
+clsUdpDebug::UdpDbgItem::UdpDbgItem() {
 #ifdef _WIN32
+    s = INVALID_SOCKET;
+#else
+    s = -1;
+#endif
+
+    prev = NULL;
+    next = NULL;
+
+    Nick = NULL;
+
+    ui32Hash = 0;
+
+    bIsScript = false;
+}
+//---------------------------------------------------------------------------
+
+clsUdpDebug::UdpDbgItem::~UdpDbgItem() {
+#ifdef _WIN32
+    if(Nick != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)Nick) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate Nick in ~UdpDbgItem! "+string((uint32_t)GetLastError())+" "+
                 string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
             AppendSpecialLog(sDbgstr);
         }
-#else
-		free(Nick);
-#endif
-        Nick = NULL;
     }
+#else
+	free(Nick);
+#endif
 
 #ifdef _WIN32
 	closesocket(s);

@@ -42,6 +42,12 @@
 //---------------------------------------------------------------------------
 
 ServerThread::ServerThread() {
+#ifdef _WIN32
+    server = INVALID_SOCKET;
+#else
+    server = -1;
+#endif
+
 	bActive = false;
 	bSuspended = false;
 	bTerminated = false;
@@ -137,6 +143,13 @@ void ServerThread::Run() {
 		#endif
 	#endif
 #endif
+
+#ifndef _WIN32
+    struct timespec sleeptime = { 0 };
+    sleeptime.tv_sec = 0;
+    sleeptime.tv_nsec = 1000000;
+#endif
+
 	while(bTerminated == false) {
 		s = accept(server, (sockaddr *)&addr, &len);
 
@@ -186,7 +199,8 @@ void ServerThread::Run() {
 #ifdef _WIN32
 				::Sleep(1);
 #else
-                usleep(1000);
+//                usleep(1000);
+                nanosleep(&sleeptime, NULL);
 #endif
 			}
 		} else {

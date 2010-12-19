@@ -61,44 +61,41 @@ BanItem::BanItem(void) {
 //---------------------------------------------------------------------------
 
 BanItem::~BanItem(void) {
-    if(sNick != NULL) {
 #ifdef _WIN32
+    if(sNick != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate sNick in BanItem::~BanItem! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
             AppendSpecialLog(sDbgstr);
         }
-#else
-		free(sNick);
-#endif
-        sNick = NULL;
     }
+#else
+	free(sNick);
+#endif
 
-    if(sReason != NULL) {
 #ifdef _WIN32
+    if(sReason != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sReason) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate sReason in BanItem::~BanItem! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
-#else
-		free(sReason);
-#endif
-        sReason = NULL;
     }
+#else
+	free(sReason);
+#endif
 
-    if(sBy != NULL) {
 #ifdef _WIN32
+    if(sBy != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sBy) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate sBy in BanItem::~BanItem! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
-#else
-		free(sBy);
-#endif
-        sBy = NULL;
     }
+#else
+	free(sBy);
+#endif
 }
 //---------------------------------------------------------------------------
 
@@ -122,31 +119,29 @@ RangeBanItem::RangeBanItem(void) {
 //---------------------------------------------------------------------------
 
 RangeBanItem::~RangeBanItem(void) {
-    if(sReason != NULL) {
 #ifdef _WIN32
+    if(sReason != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sReason) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate sReason in RangeBanItem::~RangeBanItem! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
-#else
-		free(sReason);
-#endif
-        sReason = NULL;
     }
+#else
+	free(sReason);
+#endif
 
-    if(sBy != NULL) {
 #ifdef _WIN32
+    if(sBy != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sBy) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate sBy in RangeBanItem::~RangeBanItem! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
-#else
-		free(sBy);
-#endif
-        sBy = NULL;
     }
+#else
+	free(sBy);
+#endif
 }
 //---------------------------------------------------------------------------
 

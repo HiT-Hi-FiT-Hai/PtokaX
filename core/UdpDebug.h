@@ -27,7 +27,7 @@ struct User;
 class clsUdpDebug {
 private:
     struct UdpDbgItem {
-        UdpDbgItem() { };
+        UdpDbgItem();
         ~UdpDbgItem();
 
 #ifdef _WIN32

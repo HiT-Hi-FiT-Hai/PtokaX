@@ -167,9 +167,13 @@ static void RegTimerHandler() {
 //---------------------------------------------------------------------------
 
 theLoop::theLoop() {
+    msg[0] = '\0';
+
 #ifdef _WIN32
     InitializeCriticalSection(&csAcceptQueue);
 #else
+	iSIG = 0;
+
 	pthread_mutex_init(&mtxAcceptQueue, NULL);
 #endif
 
@@ -1132,11 +1136,6 @@ void theLoop::SendLoop() {
 
     iLastSendRest = iSendRests;
     iSendRestsPeak = iSendRests > iSendRestsPeak ? iSendRests : iSendRestsPeak;
-}
-//---------------------------------------------------------------------------
-
-void theLoop::Terminate() {
-	bServerTerminated = true;
 }
 //---------------------------------------------------------------------------
 

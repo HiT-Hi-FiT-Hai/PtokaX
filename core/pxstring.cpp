@@ -243,17 +243,24 @@ string operator+(const char * sTxt, const string & sStr) {
 string & string::operator+=(const char * sTxt) {
     size_t iLen = strlen(sTxt);
 
+    char * oldbuf = sData;
+
     if(sData == sEmpty) {
         sData = (char *)malloc(iDataLen+iLen+1);
     } else {
-        sData = (char *)realloc(sData, iDataLen+iLen+1);
+        sData = (char *)realloc(oldbuf, iDataLen+iLen+1);
     }
+
     if(sData == NULL) {
         string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+iLen+1))+
             " bytes of memory for sData in string::operator+=(const char *)!";
 #ifdef _WIN32
 		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
+        if(oldbuf != sEmpty) {
+            free(oldbuf);
+        }
+
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }
@@ -271,10 +278,12 @@ string & string::operator+=(const string & sStr) {
         return *this;
     }
 
+    char * oldbuf = sData;
+
     if(sData == sEmpty) {
         sData = (char *)malloc(iDataLen+sStr.size()+1);
     } else {
-        sData = (char *)realloc(sData, iDataLen+sStr.size()+1);
+        sData = (char *)realloc(oldbuf, iDataLen+sStr.size()+1);
     }
     if(sData == NULL) {
         string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+sStr.size()+1))+
@@ -282,6 +291,10 @@ string & string::operator+=(const string & sStr) {
 #ifdef _WIN32
 		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
+        if(oldbuf != sEmpty) {
+            free(oldbuf);
+        }
+
         AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
     }

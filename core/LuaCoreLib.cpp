@@ -201,6 +201,8 @@ static int RegBot(lua_State * L) {
 #else
 		if(strcasecmp(bot->sNick, cur->sNick) == 0) {
 #endif
+            delete bot;
+
             lua_pushnil(L);
             return 1;
         }
@@ -1237,6 +1239,27 @@ static int GetUserValue(lua_State * L) {
 				lua_pushnil(L);
 			}
         	return 1;
+        case 27: {
+#ifdef _WIN32
+            uint32_t uiIP = ::inet_addr(u->IP);
+            MIB_IPNETTABLE * pINT = (MIB_IPNETTABLE *)&ScriptManager->lua_msg;
+            ULONG ulSize = 131072;
+            DWORD dwRes = ::GetIpNetTable(pINT, &ulSize, TRUE);
+            if(dwRes == NO_ERROR) {
+                for(DWORD dwi = 0; dwi < pINT->dwNumEntries; dwi++) {
+                    if(pINT->table[dwi].dwAddr == uiIP && pINT->table[dwi].dwType != MIB_IPNET_TYPE_INVALID) {
+                        char sMac[18];
+                        sprintf(sMac, "%02X-%02X-%02X-%02X-%02X-%02X", pINT->table[dwi].bPhysAddr[0], pINT->table[dwi].bPhysAddr[1], pINT->table[dwi].bPhysAddr[2],
+                            pINT->table[dwi].bPhysAddr[3], pINT->table[dwi].bPhysAddr[4], pINT->table[dwi].bPhysAddr[5]);
+                        lua_pushlstring(L, sMac, 17);
+                        return 1;
+                    }
+                }
+            }
+#endif
+            lua_pushnil(L);
+            return 1;
+        }
         default:
             luaL_error(L, "bad argument #2 to 'GetUserValue' (it's not valid id)");
             
