@@ -52,6 +52,7 @@ classUsers *colUsers = NULL;
 //---------------------------------------------------------------------------
 
 classUsers::classUsers() {
+    msg[0] = '\0';
     llist = NULL;
     elist = NULL;
 
@@ -214,150 +215,140 @@ classUsers::~classUsers() {
         RecTime * cur = next;
         next = cur->next;
 
-        if(cur->sNick != NULL) {
 #ifdef _WIN32
+        if(cur->sNick != NULL) {
             if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sNick) == 0) {
     			string sDbgstr = "[BUF] Cannot deallocate cur->sNick in classUsers::~classUsers! "+string((uint32_t)GetLastError())+" "+
     				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
                 AppendSpecialLog(sDbgstr);
             }
-#else
-			free(cur->sNick);
-#endif
         }
+#else
+		free(cur->sNick);
+#endif
 
         delete cur;
     }
 
-    if(nickList != NULL) {
 #ifdef _WIN32
+    if(nickList != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)nickList) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate nickList in classUsers::~classUsers! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
             AppendSpecialLog(sDbgstr);
         }
-#else
-		free(nickList);
-#endif
-        nickList = NULL;
     }
+#else
+	free(nickList);
+#endif
 
-    if(sZNickList != NULL) {
 #ifdef _WIN32
+    if(sZNickList != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZNickList) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate sZNickList in classUsers::~classUsers! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
-#else
-		free(sZNickList);
-#endif
-        sZNickList = NULL;
     }
+#else
+	free(sZNickList);
+#endif
 
-    if(opList != NULL) {
 #ifdef _WIN32
+    if(opList != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)opList) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate opList in classUsers::~classUsers! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
-#else
-		free(opList);
-#endif
-        opList = NULL;
     }
+#else
+	free(opList);
+#endif
 
-    if(sZOpList != NULL) {
 #ifdef _WIN32
+    if(sZOpList != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZOpList) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate sZOpList in classUsers::~classUsers! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
-#else
-		free(sZOpList);
-#endif
-        sZOpList = NULL;
     }
+#else
+	free(sZOpList);
+#endif
 
-    if(myInfos != NULL) {
 #ifdef _WIN32
+    if(myInfos != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)myInfos) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate myInfos in classUsers::~classUsers! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
-#else
-		free(myInfos);
-#endif
-        myInfos = NULL;
     }
+#else
+	free(myInfos);
+#endif
 
-    if(sZMyInfos != NULL) {
 #ifdef _WIN32
+    if(sZMyInfos != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZMyInfos) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate sZMyInfos in classUsers::~classUsers! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
-#else
-		free(sZMyInfos);
-#endif
-        sZMyInfos = NULL;
     }
+#else
+	free(sZMyInfos);
+#endif
 
-    if(myInfosTag != NULL) {
 #ifdef _WIN32
+    if(myInfosTag != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)myInfosTag) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate myInfosTag in classUsers::~classUsers! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
-#else
-		free(myInfosTag);
-#endif
-        myInfosTag = NULL;
     }
+#else
+	free(myInfosTag);
+#endif
 
-    if(sZMyInfosTag != NULL) {
 #ifdef _WIN32
+    if(sZMyInfosTag != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZMyInfosTag) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate sZMyInfosTag in classUsers::~classUsers! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
-#else
-		free(sZMyInfosTag);
-#endif
-        sZMyInfosTag = NULL;
     }
+#else
+	free(sZMyInfosTag);
+#endif
 
-    if(userIPList != NULL) {
 #ifdef _WIN32
+    if(userIPList != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)userIPList) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate userIPList in classUsers::~classUsers! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
-#else
-		free(userIPList);
-#endif
-        userIPList = NULL;
     }
+#else
+	free(userIPList);
+#endif
 
-    if(sZUserIPList != NULL) {
 #ifdef _WIN32
+    if(sZUserIPList != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZUserIPList) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate sZUserIPList in classUsers::~classUsers! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
-#else
-		free(sZUserIPList);
-#endif
-        sZUserIPList = NULL;
     }
+#else
+	free(sZUserIPList);
+#endif
 
 #ifdef _WIN32
     HeapDestroy(hRecvHeap);
@@ -405,6 +396,13 @@ void classUsers::RemUser(User * u) {
 
 void classUsers::DisconnectAll() {
     uint32_t iCloseLoops = 0;
+
+#ifndef _WIN32
+    struct timespec sleeptime = { 0 };
+    sleeptime.tv_sec = 0;
+    sleeptime.tv_nsec = 50000000;
+#endif
+
     while(llist != NULL && iCloseLoops <= 100) {
         User *next = llist;
         while(next != NULL) {
@@ -443,7 +441,8 @@ void classUsers::DisconnectAll() {
 #ifdef _WIN32
         ::Sleep(50);
 #else
-		usleep(50000);
+//		usleep(50000);
+        nanosleep(&sleeptime, NULL);
 #endif
     }
 
@@ -479,16 +478,20 @@ void classUsers::Add2NickList(char * Nick, const size_t &iNickLen, const bool &i
     // $NickList nick$$nick2$$|
 
     if(nickListSize < nickListLen+iNickLen+2) {
+        char * oldbuf = nickList;
 #ifdef _WIN32
-        nickList = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)nickList, nickListSize+NICKLISTSIZE+1);
+        nickList = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, nickListSize+NICKLISTSIZE+1);
 #else
-		nickList = (char *) realloc(nickList, nickListSize+NICKLISTSIZE+1);
+		nickList = (char *) realloc(oldbuf, nickListSize+NICKLISTSIZE+1);
 #endif
         if(nickList == NULL) {
 			string sDbgstr = "[BUF] Cannot reallocate "+string(nickListSize)+"/"+string(nickListSize+NICKLISTSIZE+1)+
 				" bytes of memory in classUsers::Add2NickList for NickList!";
 #ifdef _WIN32
 			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+			HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
+#else
+            free(oldbuf);
 #endif
 			AppendSpecialLog(sDbgstr);
             return;
@@ -510,16 +513,20 @@ void classUsers::Add2NickList(char * Nick, const size_t &iNickLen, const bool &i
         return;
 
     if(opListSize < opListLen+iNickLen+2) {
+        char * oldbuf = opList;
 #ifdef _WIN32
-        opList = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)opList, opListSize+OPLISTSIZE+1);
+        opList = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, opListSize+OPLISTSIZE+1);
 #else
-		opList = (char *) realloc(opList, opListSize+OPLISTSIZE+1);
+		opList = (char *) realloc(oldbuf, opListSize+OPLISTSIZE+1);
 #endif
         if(opList == NULL) {
 			string sDbgstr = "[BUF] Cannot reallocate "+string(opListSize)+"/"+string(opListSize+OPLISTSIZE+1)+
 				" bytes of memory in classUsers::Add2NickList for opList!";
 #ifdef _WIN32
 			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+			HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
+#else
+            free(oldbuf);
 #endif
             AppendSpecialLog(sDbgstr);
             return;
@@ -541,16 +548,20 @@ void classUsers::Add2NickList(char * Nick, const size_t &iNickLen, const bool &i
 
 void classUsers::Add2OpList(char * Nick, const size_t &iNickLen) {
     if(opListSize < opListLen+iNickLen+2) {
+        char * oldbuf = opList;
 #ifdef _WIN32
-        opList = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)opList, opListSize+OPLISTSIZE+1);
+        opList = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, opListSize+OPLISTSIZE+1);
 #else
-		opList = (char *) realloc(opList, opListSize+OPLISTSIZE+1);
+		opList = (char *) realloc(oldbuf, opListSize+OPLISTSIZE+1);
 #endif
         if(opList == NULL) {
 			string sDbgstr = "[BUF] Cannot reallocate "+string(opListSize)+"/"+string(opListSize+OPLISTSIZE+1)+
 				" bytes of memory in classUsers::Add2OpList for opList!";
 #ifdef _WIN32
 			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+			HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
+#else
+            free(oldbuf);
 #endif
             AppendSpecialLog(sDbgstr);
             return;
@@ -710,16 +721,20 @@ void classUsers::SendChat2All(User * cur, char * data, const size_t &iChatLen) {
 
 void classUsers::Add2MyInfos(User * u) {
     if(myInfosSize < myInfosLen+u->iMyInfoLen) {
+        char * oldbuf = myInfos;
 #ifdef _WIN32
-        myInfos = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)myInfos, myInfosSize+MYINFOLISTSIZE+1);
+        myInfos = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, myInfosSize+MYINFOLISTSIZE+1);
 #else
-		myInfos = (char *) realloc(myInfos, myInfosSize+MYINFOLISTSIZE+1);
+		myInfos = (char *) realloc(oldbuf, myInfosSize+MYINFOLISTSIZE+1);
 #endif
         if(myInfos == NULL) {
 			string sDbgstr = "[BUF] Cannot reallocate "+string(myInfosSize)+"/"+string(myInfosSize+MYINFOLISTSIZE+1)+
 				" bytes of memory in classUsers::Add2MyInfos! "+string(u->MyInfo, u->iMyInfoLen);
 #ifdef _WIN32
 			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+            HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
+#else
+            free(oldbuf);
 #endif
 			AppendSpecialLog(sDbgstr);
             return;
@@ -749,16 +764,20 @@ void classUsers::DelFromMyInfos(User * u) {
 
 void classUsers::Add2MyInfosTag(User * u) {
     if(myInfosTagSize < myInfosTagLen+u->iMyInfoTagLen) {
+        char * oldbuf = myInfosTag;
 #ifdef _WIN32
-        myInfosTag = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)myInfosTag, myInfosTagSize+MYINFOLISTSIZE+1);
+        myInfosTag = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, myInfosTagSize+MYINFOLISTSIZE+1);
 #else
-		myInfosTag = (char *) realloc(myInfosTag, myInfosTagSize+MYINFOLISTSIZE+1);
+		myInfosTag = (char *) realloc(oldbuf, myInfosTagSize+MYINFOLISTSIZE+1);
 #endif
         if(myInfosTag == NULL) {
 			string sDbgstr = "[BUF] Cannot reallocate "+string(myInfosTagSize)+"/"+string(myInfosTagSize+MYINFOLISTSIZE+1)+
 				" bytes of memory in classUsers::Add2MyInfosTag! "+string(u->MyInfoTag, u->iMyInfoTagLen);
 #ifdef _WIN32
 			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+            HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
+#else
+            free(oldbuf);
 #endif
 			AppendSpecialLog(sDbgstr);
             return;
@@ -791,16 +810,20 @@ void classUsers::AddBot2MyInfos(char * MyInfo) {
 	if(myInfosTag != NULL) {
 	    if(strstr(myInfosTag, MyInfo) == NULL ) {
             if(myInfosTagSize < myInfosTagLen+len) {
+                char * oldbuf = myInfosTag;
 #ifdef _WIN32
-                myInfosTag = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)myInfosTag, myInfosTagSize+MYINFOLISTSIZE+1);
+                myInfosTag = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, myInfosTagSize+MYINFOLISTSIZE+1);
 #else
-				myInfosTag = (char *) realloc(myInfosTag, myInfosTagSize+MYINFOLISTSIZE+1);
+				myInfosTag = (char *) realloc(oldbuf, myInfosTagSize+MYINFOLISTSIZE+1);
 #endif
                 if(myInfosTag == NULL) {
 					string sDbgstr = "[BUF] Cannot reallocate "+string(myInfosTagSize)+"/"+string(myInfosTagSize+MYINFOLISTSIZE+1)+
 						" bytes of memory for myInfosTag in classUsers::AddBot2MyInfos! "+string(MyInfo, len);
 #ifdef _WIN32
 					sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+                    HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
+#else
+                    free(oldbuf);
 #endif
 					AppendSpecialLog(sDbgstr);
                     return;
@@ -816,16 +839,20 @@ void classUsers::AddBot2MyInfos(char * MyInfo) {
     if(myInfos != NULL) {
     	if(strstr(myInfos, MyInfo) == NULL ) {
             if(myInfosSize < myInfosLen+len) {
+                char * oldbuf = myInfos;
 #ifdef _WIN32
-                myInfos = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)myInfos, myInfosSize+MYINFOLISTSIZE+1);
+                myInfos = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, myInfosSize+MYINFOLISTSIZE+1);
 #else
-				myInfos = (char *) realloc(myInfos, myInfosSize+MYINFOLISTSIZE+1);
+				myInfos = (char *) realloc(oldbuf, myInfosSize+MYINFOLISTSIZE+1);
 #endif
                 if(myInfos == NULL) {
 					string sDbgstr = "[BUF] Cannot reallocate "+string(myInfosSize)+"/"+string(myInfosSize+MYINFOLISTSIZE+1)+
 						" bytes of memory for myInfos in classUsers::AddBot2MyInfos! "+string(MyInfo, len);
 #ifdef _WIN32
 					sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+                    HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
+#else
+                    free(oldbuf);
 #endif
 					AppendSpecialLog(sDbgstr);
                     return;
@@ -869,16 +896,20 @@ void classUsers::Add2UserIP(User * cur) {
     }
 
     if(userIPListSize < userIPListLen+m) {
+        char * oldbuf = userIPList;
 #ifdef _WIN32
-        userIPList = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)userIPList, userIPListSize+IPLISTSIZE+1);
+        userIPList = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, userIPListSize+IPLISTSIZE+1);
 #else
-		userIPList = (char *) realloc(userIPList, userIPListSize+IPLISTSIZE+1);
+		userIPList = (char *) realloc(oldbuf, userIPListSize+IPLISTSIZE+1);
 #endif
         if(userIPList == NULL) {
 			string sDbgstr = "[BUF] Cannot reallocate "+string(userIPListSize)+"/"+string(userIPListSize+IPLISTSIZE+1)+
 				" bytes of memory in classUsers::Add2UserIP!";
 #ifdef _WIN32
 			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+            HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
+#else
+            free(oldbuf);
 #endif
 			AppendSpecialLog(sDbgstr);
             return;
@@ -977,17 +1008,17 @@ bool classUsers::CheckRecTime(User * curUser) {
 
         // check expires...
         if(cur->ui64DisConnTick+SettingManager->iShorts[SETSHORT_MIN_RECONN_TIME] <= ui64ActualTick) {
-            if(cur->sNick != NULL) {
 #ifdef _WIN32
+            if(cur->sNick != NULL) {
                 if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sNick) == 0) {
         			string sDbgstr = "[BUF] Cannot deallocate cur->sNick in classUsers::CheckRecTime! "+string((uint32_t)GetLastError())+" "+
         				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
                     AppendSpecialLog(sDbgstr);
                 }
-#else
-				free(cur->sNick);
-#endif
             }
+#else
+			free(cur->sNick);
+#endif
 
             if(cur->prev == NULL) {
                 if(cur->next == NULL) {

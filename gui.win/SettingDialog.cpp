@@ -266,7 +266,7 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                     NMTVKEYDOWN * ptvkd = (LPNMTVKEYDOWN)lParam;
                     if(ptvkd->wVKey == VK_TAB) {
                         if((::GetKeyState(VK_SHIFT) & 0x8000) > 0) {
-                            HTREEITEM htiNode = (HTREEITEM)::SendMessage(hWndWindowItems[TV_TREE], TVM_GETNEXTITEM, TVGN_CARET, 0L);
+                            HTREEITEM htiNode = (HTREEITEM)::SendMessage(hWndWindowItems[TV_TREE], TVM_GETNEXTITEM, TVGN_CARET, 0);
 
                             if(htiNode == NULL) {
                                 break;
@@ -389,7 +389,7 @@ void SettingDialog::DoModal(HWND hWndParent) {
 //---------------------------------------------------------------------------
 
 void SettingDialog::OnSelChanged() {
-    HTREEITEM htiNode = (HTREEITEM)::SendMessage(hWndWindowItems[TV_TREE], TVM_GETNEXTITEM, TVGN_CARET, 0L);
+    HTREEITEM htiNode = (HTREEITEM)::SendMessage(hWndWindowItems[TV_TREE], TVM_GETNEXTITEM, TVGN_CARET, 0);
 
     if(htiNode == NULL) {
         return;

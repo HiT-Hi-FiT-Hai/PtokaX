@@ -38,29 +38,29 @@ TextFileMan *TextFileManager = NULL;
 //---------------------------------------------------------------------------
 
 TextFileMan::TextFile::~TextFile() {
-    if(sCommand != NULL) {
 #ifdef _WIN32
+    if(sCommand != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sCommand) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate sCommand in ~TextFile! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
-#else
-		free(sCommand);
-#endif
     }
+#else
+	free(sCommand);
+#endif
 
-    if(sText != NULL) {
 #ifdef _WIN32
+    if(sText != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sText) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate sText in ~TextFile! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
-#else
-		free(sText);
-#endif
     }
+#else
+	free(sText);
+#endif
 }
 //---------------------------------------------------------------------------
 
@@ -123,11 +123,13 @@ bool TextFileMan::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = fals
                 int iret = sprintf(MSG, "$To: %s From: %s $<%s> %s", u->Nick, SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                     SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], cur->sText);
                 if(CheckSprintf(iret, iChatLen, "TextFileMan::ProcessTextFilesCmd1") == false) {
+                    free(MSG);
                     return true;
                 }
             } else {
                 int iret = sprintf(MSG,"<%s> %s", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], cur->sText);
                 if(CheckSprintf(iret, iChatLen, "TextFileMan::ProcessTextFilesCmd2") == false) {
+                    free(MSG);
                     return true;
                 }
             }

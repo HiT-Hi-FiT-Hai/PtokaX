@@ -66,6 +66,8 @@ ScriptMan::ScriptMan() {
     
     ActualUser = NULL;
 
+    lua_msg[0] = '\0';
+
     ui8ScriptCount = 0;
     ui8BotsCount = 0;
 
@@ -201,15 +203,19 @@ bool ScriptMan::AddScript(char * sName, const bool &bEnabled/* = false*/) {
             exit(EXIT_FAILURE);
         }
     } else {
+        Script ** oldbuf = ScriptTable;
 #ifdef _WIN32
-		ScriptTable = (Script **) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ScriptTable, ui8ScriptCount*sizeof(Script *));
+		ScriptTable = (Script **) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, oldbuf, ui8ScriptCount*sizeof(Script *));
 #else
-		ScriptTable = (Script **) realloc(ScriptTable, ui8ScriptCount*sizeof(Script *));
+		ScriptTable = (Script **) realloc(oldbuf, ui8ScriptCount*sizeof(Script *));
 #endif
 		if(ScriptTable == NULL) {
 			string sDbgstr = "[BUF] Cannot reallocate ScriptTable in ScriptMan::AddScript!";
 #ifdef _WIN32
             sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+            HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
+#else
+            free(oldbuf);
 #endif
 			AppendSpecialLog(sDbgstr);
             exit(EXIT_FAILURE);

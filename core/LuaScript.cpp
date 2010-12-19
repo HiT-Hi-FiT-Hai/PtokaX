@@ -214,18 +214,17 @@ ScriptBot::~ScriptBot() {
 //------------------------------------------------------------------------------
 
 ScriptTimer::~ScriptTimer() {
-	if(sFunctionName != NULL) {
 #ifdef _WIN32
+	if(sFunctionName != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sFunctionName) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate sFunctionName in ~ScriptTimer! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
-#else
-		free(sFunctionName);
-#endif
-        sFunctionName = NULL;
     }
+#else
+	free(sFunctionName);
+#endif
 }
 //------------------------------------------------------------------------------
 
@@ -305,18 +304,18 @@ Script::~Script() {
         lua_close(LUA);
     }
 
-	if(sName != NULL) {
 #ifdef _WIN32
+	if(sName != NULL) {
 		if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sName) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate sName in ~Script! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hRecvHeap, HEAP_NO_SERIALIZE, 0));
-			AppendSpecialLog(sDbgstr);
+
+            AppendSpecialLog(sDbgstr);
         }
-#else
-		free(sName);
-#endif
-		sName = NULL;
     }
+#else
+	free(sName);
+#endif
 }
 //------------------------------------------------------------------------------
 

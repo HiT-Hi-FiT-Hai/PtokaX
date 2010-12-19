@@ -228,7 +228,11 @@ int main(int argc, char* argv[]) {
 	} else if(bDaemon == false) {
 	    printf((sTitle+" running...\n").c_str());
 	}
-	
+
+    struct timespec sleeptime = { 0 };
+    sleeptime.tv_sec = 0;
+    sleeptime.tv_nsec = 100000000;
+
 	while(true) {
 	    srvLoop->Looper();
 	
@@ -236,7 +240,9 @@ int main(int argc, char* argv[]) {
 	        break;
 	    }
 	
-	    usleep(100000);
+
+//	    usleep(100000);
+        nanosleep(&sleeptime, NULL);
 	}
 	
 	if(bDaemon == false) {

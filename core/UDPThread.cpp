@@ -40,7 +40,15 @@
 UDPRecvThread *UDPThread = NULL;
 //---------------------------------------------------------------------------
 
-UDPRecvThread::UDPRecvThread() { 
+UDPRecvThread::UDPRecvThread() {
+#ifdef _WIN32
+    sock = INVALID_SOCKET;
+#else
+    sock = -1;
+#endif
+
+    rcvbuf[0] = '\0';
+
     threadId = 0;
 
 #ifdef _WIN32

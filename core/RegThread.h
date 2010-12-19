@@ -25,7 +25,7 @@
 class RegThread {
 private:
     struct RegSocket {
-        RegSocket() { };
+        RegSocket();
         ~RegSocket();
     
         uint64_t iTotalShare;

@@ -48,6 +48,15 @@
 ProfileManager *ProfileMan = NULL;
 //---------------------------------------------------------------------------
 
+ProfileItem::ProfileItem() {
+    sName = NULL;
+
+	for(uint16_t i = 0; i < 256; i++) {
+        bPermissions[i] = false;
+    }
+}
+//---------------------------------------------------------------------------
+
 ProfileItem::~ProfileItem() {
 #ifdef _WIN32
     if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sName) == 0) {
@@ -298,12 +307,13 @@ int32_t ProfileManager::AddProfile(char * name) {
 	#ifdef _SERVICE
 		CreateProfile(name);
 	#else
-		ProfileItem *newProfile = CreateProfile(name);
-
 		#ifndef _MSC_VER
+            ProfileItem *newProfile = CreateProfile(name);
 			if(ProfileManForm != NULL) {
 				ProfileManForm->AddProfile(newProfile);
 			}
+		#else
+            CreateProfile(name);
 		#endif
 	#endif
 #else
@@ -403,15 +413,19 @@ int32_t ProfileManager::RemoveProfileByName(char * name) {
         }
     }
 
+    ProfileItem ** oldbuf = ProfilesTable;
 #ifdef _WIN32
-    ProfilesTable = (ProfileItem **) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ProfilesTable, iProfileCount*sizeof(ProfileItem *));
+    ProfilesTable = (ProfileItem **) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, iProfileCount*sizeof(ProfileItem *));
 #else
-	ProfilesTable = (ProfileItem **) realloc(ProfilesTable, iProfileCount*sizeof(ProfileItem *));
+	ProfilesTable = (ProfileItem **) realloc(oldbuf, iProfileCount*sizeof(ProfileItem *));
 #endif
     if(ProfilesTable == NULL) {
     	string sDbgstr = "[BUF] Cannot reallocate ProfilesTable in ProfileManager::RemoveProfileByName!";
 #ifdef _WIN32
 		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+        HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
+#else
+        free(oldbuf);
 #endif
 		AppendSpecialLog(sDbgstr);
         exit(EXIT_FAILURE);
@@ -439,15 +453,19 @@ ProfileItem * ProfileManager::CreateProfile(const char * name) {
             exit(EXIT_FAILURE);
         }
     } else {
+        ProfileItem ** oldbuf = ProfilesTable;
 #ifdef _WIN32
-        ProfilesTable = (ProfileItem **) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ProfilesTable, iProfileCount*sizeof(ProfileItem *));
+        ProfilesTable = (ProfileItem **) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, oldbuf, iProfileCount*sizeof(ProfileItem *));
 #else
-		ProfilesTable = (ProfileItem **) realloc(ProfilesTable, iProfileCount*sizeof(ProfileItem *));
+		ProfilesTable = (ProfileItem **) realloc(oldbuf, iProfileCount*sizeof(ProfileItem *));
 #endif
         if(ProfilesTable == NULL) {
         	string sDbgstr = "[BUF] Cannot reallocate ProfilesTable in ProfileManager::CreateProfile!";
 #ifdef _WIN32
 			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+            HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
+#else
+            free(oldbuf);
 #endif
 			AppendSpecialLog(sDbgstr);
             exit(EXIT_FAILURE);

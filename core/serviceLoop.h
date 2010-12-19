@@ -92,7 +92,6 @@ public:
 #else
 	void AcceptSocket(const int &s, const sockaddr_in &addr, const socklen_t &sin_len);
 #endif
-	void Terminate();
 	void ReceiveLoop();
 	void SendLoop();
 	void Looper();
