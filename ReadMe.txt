@@ -15,7 +15,7 @@ In case when that version not start for you check logs directory, in most cases 
 When no config dir is specified then PtokaX running from console use actual directory, PtokaX running as daemon use current_user_home/.PtokaX !
 
 Note: IP-to-Country database file is available on http://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip .. unpack it to configdir/cfg directory.
-Note: This PtokaX use Lua 5.1.3 for scripting !
+Note: This PtokaX use Lua 5.1.4 for scripting !
 Note: This version have new scripting interface incompatible with all scripts for 0.3.6.0c and older !
 
 Homepage: http://www.PtokaX.org
@@ -24,7 +24,7 @@ PtokaX LUA Scripts forum: http://board.ptokax.ch
 
 PtokaX Wiki: http://wiki.ptokax.ch
 
-Please report all bugs to PPK@PtokaX.org or to me on 'PtokaX Admins Hub' dchub://ptokax-lua.damnserver.com:2006
+Please report all bugs to PPK@PtokaX.org or to me (PPK) on 'PtokaX Admins Hub' dchub://ptokax-lua.damnserver.com:2006
 
 Latest PtokaX changelog: http://wiki.ptokax.ch/doku.php?id=changelogs:ptokax:changes_after_0.330_15.31
 

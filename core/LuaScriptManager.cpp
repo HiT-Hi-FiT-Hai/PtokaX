@@ -167,7 +167,9 @@ void ScriptMan::Start() {
 		if(ScriptTable[i]->bEnabled == true) {
         	if(ScriptStart(ScriptTable[i]) == true) {
 				AddRunningScript(ScriptTable[i]);
-			}
+			} else {
+                ScriptTable[i]->bEnabled = false;
+            }
 		}
 	}
 

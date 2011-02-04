@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1252" standalone="yes" ?>
-<Language Name="Brazilian Portuguese" Author="7P-Darkman" Version="0.4.1.1">
+<Language Name="Brazilian Portuguese" Author="7P-Darkman" Version="0.4.1.2">
     <String Name="ThisHubIsRunning">Este HUB está usando o servidor Ptokax traduzido por 7P-Darkman - versão:</String>
     <String Name="HubName">Nome do HUB</String>
     <String Name="MOTD(motd)">MOTD (Mensagem do dia)</String>
@@ -773,4 +773,7 @@
     <String Name="Rename">Renomear</String>
     <String Name="Country">País</String>
     <String Name="LogScriptErrors">Salvar erros dos scripts em log</String>
+    <String Name="QuackSupports">Desculpe-nos... Este HUB não permite clientes que enviem o comando de Bug $Supports... Por favor, troque de cliente.</String>
+    <String Name="ClientsBuggySupports">Cliente com o comando $Supports</String>
+    <String Name="DisallowBuggySupports">Não permitir clientes enviando o comando de Bug $Supports</String>
 </Language>

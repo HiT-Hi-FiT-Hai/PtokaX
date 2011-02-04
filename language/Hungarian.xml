@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1252" standalone="yes" ?>
-<Language Name="Hungarian Language" Author="Hungarista" Version="0.4.0.0a">
+<Language Name="Hungarian Language" Author="Hungarista/bastya_elvtars" Version="0.4.1.2">
     <String Name="ThisHubIsRunning">A hubon fut:</String>
     <String Name="HubName">Hub neve</String>
     <String Name="MOTD(motd)">MOTD</String>
@@ -254,7 +254,7 @@
     <String Name="NickMustBeSpecified">Add meg a nicknevet!</String>
     <String Name="PassMustBeSpecified">Add meg a jelszót!</String>
     <String Name="NoBadCharsInNick">$|&lt;&gt;:?*&quot;/\ és &lt;space&gt; jelek nem szerepelhetnek a névben!</String>
-    <String Name="NoBadCharsInPass">$ | és &lt;space&gt; jelek nem szerepelhetnek a jelszóban!</String>
+    <String Name="NoPipeInPass">Szûrõjel ( | ) nem szerepelhet a jelszóban!</String>
     <String Name="UserIsAlredyReg">A felhasználó már regisztrálva van!</String>
     <String Name="UserWithSameNickAlredyExist">Egy felhasználó azonos névvel már szerepel a regisztrált felhasználók között!</String>
     <String Name="ErrorInScript">Hiba a scriptben:</String>
@@ -763,4 +763,17 @@
     <String Name="SecBeforeNextChatMsg">másodpercet a következõ chat üzenet elõtt</String>
     <String Name="SecBeforeNextPM">másodpercet a következõ privát üzenet elõtt</String>
     <String Name="SecBeforeNextSearch">másodpercet a következõ keresés elõtt</String>
+    <String Name="MaxUsersSameIP">Ugyanazon IP-rõl a maximum felhasználók száma</String>
+    <String Name="NoMaxUsersSameIP">Felhasználók száma ugyanazon IP-rõl nincs maximálva</String>
+    <String Name="SorryAlreadyMaxIPConns">Elnézést, de a kapcsolatok száma az IP-drõl már meghaladta a maximumot</String>
+    <String Name="NoReConnTime">Újracsatlakozási idõ</String>
+    <String Name="ReConnTime">Újracsatlakozási idõ nincs</String>
+    <String Name="Min">Minimum</String>
+    <String Name="SecBeforeReconn">másodperc az újracsatlakozás elõtt</String>
+    <String Name="Rename">Átnevezés</String>
+    <String Name="Country">Ország</String>
+    <String Name="LogScriptErrors">Scripthibák naplózása</String>
+    <String Name="QuackSupports">Elnézést, de ez a hub nem támogatja a hibás $Supports-parancsot küldõ klienseket</String>
+    <String Name="ClientsBuggySupports">Hibás $Supports parancsot küldõ kliensek</String>
+    <String Name="DisallowBuggySupports">Hibás $Supports parancsot küldõ kliensek tiltása</String>
 </Language>
