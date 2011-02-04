@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -34,8 +34,6 @@
 #define IDC_PROF_MAN                1003
 #define IDC_BANS                    1004
 #define IDC_RANGE_BANS              1005
-#define IDC_SCRIPTS                 1006
-#define IDC_SCRIPTS_MEM             1007
 #define IDC_ABOUT                   1008
 #define IDC_HOMEPAGE                1009
 #define IDC_BOARD                   1010
@@ -45,7 +43,7 @@
 #define IDC_RELOAD_TXTS             1014
 #define IDC_COPY                    1015
 #define IDC_SELECT_ALL              1016
-#define IDC_CLEAR_CHAT              1017
+#define IDC_CLEAR_ALL               1017
 #define IDC_REG_USER                1018
 #define IDC_DISCONNECT_USER         1019
 #define IDC_KICK_USER               1020

@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -35,7 +35,9 @@
 #include "LuaScript.h"
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+            #include "../gui.win/MainWindowPageScripts.h"
+		#else
 			#include "TScriptsForm.h"
 		#endif
 	#endif
@@ -87,8 +89,6 @@ static int GetScripts(lua_State * L) {
 		lua_pushnil(L);
         return 1;
     }
-
-    ScriptManager->CheckForDeletedScripts();
 
 	lua_newtable(L);
 
@@ -158,7 +158,9 @@ static int Move(lua_State * L, const bool &bUp) {
 
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+            pMainWindowPageScripts->MoveScript(ui8idx, bUp);
+		#else
 			if(ScriptsForm != NULL && ScriptsForm->ScriptFiles->Count != 0) {
 				int idx = ScriptsForm->ScriptFiles->ItemIndex;
 				ScriptsForm->ScriptFiles->Items->Move(ui8idx, bUp == true ? ui8idx-1 : ui8idx+1);
@@ -231,59 +233,20 @@ static int StartScript(lua_State * L) {
             return 1;
         }
 
-		if(ScriptManager->StartScript(curScript) == false) {
+		if(ScriptManager->StartScript(curScript, true) == false) {
     		lua_pushnil(L);
             return 1;
         }
 
-		curScript->bEnabled = true;
-
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(ScriptsForm != NULL) {
-	            int idx = ScriptsForm->ScriptFiles->Items->IndexOf(curScript->sName);
-	            if(idx != -1) {
-	                ScriptsForm->ScriptFiles->State[idx] = cbChecked;
-	            }
-			}
-		#endif
-	#endif
-#endif
-
     	lua_pushboolean(L, 1);
         return 1;
 	}
 
-	if(ScriptManager->AddScript(sName, true) == true && ScriptManager->StartScript(ScriptManager->ScriptTable[ScriptManager->ui8ScriptCount-1]) == true) {
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(ScriptsForm != NULL && ScriptsForm->ScriptFiles->Count != 0) {
-				int idx = ScriptsForm->ScriptFiles->Items->AddObject(sName, NULL);
-				ScriptsForm->ScriptFiles->State[idx] = cbChecked;
-			}
-		#endif
-	#endif
-#endif
-
+	if(ScriptManager->AddScript(sName, true, true) == true && ScriptManager->StartScript(ScriptManager->ScriptTable[ScriptManager->ui8ScriptCount-1], false) == true) {
         lua_settop(L, 0);
     	lua_pushboolean(L, 1);
         return 1;
     }
-
-	if(ScriptManager->ui8ScriptCount != 0 && strcmp(sName, ScriptManager->ScriptTable[ScriptManager->ui8ScriptCount-1]->sName) == 0) {
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(ScriptsForm != NULL && ScriptsForm->ScriptFiles->Count != 0) {
-				int idx = ScriptsForm->ScriptFiles->Items->AddObject(sName, NULL);
-				ScriptsForm->ScriptFiles->State[idx] = cbUnchecked;
-			}
-		#endif
-	#endif
-#endif
-	}
 
     lua_settop(L, 0);
     lua_pushnil(L);
@@ -331,25 +294,12 @@ static int RestartScript(lua_State * L) {
         return 1;
     }
 
-    ScriptManager->StopScript(curScript);
+    ScriptManager->StopScript(curScript, false);
 
-    if(ScriptManager->StartScript(curScript) == true) {
+    if(ScriptManager->StartScript(curScript, false) == true) {
     	lua_pushboolean(L, 1);
         return 1;
     }
-
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(ScriptsForm != NULL) {
-				int idx = ScriptsForm->ScriptFiles->Items->IndexOf(curScript->sName);
-				if(idx != -1) {
-					ScriptsForm->ScriptFiles->State[idx] = cbUnchecked;
-				}
-			}
-		#endif
-	#endif
-#endif
 
 	lua_pushnil(L);
     return 1;
@@ -396,22 +346,7 @@ static int StopScript(lua_State * L) {
         return 1;
     }
 
-    ScriptManager->StopScript(curScript);
-
-    curScript->bEnabled = false;
-
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(ScriptsForm != NULL) {
-				int idx = ScriptsForm->ScriptFiles->Items->IndexOf(curScript->sName);
-				if(idx != -1) {
-					ScriptsForm->ScriptFiles->State[idx] = cbUnchecked;
-				}
-			}
-		#endif
-	#endif
-#endif
+    ScriptManager->StopScript(curScript, true);
 
 	lua_pushboolean(L, 1);
     return 1;
@@ -453,7 +388,9 @@ static int Refresh(lua_State * L) {
 
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+		  pMainWindowPageScripts->AddScriptsToList(true);
+		#else
 			if(ScriptsForm != NULL) {
 	    		for(uint8_t i = 0; i < ScriptManager->ui8ScriptCount; i++) {
 	    			int idx = ScriptsForm->ScriptFiles->Items->AddObject(ScriptManager->ScriptTable[i]->sName, NULL);

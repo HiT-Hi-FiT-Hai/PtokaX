@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -62,7 +62,10 @@
 
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+			#include "../gui.win/GuiUtil.h"
+            #include "../gui.win/MainWindowPageScripts.h"
+		#else
 			#include "TScriptMemoryForm.h"
 			#include "TScriptsForm.h"
 		#endif
@@ -349,7 +352,10 @@ bool ScriptStart(Script * cur) {
 	if(luaL_dofile(cur->LUA, (SCRIPT_PATH+cur->sName).c_str()) == 0) {
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+            RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+                (string(LanguageManager->sTexts[LAN_NO_SYNERR_IN_SCRIPT_FILE], (size_t)LanguageManager->ui16TextsLens[LAN_NO_SYNERR_IN_SCRIPT_FILE]) + " " + string(cur->sName)).c_str());
+		#else
 			if(ScriptsForm != NULL) {
 				ScriptsForm->LuaErrMemo(string(LanguageManager->sTexts[LAN_NO_SYNERR_IN_SCRIPT_FILE], (size_t)LanguageManager->ui16TextsLens[LAN_NO_SYNERR_IN_SCRIPT_FILE]) +
 					" " + string(cur->sName));
@@ -377,7 +383,10 @@ bool ScriptStart(Script * cur) {
 
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+            RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+                (string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
+		#else
 			if(ScriptsForm != NULL) {
 				ScriptsForm->LuaErrMemo(string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg);
 			}
@@ -393,8 +402,6 @@ bool ScriptStart(Script * cur) {
 
 		lua_close(cur->LUA);
 		cur->LUA = NULL;
-
-        cur->bEnabled = false;
     
         return false;
     }
@@ -464,10 +471,7 @@ int ScriptGetGC(Script * cur) {
 //------------------------------------------------------------------------------
 
 #ifdef _WIN32
-	#ifdef _SERVICE
-		void ScriptGetGC(Script * /*cur*/, const uint32_t &/*i*/) {
-		}
-	#else
+	#ifndef _SERVICE
 		#ifndef _MSC_VER
 			void ScriptGetGC(Script * cur, const uint32_t &i) {
 				if(i >= (uint32_t)ScriptMemoryForm->LuaMem->Items->Count) {
@@ -478,9 +482,6 @@ int ScriptGetGC(Script * cur) {
 	    			ScriptMemoryForm->LuaMem->Items->Item[i]->Caption = cur->sName;
 					ScriptMemoryForm->LuaMem->Items->Item[i]->SubItems->Strings[0] = String(lua_gc(cur->LUA, LUA_GCCOUNT, 0));
 				}
-			}
-		#else
-			void ScriptGetGC(Script * /*cur*/, const uint32_t &/*i*/) {
 			}
 		#endif
 	#endif
@@ -556,7 +557,13 @@ static bool ScriptOnError(Script * cur, char * ErrorMsg, const size_t &iLen) {
 			#endif
         }
 
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+            RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+                (string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
+            RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+                (string(LanguageManager->sTexts[LAN_FATAL_ERR_SCRIPT], (size_t)LanguageManager->ui16TextsLens[LAN_FATAL_ERR_SCRIPT]) + " " + string(cur->sName) + " ! " +
+				string(LanguageManager->sTexts[LAN_SCRIPT_STOPPED], (size_t)LanguageManager->ui16TextsLens[LAN_SCRIPT_STOPPED]) + "!").c_str());
+		#else
 			if(ScriptsForm != NULL) {
 				ScriptsForm->LuaErrMemo(string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg);
 				ScriptsForm->LuaErrMemo(string(LanguageManager->sTexts[LAN_FATAL_ERR_SCRIPT], (size_t)LanguageManager->ui16TextsLens[LAN_FATAL_ERR_SCRIPT]) +
@@ -810,7 +817,10 @@ void ScriptError(Script * cur) {
 
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+            RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+                (string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
+        #else
 			if(ScriptsForm != NULL) {
 				ScriptsForm->LuaErrMemo(string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg);
 			}

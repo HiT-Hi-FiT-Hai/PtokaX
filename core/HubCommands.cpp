@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -52,7 +52,6 @@
 	#ifndef _SERVICE
 		#ifndef _MSC_VER
 			#include "TRegsForm.h"
-			#include "TScriptsForm.h"
 		#endif
 	#endif
 //---------------------------------------------------------------------------
@@ -2204,10 +2203,10 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 				UncountDeflood(curUser, fromPM);
 
 				// stop script
-				ScriptManager->StopScript(curScript);
+				ScriptManager->StopScript(curScript, false);
 
 				// try to start script
-				if(ScriptManager->StartScript(curScript) == true) {
+				if(ScriptManager->StartScript(curScript, false) == true) {
                     if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
                         if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
                             int imsgLen = sprintf(msg, "%s $<%s> *** %s %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -2239,19 +2238,6 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                     } 
                     return true;
 				} else {
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-					if(ScriptsForm != NULL) {
-                		int idx = ScriptsForm->ScriptFiles->Items->IndexOf(curScript->sName);
-                        if(idx != -1) {
-                            ScriptsForm->ScriptFiles->State[idx] = cbUnchecked;
-                        }
-					}
-		#endif
-	#endif
-#endif
-
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
                     int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -5185,22 +5171,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 
 				UncountDeflood(curUser, fromPM);
 
-				ScriptManager->StopScript(curScript);
-
-				curScript->bEnabled = false;
-
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-				if(ScriptsForm != NULL) {
-					int idx = ScriptsForm->ScriptFiles->Items->IndexOf(curScript->sName);
-					if(idx != -1) {
-						ScriptsForm->ScriptFiles->State[idx] = cbUnchecked;
-					}
-				}
-		#endif
-	#endif
-#endif
+				ScriptManager->StopScript(curScript, true);
 
 				if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
 					if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
@@ -5314,22 +5285,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 
 					UncountDeflood(curUser, fromPM);
 
-					if(ScriptManager->StartScript(curScript) == true) {
-						curScript->bEnabled = true;
-
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-						if(ScriptsForm != NULL) {
-							int idx = ScriptsForm->ScriptFiles->Items->IndexOf(curScript->sName);
-							if(idx != -1) {
-								ScriptsForm->ScriptFiles->State[idx] = cbChecked;
-							}
-						}
-		#endif
-	#endif
-#endif
-
+					if(ScriptManager->StartScript(curScript, true) == true) {
 						if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
 							if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
 								int imsgLen = sprintf(msg, "%s $<%s> *** %s %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
@@ -5374,18 +5330,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 
 				UncountDeflood(curUser, fromPM);
 
-				if(ScriptManager->AddScript(sCommand, true) == true && ScriptManager->StartScript(ScriptManager->ScriptTable[ScriptManager->ui8ScriptCount-1]) == true) {
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-					if(ScriptsForm != NULL) {
-						int idx = ScriptsForm->ScriptFiles->Items->AddObject(sCommand, NULL);
-						ScriptsForm->ScriptFiles->State[idx] = cbChecked;
-					}
-		#endif
-	#endif
-#endif
-
+				if(ScriptManager->AddScript(sCommand, true, true) == true && ScriptManager->StartScript(ScriptManager->ScriptTable[ScriptManager->ui8ScriptCount-1], false) == true) {
 					if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
 						if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
 							int imsgLen = sprintf(msg, "%s $<%s> *** %s %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
@@ -5416,19 +5361,6 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 					}
 					return true;
 				} else {
-					if(ScriptManager->ui8ScriptCount != 0 && strcmp(sCommand, ScriptManager->ScriptTable[ScriptManager->ui8ScriptCount-1]->sName) == 0) {
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-						if(ScriptsForm != NULL) {
-							int idx = ScriptsForm->ScriptFiles->Items->AddObject(sCommand, NULL);
-							ScriptsForm->ScriptFiles->State[idx] = cbUnchecked;
-						}
-		#endif
-	#endif
-#endif
-					}
-
 					int imsgLen = CheckFromPm(curUser, fromPM);
 
 					int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],

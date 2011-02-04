@@ -24,7 +24,7 @@ PtokaX LUA Scripts forum: http://board.ptokax.ch
 
 PtokaX Wiki: http://wiki.ptokax.ch
 
-Please report all bugs to PPK@PtokaX.org or to me on my hub PePeK.czdc.org:4861
+Please report all bugs to PPK@PtokaX.org or to me on 'PtokaX Admins Hub' dchub://ptokax-lua.damnserver.com:2006
 
 Latest PtokaX changelog: http://wiki.ptokax.ch/doku.php?id=changelogs:ptokax:changes_after_0.330_15.31
 

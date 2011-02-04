@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -46,6 +46,7 @@
 		#ifndef _MSC_VER
 			#include "TUsersChatForm.h"
         #else
+			#include "../gui.win/GuiUtil.h"
             #include "../gui.win/MainWindowPageUsersChat.h"
 		#endif
 	#endif
@@ -892,7 +893,7 @@ User::~User() {
 			}
         #else
             if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                pMainWindowPageUsersChat->AppendText(("x User removed: " + string(Nick, NickLen) + " (Socket " + string(Sck) + ")").c_str());
+                RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], ("x User removed: " + string(Nick, NickLen) + " (Socket " + string(Sck) + ")").c_str());
             }
 		#endif
 	#endif
@@ -1316,7 +1317,7 @@ bool UserDoRecv(User * u) {
                 if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
 					int iret = sprintf(msg, "- User has closed the connection: %s (%s)", u->Nick, u->IP);
 					if(CheckSprintf(iret, 1024, "UserDoRecv") == true) {
-						pMainWindowPageUsersChat->AppendText(msg);
+						RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], msg);
 					}
                 }
 			#endif

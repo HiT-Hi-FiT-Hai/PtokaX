@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -31,6 +31,7 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
+#include "GuiUtil.h"
 #include "Resources.h"
 //---------------------------------------------------------------------------
 static ATOM atomAboutDialog = 0;
@@ -91,22 +92,7 @@ LRESULT AboutDialog::AboutDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         case WM_NOTIFY:
             if(((LPNMHDR)lParam)->hwndFrom == hWndWindowItems[REDT_ABOUT] && ((LPNMHDR)lParam)->code == EN_LINK) {
                 if(((ENLINK *)lParam)->msg == WM_LBUTTONUP) {
-                    TCHAR* sURL = new TCHAR[(((ENLINK *)lParam)->chrg.cpMax - ((ENLINK *)lParam)->chrg.cpMin)+1];
-
-                    if(sURL == NULL) {
-                        break;
-                    }
-
-                    TEXTRANGE tr = { 0 };
-                    tr.chrg.cpMin = ((ENLINK *)lParam)->chrg.cpMin;
-                    tr.chrg.cpMax = ((ENLINK *)lParam)->chrg.cpMax;
-                    tr.lpstrText = sURL;
-
-                    ::SendMessage(hWndWindowItems[REDT_ABOUT], EM_GETTEXTRANGE, 0, (LPARAM)&tr);
-
-                    ::ShellExecute(NULL, NULL, sURL, NULL, NULL, SW_SHOWNORMAL);
-
-                    delete[] sURL;
+                    RichEditOpenLink(hWndWindowItems[REDT_ABOUT], (ENLINK *)lParam);
                 }
             }
             break;

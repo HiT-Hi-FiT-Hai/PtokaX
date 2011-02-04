@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -50,7 +50,7 @@ public:
     void SetStatusValue(const char * sText);
     void EnableGuiItems(const BOOL &bEnable);
 private:
-    MainWindowPage * MainWindowPages[2];
+    MainWindowPage * MainWindowPages[3];
 
     UINT uiTaskBarCreated;
     uint64_t ui64LastTrayMouseMove;

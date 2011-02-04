@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -313,12 +313,15 @@
     <ClInclude Include="core\utility.h" />
     <ClInclude Include="core\ZlibUtility.h" />
     <ClInclude Include="gui.win\AboutDialog.h" />
+    <ClInclude Include="gui.win\GuiUtil.h" />
     <ClInclude Include="gui.win\LineDialog.h" />
     <ClInclude Include="gui.win\MainWindow.h" />
     <ClInclude Include="gui.win\MainWindowPage.h" />
+    <ClInclude Include="gui.win\MainWindowPageScripts.h" />
     <ClInclude Include="gui.win\MainWindowPageStats.h" />
     <ClInclude Include="gui.win\MainWindowPageUsersChat.h" />
     <ClInclude Include="gui.win\Resources.h" />
+    <ClInclude Include="gui.win\ScriptEditorDialog.h" />
     <ClInclude Include="gui.win\SettingDialog.h" />
     <ClInclude Include="gui.win\SettingPage.h" />
     <ClInclude Include="gui.win\SettingPageAdvanced.h" />
@@ -383,12 +386,15 @@
     <ClCompile Include="core\utility.cpp" />
     <ClCompile Include="core\ZlibUtility.cpp" />
     <ClCompile Include="gui.win\AboutDialog.cpp" />
+    <ClCompile Include="gui.win\GuiUtil.cpp" />
     <ClCompile Include="gui.win\LineDialog.cpp" />
     <ClCompile Include="gui.win\MainWindow.cpp" />
     <ClCompile Include="gui.win\MainWindowPage.cpp" />
+    <ClCompile Include="gui.win\MainWindowPageScripts.cpp" />
     <ClCompile Include="gui.win\MainWindowPageStats.cpp" />
     <ClCompile Include="gui.win\MainWindowPageUsersChat.cpp" />
     <ClCompile Include="gui.win\PtokaX.cpp" />
+    <ClCompile Include="gui.win\ScriptEditorDialog.cpp" />
     <ClCompile Include="gui.win\SettingDialog.cpp" />
     <ClCompile Include="gui.win\SettingPage.cpp" />
     <ClCompile Include="gui.win\SettingPageAdvanced.cpp" />

@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -91,13 +91,15 @@ public:
     uint8_t FindScriptIdx(char * sName);
 
 #ifdef _WIN32
-    void GetGCInfo();
+    #ifndef _MSC_VER
+        void GetGCInfo();
+    #endif
 #endif
 
-	bool AddScript(char * sName, const bool &bEnabled = false);
+	bool AddScript(char * sName, const bool &bEnabled, const bool &bNew);
 
-	bool StartScript(Script * curScript);
-	void StopScript(Script * curScript);
+	bool StartScript(Script * curScript, const bool &bEnable);
+	void StopScript(Script * curScript, const bool &bDisable);
 
 	void MoveScript(const uint8_t &ui8ScriptPosInTbl, const bool &bUp);
 
