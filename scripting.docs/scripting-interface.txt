@@ -705,3 +705,4 @@ User data IDs for Core.GetUserData call.
 24	- iMagicByte
 25	- iLoginTime
 26	- sCountryCode
+27	- sMac / only for on windoze on Core.GetUserValue call.
