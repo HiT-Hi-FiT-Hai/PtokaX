@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -826,7 +826,6 @@ const char* LangXmlStr[] = {
     "Stats",
     "MenuCopy",
     "MenuSelectAll",
-    "MenuClearChat",
     "MenuRegisterUser",
     "MenuDisconnectUser",
     "MenuKickUser",
@@ -836,6 +835,13 @@ const char* LangXmlStr[] = {
     "WasRedirectedTo",
     "PleaseEnterRedirectAddress",
     "Limiter",
+    "ScriptsErrors",
+    "ScriptEditor",
+    "OpenScriptEditor",
+    "FailedToOpen",
+    "OpenInScriptEditor",
+    "FailedToSave",
+    "FailedToCheckSyntax",
 };
 //---------------------------------------------------------------------------
 

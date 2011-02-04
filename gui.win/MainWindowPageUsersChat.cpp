@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -37,6 +37,7 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
+#include "GuiUtil.h"
 #include "LineDialog.h"
 #include "Resources.h"
 //---------------------------------------------------------------------------
@@ -81,22 +82,7 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
         case WM_NOTIFY:
             if(((LPNMHDR)lParam)->hwndFrom == hWndPageItems[REDT_CHAT] && ((LPNMHDR)lParam)->code == EN_LINK) {
                 if(((ENLINK *)lParam)->msg == WM_LBUTTONUP) {
-                    TCHAR* sURL = new TCHAR[(((ENLINK *)lParam)->chrg.cpMax - ((ENLINK *)lParam)->chrg.cpMin)+1];
-
-                    if(sURL == NULL) {
-                        break;
-                    }
-
-                    TEXTRANGE tr = { 0 };
-                    tr.chrg.cpMin = ((ENLINK *)lParam)->chrg.cpMin;
-                    tr.chrg.cpMax = ((ENLINK *)lParam)->chrg.cpMax;
-                    tr.lpstrText = sURL;
-
-                    ::SendMessage(hWndPageItems[REDT_CHAT], EM_GETTEXTRANGE, 0, (LPARAM)&tr);
-
-                    ::ShellExecute(NULL, NULL, sURL, NULL, NULL, SW_SHOWNORMAL);
-
-                    delete[] sURL;
+                    RichEditOpenLink(hWndPageItems[REDT_CHAT], (ENLINK *)lParam);
                 }
             } else if(((LPNMHDR)lParam)->hwndFrom == hWndPageItems[LV_USERS] && ((LPNMHDR)lParam)->code == LVN_GETINFOTIP) {
                 NMLVGETINFOTIP * pGetInfoTip = (LPNMLVGETINFOTIP)lParam;
@@ -220,17 +206,6 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
                     }
 
                     break;
-                case IDC_COPY:
-                    ::SendMessage(hWndPageItems[REDT_CHAT], WM_COPY, 0, 0);
-                    return 0;
-                case IDC_SELECT_ALL: {
-                    CHARRANGE cr = { 0, -1 };
-                    ::SendMessage(hWndPageItems[REDT_CHAT], EM_EXSETSEL, 0, (LPARAM)&cr);
-                    return 0;
-                }
-                case IDC_CLEAR_CHAT:
-                    ::SetWindowText(hWndPageItems[REDT_CHAT], "");
-                    return 0;
                 case IDC_REG_USER:
                     return 0;
                 case IDC_DISCONNECT_USER:
@@ -245,6 +220,10 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
                 case IDC_REDIRECT_USER:
                     RedirectUser();
                     return 0;
+            }
+
+            if(RichEditCheckMenuCommands(hWndPageItems[REDT_CHAT], LOWORD(wParam)) == true) {
+                return 0;
             }
 
             break;
@@ -299,6 +278,7 @@ bool MainWindowPageUsersChat::CreateMainWindowPage(HWND hOwner) {
 
     hWndPageItems[REDT_CHAT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_READONLY,
         2, 16, rcMain.right-152, rcMain.bottom-43, m_hWnd, NULL, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[REDT_CHAT], EM_EXLIMITTEXT, 0, (LPARAM)262144);
     ::SendMessage(hWndPageItems[REDT_CHAT], EM_AUTOURLDETECT, TRUE, 0);
     ::SendMessage(hWndPageItems[REDT_CHAT], EM_SETEVENTMASK, 0, (LPARAM)::SendMessage(hWndPageItems[REDT_CHAT], EM_GETEVENTMASK, 0, 0) | ENM_LINK);
 
@@ -380,7 +360,7 @@ bool MainWindowPageUsersChat::OnEditEnter() {
 
     buf[iAllocLen+3+SettingManager->ui16TextsLens[SETTXT_ADMIN_NICK]] = '\0';
 
-    AppendText(buf);
+    RichEditAppendText(hWndPageItems[REDT_CHAT], buf);
 
     if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
     	string sDbgstr = "[BUF] Cannot deallocate buf in MainWindowPageUsersChat::OnEditEnter! "+string((uint32_t)GetLastError())+" "+
@@ -391,36 +371,6 @@ bool MainWindowPageUsersChat::OnEditEnter() {
     ::SetWindowText(hWndPageItems[EDT_CHAT], "");
 
     return true;
-}
-//------------------------------------------------------------------------------
-
-void MainWindowPageUsersChat::AppendText(const char * sText) {
-    time_t acc_time = time(NULL);
-    struct tm *tm = localtime(&acc_time);
-
-    char msg[10];
-    strftime(msg, 10, "\n[%H:%M] ", tm);
-
-    CHARRANGE cr = { 0, 0 };
-    ::SendMessage(hWndPageItems[REDT_CHAT], EM_EXGETSEL, 0, (LPARAM)&cr);
-    LONG lOldSelBegin = cr.cpMin;
-    LONG lOldSelEnd = cr.cpMax;
-
-    GETTEXTLENGTHEX gtle = { 0 };
-    gtle.codepage = CP_ACP;
-    gtle.flags = GTL_NUMCHARS;
-    cr.cpMin = cr.cpMax = (LONG)::SendMessage(hWndPageItems[REDT_CHAT], EM_GETTEXTLENGTHEX, (WPARAM)&gtle, 0);
-    ::SendMessage(hWndPageItems[REDT_CHAT], EM_EXSETSEL, 0, (LPARAM)&cr);
-
-    ::SendMessage(hWndPageItems[REDT_CHAT], EM_REPLACESEL, FALSE, ::GetWindowTextLength(hWndPageItems[REDT_CHAT]) == 0 ? (LPARAM)msg+1 : (LPARAM)msg);
-
-    ::SendMessage(hWndPageItems[REDT_CHAT], EM_REPLACESEL, FALSE, (LPARAM)sText);
-
-    cr.cpMin = lOldSelBegin;
-    cr.cpMax = lOldSelEnd;
-    ::SendMessage(hWndPageItems[REDT_CHAT], EM_EXSETSEL, 0, (LPARAM)&cr);
-
-    ::SendMessage(hWndPageItems[REDT_CHAT], WM_VSCROLL, SB_BOTTOM, NULL);
 }
 //------------------------------------------------------------------------------
 
@@ -449,6 +399,8 @@ void MainWindowPageUsersChat::RemoveUser(const User * curUser) {
 //------------------------------------------------------------------------------
 
 void MainWindowPageUsersChat::UpdateUserList() {
+    ::SendMessage(hWndPageItems[LV_USERS], WM_SETREDRAW, (WPARAM)FALSE, 0);
+
     ::SendMessage(hWndPageItems[LV_USERS], LVM_DELETEALLITEMS, 0, 0);
 
     uint32_t ui32InClose = 0, ui32InLogin = 0, ui32LoggedIn = 0, ui32Total = 0;
@@ -477,7 +429,9 @@ void MainWindowPageUsersChat::UpdateUserList() {
         }
     }
 
-    AppendText((string(LanguageManager->sTexts[LAN_TOTAL], (size_t)LanguageManager->ui16TextsLens[LAN_TOTAL]) + ": " + string(ui32Total) + ", " +
+    ::SendMessage(hWndPageItems[LV_USERS], WM_SETREDRAW, (WPARAM)TRUE, 0);
+
+    RichEditAppendText(hWndPageItems[REDT_CHAT], (string(LanguageManager->sTexts[LAN_TOTAL], (size_t)LanguageManager->ui16TextsLens[LAN_TOTAL]) + ": " + string(ui32Total) + ", " +
         string(LanguageManager->sTexts[LAN_LOGGED], (size_t)LanguageManager->ui16TextsLens[LAN_LOGGED]) + ": " + string(ui32LoggedIn) + ", " +
 		string(LanguageManager->sTexts[LAN_CLOSING], (size_t)LanguageManager->ui16TextsLens[LAN_CLOSING]) + ": " + string(ui32InClose) + ", " +
         string(LanguageManager->sTexts[LAN_LOGGING], (size_t)LanguageManager->ui16TextsLens[LAN_LOGGING]) + ": " + string(ui32InLogin)).c_str());
@@ -486,42 +440,7 @@ void MainWindowPageUsersChat::UpdateUserList() {
 
 void MainWindowPageUsersChat::OnContextMenu(HWND hWindow, LPARAM lParam) {
     if(hWindow == hWndPageItems[REDT_CHAT]) {
-        HMENU hMenu = ::CreatePopupMenu();
-
-        ::AppendMenu(hMenu, MF_STRING, IDC_COPY, LanguageManager->sTexts[LAN_MENU_COPY]);
-        ::AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
-        ::AppendMenu(hMenu, MF_STRING, IDC_SELECT_ALL, LanguageManager->sTexts[LAN_MENU_SELECT_ALL]);
-        ::AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
-        ::AppendMenu(hMenu, MF_STRING, IDC_CLEAR_CHAT, LanguageManager->sTexts[LAN_MENU_CLEAR_CHAT]);
-
-        int iX = GET_X_LPARAM(lParam);
-        int iY = GET_Y_LPARAM(lParam);
-
-        // -1, -1 is menu created by key. it need few trick to show menu on correct position ;o)
-        if(iX == -1 && iY == -1) {
-            CHARRANGE cr = { 0, 0 };
-            ::SendMessage(hWndPageItems[REDT_CHAT], EM_EXGETSEL, 0, (LPARAM)&cr);
-
-            POINT pt = { 0 };
-            ::SendMessage(hWndPageItems[REDT_CHAT], EM_POSFROMCHAR, (WPARAM)&pt, (LPARAM)cr.cpMax);
-
-            RECT rcChat;
-            ::GetClientRect(hWndPageItems[REDT_CHAT], &rcChat);
-
-            if(pt.y < rcChat.top) {
-                pt.y = rcChat.top;
-            } else if(pt.y > rcChat.bottom) {
-                pt.y = rcChat.bottom;
-            }
-
-            ::ClientToScreen(hWndPageItems[REDT_CHAT], &pt);
-            iX = pt.x;
-            iY = pt.y;
-        }
-
-        ::TrackPopupMenuEx(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, iX, iY, m_hWnd, NULL);
-
-        ::DestroyMenu(hMenu);
+        RichEditPopupMenu(hWndPageItems[REDT_CHAT], m_hWnd, lParam);
     } else if(hWindow == hWndPageItems[LV_USERS]) {
         int iSel = (int)::SendMessage(hWndPageItems[LV_USERS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
 
@@ -605,7 +524,7 @@ User * MainWindowPageUsersChat::GetUser() {
             char buf[1024];
             int imsgLen = sprintf(buf, "<%s> *** %s %s.", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], lvItem.pszText, LanguageManager->sTexts[LAN_IS_NOT_ONLINE]);
             if(CheckSprintf(imsgLen, 1024, "MainWindowPageUsersChat::DisconnectUser") == true) {
-                AppendText(buf);
+                RichEditAppendText(hWndPageItems[REDT_CHAT], buf);
             }
 
             return NULL;
@@ -653,7 +572,7 @@ void MainWindowPageUsersChat::DisconnectUser() {
     imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_WITH_IP], curUser->IP,
         LanguageManager->sTexts[LAN_WAS_CLOSED]);
     if(CheckSprintf(imsgLen, 1024, "MainWindowPageUsersChat::DisconnectUser4") == true) {
-        AppendText(msg);
+        RichEditAppendText(hWndPageItems[REDT_CHAT], msg);
     }
 }
 //------------------------------------------------------------------------------
@@ -710,7 +629,7 @@ void OnKickOk(char * sLine, const int &iLen) {
     int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_WITH_IP], curUser->IP,
         LanguageManager->sTexts[LAN_WAS_KICKED]);
     if(CheckSprintf(imsgLen, 1024, "OnKickOk4") == true) {
-        pMainWindowPageUsersChat->AppendText(msg);
+        RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], msg);
     }
 
     // disconnect the user
@@ -787,7 +706,7 @@ void OnBanOk(char * sLine, const int &iLen) {
     int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_WITH_IP], curUser->IP,
         LanguageManager->sTexts[LAN_HAS_BEEN], LanguageManager->sTexts[LAN_BANNED_LWR]);
     if(CheckSprintf(imsgLen, 1024, "OnBanOk4") == true) {
-        pMainWindowPageUsersChat->AppendText(msg);
+        RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], msg);
     }
 
     // disconnect the user
@@ -849,7 +768,7 @@ void OnRedirectOk(char * sLine, const int &iLen) {
 
     imsgLen = sprintf(msg, "<%s> *** %s %s %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_WAS_REDIRECTED_TO], sLine);
     if(CheckSprintf(imsgLen, 2048, "OnRedirectOk3") == true) {
-        pMainWindowPageUsersChat->AppendText(msg);
+        RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], msg);
     }
 
     // disconnect the user

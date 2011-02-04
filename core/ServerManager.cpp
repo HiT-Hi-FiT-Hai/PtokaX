@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -70,7 +70,9 @@
 //#include "TLSManager.h"
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+            #include "../gui.win/MainWindowPageScripts.h"
+        #else
 			#include "TScriptMemoryForm.h"
 			#include "TScriptsForm.h"
 		#endif
@@ -180,10 +182,11 @@ static void SecTimerHandler(int sig) {
 
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			hubForm->UpdateGui();
+		#ifdef _MSC_VER
+            pMainWindow->UpdateStats();
+            pMainWindowPageScripts->UpdateMemUsage();
 		#else
-			pMainWindow->UpdateStats();
+            hubForm->UpdateGui();
 		#endif
 	#endif
 #endif
@@ -489,6 +492,16 @@ void ServerInitialize() {
         exit(EXIT_FAILURE);
     }
 
+    ScriptManager = new ScriptMan();
+    if(ScriptManager == NULL) {
+    	string sDbgstr = "[BUF] Cannot allocate ScriptManager!";
+#ifdef _WIN32
+        sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
+        AppendSpecialLog(sDbgstr);
+        exit(EXIT_FAILURE);
+    }
+
 #ifdef _WIN32
 	#ifndef _SERVICE
         #ifdef _MSC_VER
@@ -502,16 +515,6 @@ void ServerInitialize() {
 	    #endif
 	#endif
 #endif
-
-    ScriptManager = new ScriptMan();
-    if(ScriptManager == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate ScriptManager!";
-#ifdef _WIN32
-        sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-        AppendSpecialLog(sDbgstr);
-        exit(EXIT_FAILURE);
-    }
 
 	SettingManager->UpdateAll();
 

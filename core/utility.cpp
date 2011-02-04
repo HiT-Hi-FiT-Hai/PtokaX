@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -35,6 +35,7 @@
 		#ifndef _MSC_VER
 			#include "TUsersChatForm.h"
 		#else
+			#include "../gui.win/GuiUtil.h"
             #include "../gui.win/MainWindowPageUsersChat.h"
 		#endif
 	#endif
@@ -1191,7 +1192,7 @@ void AppendSpecialLog(const string & sData) {
 					UsersChatForm->Memo(sMessage);
 				}
             #else
-                pMainWindowPageUsersChat->AppendText(sMessage.c_str());
+                RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], sMessage.c_str());
 			#endif
 	#endif
 	}

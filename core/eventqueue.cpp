@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -40,9 +40,9 @@
 #ifdef _WIN32
 	#ifndef _SERVICE
 		#ifndef _MSC_VER
-			#include "TScriptsForm.h"
 			#include "TUsersChatForm.h"
         #else
+			#include "../gui.win/GuiUtil.h"
             #include "../gui.win/MainWindowPageUsersChat.h"
 		#endif
 	#endif
@@ -259,24 +259,9 @@ void eventq::ProcessEvents() {
                     return;
                 }
 
-                ScriptManager->StopScript(curScript);
+                ScriptManager->StopScript(curScript, false);
 
-#ifdef _WIN32
-	#ifdef _SERVICE
-				ScriptManager->StartScript(curScript);
-	#else
-		#ifndef _MSC_VER
-				if(ScriptManager->StartScript(curScript) == false && ScriptsForm != NULL) {
-                    int idx = ScriptsForm->ScriptFiles->Items->IndexOf(curScript->sName);
-                    if(idx != -1) {
-						ScriptsForm->ScriptFiles->State[idx] = cbUnchecked;
-                    }
-            	}
-		#endif
-	#endif
-#else
-				ScriptManager->StartScript(curScript);
-#endif
+				ScriptManager->StartScript(curScript, false);
 
                 break;
             }
@@ -286,22 +271,8 @@ void eventq::ProcessEvents() {
                     return;
                 }
 
-				ScriptManager->StopScript(curScript);
+				ScriptManager->StopScript(curScript, true);
 
-				curScript->bEnabled = false;
-
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-				if(ScriptsForm != NULL) {
-                    int idx = ScriptsForm->ScriptFiles->Items->IndexOf(curScript->sName);
-                    if(idx != -1) {
-                        ScriptsForm->ScriptFiles->State[idx] = cbUnchecked;
-                	}
-                }
-		#endif
-	#endif
-#endif
                 break;
             }
 			case EVENT_STOP_SCRIPTING:
@@ -411,7 +382,7 @@ void eventq::ProcessEvents() {
                 	char msg[128];
                     int imsglen = sprintf(msg, "UDP > %s (%s) > ", u->Nick, u->IP);
                     if(CheckSprintf(imsglen, 128, "eventq::ProcessEvents") == true) {
-                        pMainWindowPageUsersChat->AppendText((string(msg, imsglen)+cur->sMsg).c_str());
+                        RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], (string(msg, imsglen)+cur->sMsg).c_str());
                     }
                 }
 		#endif

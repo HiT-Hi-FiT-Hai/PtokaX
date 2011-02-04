@@ -18,50 +18,63 @@
  */
 
 //------------------------------------------------------------------------------
-#ifndef MainWindowPageUsersChatH
-#define MainWindowPageUsersChatH
+#ifndef MainWindowPageScriptsH
+#define MainWindowPageScriptsH
 //------------------------------------------------------------------------------
 #include "MainWindowPage.h"
 //------------------------------------------------------------------------------
-struct User;
-//---------------------------------------------------------------------------
+class ScriptEditorDialog;
+//------------------------------------------------------------------------------
 
-class MainWindowPageUsersChat : public MainWindowPage {
+class MainWindowPageScripts : public MainWindowPage {
 public:
-    HWND hWndPageItems[7];
+    HWND hWndPageItems[8];
 
     enum enmPageItems {
-        BTN_SHOW_CHAT,
-        BTN_SHOW_COMMANDS,
-        BTN_AUTO_UPDATE_USERLIST,
-        REDT_CHAT,
-        LV_USERS,
-        EDT_CHAT,
-        BTN_UPDATE_USERS
+        GB_SCRIPTS_ERRORS,
+        REDT_SCRIPTS_ERRORS,
+        BTN_OPEN_SCRIPT_EDITOR,
+        BTN_REFRESH_SCRIPTS,
+        LV_SCRIPTS,
+        BTN_MOVE_UP,
+        BTN_MOVE_DOWN,
+        BTN_RESTART_SCRIPTS
     };
 
-    MainWindowPageUsersChat();
-    ~MainWindowPageUsersChat();
+    MainWindowPageScripts();
+    ~MainWindowPageScripts();
 
     bool CreateMainWindowPage(HWND hOwner);
     void UpdateLanguage();
     char * GetPageName();
-    bool OnEditEnter();
-    void AddUser(const User * curUser);
-    void RemoveUser(const User * curUser);
-    User * GetUser();
+
+    void ClearMemUsageAll();
+    void UpdateMemUsage();
+    void MoveScript(uint8_t ui8ScriptId, const bool &bUp);
+    void AddScriptsToList(const bool &bDelete);
+    void ScriptToList(const uint8_t &ui8ScriptId, const bool &bInsert, const bool &bSelected);
+    void UpdateCheck(const uint8_t &ui8ScriptId);
 private:
+    bool bIgnoreItemChanged;
+
     LRESULT MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    void UpdateUserList();
     void OnContextMenu(HWND hWindow, LPARAM lParam);
-    void DisconnectUser();
-    void KickUser();
-    void BanUser();
-    void RedirectUser();
+    ScriptEditorDialog * OpenScriptEditor();
+    void RefreshScripts();
+    void OnItemChanged(const LPNMLISTVIEW &pListView);
+    void OnDoubleClick(const LPNMITEMACTIVATE &pItemActivate);
+    void MoveUp();
+    void MoveDown();
+    void RestartScripts();
+    void UpdateUpDown();
+    void OpenInExternalEditor();
+    void OpenInScriptEditor();
+    void DeleteScript();
+    void ClearMemUsage(uint8_t ui8ScriptId);
 };
 //------------------------------------------------------------------------------
-extern MainWindowPageUsersChat *pMainWindowPageUsersChat;
+extern MainWindowPageScripts *pMainWindowPageScripts;
 //---------------------------------------------------------------------------
 
 #endif

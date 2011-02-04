@@ -18,36 +18,40 @@
  */
 
 //------------------------------------------------------------------------------
-#ifndef SettingDialogH
-#define SettingDialogH
+#ifndef ScriptEditorDialogH
+#define ScriptEditorDialogH
 //------------------------------------------------------------------------------
-#include "SettingPage.h"
-//---------------------------------------------------------------------------
 
-class SettingDialog {
+class ScriptEditorDialog {
 public:
     HWND m_hWnd;
 
-    HWND hWndWindowItems[3];
+    HWND hWndWindowItems[4];
 
     enum enmWindowItems {
-        TV_TREE,
-        BTN_OK,
-        BTN_CANCEL
+        REDT_SCRIPT,
+        BTN_LOAD_SCRIPT,
+        BTN_CHECK_SYNTAX,
+        BTN_SAVE_SCRIPT
     };
 
-    SettingDialog();
-    ~SettingDialog();
+    ScriptEditorDialog();
+    ~ScriptEditorDialog();
 
-    static LRESULT CALLBACK StaticSettingDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+    static LRESULT CALLBACK StaticScriptEditorDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	void DoModal(HWND hWndParent);
+	void LoadScript(const string &sScript);
 private:
-    SettingPage * SettingPages[12];
+    string sScriptPath;
 
-    LRESULT SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
+    LRESULT ScriptEditorDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    void OnSelChanged();
+    void OnContextMenu(HWND hWindow, LPARAM lParam);
+    void OnUpdate();
+    void OnLoadScript();
+    void OnCheckSyntax();
+    void OnSaveScript();
 };
 //------------------------------------------------------------------------------
 

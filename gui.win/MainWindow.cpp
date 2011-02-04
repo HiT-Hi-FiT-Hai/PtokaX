@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -36,6 +36,7 @@
 #endif
 //---------------------------------------------------------------------------
 #include "AboutDialog.h"
+#include "MainWindowPageScripts.h"
 #include "MainWindowPageStats.h"
 #include "MainWindowPageUsersChat.h"
 #include "Resources.h"
@@ -73,10 +74,11 @@ MainWindow::MainWindow() {
 
     memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
 
-    memset(&MainWindowPages, 0, 2 * sizeof(MainWindowPage *));
+    memset(&MainWindowPages, 0, (sizeof(MainWindowPages) / sizeof(MainWindowPages[0])) * sizeof(MainWindowPage *));
 
     MainWindowPages[0] = new MainWindowPageStats();
     MainWindowPages[1] = new MainWindowPageUsersChat();
+    MainWindowPages[2] = new MainWindowPageScripts();
 
     uiTaskBarCreated = ::RegisterWindowMessage("TaskbarCreated");
 
@@ -112,7 +114,7 @@ MainWindow::MainWindow() {
 //---------------------------------------------------------------------------
 
 MainWindow::~MainWindow() {
-    for(uint8_t ui8i = 0; ui8i < 2; ui8i++) {
+    for(uint8_t ui8i = 0; ui8i < (sizeof(MainWindowPages) / sizeof(MainWindowPages[0])); ui8i++) {
         if(MainWindowPages[ui8i] != NULL) {
             delete MainWindowPages[ui8i];
         }
@@ -163,7 +165,7 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             TCITEM tcItem = { 0 };
             tcItem.mask = TCIF_TEXT | TCIF_PARAM;
 
-            for(uint8_t ui8i = 0; ui8i < 2; ui8i++) {
+            for(uint8_t ui8i = 0; ui8i < (sizeof(MainWindowPages) / sizeof(MainWindowPages[0])); ui8i++) {
                 if(MainWindowPages[ui8i] != NULL) {
                     if(MainWindowPages[ui8i]->CreateMainWindowPage(m_hWnd) == false) {
                         ::MessageBox(m_hWnd, "Main window creation failed!", sTitle.c_str(), MB_OK);
@@ -171,7 +173,7 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
                     tcItem.pszText = MainWindowPages[ui8i]->GetPageName();
                     tcItem.lParam = (LPARAM)MainWindowPages[ui8i];
-                     ::SendMessage(hWndWindowItems[TC_TABS], TCM_INSERTITEM, ui8i, (LPARAM)&tcItem);
+                    ::SendMessage(hWndWindowItems[TC_TABS], TCM_INSERTITEM, ui8i, (LPARAM)&tcItem);
                 }
             }
 
@@ -258,7 +260,7 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
                 ::DeferWindowPos(hdwp, hWndWindowItems[TC_TABS], NULL, 0, 0, GET_X_LPARAM(lParam), 21, SWP_NOMOVE | SWP_NOZORDER);
 
-                for(uint8_t ui8i = 0; ui8i < 2; ui8i++) {
+                for(uint8_t ui8i = 0; ui8i < (sizeof(MainWindowPages) / sizeof(MainWindowPages[0])); ui8i++) {
                     if(MainWindowPages[ui8i] != NULL) {
                         ::DeferWindowPos(hdwp, MainWindowPages[ui8i]->m_hWnd, NULL, 0, 22, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)-22, SWP_NOMOVE | SWP_NOZORDER);
                     }
@@ -305,12 +307,6 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
                     return 0;
                 case IDC_RANGE_BANS:
-                    ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
-                    return 0;
-                case IDC_SCRIPTS:
-                    ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
-                    return 0;
-                case IDC_SCRIPTS_MEM:
                     ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
                     return 0;
                 case IDC_ABOUT: {
@@ -391,9 +387,6 @@ HWND MainWindow::CreateEx() {
     ::AppendMenu(hViewMenu, MF_SEPARATOR, 0, 0);
     ::AppendMenu(hViewMenu, MF_STRING, IDC_BANS, LanguageManager->sTexts[LAN_BANS]);
     ::AppendMenu(hViewMenu, MF_STRING, IDC_RANGE_BANS, LanguageManager->sTexts[LAN_RANGE_BANS]);
-    ::AppendMenu(hViewMenu, MF_SEPARATOR, 0, 0);
-    ::AppendMenu(hViewMenu, MF_STRING, IDC_SCRIPTS, LanguageManager->sTexts[LAN_SCRIPTS]);
-    ::AppendMenu(hViewMenu, MF_STRING, IDC_SCRIPTS_MEM, LanguageManager->sTexts[LAN_SCRIPTS_MEMORY_USAGE]);
 
     ::AppendMenu(hMainMenu, MF_POPUP, (UINT_PTR)hViewMenu, LanguageManager->sTexts[LAN_VIEW]);
 
@@ -478,7 +471,7 @@ void MainWindow::UpdateTitleBar() {
 //---------------------------------------------------------------------------
 
 void MainWindow::UpdateLanguage() {
-    for(uint8_t ui8i = 0; ui8i < 2; ui8i++) {
+    for(uint8_t ui8i = 0; ui8i < (sizeof(MainWindowPages) / sizeof(MainWindowPages[0])); ui8i++) {
         if(MainWindowPages[ui8i] != NULL) {
             MainWindowPages[ui8i]->UpdateLanguage();
 
@@ -501,8 +494,6 @@ void MainWindow::UpdateLanguage() {
     ::ModifyMenu(hMenu, IDC_PROF_MAN, MF_BYCOMMAND, IDC_PROF_MAN, LanguageManager->sTexts[LAN_PROFILE_MAN]);
     ::ModifyMenu(hMenu, IDC_BANS, MF_BYCOMMAND, IDC_BANS, LanguageManager->sTexts[LAN_BANS]);
     ::ModifyMenu(hMenu, IDC_RANGE_BANS, MF_BYCOMMAND, IDC_RANGE_BANS, LanguageManager->sTexts[LAN_RANGE_BANS]);
-    ::ModifyMenu(hMenu, IDC_SCRIPTS, MF_BYCOMMAND, IDC_SCRIPTS, LanguageManager->sTexts[LAN_SCRIPTS]);
-    ::ModifyMenu(hMenu, IDC_SCRIPTS_MEM, MF_BYCOMMAND, IDC_SCRIPTS_MEM, LanguageManager->sTexts[LAN_SCRIPTS_MEMORY_USAGE]);
 
     ::ModifyMenu(hMenu, IDC_HOMEPAGE, MF_BYCOMMAND, IDC_HOMEPAGE, (string("PtokaX ") +LanguageManager->sTexts[LAN_WEBSITE]).c_str());
     ::ModifyMenu(hMenu, IDC_BOARD, MF_BYCOMMAND, IDC_BOARD, (string("PtokaX ") +LanguageManager->sTexts[LAN_BOARD]).c_str());
@@ -550,7 +541,10 @@ void MainWindow::EnableGuiItems(const BOOL &bEnable) {
 
     if(bEnable == FALSE) {
         ::SendMessage(((MainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[MainWindowPageUsersChat::LV_USERS], LVM_DELETEALLITEMS, 0, 0);
+        ((MainWindowPageScripts *)MainWindowPages[1])->ClearMemUsageAll();
     }
+
+    ::EnableWindow(((MainWindowPageScripts *)MainWindowPages[2])->hWndPageItems[MainWindowPageScripts::BTN_RESTART_SCRIPTS], bEnable);
 }
 //---------------------------------------------------------------------------
 

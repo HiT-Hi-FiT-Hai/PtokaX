@@ -178,6 +178,15 @@
     <ClCompile Include="gui.win\MainWindowPageUsersChat.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
+    <ClCompile Include="gui.win\MainWindowPageScripts.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
+    <ClCompile Include="gui.win\GuiUtil.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
+    <ClCompile Include="gui.win\ScriptEditorDialog.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\eventqueue.h">
@@ -379,6 +388,15 @@
       <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui.win\MainWindowPageUsersChat.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.win\MainWindowPageScripts.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.win\GuiUtil.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.win\ScriptEditorDialog.h">
       <Filter>Gui</Filter>
     </ClInclude>
   </ItemGroup>

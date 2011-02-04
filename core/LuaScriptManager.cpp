@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -36,7 +36,9 @@
 #include "LuaScript.h"
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+            #include "../gui.win/MainWindowPageScripts.h"
+		#else
 			#include "TScriptMemoryForm.h"
 			#include "TScriptsForm.h"
 		#endif
@@ -112,7 +114,7 @@ ScriptMan::ScriptMan() {
 					continue;
 				}
 
-				AddScript(name, enabled);
+				AddScript(name, enabled, false);
             }
         }
     }
@@ -165,23 +167,21 @@ void ScriptMan::Start() {
 		if(ScriptTable[i]->bEnabled == true) {
         	if(ScriptStart(ScriptTable[i]) == true) {
 				AddRunningScript(ScriptTable[i]);
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-            } else {
-				if(ScriptsForm != NULL && ScriptsForm->ScriptFiles->Count > i) {
-					ScriptsForm->ScriptFiles->State[i] = cbUnchecked;
-				}
-		#endif
-	#endif
-#endif
 			}
 		}
 	}
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+		  pMainWindowPageScripts->AddScriptsToList(true);
+		#endif
+	#endif
+#endif
 }
 //------------------------------------------------------------------------------
 
-bool ScriptMan::AddScript(char * sName, const bool &bEnabled/* = false*/) {
+bool ScriptMan::AddScript(char * sName, const bool &bEnabled, const bool &bNew) {
     if(ui8ScriptCount == 254) {
         return false;
     }
@@ -225,12 +225,23 @@ bool ScriptMan::AddScript(char * sName, const bool &bEnabled/* = false*/) {
     ScriptTable[ui8ScriptCount-1] = new Script(sName, bEnabled);
 
     if(ScriptTable[ui8ScriptCount-1] == NULL) {
+        ui8ScriptCount--;
     	string sDbgstr = "[BUF] Cannot allocate new Script!";
 #ifdef _WIN32
 		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
 #endif
 		AppendSpecialLog(sDbgstr);
         return false;
+    }
+
+    if(bNew == true) {
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+            pMainWindowPageScripts->ScriptToList(ui8ScriptCount-1, true, false);
+		#endif
+	#endif
+#endif
     }
 
     return true;
@@ -254,7 +265,9 @@ void ScriptMan::Stop() {
 
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+            pMainWindowPageScripts->ClearMemUsageAll();
+		#else
 			if(ScriptMemoryForm != NULL) {
 				ScriptMemoryForm->LuaMem->Clear();
 			}
@@ -377,7 +390,7 @@ void ScriptMan::CheckForNewScripts() {
                 continue;
             }
 
-			AddScript(luafile.name);
+			AddScript(luafile.name, false, false);
         } while(_findnext(hFile, &luafile) == 0);
 
 		_findclose(hFile);
@@ -403,7 +416,7 @@ void ScriptMan::CheckForNewScripts() {
             continue;
         }
 
-		AddScript(p_dirent->d_name);
+		AddScript(p_dirent->d_name, false, false);
     }
 
     closedir(p_scriptdir);
@@ -433,7 +446,9 @@ void ScriptMan::Restart() {
 
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+            pMainWindowPageScripts->AddScriptsToList(true);
+		#else
 			if(ScriptsForm != NULL) {
 				for(uint8_t i = 0; i < ScriptManager->ui8ScriptCount; i++) {
 					int idx = ScriptsForm->ScriptFiles->Items->AddObject(ScriptManager->ScriptTable[i]->sName, NULL);
@@ -493,6 +508,7 @@ uint8_t ScriptMan::FindScriptIdx(char * sName) {
 //------------------------------------------------------------------------------
 
 #ifdef _WIN32
+    #ifndef _MSC_VER
 	void ScriptMan::GetGCInfo() {
 		if(SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == false) {
 	        return;
@@ -508,11 +524,12 @@ uint8_t ScriptMan::FindScriptIdx(char * sName) {
 	        ScriptGetGC(cur, i++);
 	    }
 	}
+	#endif
 #endif
 //------------------------------------------------------------------------------
 
-bool ScriptMan::StartScript(Script * curScript) {
-    uint8_t ui8dx = 255; 
+bool ScriptMan::StartScript(Script * curScript, const bool &bEnable) {
+    uint8_t ui8dx = 255;
     for(uint8_t i = 0; i < ui8ScriptCount; i++) {
         if(curScript == ScriptTable[i]) {
             ui8dx = i;
@@ -524,7 +541,26 @@ bool ScriptMan::StartScript(Script * curScript) {
         return false;
 	}
 
+    if(bEnable == true) {
+        curScript->bEnabled = true;
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+            pMainWindowPageScripts->UpdateCheck(ui8dx);
+		#endif
+	#endif
+#endif
+    }
+
     if(ScriptStart(curScript) == false) {
+        curScript->bEnabled = false;
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+            pMainWindowPageScripts->UpdateCheck(ui8dx);
+		#endif
+	#endif
+#endif
         return false;
     }
 
@@ -580,7 +616,23 @@ bool ScriptMan::StartScript(Script * curScript) {
 }
 //------------------------------------------------------------------------------
 
-void ScriptMan::StopScript(Script * curScript) {
+void ScriptMan::StopScript(Script * curScript, const bool &bDisable) {
+    if(bDisable == true) {
+		curScript->bEnabled = false;
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+	       for(uint8_t ui8i = 0; ui8i < ui8ScriptCount; ui8i++) {
+                if(curScript == ScriptTable[ui8i]) {
+                    pMainWindowPageScripts->UpdateCheck(ui8i);
+                    break;
+                }
+            }
+		#endif
+	#endif
+#endif
+    }
+
 	RemoveRunningScript(curScript);
 
     ScriptTimer * next = curScript->TimerList;
@@ -750,7 +802,7 @@ void ScriptMan::DeleteScript(const uint8_t &ui8ScriptPosInTbl) {
     Script * cur = ScriptTable[ui8ScriptPosInTbl];
 
 	if(cur->LUA != NULL) {
-		ScriptManager->StopScript(cur);
+		ScriptManager->StopScript(cur, false);
 	}
 
 	if(FileExist((SCRIPT_PATH+string(cur->sName)).c_str()) == true) {

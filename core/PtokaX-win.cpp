@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -246,6 +246,19 @@ static void WINAPI StartService(DWORD /*argc*/, char* argv[]) {
 
 int __cdecl main(int argc, char* argv[]) {
     ::SetDllDirectory("");
+
+#ifndef _WIN64
+    HINSTANCE hKernel32 = ::LoadLibrary("Kernel32.dll");
+
+    typedef BOOL (WINAPI * SPDEPP)(DWORD);
+    SPDEPP pSPDEPP = (SPDEPP)::GetProcAddress(hKernel32, "SetProcessDEPPolicy");
+
+    if(pSPDEPP != NULL) {
+        pSPDEPP(PROCESS_DEP_ENABLE);
+    }
+
+    ::FreeLibrary(hKernel32);
+#endif
 
 	sTitle = "PtokaX DC Hub " + string(PtokaXVersionString);
 #ifdef _DEBUG

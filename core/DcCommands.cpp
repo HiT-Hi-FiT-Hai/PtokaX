@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2010  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -51,6 +51,7 @@
 		#ifndef _MSC_VER
 			#include "TUsersChatForm.h"
         #else
+			#include "../gui.win/GuiUtil.h"
             #include "../gui.win/MainWindowPageUsersChat.h"
 		#endif
 	#endif
@@ -120,7 +121,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
             if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
 				int imsglen = sprintf(msg, "%s (%s) > ", curUser->Nick, curUser->IP);
 				if(CheckSprintf(imsglen, 1024, "cDcCommands::PreProcessData1") == true) {
-					pMainWindowPageUsersChat->AppendText((msg+string(sData, iLen)).c_str());
+					RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], (msg+string(sData, iLen)).c_str());
 				}
             }
 		#endif
@@ -3745,7 +3746,7 @@ bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen
         #else
             if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_CHAT], BM_GETCHECK, 0, 0) == BST_CHECKED) {
                 sData[iLen - 1] = '\0';
-                pMainWindowPageUsersChat->AppendText(sData);
+                RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], sData);
                 sData[iLen - 1] = '|';
             }
 		#endif

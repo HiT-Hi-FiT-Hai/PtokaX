@@ -1,10 +1,22 @@
 ----------------------------------------Next Release...---------------------------------------
 Added: Missing PtokaX icon to 64bit service binary.
 Added: Project files for visual studio 2010.
+Added: Crash log generation to new gui windows version.
+Added: Core.GetUserValue(tUser, 27) return user MAC Address when it is possible (windoze only).
+Added: Enabled Data Execution Prevention for 32bit windoze version when system support that. 
+Added: Line numbers to script editor.
 Fixed: Compile with Lua 5.2.0 (work 1)
 Fixed: Missing user input length checking in some commands (thx Rahim for report).
+Fixed: Multiple class member variables not initialized in the constructor.
+Fixed: Multiple memory leaks when realloc fails.
+Fixed: Multiple obsolete usleep functions replaced with nanosleep.
+Fixed: Multiple redundant check for NULL before free/delete.
+Fixed: Multiple memory leaks when ip-to-country loading fails.
+Fixed: Memory leak when script try to reg bot with nick that already exist.
+Fixed: Memory leak when text file creating fails.
 Changed: Windows GUI, from GUI created with Borland VCL to WinAPI GUI.
 Changed: Some min/max setting values.
+Rewritten: Resolve code from deprecated gethostbyname to getaddrinfo.
 
 
 ----------------------------------------0.4.1.2 9.Jan.2010-----------------------------------
