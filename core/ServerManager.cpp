@@ -394,26 +394,6 @@ void ServerInitialize() {
 
 	cpuUsage = 0.0;
 
-#ifdef _WIN32
-    #ifndef _SERVICE
-		#ifndef _MSC_VER
-            sectimer = SetTimer(NULL, 0, 1000, (TIMERPROC)SecTimerProc);
-		#else
-            sectimer = SetTimer(NULL, 0, 1000, NULL);
-		#endif
-    #else
-		sectimer = SetTimer(NULL, 0, 1000, NULL);
-    #endif
-
-	if(sectimer == 0) {
-		string sDbgstr = "[BUF] Cannot start Timer in ServerThread::ServerThread! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-		AppendSpecialLog(sDbgstr);
-        exit(EXIT_FAILURE);
-    }
-
-    regtimer = 0;
-#endif
-
 	SettingManager = new SetMan();
     if(SettingManager == NULL) {
     	string sDbgstr = "[BUF] Cannot allocate SettingManager!";
@@ -518,7 +498,25 @@ void ServerInitialize() {
 
 	SettingManager->UpdateAll();
 
-#ifndef _WIN32
+#ifdef _WIN32
+    #ifndef _SERVICE
+		#ifndef _MSC_VER
+            sectimer = SetTimer(NULL, 0, 1000, (TIMERPROC)SecTimerProc);
+		#else
+            sectimer = SetTimer(NULL, 0, 1000, NULL);
+		#endif
+    #else
+		sectimer = SetTimer(NULL, 0, 1000, NULL);
+    #endif
+
+	if(sectimer == 0) {
+		string sDbgstr = "[BUF] Cannot start Timer in ServerThread::ServerThread! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+		AppendSpecialLog(sDbgstr);
+        exit(EXIT_FAILURE);
+    }
+
+    regtimer = 0;
+#else
     struct sigaction sigactsec;
     sigactsec.sa_handler = SecTimerHandler;
     sigemptyset(&sigactsec.sa_mask);

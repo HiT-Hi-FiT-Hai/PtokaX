@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1252" standalone="yes" ?>
-<Language Name="Danish Language" Author="Gnuff™" Version="0.4.1.0RC1">
+<Language Name="Danish Language" Author="Gnuff™" Version="0.4.1.2">
     <String Name="ThisHubIsRunning">Denne hub kører med</String>
     <String Name="HubName">Hub navn</String>
     <String Name="MOTD(motd)">MOTD Message Of The Day (Dagens meddelelse)</String>
@@ -772,5 +772,8 @@
     <String Name="SecBeforeReconn">Sekunder før reconnect</String>
     <String Name="Rename">Omdøb</String>
     <String Name="Country">Land</String>
-    <String Name="LogScriptErrors">Gem script fejl til log</String>
+    <String Name="LogScriptErrors">Gem script fejl til log</String> 
+    <String Name="QuackSupports">Beklager, denne hub tillader ikke klienter at sende ugyldige $Supports kommandoer</String> 
+    <String Name="ClientsBuggySupports">Klienter med ugyldige $Supports kommandoer</String> 
+    <String Name="DisallowBuggySupports">Tillad ikke klienter at sende ugyldige $Supports kommandoer</String> 
 </Language>

@@ -219,6 +219,7 @@ void ScriptEditorDialog::LoadScript(const string &sScript) {
     if(sFile == NULL) {
         ::MessageBox(m_hWnd, (string(LanguageManager->sTexts[LAN_FAILED_TO_OPEN], (size_t)LanguageManager->ui16TextsLens[LAN_FAILED_TO_OPEN]) + ": "+ sScript).c_str(),
             LanguageManager->sTexts[LAN_ERROR], MB_OK);
+        fclose(pFile);
         return;
     }
 

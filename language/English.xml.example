@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1252" standalone="yes" ?>
-<Language Name="Example English Language" Author="PPK" Version="0.4.1.2">
+<Language Name="Example English Language" Author="PPK" Version="0.4.1.2a">
     <String Name="ThisHubIsRunning">This hub is running</String>
     <String Name="HubName">Hub name</String>
     <String Name="MOTD(motd)">MOTD (message of the day)</String>
@@ -776,4 +776,7 @@
     <String Name="QuackSupports">Sorry, this hub does not allow clients sending buggy $Supports command</String>
     <String Name="ClientsBuggySupports">Clients with buggy $Supports command</String>
     <String Name="DisallowBuggySupports">Disallow clients sending buggy $Supports command</String>
+    <String Name="MaxAlwdTopicLen256Chars">Max allowed topic length is 256 characters</String>
+    <String Name="MaxAlwdScriptNameLen256Chars">Max allowed script name length is 256 characters</String>
+    <String Name="MaxAlwdIPLen15Chars">Max allowed IP length is 15 characters</String>
 </Language>

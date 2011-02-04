@@ -430,8 +430,6 @@ void MainWindowPageScripts::OnItemChanged(const LPNMLISTVIEW &pListView) {
 
 		if(ScriptManager->StartScript(ScriptManager->ScriptTable[pListView->iItem], false) == true) {
 			RichEditAppendText(hWndPageItems[REDT_SCRIPTS_ERRORS], (string(LanguageManager->sTexts[LAN_SCRIPT_STARTED], (size_t)LanguageManager->ui16TextsLens[LAN_SCRIPT_STARTED])+".").c_str());
-		} else {
-			ListView_SetItemState(hWndPageItems[LV_SCRIPTS], pListView->iItem, INDEXTOSTATEIMAGEMASK(0), LVIS_STATEIMAGEMASK);
 		}
     }
 }
@@ -615,13 +613,7 @@ void MainWindowPageScripts::MoveScript(uint8_t ui8ScriptId, const bool &bUp) {
 void MainWindowPageScripts::UpdateCheck(const uint8_t &ui8ScriptId) {
     bIgnoreItemChanged = true;
 
-    LVITEM lvItem = { 0 };
-    lvItem.mask = LVIF_STATE;
-    lvItem.iItem = ui8ScriptId;
-    lvItem.state = INDEXTOSTATEIMAGEMASK(ScriptManager->ScriptTable[ui8ScriptId]->bEnabled == true ? 2 : 1);
-    lvItem.stateMask = LVIS_STATEIMAGEMASK;
-
-    ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_SETITEMSTATE, ui8ScriptId, (LPARAM)&lvItem);
+    ListView_SetItemState(hWndPageItems[LV_SCRIPTS], ui8ScriptId, INDEXTOSTATEIMAGEMASK(ScriptManager->ScriptTable[ui8ScriptId]->bEnabled == true ? 2 : 1), LVIS_STATEIMAGEMASK);
 
     if(ScriptManager->ScriptTable[ui8ScriptId]->bEnabled == false) {
         ClearMemUsage(ui8ScriptId);

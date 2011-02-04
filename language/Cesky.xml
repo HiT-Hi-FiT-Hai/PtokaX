@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1250" standalone="yes" ?>
-<Language Name="Czech Language" Author="PPK" Version="0.4.1.2">
+<Language Name="Czech Language" Author="PPK" Version="0.4.1.2a">
     <String Name="ThisHubIsRunning">Tento hub pohání</String>
     <String Name="HubName">Jméno hubu</String>
     <String Name="MOTD(motd)">MOTD (hláška dne)</String>
@@ -776,5 +776,7 @@
     <String Name="QuackSupports">Promiňte, tento hub nepovoluje klinty posílající poškozený příkaz $Supports</String>
     <String Name="ClientsBuggySupports">Klinti s poškozeným příkazem $Supports</String>
     <String Name="DisallowBuggySupports">Zakázat klienty posílající poškozený příkaz $Supports</String>
-
+    <String Name="MaxAlwdTopicLen256Chars">Maximální povolená délka topicu je 256 znaků</String>
+    <String Name="MaxAlwdScriptNameLen256Chars">Maximální povolená délka jména skriptu je 256 znaků</String>
+    <String Name="MaxAlwdIPLen15Chars">Maximální povolená délka IP je 15 znaků</String>
 </Language>
