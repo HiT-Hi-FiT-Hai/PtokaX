@@ -207,6 +207,7 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
 
                     break;
                 case IDC_REG_USER:
+                    ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
                     return 0;
                 case IDC_DISCONNECT_USER:
                     DisconnectUser();

@@ -39,6 +39,7 @@
 #include "MainWindowPageScripts.h"
 #include "MainWindowPageStats.h"
 #include "MainWindowPageUsersChat.h"
+#include "RegisteredUsersDialog.h"
 #include "Resources.h"
 #include "SettingDialog.h"
 #include "../core/TextFileManager.h"
@@ -297,9 +298,12 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
                     return 0;
                 }
-                case IDC_REG_USERS:
-                    ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
+                case IDC_REG_USERS: {
+                    RegisteredUsersDialog * pRegisteredUsersDialog = new  RegisteredUsersDialog();
+                    pRegisteredUsersDialog->DoModal(m_hWnd);
+
                     return 0;
+                }
                 case IDC_PROF_MAN:
                     ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
                     return 0;

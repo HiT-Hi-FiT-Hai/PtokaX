@@ -141,3 +141,84 @@ void RichEditAppendText(const HWND &hRichEdit, const char * sText) {
     ::SendMessage(hRichEdit, WM_VSCROLL, SB_BOTTOM, NULL);
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+int ListViewGetInsertPosition(const HWND &hListView, const void * pItem, const bool &bSortAscending, int (*pCompareFunc)(const void * pItem, const void * pOtherItem)) {
+	int iHighLim = (int)::SendMessage(hListView, LVM_GETITEMCOUNT, 0, 0) - 1;
+
+	if(iHighLim == -1) {
+		return 0;
+    }
+
+    int iCmpRes = 0, iLowLim = 0, iInsertPos = 0;
+
+    void * pOtherItem = NULL;
+
+    while(iLowLim <= iHighLim) {
+        iInsertPos = (iLowLim + iHighLim) / 2;
+        pOtherItem = ListViewGetItem(hListView, iInsertPos);
+
+        iCmpRes = (*pCompareFunc)(pItem, pOtherItem);
+
+        if(iCmpRes == 0) {
+            return iInsertPos;
+        }
+
+		if(bSortAscending == false) {
+			iCmpRes = -iCmpRes;
+        }
+
+        if(iCmpRes < 0) {
+            iHighLim = iInsertPos-1;
+        } else {
+            iLowLim = iInsertPos+1;
+        }
+    }
+
+    if(iCmpRes > 0) {
+        iInsertPos++;
+    }
+
+    return iInsertPos;
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void * ListViewGetItem(const HWND &hListView, const int &iPos) {
+	LVITEM lvItem = { 0 };
+	lvItem.mask = LVIF_PARAM;
+	lvItem.iItem =iPos;
+
+	::SendMessage(hListView, LVM_GETITEM, 0, (LPARAM)&lvItem);
+
+	return (void *)lvItem.lParam;
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void ListViewUpdateArrow(const HWND &hListView, const bool &bAscending, const int &iSortColumn) {
+	HWND hHeader = (HWND)::SendMessage(hListView, LVM_GETHEADER, 0, 0);
+	const int iItemCount = (int)::SendMessage(hHeader, HDM_GETITEMCOUNT, 0, 0);
+
+	for(int i = 0; i < iItemCount; i++) {
+		HDITEM hdItem = { 0 };
+		hdItem.mask = HDI_FORMAT;
+
+		::SendMessage(hHeader, HDM_GETITEM, i, (LPARAM)&hdItem);
+
+		if(i == iSortColumn) {
+            hdItem.fmt &= ~(bAscending ? HDF_SORTDOWN : HDF_SORTUP);
+            hdItem.fmt |= (bAscending ? HDF_SORTUP : HDF_SORTDOWN);
+		} else {
+            hdItem.fmt &= ~(HDF_SORTDOWN | HDF_SORTUP);
+		}
+
+		::SendMessage(hHeader, HDM_SETITEM, i, (LPARAM)&hdItem);
+	}
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+int ListViewGetItemPosition(const HWND &hListView, void * pItem) {
+	LVFINDINFO lvFindInfo = { 0 };
+    lvFindInfo.flags = LVFI_PARAM;
+    lvFindInfo.lParam = (LPARAM)pItem;
+
+	return (int)::SendMessage(hListView, LVM_FINDITEM, (WPARAM)-1, (LPARAM)&lvFindInfo);
+}

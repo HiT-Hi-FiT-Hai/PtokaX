@@ -36,7 +36,6 @@
 	#ifndef _SERVICE
 		#ifndef _MSC_VER
 			#include "TProfileManagerForm.h"
-			#include "TRegsForm.h"
 		#endif
 	#endif
 //---------------------------------------------------------------------------

@@ -50,6 +50,7 @@ char * formatTime(uint64_t rest);
 char * formatSecTime(uint64_t rest);
 
 char * stristr(const char *str1, const char *str2);
+char * stristr2(const char *str1, const char *str2);
 
 bool isIP(char * IP, const size_t ui32Len);
 bool GetIpParts(char * sIP, const size_t ui32Len, uint32_t &a, uint32_t &b, uint32_t &c, uint32_t &d);

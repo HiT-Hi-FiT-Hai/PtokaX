@@ -22,8 +22,13 @@
 //---------------------------------------------------------------------------
 #include "hashRegManager.h"
 //---------------------------------------------------------------------------
+#include "colUsers.h"
+#include "globalQueue.h"
+#include "hashUsrManager.h"
 #include "LanguageManager.h"
 #include "ProfileManager.h"
+#include "ServerManager.h"
+#include "SettingManager.h"
 #include "UdpDebug.h"
 #include "User.h"
 #include "utility.h"
@@ -32,7 +37,9 @@
 	#pragma hdrstop
 //---------------------------------------------------------------------------
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+            #include "../gui.win/RegisteredUsersDialog.h"
+		#else
 			#include "TRegsForm.h"
 		#endif
 	#endif
@@ -147,7 +154,7 @@ bool hashRegMan::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) 
 
     RegUser *newUser = new RegUser(sNick, sPasswd, iProfile);
     if(newUser == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate newUser in hashRegMan::AddNewReg!";
+    	string sDbgstr = "[BUF] Cannot allocate newUser in hashRegMan::AddNew!";
 #ifdef _WIN32
 		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
 #endif
@@ -156,23 +163,67 @@ bool hashRegMan::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) 
     }
 
 	Add(newUser);
-	Save();
 
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(RegsForm == NULL) {
-				return true;
-			}
-		
-			TListItem *Item = RegsForm->RegList->Items->Add();
-			Item->Caption = sNick;
-			Item->SubItems->Add(sPasswd);
-			Item->SubItems->Add(ProfileMan->ProfilesTable[iProfile]->sName);
-			Item->Data = (void *)newUser;
+		#ifdef _MSC_VER
+            if(pRegisteredUsersDialog != NULL) {
+                pRegisteredUsersDialog->AddReg(newUser);
+            }
+		#else
+			if(RegsForm != NULL) {
+                TListItem *Item = RegsForm->RegList->Items->Add();
+                Item->Caption = sNick;
+                Item->SubItems->Add(sPasswd);
+                Item->SubItems->Add(ProfileMan->ProfilesTable[iProfile]->sName);
+                Item->Data = (void *)newUser;
+            }
 		#endif
 	#endif
 #endif
+
+    if(bServerRunning == false) {
+        return true;
+    }
+
+	User *AddedUser = hashManager->FindUser(newUser->sNick, strlen(newUser->sNick));
+
+    if(AddedUser != NULL) {
+        bool bAllowedOpChat = ProfileMan->IsAllowed(AddedUser, ProfileManager::ALLOWEDOPCHAT);
+        AddedUser->iProfile = iProfile;
+
+        if(((AddedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
+            if(ProfileMan->IsAllowed(AddedUser, ProfileManager::HASKEYICON) == true) {
+                AddedUser->ui32BoolBits |= User::BIT_OPERATOR;
+            } else {
+                AddedUser->ui32BoolBits &= ~User::BIT_OPERATOR;
+            }
+
+            if(((AddedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
+				colUsers->Add2OpList(AddedUser->Nick, AddedUser->NickLen);
+                globalQ->OpListStore(AddedUser->Nick);
+
+                if(bAllowedOpChat != ProfileMan->IsAllowed(AddedUser, ProfileManager::ALLOWEDOPCHAT)) {
+					if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true &&
+                        (SettingManager->bBools[SETBOOL_REG_BOT] == false || SettingManager->bBotsSameNick == false)) {
+                        if(((AddedUser->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) == false) {
+                            UserSendCharDelayed(AddedUser, SettingManager->sPreTexts[SetMan::SETPRETXT_OP_CHAT_HELLO],
+                                SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_OP_CHAT_HELLO]);
+                        }
+
+                        UserSendCharDelayed(AddedUser, SettingManager->sPreTexts[SetMan::SETPRETXT_OP_CHAT_MYINFO],
+                            SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_OP_CHAT_MYINFO]);
+
+						char msg[128];
+						int imsgLen = sprintf(msg, "$OpList %s$$|", SettingManager->sTexts[SETTXT_OP_CHAT_NICK]);
+                        if(CheckSprintf(imsgLen, 128, "hashRegMan::AddNew") == true) {
+                            UserSendCharDelayed(AddedUser, msg, imsgLen);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     return true;
 }
@@ -203,6 +254,148 @@ void hashRegMan::Add2Table(RegUser * Reg) {
     }
     
     table[ui16dx] = Reg;
+}
+//---------------------------------------------------------------------------
+
+void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui16NewProfile) {
+    if(strcmp(pReg->sPass, sNewPasswd) != 0) {
+        size_t iPassLen = strlen(sNewPasswd);
+#ifdef _WIN32
+        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pReg->sPass) == 0) {
+			string sDbgstr = "[BUF] Cannot deallocate pReg->sPass in hashRegMan::ChangeReg! "+string((uint32_t)GetLastError())+" "+
+				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+			AppendSpecialLog(sDbgstr);
+        }
+
+        pReg->sPass = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iPassLen+1);
+#else
+		free(pReg->sPass);
+
+		pReg->sPass = (char *) malloc(iPassLen+1);
+#endif
+        if(pReg->sPass == NULL) {
+			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iPassLen+1))+
+				" bytes of memory for sPass in hashRegMan::ChangeReg!";
+#ifdef _WIN32
+			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
+			AppendSpecialLog(sDbgstr);
+
+            return;
+        }
+        memcpy(pReg->sPass, sNewPasswd, iPassLen);
+        pReg->sPass[iPassLen] = '\0';
+    }
+
+    pReg->iProfile = ui16NewProfile;
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+            if(pRegisteredUsersDialog != NULL) {
+                pRegisteredUsersDialog->RemoveReg(pReg);
+                pRegisteredUsersDialog->AddReg(pReg);
+            }
+		#else
+			if(RegsForm != NULL) {
+				TListItem *ListItem = RegsForm->RegList->FindCaption(0, reg->sNick, false, true, false);
+				if(ListItem != NULL) {
+					ListItem->SubItems->Strings[0] = sPass;
+					ListItem->SubItems->Strings[1] = ProfileMan->ProfilesTable[iProfile]->sName;
+				}
+			}
+		#endif
+	#endif
+#endif
+
+    if(bServerRunning == false) {
+        return;
+    }
+
+    User *ChangedUser = hashManager->FindUser(pReg->sNick, strlen(pReg->sNick));
+    if(ChangedUser != NULL && ChangedUser->iProfile != (int32_t)ui16NewProfile) {
+        bool bAllowedOpChat = ProfileMan->IsAllowed(ChangedUser, ProfileManager::ALLOWEDOPCHAT);
+
+        ChangedUser->iProfile = (int32_t)ui16NewProfile;
+
+        if(((ChangedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) !=
+            ProfileMan->IsAllowed(ChangedUser, ProfileManager::HASKEYICON)) {
+            if(ProfileMan->IsAllowed(ChangedUser, ProfileManager::HASKEYICON) == true) {
+                ChangedUser->ui32BoolBits |= User::BIT_OPERATOR;
+                colUsers->Add2OpList(ChangedUser->Nick, ChangedUser->NickLen);
+                globalQ->OpListStore(ChangedUser->Nick);
+            } else {
+                ChangedUser->ui32BoolBits &= ~User::BIT_OPERATOR;
+                colUsers->DelFromOpList(ChangedUser->Nick);
+            }
+        }
+
+        if(bAllowedOpChat != ProfileMan->IsAllowed(ChangedUser, ProfileManager::ALLOWEDOPCHAT)) {
+            if(ProfileMan->IsAllowed(ChangedUser, ProfileManager::ALLOWEDOPCHAT) == true) {
+                if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true &&
+                    (SettingManager->bBools[SETBOOL_REG_BOT] == false || SettingManager->bBotsSameNick == false)) {
+                    if(((ChangedUser->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) == false) {
+                        UserSendCharDelayed(ChangedUser, SettingManager->sPreTexts[SetMan::SETPRETXT_OP_CHAT_HELLO],
+                        SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_OP_CHAT_HELLO]);
+                    }
+
+                    UserSendCharDelayed(ChangedUser, SettingManager->sPreTexts[SetMan::SETPRETXT_OP_CHAT_MYINFO],
+                        SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_OP_CHAT_MYINFO]);
+
+                    char msg[128];
+                    int imsgLen = sprintf(msg, "$OpList %s$$|", SettingManager->sTexts[SETTXT_OP_CHAT_NICK]);
+                    if(CheckSprintf(imsgLen, 128, "hashRegMan::ChangeReg1") == true) {
+                        UserSendCharDelayed(ChangedUser, msg, imsgLen);
+                    }
+                }
+            } else {
+                if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true && (SettingManager->bBools[SETBOOL_REG_BOT] == false || SettingManager->bBotsSameNick == false)) {
+                    char msg[128];
+                    int imsgLen = sprintf(msg, "$Quit %s|", SettingManager->sTexts[SETTXT_OP_CHAT_NICK]);
+                    if(CheckSprintf(imsgLen, 128, "hashRegMan::ChangeReg2") == true) {
+                        UserSendCharDelayed(ChangedUser, msg, imsgLen);
+                    }
+                }
+            }
+        }
+    }
+}
+//---------------------------------------------------------------------------
+
+void hashRegMan::Delete(RegUser * pReg, const bool &bFromGui/* = false*/) {
+    if(bServerRunning == true) {
+        User * pRemovedUser = hashManager->FindUser(pReg->sNick, strlen(pReg->sNick));
+
+        if(pRemovedUser != NULL) {
+            pRemovedUser->iProfile = -1;
+            if(((pRemovedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
+                colUsers->DelFromOpList(pRemovedUser->Nick);
+                pRemovedUser->ui32BoolBits &= ~User::BIT_OPERATOR;
+
+                if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true && (SettingManager->bBools[SETBOOL_REG_BOT] == false || SettingManager->bBotsSameNick == false)) {
+                    char msg[128];
+                    int imsgLen = sprintf(msg, "$Quit %s|", SettingManager->sTexts[SETTXT_OP_CHAT_NICK]);
+                    if(CheckSprintf(imsgLen, 128, "hashRegMan::Delete") == true) {
+                        UserSendCharDelayed(pRemovedUser, msg, imsgLen);
+                    }
+                }
+            }
+        }
+    }
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+            if(bFromGui == false && pRegisteredUsersDialog != NULL) {
+                pRegisteredUsersDialog->RemoveReg(pReg);
+            }
+		#endif
+	#endif
+#endif
+
+	Rem(pReg);
+
+    delete pReg;
 }
 //---------------------------------------------------------------------------
 

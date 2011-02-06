@@ -222,6 +222,16 @@ char * string::c_str() const {
 }
 //---------------------------------------------------------------------------
 
+void string::clear() {
+    if(sData != sEmpty) {
+        free(sData);
+    }
+
+	sData = (char *)sEmpty;
+    iDataLen = 0;
+}
+//---------------------------------------------------------------------------
+
 string string::operator+(const char * sTxt) const {
 	string result(*this, sTxt);
 	return result;

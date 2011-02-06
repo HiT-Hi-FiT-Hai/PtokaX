@@ -52,6 +52,8 @@ public:
 
     void Add(RegUser * Reg);
     void Add2Table(RegUser * Reg);
+    void ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui16NewProfile);
+    void Delete(RegUser * pReg, const bool &bFromGui = false);
     void Rem(RegUser * Reg);
     void RemFromTable(RegUser * Reg);
 

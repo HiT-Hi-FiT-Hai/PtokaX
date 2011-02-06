@@ -842,6 +842,8 @@ const char* LangStr[] = {
     "Open in script editor",
     "Failed to save",
     "Failed to check syntax",
+    "Change",
+    "Filter registered users",
 };
 //---------------------------------------------------------------------------
 

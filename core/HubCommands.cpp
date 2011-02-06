@@ -50,7 +50,9 @@
 
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+            #include "../gui.win/RegisteredUsersDialog.h"
+        #else
 			#include "TRegsForm.h"
 		#endif
 	#endif
@@ -3203,22 +3205,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 
 				UncountDeflood(curUser, fromPM);
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-                if(RegsForm != NULL) {
-                    TListItem *item = RegsForm->RegList->FindCaption(0, String(sCommand, iNickLen), false, true, false);
-                    if(item != NULL) {
-                        RegsForm->RegList->Items->Delete(item->Index);
-                    }
-				}
-		#endif
-	#endif
-#endif
-
-				hashRegManager->Rem(reg);
-                delete reg;
-                reg = NULL;
+                hashRegManager->Delete(reg);
 
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
                     if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
@@ -3234,22 +3221,6 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                             LanguageManager->sTexts[LAN_REMOVED_LWR], sCommand, LanguageManager->sTexts[LAN_FROM_REGS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand220") == true) {
                             globalQ->OPStore(msg, imsgLen);
-                        }
-                    }
-                }
-
-                User *RemovedUser = hashManager->FindUser(sCommand, iNickLen);
-                if(RemovedUser != NULL) {
-                    RemovedUser->iProfile = -1;
-                    if(((RemovedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
-                        colUsers->DelFromOpList(RemovedUser->Nick);
-                        RemovedUser->ui32BoolBits &= ~User::BIT_OPERATOR;
-                        if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true &&
-                            (SettingManager->bBools[SETBOOL_REG_BOT] == false || SettingManager->bBotsSameNick == false)) {
-                            int imsgLen = sprintf(msg, "$Quit %s|", SettingManager->sTexts[SETTXT_OP_CHAT_NICK]);
-                            if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand223") == true) {
-                                UserSendCharDelayed(RemovedUser, msg, imsgLen);
-                            }
                         }
                     }
                 }
@@ -5474,7 +5445,12 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+                if(pRegisteredUsersDialog != NULL) {
+                    pRegisteredUsersDialog->RemoveReg(reg);
+                    pRegisteredUsersDialog->AddReg(reg);
+                }
+		#else
 				if(RegsForm != NULL) {
                     TListItem *item = RegsForm->RegList->FindCaption(0, curUser->Nick, false, true, false);
                     if(item != NULL) {

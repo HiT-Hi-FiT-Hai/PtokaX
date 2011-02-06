@@ -842,6 +842,8 @@ enum LangIds {
     LAN_OPEN_IN_SCRIPT_EDITOR,
     LAN_FAILED_TO_SAVE,
     LAN_FAILED_TO_CHECK_SYNTAX,
+    LAN_CHANGE,
+    LAN_FILTER_REGISTERED_USERS,
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------
