@@ -580,6 +580,26 @@ char* stristr(const char *str1, const char *str2) {
 }
 //---------------------------------------------------------------------------
 
+char* stristr2(const char *str1, const char *str2) {
+	char *s1, *s2;
+	char *cp = (char *)str1;
+	if(*str2 == 0)
+		return (char *)str1;
+	while(*cp != 0) {
+		s1 = cp;
+		s2 = (char *) str2;
+		while(*s1 != 0 && *s2 != 0 && ((*s1-*s2) == 0 ||
+			(tolower(*s1)-*s2) == 0))
+				s1++, s2++;
+		if(*s2 == 0) {
+			return cp;
+		}
+		cp++;
+	}
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
 // check IP string.
 // false - no ip
 // true - valid ip

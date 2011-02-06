@@ -153,7 +153,7 @@ void ScriptEditorDialog::DoModal(HWND hWndParent) {
     int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2))-227;
 
     m_hWnd = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomScriptEditorDialog), LanguageManager->sTexts[LAN_SCRIPT_EDITOR],
-        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, 443, 454,
+        WS_POPUP | WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, 443, 454,
         hWndParent, NULL, g_hInstance, NULL);
 
     if(m_hWnd == NULL) {

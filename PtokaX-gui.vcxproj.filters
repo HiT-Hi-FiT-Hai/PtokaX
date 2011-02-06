@@ -187,6 +187,9 @@
     <ClCompile Include="gui.win\ScriptEditorDialog.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
+    <ClCompile Include="gui.win\RegisteredUsersDialog.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\eventqueue.h">
@@ -397,6 +400,9 @@
       <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui.win\ScriptEditorDialog.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.win\RegisteredUsersDialog.h">
       <Filter>Gui</Filter>
     </ClInclude>
   </ItemGroup>

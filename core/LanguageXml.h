@@ -842,6 +842,8 @@ const char* LangXmlStr[] = {
     "OpenInScriptEditor",
     "FailedToSave",
     "FailedToCheckSyntax",
+    "Change",
+    "FilterRegisteredUsers",
 };
 //---------------------------------------------------------------------------
 

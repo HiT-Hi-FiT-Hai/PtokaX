@@ -28,4 +28,10 @@ bool RichEditCheckMenuCommands(const HWND &hRichEdit, const WORD &wID);
 void RichEditAppendText(const HWND &hRichEdit, const char * sText);
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+int ListViewGetInsertPosition(const HWND &hListView, const void * pItem, const bool &bSortAscending, int (*pCompareFunc)(const void * pItem, const void * pOtherItem));
+void * ListViewGetItem(const HWND &hListView, const int &iPos);
+void ListViewUpdateArrow(const HWND &hListView, const bool &isAscending, const int &iSortColumn);
+int ListViewGetItemPosition(const HWND &hListView, void * pItem);
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 #endif

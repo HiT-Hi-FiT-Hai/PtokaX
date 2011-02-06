@@ -5,6 +5,8 @@ Added: Crash log generation to new gui windows version.
 Added: Core.GetUserValue(tUser, 27) return user MAC Address when it is possible (windoze only).
 Added: Enabled Data Execution Prevention for 32bit windoze version when system support that. 
 Added: Line numbers to script editor.
+Added: Column sorting to registered users list in registered users frame.
+Added: Filter to registered users frame.
 Fixed: Compile with Lua 5.2.0 (work 1)
 Fixed: Missing user input length checking in some commands (thx Rahim for report).
 Fixed: Multiple class member variables not initialized in the constructor.
