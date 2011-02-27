@@ -113,6 +113,7 @@ public:		// User declarations
     void ChangeProfileName(const uint16_t &iProfile, char * sName, const size_t &iLen);
     void ChangeProfilePermission(const uint16_t &iProfile, const size_t &iId, const bool &bValue);
     void SaveProfiles();
+    bool RemoveProfile(const uint16_t &iProfile);
 };
 
 //---------------------------------------------------------------------------

@@ -18,54 +18,52 @@
  */
 
 //------------------------------------------------------------------------------
-#ifndef RegisteredUsersDialogH
-#define RegisteredUsersDialogH
-//------------------------------------------------------------------------------
-struct RegUser;
+#ifndef ProfilesDialogH
+#define ProfilesDialogH
 //------------------------------------------------------------------------------
 
-class RegisteredUsersDialog {
+class ProfilesDialog {
 public:
     HWND m_hWnd;
 
-    HWND hWndWindowItems[5];
+    HWND hWndWindowItems[8];
 
     enum enmWindowItems {
-        BTN_ADD_REG,
-        LV_REGS,
-        GB_FILTER,
-        EDT_FILTER,
-        CB_FILTER,
+        BTN_ADD_PROFILE,
+        LV_PROFILES,
+        BTN_MOVE_UP,
+        BTN_MOVE_DOWN,
+        GB_PERMISSIONS,
+        LV_PERMISSIONS,
+        BTN_SET_ALL,
+        BTN_CLEAR_ALL
     };
 
-    RegisteredUsersDialog();
-    ~RegisteredUsersDialog();
+    ProfilesDialog();
+    ~ProfilesDialog();
 
-    static LRESULT CALLBACK StaticRegisteredUsersDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-    static int CompareRegs(const void * pItem, const void * pOtherItem);
-    static int CALLBACK SortCompareRegs(LPARAM lParam1, LPARAM lParam2, LPARAM /*lParamSort*/);
+    static LRESULT CALLBACK StaticProfilesDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	void DoModal(HWND hWndParent);
-	void FilterRegs();
-	void AddReg(const RegUser * pReg);
-	void RemoveReg(const RegUser * pReg);
-	void UpdateProfiles();
+	void RemoveProfile(const uint16_t &iProfile);
+	void AddProfile();
+    void MoveDown(const uint16_t &iProfile);
+    void MoveUp(const uint16_t &iProfile);
 private:
-    string sFilterString;
+    bool bIgnoreItemChanged;
 
-    int iFilterColumn, iSortColumn;
+    LRESULT ProfilesDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    bool bSortAscending;
-
-    LRESULT RegisteredUsersDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-    void AddAllRegs();
-    void OnColumnClick(const LPNMLISTVIEW &pListView);
-    void RemoveRegs();
+    void AddAllProfiles();
     void OnContextMenu(HWND hWindow, LPARAM lParam);
+    void OnProfileChanged(const LPNMLISTVIEW &pListView);
+    void ChangePermissionChecks(const bool &bCheck);
+    void RenameProfile(const int &iProfile);
+    void UpdateUpDown();
+    void OnPermissionChanged(const LPNMLISTVIEW &pListView);
 };
 //------------------------------------------------------------------------------
-extern RegisteredUsersDialog *pRegisteredUsersDialog;
+extern ProfilesDialog *pProfilesDialog;
 //------------------------------------------------------------------------------
 
 #endif

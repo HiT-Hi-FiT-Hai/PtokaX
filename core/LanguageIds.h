@@ -844,6 +844,12 @@ enum LangIds {
     LAN_FAILED_TO_CHECK_SYNTAX,
     LAN_CHANGE,
     LAN_FILTER_REGISTERED_USERS,
+    LAN_USER_DELETED_ACCEPT_TO_NEW,
+    LAN_USER_CHANGED,
+    LAN_ADD_NEW_REG,
+    LAN_PROFILES,
+    LAN_ADD_NEW_PROFILE,
+    LAN_PROFILE_PERMISSIONS,
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------

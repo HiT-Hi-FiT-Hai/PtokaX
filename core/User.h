@@ -183,7 +183,7 @@ struct User {
     uint8_t ui8IpLen, ui8ConnLen, ui8DescrLen, ui8EmailLen, ui8TagLen, ui8ClientLen, ui8VerLen;
     uint8_t ui8Country, iState;
 
-    char IP[16];
+    char IP[16/*46*/];
 };
 //---------------------------------------------------------------------------
 

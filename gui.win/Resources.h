@@ -31,7 +31,7 @@
 #define IDC_SETTINGS                1000
 #define IDC_EXIT                    1001
 #define IDC_REG_USERS               1002
-#define IDC_PROF_MAN                1003
+#define IDC_PROFILES                1003
 #define IDC_BANS                    1004
 #define IDC_RANGE_BANS              1005
 #define IDC_ABOUT                   1008

@@ -25,6 +25,7 @@
 #include "../core/colUsers.h"
 #include "../core/globalQueue.h"
 #include "../core/hashBanManager.h"
+#include "../core/hashRegManager.h"
 #include "../core/hashUsrManager.h"
 #include "../core/LanguageManager.h"
 #include "../core/ServerManager.h"
@@ -39,6 +40,8 @@
 //---------------------------------------------------------------------------
 #include "GuiUtil.h"
 #include "LineDialog.h"
+#include "MainWindow.h"
+#include "RegisteredUserDialog.h"
 #include "Resources.h"
 //---------------------------------------------------------------------------
 MainWindowPageUsersChat *pMainWindowPageUsersChat = NULL;
@@ -206,9 +209,29 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
                     }
 
                     break;
-                case IDC_REG_USER:
-                    ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
+                case IDC_REG_USER: {
+                    int iSel = (int)::SendMessage(hWndPageItems[LV_USERS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
+
+                    if(iSel == -1) {
+                        return 0;
+                    }
+
+                    char sNick[65];
+
+                    LVITEM lvItem = { 0 };
+                    lvItem.mask = LVIF_TEXT;
+                    lvItem.iItem = iSel;
+                    lvItem.iSubItem = 0;
+                    lvItem.pszText = sNick;
+                    lvItem.cchTextMax = 65;
+
+                    ::SendMessage(hWndPageItems[LV_USERS], LVM_GETITEM, 0, (LPARAM)&lvItem);
+
+                    RegisteredUserDialog * pRegisteredUserDialog = new RegisteredUserDialog();
+                    pRegisteredUserDialog->DoModal(pMainWindow->m_hWnd, NULL, sNick);
+
                     return 0;
+                }
                 case IDC_DISCONNECT_USER:
                     DisconnectUser();
                     return 0;
@@ -285,7 +308,7 @@ bool MainWindowPageUsersChat::CreateMainWindowPage(HWND hOwner) {
 
     hWndPageItems[LV_USERS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, "", WS_CHILD | WS_VISIBLE | LVS_NOCOLUMNHEADER | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL |
         LVS_SORTASCENDING, rcMain.right-148, 16, (rcMain.right-(rcMain.right-148))-2, rcMain.bottom-43, m_hWnd, NULL, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[LV_USERS], LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_INFOTIP);
+    ::SendMessage(hWndPageItems[LV_USERS], LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
     hWndPageItems[EDT_CHAT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOVSCROLL | ES_MULTILINE,
         2, rcMain.bottom-25, rcMain.right-152, 23, m_hWnd, (HMENU)EDT_CHAT, g_hInstance, NULL);
@@ -451,12 +474,26 @@ void MainWindowPageUsersChat::OnContextMenu(HWND hWindow, LPARAM lParam) {
 
         HMENU hMenu = ::CreatePopupMenu();
 
-        ::AppendMenu(hMenu, MF_STRING, IDC_REG_USER, LanguageManager->sTexts[LAN_MENU_REG_USER]);
+        char sNick[65];
+
+        LVITEM lvItem = { 0 };
+        lvItem.mask = LVIF_TEXT;
+        lvItem.iItem = iSel;
+        lvItem.iSubItem = 0;
+        lvItem.pszText = sNick;
+        lvItem.cchTextMax = 65;
+
+        ::SendMessage(hWndPageItems[LV_USERS], LVM_GETITEM, 0, (LPARAM)&lvItem);
+
+        if(hashRegManager->Find(sNick, strlen(sNick)) == NULL) {
+            ::AppendMenu(hMenu, MF_STRING, IDC_REG_USER, LanguageManager->sTexts[LAN_MENU_REG_USER]);
+            ::AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
+        }
+
+        ::AppendMenu(hMenu, MF_STRING, IDC_BAN_USER, LanguageManager->sTexts[LAN_MENU_BAN_USER]);
+        ::AppendMenu(hMenu, MF_STRING, IDC_KICK_USER, LanguageManager->sTexts[LAN_MENU_KICK_USER]);
         ::AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
         ::AppendMenu(hMenu, MF_STRING, IDC_DISCONNECT_USER, LanguageManager->sTexts[LAN_MENU_DISCONNECT_USER]);
-        ::AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
-        ::AppendMenu(hMenu, MF_STRING, IDC_KICK_USER, LanguageManager->sTexts[LAN_MENU_KICK_USER]);
-        ::AppendMenu(hMenu, MF_STRING, IDC_BAN_USER, LanguageManager->sTexts[LAN_MENU_BAN_USER]);
         ::AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
         ::AppendMenu(hMenu, MF_STRING, IDC_REDIRECT_USER, LanguageManager->sTexts[LAN_MENU_REDIRECT_USER]);
 
@@ -487,8 +524,6 @@ void MainWindowPageUsersChat::OnContextMenu(HWND hWindow, LPARAM lParam) {
             iX = pt.x;
             iY = pt.y;
         }
-
-        ::EnableMenuItem(hMenu, IDC_REG_USER, MF_BYCOMMAND | MF_GRAYED);
 
         ::TrackPopupMenuEx(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, iX, iY, m_hWnd, NULL);
 

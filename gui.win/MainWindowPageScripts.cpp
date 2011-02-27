@@ -578,7 +578,7 @@ void MainWindowPageScripts::DeleteScript() {
     }
 
     if(::MessageBox(m_hWnd, (string(LanguageManager->sTexts[LAN_ARE_YOU_SURE], (size_t)LanguageManager->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(),
-        "PtokaX", MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO) {
+        sTitle.c_str(), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO) {
 		return;
 	}
 

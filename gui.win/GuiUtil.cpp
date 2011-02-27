@@ -185,7 +185,7 @@ int ListViewGetInsertPosition(const HWND &hListView, const void * pItem, const b
 void * ListViewGetItem(const HWND &hListView, const int &iPos) {
 	LVITEM lvItem = { 0 };
 	lvItem.mask = LVIF_PARAM;
-	lvItem.iItem =iPos;
+	lvItem.iItem = iPos;
 
 	::SendMessage(hListView, LVM_GETITEM, 0, (LPARAM)&lvItem);
 

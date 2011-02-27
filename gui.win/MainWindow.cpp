@@ -39,6 +39,7 @@
 #include "MainWindowPageScripts.h"
 #include "MainWindowPageStats.h"
 #include "MainWindowPageUsersChat.h"
+#include "ProfilesDialog.h"
 #include "RegisteredUsersDialog.h"
 #include "Resources.h"
 #include "SettingDialog.h"
@@ -299,14 +300,17 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     return 0;
                 }
                 case IDC_REG_USERS: {
-                    RegisteredUsersDialog * pRegisteredUsersDialog = new  RegisteredUsersDialog();
+                    RegisteredUsersDialog * pRegisteredUsersDialog = new RegisteredUsersDialog();
                     pRegisteredUsersDialog->DoModal(m_hWnd);
 
                     return 0;
                 }
-                case IDC_PROF_MAN:
-                    ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
+                case IDC_PROFILES: {
+                    ProfilesDialog * pProfilesDialog = new ProfilesDialog();
+                    pProfilesDialog->DoModal(m_hWnd);
+
                     return 0;
+                }
                 case IDC_BANS:
                     ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
                     return 0;
@@ -387,7 +391,7 @@ HWND MainWindow::CreateEx() {
     HMENU hViewMenu = ::CreatePopupMenu();
     ::AppendMenu(hViewMenu, MF_STRING, IDC_REG_USERS, LanguageManager->sTexts[LAN_REG_USERS]);
     ::AppendMenu(hViewMenu, MF_SEPARATOR, 0, 0);
-    ::AppendMenu(hViewMenu, MF_STRING, IDC_PROF_MAN, LanguageManager->sTexts[LAN_PROFILE_MAN]);
+    ::AppendMenu(hViewMenu, MF_STRING, IDC_PROFILES, LanguageManager->sTexts[LAN_PROFILES]);
     ::AppendMenu(hViewMenu, MF_SEPARATOR, 0, 0);
     ::AppendMenu(hViewMenu, MF_STRING, IDC_BANS, LanguageManager->sTexts[LAN_BANS]);
     ::AppendMenu(hViewMenu, MF_STRING, IDC_RANGE_BANS, LanguageManager->sTexts[LAN_RANGE_BANS]);
@@ -495,7 +499,7 @@ void MainWindow::UpdateLanguage() {
 
     ::ModifyMenu(hMenu, IDC_EXIT, MF_BYCOMMAND, IDC_EXIT, LanguageManager->sTexts[LAN_EXIT]);
     ::ModifyMenu(hMenu, IDC_REG_USERS, MF_BYCOMMAND, IDC_REG_USERS, LanguageManager->sTexts[LAN_REG_USERS]);
-    ::ModifyMenu(hMenu, IDC_PROF_MAN, MF_BYCOMMAND, IDC_PROF_MAN, LanguageManager->sTexts[LAN_PROFILE_MAN]);
+    ::ModifyMenu(hMenu, IDC_PROFILES, MF_BYCOMMAND, IDC_PROFILES, LanguageManager->sTexts[LAN_PROFILES]);
     ::ModifyMenu(hMenu, IDC_BANS, MF_BYCOMMAND, IDC_BANS, LanguageManager->sTexts[LAN_BANS]);
     ::ModifyMenu(hMenu, IDC_RANGE_BANS, MF_BYCOMMAND, IDC_RANGE_BANS, LanguageManager->sTexts[LAN_RANGE_BANS]);
 
