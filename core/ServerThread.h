@@ -69,7 +69,7 @@ public:
 	void WaitFor();
 	bool Listen(const uint16_t &port, bool bSilent = false);
 #ifdef _WIN32
-	bool isFlooder(const SOCKET &s, const sockaddr_in &addr, const int &sin_len);
+	bool isFlooder(const SOCKET &s, const sockaddr_in /*sockaddr_in6*/ &addr, const int &sin_len);
 #else
 	bool isFlooder(const int &s, const sockaddr_in &addr, const socklen_t &sin_len);
 #endif

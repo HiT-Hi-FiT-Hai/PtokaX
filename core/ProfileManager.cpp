@@ -34,7 +34,11 @@
 	#pragma hdrstop
 //---------------------------------------------------------------------------
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+            #include "../gui.win/ProfilesDialog.h"
+            #include "../gui.win/RegisteredUserDialog.h"
+            #include "../gui.win/RegisteredUsersDialog.h"
+        #else
 			#include "TProfileManagerForm.h"
 		#endif
 	#endif
@@ -313,10 +317,23 @@ int32_t ProfileManager::AddProfile(char * name) {
 			}
 		#else
             CreateProfile(name);
+            if(pProfilesDialog != NULL) {
+                pProfilesDialog->AddProfile();
+            }
 		#endif
 	#endif
 #else
 	CreateProfile(name);
+#endif
+
+#ifdef _WIN32
+    #ifndef _SERVICE
+        #ifdef _MSC_VER
+            if(pRegisteredUserDialog != NULL) {
+                pRegisteredUserDialog->UpdateProfiles();
+            }
+        #endif
+    #endif
 #endif
 
     return (int32_t)(iProfileCount-1);
@@ -343,30 +360,29 @@ int32_t ProfileManager::GetProfileIndex(const char * name) {
 //          -1 if the profile is in use
 //          1 on success
 int32_t ProfileManager::RemoveProfileByName(char * name) {
-    int32_t idx = -1;
-    
-    for(uint16_t i = 0; i < iProfileCount; i++) {      
+    for(uint16_t i = 0; i < iProfileCount; i++) {
 #ifdef _WIN32
         if(stricmp(ProfilesTable[i]->sName, name) == 0) {
 #else
 		if(strcasecmp(ProfilesTable[i]->sName, name) == 0) {
 #endif
-            idx = i;
-            break;
+            return (RemoveProfile(i) == true ? 1 : -1);
         }
     }
     
-    // PPK ... check this !!! else crash >:-]
-    if(idx == -1)
-        return 0;
+    return 0;
+}
 
+//---------------------------------------------------------------------------
+
+bool ProfileManager::RemoveProfile(const uint16_t &iProfile) {
     RegUser *next = hashRegManager->RegListS;
     while(next != NULL) {
         RegUser *curReg = next;
 		next = curReg->next;
-		if(curReg->iProfile == idx) {
-            //MessageBox(Application->Handle, "Failed to delete a profile. Profile is in use.", "Failed!", MB_OK|MB_ICONEXCLAMATION);
-            return -1;
+		if(curReg->iProfile == iProfile) {
+            //Profile in use can't be deleted!
+            return false;
         }
     }
     
@@ -374,18 +390,22 @@ int32_t ProfileManager::RemoveProfileByName(char * name) {
 
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+            if(pProfilesDialog != NULL) {
+                pProfilesDialog->RemoveProfile(iProfile);
+            }
+		#else
 			// remove profile from gui...
 			if(ProfileManForm != NULL) {
-				ProfileManForm->RemoveProfile((uint16_t)idx);
+				ProfileManForm->RemoveProfile(iProfile);
 			}
 		#endif
 	#endif
 #endif
     
-    delete ProfilesTable[idx];
+    delete ProfilesTable[iProfile];
     
-	for(int32_t i = idx; i < iProfileCount; i++) {
+	for(uint16_t i = iProfile; i < iProfileCount; i++) {
         ProfilesTable[i] = ProfilesTable[i+1];
     }
 
@@ -396,7 +416,7 @@ int32_t ProfileManager::RemoveProfileByName(char * name) {
             User *curUser = nextUser;
             nextUser = curUser->next;
             
-            if(curUser->iProfile > idx) {
+            if(curUser->iProfile > iProfile) {
                 curUser->iProfile--;
             }
         }
@@ -407,7 +427,7 @@ int32_t ProfileManager::RemoveProfileByName(char * name) {
     while(next != NULL) {
         RegUser *curReg = next;
 		next = curReg->next;
-        if(curReg->iProfile > idx) {
+        if(curReg->iProfile > iProfile) {
             curReg->iProfile--;
         }
     }
@@ -430,7 +450,21 @@ int32_t ProfileManager::RemoveProfileByName(char * name) {
         exit(EXIT_FAILURE);
     }
 
-    return 1;
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+            if(pRegisteredUserDialog != NULL) {
+                pRegisteredUserDialog->UpdateProfiles();
+            }
+
+			if(pRegisteredUsersDialog != NULL) {
+				pRegisteredUsersDialog->UpdateProfiles();
+			}
+		#endif
+	#endif
+#endif
+
+    return true;
 }
 //---------------------------------------------------------------------------
 
@@ -529,6 +563,24 @@ void ProfileManager::MoveProfileDown(const uint16_t &iProfile) {
 		}
 	}
 
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+            if(pProfilesDialog != NULL) {
+                pProfilesDialog->MoveDown(iProfile);
+            }
+
+            if(pRegisteredUserDialog != NULL) {
+                pRegisteredUserDialog->UpdateProfiles();
+            }
+
+			if(pRegisteredUsersDialog != NULL) {
+				pRegisteredUsersDialog->UpdateProfiles();
+			}
+		#endif
+	#endif
+#endif
+
     if(colUsers == NULL) {
         return;
     }
@@ -567,6 +619,24 @@ void ProfileManager::MoveProfileUp(const uint16_t &iProfile) {
 			curReg->iProfile++;
 		}
 	}
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+            if(pProfilesDialog != NULL) {
+                pProfilesDialog->MoveUp(iProfile);
+            }
+
+            if(pRegisteredUserDialog != NULL) {
+                pRegisteredUserDialog->UpdateProfiles();
+            }
+
+			if(pRegisteredUsersDialog != NULL) {
+				pRegisteredUsersDialog->UpdateProfiles();
+			}
+		#endif
+	#endif
+#endif
 
     if(colUsers == NULL) {
         return;
@@ -619,7 +689,15 @@ void ProfileManager::ChangeProfileName(const uint16_t &iProfile, char * sName, c
 
 #ifdef _WIN32
 	#ifndef _SERVICE
-		#ifndef _MSC_VER
+		#ifdef _MSC_VER
+            if(pRegisteredUserDialog != NULL) {
+                pRegisteredUserDialog->UpdateProfiles();
+            }
+
+			if(pRegisteredUsersDialog != NULL) {
+				pRegisteredUsersDialog->UpdateProfiles();
+			}
+		#else
 			if(ProfileManForm != NULL) {
 				ProfileManForm->ProfList->Items->Strings[iProfile] = String(sName, iLen);
 			}

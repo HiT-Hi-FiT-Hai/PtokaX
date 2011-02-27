@@ -844,6 +844,12 @@ const char* LangXmlStr[] = {
     "FailedToCheckSyntax",
     "Change",
     "FilterRegisteredUsers",
+    "UserDeletedAcceptToNew",
+    "UserChanged",
+    "AddNewReg",
+    "Profiles",
+    "AddNewProfile",
+    "ProfilePermissions",
 };
 //---------------------------------------------------------------------------
 

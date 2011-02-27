@@ -72,7 +72,7 @@ void hashMan::Add(User * u) {
     nicktable[ui16dx] = u;
 
     ui16dx = ((uint16_t *)&u->ui32IpHash)[0];
-    
+
     if(iptable[ui16dx] == NULL) {
         iptable[ui16dx] = new IpTableItem();
 

@@ -38,6 +38,7 @@
 //---------------------------------------------------------------------------
 	#ifndef _SERVICE
 		#ifdef _MSC_VER
+            #include "../gui.win/RegisteredUserDialog.h"
             #include "../gui.win/RegisteredUsersDialog.h"
 		#else
 			#include "TRegsForm.h"
@@ -359,6 +360,16 @@ void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui
             }
         }
     }
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+            if(pRegisteredUserDialog != NULL) {
+                pRegisteredUserDialog->RegChanged(pReg);
+            }
+		#endif
+	#endif
+#endif
 }
 //---------------------------------------------------------------------------
 
@@ -394,6 +405,16 @@ void hashRegMan::Delete(RegUser * pReg, const bool &bFromGui/* = false*/) {
 #endif
 
 	Rem(pReg);
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+            if(pRegisteredUserDialog != NULL) {
+                pRegisteredUserDialog->RegDeleted(pReg);
+            }
+		#endif
+	#endif
+#endif
 
     delete pReg;
 }

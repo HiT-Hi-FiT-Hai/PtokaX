@@ -844,6 +844,12 @@ const char* LangStr[] = {
     "Failed to check syntax",
     "Change",
     "Filter registered users",
+    "Registered user was deleted. When you now press accept then new registered user will be created!",
+    "Registered user was changed.",
+    "Add new registered user",
+    "Profiles",
+    "Add new profile",
+    "Profile permissions",
 };
 //---------------------------------------------------------------------------
 

@@ -320,6 +320,8 @@
     <ClInclude Include="gui.win\MainWindowPageScripts.h" />
     <ClInclude Include="gui.win\MainWindowPageStats.h" />
     <ClInclude Include="gui.win\MainWindowPageUsersChat.h" />
+    <ClInclude Include="gui.win\ProfilesDialog.h" />
+    <ClInclude Include="gui.win\RegisteredUserDialog.h" />
     <ClInclude Include="gui.win\RegisteredUsersDialog.h" />
     <ClInclude Include="gui.win\Resources.h" />
     <ClInclude Include="gui.win\ScriptEditorDialog.h" />
@@ -394,7 +396,9 @@
     <ClCompile Include="gui.win\MainWindowPageScripts.cpp" />
     <ClCompile Include="gui.win\MainWindowPageStats.cpp" />
     <ClCompile Include="gui.win\MainWindowPageUsersChat.cpp" />
+    <ClCompile Include="gui.win\ProfilesDialog.cpp" />
     <ClCompile Include="gui.win\PtokaX.cpp" />
+    <ClCompile Include="gui.win\RegisteredUserDialog.cpp" />
     <ClCompile Include="gui.win\RegisteredUsersDialog.cpp" />
     <ClCompile Include="gui.win\ScriptEditorDialog.cpp" />
     <ClCompile Include="gui.win\SettingDialog.cpp" />

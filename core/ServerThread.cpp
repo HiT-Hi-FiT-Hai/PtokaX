@@ -129,7 +129,7 @@ void ServerThread::Run() {
 #else
 	int s;
 #endif
-    sockaddr_in addr; //addr.sin_family = AF_INET;
+    sockaddr_in /*sockaddr_in6*/ addr; //addr.sin_family = AF_INET;
 #ifdef _WIN32
     int len = sizeof(addr);
 #else
@@ -290,10 +290,10 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
     usPort = port;
 
 #ifdef _WIN32
-    server = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    server = socket(AF_INET /*AF_INET6*/, SOCK_STREAM, IPPROTO_TCP);
     if(server == INVALID_SOCKET) {
 #else
-    server = socket(AF_INET, SOCK_STREAM, 0);
+    server = socket(AF_INET /*AF_INET6*/, SOCK_STREAM, 0);
     if(server == -1) {
 #endif
         if(bSilent == true) {
@@ -325,35 +325,11 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
         return false;
     }
 
-    // set the socket properties
-    sockaddr_in sa;
-    sa.sin_family = AF_INET;
-    
-#ifdef _WIN32
-    sa.sin_port = htons((unsigned short)usPort);
-#else
-	sa.sin_port = htons(usPort);
-#endif
-
-    if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP[0] != '\0') {
-#ifdef _WIN32
-        sa.sin_addr.S_un.S_addr = inet_addr(sHubIP);
-#else
-		sa.sin_addr.s_addr = inet_addr(sHubIP);
-#endif
-    } else {
-#ifdef _WIN32
-        sa.sin_addr.S_un.S_addr = INADDR_ANY;
-#else
-		sa.sin_addr.s_addr = htonl(INADDR_ANY);
-#endif
-    }
-
 #ifndef _WIN32
     int on = 1;
     if(setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1) {
         if(bSilent == true) {
-            eventqueue->AddThread(eventq::EVENT_SRVTHREAD_MSG, 
+            eventqueue->AddThread(eventq::EVENT_SRVTHREAD_MSG,
                 ("[ERR] Server socket setsockopt error: " + string(errno)+" for port: "+string(port)).c_str());
         } else {
             AppendLog(string(LanguageManager->sTexts[LAN_SRV_SCKOPT_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_SCKOPT_ERR])+
@@ -364,6 +340,30 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
         return false;
     }
 #endif
+
+    // set the socket properties
+    sockaddr_in /*sockaddr_in6*/ sa = { 0 };
+    sa.sin_family /*sa.sin6_family*/ = AF_INET /*AF_INET6*/;
+    
+#ifdef _WIN32
+    sa.sin_port /*sa.sin6_port*/ = htons((unsigned short)usPort);
+#else
+	sa.sin_port /*sa6.sin6_port*/ = htons(usPort);
+#endif
+
+    if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP[0] != '\0') {
+#ifdef _WIN32
+        sa.sin_addr.S_un.S_addr = inet_addr(sHubIP);
+#else
+		sa.sin_addr.s_addr = inet_addr(sHubIP);
+#endif
+    } else {
+#ifdef _WIN32
+        sa.sin_addr.S_un.S_addr /*sa.sin6_addr*/ = INADDR_ANY /*in6addr_any*/;
+#else
+		sa.sin_addr.s_addr /*sa6.sin6_addr*/ = INADDR_ANY /*in6addr_any*/;
+#endif
+    }
 
     // bind it
 #ifdef _WIN32
@@ -448,7 +448,7 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
-bool ServerThread::isFlooder(const SOCKET &s, const sockaddr_in &addr, const int &sin_len) {
+bool ServerThread::isFlooder(const SOCKET &s, const sockaddr_in /*sockaddr_in6*/ &addr, const int &sin_len) {
     uint32_t iAddr = addr.sin_addr.S_un.S_addr;
 #else
 bool ServerThread::isFlooder(const int &s, const sockaddr_in &addr, const socklen_t &sin_len) {

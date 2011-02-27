@@ -367,6 +367,8 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 #ifdef _WIN32
     uint32_t hash = 16777216 * AccptSocket->addr.sin_addr.S_un.S_un_b.s_b1 + 65536 * AccptSocket->addr.sin_addr.S_un.S_un_b.s_b2
 		+ 256 * AccptSocket->addr.sin_addr.S_un.S_un_b.s_b3 + AccptSocket->addr.sin_addr.S_un.S_un_b.s_b4;
+/*	uint32_t hash = 16777216 * AccptSocket->addr.sin6_addr.u.Byte[12] + 65536 * AccptSocket->addr.sin6_addr.u.Byte[13]
+		+ 256 * AccptSocket->addr.sin6_addr.u.Byte[14] + AccptSocket->addr.sin6_addr.u.Byte[15];*/
 #else
     uint32_t hash;
     HashIP(AccptSocket->IP, strlen(AccptSocket->IP), hash);
@@ -1140,7 +1142,7 @@ void theLoop::SendLoop() {
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
-void theLoop::AcceptSocket(const SOCKET &s, const sockaddr_in &addr, const int &sin_len) {
+void theLoop::AcceptSocket(const SOCKET &s, const sockaddr_in /*sockaddr_in6*/ &addr, const int &sin_len) {
     EnterCriticalSection(&csAcceptQueue);
 #else
 void theLoop::AcceptSocket(const int &s, const sockaddr_in &addr, const socklen_t &sin_len) {
@@ -1166,6 +1168,7 @@ void theLoop::AcceptSocket(const int &s, const sockaddr_in &addr, const socklen_
     newSocket->addr = addr;
     newSocket->sin_len = sin_len;
     strcpy(newSocket->IP, inet_ntoa(addr.sin_addr));
+//    inet_ntop(AF_INET6, (void *)&addr.sin6_addr, newSocket->IP, 46);
     newSocket->next = NULL;
 
     if(AcceptedSocketsS == NULL) {

@@ -18,54 +18,47 @@
  */
 
 //------------------------------------------------------------------------------
-#ifndef RegisteredUsersDialogH
-#define RegisteredUsersDialogH
+#ifndef RegisteredUserDialogH
+#define RegisteredUserDialogH
 //------------------------------------------------------------------------------
 struct RegUser;
 //------------------------------------------------------------------------------
 
-class RegisteredUsersDialog {
+class RegisteredUserDialog {
 public:
     HWND m_hWnd;
 
-    HWND hWndWindowItems[5];
+    HWND hWndWindowItems[8];
 
     enum enmWindowItems {
-        BTN_ADD_REG,
-        LV_REGS,
-        GB_FILTER,
-        EDT_FILTER,
-        CB_FILTER,
+        GB_NICK,
+        EDT_NICK,
+        GB_PASSWORD,
+        EDT_PASSWORD,
+        GB_PROFILE,
+        CB_PROFILE,
+        BTN_ACCEPT,
+        BTN_DISCARD
     };
 
-    RegisteredUsersDialog();
-    ~RegisteredUsersDialog();
+    RegisteredUserDialog();
+    ~RegisteredUserDialog();
 
-    static LRESULT CALLBACK StaticRegisteredUsersDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-    static int CompareRegs(const void * pItem, const void * pOtherItem);
-    static int CALLBACK SortCompareRegs(LPARAM lParam1, LPARAM lParam2, LPARAM /*lParamSort*/);
+    static LRESULT CALLBACK StaticRegisteredUserDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	void DoModal(HWND hWndParent);
-	void FilterRegs();
-	void AddReg(const RegUser * pReg);
-	void RemoveReg(const RegUser * pReg);
+	void DoModal(HWND hWndParent, RegUser * pReg = NULL, char * sNick = NULL);
 	void UpdateProfiles();
+	void RegChanged(RegUser * pReg);
+	void RegDeleted(RegUser * pReg);
 private:
-    string sFilterString;
+    RegUser * pRegToChange;
 
-    int iFilterColumn, iSortColumn;
+    LRESULT RegisteredUserDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    bool bSortAscending;
-
-    LRESULT RegisteredUsersDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-    void AddAllRegs();
-    void OnColumnClick(const LPNMLISTVIEW &pListView);
-    void RemoveRegs();
-    void OnContextMenu(HWND hWindow, LPARAM lParam);
+    bool OnAccept();
 };
 //------------------------------------------------------------------------------
-extern RegisteredUsersDialog *pRegisteredUsersDialog;
+extern RegisteredUserDialog *pRegisteredUserDialog;
 //------------------------------------------------------------------------------
 
 #endif
