@@ -5,8 +5,10 @@ Added: Crash log generation to new gui windows version.
 Added: Core.GetUserValue(tUser, 27) return user MAC Address when it is possible (windoze only).
 Added: Enabled Data Execution Prevention for 32bit windoze version when system support that. 
 Added: Line numbers to script editor.
-Added: Column sorting to registered users list in registered users frame.
-Added: Filter to registered users frame.
+Added: Column sorting to registered users list in registered users window.
+Added: Filter to registered users window.
+Added: Column sorting to ban list in bans window.
+Added: Filter to bans window.
 Fixed: Compile with Lua 5.2.0 (work 1)
 Fixed: Missing user input length checking in some commands (thx Rahim for report).
 Fixed: Multiple class member variables not initialized in the constructor.
@@ -16,8 +18,10 @@ Fixed: Multiple redundant check for NULL before free/delete.
 Fixed: Multiple memory leaks when ip-to-country loading fails.
 Fixed: Memory leak when script try to reg bot with nick that already exist.
 Fixed: Memory leak when text file creating fails.
+Fixed: Integer overflow for temp ban expiring after 03:14:07, January 19, 2038 in 32bit version or 23:59:59, December 31, 3000 in 64bit version (thx Saymon for report).
 Changed: Windows GUI, from GUI created with Borland VCL to WinAPI GUI.
 Changed: Some min/max setting values.
+Changed: Times and dates are now shown in system locale format.
 Rewritten: Resolve code from deprecated gethostbyname to getaddrinfo.
 
 

@@ -36,6 +36,7 @@
 #endif
 //---------------------------------------------------------------------------
 #include "AboutDialog.h"
+#include "BansDialog.h"
 #include "MainWindowPageScripts.h"
 #include "MainWindowPageStats.h"
 #include "MainWindowPageUsersChat.h"
@@ -68,7 +69,7 @@ uint64_t PXGetTickCount64() {
 //---------------------------------------------------------------------------
 
 MainWindow::MainWindow() {
-	INITCOMMONCONTROLSEX iccx = { sizeof(INITCOMMONCONTROLSEX), ICC_BAR_CLASSES | ICC_COOL_CLASSES | ICC_LINK_CLASS | ICC_LISTVIEW_CLASSES |
+	INITCOMMONCONTROLSEX iccx = { sizeof(INITCOMMONCONTROLSEX), ICC_BAR_CLASSES | ICC_COOL_CLASSES | ICC_DATE_CLASSES | ICC_LINK_CLASS | ICC_LISTVIEW_CLASSES |
         ICC_STANDARD_CLASSES | ICC_TAB_CLASSES | ICC_TREEVIEW_CLASSES | ICC_UPDOWN_CLASS };
 	InitCommonControlsEx(&iccx);
 
@@ -311,9 +312,12 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
                     return 0;
                 }
-                case IDC_BANS:
-                    ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
+                case IDC_BANS: {
+                    BansDialog * pBansDialog = new BansDialog();
+                    pBansDialog->DoModal(m_hWnd);
+
                     return 0;
+				}
                 case IDC_RANGE_BANS:
                     ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
                     return 0;
