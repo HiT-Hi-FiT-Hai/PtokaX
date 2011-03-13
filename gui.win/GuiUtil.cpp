@@ -116,8 +116,8 @@ void RichEditAppendText(const HWND &hRichEdit, const char * sText) {
     time_t acc_time = time(NULL);
     struct tm *tm = localtime(&acc_time);
 
-    char msg[13];
-    strftime(msg, 13, "\n[%H:%M:%S] ", tm);
+    char msg[128];
+    strftime(msg, 128, "\n[%X] ", tm);
 
     CHARRANGE cr = { 0, 0 };
     ::SendMessage(hRichEdit, EM_EXGETSEL, 0, (LPARAM)&cr);

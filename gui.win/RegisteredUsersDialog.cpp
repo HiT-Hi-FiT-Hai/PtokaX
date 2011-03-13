@@ -349,7 +349,6 @@ int CALLBACK RegisteredUsersDialog::SortCompareRegs(LPARAM lParam1, LPARAM lPara
 
     return (pRegisteredUsersDialog->bSortAscending == true ? iResult : -iResult);
 }
-
 //------------------------------------------------------------------------------
 
 void RegisteredUsersDialog::RemoveRegs() {
@@ -357,6 +356,8 @@ void RegisteredUsersDialog::RemoveRegs() {
         MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO) {
         return;
     }
+
+    ::SendMessage(hWndWindowItems[LV_REGS], WM_SETREDRAW, (WPARAM)FALSE, 0);
 
     int iSel = -1;
     while((iSel = (int)::SendMessage(hWndWindowItems[LV_REGS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED)) != -1) {
@@ -366,6 +367,8 @@ void RegisteredUsersDialog::RemoveRegs() {
 
         ::SendMessage(hWndWindowItems[LV_REGS], LVM_DELETEITEM, iSel, 0);
     }
+
+    ::SendMessage(hWndWindowItems[LV_REGS], WM_SETREDRAW, (WPARAM)TRUE, 0);
 }
 //------------------------------------------------------------------------------
 

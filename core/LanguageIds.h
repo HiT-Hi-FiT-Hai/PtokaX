@@ -850,6 +850,9 @@ enum LangIds {
     LAN_PROFILES,
     LAN_ADD_NEW_PROFILE,
     LAN_PROFILE_PERMISSIONS,
+    LAN_ADD_NEW_BAN,
+    LAN_FILTER_BANS,
+    LAN_BAN_DELETED_ACCEPT_TO_NEW,
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------

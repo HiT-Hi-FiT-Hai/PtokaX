@@ -982,7 +982,14 @@ bool GenerateTempBanTime(const char &cMultiplyer, const uint32_t &iTime, time_t 
             return false;
     }
 
+    tm->tm_isdst = -1;
+
     ban_time = mktime(tm);
+
+    if(ban_time == (time_t)-1) {
+        return false;
+    }
+
     return true;
 }
 //---------------------------------------------------------------------------
@@ -1137,7 +1144,7 @@ void AppendLog(const string & sData, const bool &bScript/* == false*/) {
 	acc_tm = localtime(&acc_time);
 
 	char sBuf[64];
-	strftime(sBuf, 64, "%d.%m.%Y %H:%M:%S", acc_tm);
+	strftime(sBuf, 64, "%c", acc_tm);
 
 	string sTmp = string(sBuf) + " - " + sData + "\n";
 	fprintf(fw, sTmp.c_str());
@@ -1164,7 +1171,7 @@ void AppendSpecialLog(const string & sData) {
 	acc_tm = localtime(&acc_time);
 
 	char sBuf[64];
-	strftime(sBuf, 64, "%d.%m.%Y %H:%M:%S", acc_tm);
+	strftime(sBuf, 64, "%c", acc_tm);
 
 	string sTmp = string(sBuf) + " - " + sData + NEW_LINE_CHARS;
 

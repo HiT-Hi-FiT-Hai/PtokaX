@@ -196,6 +196,12 @@
     <ClCompile Include="gui.win\ProfilesDialog.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
+    <ClCompile Include="gui.win\BansDialog.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
+    <ClCompile Include="gui.win\BanDialog.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\eventqueue.h">
@@ -415,6 +421,12 @@
       <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui.win\ProfilesDialog.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.win\BansDialog.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.win\BanDialog.h">
       <Filter>Gui</Filter>
     </ClInclude>
   </ItemGroup>

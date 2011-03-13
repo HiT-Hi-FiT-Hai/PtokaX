@@ -850,6 +850,9 @@ const char* LangStr[] = {
     "Profiles",
     "Add new profile",
     "Profile permissions",
+    "Add new ban",
+    "Filter bans",
+    "Ban was deleted. When you now press accept then new ban will be created!",
 };
 //---------------------------------------------------------------------------
 

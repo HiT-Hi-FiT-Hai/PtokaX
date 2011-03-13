@@ -183,7 +183,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                         }
 
                         struct tm *tm = localtime(&curBan->tempbanexpire);
-                        strftime(msg, 256, "%d-%b-%Y %H:%M:%S" NEW_LINE_CHARS, tm);
+                        strftime(msg, 256, "%c" NEW_LINE_CHARS, tm);
 
 						BanList += " " + string(LanguageManager->sTexts[LAN_EXPIRE], (size_t)LanguageManager->ui16TextsLens[LAN_EXPIRE]) + ": " + string(msg);
                     }
@@ -464,7 +464,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 }
 
                 struct tm *tm = localtime(&user->LoginTime);
-                iret = (int)strftime(msg+imsgLen, 256, "%d-%b-%Y %H:%M:%S", tm);
+                iret = (int)strftime(msg+imsgLen, 256, "%c", tm);
                 imsgLen += iret;
                 if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand26") == false) {
                     return true;
@@ -608,7 +608,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                         }
 
                         struct tm *tm = localtime(&curBan->tempbanexpire);
-                        strftime(msg, 256, "%d-%b-%Y %H:%M:%S" NEW_LINE_CHARS, tm);
+                        strftime(msg, 256, "%c" NEW_LINE_CHARS, tm);
 
 						BanList += " " + string(LanguageManager->sTexts[LAN_EXPIRE], (size_t)LanguageManager->ui16TextsLens[LAN_EXPIRE]) + ": " + string(msg);
                     }
@@ -810,7 +810,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                         }
 
                         struct tm *tm = localtime(&curBan->tempbanexpire);
-                        strftime(msg, 256, "%d-%b-%Y %H:%M:%S" NEW_LINE_CHARS, tm);
+                        strftime(msg, 256, "%c" NEW_LINE_CHARS, tm);
 
 						BanList += " " + string(LanguageManager->sTexts[LAN_EXPIRE], (size_t)LanguageManager->ui16TextsLens[LAN_EXPIRE]) + ": " + string(msg);
                     }
@@ -1009,7 +1009,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                         }
 
                         struct tm *tm = localtime(&curBan->tempbanexpire);
-                        strftime(msg, 256, "%d-%b-%Y %H:%M:%S" NEW_LINE_CHARS, tm);
+                        strftime(msg, 256, "%c" NEW_LINE_CHARS, tm);
 
 						BanList += " " + string(LanguageManager->sTexts[LAN_EXPIRE], (size_t)LanguageManager->ui16TextsLens[LAN_EXPIRE]) + ": " + string(msg);
                     }
@@ -3666,7 +3666,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 if(((Ban->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
                     char msg1[256];
                     struct tm *tm = localtime(&Ban->tempbanexpire);
-                    strftime(msg1, 256, "%d-%b-%Y %H:%M:%S", tm);
+                    strftime(msg1, 256, "%c", tm);
                     int iret = sprintf(msg+imsgLen, " %s: %s|", LanguageManager->sTexts[LAN_EXPIRE], msg1);
            	        imsgLen += iret;
                     if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand269") == false) {
@@ -3805,7 +3805,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 
                         if(((curBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
                             struct tm *tm = localtime(&curBan->tempbanexpire);
-                            strftime(msg, 256, "%d-%b-%Y %H:%M:%S", tm);
+                            strftime(msg, 256, "%c", tm);
 							Bans += " " + string(LanguageManager->sTexts[LAN_EXPIRE], (size_t)LanguageManager->ui16TextsLens[LAN_EXPIRE]) + ": " + string(msg);
                         }
                     }
@@ -3867,7 +3867,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 
                             if(((curRangeBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
                                 struct tm *tm = localtime(&curRangeBan->tempbanexpire);
-                                strftime(msg, 256, "%d-%b-%Y %H:%M:%S", tm);
+                                strftime(msg, 256, "%c", tm);
 								Bans += " " + string(LanguageManager->sTexts[LAN_EXPIRE], (size_t)LanguageManager->ui16TextsLens[LAN_EXPIRE]) + ": " + string(msg);
                             }
                         }
@@ -3940,7 +3940,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 
                                 if(((curBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
                                     struct tm *tm = localtime(&curBan->tempbanexpire);
-                                    strftime(msg, 256, "%d-%b-%Y %H:%M:%S", tm);
+                                    strftime(msg, 256, "%c", tm);
 									Bans += " " + string(LanguageManager->sTexts[LAN_EXPIRE], (size_t)LanguageManager->ui16TextsLens[LAN_EXPIRE]) + ": " + string(msg);
                                 }
                             }
@@ -4092,7 +4092,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 if(((RangeBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
                     char msg1[256];
                     struct tm *tm = localtime(&RangeBan->tempbanexpire);
-                    strftime(msg1, 256, "%d-%b-%Y %H:%M:%S", tm);
+                    strftime(msg1, 256, "%c", tm);
                     int iret = sprintf(msg+imsgLen, " %s: %s|", LanguageManager->sTexts[LAN_EXPIRE], msg1);
                     imsgLen += iret;
                     if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand309") == false) {

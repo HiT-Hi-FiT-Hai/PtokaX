@@ -89,11 +89,11 @@ public:
     ~hashBanMan(void);
 
 
-    void Add(BanItem *Ban);
+    void Add(BanItem * Ban);
     void Add2Table(BanItem *Ban);
 	void Add2NickTable(BanItem *Ban);
 	void Add2IpTable(BanItem *Ban);
-    void Rem(BanItem *Ban);
+    void Rem(BanItem * Ban, const bool &bFromGui = false);
     void RemFromTable(BanItem *Ban);
     void RemFromNickTable(BanItem *Ban);
 	void RemFromIpTable(BanItem *Ban);

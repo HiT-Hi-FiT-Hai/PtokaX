@@ -30,6 +30,12 @@
 #ifdef _WIN32
 	#pragma hdrstop
 //---------------------------------------------------------------------------
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+            #include "../gui.win/BansDialog.h"
+		#endif
+	#endif
+//---------------------------------------------------------------------------
 	#ifndef _MSC_VER
 		#pragma package(smart_init)
 	#endif
@@ -197,7 +203,7 @@ hashBanMan::~hashBanMan(void) {
 }
 //---------------------------------------------------------------------------
 
-void hashBanMan::Add(BanItem *Ban) {
+void hashBanMan::Add(BanItem * Ban) {
 	Add2Table(Ban);
 
     if(((Ban->ui8Bits & PERM) == PERM) == true) {
@@ -219,6 +225,16 @@ void hashBanMan::Add(BanItem *Ban) {
 			TempBanListE = Ban;
 		}
     }
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+            if(pBansDialog != NULL) {
+                pBansDialog->AddBan(Ban);
+            }
+		#endif
+	#endif
+#endif
 }
 //---------------------------------------------------------------------------
 
@@ -304,7 +320,7 @@ void hashBanMan::Add2IpTable(BanItem *Ban) {
 }
 //---------------------------------------------------------------------------
 
-void hashBanMan::Rem(BanItem *Ban) {
+void hashBanMan::Rem(BanItem * Ban, const bool &bFromGui/* = false*/) {
 	RemFromTable(Ban);
 
     if(((Ban->ui8Bits & PERM) == PERM) == true) {
@@ -340,6 +356,16 @@ void hashBanMan::Rem(BanItem *Ban) {
 			Ban->next->prev = Ban->prev;
 		}
     }
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+            if(bFromGui == false && pBansDialog != NULL) {
+                pBansDialog->RemoveBan(Ban);
+            }
+		#endif
+	#endif
+#endif
 }
 //---------------------------------------------------------------------------
 

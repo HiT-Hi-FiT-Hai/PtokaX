@@ -313,6 +313,8 @@
     <ClInclude Include="core\utility.h" />
     <ClInclude Include="core\ZlibUtility.h" />
     <ClInclude Include="gui.win\AboutDialog.h" />
+    <ClInclude Include="gui.win\BanDialog.h" />
+    <ClInclude Include="gui.win\BansDialog.h" />
     <ClInclude Include="gui.win\GuiUtil.h" />
     <ClInclude Include="gui.win\LineDialog.h" />
     <ClInclude Include="gui.win\MainWindow.h" />
@@ -389,6 +391,8 @@
     <ClCompile Include="core\utility.cpp" />
     <ClCompile Include="core\ZlibUtility.cpp" />
     <ClCompile Include="gui.win\AboutDialog.cpp" />
+    <ClCompile Include="gui.win\BanDialog.cpp" />
+    <ClCompile Include="gui.win\BansDialog.cpp" />
     <ClCompile Include="gui.win\GuiUtil.cpp" />
     <ClCompile Include="gui.win\LineDialog.cpp" />
     <ClCompile Include="gui.win\MainWindow.cpp" />

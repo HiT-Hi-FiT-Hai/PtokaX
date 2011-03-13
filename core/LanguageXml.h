@@ -850,6 +850,9 @@ const char* LangXmlStr[] = {
     "Profiles",
     "AddNewProfile",
     "ProfilePermissions",
+    "AddNewBan",
+    "FilterBans",
+    "BanDeletedAcceptToNew",
 };
 //---------------------------------------------------------------------------
 
