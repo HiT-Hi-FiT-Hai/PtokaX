@@ -132,6 +132,10 @@ LRESULT RegisteredUsersDialog::RegisteredUsersDialogProc(UINT uMsg, WPARAM wPara
                 if(((LPNMHDR)lParam)->code == LVN_COLUMNCLICK) {
                     OnColumnClick((LPNMLISTVIEW)lParam);
                 } else if(((LPNMHDR)lParam)->code == NM_DBLCLK) {
+                    if(((LPNMITEMACTIVATE)lParam)->iItem == -1) {
+                        break;
+                    }
+
                     RegUser * pReg = (RegUser *)ListViewGetItem(hWndWindowItems[LV_REGS],  ((LPNMITEMACTIVATE)lParam)->iItem);
 
                     RegisteredUserDialog * pRegisteredUserDialog = new RegisteredUserDialog();

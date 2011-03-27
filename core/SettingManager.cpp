@@ -1434,13 +1434,25 @@ void SetMan::UpdateHubNameWelcome() {
 	int iLen;
 
     if(sTexts[SETTXT_HUB_TOPIC] == NULL) {
-        iLen = sprintf(msg, "$HubName %s|<%s> %s %s (%s: ",
-            sTexts[SETTXT_HUB_NAME], sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_THIS_HUB_IS_RUNNING],
-			sTitle.c_str(), LanguageManager->sTexts[LAN_UPTIME]);
+        iLen = sprintf(msg, "$HubName %s|<%s> %s %s"
+#ifdef _PtokaX_TESTING_
+            " [build %I64u]"
+#endif
+            " (%s: ", sTexts[SETTXT_HUB_NAME], sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_THIS_HUB_IS_RUNNING], sTitle.c_str(),
+#ifdef _PtokaX_TESTING_
+            BUILD_NUMBER,
+#endif
+            LanguageManager->sTexts[LAN_UPTIME]);
     } else {
-        iLen =  sprintf(msg, "$HubName %s - %s|<%s> %s %s (%s: ",
-            sTexts[SETTXT_HUB_NAME], sTexts[SETTXT_HUB_TOPIC], sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_THIS_HUB_IS_RUNNING], 
-			sTitle.c_str(), LanguageManager->sTexts[LAN_UPTIME]);
+        iLen =  sprintf(msg, "$HubName %s - %s|<%s> %s %s"
+#ifdef _PtokaX_TESTING_
+            " [build %I64u]"
+#endif
+            " (%s: ", sTexts[SETTXT_HUB_NAME], sTexts[SETTXT_HUB_TOPIC], sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_THIS_HUB_IS_RUNNING], sTitle.c_str(),
+#ifdef _PtokaX_TESTING_
+            BUILD_NUMBER,
+#endif
+            LanguageManager->sTexts[LAN_UPTIME]);
     }
     
     if(CheckSprintf(iLen, 2048, "SetMan::UpdateHubNameWelcome") == false) {

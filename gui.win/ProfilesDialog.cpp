@@ -177,6 +177,10 @@ LRESULT ProfilesDialog::ProfilesDialogProc(UINT uMsg, WPARAM wParam, LPARAM lPar
                 if(((LPNMHDR)lParam)->code == LVN_ITEMCHANGED) {
                     OnProfileChanged((LPNMLISTVIEW)lParam);
                 } else if(((LPNMHDR)lParam)->code == NM_DBLCLK) {
+                    if(((LPNMITEMACTIVATE)lParam)->iItem == -1) {
+                        break;
+                    }
+
                     RenameProfile(((LPNMITEMACTIVATE)lParam)->iItem);
                 }
             } else if(((LPNMHDR)lParam)->hwndFrom == hWndWindowItems[LV_PERMISSIONS]) {

@@ -853,6 +853,9 @@ const char* LangXmlStr[] = {
     "AddNewBan",
     "FilterBans",
     "BanDeletedAcceptToNew",
+    "AddNewRangeBan",
+    "FilterRangeBans",
+    "RangeBanDeletedAcceptToNew",
 };
 //---------------------------------------------------------------------------
 

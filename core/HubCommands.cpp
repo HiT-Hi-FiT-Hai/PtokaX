@@ -4898,14 +4898,22 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 				Statinfo+="Uptime: "+string(iDays)+" days, "+string(iHours) + " hours, " + string(iMins) + " minutes" NEW_LINE_CHARS;
 
 #ifdef _WIN32
-	#ifndef _M_X64
-				Statinfo+="Version: PtokaX DC Hub "+string(PtokaXVersionString)+" built on "+__DATE__+" "+__TIME__+"\r\n";
-	#else
-				Statinfo+="Version: PtokaX DC Hub "+string(PtokaXVersionString)+" x64 built on "+__DATE__+" "+__TIME__+"\r\n";
-	#endif
+                Statinfo+="Version: PtokaX DC Hub " PtokaXVersionString
+    #ifndef _M_X64
+                " x64"
+    #endif
+    #ifdef _PtokaX_TESTING_
+                " [build "+string(BUILD_NUMBER)+"]"
+    #endif
+                " built on "+__DATE__+" "+__TIME__+"\r\n";
+
 				Statinfo+="OS: "+sOs+"\r\n";
 #else
-				Statinfo+="Version: PtokaX DC Hub "+string(PtokaXVersionString)+" built on "+__DATE__+" "+__TIME__+"\n";
+				Statinfo+="Version: PtokaX DC Hub " PtokaXVersionString
+    #ifdef _PtokaX_TESTING_
+                " [build "+string(BUILD_NUMBER)+"]"
+    #endif
+                " built on "+__DATE__+" "+__TIME__+"\n";
 
 				struct utsname osname;
 				if(uname(&osname) >= 0) {

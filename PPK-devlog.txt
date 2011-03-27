@@ -9,6 +9,9 @@ Added: Column sorting to registered users list in registered users window.
 Added: Filter to registered users window.
 Added: Column sorting to ban list in bans window.
 Added: Filter to bans window.
+Added: Build numbering.
+Added: Column sorting to range ban list in range bans window.
+Added: Filter to range bans window.
 Fixed: Compile with Lua 5.2.0 (work 1)
 Fixed: Missing user input length checking in some commands (thx Rahim for report).
 Fixed: Multiple class member variables not initialized in the constructor.
