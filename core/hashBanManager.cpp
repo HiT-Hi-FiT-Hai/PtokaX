@@ -33,6 +33,7 @@
 	#ifndef _SERVICE
 		#ifdef _MSC_VER
             #include "../gui.win/BansDialog.h"
+            #include "../gui.win/RangeBansDialog.h"
 		#endif
 	#endif
 //---------------------------------------------------------------------------
@@ -544,10 +545,20 @@ void hashBanMan::AddRange(RangeBanItem *RangeBan) {
         RangeBan->prev = RangeBanListE;
         RangeBanListE = RangeBan;
     }
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+            if(pRangeBansDialog != NULL) {
+                pRangeBansDialog->AddRangeBan(RangeBan);
+            }
+		#endif
+	#endif
+#endif
 }
 //---------------------------------------------------------------------------
 
-void hashBanMan::RemRange(RangeBanItem *RangeBan) {
+void hashBanMan::RemRange(RangeBanItem *RangeBan, const bool &bFromGui/* = false*/) {
     if(RangeBan->prev == NULL) {
         if(RangeBan->next == NULL) {
             RangeBanListS = NULL;
@@ -563,6 +574,16 @@ void hashBanMan::RemRange(RangeBanItem *RangeBan) {
         RangeBan->prev->next = RangeBan->next;
         RangeBan->next->prev = RangeBan->prev;
     }
+
+#ifdef _WIN32
+	#ifndef _SERVICE
+		#ifdef _MSC_VER
+            if(bFromGui == false && pRangeBansDialog != NULL) {
+                pRangeBansDialog->RemoveRangeBan(RangeBan);
+            }
+		#endif
+	#endif
+#endif
 }
 //---------------------------------------------------------------------------
 

@@ -102,7 +102,7 @@ public:
 	void Remove(BanItem *Ban); // from gui
 
     void AddRange(RangeBanItem *RangeBan);
-	void RemRange(RangeBanItem *RangeBan);
+	void RemRange(RangeBanItem *RangeBan, const bool &bFromGui = false);
 
 	RangeBanItem* FindRange(RangeBanItem *RangeBan); // from gui
 	void RemoveRange(RangeBanItem *RangeBan); // from gui

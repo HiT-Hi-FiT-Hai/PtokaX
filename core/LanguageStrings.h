@@ -853,6 +853,9 @@ const char* LangStr[] = {
     "Add new ban",
     "Filter bans",
     "Ban was deleted. When you now press accept then new ban will be created!",
+    "Add new range ban",
+    "Filter range bans",
+    "Range ban was deleted. When you now press accept then new range ban will be created!",
 };
 //---------------------------------------------------------------------------
 

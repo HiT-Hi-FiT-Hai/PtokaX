@@ -162,6 +162,10 @@ LRESULT MainWindowPageScripts::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPAR
                 if(((LPNMHDR)lParam)->code == LVN_ITEMCHANGED) {
                     OnItemChanged((LPNMLISTVIEW)lParam);
                 } else if(((LPNMHDR)lParam)->code == NM_DBLCLK) {
+                    if(((LPNMITEMACTIVATE)lParam)->iItem == -1) {
+                        break;
+                    }
+
                     OnDoubleClick((LPNMITEMACTIVATE)lParam);
                 }
             }

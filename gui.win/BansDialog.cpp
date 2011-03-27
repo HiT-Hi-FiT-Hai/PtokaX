@@ -154,6 +154,10 @@ LRESULT BansDialog::BansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 if(((LPNMHDR)lParam)->code == LVN_COLUMNCLICK) {
                     OnColumnClick((LPNMLISTVIEW)lParam);
                 } else if(((LPNMHDR)lParam)->code == NM_DBLCLK) {
+                    if(((LPNMITEMACTIVATE)lParam)->iItem == -1) {
+                        break;
+                    }
+
                     BanItem * pBan = (BanItem *)ListViewGetItem(hWndWindowItems[LV_BANS], ((LPNMITEMACTIVATE)lParam)->iItem);
 
                     BanDialog * pBanDialog = new BanDialog();
@@ -268,9 +272,7 @@ void BansDialog::DoModal(HWND hWndParent) {
     lvColumn.fmt = LVCFMT_LEFT;
     lvColumn.cx = 100;
 
-    const int iBansStrings[] = {
-        LAN_NICK, LAN_IP, LAN_REASON, LAN_EXPIRE, LAN_BANNED_BY
-    };
+    const int iBansStrings[] = { LAN_NICK, LAN_IP, LAN_REASON, LAN_EXPIRE, LAN_BANNED_BY };
 
     for(uint8_t ui8i = 0; ui8i < 5; ui8i++) {
         lvColumn.pszText = LanguageManager->sTexts[iBansStrings[ui8i]];
@@ -287,8 +289,16 @@ void BansDialog::DoModal(HWND hWndParent) {
 
     AddAllBans();
 
+    const int iBansWidths[] = { 200, 160, 125, 125, 100 };
+
     for(uint8_t ui8i = 0; ui8i < 5; ui8i++) {
         ::SendMessage(hWndWindowItems[LV_BANS], LVM_SETCOLUMNWIDTH, ui8i, LVSCW_AUTOSIZE);
+
+        int iWidth = (int)::SendMessage(hWndWindowItems[LV_BANS], LVM_GETCOLUMNWIDTH, ui8i, 0);
+
+        if(iWidth < iBansWidths[ui8i]) {
+            ::SendMessage(hWndWindowItems[LV_BANS], LVM_SETCOLUMNWIDTH, ui8i, iBansWidths[ui8i]);
+        }
     }
 
     ::EnableWindow(hWndParent, FALSE);
@@ -377,20 +387,16 @@ void BansDialog::AddBan(const BanItem * pBan) {
 
     ::SendMessage(hWndWindowItems[LV_BANS], LVM_SETITEM, 0, (LPARAM)&lvItem);
 
-    lvItem.iSubItem = 3;
-
     if((pBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) {
         char msg[256];
         struct tm *tm = localtime(&pBan->tempbanexpire);
         strftime(msg, 256, "%c", tm);
-        sTxt = msg;
-    } else {
-        sTxt = "";
+
+        lvItem.iSubItem = 3;
+        lvItem.pszText = msg;
+
+        ::SendMessage(hWndWindowItems[LV_BANS], LVM_SETITEM, 0, (LPARAM)&lvItem);
     }
-
-    lvItem.pszText = sTxt.c_str();
-
-    ::SendMessage(hWndWindowItems[LV_BANS], LVM_SETITEM, 0, (LPARAM)&lvItem);
 
     lvItem.iSubItem = 4;
     lvItem.pszText = (pBan->sBy == NULL ? "" : pBan->sBy);
@@ -407,7 +413,7 @@ int BansDialog::CompareBans(const void * pItem, const void * pOtherItem) {
         case 0:
             return _stricmp(pFirstBan->sNick == NULL ? "" : pFirstBan->sNick, pSecondBan->sNick == NULL ? "" : pSecondBan->sNick);
         case 1:
-            return _stricmp(pFirstBan->sIp[0] == '\0' ? "" : pFirstBan->sIp, pSecondBan->sIp[0] == '\0' ? "" : pSecondBan->sIp);
+            return (pFirstBan->ui32IpHash > pSecondBan->ui32IpHash) ? 1 : ((pFirstBan->ui32IpHash == pSecondBan->ui32IpHash) ? 0 : -1);
         case 2:
             return _stricmp(pFirstBan->sReason == NULL ? "" : pFirstBan->sReason, pSecondBan->sReason == NULL ? "" : pSecondBan->sReason);
         case 3:

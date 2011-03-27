@@ -853,6 +853,9 @@ enum LangIds {
     LAN_ADD_NEW_BAN,
     LAN_FILTER_BANS,
     LAN_BAN_DELETED_ACCEPT_TO_NEW,
+    LAN_ADD_NEW_RANGE_BAN,
+    LAN_FILTER_RANGE_BANS,
+    LAN_RANGE_BAN_DELETED_ACCEPT_TO_NEW,
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------
