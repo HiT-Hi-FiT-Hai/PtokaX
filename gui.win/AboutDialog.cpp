@@ -141,7 +141,7 @@ void AboutDialog::DoModal(HWND hWndParent) {
     ::SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
     ::SetWindowLongPtr(m_hWnd, GWLP_WNDPROC, (LONG_PTR)StaticAboutDialogProc);
 
-    hWndWindowItems[LBL_PTOKAX_VERSION] = ::CreateWindowEx(0, WC_STATIC, ("PtokaX" PtokaXVersionString " [build " + string(BUILD_NUMBER) + "]").c_str(), WS_CHILD | WS_VISIBLE | SS_CENTER,
+    hWndWindowItems[LBL_PTOKAX_VERSION] = ::CreateWindowEx(0, WC_STATIC, "PtokaX" PtokaXVersionString " [build " BUILD_NUMBER "]", WS_CHILD | WS_VISIBLE | SS_CENTER,
         73, 10, 290, 25, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[LBL_PTOKAX_VERSION], WM_SETFONT, (WPARAM)hfBigFont, MAKELPARAM(TRUE, 0));
 
