@@ -24,7 +24,8 @@
 //---------------------------------------------------------------------------
 #include "../core/LanguageManager.h"
 #include "../core/SettingManager.h"
-#include "../core/utility.h"
+//---------------------------------------------------------------------------
+#include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
@@ -331,157 +332,180 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
         return false;
     }
 
-    hWndPageItems[GB_SLOTS_LIMITS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_SLOTS_LIMIT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 3, 447, 125,
-        m_hWnd, NULL, g_hInstance, NULL);
+    RECT rcThis = { 0 };
+    ::GetWindowRect(m_hWnd, &rcThis);
+
+    hWndPageItems[GB_SLOTS_LIMITS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_SLOTS_LIMIT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        0, 0, iFullGB, iOneLineTwoGroupGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_SLOTS_MIN] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
-        8, 18, 40, 20, m_hWnd, (HMENU)EDT_SLOTS_MIN, g_hInstance, NULL);
+        8, iGroupBoxMargin, ScaleGui(40), iEditHeight, m_hWnd, (HMENU)EDT_SLOTS_MIN, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SLOTS_MIN], EM_SETLIMITTEXT, 3, 0);
     AddToolTip(hWndPageItems[EDT_SLOTS_MIN], LanguageManager->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
-    AddUpDown(hWndPageItems[UD_SLOTS_MIN], 48, 18, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_SLOTS_MIN],
+    AddUpDown(hWndPageItems[UD_SLOTS_MIN], ScaleGui(40) + 8, iGroupBoxMargin, iUpDownWidth, iEditHeight, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_SLOTS_MIN],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MIN_SLOTS_LIMIT], 0));
 
-    hWndPageItems[LBL_SLOTS_MIN] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MIN_SLOTS], WS_CHILD | WS_VISIBLE | SS_LEFT, 70, 21, 151, 16,
-        m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[LBL_SLOTS_MIN] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MIN_SLOTS], WS_CHILD | WS_VISIBLE | SS_LEFT,
+        ScaleGui(40) + iUpDownWidth + 13, iGroupBoxMargin + ((iEditHeight - iTextHeight) / 2),
+        ((rcThis.right - rcThis.left - 16) / 2) - (ScaleGui(40) + iUpDownWidth + 15), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[LBL_SLOTS_MAX] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MAX_SLOTS], WS_CHILD | WS_VISIBLE | SS_RIGHT, 226, 21, 151, 16,
-        m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[LBL_SLOTS_MAX] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MAX_SLOTS], WS_CHILD | WS_VISIBLE | SS_RIGHT,
+        ((rcThis.right - rcThis.left - 16) / 2) + 2, iGroupBoxMargin + ((iEditHeight - iTextHeight) / 2),
+        ((rcThis.right - rcThis.left) - ScaleGui(40) - iUpDownWidth - 18) - (((rcThis.right - rcThis.left - 16) / 2) + 2), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_SLOTS_MAX] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
-        382, 18, 40, 20, m_hWnd, (HMENU)EDT_SLOTS_MAX, g_hInstance, NULL);
+        (rcThis.right - rcThis.left) - 13 - iUpDownWidth - ScaleGui(40), iGroupBoxMargin, ScaleGui(40), iEditHeight, m_hWnd, (HMENU)EDT_SLOTS_MAX, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SLOTS_MAX], EM_SETLIMITTEXT, 3, 0);
     AddToolTip(hWndPageItems[EDT_SLOTS_MAX], LanguageManager->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
-    AddUpDown(hWndPageItems[UD_SLOTS_MAX], 422, 18, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_SLOTS_MAX],
-        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_SLOTS_LIMIT], 0));
+    AddUpDown(hWndPageItems[UD_SLOTS_MAX], (rcThis.right - rcThis.left) - 13 - iUpDownWidth, iGroupBoxMargin, iUpDownWidth, iEditHeight, (LPARAM)MAKELONG(999, 0),
+        (WPARAM)hWndPageItems[EDT_SLOTS_MAX], (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_SLOTS_LIMIT], 0));
 
-    hWndPageItems[GB_SLOTS_MSG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 41, 437, 41,
-        m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_SLOTS_MSG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        5, iGroupBoxMargin + iEditHeight + 2, iGBinGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_SLOTS_MSG] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_SLOTS_LIMIT_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        13, 56, 421, 18, m_hWnd, (HMENU)EDT_SLOTS_MSG, g_hInstance, NULL);
+        13, (2 * iGroupBoxMargin) + iEditHeight + 2, iGBinGBEDT, iEditHeight, m_hWnd, (HMENU)EDT_SLOTS_MSG, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SLOTS_MSG], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_SLOTS_MSG], LanguageManager->sTexts[LAN_SLOT_LIMIT_MSG_HINT]);
 
-    hWndPageItems[GB_SLOTS_REDIR] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ADDRESS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 82, 437, 41,
-        m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_SLOTS_REDIR] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ADDRESS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        5, iGroupBoxMargin + iEditHeight + iOneLineGB + 2, iGBinGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[BTN_SLOTS_REDIR] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ENABLE_W_ARROW], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        13, 98, 80, 16, m_hWnd, (HMENU)BTN_SLOTS_REDIR, g_hInstance, NULL);
+        13, (2 * iGroupBoxMargin) + iEditHeight + iOneLineGB + 2 + ((iEditHeight - iCheckHeight) / 2), ScaleGui(85), iCheckHeight, m_hWnd, (HMENU)BTN_SLOTS_REDIR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_SLOTS_REDIR], BM_SETCHECK, (SettingManager->bBools[SETBOOL_SLOTS_LIMIT_REDIR] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[EDT_SLOTS_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_SLOTS_LIMIT_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
-        ES_AUTOHSCROLL, 98, 97, 336, 18, m_hWnd, (HMENU)EDT_SLOTS_REDIR_ADDR, g_hInstance, NULL);
+        ES_AUTOHSCROLL, ScaleGui(85) + 18, (2 * iGroupBoxMargin) + iEditHeight + iOneLineGB + 2, (rcThis.right - rcThis.left) - (ScaleGui(85) + 36), iEditHeight,
+        m_hWnd, (HMENU)EDT_SLOTS_REDIR_ADDR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SLOTS_REDIR_ADDR], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_SLOTS_REDIR_ADDR], LanguageManager->sTexts[LAN_REDIRECT_HINT]);
 
-    hWndPageItems[GB_HUBS_SLOTS_LIMITS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_HUB_SLOT_RATIO_LIMIT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, 128, 447, 125, m_hWnd, NULL, g_hInstance, NULL);
+    int iPosX = iOneLineTwoGroupGB;
 
-    hWndPageItems[LBL_HUBS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_HUBS], WS_CHILD | WS_VISIBLE | SS_RIGHT, 8, 146, 146, 16,
+    hWndPageItems[GB_HUBS_SLOTS_LIMITS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_HUB_SLOT_RATIO_LIMIT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        0, iPosX, iFullGB, iOneLineTwoGroupGB, m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[LBL_HUBS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_HUBS], WS_CHILD | WS_VISIBLE | SS_RIGHT,
+        8, iPosX + iGroupBoxMargin + ((iEditHeight - iTextHeight) / 2), (((rcThis.right - rcThis.left) - 21) / 2) - (ScaleGui(10) / 2) - iUpDownWidth - ScaleGui(40) - 18, iTextHeight,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_HUBS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
-        159, 143, 40, 20, m_hWnd, (HMENU)EDT_HUBS, g_hInstance, NULL);
+        (((rcThis.right - rcThis.left) - 21) / 2) - (ScaleGui(10) / 2) - iUpDownWidth - ScaleGui(40) - 5, iPosX + iGroupBoxMargin, ScaleGui(40), iEditHeight,
+        m_hWnd, (HMENU)EDT_HUBS, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUBS], EM_SETLIMITTEXT, 3, 0);
     AddToolTip(hWndPageItems[EDT_HUBS], LanguageManager->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
-    AddUpDown(hWndPageItems[UD_HUBS], 199, 143, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_HUBS],
-        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_HUB_SLOT_RATIO_HUBS], 0));
+    AddUpDown(hWndPageItems[UD_HUBS], (((rcThis.right - rcThis.left) - 21) / 2) - (ScaleGui(10) / 2) - iUpDownWidth - 5, iPosX + iGroupBoxMargin, iUpDownWidth, iEditHeight,
+        (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_HUBS], (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_HUB_SLOT_RATIO_HUBS], 0));
 
-    hWndPageItems[LBL_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER, 221, 146, 5, 16, m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[LBL_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER,
+        (((rcThis.right - rcThis.left) - 21) / 2) - (ScaleGui(10) / 2), iPosX + iGroupBoxMargin + ((iEditHeight - iTextHeight) / 2), ScaleGui(10), iTextHeight,
+        m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_SLOTS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
-        231, 143, 40, 20, m_hWnd, (HMENU)EDT_SLOTS, g_hInstance, NULL);
+        (((rcThis.right - rcThis.left) - 21) / 2) + (ScaleGui(10) / 2) + 5, iPosX + iGroupBoxMargin, ScaleGui(40), iEditHeight, m_hWnd, (HMENU)EDT_SLOTS, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SLOTS], EM_SETLIMITTEXT, 3, 0);
     AddToolTip(hWndPageItems[EDT_SLOTS], LanguageManager->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
-    AddUpDown(hWndPageItems[UD_SLOTS], 271, 143, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_SLOTS],
-        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_HUB_SLOT_RATIO_SLOTS], 0));
+    AddUpDown(hWndPageItems[UD_SLOTS], (((rcThis.right - rcThis.left) - 21) / 2) + (ScaleGui(10) / 2) + ScaleGui(40) + 5, iPosX + iGroupBoxMargin, iUpDownWidth, iEditHeight,
+        (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_SLOTS], (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_HUB_SLOT_RATIO_SLOTS], 0));
 
-    hWndPageItems[LBL_SLOTS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SLOTS], WS_CHILD | WS_VISIBLE | SS_LEFT, 293, 146, 146, 16,
+    hWndPageItems[LBL_SLOTS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SLOTS], WS_CHILD | WS_VISIBLE | SS_LEFT,
+        (((rcThis.right - rcThis.left) - 21) / 2) + (ScaleGui(10) / 2) + ScaleGui(40) + iUpDownWidth + 10, iPosX + iGroupBoxMargin + ((iEditHeight - iTextHeight) / 2),
+        (rcThis.right - rcThis.left) - ((((rcThis.right - rcThis.left) - 21) / 2) + (ScaleGui(10) / 2) + ScaleGui(40) + iUpDownWidth + 23), iTextHeight,
         m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[GB_HUBS_SLOTS_MSG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 166, 437, 41,
-        m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_HUBS_SLOTS_MSG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        5, iPosX + iGroupBoxMargin + iEditHeight + 2, iGBinGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_HUBS_SLOTS_MSG] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_HUB_SLOT_RATIO_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        13, 181, 421, 18, m_hWnd, (HMENU)EDT_HUBS_SLOTS_MSG, g_hInstance, NULL);
+        13, iPosX + (2 * iGroupBoxMargin) + iEditHeight + 2, iGBinGBEDT, iEditHeight, m_hWnd, (HMENU)EDT_HUBS_SLOTS_MSG, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUBS_SLOTS_MSG], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_HUBS_SLOTS_MSG], LanguageManager->sTexts[LAN_HUB_SLOT_RATIO_MSG_HINT]);
 
-    hWndPageItems[GB_HUBS_SLOTS_REDIR] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ADDRESS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 207, 437, 41,
-        m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_HUBS_SLOTS_REDIR] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ADDRESS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        5, iPosX + iGroupBoxMargin + iEditHeight + iOneLineGB + 2, iGBinGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[BTN_HUBS_SLOTS_REDIR] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ENABLE_W_ARROW], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        13, 223, 80, 16, m_hWnd, (HMENU)BTN_HUBS_SLOTS_REDIR, g_hInstance, NULL);
+        13, iPosX + (2 * iGroupBoxMargin) + iEditHeight + iOneLineGB + 2 + ((iEditHeight - iCheckHeight) / 2), ScaleGui(85), iCheckHeight, m_hWnd, (HMENU)BTN_HUBS_SLOTS_REDIR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_HUBS_SLOTS_REDIR], BM_SETCHECK, (SettingManager->bBools[SETBOOL_HUB_SLOT_RATIO_REDIR] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[EDT_HUBS_SLOTS_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_HUB_SLOT_RATIO_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
-        ES_AUTOHSCROLL, 98, 222, 336, 18, m_hWnd, (HMENU)EDT_HUBS_SLOTS_REDIR_ADDR, g_hInstance, NULL);
+        ES_AUTOHSCROLL, ScaleGui(85) + 18, iPosX + (2 * iGroupBoxMargin) + iEditHeight + iOneLineGB + 2, (rcThis.right - rcThis.left) - (ScaleGui(85) + 36), iEditHeight,
+        m_hWnd, (HMENU)EDT_HUBS_SLOTS_REDIR_ADDR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUBS_SLOTS_REDIR_ADDR], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_HUBS_SLOTS_REDIR_ADDR], LanguageManager->sTexts[LAN_REDIRECT_HINT]);
 
+    iPosX *= 2;
+
     hWndPageItems[GB_HUBS_LIMIT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MAX_HUBS_LIMIT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, 253, 447, 125, m_hWnd, NULL, g_hInstance, NULL);
+        0, iPosX, iFullGB, iOneLineTwoGroupGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_MAX_HUBS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
-        8, 268, 40, 20, m_hWnd, (HMENU)EDT_MAX_HUBS, g_hInstance, NULL);
+        8, iPosX + iGroupBoxMargin, ScaleGui(40), iEditHeight, m_hWnd, (HMENU)EDT_MAX_HUBS, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MAX_HUBS], EM_SETLIMITTEXT, 3, 0);
     AddToolTip(hWndPageItems[EDT_MAX_HUBS], LanguageManager->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
-    AddUpDown(hWndPageItems[UD_MAX_HUBS], 48, 268, 17, 20, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_MAX_HUBS],
+    AddUpDown(hWndPageItems[UD_MAX_HUBS], ScaleGui(40) + 8, iPosX + iGroupBoxMargin, iUpDownWidth, iEditHeight, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_MAX_HUBS],
         (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_HUBS_LIMIT], 0));
 
-    hWndPageItems[LBL_MAX_HUBS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MAX_HUBS], WS_CHILD | WS_VISIBLE | SS_LEFT, 70, 271, 369, 16,
-        m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[LBL_MAX_HUBS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MAX_HUBS], WS_CHILD | WS_VISIBLE | SS_LEFT,
+        ScaleGui(40) + iUpDownWidth + 13, iPosX +iGroupBoxMargin + ((iEditHeight - iTextHeight) / 2),
+        ((rcThis.right - rcThis.left - 16) / 2) - (ScaleGui(40) + iUpDownWidth + 15), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[GB_HUBS_MSG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 291, 437, 41,
-        m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_HUBS_MSG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        5, iPosX + iGroupBoxMargin + iEditHeight + 2, iGBinGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_HUBS_MSG] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_MAX_HUBS_LIMIT_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        13, 306, 421, 18, m_hWnd, (HMENU)EDT_HUBS_MSG, g_hInstance, NULL);
+        13, iPosX + (2 * iGroupBoxMargin) + iEditHeight + 2, iGBinGBEDT, iEditHeight, m_hWnd, (HMENU)EDT_HUBS_MSG, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUBS_MSG], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_HUBS_MSG], LanguageManager->sTexts[LAN_HUB_LIMIT_MSG_HINT]);
 
-    hWndPageItems[GB_HUBS_REDIR] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ADDRESS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 332, 437, 41,
-        m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_HUBS_REDIR] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ADDRESS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        5, iPosX + iGroupBoxMargin + iEditHeight + iOneLineGB + 2, iGBinGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[BTN_HUBS_REDIR] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ENABLE_W_ARROW], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        13, 348, 80, 16, m_hWnd, (HMENU)BTN_HUBS_REDIR, g_hInstance, NULL);
+        13, iPosX + (2 * iGroupBoxMargin) + iEditHeight + iOneLineGB + 2 + ((iEditHeight - iCheckHeight) / 2), ScaleGui(85), iCheckHeight, m_hWnd, (HMENU)BTN_HUBS_REDIR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_HUBS_REDIR], BM_SETCHECK, (SettingManager->bBools[SETBOOL_MAX_HUBS_LIMIT_REDIR] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[EDT_HUBS_REDIR_ADDR] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_MAX_HUBS_LIMIT_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
-        ES_AUTOHSCROLL, 98, 347, 336, 18, m_hWnd, (HMENU)EDT_HUBS_REDIR_ADDR, g_hInstance, NULL);
+        ES_AUTOHSCROLL, ScaleGui(85) + 18, iPosX + (2 * iGroupBoxMargin) + iEditHeight + iOneLineGB + 2, (rcThis.right - rcThis.left) - (ScaleGui(85) + 36), iEditHeight,
+        m_hWnd, (HMENU)EDT_HUBS_REDIR_ADDR, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUBS_REDIR_ADDR], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_HUBS_REDIR_ADDR], LanguageManager->sTexts[LAN_REDIRECT_HINT]);
 
-    hWndPageItems[GB_CTM_LEN] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_CTM_LIMIT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, 378, 221, 43, m_hWnd, NULL, g_hInstance, NULL);
+    iPosX += iOneLineTwoGroupGB;
 
-    hWndPageItems[LBL_CTM_LEN] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MAXIMUM], WS_CHILD | WS_VISIBLE | SS_LEFT, 8, 396, 143, 16,
+    hWndPageItems[GB_CTM_LEN] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_CTM_LIMIT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        0, iPosX, ((rcThis.right - rcThis.left - 5) / 2) - 2, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[LBL_CTM_LEN] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MAXIMUM], WS_CHILD | WS_VISIBLE | SS_LEFT,
+        8, iPosX + iGroupBoxMargin + ((iEditHeight - iTextHeight) / 2), ((rcThis.right - rcThis.left - 5) / 2) - iUpDownWidth - ScaleGui(40) - 23, iTextHeight,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_CTM_LEN] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
-        156, 393, 40, 20, m_hWnd, (HMENU)EDT_CTM_LEN, g_hInstance, NULL);
+        ((rcThis.right - rcThis.left - 5) / 2) - iUpDownWidth - ScaleGui(40) - 10, iPosX + iGroupBoxMargin, ScaleGui(40), iEditHeight, m_hWnd, (HMENU)EDT_CTM_LEN, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_CTM_LEN], EM_SETLIMITTEXT, 3, 0);
 
-    AddUpDown(hWndPageItems[UD_CTM_LEN], 196, 393, 17, 20, (LPARAM)MAKELONG(512, 1), (WPARAM)hWndPageItems[EDT_CTM_LEN],
-        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_CTM_LEN], 0));
+    AddUpDown(hWndPageItems[UD_CTM_LEN], ((rcThis.right - rcThis.left - 5) / 2) - iUpDownWidth - 10, iPosX + iGroupBoxMargin, iUpDownWidth, iEditHeight, (LPARAM)MAKELONG(512, 1),
+        (WPARAM)hWndPageItems[EDT_CTM_LEN], (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_CTM_LEN], 0));
 
     hWndPageItems[GB_RCTM_LEN] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_RCTM_LIMIT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        226, 378, 221, 43, m_hWnd, NULL, g_hInstance, NULL);
+        ((rcThis.right - rcThis.left - 5) / 2) + 3, iPosX, (rcThis.right - rcThis.left) - (((rcThis.right - rcThis.left - 5) / 2) + 8), iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[LBL_RCTM_LEN] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MAXIMUM], WS_CHILD | WS_VISIBLE | SS_LEFT, 234, 396, 143, 16,
-        m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[LBL_RCTM_LEN] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_MAXIMUM], WS_CHILD | WS_VISIBLE | SS_LEFT,
+        ((rcThis.right - rcThis.left - 5) / 2) + 11, iPosX + iGroupBoxMargin + ((iEditHeight - iTextHeight) / 2),
+        (rcThis.right - rcThis.left) - ((rcThis.right - rcThis.left - 5) / 2) - iUpDownWidth - ScaleGui(40) - 29, iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_RCTM_LEN] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
-        382, 393, 40, 20, m_hWnd, (HMENU)EDT_RCTM_LEN, g_hInstance, NULL);
+        (rcThis.right - rcThis.left) - iUpDownWidth - ScaleGui(40) - 13, iPosX + iGroupBoxMargin, ScaleGui(40), iEditHeight, m_hWnd, (HMENU)EDT_RCTM_LEN, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_RCTM_LEN], EM_SETLIMITTEXT, 3, 0);
 
-    AddUpDown(hWndPageItems[UD_RCTM_LEN], 422, 393, 17, 20, (LPARAM)MAKELONG(512, 1), (WPARAM)hWndPageItems[EDT_RCTM_LEN],
-        (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_RCTM_LEN], 0));
+    AddUpDown(hWndPageItems[UD_RCTM_LEN], (rcThis.right - rcThis.left) - iUpDownWidth - 13, iPosX + iGroupBoxMargin, iUpDownWidth, iEditHeight, (LPARAM)MAKELONG(512, 1),
+        (WPARAM)hWndPageItems[EDT_RCTM_LEN], (LPARAM)MAKELONG(SettingManager->iShorts[SETSHORT_MAX_RCTM_LEN], 0));
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {

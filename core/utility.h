@@ -104,7 +104,6 @@ extern bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bCmdNoKeyCheck;
 	extern HANDLE hConsole, hPtokaXHeap, hRecvHeap, hSendHeap;
 	extern string PATH_LUA, sOs;
 	extern bool b2K;
-	extern HFONT hfFont;
 #endif
 //---------------------------------------------------------------------------
 

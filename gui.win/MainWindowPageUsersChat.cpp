@@ -34,11 +34,12 @@
 #include "../core/User.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiUtil.h"
+//---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-#include "GuiUtil.h"
 #include "LineDialog.h"
 #include "MainWindow.h"
 #include "RegisteredUserDialog.h"
@@ -68,17 +69,17 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
 
             return 0;
         case WM_WINDOWPOSCHANGED: {
-            int iX = ((WINDOWPOS*)lParam)->cx;
-            int iY = ((WINDOWPOS*)lParam)->cy;
+            int iX = ((WINDOWPOS *)lParam)->cx;
+            int iY = ((WINDOWPOS *)lParam)->cy;
 
-            ::SetWindowPos(hWndPageItems[BTN_SHOW_CHAT], NULL, 0, 0, ((iX-150)/2)-3, 16, SWP_NOMOVE | SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[BTN_SHOW_COMMANDS], NULL, ((iX-150)/2)+1, 0, ((iX-150)/2)-3, 16, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[BTN_AUTO_UPDATE_USERLIST], NULL, iX-148, 0, (iX-(iX-150))-4, 16, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[REDT_CHAT], NULL, 0, 0, iX-152, iY-43, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[BTN_SHOW_CHAT], NULL, 0, 0, ((iX - ScaleGui(150)) / 2) - 3, iCheckHeight, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[BTN_SHOW_COMMANDS], NULL, ((iX - ScaleGui(150)) / 2) + 1, 0, ((iX - ScaleGui(150)) / 2) - 3, iCheckHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[BTN_AUTO_UPDATE_USERLIST], NULL, iX - (ScaleGui(150) - 4), 0, (iX - (iX - (ScaleGui(150) - 2))) - 4, iCheckHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[REDT_CHAT], NULL, 0, 0, iX - ScaleGui(150), iY - iEditHeight - iCheckHeight - 4, SWP_NOMOVE | SWP_NOZORDER);
             ::SendMessage(hWndPageItems[REDT_CHAT], WM_VSCROLL, SB_BOTTOM, NULL);
-            ::SetWindowPos(hWndPageItems[LV_USERS], NULL, iX-148, 16, (iX-(iX-148))-2, iY-43, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[EDT_CHAT], NULL, 2, iY-25, iX-152, 23, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[BTN_UPDATE_USERS], NULL, iX-149, iY-25, (iX-(iX-148)), 23, SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[LV_USERS], NULL, iX - (ScaleGui(150) - 4), iCheckHeight, (iX - (iX - (ScaleGui(150) - 2))) - 4, iY - iEditHeight - iCheckHeight - 4, SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[EDT_CHAT], NULL, 2, iY - iEditHeight - 2, iX - ScaleGui(150), iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[BTN_UPDATE_USERS], NULL, iX - (ScaleGui(150) - 3), iY - iEditHeight - 2, (iX - (iX - (ScaleGui(150) - 2))) - 2, iEditHeight, SWP_NOZORDER);
 
             return 0;
         }
@@ -292,30 +293,32 @@ bool MainWindowPageUsersChat::CreateMainWindowPage(HWND hOwner) {
     ::GetClientRect(m_hWnd, &rcMain);
 
     hWndPageItems[BTN_SHOW_CHAT] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_CHAT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        2, 0, ((rcMain.right-150)/2)-3, 16, m_hWnd, NULL, g_hInstance, NULL);
+        2, 0, ((rcMain.right - ScaleGui(150)) / 2) - 3, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[BTN_SHOW_COMMANDS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_CMDS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        ((rcMain.right-150)/2)+1, 0, ((rcMain.right-150)/2)-3, 16, m_hWnd, NULL, g_hInstance, NULL);
+        ((rcMain.right - ScaleGui(150)) / 2) + 1, 0, ((rcMain.right - ScaleGui(150)) / 2) - 3, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[BTN_AUTO_UPDATE_USERLIST] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_AUTO], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        rcMain.right-148, 0, (rcMain.right-(rcMain.right-150))-4, 16, m_hWnd, (HMENU)BTN_AUTO_UPDATE_USERLIST, g_hInstance, NULL);
+        rcMain.right - ScaleGui(150) - 4, 0, (rcMain.right - (rcMain.right - ScaleGui(150) - 2)) - 4, iCheckHeight, m_hWnd, (HMENU)BTN_AUTO_UPDATE_USERLIST, g_hInstance, NULL);
 
     hWndPageItems[REDT_CHAT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_READONLY,
-        2, 16, rcMain.right-152, rcMain.bottom-43, m_hWnd, NULL, g_hInstance, NULL);
+        2, iCheckHeight, rcMain.right - ScaleGui(150), rcMain.bottom - iEditHeight - iCheckHeight - 4, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[REDT_CHAT], EM_EXLIMITTEXT, 0, (LPARAM)262144);
     ::SendMessage(hWndPageItems[REDT_CHAT], EM_AUTOURLDETECT, TRUE, 0);
     ::SendMessage(hWndPageItems[REDT_CHAT], EM_SETEVENTMASK, 0, (LPARAM)::SendMessage(hWndPageItems[REDT_CHAT], EM_GETEVENTMASK, 0, 0) | ENM_LINK);
 
     hWndPageItems[LV_USERS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, "", WS_CHILD | WS_VISIBLE | LVS_NOCOLUMNHEADER | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL |
-        LVS_SORTASCENDING, rcMain.right-148, 16, (rcMain.right-(rcMain.right-148))-2, rcMain.bottom-43, m_hWnd, NULL, g_hInstance, NULL);
+        LVS_SORTASCENDING, rcMain.right - ScaleGui(150) - 4, iCheckHeight, (rcMain.right - (rcMain.right - ScaleGui(150) - 2)) - 4, rcMain.bottom - iEditHeight - iCheckHeight - 4,
+        m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[LV_USERS], LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
     hWndPageItems[EDT_CHAT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOVSCROLL | ES_MULTILINE,
-        2, rcMain.bottom-25, rcMain.right-152, 23, m_hWnd, (HMENU)EDT_CHAT, g_hInstance, NULL);
+        2, rcMain.bottom - iEditHeight - 2, rcMain.right - ScaleGui(150), iEditHeight, m_hWnd, (HMENU)EDT_CHAT, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_CHAT], EM_SETLIMITTEXT, 8192, 0);
 
     hWndPageItems[BTN_UPDATE_USERS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REFRESH_USERLIST], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_TABSTOP | BS_PUSHBUTTON,
-        rcMain.right-149, rcMain.bottom-25, (rcMain.right-(rcMain.right-148)), 23, m_hWnd, (HMENU)BTN_UPDATE_USERS, g_hInstance, NULL);
+        rcMain.right - ScaleGui(150) - 3, rcMain.bottom - iEditHeight - 2, (rcMain.right - (rcMain.right - ScaleGui(150) - 2)) - 2, iEditHeight,
+         m_hWnd, (HMENU)BTN_UPDATE_USERS, g_hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {
@@ -331,7 +334,7 @@ bool MainWindowPageUsersChat::CreateMainWindowPage(HWND hOwner) {
     LVCOLUMN lvColumn = { 0 };
     lvColumn.mask = LVCF_FMT | LVCF_WIDTH;
     lvColumn.fmt = LVCFMT_LEFT;
-    lvColumn.cx = rcUsers.right - rcUsers.left;
+    lvColumn.cx = (rcUsers.right - rcUsers.left) - 5;
 
     ::SendMessage(hWndPageItems[LV_USERS], LVM_INSERTCOLUMN, 0, (LPARAM)&lvColumn);
 

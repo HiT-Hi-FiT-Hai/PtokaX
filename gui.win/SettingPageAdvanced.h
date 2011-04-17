@@ -44,7 +44,7 @@ public:
     char * GetPageName();
     void FocusLastItem();
 private:
-    HWND hWndPageItems[20];
+    HWND hWndPageItems[19];
     
     enum enmPageItems {
         GB_HUB_STARTUP_AND_TRAY,
@@ -59,7 +59,6 @@ private:
         GB_SCRIPTING,
         BTN_ENABLE_SCRIPTING,
         BTN_STOP_SCRIPT_ON_ERROR,
-        BTN_POPUP_SCRIPT_WINDOW_ON_ERROR,
         BTN_SAVE_SCRIPT_ERRORS_TO_LOG,
         GB_KICK_MESSAGES,
         BTN_FILTER_KICK_MESSAGES,

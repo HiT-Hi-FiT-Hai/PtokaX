@@ -205,7 +205,9 @@
     <ClCompile Include="gui.win\RangeBansDialog.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
-    <ClCompile Include="gui.win\RangeBanDialog.cpp" />
+    <ClCompile Include="gui.win\RangeBanDialog.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\eventqueue.h">
@@ -436,7 +438,9 @@
     <ClInclude Include="gui.win\RangeBansDialog.h">
       <Filter>Gui</Filter>
     </ClInclude>
-    <ClInclude Include="gui.win\RangeBanDialog.h" />
+    <ClInclude Include="gui.win\RangeBanDialog.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ico\Spider16M-32x32.ico">

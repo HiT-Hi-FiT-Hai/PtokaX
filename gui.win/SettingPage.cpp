@@ -22,6 +22,8 @@
 //---------------------------------------------------------------------------
 #include "SettingPage.h"
 //---------------------------------------------------------------------------
+#include "GuiUtil.h"
+//---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
 #endif
@@ -34,6 +36,16 @@ void * pSettingDialog = NULL;
 //---------------------------------------------------------------------------
 WNDPROC wpOldButtonProc = NULL;
 WNDPROC wpOldEditProc = NULL;
+//---------------------------------------------------------------------------
+int SettingPage::iFullGB = 462 - 5;
+int SettingPage::iFullEDT = 462 - 21;
+int SettingPage::iGBinGB = 462 - 15;
+int SettingPage::iGBinGBEDT = 462 - 31;
+int SettingPage::iOneCheckGB = 17 + 16 + 8;
+int SettingPage::iTwoChecksGB = 17 + (2 * 16) + 3 + 8;
+int SettingPage::iOneLineTwoGroupGB = 17 + 23 + (2 * iOneLineGB) + 7;
+int SettingPage::iTwoLineGB = 17 + (2 * 23) + 13;
+int SettingPage::iThreeLineGB = 17 + (3 * 23) + 18;
 //---------------------------------------------------------------------------
 
 SettingPage::SettingPage() {
@@ -69,8 +81,11 @@ void SettingPage::CreateHWND(HWND hOwner) {
         atomSettingPage = ::RegisterClassEx(&m_wc);
     }
 
+    RECT rcParent = { 0 };
+    ::GetClientRect(hOwner, &rcParent);
+
     m_hWnd = ::CreateWindowEx(WS_EX_CONTROLPARENT, MAKEINTATOM(atomSettingPage), "", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-        160, 0, 452, 426, hOwner, NULL, g_hInstance, NULL);
+        ScaleGui(154) + 10, 0, rcParent.right-(ScaleGui(154) + 10), rcParent.bottom, hOwner, NULL, g_hInstance, NULL);
 
     if(m_hWnd != NULL) {
         bCreated = true;

@@ -25,7 +25,8 @@
 #include "../core/LanguageManager.h"
 #include "../core/ServerManager.h"
 #include "../core/SettingManager.h"
-#include "../core/utility.h"
+//---------------------------------------------------------------------------
+#include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
@@ -324,14 +325,17 @@ void SettingDialog::DoModal(HWND hWndParent) {
         atomSettingDialog = ::RegisterClassEx(&m_wc);
     }
 
-    RECT rcParent;
+    int iWidth = ScaleGui(622);
+    int iHeight = ScaleGui(494);
+
+    RECT rcParent = { 0 };
     ::GetWindowRect(hWndParent, &rcParent);
 
-    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2))-309;
-    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2))-227;
+    int iX = (rcParent.left + (((rcParent.right - rcParent.left)) / 2)) - (iWidth / 2);
+    int iY = (rcParent.top + ((rcParent.bottom - rcParent.top)/ 2 )) - (iHeight / 2);
 
     m_hWnd = ::CreateWindowEx(WS_EX_CONTROLPARENT | WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomSettingDialog), LanguageManager->sTexts[LAN_SETTINGS],
-        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, 618, 454,
+        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, iWidth, iHeight,
         hWndParent, NULL, g_hInstance, NULL);
 
     if(m_hWnd == NULL) {
@@ -343,8 +347,10 @@ void SettingDialog::DoModal(HWND hWndParent) {
     ::SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
     ::SetWindowLongPtr(m_hWnd, GWLP_WNDPROC, (LONG_PTR)StaticSettingDialogProc);
 
+    ::GetClientRect(m_hWnd, &rcParent);
+
     hWndWindowItems[TV_TREE] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_TREEVIEW, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_HASLINES | TVS_SHOWSELALWAYS |
-        TVS_DISABLEDRAGDROP, 5, 5, 150, 370, m_hWnd, NULL, g_hInstance, NULL);
+        TVS_DISABLEDRAGDROP, 5, 5, ScaleGui(154), rcParent.bottom - ( 2 * iEditHeight) - 16, m_hWnd, NULL, g_hInstance, NULL);
 
     TVINSERTSTRUCT tvIS;
     memset(&tvIS, 0, sizeof(TVINSERTSTRUCT));
@@ -371,10 +377,10 @@ void SettingDialog::DoModal(HWND hWndParent) {
     }
 
     hWndWindowItems[BTN_OK] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        4, 379, 152, 20, m_hWnd, (HMENU)IDOK, g_hInstance, NULL);
+        4, rcParent.bottom - ( 2 * iEditHeight) - 7, ScaleGui(154) + 2, iEditHeight, m_hWnd, (HMENU)IDOK, g_hInstance, NULL);
 
     hWndWindowItems[BTN_CANCEL] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        4, 402, 152, 20, m_hWnd, (HMENU)IDCANCEL, g_hInstance, NULL);
+        4, rcParent.bottom - iEditHeight - 4, ScaleGui(154) + 2, iEditHeight, m_hWnd, (HMENU)IDCANCEL, g_hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
         ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
@@ -383,6 +389,29 @@ void SettingDialog::DoModal(HWND hWndParent) {
     wpOldTreeProc = (WNDPROC)::SetWindowLongPtr(hWndWindowItems[TV_TREE], GWLP_WNDPROC, (LONG_PTR)TreeProc);
 
     ::EnableWindow(hWndParent, FALSE);
+
+    if(SettingPages[0]->CreateSettingPage(m_hWnd) == false) {
+        ::MessageBox(m_hWnd, "Setting page creation failed!", SettingPages[0]->GetPageName(), MB_OK);
+        ::EndDialog(m_hWnd, IDCANCEL);
+    }
+
+    RECT rcPage = { 0 };
+    ::GetWindowRect(SettingPages[0]->m_hWnd, &rcPage);
+
+    int iDiff = rcParent.bottom - (rcPage.bottom-rcPage.top);
+
+    ::GetWindowRect(m_hWnd, &rcParent);
+
+    if(iDiff != 0) {
+        ::SetWindowPos(m_hWnd, NULL, 0, 0, (rcParent.right-rcParent.left), (rcParent.bottom-rcParent.top) - iDiff, SWP_NOMOVE | SWP_NOZORDER);
+
+        ::GetClientRect(m_hWnd, &rcParent);
+
+        ::SetWindowPos(hWndWindowItems[TV_TREE], NULL, 0, 0, ScaleGui(154), rcParent.bottom - ( 2 * iEditHeight) - 16, SWP_NOMOVE | SWP_NOZORDER);
+
+        ::SetWindowPos(hWndWindowItems[BTN_OK], NULL, 4, rcParent.bottom - ( 2 * iEditHeight) - 7, ScaleGui(154) + 2, iEditHeight, SWP_NOZORDER);
+        ::SetWindowPos(hWndWindowItems[BTN_CANCEL], NULL, 4, rcParent.bottom - iEditHeight - 4, ScaleGui(154) + 2, iEditHeight, SWP_NOZORDER);
+    }
 
     ::ShowWindow(m_hWnd, SW_SHOW);
 }

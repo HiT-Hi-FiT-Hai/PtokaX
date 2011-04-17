@@ -22,6 +22,8 @@
 //---------------------------------------------------------------------------
 #include "MainWindowPage.h"
 //---------------------------------------------------------------------------
+#include "GuiUtil.h"
+//---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
 #endif
@@ -64,7 +66,7 @@ void MainWindowPage::CreateHWND(HWND hOwner) {
     ::GetClientRect(hOwner, &rcMain);
 
     m_hWnd = ::CreateWindowEx(WS_EX_CONTROLPARENT, MAKEINTATOM(atomMainWindowPage), "", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-        0, 22, rcMain.right, rcMain.bottom-22, hOwner, NULL, g_hInstance, NULL);
+        0, iEditHeight + 1, rcMain.right, rcMain.bottom - (iEditHeight + 1), hOwner, NULL, g_hInstance, NULL);
 
     if(m_hWnd != NULL) {
         ::SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);

@@ -23,7 +23,8 @@
 #include "LineDialog.h"
 //---------------------------------------------------------------------------
 #include "../core/LanguageManager.h"
-#include "../core/utility.h"
+//---------------------------------------------------------------------------
+#include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
@@ -117,11 +118,11 @@ void LineDialog::DoModal(HWND hWndParent, char * Caption, char * Line) {
     RECT rcParent;
     ::GetWindowRect(hWndParent, &rcParent);
 
-    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2))-153;
-    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2))-50;
+    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(306) / 2);
+    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(105) / 2);
 
     m_hWnd = ::CreateWindowEx(WS_EX_CONTROLPARENT | WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomLineDialog), (string(Caption) + ":").c_str(),
-        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX, iY, 306, 100, hWndParent, NULL, g_hInstance, NULL);
+        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX, iY, ScaleGui(306), ScaleGui(105), hWndParent, NULL, g_hInstance, NULL);
 
     if(m_hWnd == NULL) {
         return;
@@ -132,18 +133,38 @@ void LineDialog::DoModal(HWND hWndParent, char * Caption, char * Line) {
     ::SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
     ::SetWindowLongPtr(m_hWnd, GWLP_WNDPROC, (LONG_PTR)StaticLineDialogProc);
 
-    hWndWindowItems[GB_LINE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 6, 0, 288, 42,
+    {
+        ::GetClientRect(m_hWnd, &rcParent);
+
+        int iHeight = iOneLineGB + iEditHeight + 6;
+
+        int iDiff = rcParent.bottom - iHeight;
+
+        if(iDiff != 0) {
+            ::GetWindowRect(hWndParent, &rcParent);
+
+            iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - ((ScaleGui(100) - iDiff) / 2);
+
+            ::GetWindowRect(m_hWnd, &rcParent);
+
+            ::SetWindowPos(m_hWnd, NULL, iX, iY, (rcParent.right-rcParent.left), (rcParent.bottom-rcParent.top) - iDiff, SWP_NOZORDER);
+        }
+    }
+
+    ::GetClientRect(m_hWnd, &rcParent);
+
+    hWndWindowItems[GB_LINE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 0, rcParent.right - 10, iOneLineGB,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndWindowItems[EDT_LINE] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, Line, WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        14, 14, 272, 20, m_hWnd, NULL, g_hInstance, NULL);
+        13, iGroupBoxMargin, rcParent.right - 26, iEditHeight, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_LINE], EM_SETSEL, 0, -1);
 
     hWndWindowItems[BTN_OK] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        5, 47, 143, 20, m_hWnd, (HMENU)IDOK, g_hInstance, NULL);
+        4, iOneLineGB + 4, (rcParent.right / 2) - 5, iEditHeight, m_hWnd, (HMENU)IDOK, g_hInstance, NULL);
 
     hWndWindowItems[BTN_CANCEL] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        152, 47, 143, 20, m_hWnd, (HMENU)IDCANCEL, g_hInstance, NULL);
+        rcParent.right - ((rcParent.right / 2) - 1), iOneLineGB + 4, (rcParent.right / 2) - 5, iEditHeight, m_hWnd, (HMENU)IDCANCEL, g_hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
         ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));

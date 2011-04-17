@@ -26,6 +26,16 @@ class SettingPage {
 public:
     HWND m_hWnd;
 
+    static int iFullGB;
+    static int iFullEDT;
+    static int iGBinGB;
+    static int iGBinGBEDT;
+    static int iOneCheckGB;
+    static int iTwoChecksGB;
+    static int iOneLineTwoGroupGB;
+    static int iTwoLineGB;
+    static int iThreeLineGB;
+
     bool bCreated;
 
     SettingPage();

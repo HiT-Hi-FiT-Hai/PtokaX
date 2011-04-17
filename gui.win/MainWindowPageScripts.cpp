@@ -32,11 +32,12 @@
 #include "../core/UdpDebug.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiUtil.h"
+//---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-#include "GuiUtil.h"
 #include "MainWindow.h"
 #include "Resources.h"
 #include "ScriptEditorDialog.h"
@@ -109,15 +110,16 @@ LRESULT MainWindowPageScripts::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPAR
             int iX = ((WINDOWPOS*)lParam)->cx;
             int iY = ((WINDOWPOS*)lParam)->cy;
 
-            ::SetWindowPos(hWndPageItems[BTN_RESTART_SCRIPTS], NULL, iX-147, iY-25, 145, 23, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[BTN_MOVE_DOWN], NULL, iX-74, iY-49, 72, 23, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[BTN_MOVE_UP], NULL, iX-147, iY-49, 72, 23, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[LV_SCRIPTS], NULL, iX-146, 50, 143, iY-101, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[BTN_REFRESH_SCRIPTS], NULL, iX-147, 25, 145, 23, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[BTN_OPEN_SCRIPT_EDITOR], NULL, iX-147, 1, 145, 23, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[REDT_SCRIPTS_ERRORS], NULL, 0, 0, iX-168, iY-25, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[BTN_RESTART_SCRIPTS], NULL, iX - ScaleGui(145) - 4, iY - iEditHeight - 2, ScaleGui(145) + 2, iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[BTN_MOVE_DOWN], NULL, iX - ScaleGui(72) - 2, iY - (2 * iEditHeight) - 5, ScaleGui(72), iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[BTN_MOVE_UP], NULL, iX - ScaleGui(145) - 4, iY - (2 * iEditHeight) - 5, ScaleGui(72), iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[LV_SCRIPTS], NULL, iX - ScaleGui(145) - 3, (2 * iEditHeight) + 8,
+                ScaleGui(145), iY - ((2 * iEditHeight) + 8) - ((2 * iEditHeight) - 5) - 14, SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[BTN_REFRESH_SCRIPTS], NULL, iX - ScaleGui(145) - 4, iEditHeight + 4, ScaleGui(145) + 2, iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[BTN_OPEN_SCRIPT_EDITOR], NULL, iX - ScaleGui(145) - 4, 1, ScaleGui(145) + 2, iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[REDT_SCRIPTS_ERRORS], NULL, 0, 0, iX - ScaleGui(145) - 25, iY - (iGroupBoxMargin + 11), SWP_NOMOVE | SWP_NOZORDER);
             ::SendMessage(hWndPageItems[REDT_SCRIPTS_ERRORS], WM_VSCROLL, SB_BOTTOM, NULL);
-            ::SetWindowPos(hWndPageItems[GB_SCRIPTS_ERRORS], NULL, 0, 0, iX-152, iY-3, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[GB_SCRIPTS_ERRORS], NULL, 0, 0, iX - ScaleGui(145) - 9, iY - 3, SWP_NOMOVE | SWP_NOZORDER);
 
             return 0;
         }
@@ -183,29 +185,29 @@ bool MainWindowPageScripts::CreateMainWindowPage(HWND hOwner) {
     ::GetClientRect(m_hWnd, &rcMain);
 
     hWndPageItems[GB_SCRIPTS_ERRORS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_SCRIPTS_ERRORS],
-        WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | BS_GROUPBOX, 3, 0, rcMain.right-152, rcMain.bottom-3, m_hWnd, NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | BS_GROUPBOX, 3, 0, rcMain.right - ScaleGui(145) - 9, rcMain.bottom - 3, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[REDT_SCRIPTS_ERRORS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL | ES_AUTOVSCROLL | ES_MULTILINE | ES_READONLY,
-        8, 14, rcMain.right-168, rcMain.bottom-25, hWndPageItems[GB_SCRIPTS_ERRORS], (HMENU)REDT_SCRIPTS_ERRORS, g_hInstance, NULL);
+        11, iGroupBoxMargin, rcMain.right - ScaleGui(145) - 25, rcMain.bottom - (iGroupBoxMargin + 11), m_hWnd, (HMENU)REDT_SCRIPTS_ERRORS, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[REDT_SCRIPTS_ERRORS], EM_EXLIMITTEXT, 0, (LPARAM)1048576);
     ::SendMessage(hWndPageItems[REDT_SCRIPTS_ERRORS], EM_AUTOURLDETECT, TRUE, 0);
     ::SendMessage(hWndPageItems[REDT_SCRIPTS_ERRORS], EM_SETEVENTMASK, 0, (LPARAM)::SendMessage(hWndPageItems[REDT_SCRIPTS_ERRORS], EM_GETEVENTMASK, 0, 0) | ENM_LINK);
 
     hWndPageItems[BTN_OPEN_SCRIPT_EDITOR] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_OPEN_SCRIPT_EDITOR], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        rcMain.right-147, 1, 145, 23, m_hWnd, (HMENU)BTN_OPEN_SCRIPT_EDITOR, g_hInstance, NULL);
+        rcMain.right - ScaleGui(145) - 4, 1, ScaleGui(145) + 2, iEditHeight, m_hWnd, (HMENU)BTN_OPEN_SCRIPT_EDITOR, g_hInstance, NULL);
 
     hWndPageItems[BTN_REFRESH_SCRIPTS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REFRESH_SCRIPTS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        rcMain.right-147, 25, 145, 23, m_hWnd, (HMENU)BTN_REFRESH_SCRIPTS, g_hInstance, NULL);
+        rcMain.right - ScaleGui(145) - 4, iEditHeight + 4, ScaleGui(145) + 2, iEditHeight, m_hWnd, (HMENU)BTN_REFRESH_SCRIPTS, g_hInstance, NULL);
 
     hWndPageItems[LV_SCRIPTS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, "", WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL,
-        rcMain.right-146, 50, 143, rcMain.bottom-101, m_hWnd, NULL, g_hInstance, NULL);
+        rcMain.right - ScaleGui(145) - 3, (2 * iEditHeight) + 8, ScaleGui(145), rcMain.bottom - ((2 * iEditHeight) + 8) - ((2 * iEditHeight) - 5) - 14, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_LABELTIP | LVS_EX_CHECKBOXES);
 
     hWndPageItems[BTN_MOVE_UP] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MOVE_UP], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_TABSTOP | BS_PUSHBUTTON,
-        rcMain.right-147, rcMain.bottom-49, 72, 23, m_hWnd, (HMENU)BTN_MOVE_UP, g_hInstance, NULL);
+        rcMain.right - ScaleGui(145) - 4, rcMain.bottom - (2 * iEditHeight) - 5, ScaleGui(72), iEditHeight, m_hWnd, (HMENU)BTN_MOVE_UP, g_hInstance, NULL);
 
     hWndPageItems[BTN_MOVE_DOWN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MOVE_DOWN], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_TABSTOP | BS_PUSHBUTTON,
-        rcMain.right-74, rcMain.bottom-49, 72, 23, m_hWnd, (HMENU)BTN_MOVE_DOWN, g_hInstance, NULL);
+        rcMain.right - ScaleGui(72) - 2, rcMain.bottom - (2 * iEditHeight) - 5, ScaleGui(72), iEditHeight, m_hWnd, (HMENU)BTN_MOVE_DOWN, g_hInstance, NULL);
 
     {
         DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON;
@@ -214,7 +216,7 @@ bool MainWindowPageScripts::CreateMainWindowPage(HWND hOwner) {
         }
 
         hWndPageItems[BTN_RESTART_SCRIPTS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_RESTART_SCRIPTS], dwStyle,
-            rcMain.right-147, rcMain.bottom-25, 145, 23, m_hWnd, (HMENU)BTN_RESTART_SCRIPTS, g_hInstance, NULL);
+            rcMain.right - ScaleGui(145) - 4, rcMain.bottom - iEditHeight - 2, ScaleGui(145) + 2, iEditHeight, m_hWnd, (HMENU)BTN_RESTART_SCRIPTS, g_hInstance, NULL);
     }
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
@@ -234,7 +236,7 @@ bool MainWindowPageScripts::CreateMainWindowPage(HWND hOwner) {
     LVCOLUMN lvColumn = { 0 };
     lvColumn.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
     lvColumn.fmt = LVCFMT_LEFT;
-    lvColumn.cx = (((rcScripts.right - rcScripts.left)/3)*2)+1;
+    lvColumn.cx = (((rcScripts.right - rcScripts.left)/3)*2);
     lvColumn.pszText = LanguageManager->sTexts[LAN_SCRIPT_FILE];
     lvColumn.iSubItem = 0;
 
