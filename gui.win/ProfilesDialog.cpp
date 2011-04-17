@@ -26,11 +26,12 @@
 #include "../core/ProfileManager.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiUtil.h"
+//---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-#include "GuiUtil.h"
 #include "LineDialog.h"
 //---------------------------------------------------------------------------
 ProfilesDialog * pProfilesDialog = NULL;
@@ -85,23 +86,24 @@ LRESULT ProfilesDialog::ProfilesDialogProc(UINT uMsg, WPARAM wParam, LPARAM lPar
             RECT rcParent;
             ::GetClientRect(m_hWnd, &rcParent);
 
-            int iProfilesWidth = (rcParent.right-rcParent.left)/3;
+            int iProfilesWidth = rcParent.right / 3;
 
-            int iPermissionsWidth = (rcParent.right-rcParent.left)-(iProfilesWidth+17);
+            int iPermissionsWidth = rcParent.right - (iProfilesWidth + 17);
 
-            ::SetWindowPos(hWndWindowItems[BTN_CLEAR_ALL], NULL,
-                iProfilesWidth+9+(iPermissionsWidth/2), rcParent.bottom-30, (rcParent.right-rcParent.left)-(iProfilesWidth+17+(iPermissionsWidth/2)), 23, SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[BTN_SET_ALL], NULL, iProfilesWidth+9, rcParent.bottom-30, (iPermissionsWidth/2)-1, 23, SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[LV_PERMISSIONS], NULL, iProfilesWidth+10, rcParent.top+16, (rcParent.right-rcParent.left)-(iProfilesWidth+19), (rcParent.bottom-rcParent.top)-48,
-                SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[BTN_CLEAR_ALL], NULL, iProfilesWidth + 11 + (iPermissionsWidth / 2), rcParent.bottom - iEditHeight - 10,
+                rcParent.right - (iProfilesWidth + 21 + (iPermissionsWidth / 2)), iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[BTN_SET_ALL], NULL, iProfilesWidth + 11, rcParent.bottom - iEditHeight - 10, (iPermissionsWidth / 2) - 3, iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[LV_PERMISSIONS], NULL, iProfilesWidth + 12, rcParent.top + iGroupBoxMargin,
+                rcParent.right - (iProfilesWidth + 23), rcParent.bottom - iGroupBoxMargin - iEditHeight - 14, SWP_NOZORDER);
             ::SendMessage(hWndWindowItems[LV_PERMISSIONS], LVM_SETCOLUMNWIDTH, 0, iPermissionsWidth-25);
-            ::SetWindowPos(hWndWindowItems[GB_PERMISSIONS], NULL, iProfilesWidth+4, rcParent.top+1, (rcParent.right-rcParent.left)-(iProfilesWidth+7), (rcParent.bottom-rcParent.top)-4,
+            ::SetWindowPos(hWndWindowItems[GB_PERMISSIONS], NULL, iProfilesWidth + 4, rcParent.top, rcParent.right - (iProfilesWidth + 7), rcParent.bottom - 3,
                 SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[BTN_MOVE_DOWN], NULL, (iProfilesWidth/2)+2, rcParent.bottom-25, iProfilesWidth-(iProfilesWidth/2), 23, SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[BTN_MOVE_UP], NULL, 2, rcParent.bottom-25, (iProfilesWidth/2)-1, 23, SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[LV_PROFILES], NULL, 0, 0, iProfilesWidth-2, (rcParent.bottom-rcParent.top)-54, SWP_NOMOVE | SWP_NOZORDER);
-            ::SendMessage(hWndWindowItems[LV_PROFILES], LVM_SETCOLUMNWIDTH, 0, iProfilesWidth-6);
-            ::SetWindowPos(hWndWindowItems[BTN_ADD_PROFILE], NULL, 0, 0, iProfilesWidth, 23, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[BTN_MOVE_DOWN], NULL, (iProfilesWidth / 2) + 2, rcParent.bottom - iEditHeight - 2,
+                iProfilesWidth - (iProfilesWidth / 2), iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[BTN_MOVE_UP], NULL, 2, rcParent.bottom - iEditHeight - 2, (iProfilesWidth / 2) - 1, iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[LV_PROFILES], NULL, 0, 0, iProfilesWidth - 2, rcParent.bottom - (2 * iEditHeight) - 12, SWP_NOMOVE | SWP_NOZORDER);
+            ::SendMessage(hWndWindowItems[LV_PROFILES], LVM_SETCOLUMNWIDTH, 0, iProfilesWidth - 6);
+            ::SetWindowPos(hWndWindowItems[BTN_ADD_PROFILE], NULL, 0, 0, iProfilesWidth, iEditHeight, SWP_NOMOVE | SWP_NOZORDER);
 
             return 0;
         }
@@ -227,11 +229,11 @@ void ProfilesDialog::DoModal(HWND hWndParent) {
     RECT rcParent;
     ::GetWindowRect(hWndParent, &rcParent);
 
-    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2))-221;
-    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2))-227;
+    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(443) / 2);
+    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(454) / 2);
 
     m_hWnd = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomProfilesDialog), LanguageManager->sTexts[LAN_PROFILES],
-        WS_POPUP | WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, 443, 454,
+        WS_POPUP | WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(443), ScaleGui(454),
         hWndParent, NULL, g_hInstance, NULL);
 
     if(m_hWnd == NULL) {
@@ -243,36 +245,36 @@ void ProfilesDialog::DoModal(HWND hWndParent) {
 
     ::GetClientRect(m_hWnd, &rcParent);
 
-    int iProfilesWidth = (rcParent.right-rcParent.left)/3;
+    int iProfilesWidth = rcParent.right / 3;
 
     hWndWindowItems[BTN_ADD_PROFILE] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ADD_NEW_PROFILE], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        2, rcParent.top+2, iProfilesWidth, 23, m_hWnd, (HMENU)BTN_ADD_PROFILE, g_hInstance, NULL);
+        2, 2, iProfilesWidth, iEditHeight, m_hWnd, (HMENU)BTN_ADD_PROFILE, g_hInstance, NULL);
 
     hWndWindowItems[LV_PROFILES] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, "", WS_CHILD | WS_VISIBLE | LVS_NOCOLUMNHEADER | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL,
-        3, 27, iProfilesWidth-2, (rcParent.bottom-rcParent.top)-54, m_hWnd, NULL, g_hInstance, NULL);
+        3, iEditHeight + 6, iProfilesWidth - 2, rcParent.bottom - (2 * iEditHeight) - 12, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[LV_PROFILES], LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_LABELTIP);
 
     hWndWindowItems[BTN_MOVE_UP] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MOVE_UP], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_TABSTOP | BS_PUSHBUTTON,
-        2, rcParent.bottom-25, (iProfilesWidth/2)-1, 23, m_hWnd, (HMENU)BTN_MOVE_UP, g_hInstance, NULL);
+        2, rcParent.bottom - iEditHeight - 2, (iProfilesWidth / 2) - 1, iEditHeight, m_hWnd, (HMENU)BTN_MOVE_UP, g_hInstance, NULL);
 
     hWndWindowItems[BTN_MOVE_DOWN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MOVE_DOWN], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        (iProfilesWidth/2)+2, rcParent.bottom-25, iProfilesWidth-(iProfilesWidth/2), 23, m_hWnd, (HMENU)BTN_MOVE_DOWN, g_hInstance, NULL);
+        (iProfilesWidth / 2) + 2, rcParent.bottom - iEditHeight - 2, iProfilesWidth - (iProfilesWidth / 2), iEditHeight, m_hWnd, (HMENU)BTN_MOVE_DOWN, g_hInstance, NULL);
 
     hWndWindowItems[GB_PERMISSIONS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_PROFILE_PERMISSIONS],
-        WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | BS_GROUPBOX, iProfilesWidth+4, 1, (rcParent.right-rcParent.left)-(iProfilesWidth+7), (rcParent.bottom-rcParent.top)-4,
+        WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | BS_GROUPBOX, iProfilesWidth + 4, 0, rcParent.right -(iProfilesWidth + 7), rcParent.bottom - 3,
         m_hWnd, NULL, g_hInstance, NULL);
 
     hWndWindowItems[LV_PERMISSIONS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, "", WS_CHILD | WS_VISIBLE | LVS_NOCOLUMNHEADER | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL,
-        iProfilesWidth+10, rcParent.top+16, (rcParent.right-rcParent.left)-(iProfilesWidth+19), (rcParent.bottom-rcParent.top)-48, m_hWnd, NULL, g_hInstance, NULL);
+        iProfilesWidth + 12, iGroupBoxMargin, rcParent.right - (iProfilesWidth + 23), rcParent.bottom - iGroupBoxMargin - iEditHeight - 14, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[LV_PERMISSIONS], LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_LABELTIP | LVS_EX_CHECKBOXES);
 
-    int iPermissionsWidth = (rcParent.right-rcParent.left)-(iProfilesWidth+17);
+    int iPermissionsWidth = rcParent.right - (iProfilesWidth + 17);
 
     hWndWindowItems[BTN_SET_ALL] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_SET_ALL], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        iProfilesWidth+9, rcParent.bottom-30, (iPermissionsWidth/2)-1, 23, m_hWnd, (HMENU)BTN_SET_ALL, g_hInstance, NULL);
+        iProfilesWidth + 11, rcParent.bottom - iEditHeight - 11, (iPermissionsWidth / 2) - 3, iEditHeight, m_hWnd, (HMENU)BTN_SET_ALL, g_hInstance, NULL);
 
     hWndWindowItems[BTN_CLEAR_ALL] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_CLEAR_ALL], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        iProfilesWidth+9+(iPermissionsWidth/2), rcParent.bottom-30, (rcParent.right-rcParent.left)-(iProfilesWidth+17+(iPermissionsWidth/2)), 23,
+        iProfilesWidth + 11 + (iPermissionsWidth / 2), rcParent.bottom - iEditHeight - 11, rcParent.right - (iProfilesWidth + 21 + (iPermissionsWidth / 2)), iEditHeight,
         m_hWnd, (HMENU)BTN_CLEAR_ALL, g_hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
@@ -289,14 +291,14 @@ void ProfilesDialog::DoModal(HWND hWndParent) {
     LVCOLUMN lvColumn = { 0 };
     lvColumn.mask = LVCF_FMT | LVCF_WIDTH;
     lvColumn.fmt = LVCFMT_LEFT;
-    lvColumn.cx = rcProfiles.right - rcProfiles.left;
+    lvColumn.cx = rcProfiles.right;
 
     ::SendMessage(hWndWindowItems[LV_PROFILES], LVM_INSERTCOLUMN, 0, (LPARAM)&lvColumn);
 
 	RECT rcPermissions;
 	::GetClientRect(hWndWindowItems[LV_PERMISSIONS], &rcPermissions);
 
-    lvColumn.cx = rcPermissions.right - rcPermissions.left;
+    lvColumn.cx = rcPermissions.right;
 
     ::SendMessage(hWndWindowItems[LV_PERMISSIONS], LVM_INSERTCOLUMN, 0, (LPARAM)&lvColumn);
 

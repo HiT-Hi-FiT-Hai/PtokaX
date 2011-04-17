@@ -26,11 +26,12 @@
 #include "../core/LanguageManager.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiUtil.h"
+//---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-#include "GuiUtil.h"
 #include "BanDialog.h"
 //---------------------------------------------------------------------------
 BansDialog * pBansDialog = NULL;
@@ -78,15 +79,15 @@ LRESULT BansDialog::BansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             RECT rcParent;
             ::GetClientRect(m_hWnd, &rcParent);
 
-            ::SetWindowPos(hWndWindowItems[BTN_CLEAR_PERM_BANS], NULL, ((rcParent.right-rcParent.left)/2)+1, rcParent.bottom-25,
-                (rcParent.right-rcParent.left)-((rcParent.right-rcParent.left)/2)-3, 23, SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[BTN_CLEAR_TEMP_BANS], NULL, 2, rcParent.bottom-25, ((rcParent.right-rcParent.left)/2)-2, 23, SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[CB_FILTER], NULL, ((rcParent.right-rcParent.left)/2)+3, rcParent.bottom-56,
-                (rcParent.right-rcParent.left)-((rcParent.right-rcParent.left)/2)-14, 21, SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[EDT_FILTER], NULL, 11, rcParent.bottom-56, ((rcParent.right-rcParent.left)/2)-14, 21, SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[GB_FILTER], NULL, 3, rcParent.bottom-71, (rcParent.right-rcParent.left)-6, 44, SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[LV_BANS], NULL, 0, 0, (rcParent.right-rcParent.left)-6, (rcParent.bottom-rcParent.top)-99, SWP_NOMOVE | SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[BTN_ADD_BAN], NULL, 0, 0, (rcParent.right-rcParent.left)-4, 23, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[BTN_CLEAR_PERM_BANS], NULL, (rcParent.right / 2) + 1, rcParent.bottom - iEditHeight - 2,
+                rcParent.right - (rcParent.right / 2) - 3, iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[BTN_CLEAR_TEMP_BANS], NULL, 2, rcParent.bottom - iEditHeight - 2, (rcParent.right / 2) - 2, iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[CB_FILTER], NULL, (rcParent.right / 2) + 3, (rcParent.bottom - iEditHeight - iOneLineGB - 6) + iGroupBoxMargin,
+                rcParent.right - (rcParent.right / 2) - 14, iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[EDT_FILTER], NULL, 11, (rcParent.bottom - iEditHeight - iOneLineGB - 6) + iGroupBoxMargin, (rcParent.right / 2) - 14, iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[GB_FILTER], NULL, 3, rcParent.bottom - iEditHeight - iOneLineGB - 6, rcParent.right - 6, iOneLineGB, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[LV_BANS], NULL, 0, 0, rcParent.right - 6, rcParent.bottom - iOneLineGB - (2 * iEditHeight) - 14, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[BTN_ADD_BAN], NULL, 0, 0, rcParent.right - 4, iEditHeight, SWP_NOMOVE | SWP_NOZORDER);
 
             return 0;
         }
@@ -170,8 +171,8 @@ LRESULT BansDialog::BansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             break;
         case WM_GETMINMAXINFO: {
             MINMAXINFO *mminfo = (MINMAXINFO*)lParam;
-            mminfo->ptMinTrackSize.x = 443;
-            mminfo->ptMinTrackSize.y = 454;
+            mminfo->ptMinTrackSize.x = ScaleGui(443);
+            mminfo->ptMinTrackSize.y = ScaleGui(454);
 
             return 0;
         }
@@ -215,11 +216,11 @@ void BansDialog::DoModal(HWND hWndParent) {
     RECT rcParent;
     ::GetWindowRect(hWndParent, &rcParent);
 
-    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2))-221;
-    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2))-227;
+    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(443) / 2);
+    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(454) / 2);
 
     m_hWnd = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomBansDialog), LanguageManager->sTexts[LAN_BANS],
-        WS_POPUP | WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, 443, 454,
+        WS_POPUP | WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(443), ScaleGui(454),
         hWndParent, NULL, g_hInstance, NULL);
 
     if(m_hWnd == NULL) {
@@ -232,27 +233,29 @@ void BansDialog::DoModal(HWND hWndParent) {
     ::GetClientRect(m_hWnd, &rcParent);
 
     hWndWindowItems[BTN_ADD_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ADD_NEW_BAN], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        2, rcParent.top+2, ((rcParent.right-rcParent.left)/3)-2, 23, m_hWnd, (HMENU)BTN_ADD_BAN, g_hInstance, NULL);
+        2, 2, (rcParent.right / 3) - 2, iEditHeight, m_hWnd, (HMENU)BTN_ADD_BAN, g_hInstance, NULL);
 
     hWndWindowItems[LV_BANS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, "", WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SHOWSELALWAYS,
-        3, 27, (rcParent.right-rcParent.left)-6, (rcParent.bottom-rcParent.top)-99, m_hWnd, NULL, g_hInstance, NULL);
+        3, iEditHeight + 6, rcParent.right - 6, rcParent.bottom - iOneLineGB - (2 * iEditHeight) - 14, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[LV_BANS], LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_LABELTIP);
 
     hWndWindowItems[GB_FILTER] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_FILTER_BANS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, rcParent.bottom-71, (rcParent.right-rcParent.left)-6, 44, m_hWnd, NULL, g_hInstance, NULL);
+        3, rcParent.bottom - iEditHeight - iOneLineGB - 6, rcParent.right - 6, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndWindowItems[EDT_FILTER] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, rcParent.bottom-56, ((rcParent.right-rcParent.left)/2)-14, 21, m_hWnd, (HMENU)EDT_FILTER, g_hInstance, NULL);
+        11, (rcParent.bottom - iEditHeight - iOneLineGB - 6) + iGroupBoxMargin, (rcParent.right / 2) - 14, iEditHeight, m_hWnd, (HMENU)EDT_FILTER, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_FILTER], EM_SETLIMITTEXT, 64, 0);
 
     hWndWindowItems[CB_FILTER] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
-        ((rcParent.right-rcParent.left)/2)+3, rcParent.bottom-56, (rcParent.right-rcParent.left)-((rcParent.right-rcParent.left)/2)-14, 21, m_hWnd, (HMENU)CB_FILTER, g_hInstance, NULL);
+        (rcParent.right / 2) + 3, (rcParent.bottom - iEditHeight - iOneLineGB - 6) + iGroupBoxMargin, rcParent.right - (rcParent.right / 2) - 14, iEditHeight,
+        m_hWnd, (HMENU)CB_FILTER, g_hInstance, NULL);
 
     hWndWindowItems[BTN_CLEAR_TEMP_BANS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_CLEAR_TEMP_BANS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        2, rcParent.bottom-25, ((rcParent.right-rcParent.left)/2)-2, 23, m_hWnd, (HMENU)BTN_CLEAR_TEMP_BANS, g_hInstance, NULL);
+        2, rcParent.bottom - iEditHeight - 2, (rcParent.right / 2) - 2, iEditHeight, m_hWnd, (HMENU)BTN_CLEAR_TEMP_BANS, g_hInstance, NULL);
 
     hWndWindowItems[BTN_CLEAR_PERM_BANS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_CLEAR_PERM_BANS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        ((rcParent.right-rcParent.left)/2)+1, rcParent.bottom-25, (rcParent.right-rcParent.left)-((rcParent.right-rcParent.left)/2)-3, 23, m_hWnd, (HMENU)BTN_CLEAR_PERM_BANS, g_hInstance, NULL);
+        (rcParent.right / 2) + 1, rcParent.bottom - iEditHeight - 2, rcParent.right - (rcParent.right / 2) - 3, iEditHeight,
+        m_hWnd, (HMENU)BTN_CLEAR_PERM_BANS, g_hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
         if(hWndWindowItems[ui8i] == NULL) {

@@ -26,6 +26,8 @@
 #include "../core/LanguageManager.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiUtil.h"
+//---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
 #endif
@@ -130,13 +132,6 @@ LRESULT BanDialog::BanDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             }
 
             break;
-        case WM_GETMINMAXINFO: {
-            MINMAXINFO *mminfo = (MINMAXINFO*)lParam;
-            mminfo->ptMinTrackSize.x = 300;
-            mminfo->ptMinTrackSize.y = 357;
-
-            return 0;
-        }
         case WM_CLOSE:
             ::EnableWindow(::GetParent(m_hWnd), TRUE);
             break;
@@ -169,11 +164,11 @@ void BanDialog::DoModal(HWND hWndParent, BanItem * pBan/* = NULL*/) {
     RECT rcParent;
     ::GetWindowRect(hWndParent, &rcParent);
 
-    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2))-150;
-    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2))-179;
+    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(300) / 2);
+    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(394) / 2);
 
     m_hWnd = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomBanDialog), LanguageManager->sTexts[LAN_BAN],
-        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, 300, 357,
+        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(300), ScaleGui(394),
         hWndParent, NULL, g_hInstance, NULL);
 
     if(m_hWnd == NULL) {
@@ -185,68 +180,97 @@ void BanDialog::DoModal(HWND hWndParent, BanItem * pBan/* = NULL*/) {
 
     ::GetClientRect(m_hWnd, &rcParent);
 
+    {
+        int iHeight = iOneLineOneChecksGB + iOneLineTwoChecksGB + (2 * iOneLineGB) + (iGroupBoxMargin + iCheckHeight + iOneLineGB + 5) + iEditHeight + 6;
+
+        int iDiff = rcParent.bottom - iHeight;
+
+        if(iDiff != 0) {
+            ::GetWindowRect(hWndParent, &rcParent);
+
+            iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - ((ScaleGui(307) - iDiff) / 2);
+
+            ::GetWindowRect(m_hWnd, &rcParent);
+
+            ::SetWindowPos(m_hWnd, NULL, iX, iY, (rcParent.right-rcParent.left), (rcParent.bottom-rcParent.top) - iDiff, SWP_NOZORDER);
+        }
+    }
+
+    ::GetClientRect(m_hWnd, &rcParent);
+
     hWndWindowItems[GB_NICK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_NICK], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, 1, (rcParent.right-rcParent.left)-6, 60, m_hWnd, NULL, g_hInstance, NULL);
+        3, 0, rcParent.right - 6, iOneLineOneChecksGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndWindowItems[EDT_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, 16, (rcParent.right-rcParent.left)-22, 18, m_hWnd, (HMENU)EDT_NICK, g_hInstance, NULL);
+        11, iGroupBoxMargin, rcParent.right - 22, iEditHeight, m_hWnd, (HMENU)EDT_NICK, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_NICK], EM_SETLIMITTEXT, 64, 0);
 
     hWndWindowItems[BTN_NICK_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_NICK_BAN], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        11, 39, (rcParent.right-rcParent.left)-22, 16, m_hWnd, NULL, g_hInstance, NULL);
+        11, iGroupBoxMargin + iEditHeight + 4, rcParent.right - 22, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
+
+    int iPosX = iOneLineOneChecksGB;
 
     hWndWindowItems[GB_IP] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_IP], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, 61, (rcParent.right-rcParent.left)-6, 79, m_hWnd, NULL, g_hInstance, NULL);
+        3, iPosX, rcParent.right - 6, iOneLineTwoChecksGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndWindowItems[EDT_IP] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, 76, (rcParent.right-rcParent.left)-22, 18, m_hWnd, NULL, g_hInstance, NULL);
+        11, iPosX + iGroupBoxMargin, rcParent.right - 22, iEditHeight, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_IP], EM_SETLIMITTEXT, 15, 0);
 
     hWndWindowItems[BTN_IP_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_IP_BAN], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        11, 99, (rcParent.right-rcParent.left)-22, 16, m_hWnd, (HMENU)BTN_IP_BAN, g_hInstance, NULL);
+        11, iPosX + iGroupBoxMargin + iEditHeight + 4, rcParent.right - 22, iCheckHeight, m_hWnd, (HMENU)BTN_IP_BAN, g_hInstance, NULL);
 
     hWndWindowItems[BTN_FULL_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_FULL_BAN], WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_DISABLED | BS_AUTOCHECKBOX,
-        11, 118, (rcParent.right-rcParent.left)-22, 16, m_hWnd, NULL, g_hInstance, NULL);
+        11, iPosX + iGroupBoxMargin + iEditHeight + iCheckHeight + 7, rcParent.right - 22, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
+
+    iPosX += iOneLineTwoChecksGB;
 
     hWndWindowItems[GB_REASON] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_REASON], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, 140, (rcParent.right-rcParent.left)-6, 41, m_hWnd, NULL, g_hInstance, NULL);
+        3, iPosX, rcParent.right - 6, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndWindowItems[EDT_REASON] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, 155, (rcParent.right-rcParent.left)-22, 18, m_hWnd, (HMENU)EDT_REASON, g_hInstance, NULL);
+        11, iPosX + iGroupBoxMargin, rcParent.right - 22, iEditHeight, m_hWnd, (HMENU)EDT_REASON, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_REASON], EM_SETLIMITTEXT, 255, 0);
 
+    iPosX += iOneLineGB;
+
     hWndWindowItems[GB_BY] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_CREATED_BY], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, 181, (rcParent.right-rcParent.left)-6, 41, m_hWnd, NULL, g_hInstance, NULL);
+        3, iPosX, rcParent.right - 6, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndWindowItems[EDT_BY] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, 196, (rcParent.right-rcParent.left)-22, 18, m_hWnd, (HMENU)EDT_BY, g_hInstance, NULL);
+        11, iPosX + iGroupBoxMargin, rcParent.right - 22, iEditHeight, m_hWnd, (HMENU)EDT_BY, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_BY], EM_SETLIMITTEXT, 64, 0);
 
+    iPosX += iOneLineGB;
+
     hWndWindowItems[GB_BAN_TYPE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, 222, (rcParent.right-rcParent.left)-6, 77, m_hWnd, NULL, g_hInstance, NULL);
+        3, iPosX, rcParent.right - 6, iGroupBoxMargin + iCheckHeight + iOneLineGB + 5, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndWindowItems[RB_PERM_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_PERMANENT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,
-        16, 236, (rcParent.right-rcParent.left)-32, 16, m_hWnd, (HMENU)RB_PERM_BAN, g_hInstance, NULL);
+        16, iPosX + iGroupBoxMargin, rcParent.right - 32, iCheckHeight, m_hWnd, (HMENU)RB_PERM_BAN, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[RB_PERM_BAN], BM_SETCHECK, BST_CHECKED, 0);
 
     hWndWindowItems[GB_TEMP_BAN] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, NULL, WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        8, 252, (rcParent.right-rcParent.left)-16, 42, m_hWnd, NULL, g_hInstance, NULL);
+        8, iPosX + iGroupBoxMargin + iCheckHeight, rcParent.right - 16, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
 
-    int iThird = ((rcParent.right-rcParent.left)-32)/3;
+    int iThird = (rcParent.right - 32) / 3;
+
     hWndWindowItems[RB_TEMP_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_TEMPORARY], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,
-        16, 268, iThird-2, 16, m_hWnd, (HMENU)RB_TEMP_BAN, g_hInstance, NULL);
+        16, iPosX + (2 * iGroupBoxMargin) + iCheckHeight + ((iEditHeight - iCheckHeight) / 2), iThird - 2, iCheckHeight, m_hWnd, (HMENU)RB_TEMP_BAN, g_hInstance, NULL);
 
     hWndWindowItems[DT_TEMP_BAN_EXPIRE_DATE] = ::CreateWindowEx(0, DATETIMEPICK_CLASS, NULL, WS_CHILD | WS_VISIBLE | WS_DISABLED | DTS_SHORTDATECENTURYFORMAT,
-        iThird+16, 266, iThird-2, 20, m_hWnd, NULL, g_hInstance, NULL);
+        iThird + 16, iPosX + (2 * iGroupBoxMargin) + iCheckHeight, iThird - 2, iEditHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndWindowItems[DT_TEMP_BAN_EXPIRE_TIME] = ::CreateWindowEx(0, DATETIMEPICK_CLASS, NULL, WS_CHILD | WS_VISIBLE | WS_DISABLED | DTS_TIMEFORMAT | DTS_UPDOWN,
-        (iThird*2)+19, 266, iThird-2, 20, m_hWnd, NULL, g_hInstance, NULL);
+        (iThird * 2) + 19, iPosX + (2 * iGroupBoxMargin) + iCheckHeight, iThird - 2, iEditHeight, m_hWnd, NULL, g_hInstance, NULL);
+
+    iPosX += iGroupBoxMargin + iCheckHeight + iOneLineGB + 9;
 
     hWndWindowItems[BTN_ACCEPT] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        2, 304, ((rcParent.right-rcParent.left)/2)-3, 23, m_hWnd, (HMENU)BTN_ACCEPT, g_hInstance, NULL);
+        2, iPosX, (rcParent.right / 2) - 3, iEditHeight, m_hWnd, (HMENU)BTN_ACCEPT, g_hInstance, NULL);
 
     hWndWindowItems[BTN_DISCARD] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        ((rcParent.right-rcParent.left)/2)+2, 304, ((rcParent.right-rcParent.left)/2)-4, 23, m_hWnd, (HMENU)BTN_DISCARD, g_hInstance, NULL);
+        (rcParent.right / 2) + 2, iPosX, (rcParent.right / 2) - 4, iEditHeight, m_hWnd, (HMENU)BTN_DISCARD, g_hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
         if(hWndWindowItems[ui8i] == NULL) {

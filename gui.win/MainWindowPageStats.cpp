@@ -31,6 +31,8 @@
 #include "../core/User.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiUtil.h"
+//---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
 #endif
@@ -50,7 +52,7 @@ LRESULT MainWindowPageStats::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM
 
             return 0;
         case WM_COMMAND:
-           switch(LOWORD(wParam))
+           switch(LOWORD(wParam)) {
                 case BTN_START_STOP:
                     if(bServerRunning == false) {
                         if(ServerStart() == false) {
@@ -67,22 +69,24 @@ LRESULT MainWindowPageStats::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM
                 case BTN_MASS_MSG:
                     OnMassMessage();
                     return 0;
+            }
+
             break;
         case WM_WINDOWPOSCHANGED: {
             int iX = ((WINDOWPOS*)lParam)->cx;
 
-            ::SetWindowPos(hWndPageItems[BTN_START_STOP], NULL, 0, 0, iX-10, 40, SWP_NOMOVE | SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[GB_STATS], NULL, 0, 0, iX-12, 138, SWP_NOMOVE | SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[LBL_STATUS_VALUE], NULL, 0, 0, iX-169, 14, SWP_NOMOVE | SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[LBL_JOINS_VALUE], NULL, 0, 0, iX-169, 14, SWP_NOMOVE | SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[LBL_PARTS_VALUE], NULL, 0, 0, iX-169, 14, SWP_NOMOVE | SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[LBL_ACTIVE_VALUE], NULL, 0, 0, iX-169, 14, SWP_NOMOVE | SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[LBL_ONLINE_VALUE], NULL, 0, 0, iX-169, 14, SWP_NOMOVE | SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[LBL_PEAK_VALUE], NULL, 0, 0, iX-169, 14, SWP_NOMOVE | SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[LBL_RECEIVED_VALUE], NULL, 0, 0, iX-169, 14, SWP_NOMOVE | SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[LBL_SENT_VALUE], NULL, 0, 0, iX-169, 14, SWP_NOMOVE | SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[BTN_REDIRECT_ALL], NULL, 0, 0, iX-10, 23, SWP_NOMOVE | SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[BTN_MASS_MSG], NULL, 0, 0, iX-10, 23, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[BTN_START_STOP], NULL, 0, 0, iX - 8, ScaleGui(40), SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[GB_STATS], NULL, 0, 0, iX-10, iGroupBoxMargin + (8 * iTextHeight) + 2, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[LBL_STATUS_VALUE], NULL, 0, 0, iX - (ScaleGui(150) + 31), iTextHeight, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[LBL_JOINS_VALUE], NULL, 0, 0, iX - (ScaleGui(150) + 31), iTextHeight, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[LBL_PARTS_VALUE], NULL, 0, 0, iX - (ScaleGui(150) + 31), iTextHeight, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[LBL_ACTIVE_VALUE], NULL, 0, 0, iX - (ScaleGui(150) + 31), iTextHeight, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[LBL_ONLINE_VALUE], NULL, 0, 0, iX - (ScaleGui(150) + 31), iTextHeight, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[LBL_PEAK_VALUE], NULL, 0, 0, iX - (ScaleGui(150) + 31), iTextHeight, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[LBL_RECEIVED_VALUE], NULL, 0, 0, iX - (ScaleGui(150) + 31), iTextHeight, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[LBL_SENT_VALUE], NULL, 0, 0, iX - (ScaleGui(150) + 31), iTextHeight, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[BTN_REDIRECT_ALL], NULL, 0, 0, iX - 8, iEditHeight, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[BTN_MASS_MSG], NULL, 0, 0, iX - 8, iEditHeight, SWP_NOMOVE | SWP_NOZORDER);
 
             return 0;
         }
@@ -98,72 +102,78 @@ bool MainWindowPageStats::CreateMainWindowPage(HWND hOwner) {
     RECT rcMain;
     ::GetClientRect(m_hWnd, &rcMain);
 
+    ::SetWindowPos(m_hWnd, NULL, 0, 0, rcMain.right, ScaleGui(40) + iGroupBoxMargin + (8 * iTextHeight) + (2 * iEditHeight) + 13, SWP_NOMOVE | SWP_NOZORDER);
+
     hWndPageItems[BTN_START_STOP] = ::CreateWindowEx(0, WC_BUTTON, bServerRunning == false ? LanguageManager->sTexts[LAN_START_HUB] : LanguageManager->sTexts[LAN_STOP_HUB],
-        WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON, 5, 4, rcMain.right-10, 40, m_hWnd, (HMENU)BTN_START_STOP, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON, 4, 3, rcMain.right-8, ScaleGui(40), m_hWnd, (HMENU)BTN_START_STOP, g_hInstance, NULL);
+
+    int iPosX = ScaleGui(40);
 
     hWndPageItems[GB_STATS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        6, 43, rcMain.right-12, 138, m_hWnd, NULL, g_hInstance, NULL);
+        5, iPosX, rcMain.right-10, iGroupBoxMargin + (8 * iTextHeight) + 2, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_STATUS] = ::CreateWindowEx(0, WC_STATIC, (string(LanguageManager->sTexts[LAN_STATUS], (size_t)LanguageManager->ui16TextsLens[LAN_STATUS])+":").c_str(),
-        WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP, 6, 12, 140, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP, 13, iPosX + (iGroupBoxMargin - 5), ScaleGui(150), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_STATUS_VALUE] = ::CreateWindowEx(0, WC_STATIC, (string(LanguageManager->sTexts[LAN_READY], (size_t)LanguageManager->ui16TextsLens[LAN_READY])+".").c_str(),
-        WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP, 151, 12, rcMain.right-169, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP, ScaleGui(150) + 18, iPosX + (iGroupBoxMargin - 5), rcMain.right - (ScaleGui(150) + 31), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_JOINS] = ::CreateWindowEx(0, WC_STATIC,
         (string(LanguageManager->sTexts[LAN_ACCEPTED_CONNECTIONS], (size_t)LanguageManager->ui16TextsLens[LAN_ACCEPTED_CONNECTIONS])+":").c_str(),
-        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 6, 27, 140, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosX + (iGroupBoxMargin - 5) + iTextHeight, ScaleGui(150), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_JOINS_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-        151, 27, rcMain.right-169, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
+        ScaleGui(150) + 18, iPosX + (iGroupBoxMargin - 5) + iTextHeight, rcMain.right - (ScaleGui(150) + 31), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_PARTS] = ::CreateWindowEx(0, WC_STATIC,
         (string(LanguageManager->sTexts[LAN_CLOSED_CONNECTIONS], (size_t)LanguageManager->ui16TextsLens[LAN_CLOSED_CONNECTIONS])+":").c_str(),
-        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 6, 42, 140, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosX + (iGroupBoxMargin - 5) + (2 * iTextHeight), ScaleGui(150), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_PARTS_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-        151, 42, rcMain.right-169, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
+        ScaleGui(150) + 18, iPosX + (iGroupBoxMargin - 5) + (2 * iTextHeight), rcMain.right - (ScaleGui(150) + 31), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_ACTIVE] = ::CreateWindowEx(0, WC_STATIC,
         (string(LanguageManager->sTexts[LAN_ACTIVE_CONNECTIONS], (size_t)LanguageManager->ui16TextsLens[LAN_ACTIVE_CONNECTIONS])+":").c_str(),
-        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 6, 57, 140, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosX + (iGroupBoxMargin - 5) + (3 * iTextHeight), ScaleGui(150), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_ACTIVE_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-        151, 57, rcMain.right-169, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
+        ScaleGui(150) + 18, iPosX + (iGroupBoxMargin - 5) + (3 * iTextHeight), rcMain.right - (ScaleGui(150) + 31), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_ONLINE] = ::CreateWindowEx(0, WC_STATIC,
         (string(LanguageManager->sTexts[LAN_USERS_ONLINE], (size_t)LanguageManager->ui16TextsLens[LAN_USERS_ONLINE])+":").c_str(),
-        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 6, 72, 140, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosX + (iGroupBoxMargin - 5) + (4 * iTextHeight), ScaleGui(150), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_ONLINE_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-        151, 72, rcMain.right-169, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
+        ScaleGui(150) + 18, iPosX + (iGroupBoxMargin - 5) + (4 * iTextHeight), rcMain.right - (ScaleGui(150) + 31), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_PEAK] = ::CreateWindowEx(0, WC_STATIC,
         (string(LanguageManager->sTexts[LAN_USERS_PEAK], (size_t)LanguageManager->ui16TextsLens[LAN_USERS_PEAK])+":").c_str(),
-        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 6, 87, 140, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosX + (iGroupBoxMargin - 5) + (5 * iTextHeight), ScaleGui(150), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_PEAK_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-        151, 87, rcMain.right-169, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
+        ScaleGui(150) + 18, iPosX + (iGroupBoxMargin - 5) + (5 * iTextHeight), rcMain.right - (ScaleGui(150) + 31), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_RECEIVED] = ::CreateWindowEx(0, WC_STATIC,
         (string(LanguageManager->sTexts[LAN_RECEIVED], (size_t)LanguageManager->ui16TextsLens[LAN_RECEIVED])+":").c_str(),
-        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 6, 102, 140, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosX + (iGroupBoxMargin - 5) + (6 * iTextHeight), ScaleGui(150), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_RECEIVED_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0 B (0 B/s)", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-        151, 102, rcMain.right-169, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
+        ScaleGui(150) + 18, iPosX + (iGroupBoxMargin - 5) + (6 * iTextHeight), rcMain.right - (ScaleGui(150) + 31), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_SENT] = ::CreateWindowEx(0, WC_STATIC,
         (string(LanguageManager->sTexts[LAN_SENT], (size_t)LanguageManager->ui16TextsLens[LAN_SENT])+":").c_str(),
-        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 6, 117, 140, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosX + (iGroupBoxMargin - 5) + (7 * iTextHeight), ScaleGui(150), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_SENT_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0 B (0 B/s)", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-        151, 117, rcMain.right-169, 14, hWndPageItems[GB_STATS], NULL, g_hInstance, NULL);
+        ScaleGui(150) + 18, iPosX + (iGroupBoxMargin - 5) + (7 * iTextHeight), rcMain.right - (ScaleGui(150) + 31), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
+
+    iPosX += iGroupBoxMargin + (8 * iTextHeight) + 1;
 
     hWndPageItems[BTN_REDIRECT_ALL] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ALL_USERS], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_TABSTOP | BS_PUSHBUTTON,
-        5, 186, rcMain.right-10, 23, m_hWnd, (HMENU)BTN_REDIRECT_ALL, g_hInstance, NULL);
+        4, iPosX + 5, rcMain.right-8, iEditHeight, m_hWnd, (HMENU)BTN_REDIRECT_ALL, g_hInstance, NULL);
 
     hWndPageItems[BTN_MASS_MSG] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MASS_MSG], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_TABSTOP | BS_PUSHBUTTON,
-        5, 213, rcMain.right-10, 23, m_hWnd, (HMENU)BTN_MASS_MSG, g_hInstance, NULL);
+        4, iPosX + iEditHeight + 8, rcMain.right-8, iEditHeight, m_hWnd, (HMENU)BTN_MASS_MSG, g_hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {

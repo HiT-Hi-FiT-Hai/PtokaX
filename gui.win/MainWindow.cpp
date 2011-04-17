@@ -31,6 +31,8 @@
 #include "../core/SettingManager.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiUtil.h"
+//---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
 #endif
@@ -51,6 +53,7 @@
 //---------------------------------------------------------------------------
 MainWindow *pMainWindow = NULL;
 //---------------------------------------------------------------------------
+static int iHeight = 318;
 
 static uint64_t (*GetActualTick)();
 //---------------------------------------------------------------------------
@@ -88,28 +91,36 @@ MainWindow::MainWindow() {
 
     ui64LastTrayMouseMove = 0;
 
-    LOGFONT lfFont;
-    ::GetObject((HFONT)::GetStockObject(DEFAULT_GUI_FONT), sizeof(LOGFONT), &lfFont);
+	NONCLIENTMETRICS NCM = { 0 };
+	NCM.cbSize = sizeof(NONCLIENTMETRICS);
 
-    if(lfFont.lfHeight > 12) {
-        lfFont.lfHeight = 12;
-    } else if(lfFont.lfHeight < -12) {
-        lfFont.lfHeight = -12;
-    }
-
-    hfFont = ::CreateFontIndirect(&lfFont);
-
-	OSVERSIONINFOEX ver;
+    OSVERSIONINFOEX ver;
 	memset(&ver, 0, sizeof(OSVERSIONINFOEX));
 	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 
-	if(::GetVersionEx((OSVERSIONINFO*)&ver) != 0) {
-        if(ver.dwPlatformId == VER_PLATFORM_WIN32_NT && ver.dwMajorVersion >= 6) {
-            pGTC64 = (GTC64)::GetProcAddress(::GetModuleHandle("kernel32.dll"), "GetTickCount64");
-            if(pGTC64 != NULL) {
-                GetActualTick = PXGetTickCount64;
-                return;
-            }
+    if(::GetVersionEx((OSVERSIONINFO*)&ver) != 0 && ver.dwPlatformId == VER_PLATFORM_WIN32_NT && ver.dwMajorVersion < 6) {
+        NCM.cbSize -= sizeof(int);
+    }
+
+	::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), &NCM, 0);
+
+//NCM.lfMessageFont.lfHeight = -18;
+
+    if(NCM.lfMessageFont.lfHeight > 0) {
+        fScaleFactor = (float)(NCM.lfMessageFont.lfHeight / 12.0);
+    } else if(NCM.lfMessageFont.lfHeight < 0) {
+        fScaleFactor = float(NCM.lfMessageFont.lfHeight / -12.0);
+    }
+
+    hfFont = ::CreateFontIndirect(&NCM.lfMessageFont);
+
+    iHeight = ScaleGui(iHeight);
+
+	if(::GetVersionEx((OSVERSIONINFO*)&ver) != 0 && ver.dwPlatformId == VER_PLATFORM_WIN32_NT && ver.dwMajorVersion >= 6) {
+        pGTC64 = (GTC64)::GetProcAddress(::GetModuleHandle("kernel32.dll"), "GetTickCount64");
+        if(pGTC64 != NULL) {
+            GetActualTick = PXGetTickCount64;
+            return;
         }
     }
 
@@ -151,6 +162,44 @@ LRESULT CALLBACK MainWindow::StaticMainWindowProc(HWND hWnd, UINT uMsg, WPARAM w
 LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch(uMsg) {
         case WM_CREATE: {
+            {
+                HWND hCombo = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VSCROLL | CBS_DROPDOWNLIST, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, m_hWnd, NULL,
+                    g_hInstance, NULL);
+
+                if(hCombo != NULL) {
+                    ::SendMessage(hCombo, WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+
+                    iGroupBoxMargin = (int)::SendMessage(hCombo, CB_GETITEMHEIGHT, (WPARAM)-1, 0);
+                    iEditHeight = iGroupBoxMargin + (::GetSystemMetrics(SM_CXFIXEDFRAME) * 2);
+                    iTextHeight = iGroupBoxMargin - 2;
+                    iCheckHeight = max(iTextHeight - 2, ::GetSystemMetrics(SM_CYSMICON));
+
+                    ::DestroyWindow(hCombo);
+                }
+
+                HWND hUpDown = ::CreateWindowEx(0, UPDOWN_CLASS, "", WS_CHILD | UDS_ARROWKEYS | UDS_NOTHOUSANDS | UDS_SETBUDDYINT,
+                    CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, iEditHeight, m_hWnd, NULL, g_hInstance, NULL);
+
+                if(hUpDown != NULL) {
+                    RECT rcUpDown;
+                    ::GetWindowRect(hUpDown, &rcUpDown);
+
+                    iUpDownWidth = rcUpDown.right - rcUpDown.left;
+
+                    ::DestroyWindow(hUpDown);
+                }
+
+                iOneLineGB = iGroupBoxMargin + iEditHeight + 8;
+                iOneLineOneChecksGB = iGroupBoxMargin + iCheckHeight + iEditHeight + 12;
+                iOneLineTwoChecksGB = iGroupBoxMargin + (2 * iCheckHeight) + iEditHeight + 15;
+
+                SettingPage::iOneCheckGB = iGroupBoxMargin + iCheckHeight + 8;
+                SettingPage::iTwoChecksGB = iGroupBoxMargin + (2 * iCheckHeight) + 3 + 8;
+                SettingPage::iOneLineTwoGroupGB = iGroupBoxMargin + iEditHeight + (2 * iOneLineGB) + 7;
+                SettingPage::iTwoLineGB = iGroupBoxMargin  + (2 * iEditHeight) + 13;
+                SettingPage::iThreeLineGB = iGroupBoxMargin + (3 * iEditHeight) + 18;
+            }
+
             RECT rcMain;
             ::GetClientRect(m_hWnd, &rcMain);
 
@@ -163,7 +212,7 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 dwTabsStyle |= TCS_HOTTRACK;
             }
 
-            hWndWindowItems[TC_TABS] = ::CreateWindowEx(0, WC_TABCONTROL, "", dwTabsStyle, 0, 0, rcMain.right, 21, m_hWnd, NULL, g_hInstance, NULL);
+            hWndWindowItems[TC_TABS] = ::CreateWindowEx(0, WC_TABCONTROL, "", dwTabsStyle, 0, 0, rcMain.right, iEditHeight, m_hWnd, NULL, g_hInstance, NULL);
             ::SendMessage(hWndWindowItems[TC_TABS], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
 
             TCITEM tcItem = { 0 };
@@ -178,6 +227,21 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     tcItem.pszText = MainWindowPages[ui8i]->GetPageName();
                     tcItem.lParam = (LPARAM)MainWindowPages[ui8i];
                     ::SendMessage(hWndWindowItems[TC_TABS], TCM_INSERTITEM, ui8i, (LPARAM)&tcItem);
+                }
+
+                if(ui8i == 0) {
+                    RECT rcPage = { 0 };
+                    ::GetWindowRect(MainWindowPages[0]->m_hWnd, &rcPage);
+
+                    int iDiff = (rcMain.bottom) - (rcPage.bottom-rcPage.top) - (iEditHeight + 1);
+
+                    ::GetWindowRect(m_hWnd, &rcMain);
+
+                    if(iDiff != 0) {
+                        iHeight = (rcMain.bottom-rcMain.top) - iDiff;
+
+                        ::SetWindowPos(m_hWnd, NULL, 0, 0, (rcMain.right-rcMain.left), (rcMain.bottom-rcMain.top) - iDiff, SWP_NOMOVE | SWP_NOZORDER);
+                    }
                 }
             }
 
@@ -257,16 +321,17 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 ::ShowWindow(m_hWnd, SW_HIDE);
             } else {
                 RECT rc;
-                ::SetRect(&rc, 0, 0, GET_X_LPARAM(lParam), 21);
+                ::SetRect(&rc, 0, 0, GET_X_LPARAM(lParam), iEditHeight);
                 ::SendMessage(hWndWindowItems[TC_TABS], TCM_ADJUSTRECT, FALSE, (LPARAM)&rc);
 
                 HDWP hdwp = ::BeginDeferWindowPos(3);
 
-                ::DeferWindowPos(hdwp, hWndWindowItems[TC_TABS], NULL, 0, 0, GET_X_LPARAM(lParam), 21, SWP_NOMOVE | SWP_NOZORDER);
+                ::DeferWindowPos(hdwp, hWndWindowItems[TC_TABS], NULL, 0, 0, GET_X_LPARAM(lParam), iEditHeight, SWP_NOMOVE | SWP_NOZORDER);
 
                 for(uint8_t ui8i = 0; ui8i < (sizeof(MainWindowPages) / sizeof(MainWindowPages[0])); ui8i++) {
                     if(MainWindowPages[ui8i] != NULL) {
-                        ::DeferWindowPos(hdwp, MainWindowPages[ui8i]->m_hWnd, NULL, 0, 22, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)-22, SWP_NOMOVE | SWP_NOZORDER);
+                        ::DeferWindowPos(hdwp, MainWindowPages[ui8i]->m_hWnd, NULL, 0, iEditHeight + 1, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) - (iEditHeight + 1),
+                            SWP_NOMOVE | SWP_NOZORDER);
                     }
                 }
 
@@ -276,8 +341,8 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             return 0;
         case WM_GETMINMAXINFO: {
             MINMAXINFO *mminfo = (MINMAXINFO*)lParam;
-            mminfo->ptMinTrackSize.x = 400;
-            mminfo->ptMinTrackSize.y = 321;
+            mminfo->ptMinTrackSize.x = ScaleGui(400);
+            mminfo->ptMinTrackSize.y = iHeight;
 
             return 0;
         }
@@ -434,7 +499,7 @@ HWND MainWindow::CreateEx() {
     m_hWnd = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE | WS_EX_CONTROLPARENT, MAKEINTATOM(atom),
         (string(SettingManager->sTexts[SETTXT_HUB_NAME], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME]) + " | " + sTitle).c_str(),
         WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-        CW_USEDEFAULT, CW_USEDEFAULT, 400, 321, NULL, hMainMenu, g_hInstance, NULL);
+        CW_USEDEFAULT, CW_USEDEFAULT, ScaleGui(400), iHeight, NULL, hMainMenu, g_hInstance, NULL);
 
 	return m_hWnd;
 }

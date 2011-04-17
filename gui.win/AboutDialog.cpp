@@ -25,13 +25,13 @@
 #include "AboutDialog.h"
 //---------------------------------------------------------------------------
 #include "../core/LanguageManager.h"
-#include "../core/utility.h"
+//---------------------------------------------------------------------------
+#include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-#include "GuiUtil.h"
 #include "Resources.h"
 //---------------------------------------------------------------------------
 static ATOM atomAboutDialog = 0;
@@ -49,9 +49,9 @@ AboutDialog::AboutDialog() {
     ::GetObject((HFONT)::GetStockObject(DEFAULT_GUI_FONT), sizeof(LOGFONT), &lfFont);
 
     if(lfFont.lfHeight > 0) {
-        lfFont.lfHeight = 20;
+        lfFont.lfHeight = ScaleGui(20);
     } else {
-        lfFont.lfHeight = -20;
+        lfFont.lfHeight = ScaleGui(-20);
     }
 
     lfFont.lfWeight = FW_BOLD;
@@ -82,10 +82,13 @@ LRESULT CALLBACK AboutDialog::StaticAboutDialogProc(HWND hWnd, UINT uMsg, WPARAM
 LRESULT AboutDialog::AboutDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch(uMsg) {
         case WM_PAINT: {
+            RECT rcParent;
+            ::GetClientRect(m_hWnd, &rcParent);
+
             PAINTSTRUCT ps;
             HDC hdc = ::BeginPaint(m_hWnd, &ps);
             ::DrawIconEx(hdc, 5, 5, hiSpider, 0, 0, 0, NULL, DI_NORMAL);
-            ::DrawIconEx(hdc, 368, 5, hiLua, 0, 0, 0, NULL, DI_NORMAL);
+            ::DrawIconEx(hdc, rcParent.right - 69, 5, hiLua, 0, 0, 0, NULL, DI_NORMAL);
             ::EndPaint(m_hWnd, &ps);
             return 0;
         }
@@ -126,12 +129,12 @@ void AboutDialog::DoModal(HWND hWndParent) {
     RECT rcParent;
     ::GetWindowRect(hWndParent, &rcParent);
 
-    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2))-221;
-    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2))-227;
+    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(443) / 2);
+    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(454) / 2);
 
     m_hWnd = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomAboutDialog),
         (string(LanguageManager->sTexts[LAN_ABOUT], (size_t)LanguageManager->ui16TextsLens[LAN_ABOUT]) + " PtokaX").c_str(),
-        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, 443, 454,
+        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(443), ScaleGui(454),
         hWndParent, NULL, g_hInstance, NULL);
 
     if(m_hWnd == NULL) {
@@ -141,16 +144,18 @@ void AboutDialog::DoModal(HWND hWndParent) {
     ::SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
     ::SetWindowLongPtr(m_hWnd, GWLP_WNDPROC, (LONG_PTR)StaticAboutDialogProc);
 
+    ::GetClientRect(m_hWnd, &rcParent);
+
     hWndWindowItems[LBL_PTOKAX_VERSION] = ::CreateWindowEx(0, WC_STATIC, "PtokaX" PtokaXVersionString " [build " BUILD_NUMBER "]", WS_CHILD | WS_VISIBLE | SS_CENTER,
-        73, 10, 290, 25, m_hWnd, NULL, g_hInstance, NULL);
+        73, 10, ScaleGui(290), ScaleGui(25), m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[LBL_PTOKAX_VERSION], WM_SETFONT, (WPARAM)hfBigFont, MAKELPARAM(TRUE, 0));
 
-    hWndWindowItems[LBL_LUA_VERSION] = ::CreateWindowEx(0, WC_STATIC, LUA_RELEASE, WS_CHILD | WS_VISIBLE | SS_CENTER, 73, 39, 290, 25,
+    hWndWindowItems[LBL_LUA_VERSION] = ::CreateWindowEx(0, WC_STATIC, LUA_RELEASE, WS_CHILD | WS_VISIBLE | SS_CENTER, 73, ScaleGui(39), ScaleGui(290), ScaleGui(25),
         m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[LBL_LUA_VERSION], WM_SETFONT, (WPARAM)hfBigFont, MAKELPARAM(TRUE, 0));
 
     hWndWindowItems[REDT_ABOUT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_CENTER | ES_READONLY,
-        5, 74, 427, 347, m_hWnd, NULL, g_hInstance, NULL);
+        5, ScaleGui(74), rcParent.right - 10, rcParent.bottom - ScaleGui(74) - 5, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[REDT_ABOUT], EM_SETBKGNDCOLOR, 0, ::GetSysColor(COLOR_3DFACE));
     ::SendMessage(hWndWindowItems[REDT_ABOUT], EM_AUTOURLDETECT, TRUE, 0);
     ::SendMessage(hWndWindowItems[REDT_ABOUT], EM_SETEVENTMASK, 0, (LPARAM)::SendMessage(hWndWindowItems[REDT_ABOUT], EM_GETEVENTMASK, 0, 0) | ENM_LINK);

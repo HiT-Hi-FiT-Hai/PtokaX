@@ -27,11 +27,11 @@
 #include "../core/ProfileManager.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiUtil.h"
+//---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
 #endif
-//---------------------------------------------------------------------------
-#include "GuiUtil.h"
 //---------------------------------------------------------------------------
 RegisteredUserDialog * pRegisteredUserDialog = NULL;
 //---------------------------------------------------------------------------
@@ -137,13 +137,6 @@ LRESULT RegisteredUserDialog::RegisteredUserDialogProc(UINT uMsg, WPARAM wParam,
             }
 
             break;
-        case WM_GETMINMAXINFO: {
-            MINMAXINFO *mminfo = (MINMAXINFO*)lParam;
-            mminfo->ptMinTrackSize.x = 300;
-            mminfo->ptMinTrackSize.y = 185;
-
-            return 0;
-        }
         case WM_CLOSE:
             ::EnableWindow(::GetParent(m_hWnd), TRUE);
             break;
@@ -176,11 +169,11 @@ void RegisteredUserDialog::DoModal(HWND hWndParent, RegUser * pReg/* = NULL*/, c
     RECT rcParent;
     ::GetWindowRect(hWndParent, &rcParent);
 
-    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2))-150;
-    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2))-93;
+    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(300) / 2);
+    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(201) / 2);
 
     m_hWnd = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomRegisteredUserDialog), LanguageManager->sTexts[LAN_REGISTERED_USER],
-        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, 300, 185,
+        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(300), ScaleGui(201),
         hWndParent, NULL, g_hInstance, NULL);
 
     if(m_hWnd == NULL) {
@@ -192,31 +185,55 @@ void RegisteredUserDialog::DoModal(HWND hWndParent, RegUser * pReg/* = NULL*/, c
 
     ::GetClientRect(m_hWnd, &rcParent);
 
+    {
+        int iHeight = (3 * iOneLineGB) + iEditHeight + 6;
+
+        int iDiff = rcParent.bottom - iHeight;
+        
+        if(iDiff != 0) {
+            ::GetWindowRect(hWndParent, &rcParent);
+
+            iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - ((ScaleGui(196) - iDiff) / 2);
+
+            ::GetWindowRect(m_hWnd, &rcParent);
+
+            ::SetWindowPos(m_hWnd, NULL, iX, iY, (rcParent.right-rcParent.left), (rcParent.bottom-rcParent.top) - iDiff, SWP_NOZORDER);
+        }
+    }
+
+    ::GetClientRect(m_hWnd, &rcParent);
+
     hWndWindowItems[GB_NICK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_NICK], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, 1, (rcParent.right-rcParent.left)-6, 41, m_hWnd, NULL, g_hInstance, NULL);
+        3, 0, rcParent.right - 6, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndWindowItems[EDT_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, 16, (rcParent.right-rcParent.left)-22, 18, m_hWnd, (HMENU)EDT_NICK, g_hInstance, NULL);
+        11, iGroupBoxMargin, rcParent.right - 22, iEditHeight, m_hWnd, (HMENU)EDT_NICK, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_NICK], EM_SETLIMITTEXT, 64, 0);
 
+    int iPosX = iOneLineGB;
+
     hWndWindowItems[GB_PASSWORD] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_PASSWORD], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, 42, (rcParent.right-rcParent.left)-6, 41, m_hWnd, NULL, g_hInstance, NULL);
+        3, iPosX, rcParent.right - 6, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndWindowItems[EDT_PASSWORD] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, 57, (rcParent.right-rcParent.left)-22, 18, m_hWnd, (HMENU)EDT_PASSWORD, g_hInstance, NULL);
+        11, iPosX + iGroupBoxMargin, (rcParent.right-rcParent.left)-22, iEditHeight, m_hWnd, (HMENU)EDT_PASSWORD, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_PASSWORD], EM_SETLIMITTEXT, 64, 0);
 
+    iPosX += iOneLineGB;
+
     hWndWindowItems[GB_PROFILE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_PROFILE], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, 83, (rcParent.right-rcParent.left)-6, 44, m_hWnd, NULL, g_hInstance, NULL);
+        3, iPosX, rcParent.right - 6, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndWindowItems[CB_PROFILE] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
-        11, 98, (rcParent.right-rcParent.left)-22, 21, m_hWnd, (HMENU)CB_PROFILE, g_hInstance, NULL);
+        11, iPosX + iGroupBoxMargin, (rcParent.right-rcParent.left)-22, iEditHeight, m_hWnd, (HMENU)CB_PROFILE, g_hInstance, NULL);
+
+    iPosX += iOneLineGB + 4;
 
     hWndWindowItems[BTN_ACCEPT] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        2, 132, ((rcParent.right-rcParent.left)/2)-3, 23, m_hWnd, (HMENU)BTN_ACCEPT, g_hInstance, NULL);
+        2, iPosX, ((rcParent.right-rcParent.left)/2)-3, iEditHeight, m_hWnd, (HMENU)BTN_ACCEPT, g_hInstance, NULL);
 
     hWndWindowItems[BTN_DISCARD] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        ((rcParent.right-rcParent.left)/2)+2, 132, ((rcParent.right-rcParent.left)/2)-4, 23, m_hWnd, (HMENU)BTN_DISCARD, g_hInstance, NULL);
+        ((rcParent.right-rcParent.left)/2)+2, iPosX, ((rcParent.right-rcParent.left)/2)-4, iEditHeight, m_hWnd, (HMENU)BTN_DISCARD, g_hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
         if(hWndWindowItems[ui8i] == NULL) {

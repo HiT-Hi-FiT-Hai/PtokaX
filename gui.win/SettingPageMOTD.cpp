@@ -26,6 +26,8 @@
 #include "../core/SettingManager.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiUtil.h"
+//---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
 #endif
@@ -162,19 +164,23 @@ bool SettingPageMOTD::CreateSettingPage(HWND hOwner) {
         return false;
     }
 
-    hWndPageItems[GB_MOTD] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MOTD], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 3, 447, 418,
-        m_hWnd, NULL, g_hInstance, NULL);
+    RECT rcThis = { 0 };
+    ::GetWindowRect(m_hWnd, &rcThis);
+
+    hWndPageItems[GB_MOTD] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MOTD], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        0, 0, iFullGB, (rcThis.bottom - rcThis.top) - 3, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_MOTD] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sMOTD != NULL ? SettingManager->sMOTD : "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP |
-        ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN, 8, 18, 431, 357, m_hWnd, (HMENU)EDT_MOTD, g_hInstance, NULL);
+        ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN, 8, iGroupBoxMargin, iFullEDT, (rcThis.bottom - rcThis.top) - iGroupBoxMargin - (2 * iCheckHeight) - 18,
+        m_hWnd, (HMENU)EDT_MOTD, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MOTD], EM_SETLIMITTEXT, 64000, 0);
 
     hWndPageItems[BTN_MOTD_AS_PM] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MOTD_IN_PM], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 380, 431, 16, m_hWnd, NULL, g_hInstance, NULL);
+        8, (rcThis.bottom - rcThis.top) - (2 * iCheckHeight) - 14, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_MOTD_AS_PM], BM_SETCHECK, (SettingManager->bBools[SETBOOL_MOTD_AS_PM] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[BTN_DISABLE_MOTD] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISABLE_MOTD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 399, 431, 16, m_hWnd, (HMENU)BTN_DISABLE_MOTD, g_hInstance, NULL);
+        8, (rcThis.bottom - rcThis.top) - iCheckHeight - 11, iFullEDT, iCheckHeight, m_hWnd, (HMENU)BTN_DISABLE_MOTD, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_DISABLE_MOTD], BM_SETCHECK, (SettingManager->bBools[SETBOOL_DISABLE_MOTD] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {

@@ -54,7 +54,6 @@ bool bCmdAutoStart = false, bCmdNoAutoStart = false, bCmdNoTray = false, bCmdNoK
 	HANDLE hConsole = NULL, hPtokaXHeap = NULL, hRecvHeap = NULL, hSendHeap = NULL;
 	string PATH_LUA = "", sOs = "";
 	bool b2K = false;
-	HFONT hfFont = NULL;
 #endif
 //---------------------------------------------------------------------------
 

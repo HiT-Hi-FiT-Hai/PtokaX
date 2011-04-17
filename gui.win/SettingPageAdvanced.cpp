@@ -24,7 +24,8 @@
 //---------------------------------------------------------------------------
 #include "../core/LanguageManager.h"
 #include "../core/SettingManager.h"
-#include "../core/utility.h"
+//---------------------------------------------------------------------------
+#include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
@@ -52,7 +53,6 @@ LRESULT SettingPageAdvanced::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lP
                 if(HIWORD(wParam) == BN_CLICKED) {
                     BOOL bEnable = ::SendMessage(hWndPageItems[BTN_ENABLE_SCRIPTING], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE;
                     ::EnableWindow(hWndPageItems[BTN_STOP_SCRIPT_ON_ERROR], bEnable);
-                    ::EnableWindow(hWndPageItems[BTN_POPUP_SCRIPT_WINDOW_ON_ERROR], bEnable);
                     ::EnableWindow(hWndPageItems[BTN_SAVE_SCRIPT_ERRORS_TO_LOG], bEnable);
                 }
 
@@ -150,7 +150,6 @@ void SettingPageAdvanced::Save() {
 
     SettingManager->SetBool(SETBOOL_ENABLE_SCRIPTING, ::SendMessage(hWndPageItems[BTN_ENABLE_SCRIPTING], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
     SettingManager->SetBool(SETBOOL_STOP_SCRIPT_ON_ERROR, ::SendMessage(hWndPageItems[BTN_STOP_SCRIPT_ON_ERROR], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
-    SettingManager->SetBool(SETBOOL_POPUP_SCRIPT_WINDOW, ::SendMessage(hWndPageItems[BTN_POPUP_SCRIPT_WINDOW_ON_ERROR], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
     SettingManager->SetBool(SETBOOL_LOG_SCRIPT_ERRORS, ::SendMessage(hWndPageItems[BTN_SAVE_SCRIPT_ERRORS_TO_LOG], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 
     SettingManager->SetBool(SETBOOL_FILTER_KICK_MESSAGES, ::SendMessage(hWndPageItems[BTN_FILTER_KICK_MESSAGES], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
@@ -179,79 +178,87 @@ bool SettingPageAdvanced::CreateSettingPage(HWND hOwner) {
         return false;
     }
 
+    RECT rcThis = { 0 };
+    ::GetWindowRect(m_hWnd, &rcThis);
+
+    int iPosX = iGroupBoxMargin + (4 * iCheckHeight) + 17;
+
     hWndPageItems[GB_HUB_STARTUP_AND_TRAY] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_HUB_STARTUP_AND_TRAY_ICON],
-        WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 3, 447, 93, m_hWnd, NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 0, iFullGB, iPosX, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[BTN_AUTO_START] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_HUB_AUTO_START], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 17, 431, 16, m_hWnd, NULL, g_hInstance, NULL);
+        8, iGroupBoxMargin, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_AUTO_START], BM_SETCHECK, (SettingManager->bBools[SETBOOL_AUTO_START] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[BTN_CHECK_FOR_UPDATE] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_UPDATE_CHECK_ON_STARTUP], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 36, 431, 16, m_hWnd, NULL, g_hInstance, NULL);
+        8, iGroupBoxMargin + iCheckHeight + 3, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_CHECK_FOR_UPDATE], BM_SETCHECK, (SettingManager->bBools[SETBOOL_CHECK_NEW_RELEASES] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[BTN_ENABLE_TRAY_ICON] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ENABLE_TRAY_ICON], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 55, 431, 16, m_hWnd, (HMENU)BTN_ENABLE_TRAY_ICON, g_hInstance, NULL);
+        8, iGroupBoxMargin + (2 * iCheckHeight) + 6, iFullEDT, iCheckHeight, m_hWnd, (HMENU)BTN_ENABLE_TRAY_ICON, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_ENABLE_TRAY_ICON], BM_SETCHECK, (SettingManager->bBools[SETBOOL_ENABLE_TRAY_ICON] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[BTN_MINIMIZE_ON_STARTUP] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MINIMIZE_ON_STARTUP], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 74, 431, 16, m_hWnd, NULL, g_hInstance, NULL);
+        8, iGroupBoxMargin + (3 * iCheckHeight) + 9, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_MINIMIZE_ON_STARTUP], BM_SETCHECK, (SettingManager->bBools[SETBOOL_START_MINIMIZED] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[GB_HUB_COMMANDS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_HUB_COMMANDS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, 96, 447, 60, m_hWnd, NULL, g_hInstance, NULL);
+        0, iPosX, iFullGB, iOneLineOneChecksGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[LBL_PREFIXES_FOR_HUB_COMMANDS] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_PREFIXES_FOR_HUB_CMDS],
-        WS_CHILD | WS_VISIBLE | SS_LEFT, 8, 113, 360, 16, m_hWnd, NULL, g_hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | SS_LEFT, 8, iPosX + iGroupBoxMargin + ((iEditHeight - iTextHeight) / 2), ScaleGui(350), iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_PREFIXES_FOR_HUB_COMMANDS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES], WS_CHILD |
-        WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL, 373, 111, 66, 18, m_hWnd, (HMENU)EDT_PREFIXES_FOR_HUB_COMMANDS, g_hInstance, NULL);
+        WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL, ScaleGui(350) + 13, iPosX + iGroupBoxMargin, (rcThis.right - rcThis.left) - (ScaleGui(350) + 26), iEditHeight,
+        m_hWnd, (HMENU)EDT_PREFIXES_FOR_HUB_COMMANDS, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_PREFIXES_FOR_HUB_COMMANDS], EM_SETLIMITTEXT, 5, 0);
 
     hWndPageItems[BTN_REPLY_TO_HUB_COMMANDS_IN_PM] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REPLY_HUB_CMDS_PM], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 134, 431, 16, m_hWnd, NULL, g_hInstance, NULL);
+        8, iPosX + iGroupBoxMargin + iEditHeight + 4, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_REPLY_TO_HUB_COMMANDS_IN_PM], BM_SETCHECK,
         (SettingManager->bBools[SETBOOL_REPLY_TO_HUB_COMMANDS_AS_PM] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
+    iPosX += iOneLineOneChecksGB;
+
     hWndPageItems[GB_SCRIPTING] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_SCRIPTING], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, 156, 447, 93, m_hWnd, NULL, g_hInstance, NULL);
+        0, iPosX, iFullGB, iGroupBoxMargin + (3 * iCheckHeight) + 14, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[BTN_ENABLE_SCRIPTING] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ENABLE_SCRIPTING], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 170, 431, 16, m_hWnd, (HMENU)BTN_ENABLE_SCRIPTING, g_hInstance, NULL);
+        8, iPosX + iGroupBoxMargin, iFullEDT, iCheckHeight, m_hWnd, (HMENU)BTN_ENABLE_SCRIPTING, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_ENABLE_SCRIPTING], BM_SETCHECK, (SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[BTN_STOP_SCRIPT_ON_ERROR] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_STOP_SCRIPT_ON_ERR], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 189, 431, 16, m_hWnd, NULL, g_hInstance, NULL);
+        8, iPosX + iGroupBoxMargin + iCheckHeight + 3, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_STOP_SCRIPT_ON_ERROR], BM_SETCHECK, (SettingManager->bBools[SETBOOL_STOP_SCRIPT_ON_ERROR] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    hWndPageItems[BTN_POPUP_SCRIPT_WINDOW_ON_ERROR] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_POPUP_SCRIPT_WINDOW], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 208, 431, 16, m_hWnd, NULL, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[BTN_POPUP_SCRIPT_WINDOW_ON_ERROR], BM_SETCHECK, (SettingManager->bBools[SETBOOL_POPUP_SCRIPT_WINDOW] == true ? BST_CHECKED : BST_UNCHECKED), 0);
-
     hWndPageItems[BTN_SAVE_SCRIPT_ERRORS_TO_LOG] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_LOG_SCRIPT_ERRORS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 227, 431, 16, m_hWnd, NULL, g_hInstance, NULL);
+        8, iPosX + iGroupBoxMargin + (2 * iCheckHeight) + 6, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_SAVE_SCRIPT_ERRORS_TO_LOG], BM_SETCHECK, (SettingManager->bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
+    iPosX += iGroupBoxMargin + (3 * iCheckHeight) + 14;
+
     hWndPageItems[GB_KICK_MESSAGES] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_KICK_MESSAGES], WS_CHILD | WS_VISIBLE |
-        BS_GROUPBOX, 0, 249, 447, 55, m_hWnd, NULL, g_hInstance, NULL);
+        BS_GROUPBOX, 0, iPosX, iFullGB, iTwoChecksGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[BTN_FILTER_KICK_MESSAGES] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_FILTER_KICKS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 263, 431, 16, m_hWnd, (HMENU)BTN_FILTER_KICK_MESSAGES, g_hInstance, NULL);
+        8, iPosX + iGroupBoxMargin, iFullEDT, iCheckHeight, m_hWnd, (HMENU)BTN_FILTER_KICK_MESSAGES, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_FILTER_KICK_MESSAGES], BM_SETCHECK, (SettingManager->bBools[SETBOOL_FILTER_KICK_MESSAGES] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[BTN_SEND_KICK_MESSAGES_TO_OPS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_FILTERED_KICKS_TO_OPS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 282, 431, 16, m_hWnd, NULL, g_hInstance, NULL);
+        8, iPosX + iGroupBoxMargin + iCheckHeight + 3, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_SEND_KICK_MESSAGES_TO_OPS], BM_SETCHECK, (SettingManager->bBools[SETBOOL_SEND_KICK_MESSAGES_TO_OPS] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
+    iPosX += iTwoChecksGB;
+
     hWndPageItems[GB_STATUS_MESSAGES] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_STATUS_MESSAGES], WS_CHILD | WS_VISIBLE |
-        BS_GROUPBOX, 0, 304, 447, 55, m_hWnd, NULL, g_hInstance, NULL);
+        BS_GROUPBOX, 0, iPosX, iFullGB, iTwoChecksGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[BTN_SEND_STATUS_MESSAGES_TO_OPS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_SEND_STATUS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 318, 431, 16, m_hWnd, (HMENU)BTN_SEND_STATUS_MESSAGES_TO_OPS, g_hInstance, NULL);
+        8, iPosX + iGroupBoxMargin, iFullEDT, iCheckHeight, m_hWnd, (HMENU)BTN_SEND_STATUS_MESSAGES_TO_OPS, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_SEND_STATUS_MESSAGES_TO_OPS], BM_SETCHECK, (SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_SEND_STATUS_PM], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, 337, 431, 16, m_hWnd, NULL, g_hInstance, NULL);
+        8, iPosX + iGroupBoxMargin + iCheckHeight + 3, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM], BM_SETCHECK, (SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
@@ -265,7 +272,6 @@ bool SettingPageAdvanced::CreateSettingPage(HWND hOwner) {
     ::EnableWindow(hWndPageItems[BTN_MINIMIZE_ON_STARTUP], SettingManager->bBools[SETBOOL_ENABLE_TRAY_ICON] == true ? TRUE : FALSE);
 
     ::EnableWindow(hWndPageItems[BTN_STOP_SCRIPT_ON_ERROR], SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == true ? TRUE : FALSE);
-    ::EnableWindow(hWndPageItems[BTN_POPUP_SCRIPT_WINDOW_ON_ERROR], SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == true ? TRUE : FALSE);
     ::EnableWindow(hWndPageItems[BTN_SAVE_SCRIPT_ERRORS_TO_LOG], SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == true ? TRUE : FALSE);
 
     ::EnableWindow(hWndPageItems[BTN_SEND_KICK_MESSAGES_TO_OPS], SettingManager->bBools[SETBOOL_FILTER_KICK_MESSAGES] == true ? TRUE : FALSE);

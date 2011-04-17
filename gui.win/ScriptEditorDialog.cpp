@@ -30,11 +30,12 @@
 #include "../core/UdpDebug.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiUtil.h"
+//---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-#include "GuiUtil.h"
 #include "MainWindowPageScripts.h"
 #include "Resources.h"
 //---------------------------------------------------------------------------
@@ -70,11 +71,12 @@ LRESULT ScriptEditorDialog::ScriptEditorDialogProc(UINT uMsg, WPARAM wParam, LPA
             RECT rcParent;
             ::GetClientRect(m_hWnd, &rcParent);
 
-            ::SetWindowPos(hWndWindowItems[BTN_SAVE_SCRIPT], NULL, ((rcParent.right-rcParent.left)/3)*2, rcParent.bottom-25,
-                (rcParent.right-rcParent.left)-(((rcParent.right-rcParent.left)/3)*2)-2, 23, SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[BTN_CHECK_SYNTAX], NULL, ((rcParent.right-rcParent.left)/3)+1, rcParent.bottom-25, ((rcParent.right-rcParent.left)/3)-2, 23, SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[BTN_LOAD_SCRIPT], NULL, 2, rcParent.bottom-25, ((rcParent.right-rcParent.left)/3)-2, 23, SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[REDT_SCRIPT], NULL, 0, 0, rcParent.right-40, rcParent.bottom-27, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[BTN_SAVE_SCRIPT], NULL, (rcParent.right / 3) * 2, rcParent.bottom - iEditHeight - 2,
+                rcParent.right - ((rcParent.right / 3) * 2) - 2, iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[BTN_CHECK_SYNTAX], NULL, (rcParent.right / 3) + 1, rcParent.bottom - iEditHeight - 2,
+                (rcParent.right / 3) - 2, iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[BTN_LOAD_SCRIPT], NULL, 2, rcParent.bottom - iEditHeight - 2, (rcParent.right / 3) - 2, iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[REDT_SCRIPT], NULL, 0, 0, rcParent.right - ScaleGui(40), rcParent.bottom - iEditHeight - 4, SWP_NOMOVE | SWP_NOZORDER);
 
             return 0;
         }
@@ -114,8 +116,8 @@ LRESULT ScriptEditorDialog::ScriptEditorDialogProc(UINT uMsg, WPARAM wParam, LPA
             break;
         case WM_GETMINMAXINFO: {
             MINMAXINFO *mminfo = (MINMAXINFO*)lParam;
-            mminfo->ptMinTrackSize.x = 443;
-            mminfo->ptMinTrackSize.y = 454;
+            mminfo->ptMinTrackSize.x = ScaleGui(443);
+            mminfo->ptMinTrackSize.y = ScaleGui(454);
 
             return 0;
         }
@@ -149,11 +151,11 @@ void ScriptEditorDialog::DoModal(HWND hWndParent) {
     RECT rcParent;
     ::GetWindowRect(hWndParent, &rcParent);
 
-    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2))-221;
-    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2))-227;
+    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(443) / 2);
+    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(454) / 2);
 
     m_hWnd = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomScriptEditorDialog), LanguageManager->sTexts[LAN_SCRIPT_EDITOR],
-        WS_POPUP | WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, 443, 454,
+        WS_POPUP | WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(443), ScaleGui(454),
         hWndParent, NULL, g_hInstance, NULL);
 
     if(m_hWnd == NULL) {
@@ -166,13 +168,13 @@ void ScriptEditorDialog::DoModal(HWND hWndParent) {
     ::GetClientRect(m_hWnd, &rcParent);
 
     hWndWindowItems[REDT_SCRIPT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_HSCROLL | WS_VSCROLL | ES_AUTOVSCROLL | ES_MULTILINE,
-        40, 0, rcParent.right-40, rcParent.bottom-27, m_hWnd, (HMENU)REDT_SCRIPT, g_hInstance, NULL);
+        ScaleGui(40), 0, rcParent.right - ScaleGui(40), rcParent.bottom - iEditHeight - 4, m_hWnd, (HMENU)REDT_SCRIPT, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_EXLIMITTEXT, 0, (LPARAM)16777216);
     ::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_AUTOURLDETECT, TRUE, 0);
     ::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_SETEVENTMASK, 0, (LPARAM)::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_GETEVENTMASK, 0, 0) | ENM_LINK);
 
     hWndWindowItems[BTN_LOAD_SCRIPT] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_LOAD_SCRIPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        2, rcParent.bottom-25, ((rcParent.right-rcParent.left)/3)-2, 23, m_hWnd, (HMENU)BTN_LOAD_SCRIPT, g_hInstance, NULL);
+        2, rcParent.bottom - iEditHeight - 2, (rcParent.right / 3) - 2, iEditHeight, m_hWnd, (HMENU)BTN_LOAD_SCRIPT, g_hInstance, NULL);
 
     {
         DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON;
@@ -181,11 +183,11 @@ void ScriptEditorDialog::DoModal(HWND hWndParent) {
         }
 
         hWndWindowItems[BTN_CHECK_SYNTAX] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_CHECK_SYNTAX], dwStyle,
-            ((rcParent.right-rcParent.left)/3)+1, rcParent.bottom-25, ((rcParent.right-rcParent.left)/3)-2, 23, m_hWnd, (HMENU)BTN_CHECK_SYNTAX, g_hInstance, NULL);
+            (rcParent.right / 3) + 1, rcParent.bottom - iEditHeight - 2, (rcParent.right / 3) - 2, iEditHeight, m_hWnd, (HMENU)BTN_CHECK_SYNTAX, g_hInstance, NULL);
     }
 
     hWndWindowItems[BTN_SAVE_SCRIPT] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_SAVE_SCRIPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        ((rcParent.right-rcParent.left)/3)*2, rcParent.bottom-25, (rcParent.right-rcParent.left)-(((rcParent.right-rcParent.left)/3)*2)-2, 23, m_hWnd, (HMENU)BTN_SAVE_SCRIPT, g_hInstance, NULL);
+        (rcParent.right / 3) * 2, rcParent.bottom - iEditHeight - 2, rcParent.right - ((rcParent.right / 3) * 2) - 2, iEditHeight, m_hWnd, (HMENU)BTN_SAVE_SCRIPT, g_hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
         if(hWndWindowItems[ui8i] == NULL) {
@@ -252,7 +254,7 @@ void ScriptEditorDialog::OnUpdate() {
 
     HDC hDC = ::GetDC(m_hWnd);
 
-    RECT rect = { 0, 0, 38, iHeight+5 };
+    RECT rect = { 0, 0, ScaleGui(38), iHeight + 5 };
 
 	::FillRect(hDC, &rect, ::GetSysColorBrush(COLOR_BTNFACE));
 	rect.top = 2;

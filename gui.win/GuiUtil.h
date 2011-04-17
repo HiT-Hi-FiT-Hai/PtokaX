@@ -21,6 +21,20 @@
 #ifndef GuiUtilH
 #define GuiUtilH
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+extern float fScaleFactor;
+extern int iGroupBoxMargin;
+extern int iCheckHeight;
+extern int iEditHeight;
+extern int iTextHeight;
+extern int iUpDownWidth;
+extern int iOneLineGB;
+extern int iOneLineOneChecksGB;
+extern int iOneLineTwoChecksGB;
+extern HFONT hfFont;
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+int ScaleGui(const int &iValue);
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void RichEditOpenLink(const HWND &hRichEdit, const ENLINK * pEnLink);
 void RichEditPopupMenu(const HWND &hRichEdit, const HWND &hParent, const LPARAM &lParam);
