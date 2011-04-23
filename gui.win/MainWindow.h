@@ -23,6 +23,10 @@
 //------------------------------------------------------------------------------
 #include "MainWindowPage.h"
 //------------------------------------------------------------------------------
+#define WM_UPDATE_CHECK_MSG (WM_USER+11)
+#define WM_UPDATE_CHECK_TERMINATE (WM_USER+12)
+#define WM_UPDATE_CHECK_DATA (WM_USER+13)
+//------------------------------------------------------------------------------
 
 class MainWindow {
 public:

@@ -684,7 +684,7 @@ enum LangIds {
     LAN_DELETE_SCRIPT, 
     LAN_REFRESH_SCRIPTS, 
     LAN_POPUP_SCRIPT_WINDOW, 
-    LAN_UPDATE_CHECK, 
+    LAN_CHECKING_FOR_UPDATE,
     LAN_ACCEPTED_CONNECTIONS, 
     LAN_CLOSED_CONNECTIONS, 
     LAN_ACTIVE_CONNECTIONS, 
@@ -856,6 +856,7 @@ enum LangIds {
     LAN_ADD_NEW_RANGE_BAN,
     LAN_FILTER_RANGE_BANS,
     LAN_RANGE_BAN_DELETED_ACCEPT_TO_NEW,
+    LAN_IS_AVAILABLE,
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------

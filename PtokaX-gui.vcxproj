@@ -480,6 +480,7 @@
     <ClInclude Include="core\TextFileManager.h" />
     <ClInclude Include="core\UdpDebug.h" />
     <ClInclude Include="core\UDPThread.h" />
+    <ClInclude Include="core\UpdateCheckThread.h" />
     <ClInclude Include="core\User.h" />
     <ClInclude Include="core\utility.h" />
     <ClInclude Include="core\ZlibUtility.h" />
@@ -514,6 +515,7 @@
     <ClInclude Include="gui.win\SettingPageMyINFO.h" />
     <ClInclude Include="gui.win\SettingPageRules.h" />
     <ClInclude Include="gui.win\SettingPageRules2.h" />
+    <ClInclude Include="gui.win\UpdateDialog.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="gui.win\PtokaX.rc" />
@@ -560,6 +562,7 @@
     <ClCompile Include="core\TextFileManager.cpp" />
     <ClCompile Include="core\UdpDebug.cpp" />
     <ClCompile Include="core\UDPThread.cpp" />
+    <ClCompile Include="core\UpdateCheckThread.cpp" />
     <ClCompile Include="core\User.cpp" />
     <ClCompile Include="core\utility.cpp" />
     <ClCompile Include="core\ZlibUtility.cpp" />
@@ -594,6 +597,7 @@
     <ClCompile Include="gui.win\SettingPageMyINFO.cpp" />
     <ClCompile Include="gui.win\SettingPageRules.cpp" />
     <ClCompile Include="gui.win\SettingPageRules2.cpp" />
+    <ClCompile Include="gui.win\UpdateDialog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="core\PtokaX.Manifest" />

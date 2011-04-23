@@ -684,7 +684,7 @@ const char* LangXmlStr[] = {
     "DeleteScript", 
     "RefreshScripts", 
     "PopupScriptsWindow", 
-    "UpdateCheck", 
+    "CheckingForUpdate",
     "AcceptedConnections", 
     "ClosedConnections", 
     "ActiveConnections", 
@@ -856,6 +856,7 @@ const char* LangXmlStr[] = {
     "AddNewRangeBan",
     "FilterRangeBans",
     "RangeBanDeletedAcceptToNew",
+    "IsAvailable",
 };
 //---------------------------------------------------------------------------
 

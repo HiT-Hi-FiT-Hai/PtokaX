@@ -12,6 +12,7 @@ Added: Filter to bans window.
 Added: Build numbering.
 Added: Column sorting to range ban list in range bans window.
 Added: Filter to range bans window.
+Added: DPI awareness.
 Fixed: Compile with Lua 5.2.0 (work 1)
 Fixed: Missing user input length checking in some commands (thx Rahim for report).
 Fixed: Multiple class member variables not initialized in the constructor.
@@ -25,6 +26,8 @@ Fixed: Integer overflow for temp ban expiring after 03:14:07, January 19, 2038 i
 Changed: Windows GUI, from GUI created with Borland VCL to WinAPI GUI.
 Changed: Some min/max setting values.
 Changed: Times and dates are now shown in system locale format.
+Changed: GUI layout to correctly use system font and DPI settings.
+Improved: Update checking. Now using HTTP 1.1, update file is simple text file instead of xml.
 Rewritten: Resolve code from deprecated gethostbyname to getaddrinfo.
 
 

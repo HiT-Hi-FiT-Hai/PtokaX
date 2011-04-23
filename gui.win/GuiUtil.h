@@ -39,7 +39,7 @@ int ScaleGui(const int &iValue);
 void RichEditOpenLink(const HWND &hRichEdit, const ENLINK * pEnLink);
 void RichEditPopupMenu(const HWND &hRichEdit, const HWND &hParent, const LPARAM &lParam);
 bool RichEditCheckMenuCommands(const HWND &hRichEdit, const WORD &wID);
-void RichEditAppendText(const HWND &hRichEdit, const char * sText);
+void RichEditAppendText(const HWND &hRichEdit, const char * sText, const bool &bWithTime = true);
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int ListViewGetInsertPosition(const HWND &hListView, const void * pItem, const bool &bSortAscending, int (*pCompareFunc)(const void * pItem, const void * pOtherItem));
