@@ -208,6 +208,12 @@
     <ClCompile Include="gui.win\RangeBanDialog.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
+    <ClCompile Include="core\UpdateCheckThread.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="gui.win\UpdateDialog.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\eventqueue.h">
@@ -439,6 +445,12 @@
       <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui.win\RangeBanDialog.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\UpdateCheckThread.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.win\UpdateDialog.h">
       <Filter>Gui</Filter>
     </ClInclude>
   </ItemGroup>

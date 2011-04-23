@@ -47,7 +47,9 @@
 #include "RegisteredUsersDialog.h"
 #include "Resources.h"
 #include "SettingDialog.h"
+#include "UpdateDialog.h"
 #include "../core/TextFileManager.h"
+#include "../core/UpdateCheckThread.h"
 //---------------------------------------------------------------------------
 #define WM_TRAYICON (WM_USER+10)
 //---------------------------------------------------------------------------
@@ -245,6 +247,19 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 }
             }
 
+            if(SettingManager->bBools[SETBOOL_CHECK_NEW_RELEASES] == true) {
+                // Create update check thread
+                pUpdateCheckThread = new UpdateCheckThread();
+                if(pUpdateCheckThread == NULL) {
+                    string sDbgstr = "[BUF] Cannot allocate UpdateCheckThread! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+                    AppendSpecialLog(sDbgstr);
+                    exit(EXIT_FAILURE);
+                }
+
+                // Start the update check thread
+                pUpdateCheckThread->Resume();
+            }
+
             return 0;
         }
         case WM_CLOSE:
@@ -405,9 +420,32 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 case IDC_WIKI:
                     ::ShellExecute(NULL, NULL, "http://wiki.ptokax.ch", NULL, NULL, SW_SHOWNORMAL);
                     return 0;
-                case IDC_UPDATE_CHECK:
-                    ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
+                case IDC_UPDATE_CHECK: {
+                    pUpdateDialog = new UpdateDialog();
+                    pUpdateDialog->DoModal(m_hWnd);
+
+                    // First destroy old update check thread if any
+                    if(pUpdateCheckThread != NULL) {
+                        pUpdateCheckThread->Close();
+                        pUpdateCheckThread->WaitFor();
+
+                        delete pUpdateCheckThread;
+                        pUpdateCheckThread = NULL;
+                    }
+
+                    // Create update check thread
+                    pUpdateCheckThread = new UpdateCheckThread();
+                    if(pUpdateCheckThread == NULL) {
+                        string sDbgstr = "[BUF] Cannot allocate UpdateCheckThread! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+                        AppendSpecialLog(sDbgstr);
+                        exit(EXIT_FAILURE);
+                    }
+
+                    // Start the update check thread
+                    pUpdateCheckThread->Resume();
+
                     return 0;
+                }
                 case IDC_SAVE_SETTINGS:
                     hashBanManager->Save(true);
                     ProfileMan->SaveProfiles();
@@ -423,6 +461,7 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     ::MessageBox(m_hWnd,
                         (string(LanguageManager->sTexts[LAN_TXT_FILES_RELOADED], (size_t)LanguageManager->ui16TextsLens[LAN_TXT_FILES_RELOADED])+".").c_str(),
                             sTitle.c_str(), MB_OK | MB_ICONINFORMATION);
+
                     return 0;
             }
 
@@ -437,6 +476,44 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             AppendLog("Serving stopped (Windows shutdown).");
 
             return TRUE;
+        case WM_UPDATE_CHECK_MSG: {
+            char * sMsg = (char *)lParam;
+            if(pUpdateDialog != NULL) {
+                pUpdateDialog->Message(sMsg);
+            }
+
+            free(sMsg);
+
+            return 0;
+        }
+        case WM_UPDATE_CHECK_DATA: {
+            char * sMsg = (char *)lParam;
+
+            if(pUpdateDialog == NULL) {
+                pUpdateDialog = new UpdateDialog();
+
+                if(pUpdateDialog->ParseData(sMsg, m_hWnd) == false) {
+                    delete pUpdateDialog;
+                    pUpdateDialog = NULL;
+                }
+            } else {
+                pUpdateDialog->ParseData(sMsg, m_hWnd);
+            }
+
+            free(sMsg);
+
+            return 0;
+        }
+        case WM_UPDATE_CHECK_TERMINATE:
+            if(pUpdateCheckThread != NULL) {
+                pUpdateCheckThread->Close();
+                pUpdateCheckThread->WaitFor();
+
+                delete pUpdateCheckThread;
+                pUpdateCheckThread = NULL;
+            }
+
+            return 0;
     }
 
 	if(uMsg == uiTaskBarCreated) {
