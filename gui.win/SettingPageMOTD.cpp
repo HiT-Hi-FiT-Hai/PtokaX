@@ -145,9 +145,9 @@ void SettingPageMOTD::GetUpdates(bool & /*bUpdateHubNameWelcome*/, bool & /*bUpd
 
 //------------------------------------------------------------------------------
 
-WNDPROC wpOldMultiEditProc = NULL;
+static WNDPROC wpOldMultiEditProc = NULL;
 
-LRESULT CALLBACK MultiEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+static LRESULT CALLBACK MultiEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
         return 0;
     }
@@ -188,7 +188,7 @@ bool SettingPageMOTD::CreateSettingPage(HWND hOwner) {
             return false;
         }
 
-        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
 
     ::EnableWindow(hWndPageItems[EDT_MOTD], SettingManager->bBools[SETBOOL_DISABLE_MOTD] == true ? FALSE : TRUE);

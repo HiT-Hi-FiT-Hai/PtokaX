@@ -26,11 +26,10 @@ struct RegUser;
 
 class RegisteredUserDialog {
 public:
-    HWND m_hWnd;
-
-    HWND hWndWindowItems[8];
+    HWND hWndWindowItems[9];
 
     enum enmWindowItems {
+        WINDOW_HANDLE,
         GB_NICK,
         EDT_NICK,
         GB_PASSWORD,
@@ -58,7 +57,7 @@ private:
     bool OnAccept();
 };
 //------------------------------------------------------------------------------
-extern RegisteredUserDialog *pRegisteredUserDialog;
+extern RegisteredUserDialog * pRegisteredUserDialog;
 //------------------------------------------------------------------------------
 
 #endif

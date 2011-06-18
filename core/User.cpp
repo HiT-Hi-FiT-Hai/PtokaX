@@ -41,19 +41,10 @@
 //---------------------------------------------------------------------------
 #include "ClientTagManager.h"
 #include "DeFlood.h"
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			#include "TUsersChatForm.h"
-        #else
-			#include "../gui.win/GuiUtil.h"
-            #include "../gui.win/MainWindowPageUsersChat.h"
-		#endif
-	#endif
 //---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
+#ifdef _BUILD_GUI
+	#include "../gui.win/GuiUtil.h"
+    #include "../gui.win/MainWindowPageUsersChat.h"
 #endif
 //---------------------------------------------------------------------------
 static const size_t ZMINDATALEN = 128;
@@ -885,18 +876,10 @@ User::~User() {
 
 	ui32Parts++;
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(UsersChatForm != NULL && UsersChatForm->CmdTrace->Checked == true) {
-				Memo("x User removed: " + string(Nick, NickLen) + " (Socket " + string(Sck) + ")");
-			}
-        #else
-            if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], ("x User removed: " + string(Nick, NickLen) + " (Socket " + string(Sck) + ")").c_str());
-            }
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+        RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], ("x User removed: " + string(Nick, NickLen) + " (Socket " + string(Sck) + ")").c_str());
+    }
 #endif
 
 	if(Nick != sDefaultNick) {
@@ -1033,14 +1016,18 @@ void UserMakeLock(User * u) {
 	// The lock has fixed length 63 bytes
 
 #ifdef _WIN32
-	#ifdef _SERVICE
+	#ifdef _BUILD_GUI
+	    #ifndef _M_X64
+	        static const char * sLock = "$Lock EXTENDEDPROTOCOL                           win Pk=PtokaX|"; // 63
+	    #else
+	        static const char * sLock = "$Lock EXTENDEDPROTOCOL                           wg6 Pk=PtokaX|"; // 63
+	    #endif
+	#else
 	    #ifndef _M_X64
 	        static const char * sLock = "$Lock EXTENDEDPROTOCOL                           wis Pk=PtokaX|"; // 63
 	    #else
-	        static const char * sLock = "$Lock EXTENDEDPROTOCOL                           w64 Pk=PtokaX|"; // 63
+	        static const char * sLock = "$Lock EXTENDEDPROTOCOL                           ws6 Pk=PtokaX|"; // 63
 	    #endif
-	#else
-	    static const char * sLock = "$Lock EXTENDEDPROTOCOL                           win Pk=PtokaX|"; // 63
 	#endif
 #else
 	static const char * sLock = "$Lock EXTENDEDPROTOCOL                           nix Pk=PtokaX|"; // 63
@@ -1305,23 +1292,14 @@ bool UserDoRecv(User * u) {
 				" (" + string(u->IP, u->ui8IpLen) + ").");
 		}
 
-		#ifndef _SERVICE
-			#ifndef _MSC_VER
-				if(UsersChatForm != NULL && UsersChatForm->CmdTrace->Checked == true) {
-					int iret = sprintf(msg, "- User has closed the connection: %s (%s)", u->Nick, u->IP);
-					if(CheckSprintf(iret, 1024, "UserDoRecv") == true) {
-						Memo(msg);
-					}
-				}
-            #else
-                if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-					int iret = sprintf(msg, "- User has closed the connection: %s (%s)", u->Nick, u->IP);
-					if(CheckSprintf(iret, 1024, "UserDoRecv") == true) {
-						RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], msg);
-					}
-                }
-			#endif
-		#endif
+	#ifdef _BUILD_GUI
+        if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+			int iret = sprintf(msg, "- User has closed the connection: %s (%s)", u->Nick, u->IP);
+			if(CheckSprintf(iret, 1024, "UserDoRecv") == true) {
+				RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], msg);
+			}
+        }
+    #endif
 #endif
 
         u->ui32BoolBits |= User::BIT_ERROR;
@@ -2239,21 +2217,10 @@ void UserClose(User * u, bool bNoQuit/* = false*/) {
 			colUsers->Add2RecTimes(u);
         }
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(UsersChatForm != NULL && UsersChatForm->UsersAutoUpd->Checked == true) {
-				int idx = UsersChatForm->userList->Items->IndexOf(u->Nick);
-				if(idx != -1) {
-					UsersChatForm->userList->Items->Delete(idx);
-				}
-			}
-        #else
-            if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_AUTO_UPDATE_USERLIST], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                pMainWindowPageUsersChat->RemoveUser(u);
-            }
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+        if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_AUTO_UPDATE_USERLIST], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+            pMainWindowPageUsersChat->RemoveUser(u);
+        }
 #endif
 
         //sqldb->FinalizeVisit(u);

@@ -29,7 +29,7 @@ public:
     HWND hWndWindowItems[17];
 
     enum enmWindowItems {
-        WND_THIS,
+        WINDOW_HANDLE,
         GB_RANGE,
         EDT_FROM_IP,
         EDT_TO_IP,
@@ -63,7 +63,7 @@ private:
     bool OnAccept();
 };
 //------------------------------------------------------------------------------
-extern RangeBanDialog *pRangeBanDialog;
+extern RangeBanDialog * pRangeBanDialog;
 //------------------------------------------------------------------------------
 
 #endif

@@ -46,19 +46,10 @@
 #include "IP2Country.h"
 #include "ResNickManager.h"
 #include "TextFileManager.h"
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			#include "TUsersChatForm.h"
-        #else
-			#include "../gui.win/GuiUtil.h"
-            #include "../gui.win/MainWindowPageUsersChat.h"
-		#endif
-	#endif
 //---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
+#ifdef _BUILD_GUI
+	#include "../gui.win/GuiUtil.h"
+    #include "../gui.win/MainWindowPageUsersChat.h"
 #endif
 //---------------------------------------------------------------------------
 cDcCommands *DcCommands = NULL;
@@ -107,25 +98,14 @@ cDcCommands::~cDcCommands() {
 
 // Process DC data form User
 void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCheck, const uint32_t &iLen) {
-	// Full raw data trace for better logging
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(UsersChatForm != NULL && UsersChatForm->CmdTrace->Checked == true) {
-				int imsglen = sprintf(msg, "%s (%s) > ", curUser->Nick, curUser->IP);
-				if(CheckSprintf(imsglen, 1024, "cDcCommands::PreProcessData1") == true) {
-					Memo(msg+string(sData, iLen));
-				}
-			}
-        #else
-            if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-				int imsglen = sprintf(msg, "%s (%s) > ", curUser->Nick, curUser->IP);
-				if(CheckSprintf(imsglen, 1024, "cDcCommands::PreProcessData1") == true) {
-					RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], (msg+string(sData, iLen)).c_str());
-				}
-            }
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    // Full raw data trace for better logging
+    if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+		int imsglen = sprintf(msg, "%s (%s) > ", curUser->Nick, curUser->IP);
+		if(CheckSprintf(imsglen, 1024, "cDcCommands::PreProcessData1") == true) {
+			RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], (msg+string(sData, iLen)).c_str());
+		}
+    }
 #endif
 
     // micro spam
@@ -3737,20 +3717,12 @@ void cDcCommands::Version(User * curUser, char * sData, const uint32_t &iLen) {
 
 // Chat message
 bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(UsersChatForm != NULL && UsersChatForm->ChatTrace->Checked == true) {
-				Memo(sData);
-			}
-        #else
-            if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_CHAT], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                sData[iLen - 1] = '\0';
-                RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], sData);
-                sData[iLen - 1] = '|';
-            }
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_CHAT], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+        sData[iLen - 1] = '\0';
+        RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], sData);
+        sData[iLen - 1] = '|';
+    }
 #endif
     
 	// if the user is sending chat as other user, kick him

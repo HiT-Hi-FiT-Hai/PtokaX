@@ -29,7 +29,7 @@ public:
     HWND hWndWindowItems[8];
 
     enum enmWindowItems {
-        WND_THIS,
+        WINDOW_HANDLE,
         BTN_ADD_RANGE_BAN,
         LV_RANGE_BANS,
         GB_FILTER,
@@ -64,6 +64,7 @@ private:
     void RemoveRangeBans();
     void OnContextMenu(HWND hWindow, LPARAM lParam);
     bool FilterRangeBan(const RangeBanItem * pRangeBan);
+    void ChangeRangeBan();
 };
 //------------------------------------------------------------------------------
 extern RangeBansDialog * pRangeBansDialog;

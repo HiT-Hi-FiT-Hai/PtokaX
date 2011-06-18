@@ -34,27 +34,19 @@
 #endif
 //------------------------------------------------------------------------------
 #include "LuaScript.h"
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            #include "../gui.win/MainWindowPageScripts.h"
-		#else
-			#include "TScriptMemoryForm.h"
-			#include "TScriptsForm.h"
-		#endif
-	#endif
 //------------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-		#pragma link "PXLua.lib"
-	#else
-        #ifndef _M_X64
-            #pragma comment(lib, "PXLua")
-        #else
-            #pragma comment(lib, "PXLua-x64")
-        #endif
+#ifdef _BUILD_GUI
+    #include "../gui.win/MainWindowPageScripts.h"
+#endif
+//------------------------------------------------------------------------------
+#ifdef _WIN32
+    #ifndef _M_X64
+        #pragma comment(lib, "PXLua")
+    #else
+        #pragma comment(lib, "PXLua-x64")
 	#endif
-	#pragma message("Linking PXLua.lib")
+
+	#pragma message("Linking PXLua library")
 #endif
 //---------------------------------------------------------------------------
 ScriptMan *ScriptManager = NULL;
@@ -173,12 +165,8 @@ void ScriptMan::Start() {
 		}
 	}
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-		  pMainWindowPageScripts->AddScriptsToList(true);
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    pMainWindowPageScripts->AddScriptsToList(true);
 #endif
 }
 //------------------------------------------------------------------------------
@@ -236,15 +224,11 @@ bool ScriptMan::AddScript(char * sName, const bool &bEnabled, const bool &bNew) 
         return false;
     }
 
+#ifdef _BUILD_GUI
     if(bNew == true) {
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            pMainWindowPageScripts->ScriptToList(ui8ScriptCount-1, true, false);
-		#endif
-	#endif
-#endif
+        pMainWindowPageScripts->ScriptToList(ui8ScriptCount-1, true, false);
     }
+#endif
 
     return true;
 }
@@ -265,16 +249,8 @@ void ScriptMan::Stop() {
 
 	ActualUser = NULL;
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            pMainWindowPageScripts->ClearMemUsageAll();
-		#else
-			if(ScriptMemoryForm != NULL) {
-				ScriptMemoryForm->LuaMem->Clear();
-			}
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    pMainWindowPageScripts->ClearMemUsageAll();
 #endif
 }
 //------------------------------------------------------------------------------
@@ -427,17 +403,6 @@ void ScriptMan::CheckForNewScripts() {
 //------------------------------------------------------------------------------
 
 void ScriptMan::Restart() {
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(ScriptsForm != NULL) {
-				ScriptsForm->ScriptFiles->Clear();
-				ScriptsForm->LUAerr->Clear();
-			}
-		#endif
-	#endif
-#endif
-
 	OnExit();
 	Stop();
 
@@ -446,19 +411,8 @@ void ScriptMan::Restart() {
 	Start();
 	OnStartup();
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            pMainWindowPageScripts->AddScriptsToList(true);
-		#else
-			if(ScriptsForm != NULL) {
-				for(uint8_t i = 0; i < ScriptManager->ui8ScriptCount; i++) {
-					int idx = ScriptsForm->ScriptFiles->Items->AddObject(ScriptManager->ScriptTable[i]->sName, NULL);
-					ScriptsForm->ScriptFiles->State[idx] = ScriptManager->ScriptTable[i]->bEnabled == true ? cbChecked : cbUnchecked;
-				}
-			}
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    pMainWindowPageScripts->AddScriptsToList(true);
 #endif
 }
 //------------------------------------------------------------------------------
@@ -545,23 +499,15 @@ bool ScriptMan::StartScript(Script * curScript, const bool &bEnable) {
 
     if(bEnable == true) {
         curScript->bEnabled = true;
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            pMainWindowPageScripts->UpdateCheck(ui8dx);
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+        pMainWindowPageScripts->UpdateCheck(ui8dx);
 #endif
     }
 
     if(ScriptStart(curScript) == false) {
         curScript->bEnabled = false;
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            pMainWindowPageScripts->UpdateCheck(ui8dx);
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+        pMainWindowPageScripts->UpdateCheck(ui8dx);
 #endif
         return false;
     }
@@ -621,49 +567,18 @@ bool ScriptMan::StartScript(Script * curScript, const bool &bEnable) {
 void ScriptMan::StopScript(Script * curScript, const bool &bDisable) {
     if(bDisable == true) {
 		curScript->bEnabled = false;
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-	       for(uint8_t ui8i = 0; ui8i < ui8ScriptCount; ui8i++) {
-                if(curScript == ScriptTable[ui8i]) {
-                    pMainWindowPageScripts->UpdateCheck(ui8i);
-                    break;
-                }
+
+#ifdef _BUILD_GUI
+	    for(uint8_t ui8i = 0; ui8i < ui8ScriptCount; ui8i++) {
+            if(curScript == ScriptTable[ui8i]) {
+                pMainWindowPageScripts->UpdateCheck(ui8i);
+                break;
             }
-		#endif
-	#endif
+        }
 #endif
     }
 
 	RemoveRunningScript(curScript);
-
-    ScriptTimer * next = curScript->TimerList;
-
-    while(next != NULL) {
-        ScriptTimer * tmr = next;
-        next = tmr->next;
-
-#ifdef _WIN32
-        KillTimer(NULL, tmr->uiTimerId);
-        tmr->uiTimerId = 0;
-#else
-        timer_delete(tmr->TimerId);
-        tmr->TimerId = 0;
-#endif
-    }
-
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(ScriptMemoryForm != NULL) {
-				TListItem *item = ScriptMemoryForm->LuaMem->FindCaption(0, curScript->sName, false, true, false);
-				if(item != NULL) {
-					ScriptMemoryForm->LuaMem->Items->Delete(item->Index);
-				}
-			}
-		#endif
-	#endif
-#endif
 
     if(bServerRunning == true) {
         ScriptOnExit(curScript);

@@ -294,7 +294,7 @@ bool SettingPageGeneral2::CreateSettingPage(HWND hOwner) {
             return false;
         }
 
-        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
 
     ::EnableWindow(hWndPageItems[BTN_SEND_TEXT_FILES_AS_PM], SettingManager->bBools[SETBOOL_ENABLE_TEXT_FILES] == true ? TRUE : FALSE);

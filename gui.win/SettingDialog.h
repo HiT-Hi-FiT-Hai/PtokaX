@@ -26,11 +26,10 @@
 
 class SettingDialog {
 public:
-    HWND m_hWnd;
-
-    HWND hWndWindowItems[3];
+    HWND hWndWindowItems[4];
 
     enum enmWindowItems {
+        WINDOW_HANDLE,
         TV_TREE,
         BTN_OK,
         BTN_CANCEL
@@ -49,6 +48,8 @@ private:
 
     void OnSelChanged();
 };
+//------------------------------------------------------------------------------
+extern SettingDialog * pSettingDialog;
 //------------------------------------------------------------------------------
 
 #endif

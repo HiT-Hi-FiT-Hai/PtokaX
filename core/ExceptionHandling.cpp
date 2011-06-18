@@ -61,14 +61,15 @@ void AppendLog(const char * sData) {
 //---------------------------------------------------------------------------
 
 FARPROC WINAPI PtokaX_FailHook(unsigned /*dliNotify*/, PDelayLoadInfo /*pdli*/) {
-#ifdef _SERVICE
-    AppendLog("Something bad happen and PtokaX crashed. PtokaX was not able to collect any information why this happen because your operating system"
-        " don't support functionality needed for that. If you know why this crash happen then please report it as bug to PPK@PtokaX.org!");
-#else
+#ifdef _BUILD_GUI
     ::MessageBox(NULL, "Something bad happen and PtokaX crashed. PtokaX was not able to collect any information why this happen because your operating system"
 		" don't support functionality needed for that. If you know why this crash happen then please report it as bug to PPK@PtokaX.org!",
         "PtokaX crashed!", MB_OK | MB_ICONERROR);
+#else
+    AppendLog("Something bad happen and PtokaX crashed. PtokaX was not able to collect any information why this happen because your operating system"
+        " don't support functionality needed for that. If you know why this crash happen then please report it as bug to PPK@PtokaX.org!");
 #endif
+
     exit(EXIT_FAILURE);
 }
 
@@ -140,13 +141,13 @@ LONG WINAPI PtokaX_UnhandledExceptionFilter(LPEXCEPTION_POINTERS ExceptionInfo) 
 
     // Check if we have debug symbols
     if(FileExist(sDebugSymbolsFile.c_str()) == false) {
-#ifdef _SERVICE
-        AppendLog("Something bad happen and PtokaX crashed. PtokaX was not able to collect any information why this happen because file with debug symbols"
-            " (PtokaX.pdb) is missing. If you know why this crash happen then please report it as bug to PPK@PtokaX.org!");
-#else
+#ifdef _BUILD_GUI
         ::MessageBox(NULL, "Something bad happen and PtokaX crashed. PtokaX was not able to collect any information why this happen because file with debug symbols"
 			" (PtokaX.pdb) is missing. If you know why this crash happen then please report it as bug to PPK@PtokaX.org!",
             "PtokaX crashed!", MB_OK | MB_ICONERROR);
+#else
+        AppendLog("Something bad happen and PtokaX crashed. PtokaX was not able to collect any information why this happen because file with debug symbols"
+            " (PtokaX.pdb) is missing. If you know why this crash happen then please report it as bug to PPK@PtokaX.org!");
 #endif
 
         ExceptionHandlingUnitialize();
@@ -157,13 +158,13 @@ LONG WINAPI PtokaX_UnhandledExceptionFilter(LPEXCEPTION_POINTERS ExceptionInfo) 
 	// Initialize debug symbols
     SymSetOptions(SYMOPT_DEFERRED_LOADS | SYMOPT_FAIL_CRITICAL_ERRORS | SYMOPT_LOAD_LINES);
     if(SymInitialize(GetCurrentProcess(), PATH.c_str(), TRUE) == FALSE) {
-#ifdef _SERVICE
-        AppendLog("Something bad happen and PtokaX crashed. PtokaX was not able to collect any information why this happen because initializatin of"
-            " debug symbols failed. If you know why this crash happen then please report it as bug to PPK@PtokaX.org!");
-#else
+#ifdef _BUILD_GUI
         ::MessageBox(NULL, "Something bad happen and PtokaX crashed. PtokaX was not able to collect any information why this happen because initializatin of"
 			" debug symbols failed. If you know why this crash happen then please report it as bug to PPK@PtokaX.org!",
             "PtokaX crashed!", MB_OK | MB_ICONERROR);
+#else
+        AppendLog("Something bad happen and PtokaX crashed. PtokaX was not able to collect any information why this happen because initializatin of"
+            " debug symbols failed. If you know why this crash happen then please report it as bug to PPK@PtokaX.org!");
 #endif
 
         ExceptionHandlingUnitialize();
@@ -181,13 +182,13 @@ LONG WINAPI PtokaX_UnhandledExceptionFilter(LPEXCEPTION_POINTERS ExceptionInfo) 
     // Open crash file
     FILE * fw = fopen((sLogPath + sDebugBuf).c_str(), "w");
     if(fw == NULL) {
-#ifdef _SERVICE
-        AppendLog("Something bad happen and PtokaX crashed. PtokaX was not able to create file with information why this crash happen."
-            " If you know why this crash happen then please report it as bug to PPK@PtokaX.org!");
-#else
+#ifdef _BUILD_GUI
         ::MessageBox(NULL, "Something bad happen and PtokaX crashed. PtokaX was not able to create file with information why this crash happen."
 			" If you know why this crash happen then please report it as bug to PPK@PtokaX.org!",
             "PtokaX crashed!", MB_OK | MB_ICONERROR);
+#else
+        AppendLog("Something bad happen and PtokaX crashed. PtokaX was not able to create file with information why this crash happen."
+            " If you know why this crash happen then please report it as bug to PPK@PtokaX.org!");
 #endif
 
         ExceptionHandlingUnitialize();
@@ -267,10 +268,10 @@ LONG WINAPI PtokaX_UnhandledExceptionFilter(LPEXCEPTION_POINTERS ExceptionInfo) 
 
 	fclose(fw);
 
-#ifdef _SERVICE
-    AppendLog(sCrashMsg.c_str());
-#else
+#ifdef _BUILD_GUI
     ::MessageBox(NULL, sCrashMsg.c_str(), "PtokaX crashed!", MB_OK | MB_ICONERROR);
+#else
+    AppendLog(sCrashMsg.c_str());
 #endif
 
     ExceptionHandlingUnitialize();

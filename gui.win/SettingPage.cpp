@@ -32,8 +32,6 @@
 //---------------------------------------------------------------------------
 static ATOM atomSettingPage = 0;
 //---------------------------------------------------------------------------
-void * pSettingDialog = NULL;
-//---------------------------------------------------------------------------
 WNDPROC wpOldButtonProc = NULL;
 WNDPROC wpOldEditProc = NULL;
 //---------------------------------------------------------------------------
@@ -175,13 +173,13 @@ LRESULT SettingWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, WN
         return DLGC_WANTTAB;
     } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
         if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
-            ::SetFocus(((SettingDialog *)pSettingDialog)->hWndWindowItems[((SettingDialog *)pSettingDialog)->TV_TREE]);
+            ::SetFocus(pSettingDialog->hWndWindowItems[SettingDialog::TV_TREE]);
             return 0;
         } else {
             SettingPage * pSettingPage = (SettingPage *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
             if(pSettingPage != NULL) {
-                ::SetFocus(::GetNextDlgTabItem(((SettingDialog *)pSettingDialog)->m_hWnd, hWnd, TRUE));
+				::SetFocus(::GetNextDlgTabItem(pSettingDialog->hWndWindowItems[SettingDialog::WINDOW_HANDLE], hWnd, TRUE));
                 return 0;
             }
         }

@@ -65,7 +65,7 @@ void MainWindowPage::CreateHWND(HWND hOwner) {
     RECT rcMain;
     ::GetClientRect(hOwner, &rcMain);
 
-    m_hWnd = ::CreateWindowEx(WS_EX_CONTROLPARENT, MAKEINTATOM(atomMainWindowPage), "", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+    m_hWnd = ::CreateWindowEx(0, MAKEINTATOM(atomMainWindowPage), "", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
         0, iEditHeight + 1, rcMain.right, rcMain.bottom - (iEditHeight + 1), hOwner, NULL, g_hInstance, NULL);
 
     if(m_hWnd != NULL) {

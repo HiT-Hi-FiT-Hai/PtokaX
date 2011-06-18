@@ -43,7 +43,7 @@ UpdateDialog::UpdateDialog() {
 //---------------------------------------------------------------------------
 
 UpdateDialog::~UpdateDialog() {
-    // ...
+    pUpdateDialog = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -64,12 +64,23 @@ LRESULT UpdateDialog::UpdateDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) 
             break;
         case WM_CLOSE:
             ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
-
+            g_hWndActiveDialog = NULL;
             break;
         case WM_NCDESTROY:
             delete this;
-
             return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
+        case WM_COMMAND:
+           switch(LOWORD(wParam)) {
+                case IDOK:
+                case IDCANCEL:
+                    ::PostMessage(hWndWindowItems[WINDOW_HANDLE], WM_CLOSE, 0, 0);
+					return 0;
+            }
+
+            break;
+        case WM_SETFOCUS:
+            ::SetFocus(hWndWindowItems[REDT_UPDATE]);
+            return 0;
     }
 
 	return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
@@ -105,6 +116,8 @@ void UpdateDialog::DoModal(HWND hWndParent) {
         return;
     }
 
+    g_hWndActiveDialog = hWndWindowItems[WINDOW_HANDLE];
+
     ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_WNDPROC, (LONG_PTR)StaticUpdateDialogProc);
 
     ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
@@ -114,7 +127,7 @@ void UpdateDialog::DoModal(HWND hWndParent) {
     ::SendMessage(hWndWindowItems[REDT_UPDATE], EM_SETBKGNDCOLOR, 0, ::GetSysColor(COLOR_3DFACE));
     ::SendMessage(hWndWindowItems[REDT_UPDATE], EM_AUTOURLDETECT, TRUE, 0);
     ::SendMessage(hWndWindowItems[REDT_UPDATE], EM_SETEVENTMASK, 0, (LPARAM)::SendMessage(hWndWindowItems[REDT_UPDATE], EM_GETEVENTMASK, 0, 0) | ENM_LINK);
-    ::SendMessage(hWndWindowItems[REDT_UPDATE], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+    ::SendMessage(hWndWindowItems[REDT_UPDATE], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
 
     ::EnableWindow(hWndParent, FALSE);
 

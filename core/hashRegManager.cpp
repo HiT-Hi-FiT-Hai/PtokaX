@@ -35,19 +35,11 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
+#endif
 //---------------------------------------------------------------------------
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            #include "../gui.win/RegisteredUserDialog.h"
-            #include "../gui.win/RegisteredUsersDialog.h"
-		#else
-			#include "TRegsForm.h"
-		#endif
-	#endif
-//---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
+#ifdef _BUILD_GUI
+    #include "../gui.win/RegisteredUserDialog.h"
+    #include "../gui.win/RegisteredUsersDialog.h"
 #endif
 //---------------------------------------------------------------------------
 hashRegMan *hashRegManager = NULL;
@@ -165,22 +157,10 @@ bool hashRegMan::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) 
 
 	Add(newUser);
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            if(pRegisteredUsersDialog != NULL) {
-                pRegisteredUsersDialog->AddReg(newUser);
-            }
-		#else
-			if(RegsForm != NULL) {
-                TListItem *Item = RegsForm->RegList->Items->Add();
-                Item->Caption = sNick;
-                Item->SubItems->Add(sPasswd);
-                Item->SubItems->Add(ProfileMan->ProfilesTable[iProfile]->sName);
-                Item->Data = (void *)newUser;
-            }
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    if(pRegisteredUsersDialog != NULL) {
+        pRegisteredUsersDialog->AddReg(newUser);
+    }
 #endif
 
     if(bServerRunning == false) {
@@ -290,23 +270,11 @@ void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui
 
     pReg->iProfile = ui16NewProfile;
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            if(pRegisteredUsersDialog != NULL) {
-                pRegisteredUsersDialog->RemoveReg(pReg);
-                pRegisteredUsersDialog->AddReg(pReg);
-            }
-		#else
-			if(RegsForm != NULL) {
-				TListItem *ListItem = RegsForm->RegList->FindCaption(0, reg->sNick, false, true, false);
-				if(ListItem != NULL) {
-					ListItem->SubItems->Strings[0] = sPass;
-					ListItem->SubItems->Strings[1] = ProfileMan->ProfilesTable[iProfile]->sName;
-				}
-			}
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    if(pRegisteredUsersDialog != NULL) {
+        pRegisteredUsersDialog->RemoveReg(pReg);
+        pRegisteredUsersDialog->AddReg(pReg);
+    }
 #endif
 
     if(bServerRunning == false) {
@@ -361,14 +329,10 @@ void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui
         }
     }
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            if(pRegisteredUserDialog != NULL) {
-                pRegisteredUserDialog->RegChanged(pReg);
-            }
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    if(pRegisteredUserDialog != NULL) {
+        pRegisteredUserDialog->RegChanged(pReg);
+    }
 #endif
 }
 //---------------------------------------------------------------------------
@@ -394,26 +358,18 @@ void hashRegMan::Delete(RegUser * pReg, const bool &bFromGui/* = false*/) {
         }
     }
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            if(bFromGui == false && pRegisteredUsersDialog != NULL) {
-                pRegisteredUsersDialog->RemoveReg(pReg);
-            }
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    if(bFromGui == false && pRegisteredUsersDialog != NULL) {
+        pRegisteredUsersDialog->RemoveReg(pReg);
+    }
 #endif
 
 	Rem(pReg);
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            if(pRegisteredUserDialog != NULL) {
-                pRegisteredUserDialog->RegDeleted(pReg);
-            }
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    if(pRegisteredUserDialog != NULL) {
+        pRegisteredUserDialog->RegDeleted(pReg);
+    }
 #endif
 
     delete pReg;
@@ -577,14 +533,8 @@ void hashRegMan::Load(void) {
                         LanguageManager->sTexts[LAN_CHANGED_PROFILE_TO], ProfileMan->ProfilesTable[iProfilesCount]->sName);
 					CheckSprintf(imsgLen, 1024, "hashRegMan::LoadXmlRegList1");
 
-#ifdef _WIN32
-	#ifdef _SERVICE
-					AppendLog(msg);
-	#else
-		#ifndef _MSC_VER
-					MessageBox(Application->Handle, msg, LanguageManager->sTexts[LAN_NOTE], MB_OK|MB_ICONEXCLAMATION);
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+					::MessageBox(NULL, msg, sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 #else
 					AppendLog(msg);
 #endif
@@ -610,14 +560,8 @@ void hashRegMan::Load(void) {
                         LanguageManager->sTexts[LAN_USER_DELETED]);
 					CheckSprintf(imsgLen, 1024, "hashRegMan::LoadXmlRegList2");
 
-#ifdef _WIN32
-	#ifdef _SERVICE
-                    AppendLog(msg);
-	#else
-		#ifndef _MSC_VER
-					MessageBox(Application->Handle, msg, LanguageManager->sTexts[LAN_NOTE], MB_OK|MB_ICONEXCLAMATION);
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+					::MessageBox(NULL, msg, sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 #else
 					AppendLog(msg);
 #endif

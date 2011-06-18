@@ -45,7 +45,7 @@
 #include "RegisteredUserDialog.h"
 #include "Resources.h"
 //---------------------------------------------------------------------------
-MainWindowPageUsersChat *pMainWindowPageUsersChat = NULL;
+MainWindowPageUsersChat * pMainWindowPageUsersChat = NULL;
 //---------------------------------------------------------------------------
 static WNDPROC wpOldEditProc = NULL;
 //---------------------------------------------------------------------------
@@ -228,7 +228,7 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
 
                     ::SendMessage(hWndPageItems[LV_USERS], LVM_GETITEM, 0, (LPARAM)&lvItem);
 
-                    RegisteredUserDialog * pRegisteredUserDialog = new RegisteredUserDialog();
+                    pRegisteredUserDialog = new RegisteredUserDialog();
                     pRegisteredUserDialog->DoModal(pMainWindow->m_hWnd, NULL, sNick);
 
                     return 0;
@@ -325,7 +325,7 @@ bool MainWindowPageUsersChat::CreateMainWindowPage(HWND hOwner) {
             return false;
         }
 
-        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
 
 	RECT rcUsers;
@@ -503,30 +503,7 @@ void MainWindowPageUsersChat::OnContextMenu(HWND hWindow, LPARAM lParam) {
         int iX = GET_X_LPARAM(lParam);
         int iY = GET_Y_LPARAM(lParam);
 
-        // -1, -1 is menu created by key. We need few tricks to show menu on correct position ;o)
-        if(iX == -1 && iY == -1) {
-            POINT pt = { 0 };
-            if((BOOL)::SendMessage(hWndPageItems[LV_USERS], LVM_ISITEMVISIBLE, (WPARAM)iSel, 0) == FALSE) {
-                RECT rcList;
-                ::GetClientRect(hWndPageItems[LV_USERS], &rcList);
-
-                ::SendMessage(hWndPageItems[LV_USERS], LVM_GETITEMPOSITION, (WPARAM)iSel, (LPARAM)&pt);
-
-                pt.y = (pt.y < rcList.top) ? rcList.top : rcList.bottom;
-            } else {
-                RECT rcItem;
-                rcItem.left = LVIR_LABEL;
-                ::SendMessage(hWndPageItems[LV_USERS], LVM_GETITEMRECT, (WPARAM)iSel, (LPARAM)&rcItem);
-
-                pt.x = rcItem.left;
-                pt.y = rcItem.top + ((rcItem.bottom - rcItem.top) / 2);
-            }
-
-            ::ClientToScreen(hWndPageItems[LV_USERS], &pt);
-
-            iX = pt.x;
-            iY = pt.y;
-        }
+        ListViewGetMenuPos(hWndPageItems[LV_USERS], iX, iY);
 
         ::TrackPopupMenuEx(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, iX, iY, m_hWnd, NULL);
 

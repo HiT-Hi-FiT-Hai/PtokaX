@@ -61,7 +61,7 @@ private:
     void RedirectUser();
 };
 //------------------------------------------------------------------------------
-extern MainWindowPageUsersChat *pMainWindowPageUsersChat;
-//---------------------------------------------------------------------------
+extern MainWindowPageUsersChat * pMainWindowPageUsersChat;
+//------------------------------------------------------------------------------
 
 #endif

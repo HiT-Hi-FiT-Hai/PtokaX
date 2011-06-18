@@ -24,11 +24,10 @@
 
 class ProfilesDialog {
 public:
-    HWND m_hWnd;
-
-    HWND hWndWindowItems[8];
+    HWND hWndWindowItems[9];
 
     enum enmWindowItems {
+        WINDOW_HANDLE,
         BTN_ADD_PROFILE,
         LV_PROFILES,
         BTN_MOVE_UP,
@@ -63,7 +62,7 @@ private:
     void OnPermissionChanged(const LPNMLISTVIEW &pListView);
 };
 //------------------------------------------------------------------------------
-extern ProfilesDialog *pProfilesDialog;
+extern ProfilesDialog * pProfilesDialog;
 //------------------------------------------------------------------------------
 
 #endif

@@ -32,20 +32,12 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
+#endif
 //---------------------------------------------------------------------------
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            #include "../gui.win/ProfilesDialog.h"
-            #include "../gui.win/RegisteredUserDialog.h"
-            #include "../gui.win/RegisteredUsersDialog.h"
-        #else
-			#include "TProfileManagerForm.h"
-		#endif
-	#endif
-//---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
+#ifdef _BUILD_GUI
+    #include "../gui.win/ProfilesDialog.h"
+    #include "../gui.win/RegisteredUserDialog.h"
+    #include "../gui.win/RegisteredUsersDialog.h"
 #endif
 //---------------------------------------------------------------------------
 ProfileManager *ProfileMan = NULL;
@@ -86,14 +78,8 @@ ProfileManager::ProfileManager() {
 	if(doc.LoadFile() == false) {
 		CreateDefaultProfiles();
 		if(doc.LoadFile() == false) {
-#ifdef _WIN32
-	#ifdef _SERVICE
-            AppendLog(LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL]);
-	#else
-		#ifndef _MSC_VER
-			ShowMessage(LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL]);
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+            ::MessageBox(NULL, LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL], sTitle.c_str(), MB_OK | MB_ICONERROR);
 #else
 			AppendLog(LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL]);
 #endif
@@ -145,14 +131,8 @@ ProfileManager::ProfileManager() {
 			}
 		}
 	} else {
-#ifdef _WIN32
-	#ifdef _SERVICE
-        AppendLog(LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL]);
-	#else
-		#ifndef _MSC_VER
-			ShowMessage(LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL]);
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+		::MessageBox(NULL, LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL], sTitle.c_str(), MB_OK | MB_ICONERROR);
 #else
 		AppendLog(LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL]);
 #endif
@@ -306,34 +286,18 @@ int32_t ProfileManager::AddProfile(char * name) {
         break;
     }
 
-#ifdef _WIN32
-	#ifdef _SERVICE
-		CreateProfile(name);
-	#else
-		#ifndef _MSC_VER
-            ProfileItem *newProfile = CreateProfile(name);
-			if(ProfileManForm != NULL) {
-				ProfileManForm->AddProfile(newProfile);
-			}
-		#else
-            CreateProfile(name);
-            if(pProfilesDialog != NULL) {
-                pProfilesDialog->AddProfile();
-            }
-		#endif
-	#endif
-#else
-	CreateProfile(name);
+    CreateProfile(name);
+
+#ifdef _BUILD_GUI
+    if(pProfilesDialog != NULL) {
+        pProfilesDialog->AddProfile();
+    }
 #endif
 
-#ifdef _WIN32
-    #ifndef _SERVICE
-        #ifdef _MSC_VER
-            if(pRegisteredUserDialog != NULL) {
-                pRegisteredUserDialog->UpdateProfiles();
-            }
-        #endif
-    #endif
+#ifdef _BUILD_GUI
+    if(pRegisteredUserDialog != NULL) {
+        pRegisteredUserDialog->UpdateProfiles();
+    }
 #endif
 
     return (int32_t)(iProfileCount-1);
@@ -388,19 +352,10 @@ bool ProfileManager::RemoveProfile(const uint16_t &iProfile) {
     
     iProfileCount--;
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            if(pProfilesDialog != NULL) {
-                pProfilesDialog->RemoveProfile(iProfile);
-            }
-		#else
-			// remove profile from gui...
-			if(ProfileManForm != NULL) {
-				ProfileManForm->RemoveProfile(iProfile);
-			}
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    if(pProfilesDialog != NULL) {
+        pProfilesDialog->RemoveProfile(iProfile);
+    }
 #endif
     
     delete ProfilesTable[iProfile];
@@ -450,18 +405,14 @@ bool ProfileManager::RemoveProfile(const uint16_t &iProfile) {
         exit(EXIT_FAILURE);
     }
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            if(pRegisteredUserDialog != NULL) {
-                pRegisteredUserDialog->UpdateProfiles();
-            }
+#ifdef _BUILD_GUI
+    if(pRegisteredUserDialog != NULL) {
+        pRegisteredUserDialog->UpdateProfiles();
+    }
 
-			if(pRegisteredUsersDialog != NULL) {
-				pRegisteredUsersDialog->UpdateProfiles();
-			}
-		#endif
-	#endif
+	if(pRegisteredUsersDialog != NULL) {
+		pRegisteredUsersDialog->UpdateProfiles();
+	}
 #endif
 
     return true;
@@ -563,22 +514,18 @@ void ProfileManager::MoveProfileDown(const uint16_t &iProfile) {
 		}
 	}
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            if(pProfilesDialog != NULL) {
-                pProfilesDialog->MoveDown(iProfile);
-            }
+#ifdef _BUILD_GUI
+    if(pProfilesDialog != NULL) {
+        pProfilesDialog->MoveDown(iProfile);
+    }
 
-            if(pRegisteredUserDialog != NULL) {
-                pRegisteredUserDialog->UpdateProfiles();
-            }
+    if(pRegisteredUserDialog != NULL) {
+        pRegisteredUserDialog->UpdateProfiles();
+    }
 
-			if(pRegisteredUsersDialog != NULL) {
-				pRegisteredUsersDialog->UpdateProfiles();
-			}
-		#endif
-	#endif
+	if(pRegisteredUsersDialog != NULL) {
+		pRegisteredUsersDialog->UpdateProfiles();
+	}
 #endif
 
     if(colUsers == NULL) {
@@ -620,22 +567,18 @@ void ProfileManager::MoveProfileUp(const uint16_t &iProfile) {
 		}
 	}
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            if(pProfilesDialog != NULL) {
-                pProfilesDialog->MoveUp(iProfile);
-            }
+#ifdef _BUILD_GUI
+    if(pProfilesDialog != NULL) {
+        pProfilesDialog->MoveUp(iProfile);
+    }
 
-            if(pRegisteredUserDialog != NULL) {
-                pRegisteredUserDialog->UpdateProfiles();
-            }
+    if(pRegisteredUserDialog != NULL) {
+        pRegisteredUserDialog->UpdateProfiles();
+    }
 
-			if(pRegisteredUsersDialog != NULL) {
-				pRegisteredUsersDialog->UpdateProfiles();
-			}
-		#endif
-	#endif
+	if(pRegisteredUsersDialog != NULL) {
+		pRegisteredUsersDialog->UpdateProfiles();
+	}
 #endif
 
     if(colUsers == NULL) {
@@ -687,37 +630,19 @@ void ProfileManager::ChangeProfileName(const uint16_t &iProfile, char * sName, c
 	memcpy(ProfilesTable[iProfile]->sName, sName, iLen);
     ProfilesTable[iProfile]->sName[iLen] = '\0';
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            if(pRegisteredUserDialog != NULL) {
-                pRegisteredUserDialog->UpdateProfiles();
-            }
+#ifdef _BUILD_GUI
+    if(pRegisteredUserDialog != NULL) {
+        pRegisteredUserDialog->UpdateProfiles();
+    }
 
-			if(pRegisteredUsersDialog != NULL) {
-				pRegisteredUsersDialog->UpdateProfiles();
-			}
-		#else
-			if(ProfileManForm != NULL) {
-				ProfileManForm->ProfList->Items->Strings[iProfile] = String(sName, iLen);
-			}
-		#endif
-	#endif
+	if(pRegisteredUsersDialog != NULL) {
+		pRegisteredUsersDialog->UpdateProfiles();
+	}
 #endif
 }
 //---------------------------------------------------------------------------
 
 void ProfileManager::ChangeProfilePermission(const uint16_t &iProfile, const size_t &iId, const bool &bValue) {
     ProfilesTable[iProfile]->bPermissions[iId] = bValue;
-
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(ProfileManForm != NULL) {
-				ProfileManForm->UpdateCheck(iProfile, iId, bValue);
-			}
-	#endif
-	#endif
-#endif
 }
 //---------------------------------------------------------------------------

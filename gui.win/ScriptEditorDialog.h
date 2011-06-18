@@ -24,11 +24,10 @@
 
 class ScriptEditorDialog {
 public:
-    HWND m_hWnd;
-
-    HWND hWndWindowItems[4];
+    HWND hWndWindowItems[5];
 
     enum enmWindowItems {
+        WINDOW_HANDLE,
         REDT_SCRIPT,
         BTN_LOAD_SCRIPT,
         BTN_CHECK_SYNTAX,
@@ -41,7 +40,7 @@ public:
     static LRESULT CALLBACK StaticScriptEditorDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	void DoModal(HWND hWndParent);
-	void LoadScript(const string &sScript);
+	void LoadScript(char * sScript);
 private:
     string sScriptPath;
 

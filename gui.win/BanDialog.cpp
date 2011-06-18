@@ -40,10 +40,6 @@ static ATOM atomBanDialog = 0;
 //---------------------------------------------------------------------------
 
 BanDialog::BanDialog() {
-    pBanDialog = this;
-
-    m_hWnd = NULL;
-
     memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
 
     pBanToChange = NULL;
@@ -70,14 +66,14 @@ LRESULT BanDialog::BanDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch(uMsg) {
         case WM_COMMAND:
             switch(LOWORD(wParam)) {
-                case BTN_ACCEPT:
+                case IDOK:
                     if(OnAccept() == false) {
                         return 0;
                     }
-                case BTN_DISCARD:
-                    ::PostMessage(m_hWnd, WM_CLOSE, 0, 0);
+                case IDCANCEL:
+                    ::PostMessage(hWndWindowItems[WINDOW_HANDLE], WM_CLOSE, 0, 0);
                     return 0;
-                case EDT_NICK:
+                case (EDT_NICK+100):
                     if(HIWORD(wParam) == EN_CHANGE) {
                         char buf[65];
                         ::GetWindowText((HWND)lParam, buf, 65);
@@ -133,14 +129,18 @@ LRESULT BanDialog::BanDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
             break;
         case WM_CLOSE:
-            ::EnableWindow(::GetParent(m_hWnd), TRUE);
+            ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
+            g_hWndActiveDialog = NULL;
             break;
         case WM_NCDESTROY:
             delete this;
-            return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+            return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
+        case WM_SETFOCUS:
+            ::SetFocus(hWndWindowItems[EDT_NICK]);
+            return 0;
     }
 
-	return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+	return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
 }
 //------------------------------------------------------------------------------
 
@@ -167,18 +167,20 @@ void BanDialog::DoModal(HWND hWndParent, BanItem * pBan/* = NULL*/) {
     int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(300) / 2);
     int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(394) / 2);
 
-    m_hWnd = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomBanDialog), LanguageManager->sTexts[LAN_BAN],
+    hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomBanDialog), LanguageManager->sTexts[LAN_BAN],
         WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(300), ScaleGui(394),
         hWndParent, NULL, g_hInstance, NULL);
 
-    if(m_hWnd == NULL) {
+    if(hWndWindowItems[WINDOW_HANDLE] == NULL) {
         return;
     }
 
-    ::SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
-    ::SetWindowLongPtr(m_hWnd, GWLP_WNDPROC, (LONG_PTR)StaticBanDialogProc);
+    g_hWndActiveDialog = hWndWindowItems[WINDOW_HANDLE];
 
-    ::GetClientRect(m_hWnd, &rcParent);
+    ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_USERDATA, (LONG_PTR)this);
+    ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_WNDPROC, (LONG_PTR)StaticBanDialogProc);
+
+    ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
     {
         int iHeight = iOneLineOneChecksGB + iOneLineTwoChecksGB + (2 * iOneLineGB) + (iGroupBoxMargin + iCheckHeight + iOneLineGB + 5) + iEditHeight + 6;
@@ -190,94 +192,95 @@ void BanDialog::DoModal(HWND hWndParent, BanItem * pBan/* = NULL*/) {
 
             iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - ((ScaleGui(307) - iDiff) / 2);
 
-            ::GetWindowRect(m_hWnd, &rcParent);
+            ::GetWindowRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
-            ::SetWindowPos(m_hWnd, NULL, iX, iY, (rcParent.right-rcParent.left), (rcParent.bottom-rcParent.top) - iDiff, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[WINDOW_HANDLE], NULL, iX, iY, (rcParent.right-rcParent.left), (rcParent.bottom-rcParent.top) - iDiff, SWP_NOZORDER);
         }
     }
 
-    ::GetClientRect(m_hWnd, &rcParent);
+    ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
     hWndWindowItems[GB_NICK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_NICK], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, 0, rcParent.right - 6, iOneLineOneChecksGB, m_hWnd, NULL, g_hInstance, NULL);
+        3, 0, rcParent.right - 6, iOneLineOneChecksGB, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
 
     hWndWindowItems[EDT_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, iGroupBoxMargin, rcParent.right - 22, iEditHeight, m_hWnd, (HMENU)EDT_NICK, g_hInstance, NULL);
+        11, iGroupBoxMargin, rcParent.right - 22, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)(EDT_NICK+100), g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_NICK], EM_SETLIMITTEXT, 64, 0);
 
     hWndWindowItems[BTN_NICK_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_NICK_BAN], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        11, iGroupBoxMargin + iEditHeight + 4, rcParent.right - 22, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
+        11, iGroupBoxMargin + iEditHeight + 4, rcParent.right - 22, iCheckHeight, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
 
     int iPosX = iOneLineOneChecksGB;
 
     hWndWindowItems[GB_IP] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_IP], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, iPosX, rcParent.right - 6, iOneLineTwoChecksGB, m_hWnd, NULL, g_hInstance, NULL);
+        3, iPosX, rcParent.right - 6, iOneLineTwoChecksGB, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
 
     hWndWindowItems[EDT_IP] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, iPosX + iGroupBoxMargin, rcParent.right - 22, iEditHeight, m_hWnd, NULL, g_hInstance, NULL);
+        11, iPosX + iGroupBoxMargin, rcParent.right - 22, iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_IP], EM_SETLIMITTEXT, 15, 0);
 
     hWndWindowItems[BTN_IP_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_IP_BAN], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        11, iPosX + iGroupBoxMargin + iEditHeight + 4, rcParent.right - 22, iCheckHeight, m_hWnd, (HMENU)BTN_IP_BAN, g_hInstance, NULL);
+        11, iPosX + iGroupBoxMargin + iEditHeight + 4, rcParent.right - 22, iCheckHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)BTN_IP_BAN, g_hInstance, NULL);
 
     hWndWindowItems[BTN_FULL_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_FULL_BAN], WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_DISABLED | BS_AUTOCHECKBOX,
-        11, iPosX + iGroupBoxMargin + iEditHeight + iCheckHeight + 7, rcParent.right - 22, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
+        11, iPosX + iGroupBoxMargin + iEditHeight + iCheckHeight + 7, rcParent.right - 22, iCheckHeight, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
 
     iPosX += iOneLineTwoChecksGB;
 
     hWndWindowItems[GB_REASON] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_REASON], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, iPosX, rcParent.right - 6, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+        3, iPosX, rcParent.right - 6, iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
 
     hWndWindowItems[EDT_REASON] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, iPosX + iGroupBoxMargin, rcParent.right - 22, iEditHeight, m_hWnd, (HMENU)EDT_REASON, g_hInstance, NULL);
+        11, iPosX + iGroupBoxMargin, rcParent.right - 22, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)EDT_REASON, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_REASON], EM_SETLIMITTEXT, 255, 0);
 
     iPosX += iOneLineGB;
 
     hWndWindowItems[GB_BY] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_CREATED_BY], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, iPosX, rcParent.right - 6, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+        3, iPosX, rcParent.right - 6, iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
 
     hWndWindowItems[EDT_BY] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, iPosX + iGroupBoxMargin, rcParent.right - 22, iEditHeight, m_hWnd, (HMENU)EDT_BY, g_hInstance, NULL);
+        11, iPosX + iGroupBoxMargin, rcParent.right - 22, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)EDT_BY, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_BY], EM_SETLIMITTEXT, 64, 0);
 
     iPosX += iOneLineGB;
 
     hWndWindowItems[GB_BAN_TYPE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, iPosX, rcParent.right - 6, iGroupBoxMargin + iCheckHeight + iOneLineGB + 5, m_hWnd, NULL, g_hInstance, NULL);
-
-    hWndWindowItems[RB_PERM_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_PERMANENT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,
-        16, iPosX + iGroupBoxMargin, rcParent.right - 32, iCheckHeight, m_hWnd, (HMENU)RB_PERM_BAN, g_hInstance, NULL);
-    ::SendMessage(hWndWindowItems[RB_PERM_BAN], BM_SETCHECK, BST_CHECKED, 0);
+        3, iPosX, rcParent.right - 6, iGroupBoxMargin + iCheckHeight + iOneLineGB + 5, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
 
     hWndWindowItems[GB_TEMP_BAN] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, NULL, WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        8, iPosX + iGroupBoxMargin + iCheckHeight, rcParent.right - 16, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+        8, iPosX + iGroupBoxMargin + iCheckHeight, rcParent.right - 16, iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
+
+    hWndWindowItems[RB_PERM_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_PERMANENT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,
+        16, iPosX + iGroupBoxMargin, rcParent.right - 32, iCheckHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)RB_PERM_BAN, g_hInstance, NULL);
+    ::SendMessage(hWndWindowItems[RB_PERM_BAN], BM_SETCHECK, BST_CHECKED, 0);
 
     int iThird = (rcParent.right - 32) / 3;
 
     hWndWindowItems[RB_TEMP_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_TEMPORARY], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,
-        16, iPosX + (2 * iGroupBoxMargin) + iCheckHeight + ((iEditHeight - iCheckHeight) / 2), iThird - 2, iCheckHeight, m_hWnd, (HMENU)RB_TEMP_BAN, g_hInstance, NULL);
+        16, iPosX + (2 * iGroupBoxMargin) + iCheckHeight + ((iEditHeight - iCheckHeight) / 2), iThird - 2, iCheckHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)RB_TEMP_BAN, g_hInstance, NULL);
+    ::SendMessage(hWndWindowItems[RB_TEMP_BAN], BM_SETCHECK, BST_UNCHECKED, 0);
 
-    hWndWindowItems[DT_TEMP_BAN_EXPIRE_DATE] = ::CreateWindowEx(0, DATETIMEPICK_CLASS, NULL, WS_CHILD | WS_VISIBLE | WS_DISABLED | DTS_SHORTDATECENTURYFORMAT,
-        iThird + 16, iPosX + (2 * iGroupBoxMargin) + iCheckHeight, iThird - 2, iEditHeight, m_hWnd, NULL, g_hInstance, NULL);
+    hWndWindowItems[DT_TEMP_BAN_EXPIRE_DATE] = ::CreateWindowEx(0, DATETIMEPICK_CLASS, NULL, WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_DISABLED | DTS_SHORTDATECENTURYFORMAT,
+        iThird + 16, iPosX + (2 * iGroupBoxMargin) + iCheckHeight, iThird - 2, iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
 
-    hWndWindowItems[DT_TEMP_BAN_EXPIRE_TIME] = ::CreateWindowEx(0, DATETIMEPICK_CLASS, NULL, WS_CHILD | WS_VISIBLE | WS_DISABLED | DTS_TIMEFORMAT | DTS_UPDOWN,
-        (iThird * 2) + 19, iPosX + (2 * iGroupBoxMargin) + iCheckHeight, iThird - 2, iEditHeight, m_hWnd, NULL, g_hInstance, NULL);
+    hWndWindowItems[DT_TEMP_BAN_EXPIRE_TIME] = ::CreateWindowEx(0, DATETIMEPICK_CLASS, NULL, WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_DISABLED | DTS_TIMEFORMAT | DTS_UPDOWN,
+        (iThird * 2) + 19, iPosX + (2 * iGroupBoxMargin) + iCheckHeight, iThird - 2, iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
 
     iPosX += iGroupBoxMargin + iCheckHeight + iOneLineGB + 9;
 
     hWndWindowItems[BTN_ACCEPT] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        2, iPosX, (rcParent.right / 2) - 3, iEditHeight, m_hWnd, (HMENU)BTN_ACCEPT, g_hInstance, NULL);
+        2, iPosX, (rcParent.right / 2) - 3, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDOK, g_hInstance, NULL);
 
     hWndWindowItems[BTN_DISCARD] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        (rcParent.right / 2) + 2, iPosX, (rcParent.right / 2) - 4, iEditHeight, m_hWnd, (HMENU)BTN_DISCARD, g_hInstance, NULL);
+        (rcParent.right / 2) + 2, iPosX, (rcParent.right / 2) - 4, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDCANCEL, g_hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
         if(hWndWindowItems[ui8i] == NULL) {
             return;
         }
 
-        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
 
     if(pBanToChange != NULL) {
@@ -335,7 +338,7 @@ void BanDialog::DoModal(HWND hWndParent, BanItem * pBan/* = NULL*/) {
 
     ::EnableWindow(hWndParent, FALSE);
 
-    ::ShowWindow(m_hWnd, SW_SHOW);
+    ::ShowWindow(hWndWindowItems[WINDOW_HANDLE], SW_SHOW);
 }
 //------------------------------------------------------------------------------
 
@@ -344,14 +347,14 @@ bool BanDialog::OnAccept() {
     bool bIpBan = ::SendMessage(hWndWindowItems[BTN_IP_BAN], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false;
 
 	if(bNickBan == false && bIpBan == false) {
-		::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_YOU_CANT_CREATE_BAN_WITHOUT_NICK_OR_IP], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_YOU_CANT_CREATE_BAN_WITHOUT_NICK_OR_IP], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	}
 
     int iNickLen = ::GetWindowTextLength(hWndWindowItems[EDT_NICK]);
 
 	if(bNickBan == true && iNickLen == 0) {
-		::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_FOR_NICK_BAN_SPECIFY_NICK], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_FOR_NICK_BAN_SPECIFY_NICK], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	}
 
@@ -362,10 +365,10 @@ bool BanDialog::OnAccept() {
 
 	if(bIpBan == true) {
 		if(iIpLen == 0) {
-			::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_FOR_IP_BAN_SPECIFY_IP], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+			::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_FOR_IP_BAN_SPECIFY_IP], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		} else if(isIP(sIP, iIpLen) == false) {
-			::MessageBox(m_hWnd, (string(sIP) + " " + LanguageManager->sTexts[LAN_IS_NOT_VALID_IP_ADDRESS]).c_str(), sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+			::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(sIP) + " " + LanguageManager->sTexts[LAN_IS_NOT_VALID_IP_ADDRESS]).c_str(), sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 			return false;
         }
 	}
@@ -384,7 +387,7 @@ bool BanDialog::OnAccept() {
 
         if(::SendMessage(hWndWindowItems[DT_TEMP_BAN_EXPIRE_DATE], DTM_GETSYSTEMTIME, 0, (LPARAM)&stDate) != GDT_VALID ||
             ::SendMessage(hWndWindowItems[DT_TEMP_BAN_EXPIRE_TIME], DTM_GETSYSTEMTIME, 0, (LPARAM)&stTime) != GDT_VALID) {
-            ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_BAD_TIME_SPECIFIED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+            ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_BAD_TIME_SPECIFIED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 
             return false;
         }
@@ -404,7 +407,7 @@ bool BanDialog::OnAccept() {
 		ban_time = mktime(tm);
 
 		if(ban_time <= acc_time || ban_time == (time_t)-1) {
-			::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_BAD_TIME_SPECIFIED_BAN_EXPIRED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+			::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_BAD_TIME_SPECIFIED_BAN_EXPIRED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 
 			return false;
         }
@@ -470,14 +473,14 @@ bool BanDialog::OnAccept() {
                                             // PPK ... same ban and new is not full, delete new
                                             delete pBan;
 
-                                            ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+                                            ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
                                             return false;
                                         } else {
 											if(((nxtBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
                                                 // PPK ... same ban and both full, delete new
                                                 delete pBan;
 
-                                                ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+                                                ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
                                                 return false;
                                             } else {
                                                 // PPK ... same ban but only new is full, delete old
@@ -531,14 +534,14 @@ bool BanDialog::OnAccept() {
                                                 // PPK ... same ban and old is perm, delete new
                                                 delete pBan;
 
-                                                ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+                                                ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
                                                 return false;
                                             } else {
 												if(((nxtBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
                                                     // PPK ... same ban and old is full perm, delete new
                                                     delete pBan;
 
-                                                    ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+                                                    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
                                                     return false;
                                                 } else {
                                                     // PPK ... same ban and only new is full, set new to ipban only
@@ -586,7 +589,7 @@ bool BanDialog::OnAccept() {
                                                     // PPK ... same bans, but new with lower expiration -> delete new
                                                     delete pBan;
 
-                                                    ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+                                                    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
                     								return false;
                                                 } else {
 													if(((nxtBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false) {
@@ -596,7 +599,7 @@ bool BanDialog::OnAccept() {
                                                         // PPK ... same bans, new have lower expiration -> delete new
                                                         delete pBan;
 
-                                                        ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+                                                        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
                                                         return false;
                                                     }
                                                 }
@@ -617,7 +620,7 @@ bool BanDialog::OnAccept() {
 							if(((nxtBan->ui8Bits & hashBanMan::PERM) == hashBanMan::PERM) == true) {
                                 delete pBan;
 
-                                ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+                                ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
                                 return false;
                             } else {
 								if(((nxtBan->ui8Bits & hashBanMan::IP) == hashBanMan::IP) == true) {
@@ -634,7 +637,7 @@ bool BanDialog::OnAccept() {
 							if(((nxtBan->ui8Bits & hashBanMan::PERM) == hashBanMan::PERM) == true) {
                                 delete pBan;
 
-                                ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+                                ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 								return false;
                             } else {
                                 if(nxtBan->tempbanexpire < pBan->tempbanexpire) {
@@ -650,7 +653,7 @@ bool BanDialog::OnAccept() {
                                 } else {
                                     delete pBan;
 
-                                    ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+                                    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 									return false;
                                 }
                             }
@@ -731,7 +734,7 @@ bool BanDialog::OnAccept() {
 
                         delete pBan;
 
-                        ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+                        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
                         return false;
                     }
                 } else { // temp ban
@@ -755,7 +758,7 @@ bool BanDialog::OnAccept() {
 
                         delete pBan;
 
-                        ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+                        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
                         return false;
                     }
                 }
@@ -1124,6 +1127,6 @@ void BanDialog::BanDeleted(BanItem * pBan) {
         return;
     }
 
-    ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_BAN_DELETED_ACCEPT_TO_NEW], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_BAN_DELETED_ACCEPT_TO_NEW], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 }
 //------------------------------------------------------------------------------

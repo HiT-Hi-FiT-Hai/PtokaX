@@ -24,8 +24,6 @@
 
 class LineDialog {
 public:
-    HWND m_hWnd;
-
     LineDialog(void (*pOnOkFunction)(char * Line, const int &iLen));
     ~LineDialog();
 
@@ -33,9 +31,10 @@ public:
 
 	void DoModal(HWND hWndParent, char * Caption, char * Line);
 private:
-    HWND hWndWindowItems[4];
+    HWND hWndWindowItems[5];
 
     enum enmWindowItems {
+        WINDOW_HANDLE,
         GB_LINE,
         EDT_LINE,
         BTN_OK,

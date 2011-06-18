@@ -735,7 +735,7 @@ bool SettingPageDeflood3::CreateSettingPage(HWND hOwner) {
             return false;
         }
 
-        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
 
     ::EnableWindow(hWndPageItems[EDT_SEARCH_MSGS], SettingManager->iShorts[SETSHORT_SEARCH_ACTION] == 0 ? FALSE : TRUE);

@@ -26,11 +26,10 @@ struct BanItem;
 
 class BansDialog {
 public:
-    HWND m_hWnd;
-
-    HWND hWndWindowItems[7];
+    HWND hWndWindowItems[8];
 
     enum enmWindowItems {
+        WINDOW_HANDLE,
         BTN_ADD_BAN,
         LV_BANS,
         GB_FILTER,
@@ -65,9 +64,10 @@ private:
     void RemoveBans();
     void OnContextMenu(HWND hWindow, LPARAM lParam);
     bool FilterBan(const BanItem * pBan);
+    void ChangeBan();
 };
 //------------------------------------------------------------------------------
-extern BansDialog *pBansDialog;
+extern BansDialog * pBansDialog;
 //------------------------------------------------------------------------------
 
 #endif

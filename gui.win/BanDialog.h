@@ -26,11 +26,10 @@ struct BanItem;
 
 class BanDialog {
 public:
-    HWND m_hWnd;
-
-    HWND hWndWindowItems[19];
+    HWND hWndWindowItems[20];
 
     enum enmWindowItems {
+        WINDOW_HANDLE,
         GB_NICK,
         EDT_NICK,
         BTN_NICK_BAN,
@@ -67,7 +66,7 @@ private:
     bool OnAccept();
 };
 //------------------------------------------------------------------------------
-extern BanDialog *pBanDialog;
+extern BanDialog * pBanDialog;
 //------------------------------------------------------------------------------
 
 #endif

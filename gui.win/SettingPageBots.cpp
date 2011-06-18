@@ -379,7 +379,7 @@ bool SettingPageBots::CreateSettingPage(HWND hOwner) {
             return false;
         }
 
-        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
 
     ::EnableWindow(hWndPageItems[EDT_HUB_BOT_NICK], SettingManager->bBools[SETBOOL_REG_BOT] == true ? TRUE : FALSE);

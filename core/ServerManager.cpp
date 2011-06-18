@@ -43,49 +43,23 @@
 #endif
 //---------------------------------------------------------------------------
 #include "ClientTagManager.h"
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			#include "frmHub.h"
-		#endif
-	#endif
-#endif
 #include "HubCommands.h"
 #include "IP2Country.h"
 #include "LuaScript.h"
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-			#include "../gui.win/MainWindow.h"
-		#endif
-	#endif
-#endif
 #include "RegThread.h"
-#ifndef _WIN32
-	#include "regtmrinc.h"
-#endif
 #include "ResNickManager.h"
 #include "ServerThread.h"
 #include "TextFileManager.h"
 //#include "TLSManager.h"
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            #include "../gui.win/MainWindowPageScripts.h"
-        #else
-			#include "TScriptMemoryForm.h"
-			#include "TScriptsForm.h"
-		#endif
-	#endif
-#endif
 #include "UDPThread.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
-#else
-	static int SIGSECTMR = SIGRTMIN+1;
+#ifdef _BUILD_GUI
+    #include "../gui.win/MainWindow.h"
+    #include "../gui.win/MainWindowPageScripts.h"
+#endif
+//---------------------------------------------------------------------------
+#ifndef _WIN32
+    #include "regtmrinc.h"
 #endif
 //---------------------------------------------------------------------------
 static ServerThread *ServersE = NULL;
@@ -93,6 +67,7 @@ static ServerThread *ServersE = NULL;
     UINT_PTR sectimer = 0;
     UINT_PTR regtimer = 0;
 #else
+    static int SIGSECTMR = SIGRTMIN+1;
 	static timer_t sectimer, regtimer;
 #endif
 //---------------------------------------------------------------------------
@@ -112,7 +87,7 @@ time_t starttime = 0;
 uint64_t iMins = 0, iHours = 0, iDays = 0;
 bool bServerRunning = false, bServerTerminated = false, bIsRestart = false, bIsClose = false;
 #ifdef _WIN32
-	#ifdef _SERVICE
+	#ifndef _BUILD_GUI
 	    bool bService = false;
 	#endif
 #else
@@ -123,16 +98,7 @@ uint8_t ui8SrCntr = 0, ui8MinTick = 0;
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
-    #ifndef _SERVICE
-        #ifndef _MSC_VER
-	       VOID CALLBACK SecTimerProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*idEvent*/, DWORD /*dwTime*/) {
-        #else
-            void ServerOnSecTimer() {
-        #endif
-    #else
-        void ServerOnSecTimer() {
-    #endif
-
+void ServerOnSecTimer() {
 	if(b2K == true) {
 		FILETIME tmpa, tmpb, kernelTimeFT, userTimeFT;
 		GetProcessTimes(GetCurrentProcess(), &tmpa, &tmpb, &kernelTimeFT, &userTimeFT);
@@ -180,29 +146,15 @@ static void SecTimerHandler(int sig) {
 	iAverageBytesSent += UploadSpeed[ui8MinTick];
 	iAverageBytesRead += DownloadSpeed[ui8MinTick];
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            pMainWindow->UpdateStats();
-            pMainWindowPageScripts->UpdateMemUsage();
-		#else
-            hubForm->UpdateGui();
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    pMainWindow->UpdateStats();
+    pMainWindowPageScripts->UpdateMemUsage();
 #endif
 }
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
-    #ifndef _SERVICE
-        #ifndef _MSC_VER
-	       VOID CALLBACK RegTimerProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*idEvent*/, DWORD /*dwTime*/) {
-        #else
-            void ServerOnRegTimer() {
-        #endif
-    #else
-        void ServerOnRegTimer() {
-    #endif
+    void ServerOnRegTimer() {
 	    if(SettingManager->bBools[SETBOOL_AUTO_REG] == true && SettingManager->sTexts[SETTXT_REGISTER_SERVERS] != NULL) {
 			// First destroy old hublist reg thread if any
 	        if(RegisterThread != NULL) {
@@ -482,32 +434,18 @@ void ServerInitialize() {
         exit(EXIT_FAILURE);
     }
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-        #ifdef _MSC_VER
-            pMainWindow = new MainWindow();
+#ifdef _BUILD_GUI
+    pMainWindow = new MainWindow();
 
-            if(pMainWindow->CreateEx() == NULL) {
-                exit(EXIT_FAILURE);
-            }
-        #else
-	        Application->CreateForm(__classid(ThubForm), &hubForm);
-	    #endif
-	#endif
+    if(pMainWindow->CreateEx() == NULL) {
+        exit(EXIT_FAILURE);
+    }
 #endif
 
 	SettingManager->UpdateAll();
 
 #ifdef _WIN32
-    #ifndef _SERVICE
-		#ifndef _MSC_VER
-            sectimer = SetTimer(NULL, 0, 1000, (TIMERPROC)SecTimerProc);
-		#else
-            sectimer = SetTimer(NULL, 0, 1000, NULL);
-		#endif
-    #else
-		sectimer = SetTimer(NULL, 0, 1000, NULL);
-    #endif
+    sectimer = SetTimer(NULL, 0, 1000, NULL);
 
 	if(sectimer == 0) {
 		string sDbgstr = "[BUF] Cannot start Timer in ServerThread::ServerThread! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
@@ -577,14 +515,8 @@ bool ServerStart() {
 
     TextFileManager->RefreshTextFiles();
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			hubForm->ButtonStart->Enabled = false;
-		#else
-            pMainWindow->EnableStartButton(FALSE);
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    pMainWindow->EnableStartButton(FALSE);
 #endif
 
     ui64ActualTick = ui64TotalShare = 0;
@@ -601,15 +533,8 @@ bool ServerStart() {
 
     if(SettingManager->bBools[SETBOOL_RESOLVE_TO_IP] == true) {
         if(isIP(SettingManager->sTexts[SETTXT_HUB_ADDRESS], SettingManager->ui16TextsLens[SETTXT_HUB_ADDRESS]) == false) {
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-				hubForm->StatusValue->Caption = String(LanguageManager->sTexts[LAN_RESOLVING_HUB_ADDRESS],
-					(size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_HUB_ADDRESS])+"...";
-        #else
-                pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_RESOLVING_HUB_ADDRESS], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_HUB_ADDRESS])+"...").c_str());
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+            pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_RESOLVING_HUB_ADDRESS], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_HUB_ADDRESS])+"...").c_str());
 #endif
             struct addrinfo hints = { 0 };
             hints.ai_family = AF_INET;
@@ -619,22 +544,7 @@ bool ServerStart() {
             if(::getaddrinfo(SettingManager->sTexts[SETTXT_HUB_ADDRESS], NULL, &hints, &res) != 0 || res->ai_family != AF_INET) {
 #ifdef _WIN32
             	int err = WSAGetLastError();
-	#ifdef _SERVICE
-                AppendLog(string(LanguageManager->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
-					" '"+string(SettingManager->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(LanguageManager->sTexts[LAN_HAS_FAILED], (size_t)LanguageManager->ui16TextsLens[LAN_HAS_FAILED])+
-					".\n"+string(LanguageManager->sTexts[LAN_ERROR_CODE], (size_t)LanguageManager->ui16TextsLens[LAN_ERROR_CODE])+": "+
-					string(WSErrorStr(err))+" ("+string(err)+")\n\n"+
-					string(LanguageManager->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".");
-	#else
-		#ifndef _MSC_VER
-				MessageBox(Application->Handle,(string(LanguageManager->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
-					" '"+string(SettingManager->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(LanguageManager->sTexts[LAN_HAS_FAILED], (size_t)LanguageManager->ui16TextsLens[LAN_HAS_FAILED])+
-					".\n"+string(LanguageManager->sTexts[LAN_ERROR_CODE], (size_t)LanguageManager->ui16TextsLens[LAN_ERROR_CODE])+": "+
-					string(WSErrorStr(err))+" ("+string(err)+")\n\n"+
-					string(LanguageManager->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".").c_str(),
-					LanguageManager->sTexts[LAN_ERROR], MB_OK|MB_ICONERROR);
-				hubForm->ButtonStart->Enabled = true;
-        #else
+	#ifdef _BUILD_GUI
 				::MessageBox(pMainWindow->m_hWnd,(string(LanguageManager->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
 					" '"+string(SettingManager->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(LanguageManager->sTexts[LAN_HAS_FAILED], (size_t)LanguageManager->ui16TextsLens[LAN_HAS_FAILED])+
 					".\n"+string(LanguageManager->sTexts[LAN_ERROR_CODE], (size_t)LanguageManager->ui16TextsLens[LAN_ERROR_CODE])+": "+
@@ -642,7 +552,12 @@ bool ServerStart() {
 					string(LanguageManager->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".").c_str(),
 					LanguageManager->sTexts[LAN_ERROR], MB_OK|MB_ICONERROR);
                 pMainWindow->EnableStartButton(TRUE);
-		#endif
+	#else
+                AppendLog(string(LanguageManager->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
+					" '"+string(SettingManager->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(LanguageManager->sTexts[LAN_HAS_FAILED], (size_t)LanguageManager->ui16TextsLens[LAN_HAS_FAILED])+
+					".\n"+string(LanguageManager->sTexts[LAN_ERROR_CODE], (size_t)LanguageManager->ui16TextsLens[LAN_ERROR_CODE])+": "+
+					string(WSErrorStr(err))+" ("+string(err)+")\n\n"+
+					string(LanguageManager->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".");
 	#endif
 #else
                 AppendLog(string(LanguageManager->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
@@ -694,20 +609,9 @@ bool ServerStart() {
     }
 
 	if(ServersS == NULL) {
-#ifdef _WIN32
-	#ifdef _SERVICE
-        AppendLog(LanguageManager->sTexts[LAN_NO_VALID_TCP_PORT_SPECIFIED]);
-	#else
-		#ifndef _MSC_VER
-			MessageBox(Application->Handle, LanguageManager->sTexts[LAN_NO_VALID_TCP_PORT_SPECIFIED],
-				LanguageManager->sTexts[LAN_ERROR], MB_OK|MB_ICONERROR);
-			hubForm->ButtonStart->Enabled = true;
-		#else
-			::MessageBox(pMainWindow->m_hWnd, LanguageManager->sTexts[LAN_NO_VALID_TCP_PORT_SPECIFIED], LanguageManager->sTexts[LAN_ERROR],
-                MB_OK|MB_ICONERROR);
-            pMainWindow->EnableStartButton(TRUE);
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+		::MessageBox(pMainWindow->m_hWnd, LanguageManager->sTexts[LAN_NO_VALID_TCP_PORT_SPECIFIED], LanguageManager->sTexts[LAN_ERROR], MB_OK|MB_ICONERROR);
+        pMainWindow->EnableStartButton(TRUE);
 #else
 		AppendLog(LanguageManager->sTexts[LAN_NO_VALID_TCP_PORT_SPECIFIED]);
 #endif
@@ -855,52 +759,17 @@ bool ServerStart() {
     // Call lua_Main
 	ScriptManager->OnStartup();
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			hubForm->StatusValue->Caption = String(LanguageManager->sTexts[LAN_RUNNING], (size_t)LanguageManager->ui16TextsLens[LAN_RUNNING])+"...";
-			hubForm->ButtonStart->Caption = String(LanguageManager->sTexts[LAN_STOP_HUB], (size_t)LanguageManager->ui16TextsLens[LAN_STOP_HUB]);
-			hubForm->ButtonStart->Enabled = true;
-		
-			hubForm->Accepts->Visible = true;
-			hubForm->Parts->Visible = true;
-			hubForm->Total->Visible = true;
-			hubForm->LoggedIn->Visible = true;
-			hubForm->Rx->Visible = true;
-			hubForm->Tx->Visible = true;
-			hubForm->Peak->Visible = true;
-			hubForm->AcceptsNumber->Visible = true;
-			hubForm->PartsNumber->Visible = true;
-			hubForm->TotalNumber->Visible = true;
-			hubForm->LoggedInNumber->Visible = true;
-			hubForm->RxValue->Visible = true;
-			hubForm->TxValue->Visible = true;
-			hubForm->PeakValue->Visible = true;
-		
-			if(ScriptsForm != NULL) {
-				ScriptsForm->LUArst->Enabled = true;
-			}
-		#else
-            pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_RUNNING], (size_t)LanguageManager->ui16TextsLens[LAN_RUNNING])+"...").c_str());
-            pMainWindow->SetStartButtonText(LanguageManager->sTexts[LAN_STOP_HUB]);
-            pMainWindow->EnableStartButton(TRUE);
-            pMainWindow->EnableGuiItems(TRUE);
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_RUNNING], (size_t)LanguageManager->ui16TextsLens[LAN_RUNNING])+"...").c_str());
+    pMainWindow->SetStartButtonText(LanguageManager->sTexts[LAN_STOP_HUB]);
+    pMainWindow->EnableStartButton(TRUE);
+    pMainWindow->EnableGuiItems(TRUE);
 #endif
 
     //Start the HubRegistration timer
     if(SettingManager->bBools[SETBOOL_AUTO_REG] == true) {
 #ifdef _WIN32
-        #ifndef _SERVICE
-			#ifndef _MSC_VER
-    			regtimer = SetTimer(NULL, 0, 901000, (TIMERPROC)RegTimerProc);
-			#else
-				regtimer = SetTimer(NULL, 0, 901000, NULL);
-			#endif
-        #else
-			regtimer = SetTimer(NULL, 0, 901000, NULL);
-        #endif
+		regtimer = SetTimer(NULL, 0, 901000, NULL);
 
         if(regtimer == 0) {
 			string sDbgstr = "[BUF] Cannot start RegTimer in ServerMan::StartServer! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
@@ -926,14 +795,8 @@ bool ServerStart() {
 //---------------------------------------------------------------------------
 
 void ServerStop() {
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			hubForm->ButtonStart->Enabled = false;
-		#else
-            pMainWindow->EnableStartButton(FALSE);
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    pMainWindow->EnableStartButton(FALSE);
 #else
     struct itimerspec sectmrspec;
     sectmrspec.it_interval.tv_sec = 0;
@@ -1061,38 +924,11 @@ void ServerFinalStop(const bool &bFromServiceLoop) {
 	//userstat  // better here ;)
 //    sqldb->FinalizeAllVisits();
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(ScriptsForm != NULL) {
-				ScriptsForm->LUArst->Enabled = false;
-			}
-		
-			hubForm->ButtonStart->Caption = String(LanguageManager->sTexts[LAN_START_HUB], (size_t)LanguageManager->ui16TextsLens[LAN_START_HUB]);
-			hubForm->ButtonStart->Enabled = true;
-			hubForm->StatusValue->Caption = String(LanguageManager->sTexts[LAN_STOPPED], (size_t)LanguageManager->ui16TextsLens[LAN_STOPPED])+".";
-		
-			hubForm->Accepts->Visible = false;
-			hubForm->Parts->Visible = false;
-			hubForm->Total->Visible = false;
-			hubForm->LoggedIn->Visible = false;
-			hubForm->Rx->Visible = false;
-			hubForm->Tx->Visible = false;
-			hubForm->Peak->Visible = false;
-			hubForm->AcceptsNumber->Visible = false;
-			hubForm->PartsNumber->Visible = false;
-			hubForm->TotalNumber->Visible = false;
-			hubForm->LoggedInNumber->Visible = false;
-			hubForm->RxValue->Visible = false;
-			hubForm->TxValue->Visible = false;
-			hubForm->PeakValue->Visible = false;
-        #else
-            pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_STOPPED], (size_t)LanguageManager->ui16TextsLens[LAN_STOPPED])+".").c_str());
-            pMainWindow->SetStartButtonText(LanguageManager->sTexts[LAN_START_HUB]);
-            pMainWindow->EnableStartButton(TRUE);
-            pMainWindow->EnableGuiItems(FALSE);
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_STOPPED], (size_t)LanguageManager->ui16TextsLens[LAN_STOPPED])+".").c_str());
+    pMainWindow->SetStartButtonText(LanguageManager->sTexts[LAN_START_HUB]);
+    pMainWindow->EnableStartButton(TRUE);
+    pMainWindow->EnableGuiItems(FALSE);
 #endif
 
     ui8SrCntr = 0;
@@ -1109,22 +945,12 @@ void ServerFinalStop(const bool &bFromServiceLoop) {
 
     if(bIsRestart == true) {
         bIsRestart = false;
+
 		// start hub
-#ifdef _WIN32
-	#ifdef _SERVICE
-		if(ServerStart() == false) {
-			AppendLog("Server start failed!");
-			exit(EXIT_FAILURE);
-		}
-	#else
-		#ifndef _MSC_VER
-			hubForm->ButtonStartClick(hubForm);
-		#else
-            if(ServerStart() == false) {
-                pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_READY], (size_t)LanguageManager->ui16TextsLens[LAN_READY])+".").c_str());
-            }
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+        if(ServerStart() == false) {
+            pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_READY], (size_t)LanguageManager->ui16TextsLens[LAN_READY])+".").c_str());
+        }
 #else
 		if(ServerStart() == false) {
             AppendLog("Server start failed!");
@@ -1193,15 +1019,7 @@ void ServerFinalClose() {
 	
 	WSACleanup();
 	
-	#ifdef _SERVICE
-	    PostMessage(NULL, WM_USER+1, 0, 0);
-	#else
-		#ifndef _MSC_VER
-			Application->Terminate();
-		#else
-			PostMessage(NULL, WM_USER+1, 0, 0);
-		#endif
-	#endif
+	::PostMessage(NULL, WM_USER+1, 0, 0);
 #endif
 }
 //---------------------------------------------------------------------------
@@ -1340,16 +1158,8 @@ void ServerUpdateAutoRegState() {
     }
 
     if(SettingManager->bBools[SETBOOL_AUTO_REG] == true) {
-#ifdef _WIN32
-        #ifndef _SERVICE
-			#ifndef _MSC_VER
-    			regtimer = SetTimer(NULL, 0, 901000, (TIMERPROC)RegTimerProc);
-			#else
-				regtimer = SetTimer(NULL, 0, 901000, NULL);
-			#endif
-        #else
-			regtimer = SetTimer(NULL, 0, 901000, NULL);
-        #endif
+#ifdef _BUILD_GUI
+        regtimer = SetTimer(NULL, 0, 901000, NULL);
 
         if(regtimer == 0) {
             string sDbgstr = "[BUF] Cannot start RegTimer in ServerMan::UpdateAutoRegState! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();

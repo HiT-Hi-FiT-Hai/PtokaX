@@ -760,7 +760,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
             return false;
         }
 
-        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
 
     ::EnableWindow(hWndPageItems[EDT_GLOBAL_MAIN_CHAT_MSGS], SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
