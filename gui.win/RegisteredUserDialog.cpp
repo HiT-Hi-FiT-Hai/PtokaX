@@ -39,10 +39,6 @@ static ATOM atomRegisteredUserDialog = 0;
 //---------------------------------------------------------------------------
 
 RegisteredUserDialog::RegisteredUserDialog() {
-    pRegisteredUserDialog = this;
-
-    m_hWnd = NULL;
-
     memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
 
     pRegToChange = NULL;
@@ -69,14 +65,14 @@ LRESULT RegisteredUserDialog::RegisteredUserDialogProc(UINT uMsg, WPARAM wParam,
     switch(uMsg) {
         case WM_COMMAND:
             switch(LOWORD(wParam)) {
-                case BTN_ACCEPT:
+                case IDOK:
                     if(OnAccept() == false) {
                         return 0;
                     }
-                case BTN_DISCARD:
-                    ::PostMessage(m_hWnd, WM_CLOSE, 0, 0);
+                case IDCANCEL:
+                    ::PostMessage(hWndWindowItems[WINDOW_HANDLE], WM_CLOSE, 0, 0);
                     return 0;
-                case EDT_NICK:
+                case (EDT_NICK+100):
                     if(HIWORD(wParam) == EN_CHANGE) {
                         char buf[65];
                         ::GetWindowText((HWND)lParam, buf, 65);
@@ -138,14 +134,23 @@ LRESULT RegisteredUserDialog::RegisteredUserDialogProc(UINT uMsg, WPARAM wParam,
 
             break;
         case WM_CLOSE:
-            ::EnableWindow(::GetParent(m_hWnd), TRUE);
+            ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
+            g_hWndActiveDialog = NULL;
             break;
         case WM_NCDESTROY:
             delete this;
-            return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+            return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
+        case WM_SETFOCUS:
+            if(pRegToChange == NULL) {
+                ::SetFocus(hWndWindowItems[EDT_NICK]);
+            } else {
+                ::SetFocus(hWndWindowItems[EDT_PASSWORD]);
+            }
+
+            return 0;
     }
 
-	return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+	return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
 }
 //------------------------------------------------------------------------------
 
@@ -172,18 +177,20 @@ void RegisteredUserDialog::DoModal(HWND hWndParent, RegUser * pReg/* = NULL*/, c
     int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(300) / 2);
     int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(201) / 2);
 
-    m_hWnd = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomRegisteredUserDialog), LanguageManager->sTexts[LAN_REGISTERED_USER],
+    hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomRegisteredUserDialog), LanguageManager->sTexts[LAN_REGISTERED_USER],
         WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(300), ScaleGui(201),
         hWndParent, NULL, g_hInstance, NULL);
 
-    if(m_hWnd == NULL) {
+    if(hWndWindowItems[WINDOW_HANDLE] == NULL) {
         return;
     }
 
-    ::SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
-    ::SetWindowLongPtr(m_hWnd, GWLP_WNDPROC, (LONG_PTR)StaticRegisteredUserDialogProc);
+    g_hWndActiveDialog = hWndWindowItems[WINDOW_HANDLE];
 
-    ::GetClientRect(m_hWnd, &rcParent);
+    ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_USERDATA, (LONG_PTR)this);
+    ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_WNDPROC, (LONG_PTR)StaticRegisteredUserDialogProc);
+
+    ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
     {
         int iHeight = (3 * iOneLineGB) + iEditHeight + 6;
@@ -195,52 +202,52 @@ void RegisteredUserDialog::DoModal(HWND hWndParent, RegUser * pReg/* = NULL*/, c
 
             iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - ((ScaleGui(196) - iDiff) / 2);
 
-            ::GetWindowRect(m_hWnd, &rcParent);
+            ::GetWindowRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
-            ::SetWindowPos(m_hWnd, NULL, iX, iY, (rcParent.right-rcParent.left), (rcParent.bottom-rcParent.top) - iDiff, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[WINDOW_HANDLE], NULL, iX, iY, (rcParent.right-rcParent.left), (rcParent.bottom-rcParent.top) - iDiff, SWP_NOZORDER);
         }
     }
 
-    ::GetClientRect(m_hWnd, &rcParent);
+    ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
     hWndWindowItems[GB_NICK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_NICK], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, 0, rcParent.right - 6, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+        3, 0, rcParent.right - 6, iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
 
     hWndWindowItems[EDT_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, iGroupBoxMargin, rcParent.right - 22, iEditHeight, m_hWnd, (HMENU)EDT_NICK, g_hInstance, NULL);
+        11, iGroupBoxMargin, rcParent.right - 22, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)(EDT_NICK+100), g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_NICK], EM_SETLIMITTEXT, 64, 0);
 
     int iPosX = iOneLineGB;
 
     hWndWindowItems[GB_PASSWORD] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_PASSWORD], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, iPosX, rcParent.right - 6, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+        3, iPosX, rcParent.right - 6, iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
 
     hWndWindowItems[EDT_PASSWORD] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, iPosX + iGroupBoxMargin, (rcParent.right-rcParent.left)-22, iEditHeight, m_hWnd, (HMENU)EDT_PASSWORD, g_hInstance, NULL);
+        11, iPosX + iGroupBoxMargin, (rcParent.right-rcParent.left)-22, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)EDT_PASSWORD, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_PASSWORD], EM_SETLIMITTEXT, 64, 0);
 
     iPosX += iOneLineGB;
 
     hWndWindowItems[GB_PROFILE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_PROFILE], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, iPosX, rcParent.right - 6, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+        3, iPosX, rcParent.right - 6, iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
 
     hWndWindowItems[CB_PROFILE] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
-        11, iPosX + iGroupBoxMargin, (rcParent.right-rcParent.left)-22, iEditHeight, m_hWnd, (HMENU)CB_PROFILE, g_hInstance, NULL);
+        11, iPosX + iGroupBoxMargin, (rcParent.right-rcParent.left)-22, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)CB_PROFILE, g_hInstance, NULL);
 
     iPosX += iOneLineGB + 4;
 
     hWndWindowItems[BTN_ACCEPT] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        2, iPosX, ((rcParent.right-rcParent.left)/2)-3, iEditHeight, m_hWnd, (HMENU)BTN_ACCEPT, g_hInstance, NULL);
+        2, iPosX, ((rcParent.right-rcParent.left)/2)-3, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDOK, g_hInstance, NULL);
 
     hWndWindowItems[BTN_DISCARD] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        ((rcParent.right-rcParent.left)/2)+2, iPosX, ((rcParent.right-rcParent.left)/2)-4, iEditHeight, m_hWnd, (HMENU)BTN_DISCARD, g_hInstance, NULL);
+        ((rcParent.right-rcParent.left)/2)+2, iPosX, ((rcParent.right-rcParent.left)/2)-4, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDCANCEL, g_hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
         if(hWndWindowItems[ui8i] == NULL) {
             return;
         }
 
-        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
 
     UpdateProfiles();
@@ -258,7 +265,7 @@ void RegisteredUserDialog::DoModal(HWND hWndParent, RegUser * pReg/* = NULL*/, c
 
     ::EnableWindow(hWndParent, FALSE);
 
-    ::ShowWindow(m_hWnd, SW_SHOW);
+    ::ShowWindow(hWndWindowItems[WINDOW_HANDLE], SW_SHOW);
 }
 //------------------------------------------------------------------------------
 
@@ -283,12 +290,12 @@ void RegisteredUserDialog::UpdateProfiles() {
 
 bool RegisteredUserDialog::OnAccept() {
     if(::GetWindowTextLength(hWndWindowItems[EDT_NICK]) == 0) {
-        ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_NICK_MUST_SPECIFIED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_NICK_MUST_SPECIFIED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
         return false;
     }
 
     if(::GetWindowTextLength(hWndWindowItems[EDT_PASSWORD]) == 0) {
-        ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_PASS_MUST_SPECIFIED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_PASS_MUST_SPECIFIED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
         return false;
     }
 
@@ -301,7 +308,7 @@ bool RegisteredUserDialog::OnAccept() {
 
     if(pRegToChange == NULL) {
         if(hashRegManager->AddNew(sNick, sPassword, ui16Profile) == false) {
-            ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_USER_IS_ALREDY_REG], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+            ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_USER_IS_ALREDY_REG], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
             return false;
         }
 
@@ -322,7 +329,7 @@ void RegisteredUserDialog::RegChanged(RegUser * pReg) {
 
     ::SendMessage(hWndWindowItems[CB_PROFILE], CB_SETCURSEL, pRegToChange->iProfile, 0);
 
-    ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_USER_CHANGED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_USER_CHANGED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 }
 //------------------------------------------------------------------------------
 
@@ -331,6 +338,6 @@ void RegisteredUserDialog::RegDeleted(RegUser * pReg) {
         return;
     }
 
-    ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_USER_DELETED_ACCEPT_TO_NEW], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_USER_DELETED_ACCEPT_TO_NEW], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 }
 //------------------------------------------------------------------------------

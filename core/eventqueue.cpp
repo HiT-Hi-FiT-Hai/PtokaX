@@ -37,19 +37,10 @@
 //---------------------------------------------------------------------------
 #include "LuaScript.h"
 #include "RegThread.h"
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			#include "TUsersChatForm.h"
-        #else
-			#include "../gui.win/GuiUtil.h"
-            #include "../gui.win/MainWindowPageUsersChat.h"
-		#endif
-	#endif
 //---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
+#ifdef _BUILD_GUI
+	#include "../gui.win/GuiUtil.h"
+    #include "../gui.win/MainWindowPageUsersChat.h"
 #endif
 //---------------------------------------------------------------------------
 eventq *eventqueue = NULL;
@@ -367,26 +358,14 @@ void eventq::ProcessEvents() {
                     break;
                 }
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-				if(UsersChatForm != NULL && UsersChatForm->CmdTrace->Checked == true) {
-                	char msg[128];
-                    int imsglen = sprintf(msg, "UDP > %s (%s) > ", u->Nick, u->IP);
-                    if(CheckSprintf(imsglen, 128, "eventq::ProcessEvents") == true) {
-                        Memo(string(msg, imsglen)+cur->sMsg);
-                    }
-                }
-        #else
-                if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                	char msg[128];
-                    int imsglen = sprintf(msg, "UDP > %s (%s) > ", u->Nick, u->IP);
-                    if(CheckSprintf(imsglen, 128, "eventq::ProcessEvents") == true) {
-                        RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], (string(msg, imsglen)+cur->sMsg).c_str());
-                    }
-                }
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+        char msg[128];
+        int imsglen = sprintf(msg, "UDP > %s (%s) > ", u->Nick, u->IP);
+        if(CheckSprintf(imsglen, 128, "eventq::ProcessEvents") == true) {
+            RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], (string(msg, imsglen)+cur->sMsg).c_str());
+        }
+    }
 #endif
 
                 DcCommands->SRFromUDP(u, cur->sMsg, iMsgLen);

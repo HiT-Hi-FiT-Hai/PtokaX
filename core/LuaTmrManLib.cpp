@@ -103,39 +103,30 @@ static int AddTimer(lua_State * L) {
     }
 
 #ifdef _WIN32
-    #ifndef _SERVICE
-		#ifndef _MSC_VER
-			UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tonumber(L, 1),
-				(TIMERPROC) (iLen == 0 ? ScriptTimerProc : ScriptTimerCustomProc));
-		#else
-			UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tonumber(L, 1), NULL);
-		#endif
-    #else
-		UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tonumber(L, 1), NULL);
-    #endif
+	UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tonumber(L, 1), NULL);
 
     if(timer == 0) {
         lua_settop(L, 0);
-#else
-	ScriptTimer * newtimer = new ScriptTimer(sFunctionName, iLen, cur);
-
-    if(newtimer == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate new ScriptTimer!";
-        AppendSpecialLog(sDbgstr);
-#endif
 		lua_pushnil(L);
         return 1;
     }
 
-#ifdef _WIN32
-	ScriptTimer * newtimer = new ScriptTimer(timer, sFunctionName, iLen, cur);
-
-    lua_settop(L, 0);
+	ScriptTimer * newtimer = new ScriptTimer(timer, sFunctionName, iLen);
+#else
+	ScriptTimer * newtimer = new ScriptTimer(sFunctionName, iLen);
+#endif
 
     if(newtimer == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate new ScriptTimer! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+		string sDbgstr = "[BUF] Cannot allocate new ScriptTimer!";
+#ifdef _WIN32
+        sDbgstr += " " + string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
         AppendSpecialLog(sDbgstr);
-#else
+		lua_pushnil(L);
+        return 1;
+    }
+
+#ifndef _WIN32
     timer_t scrtimer;
 
     struct sigevent sigev;
@@ -168,18 +159,29 @@ static int AddTimer(lua_State * L) {
     if(iRet == -1) {
         timer_delete(scrtimer);
         lua_settop(L, 0);
-#endif
 		lua_pushnil(L);
         return 1;
     }
+#endif
 
-#ifdef _WIN32
-    lua_pushnumber(L, (double)newtimer->uiTimerId);
-#else
     lua_settop(L, 0);
 
+#ifdef _WIN32
+    lua_pushlightuserdata(L, (void *)newtimer->uiTimerId);
+#else
     lua_pushlightuserdata(L, (void *)newtimer->TimerId);
 #endif
+
+    newtimer->prev = NULL;
+
+    if(cur->TimerList == NULL) {
+        newtimer->next = NULL;
+    } else {
+        newtimer->next = cur->TimerList;
+        cur->TimerList->prev = newtimer;
+    }
+
+    cur->TimerList = newtimer;
 
     return 1;
 }

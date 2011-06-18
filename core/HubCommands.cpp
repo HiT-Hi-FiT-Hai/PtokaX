@@ -47,19 +47,9 @@
 #include "IP2Country.h"
 #include "LuaScript.h"
 #include "TextFileManager.h"
-
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            #include "../gui.win/RegisteredUsersDialog.h"
-        #else
-			#include "TRegsForm.h"
-		#endif
-	#endif
 //---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
+#ifdef _BUILD_GUI
+    #include "../gui.win/RegisteredUsersDialog.h"
 #endif
 //---------------------------------------------------------------------------
 HubCommands *HubCmds = NULL;
@@ -4974,12 +4964,6 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 					   Statinfo+="Mem usage (Peak): "+string(formatBytes(pmc.WorkingSetSize))+ " ("+string(formatBytes(pmc.PeakWorkingSetSize))+")\r\n";
 					   Statinfo+="VM size (Peak): "+string(formatBytes(pmc.PagefileUsage))+ " ("+string(formatBytes(pmc.PeakPagefileUsage))+")\r\n";
                     }
-				} else {
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-					Statinfo+="Mem usage: "+string(AllocMemSize/1024)+" kB\r\n";
-		#endif
-	#endif
 				}
 #else // _WIN32
 				char cpuusage[32];
@@ -5447,22 +5431,11 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 memcpy(reg->sPass, sCommand+7, iPassLen);
                 reg->sPass[iPassLen] = '\0';
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
+#ifdef _BUILD_GUI
                 if(pRegisteredUsersDialog != NULL) {
                     pRegisteredUsersDialog->RemoveReg(reg);
                     pRegisteredUsersDialog->AddReg(reg);
                 }
-		#else
-				if(RegsForm != NULL) {
-                    TListItem *item = RegsForm->RegList->FindCaption(0, curUser->Nick, false, true, false);
-                    if(item != NULL) {
-                        item->SubItems->Strings[0] = sCommand+7;
-                    }
-				}
-		#endif
-	#endif
 #endif
 
                 int imsgLen = CheckFromPm(curUser, fromPM);

@@ -28,16 +28,6 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
-//---------------------------------------------------------------------------
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			#include "TProfileManagerForm.h"
-		#endif
-	#endif
-//---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
 #endif
 //---------------------------------------------------------------------------
 
@@ -396,24 +386,6 @@ static int MoveDown(lua_State * L) {
 
     ProfileMan->MoveProfileDown(iProfile);
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(ProfileManForm != NULL) {
-				int idx = ProfileManForm->ProfList->ItemIndex;
-		   
-				ProfileManForm->ProfList->Items->Move(iProfile, iProfile+1);
-				ProfileManForm->Profiles->Move(iProfile, iProfile+1);
-		
-				if(idx != -1) { 
-					ProfileManForm->ProfList->ItemIndex = iProfile+1;
-					ProfileManForm->ProfileUpDownUpdate();
-				}
-			}
-		#endif
-	#endif
-#endif
-
     lua_settop(L, 0);
     lua_pushboolean(L, 1);
     return 1;
@@ -446,24 +418,6 @@ static int MoveUp(lua_State * L) {
 	}
 
     ProfileMan->MoveProfileUp(iProfile);
-
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(ProfileManForm != NULL) {
-				int idx = ProfileManForm->ProfList->ItemIndex;
-		   
-				ProfileManForm->ProfList->Items->Move(iProfile, iProfile-1);
-				ProfileManForm->Profiles->Move(iProfile, iProfile-1);
-		
-				if(idx != -1) { 
-					ProfileManForm->ProfList->ItemIndex = iProfile-1;
-					ProfileManForm->ProfileUpDownUpdate();
-				}
-			}
-		#endif
-	#endif
-#endif
 
     lua_settop(L, 0);
     lua_pushboolean(L, 1);

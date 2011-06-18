@@ -35,44 +35,15 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
-//---------------------------------------------------------------------------
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			#include "frmHub.h"
-		#else
-			#include "../gui.win/MainWindow.h"
-		#endif
-	#endif
 #endif
+//---------------------------------------------------------------------------
 #include "ResNickManager.h"
 #include "ServerThread.h"
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			#include "TBansForm.h"
-		#endif
-	#endif
-#endif
 #include "TextFileManager.h"
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			#include "TinfoForm.h"
-			#include "TnewUserForm.h"
-			#include "TProfileManagerForm.h"
-			#include "TRangeBansForm.h"
-			#include "TRegsForm.h"
-			#include "TScriptMemoryForm.h"
-			#include "TUsersChatForm.h"
-		#endif
-	#endif
-#endif
 #include "UDPThread.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
+#ifdef _BUILD_GUI
+	#include "../gui.win/MainWindow.h"
 #endif
 //---------------------------------------------------------------------------
 static const char* sMin = "[min]";
@@ -641,19 +612,14 @@ void SetMan::SetBool(size_t iBoolId, const bool &bValue) {
                 TextFileManager->RefreshTextFiles();
             }
             break;
+#ifdef _BUILD_GUI
 		case SETBOOL_ENABLE_TRAY_ICON:
-#ifdef _WIN32
-	#ifndef _SERVICE
-	            if(bUpdateLocked == false) {
-		#ifndef _MSC_VER
-					hubForm->UpdateSysTray();
-			# else
-                    pMainWindow->UpdateSysTray();
-		#endif
-				}
-	#endif
-#endif
+	        if(bUpdateLocked == false) {
+                pMainWindow->UpdateSysTray();
+			}
+
             break;
+#endif
         case SETBOOL_AUTO_REG:
             if(bUpdateLocked == false) {
 				ServerUpdateAutoRegState();
@@ -1173,16 +1139,10 @@ void SetMan::SetText(size_t iTxtId, const char * sTxt, const size_t &iLen) {
             break;
         case SETTXT_HUB_TOPIC:
 		case SETTXT_HUB_NAME:
-#ifdef _WIN32
-	#ifndef _SERVICE
-				if(bUpdateLocked == false) {
-		#ifndef _MSC_VER
-					hubForm->UpdateCaption();
-		# else
-                    pMainWindow->UpdateTitleBar();
-		#endif
-				}
-	#endif
+#ifdef _BUILD_GUI
+			if(bUpdateLocked == false) {
+                pMainWindow->UpdateTitleBar();
+			}
 #endif
             UpdateHubNameWelcome();
             UpdateHubName();
@@ -2427,46 +2387,8 @@ void SetMan::UpdateLanguage() {
 
     UpdateHubNameWelcome();
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			hubForm->ReadLanguage();
-		
-			if(BansForm != NULL) {
-				BansForm->ReadLanguage();
-			}
-		
-			if(infoForm != NULL) {
-				infoForm->ReadLanguage();
-			}
-		
-			if(newUserForm != NULL) {
-				newUserForm->ReadLanguage();
-			}
-		
-			if(ProfileManForm != NULL) {
-				ProfileManForm->ReadLanguage();
-			}
-		
-			if(RangeBansForm != NULL) {
-				RangeBansForm->ReadLanguage();
-			}
-		
-			if(RegsForm != NULL) {
-				RegsForm->ReadLanguage();
-			}
-		
-			if(ScriptMemoryForm != NULL) {
-				ScriptMemoryForm->ReadLanguage();
-			}
-		
-			if(UsersChatForm != NULL) {
-				UsersChatForm->ReadLanguage();
-			}
-		#else
-            pMainWindow->UpdateLanguage();
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    pMainWindow->UpdateLanguage();
 #endif
 }
 //---------------------------------------------------------------------------

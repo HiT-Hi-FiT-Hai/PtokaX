@@ -33,16 +33,6 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
-//---------------------------------------------------------------------------
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			#include "TUsersChatForm.h"
-		#endif
-	#endif
-//---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
 #endif
 //---------------------------------------------------------------------------
 static const uint32_t MYINFOLISTSIZE = 1024*256;
@@ -460,16 +450,6 @@ void classUsers::DisconnectAll() {
 
 		delete u;
 	}
-
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(UsersChatForm != NULL) {
-				UsersChatForm->userList->Items->Clear();
-			}
-		#endif
-	#endif
-#endif
 }
 //---------------------------------------------------------------------------
 

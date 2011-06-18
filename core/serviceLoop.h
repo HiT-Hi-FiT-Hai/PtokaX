@@ -24,15 +24,6 @@
 struct User;
 //---------------------------------------------------------------------------
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			static VOID CALLBACK LooperProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
-		#endif
-	#endif
-#endif
-//---------------------------------------------------------------------------
-
 class theLoop {
 private:
     struct AcceptedSocket {

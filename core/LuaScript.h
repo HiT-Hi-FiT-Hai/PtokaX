@@ -41,9 +41,9 @@ struct ScriptBot {
 
 struct ScriptTimer {
 #ifdef _WIN32
-    ScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &iLen, Script * cur);
+    ScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &iLen);
 #else
-	ScriptTimer(char * sFunctName, const size_t &iLen, Script * cur);
+	ScriptTimer(char * sFunctName, const size_t &iLen);
 #endif
     ~ScriptTimer();
 
@@ -114,16 +114,7 @@ User * ScriptGetUser(lua_State * L, const int &iTop, const char * sFunction);
 void ScriptError(Script * cur);
 
 #ifdef _WIN32
-    #ifndef _SERVICE
-        #ifndef _MSC_VER
-            VOID CALLBACK ScriptTimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
-            VOID CALLBACK ScriptTimerCustomProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
-        #else
-            void ScriptOnTimer(const UINT_PTR &uiTimerId);
-        #endif
-    #else
-        void ScriptOnTimer(const UINT_PTR &uiTimerId);
-    #endif
+    void ScriptOnTimer(const UINT_PTR &uiTimerId);
 #else
 	void ScriptOnTimer(ScriptTimer * AccTimer);
 #endif

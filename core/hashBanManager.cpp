@@ -29,17 +29,11 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
+#endif
 //---------------------------------------------------------------------------
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            #include "../gui.win/BansDialog.h"
-            #include "../gui.win/RangeBansDialog.h"
-		#endif
-	#endif
-//---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
+#ifdef _BUILD_GUI
+	#include "../gui.win/BansDialog.h"
+    #include "../gui.win/RangeBansDialog.h"
 #endif
 //---------------------------------------------------------------------------
 hashBanMan *hashBanManager = NULL;
@@ -227,14 +221,10 @@ void hashBanMan::Add(BanItem * Ban) {
 		}
     }
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            if(pBansDialog != NULL) {
-                pBansDialog->AddBan(Ban);
-            }
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+	if(pBansDialog != NULL) {
+        pBansDialog->AddBan(Ban);
+    }
 #endif
 }
 //---------------------------------------------------------------------------
@@ -358,14 +348,10 @@ void hashBanMan::Rem(BanItem * Ban, const bool &bFromGui/* = false*/) {
 		}
     }
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            if(bFromGui == false && pBansDialog != NULL) {
-                pBansDialog->RemoveBan(Ban);
-            }
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    if(bFromGui == false && pBansDialog != NULL) {
+        pBansDialog->RemoveBan(Ban);
+    }
 #endif
 }
 //---------------------------------------------------------------------------
@@ -546,14 +532,10 @@ void hashBanMan::AddRange(RangeBanItem *RangeBan) {
         RangeBanListE = RangeBan;
     }
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            if(pRangeBansDialog != NULL) {
-                pRangeBansDialog->AddRangeBan(RangeBan);
-            }
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    if(pRangeBansDialog != NULL) {
+        pRangeBansDialog->AddRangeBan(RangeBan);
+    }
 #endif
 }
 //---------------------------------------------------------------------------
@@ -575,14 +557,10 @@ void hashBanMan::RemRange(RangeBanItem *RangeBan, const bool &bFromGui/* = false
         RangeBan->next->prev = RangeBan->prev;
     }
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            if(bFromGui == false && pRangeBansDialog != NULL) {
-                pRangeBansDialog->RemoveRangeBan(RangeBan);
-            }
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    if(bFromGui == false && pRangeBansDialog != NULL) {
+        pRangeBansDialog->RemoveRangeBan(RangeBan);
+    }
 #endif
 }
 //---------------------------------------------------------------------------

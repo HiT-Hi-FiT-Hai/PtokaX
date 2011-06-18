@@ -26,11 +26,10 @@ struct RegUser;
 
 class RegisteredUsersDialog {
 public:
-    HWND m_hWnd;
-
-    HWND hWndWindowItems[5];
+    HWND hWndWindowItems[6];
 
     enum enmWindowItems {
+        WINDOW_HANDLE,
         BTN_ADD_REG,
         LV_REGS,
         GB_FILTER,
@@ -63,9 +62,10 @@ private:
     void OnColumnClick(const LPNMLISTVIEW &pListView);
     void RemoveRegs();
     void OnContextMenu(HWND hWindow, LPARAM lParam);
+    void ChangeReg();
 };
 //------------------------------------------------------------------------------
-extern RegisteredUsersDialog *pRegisteredUsersDialog;
+extern RegisteredUsersDialog * pRegisteredUsersDialog;
 //------------------------------------------------------------------------------
 
 #endif

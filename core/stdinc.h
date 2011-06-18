@@ -53,14 +53,10 @@
 	#endif
 	#include <winsock2.h>
 	#include <ws2tcpip.h>
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			#include <vcl.h>
-		#else
-			#include <commctrl.h>
-			#include <RichEdit.h>
-			#include <Windowsx.h>
-		#endif
+	#ifdef _BUILD_GUI
+		#include <commctrl.h>
+		#include <RichEdit.h>
+		#include <Windowsx.h>
 	#endif
 #endif
 #include <locale.h>
@@ -100,7 +96,7 @@
 #include "pxstring.h"
 //---------------------------------------------------------------------------
 #define PtokaXVersionString "0.4.1.2"
-#define BUILD_NUMBER "127"
+#define BUILD_NUMBER "162"
 #define sErrOutOfMem "[ERR] Out of memory..."
 
 #ifdef _WIN32
@@ -109,13 +105,9 @@
     #define NEW_LINE_CHARS "\n"
 #endif
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-        #ifdef _MSC_VER
-            extern HINSTANCE g_hInstance;
-            extern HWND g_hWndActiveDialog;
-        #endif
-    #endif
+#ifdef _BUILD_GUI
+    extern HINSTANCE g_hInstance;
+    extern HWND g_hWndActiveDialog;
 #endif
 //---------------------------------------------------------------------------
 

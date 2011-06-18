@@ -38,12 +38,10 @@ static ATOM atomAboutDialog = 0;
 //---------------------------------------------------------------------------
 
 AboutDialog::AboutDialog() {
-    m_hWnd = NULL;
-
     memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
 
-    hiSpider = (HICON)::LoadImage(g_hInstance, MAKEINTRESOURCE(IDR_MAINICONBIG), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
-    hiLua = (HICON)::LoadImage(g_hInstance, MAKEINTRESOURCE(IDR_LUAICON), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+    hSpider = (HICON)::LoadImage(g_hInstance, MAKEINTRESOURCE(IDR_MAINICONBIG), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+    hLua = (HICON)::LoadImage(g_hInstance, MAKEINTRESOURCE(IDR_LUAICON), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
 
     LOGFONT lfFont;
     ::GetObject((HFONT)::GetStockObject(DEFAULT_GUI_FONT), sizeof(LOGFONT), &lfFont);
@@ -56,15 +54,15 @@ AboutDialog::AboutDialog() {
 
     lfFont.lfWeight = FW_BOLD;
 
-    hfBigFont = ::CreateFontIndirect(&lfFont);
+    hBigFont = ::CreateFontIndirect(&lfFont);
 }
 //---------------------------------------------------------------------------
 
 AboutDialog::~AboutDialog() {
-    ::DeleteObject(hiSpider);
-    ::DeleteObject(hiLua);
+    ::DeleteObject(hSpider);
+    ::DeleteObject(hLua);
 
-    ::DeleteObject(hfBigFont);
+    ::DeleteObject(hBigFont);
 }
 //---------------------------------------------------------------------------
 
@@ -83,13 +81,13 @@ LRESULT AboutDialog::AboutDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch(uMsg) {
         case WM_PAINT: {
             RECT rcParent;
-            ::GetClientRect(m_hWnd, &rcParent);
+            ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
             PAINTSTRUCT ps;
-            HDC hdc = ::BeginPaint(m_hWnd, &ps);
-            ::DrawIconEx(hdc, 5, 5, hiSpider, 0, 0, 0, NULL, DI_NORMAL);
-            ::DrawIconEx(hdc, rcParent.right - 69, 5, hiLua, 0, 0, 0, NULL, DI_NORMAL);
-            ::EndPaint(m_hWnd, &ps);
+            HDC hdc = ::BeginPaint(hWndWindowItems[WINDOW_HANDLE], &ps);
+            ::DrawIconEx(hdc, 5, 5, hSpider, 0, 0, 0, NULL, DI_NORMAL);
+            ::DrawIconEx(hdc, rcParent.right - 69, 5, hLua, 0, 0, 0, NULL, DI_NORMAL);
+            ::EndPaint(hWndWindowItems[WINDOW_HANDLE], &ps);
             return 0;
         }
         case WM_NOTIFY:
@@ -100,14 +98,30 @@ LRESULT AboutDialog::AboutDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             }
             break;
         case WM_CLOSE:
-            ::EnableWindow(::GetParent(m_hWnd), TRUE);
+            ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
+            g_hWndActiveDialog = NULL;
             break;
         case WM_NCDESTROY:
             delete this;
-            return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+            return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
+        case WM_COMMAND:
+           switch(LOWORD(wParam)) {
+                case IDOK:
+                case IDCANCEL:
+                    ::PostMessage(hWndWindowItems[WINDOW_HANDLE], WM_CLOSE, 0, 0);
+					return 0;
+            }
+
+            break;
+        case WM_SETFOCUS: {
+            CHARRANGE cr = { 0, 0 };
+            ::SendMessage(hWndWindowItems[REDT_ABOUT], EM_EXSETSEL, 0, (LPARAM)&cr);
+            ::SetFocus(hWndWindowItems[REDT_ABOUT]);
+            return 0;
+        }
     }
 
-	return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+	return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
 }
 //------------------------------------------------------------------------------
 
@@ -132,34 +146,36 @@ void AboutDialog::DoModal(HWND hWndParent) {
     int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(443) / 2);
     int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(454) / 2);
 
-    m_hWnd = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomAboutDialog),
+    hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomAboutDialog),
         (string(LanguageManager->sTexts[LAN_ABOUT], (size_t)LanguageManager->ui16TextsLens[LAN_ABOUT]) + " PtokaX").c_str(),
         WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(443), ScaleGui(454),
         hWndParent, NULL, g_hInstance, NULL);
 
-    if(m_hWnd == NULL) {
+    if(hWndWindowItems[WINDOW_HANDLE] == NULL) {
         return;
     }
 
-    ::SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
-    ::SetWindowLongPtr(m_hWnd, GWLP_WNDPROC, (LONG_PTR)StaticAboutDialogProc);
+    g_hWndActiveDialog = hWndWindowItems[WINDOW_HANDLE];
 
-    ::GetClientRect(m_hWnd, &rcParent);
+    ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_USERDATA, (LONG_PTR)this);
+    ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_WNDPROC, (LONG_PTR)StaticAboutDialogProc);
+
+    ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
     hWndWindowItems[LBL_PTOKAX_VERSION] = ::CreateWindowEx(0, WC_STATIC, "PtokaX" PtokaXVersionString " [build " BUILD_NUMBER "]", WS_CHILD | WS_VISIBLE | SS_CENTER,
-        73, 10, ScaleGui(290), ScaleGui(25), m_hWnd, NULL, g_hInstance, NULL);
-    ::SendMessage(hWndWindowItems[LBL_PTOKAX_VERSION], WM_SETFONT, (WPARAM)hfBigFont, MAKELPARAM(TRUE, 0));
+        73, 10, ScaleGui(290), ScaleGui(25), hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
+    ::SendMessage(hWndWindowItems[LBL_PTOKAX_VERSION], WM_SETFONT, (WPARAM)hBigFont, MAKELPARAM(TRUE, 0));
 
     hWndWindowItems[LBL_LUA_VERSION] = ::CreateWindowEx(0, WC_STATIC, LUA_RELEASE, WS_CHILD | WS_VISIBLE | SS_CENTER, 73, ScaleGui(39), ScaleGui(290), ScaleGui(25),
-        m_hWnd, NULL, g_hInstance, NULL);
-    ::SendMessage(hWndWindowItems[LBL_LUA_VERSION], WM_SETFONT, (WPARAM)hfBigFont, MAKELPARAM(TRUE, 0));
+        hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
+    ::SendMessage(hWndWindowItems[LBL_LUA_VERSION], WM_SETFONT, (WPARAM)hBigFont, MAKELPARAM(TRUE, 0));
 
     hWndWindowItems[REDT_ABOUT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_CENTER | ES_READONLY,
-        5, ScaleGui(74), rcParent.right - 10, rcParent.bottom - ScaleGui(74) - 5, m_hWnd, NULL, g_hInstance, NULL);
+        5, ScaleGui(74), rcParent.right - 10, rcParent.bottom - ScaleGui(74) - 5, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[REDT_ABOUT], EM_SETBKGNDCOLOR, 0, ::GetSysColor(COLOR_3DFACE));
     ::SendMessage(hWndWindowItems[REDT_ABOUT], EM_AUTOURLDETECT, TRUE, 0);
     ::SendMessage(hWndWindowItems[REDT_ABOUT], EM_SETEVENTMASK, 0, (LPARAM)::SendMessage(hWndWindowItems[REDT_ABOUT], EM_GETEVENTMASK, 0, 0) | ENM_LINK);
-    ::SendMessage(hWndWindowItems[REDT_ABOUT], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+    ::SendMessage(hWndWindowItems[REDT_ABOUT], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
 
 	::SendMessage(hWndWindowItems[REDT_ABOUT], EM_REPLACESEL, FALSE, (LPARAM)"{\\rtf1\\ansi\\ansicpg1250{\\colortbl ;\\red0\\green0\\blue128;}"
     "PtokaX is a server-software for the Direct Connect P2P Network.\\par\n"
@@ -195,6 +211,6 @@ void AboutDialog::DoModal(HWND hWndParent) {
 
     ::EnableWindow(hWndParent, FALSE);
 
-    ::ShowWindow(m_hWnd, SW_SHOW);
+    ::ShowWindow(hWndWindowItems[WINDOW_HANDLE], SW_SHOW);
 }
 //---------------------------------------------------------------------------

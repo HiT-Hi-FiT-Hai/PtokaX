@@ -39,7 +39,7 @@ int iUpDownWidth = 17;
 int iOneLineGB = 17 + 23 + 8;
 int iOneLineOneChecksGB = 17 + 16 + 23 + 12;
 int iOneLineTwoChecksGB = 17 + (2 * 16) + 23 + 15;
-HFONT hfFont = NULL;
+HFONT hFont = NULL;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int ScaleGui(const int &iValue) {
@@ -244,3 +244,46 @@ int ListViewGetItemPosition(const HWND &hListView, void * pItem) {
 
 	return (int)::SendMessage(hListView, LVM_FINDITEM, (WPARAM)-1, (LPARAM)&lvFindInfo);
 }
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void ListViewGetMenuPos(const HWND &hListView, int &iX, int &iY) {
+    // -1, -1 is menu created by key. We need few tricks to show menu on correct position ;o)
+    if(iX == -1 && iY == -1) {
+        int iSel = (int)::SendMessage(hListView, LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
+
+        POINT pt = { 0 };
+        if((BOOL)::SendMessage(hListView, LVM_ISITEMVISIBLE, (WPARAM)iSel, 0) == FALSE) {
+            RECT rcList;
+            ::GetClientRect(hListView, &rcList);
+
+            ::SendMessage(hListView, LVM_GETITEMPOSITION, (WPARAM)iSel, (LPARAM)&pt);
+
+            pt.y = (pt.y < rcList.top) ? rcList.top : rcList.bottom;
+        } else {
+            RECT rcItem;
+            rcItem.left = LVIR_LABEL;
+            ::SendMessage(hListView, LVM_GETITEMRECT, (WPARAM)iSel, (LPARAM)&rcItem);
+
+            pt.x = rcItem.left;
+            pt.y = rcItem.top + ((rcItem.bottom - rcItem.top) / 2);
+        }
+
+        ::ClientToScreen(hListView, &pt);
+
+        iX = pt.x;
+        iY = pt.y;
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void ListViewSelectFirstItem(const HWND &hListView) {
+    if((int)::SendMessage(hListView, LVM_GETITEMCOUNT, 0, 0) != 0) {
+        LVITEM lvItem = { 0 };
+        lvItem.mask = LVIF_STATE;
+        lvItem.state = LVIS_SELECTED | LVIS_FOCUSED;
+        lvItem.stateMask = LVIS_SELECTED | LVIS_FOCUSED;
+
+        ::SendMessage(hListView, LVM_SETITEMSTATE, 0, (LPARAM)&lvItem);
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

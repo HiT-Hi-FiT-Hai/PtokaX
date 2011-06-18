@@ -43,8 +43,6 @@ static ATOM atomScriptEditorDialog = 0;
 //---------------------------------------------------------------------------
 
 ScriptEditorDialog::ScriptEditorDialog() {
-    m_hWnd = NULL;
-
     memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
 }
 //---------------------------------------------------------------------------
@@ -69,7 +67,7 @@ LRESULT ScriptEditorDialog::ScriptEditorDialogProc(UINT uMsg, WPARAM wParam, LPA
     switch(uMsg) {
         case WM_WINDOWPOSCHANGED: {
             RECT rcParent;
-            ::GetClientRect(m_hWnd, &rcParent);
+            ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
             ::SetWindowPos(hWndWindowItems[BTN_SAVE_SCRIPT], NULL, (rcParent.right / 3) * 2, rcParent.bottom - iEditHeight - 2,
                 rcParent.right - ((rcParent.right / 3) * 2) - 2, iEditHeight, SWP_NOZORDER);
@@ -82,12 +80,12 @@ LRESULT ScriptEditorDialog::ScriptEditorDialogProc(UINT uMsg, WPARAM wParam, LPA
         }
         case WM_COMMAND:
             switch(LOWORD(wParam)) {
-                case REDT_SCRIPT:
+                case (REDT_SCRIPT+100):
                     if(HIWORD(wParam) == EN_UPDATE) {
                         OnUpdate();
                     }
                     break;
-                case BTN_LOAD_SCRIPT:
+                case (BTN_LOAD_SCRIPT+100):
                     OnLoadScript();
                     return 0;
                 case BTN_CHECK_SYNTAX:
@@ -96,6 +94,10 @@ LRESULT ScriptEditorDialog::ScriptEditorDialogProc(UINT uMsg, WPARAM wParam, LPA
                 case BTN_SAVE_SCRIPT:
                     OnSaveScript();
                     return 0;
+                case IDOK:
+                case IDCANCEL:
+                    ::PostMessage(hWndWindowItems[WINDOW_HANDLE], WM_CLOSE, 0, 0);
+					return 0;
             }
 
             if(RichEditCheckMenuCommands(hWndWindowItems[REDT_SCRIPT], LOWORD(wParam)) == true) {
@@ -122,15 +124,33 @@ LRESULT ScriptEditorDialog::ScriptEditorDialogProc(UINT uMsg, WPARAM wParam, LPA
             return 0;
         }
         case WM_CLOSE:
-            ::EnableWindow(::GetParent(m_hWnd), TRUE);
+            ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
+            g_hWndActiveDialog = NULL;
             break;
         case WM_NCDESTROY:
             delete this;
-            return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+            return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
+        case WM_SETFOCUS: {
+            CHARRANGE cr = { 0, 0 };
+            ::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_EXSETSEL, 0, (LPARAM)&cr);
+            ::SetFocus(hWndWindowItems[REDT_SCRIPT]);
+            return 0;
+        }
     }
 
-	return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+	return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
 }
+//------------------------------------------------------------------------------
+static WNDPROC wpOldMultiEditProc = NULL;
+
+static LRESULT CALLBACK MultiEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return 0;
+    }
+
+    return ::CallWindowProc(wpOldMultiEditProc, hWnd, uMsg, wParam, lParam);
+}
+
 //------------------------------------------------------------------------------
 
 void ScriptEditorDialog::DoModal(HWND hWndParent) {
@@ -154,27 +174,29 @@ void ScriptEditorDialog::DoModal(HWND hWndParent) {
     int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(443) / 2);
     int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(454) / 2);
 
-    m_hWnd = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomScriptEditorDialog), LanguageManager->sTexts[LAN_SCRIPT_EDITOR],
+    hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomScriptEditorDialog), LanguageManager->sTexts[LAN_SCRIPT_EDITOR],
         WS_POPUP | WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(443), ScaleGui(454),
         hWndParent, NULL, g_hInstance, NULL);
 
-    if(m_hWnd == NULL) {
+    if(hWndWindowItems[WINDOW_HANDLE] == NULL) {
         return;
     }
 
-    ::SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
-    ::SetWindowLongPtr(m_hWnd, GWLP_WNDPROC, (LONG_PTR)StaticScriptEditorDialogProc);
+    g_hWndActiveDialog = hWndWindowItems[WINDOW_HANDLE];
 
-    ::GetClientRect(m_hWnd, &rcParent);
+    ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_USERDATA, (LONG_PTR)this);
+    ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_WNDPROC, (LONG_PTR)StaticScriptEditorDialogProc);
+
+    ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
     hWndWindowItems[REDT_SCRIPT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_HSCROLL | WS_VSCROLL | ES_AUTOVSCROLL | ES_MULTILINE,
-        ScaleGui(40), 0, rcParent.right - ScaleGui(40), rcParent.bottom - iEditHeight - 4, m_hWnd, (HMENU)REDT_SCRIPT, g_hInstance, NULL);
+        ScaleGui(40), 0, rcParent.right - ScaleGui(40), rcParent.bottom - iEditHeight - 4, hWndWindowItems[WINDOW_HANDLE], (HMENU)(REDT_SCRIPT+100), g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_EXLIMITTEXT, 0, (LPARAM)16777216);
     ::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_AUTOURLDETECT, TRUE, 0);
     ::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_SETEVENTMASK, 0, (LPARAM)::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_GETEVENTMASK, 0, 0) | ENM_LINK);
 
     hWndWindowItems[BTN_LOAD_SCRIPT] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_LOAD_SCRIPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        2, rcParent.bottom - iEditHeight - 2, (rcParent.right / 3) - 2, iEditHeight, m_hWnd, (HMENU)BTN_LOAD_SCRIPT, g_hInstance, NULL);
+        2, rcParent.bottom - iEditHeight - 2, (rcParent.right / 3) - 2, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)(BTN_LOAD_SCRIPT+100), g_hInstance, NULL);
 
     {
         DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON;
@@ -183,31 +205,34 @@ void ScriptEditorDialog::DoModal(HWND hWndParent) {
         }
 
         hWndWindowItems[BTN_CHECK_SYNTAX] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_CHECK_SYNTAX], dwStyle,
-            (rcParent.right / 3) + 1, rcParent.bottom - iEditHeight - 2, (rcParent.right / 3) - 2, iEditHeight, m_hWnd, (HMENU)BTN_CHECK_SYNTAX, g_hInstance, NULL);
+            (rcParent.right / 3) + 1, rcParent.bottom - iEditHeight - 2, (rcParent.right / 3) - 2, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)BTN_CHECK_SYNTAX, g_hInstance, NULL);
     }
 
     hWndWindowItems[BTN_SAVE_SCRIPT] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_SAVE_SCRIPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        (rcParent.right / 3) * 2, rcParent.bottom - iEditHeight - 2, rcParent.right - ((rcParent.right / 3) * 2) - 2, iEditHeight, m_hWnd, (HMENU)BTN_SAVE_SCRIPT, g_hInstance, NULL);
+        (rcParent.right / 3) * 2, rcParent.bottom - iEditHeight - 2, rcParent.right - ((rcParent.right / 3) * 2) - 2, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)BTN_SAVE_SCRIPT,
+        g_hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
         if(hWndWindowItems[ui8i] == NULL) {
             return;
         }
 
-        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
+
+    wpOldMultiEditProc = (WNDPROC)::SetWindowLongPtr(hWndWindowItems[REDT_SCRIPT], GWLP_WNDPROC, (LONG_PTR)MultiEditProc);
 
     ::EnableWindow(hWndParent, FALSE);
 
-    ::ShowWindow(m_hWnd, SW_SHOW);
+    ::ShowWindow(hWndWindowItems[WINDOW_HANDLE], SW_SHOW);
 }
 //------------------------------------------------------------------------------
 
-void ScriptEditorDialog::LoadScript(const string &sScript) {
-    FILE * pFile = fopen(sScript.c_str(), "rb");
+void ScriptEditorDialog::LoadScript(char * sScript) {
+    FILE * pFile = fopen(sScript, "rb");
 
     if(pFile == NULL) {
-        ::MessageBox(m_hWnd, (string(LanguageManager->sTexts[LAN_FAILED_TO_OPEN], (size_t)LanguageManager->ui16TextsLens[LAN_FAILED_TO_OPEN]) + ": "+ sScript).c_str(),
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(LanguageManager->sTexts[LAN_FAILED_TO_OPEN], (size_t)LanguageManager->ui16TextsLens[LAN_FAILED_TO_OPEN]) + ": "+ sScript).c_str(),
             LanguageManager->sTexts[LAN_ERROR], MB_OK);
         return;
     }
@@ -219,7 +244,7 @@ void ScriptEditorDialog::LoadScript(const string &sScript) {
     char * sFile = (char *)malloc(lLenght+1);
 
     if(sFile == NULL) {
-        ::MessageBox(m_hWnd, (string(LanguageManager->sTexts[LAN_FAILED_TO_OPEN], (size_t)LanguageManager->ui16TextsLens[LAN_FAILED_TO_OPEN]) + ": "+ sScript).c_str(),
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(LanguageManager->sTexts[LAN_FAILED_TO_OPEN], (size_t)LanguageManager->ui16TextsLens[LAN_FAILED_TO_OPEN]) + ": "+ sScript).c_str(),
             LanguageManager->sTexts[LAN_ERROR], MB_OK);
         fclose(pFile);
         return;
@@ -241,7 +266,7 @@ void ScriptEditorDialog::LoadScript(const string &sScript) {
 
 void ScriptEditorDialog::OnContextMenu(HWND hWindow, LPARAM lParam) {
     if(hWindow == hWndWindowItems[REDT_SCRIPT]) {
-        RichEditPopupMenu(hWndWindowItems[REDT_SCRIPT], m_hWnd, lParam);
+        RichEditPopupMenu(hWndWindowItems[REDT_SCRIPT], hWndWindowItems[WINDOW_HANDLE], lParam);
     }
 }
 //------------------------------------------------------------------------------
@@ -252,7 +277,7 @@ void ScriptEditorDialog::OnUpdate() {
 
     int iHeight = rcScript.bottom - rcScript.top;
 
-    HDC hDC = ::GetDC(m_hWnd);
+    HDC hDC = ::GetDC(hWndWindowItems[WINDOW_HANDLE]);
 
     RECT rect = { 0, 0, ScaleGui(38), iHeight + 5 };
 
@@ -276,7 +301,7 @@ void ScriptEditorDialog::OnUpdate() {
     int iFirstCharacterOnLastLine = (long)::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_CHARFROMPOS, 0, (LPARAM)&ptl);
     int iLastVisibleLine = (long)::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_EXLINEFROMCHAR, 0, iFirstCharacterOnLastLine);
 
-    HGDIOBJ hOldObj = ::SelectObject(hDC, hfFont);
+    HGDIOBJ hOldObj = ::SelectObject(hDC, hFont);
 
     SIZE sz = { 0 };
     ::GetTextExtentPoint32(hDC, "1", 1, &sz);
@@ -313,7 +338,7 @@ void ScriptEditorDialog::OnLoadScript() {
 
     OPENFILENAME OpenFileName = { 0 };
     OpenFileName.lStructSize = sizeof(OPENFILENAME);
-    OpenFileName.hwndOwner = m_hWnd;
+    OpenFileName.hwndOwner = hWndWindowItems[WINDOW_HANDLE];
     OpenFileName.lpstrFilter = "Lua Scripts\0*.lua\0All Files\0*.*\0\0";
     OpenFileName.nFilterIndex = 1;
     OpenFileName.lpstrFile = buf;
@@ -334,7 +359,7 @@ void ScriptEditorDialog::OnCheckSyntax() {
     char * sBuf = (char *)malloc(iAllocLen+1);
 
     if(sBuf == NULL) {
-        ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_FAILED_TO_CHECK_SYNTAX], LanguageManager->sTexts[LAN_ERROR], MB_OK);
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_FAILED_TO_CHECK_SYNTAX], LanguageManager->sTexts[LAN_ERROR], MB_OK);
         return;
     }
 
@@ -344,7 +369,7 @@ void ScriptEditorDialog::OnCheckSyntax() {
 	luaL_openlibs(L);
 
 	if(luaL_dostring(L, sBuf) == 0) {
-		::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_NO_SYNERR_IN_SCRIPT], sTitle.c_str(), MB_OK);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_NO_SYNERR_IN_SCRIPT], sTitle.c_str(), MB_OK);
 		lua_close(L);
 	} else {
 		size_t iLen = 0;
@@ -356,7 +381,7 @@ void ScriptEditorDialog::OnCheckSyntax() {
 
         RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS], sTmp.c_str());
 
-        ::MessageBox(m_hWnd, sTmp.c_str(), LanguageManager->sTexts[LAN_ERROR], MB_OK);
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], sTmp.c_str(), LanguageManager->sTexts[LAN_ERROR], MB_OK);
 
 		lua_close(L);
 	}
@@ -376,7 +401,7 @@ void ScriptEditorDialog::OnSaveScript() {
 
     OPENFILENAME OpenFileName = { 0 };
     OpenFileName.lStructSize = sizeof(OPENFILENAME);
-    OpenFileName.hwndOwner = m_hWnd;
+    OpenFileName.hwndOwner = hWndWindowItems[WINDOW_HANDLE];
     OpenFileName.lpstrFilter = "Lua Scripts\0*.lua\0All Files\0*.*\0\0";
     OpenFileName.nFilterIndex = 1;
     OpenFileName.lpstrFile = buf;
@@ -394,7 +419,7 @@ void ScriptEditorDialog::OnSaveScript() {
     char * sBuf = (char *)malloc(iAllocLen+1);
 
     if(sBuf == NULL) {
-        ::MessageBox(m_hWnd, (string(LanguageManager->sTexts[LAN_FAILED_TO_SAVE], (size_t)LanguageManager->ui16TextsLens[LAN_FAILED_TO_SAVE]) + ": "+ buf).c_str(),
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(LanguageManager->sTexts[LAN_FAILED_TO_SAVE], (size_t)LanguageManager->ui16TextsLens[LAN_FAILED_TO_SAVE]) + ": "+ buf).c_str(),
             LanguageManager->sTexts[LAN_ERROR], MB_OK);
         return;
     }
@@ -404,7 +429,7 @@ void ScriptEditorDialog::OnSaveScript() {
     FILE * pFile = fopen(buf, "wb");
 
     if(pFile == NULL) {
-        ::MessageBox(m_hWnd, (string(LanguageManager->sTexts[LAN_FAILED_TO_SAVE], (size_t)LanguageManager->ui16TextsLens[LAN_FAILED_TO_SAVE]) + ": "+ buf).c_str(),
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(LanguageManager->sTexts[LAN_FAILED_TO_SAVE], (size_t)LanguageManager->ui16TextsLens[LAN_FAILED_TO_SAVE]) + ": "+ buf).c_str(),
             LanguageManager->sTexts[LAN_ERROR], MB_OK);
         free(sBuf);
         return;

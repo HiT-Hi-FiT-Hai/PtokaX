@@ -23,20 +23,9 @@
 //---------------------------------------------------------------------------
 class ServerThread;
 //---------------------------------------------------------------------------
-
 #ifdef _WIN32
-	#ifndef _SERVICE
-        #ifndef _MSC_VER
-            static VOID CALLBACK SecTimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
-            static VOID CALLBACK RegTimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
-        #else
-            void ServerOnSecTimer();
-            void ServerOnRegTimer();
-        #endif
-    #else
-        void ServerOnSecTimer();
-        void ServerOnRegTimer();
-    #endif
+    void ServerOnSecTimer();
+    void ServerOnRegTimer();
 #endif
 //---------------------------------------------------------------------------
 void ServerInitialize();
@@ -67,15 +56,10 @@ extern time_t starttime;
 extern uint64_t iMins, iHours, iDays;
 extern bool bServerRunning, bServerTerminated, bIsRestart, bIsClose;
 #ifdef _WIN32
-	#ifdef _SERVICE
+	extern UINT_PTR sectimer;
+    extern UINT_PTR regtimer;
+	#ifndef _BUILD_GUI
 	    extern bool bService;
-	    extern UINT_PTR sectimer;
-        extern UINT_PTR regtimer;
-    #else
-        #ifdef _MSC_VER
-            extern UINT_PTR sectimer;
-            extern UINT_PTR regtimer;
-        #endif
 	#endif
 #else
 	extern bool bDaemon;

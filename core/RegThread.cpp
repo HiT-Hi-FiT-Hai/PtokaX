@@ -324,14 +324,6 @@ void RegThread::Resume() {
 //---------------------------------------------------------------------------
 
 void RegThread::Run() {
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			try {
-		#endif
-	#endif
-#endif
-
 #ifndef _WIN32
     struct timespec sleeptime = { 0 };
     sleeptime.tv_sec = 0;
@@ -472,25 +464,6 @@ void RegThread::Run() {
 
     RegSockListS = NULL;
 	RegSockListE = NULL;
-
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			} catch(Exception &e) {
-				AppendSpecialLog("[ERR] Exception in hublist reg thread: "+
-					string(e.Message.c_str(), e.Message.Length()));
-				Application->ShowException(&e);
-			} catch(...) {
-				try {
-					throw Exception("");
-				}
-				catch(Exception &exception) {
-					Application->ShowException(&exception);
-				}
-			}
-		#endif
-	#endif
-#endif
 }
 //---------------------------------------------------------------------------
 

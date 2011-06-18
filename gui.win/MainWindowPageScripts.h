@@ -60,7 +60,7 @@ private:
     LRESULT MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     void OnContextMenu(HWND hWindow, LPARAM lParam);
-    ScriptEditorDialog * OpenScriptEditor();
+    void OpenScriptEditor(char * sScript = NULL);
     void RefreshScripts();
     void OnItemChanged(const LPNMLISTVIEW &pListView);
     void OnDoubleClick(const LPNMITEMACTIVATE &pItemActivate);
@@ -74,7 +74,7 @@ private:
     void ClearMemUsage(uint8_t ui8ScriptId);
 };
 //------------------------------------------------------------------------------
-extern MainWindowPageScripts *pMainWindowPageScripts;
+extern MainWindowPageScripts * pMainWindowPageScripts;
 //---------------------------------------------------------------------------
 
 #endif

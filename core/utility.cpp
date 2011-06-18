@@ -30,19 +30,11 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
+#endif
 //---------------------------------------------------------------------------
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			#include "TUsersChatForm.h"
-		#else
-			#include "../gui.win/GuiUtil.h"
-            #include "../gui.win/MainWindowPageUsersChat.h"
-		#endif
-	#endif
-//---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
+#ifdef _BUILD_GUI
+	#include "../gui.win/GuiUtil.h"
+    #include "../gui.win/MainWindowPageUsersChat.h"
 #endif
 //---------------------------------------------------------------------------
 static const int MAX_PAT_SIZE = 64;
@@ -1207,23 +1199,15 @@ void AppendSpecialLog(const string & sData) {
 	        return sPath;
 	    }
 	}
-	//---------------------------------------------------------------------------
+#endif
+//---------------------------------------------------------------------------
 
-	#ifdef _SERVICE
-		void Memo(const string & /*sMessage*/) {
-	#else
-		void Memo(const string & sMessage) {
-			#ifndef _MSC_VER
-				if(UsersChatForm != NULL) {
-					UsersChatForm->Memo(sMessage);
-				}
-            #else
-                RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], sMessage.c_str());
-			#endif
-	#endif
-	}
+#ifdef _BUILD_GUI
+	void Memo(const string &sMessage) {
+        RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], sMessage.c_str());
+    }
 #else
-	void Memo(const string & /*sMessage*/) {
+	void Memo(const string &/*sMessage*/) {
 	    // ...
 	}
 #endif

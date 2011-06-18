@@ -64,7 +64,7 @@ private:
     void OnSelChanged();
 };
 //------------------------------------------------------------------------------
-extern MainWindow *pMainWindow;
+extern MainWindow * pMainWindow;
 //------------------------------------------------------------------------------
 
 #endif

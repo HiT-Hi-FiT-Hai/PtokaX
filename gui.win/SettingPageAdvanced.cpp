@@ -266,7 +266,7 @@ bool SettingPageAdvanced::CreateSettingPage(HWND hOwner) {
             return false;
         }
 
-        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
 
     ::EnableWindow(hWndPageItems[BTN_MINIMIZE_ON_STARTUP], SettingManager->bBools[SETBOOL_ENABLE_TRAY_ICON] == true ? TRUE : FALSE);

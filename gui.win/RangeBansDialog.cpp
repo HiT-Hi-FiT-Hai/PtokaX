@@ -45,8 +45,6 @@ static WNDPROC wpOldEditProc = NULL;
 //---------------------------------------------------------------------------
 
 RangeBansDialog::RangeBansDialog() {
-    pRangeBansDialog = this;
-
     memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
 
     iFilterColumn = iSortColumn = 0;
@@ -75,7 +73,7 @@ LRESULT RangeBansDialog::RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lP
     switch(uMsg) {
         case WM_WINDOWPOSCHANGED: {
             RECT rcParent;
-            ::GetClientRect(hWndWindowItems[WND_THIS], &rcParent);
+            ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
             ::SetWindowPos(hWndWindowItems[BTN_CLEAR_RANGE_PERM_BANS], NULL, (rcParent.right / 2) + 1, rcParent.bottom - iEditHeight - 2,
                 rcParent.right - (rcParent.right / 2) - 3, iEditHeight, SWP_NOZORDER);
@@ -91,25 +89,15 @@ LRESULT RangeBansDialog::RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lP
         }
         case WM_COMMAND:
             switch(LOWORD(wParam)) {
-                case BTN_ADD_RANGE_BAN: {
+                case (BTN_ADD_RANGE_BAN+100): {
 
-                    RangeBanDialog * pRangeBanDialog = new RangeBanDialog();
-                    pRangeBanDialog->DoModal(hWndWindowItems[WND_THIS]);
+                    pRangeBanDialog = new RangeBanDialog();
+                    pRangeBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE]);
 
                     return 0;
                 }
                 case IDC_CHANGE_RANGE_BAN: {
-                    int iSel = (int)::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
-
-                    if(iSel == -1) {
-                        return 0;
-                    }
-
-                    RangeBanItem * pRangeBan = (RangeBanItem *)ListViewGetItem(hWndWindowItems[LV_RANGE_BANS], iSel);
-
-                    RangeBanDialog * pRangeBanDialog = new RangeBanDialog();
-                    pRangeBanDialog->DoModal(hWndWindowItems[WND_THIS], pRangeBan);
-
+                    ChangeRangeBan();
                     return 0;
                 }
                 case IDC_REMOVE_RANGE_BANS:
@@ -124,7 +112,7 @@ LRESULT RangeBansDialog::RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lP
 
                     break;
                 case BTN_CLEAR_RANGE_TEMP_BANS:
-                    if(::MessageBox(hWndWindowItems[WND_THIS], (string(LanguageManager->sTexts[LAN_ARE_YOU_SURE], (size_t)LanguageManager->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(),
+                    if(::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(LanguageManager->sTexts[LAN_ARE_YOU_SURE], (size_t)LanguageManager->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(),
                         sTitle.c_str(), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO) {
                         return 0;
                     }
@@ -134,7 +122,7 @@ LRESULT RangeBansDialog::RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lP
 
                     return 0;
                 case BTN_CLEAR_RANGE_PERM_BANS:
-                    if(::MessageBox(hWndWindowItems[WND_THIS], (string(LanguageManager->sTexts[LAN_ARE_YOU_SURE], (size_t)LanguageManager->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(),
+                    if(::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(LanguageManager->sTexts[LAN_ARE_YOU_SURE], (size_t)LanguageManager->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(),
                         sTitle.c_str(), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO) {
                         return 0;
                     }
@@ -143,6 +131,23 @@ LRESULT RangeBansDialog::RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lP
                     AddAllRangeBans();
 
                     return 0;
+                case IDOK: { // NM_RETURN
+                    HWND hWndFocus = ::GetFocus();
+
+                    if(hWndFocus == hWndWindowItems[LV_RANGE_BANS]) {
+                        ChangeRangeBan();
+                        return 0;
+                    } else if(hWndFocus == hWndWindowItems[EDT_FILTER]) {
+                        FilterRangeBans();
+                        return 0;
+                    }
+
+                    break;
+                }
+                case IDCANCEL:
+                    ::PostMessage(hWndWindowItems[WINDOW_HANDLE], WM_CLOSE, 0, 0);
+					return 0;
+
             }
 
             break;
@@ -160,8 +165,8 @@ LRESULT RangeBansDialog::RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lP
 
                     RangeBanItem * pRangeBan = (RangeBanItem *)ListViewGetItem(hWndWindowItems[LV_RANGE_BANS], ((LPNMITEMACTIVATE)lParam)->iItem);
 
-                    RangeBanDialog * pRangeBanDialog = new RangeBanDialog();
-                    pRangeBanDialog->DoModal(hWndWindowItems[WND_THIS], pRangeBan);
+                    pRangeBanDialog = new RangeBanDialog();
+                    pRangeBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pRangeBan);
 
                     return 0;
                 }
@@ -176,14 +181,29 @@ LRESULT RangeBansDialog::RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lP
             return 0;
         }
         case WM_CLOSE:
-            ::EnableWindow(::GetParent(hWndWindowItems[WND_THIS]), TRUE);
+            ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
             break;
         case WM_NCDESTROY:
             delete this;
-            return ::DefWindowProc(hWndWindowItems[WND_THIS], uMsg, wParam, lParam);
+            return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
+        case WM_SETFOCUS:
+            if((UINT)::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_GETSELECTEDCOUNT, 0, 0) != 0) {
+                ::SetFocus(hWndWindowItems[LV_RANGE_BANS]);
+            } else {
+                ::SetFocus(hWndWindowItems[EDT_FILTER]);
+            }
+
+            return 0;
+        case WM_ACTIVATE:
+            if(LOWORD(wParam) != WA_INACTIVE) {
+                g_hWndActiveDialog = hWndWindowItems[WINDOW_HANDLE];
+            }
+
+            break;
+
     }
 
-	return ::DefWindowProc(hWndWindowItems[WND_THIS], uMsg, wParam, lParam);
+	return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
 }
 //------------------------------------------------------------------------------
 
@@ -218,43 +238,45 @@ void RangeBansDialog::DoModal(HWND hWndParent) {
     int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(443) / 2);
     int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(454) / 2);
 
-    hWndWindowItems[WND_THIS] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomRangeBansDialog), LanguageManager->sTexts[LAN_RANGE_BANS],
+    hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomRangeBansDialog), LanguageManager->sTexts[LAN_RANGE_BANS],
         WS_POPUP | WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(443), ScaleGui(454),
         hWndParent, NULL, g_hInstance, NULL);
 
-    if(hWndWindowItems[WND_THIS] == NULL) {
+    if(hWndWindowItems[WINDOW_HANDLE] == NULL) {
         return;
     }
 
-    ::SetWindowLongPtr(hWndWindowItems[WND_THIS], GWLP_USERDATA, (LONG_PTR)this);
-    ::SetWindowLongPtr(hWndWindowItems[WND_THIS], GWLP_WNDPROC, (LONG_PTR)StaticRangeBansDialogProc);
+    g_hWndActiveDialog = hWndWindowItems[WINDOW_HANDLE];
 
-    ::GetClientRect(hWndWindowItems[WND_THIS], &rcParent);
+    ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_USERDATA, (LONG_PTR)this);
+    ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_WNDPROC, (LONG_PTR)StaticRangeBansDialogProc);
+
+    ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
     hWndWindowItems[BTN_ADD_RANGE_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ADD_NEW_RANGE_BAN], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        2, 2, rcParent.right - 4, iEditHeight, hWndWindowItems[WND_THIS], (HMENU)BTN_ADD_RANGE_BAN, g_hInstance, NULL);
+        2, 2, rcParent.right - 4, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)(BTN_ADD_RANGE_BAN+100), g_hInstance, NULL);
 
-    hWndWindowItems[LV_RANGE_BANS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, "", WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SHOWSELALWAYS,
-        3, iEditHeight + 6, rcParent.right - 6, rcParent.bottom - iOneLineGB - (2 * iEditHeight) - 14, hWndWindowItems[WND_THIS], NULL, g_hInstance, NULL);
+    hWndWindowItems[LV_RANGE_BANS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | LVS_REPORT | LVS_SHOWSELALWAYS,
+        3, iEditHeight + 6, rcParent.right - 6, rcParent.bottom - iOneLineGB - (2 * iEditHeight) - 14, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_LABELTIP);
 
     hWndWindowItems[GB_FILTER] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_FILTER_RANGE_BANS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, rcParent.bottom - iEditHeight - iOneLineGB - 6, rcParent.right - 6, iOneLineGB, hWndWindowItems[WND_THIS], NULL, g_hInstance, NULL);
+        3, rcParent.bottom - iEditHeight - iOneLineGB - 6, rcParent.right - 6, iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
 
     hWndWindowItems[EDT_FILTER] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, (rcParent.bottom - iEditHeight - iOneLineGB - 6) + iGroupBoxMargin, (rcParent.right / 2) - 14, iEditHeight, hWndWindowItems[WND_THIS], (HMENU)EDT_FILTER, g_hInstance, NULL);
+        11, (rcParent.bottom - iEditHeight - iOneLineGB - 6) + iGroupBoxMargin, (rcParent.right / 2) - 14, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)EDT_FILTER, g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_FILTER], EM_SETLIMITTEXT, 64, 0);
 
     hWndWindowItems[CB_FILTER] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
         (rcParent.right / 2) + 3, (rcParent.bottom - iEditHeight - iOneLineGB - 6) + iGroupBoxMargin, rcParent.right - (rcParent.right / 2) - 14, iEditHeight,
-        hWndWindowItems[WND_THIS], (HMENU)CB_FILTER,
+        hWndWindowItems[WINDOW_HANDLE], (HMENU)CB_FILTER,
         g_hInstance, NULL);
 
     hWndWindowItems[BTN_CLEAR_RANGE_TEMP_BANS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_CLEAR_TEMP_RANGE_BANS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        2, rcParent.bottom - iEditHeight - 2, (rcParent.right / 2) - 2, iEditHeight, hWndWindowItems[WND_THIS], (HMENU)BTN_CLEAR_RANGE_TEMP_BANS, g_hInstance, NULL);
+        2, rcParent.bottom - iEditHeight - 2, (rcParent.right / 2) - 2, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)BTN_CLEAR_RANGE_TEMP_BANS, g_hInstance, NULL);
 
     hWndWindowItems[BTN_CLEAR_RANGE_PERM_BANS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_CLEAR_PERM_RANGE_BANS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        (rcParent.right / 2) + 1, rcParent.bottom - iEditHeight - 2, rcParent.right - (rcParent.right / 2) - 3, iEditHeight, hWndWindowItems[WND_THIS],
+        (rcParent.right / 2) + 1, rcParent.bottom - iEditHeight - 2, rcParent.right - (rcParent.right / 2) - 3, iEditHeight, hWndWindowItems[WINDOW_HANDLE],
         (HMENU)BTN_CLEAR_RANGE_PERM_BANS, g_hInstance, NULL);
 
     for(uint8_t ui8i = 1; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
@@ -262,7 +284,7 @@ void RangeBansDialog::DoModal(HWND hWndParent) {
             return;
         }
 
-        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
 
     wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndWindowItems[EDT_FILTER], GWLP_WNDPROC, (LONG_PTR)EditProc);
@@ -306,7 +328,7 @@ void RangeBansDialog::DoModal(HWND hWndParent) {
 
     ::EnableWindow(hWndParent, FALSE);
 
-    ::ShowWindow(hWndWindowItems[WND_THIS], SW_SHOW);
+    ::ShowWindow(hWndWindowItems[WINDOW_HANDLE], SW_SHOW);
 }
 //------------------------------------------------------------------------------
 
@@ -333,6 +355,8 @@ void RangeBansDialog::AddAllRangeBans() {
 
         AddRangeBan(curRangeBan);
     }
+
+    ListViewSelectFirstItem(hWndWindowItems[LV_RANGE_BANS]);
 
     ::SendMessage(hWndWindowItems[LV_RANGE_BANS], WM_SETREDRAW, (WPARAM)TRUE, 0);
 }
@@ -436,7 +460,7 @@ int CALLBACK RangeBansDialog::SortCompareRangeBans(LPARAM lParam1, LPARAM lParam
 //------------------------------------------------------------------------------
 
 void RangeBansDialog::RemoveRangeBans() {
-    if(::MessageBox(hWndWindowItems[WND_THIS], (string(LanguageManager->sTexts[LAN_ARE_YOU_SURE], (size_t)LanguageManager->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(), sTitle.c_str(),
+    if(::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(LanguageManager->sTexts[LAN_ARE_YOU_SURE], (size_t)LanguageManager->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(), sTitle.c_str(),
         MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO) {
         return;
     }
@@ -500,6 +524,8 @@ void RangeBansDialog::FilterRangeBans() {
                 AddRangeBan(curRangeBan);
             }
         }
+
+        ListViewSelectFirstItem(hWndWindowItems[LV_RANGE_BANS]);
 
         ::SendMessage(hWndWindowItems[LV_RANGE_BANS], WM_SETREDRAW, (WPARAM)TRUE, 0);
     }
@@ -576,35 +602,24 @@ void RangeBansDialog::OnContextMenu(HWND hWindow, LPARAM lParam) {
     int iX = GET_X_LPARAM(lParam);
     int iY = GET_Y_LPARAM(lParam);
 
-    // -1, -1 is menu created by key. We need few tricks to show menu on correct position ;o)
-    if(iX == -1 && iY == -1) {
-        int iSel = (int)::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
+    ListViewGetMenuPos(hWndWindowItems[LV_RANGE_BANS], iX, iY);
 
-        POINT pt = { 0 };
-        if((BOOL)::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_ISITEMVISIBLE, (WPARAM)iSel, 0) == FALSE) {
-            RECT rcList;
-            ::GetClientRect(hWndWindowItems[LV_RANGE_BANS], &rcList);
-
-            ::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_GETITEMPOSITION, (WPARAM)iSel, (LPARAM)&pt);
-
-            pt.y = (pt.y < rcList.top) ? rcList.top : rcList.bottom;
-        } else {
-            RECT rcItem;
-            rcItem.left = LVIR_LABEL;
-            ::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_GETITEMRECT, (WPARAM)iSel, (LPARAM)&rcItem);
-
-            pt.x = rcItem.left;
-            pt.y = rcItem.top + ((rcItem.bottom - rcItem.top) / 2);
-        }
-
-        ::ClientToScreen(hWndWindowItems[LV_RANGE_BANS], &pt);
-
-        iX = pt.x;
-        iY = pt.y;
-    }
-
-    ::TrackPopupMenuEx(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, iX, iY, hWndWindowItems[WND_THIS], NULL);
+    ::TrackPopupMenuEx(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, iX, iY, hWndWindowItems[WINDOW_HANDLE], NULL);
 
     ::DestroyMenu(hMenu);
 }
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void RangeBansDialog::ChangeRangeBan() {
+    int iSel = (int)::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
+
+    if(iSel == -1) {
+        return;
+    }
+
+    RangeBanItem * pRangeBan = (RangeBanItem *)ListViewGetItem(hWndWindowItems[LV_RANGE_BANS], iSel);
+
+    pRangeBanDialog = new RangeBanDialog();
+    pRangeBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pRangeBan);
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

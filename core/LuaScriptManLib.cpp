@@ -33,18 +33,9 @@
 #endif
 //---------------------------------------------------------------------------
 #include "LuaScript.h"
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            #include "../gui.win/MainWindowPageScripts.h"
-		#else
-			#include "TScriptsForm.h"
-		#endif
-	#endif
 //---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
+#ifdef _BUILD_GUI
+    #include "../gui.win/MainWindowPageScripts.h"
 #endif
 //---------------------------------------------------------------------------
 
@@ -156,26 +147,8 @@ static int Move(lua_State * L, const bool &bUp) {
 
 	ScriptManager->MoveScript(ui8idx, bUp);
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            pMainWindowPageScripts->MoveScript(ui8idx, bUp);
-		#else
-			if(ScriptsForm != NULL && ScriptsForm->ScriptFiles->Count != 0) {
-				int idx = ScriptsForm->ScriptFiles->ItemIndex;
-				ScriptsForm->ScriptFiles->Items->Move(ui8idx, bUp == true ? ui8idx-1 : ui8idx+1);
-				if(idx != -1) {
-					if(idx == (int)ui8idx) {
-						ScriptsForm->ScriptFiles->ItemIndex = (bUp == true ? idx-1 : idx+1);
-					} else if(bUp == true && idx == (int)ui8idx-1) {
-						ScriptsForm->ScriptFiles->ItemIndex = idx+1;
-					} else if(bUp == false && idx == (int)ui8idx+1) {
-						ScriptsForm->ScriptFiles->ItemIndex = idx-1;
-					}
-				}
-			}
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    pMainWindowPageScripts->MoveScript(ui8idx, bUp);
 #endif
 
     lua_settop(L, 0);
@@ -373,34 +346,11 @@ static int Refresh(lua_State * L) {
         return 0;
     }
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(ScriptsForm != NULL) {
-			   ScriptsForm->ScriptFiles->Clear();
-			}
-		#endif
-	#endif
-#endif
-
     ScriptManager->CheckForDeletedScripts();
 	ScriptManager->CheckForNewScripts();
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-		  pMainWindowPageScripts->AddScriptsToList(true);
-		#else
-			if(ScriptsForm != NULL) {
-	    		for(uint8_t i = 0; i < ScriptManager->ui8ScriptCount; i++) {
-	    			int idx = ScriptsForm->ScriptFiles->Items->AddObject(ScriptManager->ScriptTable[i]->sName, NULL);
-	    			ScriptsForm->ScriptFiles->State[idx] = ScriptManager->ScriptTable[i]->bEnabled == true ? cbChecked : cbUnchecked;
-	    		}
-		    
-	    		ScriptsForm->LuaUpDownUpdate();
-			}
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+	pMainWindowPageScripts->AddScriptsToList(true);
 #endif
 
     return 0;

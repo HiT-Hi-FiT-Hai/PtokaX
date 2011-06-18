@@ -40,14 +40,6 @@
 //---------------------------------------------------------------------------
 #include "LuaScript.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			#include "frmHub.h"
-		#endif
-	#endif
-#endif
-
 #include "IP2Country.h"
 #include "LuaCoreLib.h"
 #include "LuaBanManLib.h"
@@ -59,21 +51,10 @@
 #include "LuaTmrManLib.h"
 #include "LuaUDPDbgLib.h"
 #include "ResNickManager.h"
-
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-			#include "../gui.win/GuiUtil.h"
-            #include "../gui.win/MainWindowPageScripts.h"
-		#else
-			#include "TScriptMemoryForm.h"
-			#include "TScriptsForm.h"
-		#endif
-	#endif
 //---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
+#ifdef _BUILD_GUI
+	#include "../gui.win/GuiUtil.h"
+    #include "../gui.win/MainWindowPageScripts.h"
 #endif
 //---------------------------------------------------------------------------
 
@@ -172,9 +153,9 @@ ScriptBot::~ScriptBot() {
 //------------------------------------------------------------------------------
 
 #ifdef _WIN32
-	ScriptTimer::ScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &iLen, Script * cur) {
+	ScriptTimer::ScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &iLen) {
 #else
-	ScriptTimer::ScriptTimer(char * sFunctName, const size_t &iLen, Script * cur) {
+	ScriptTimer::ScriptTimer(char * sFunctName, const size_t &iLen) {
 #endif
 	if(sFunctName != NULL) {
 #ifdef _WIN32
@@ -197,22 +178,14 @@ ScriptBot::~ScriptBot() {
         sFunctionName = NULL;
     }
 
+    prev = NULL;
+    next = NULL;
+
 #ifdef _WIN32
 	uiTimerId = uiTmrId;
 #else
 	TimerId = 0;
 #endif
-
-    prev = NULL;
-
-    if(cur->TimerList == NULL) {
-        next = NULL;
-    } else {
-        next = cur->TimerList;
-        cur->TimerList->prev = this;
-    }
-
-    cur->TimerList = this;
 }
 //------------------------------------------------------------------------------
 
@@ -350,48 +323,21 @@ bool ScriptStart(Script * cur) {
 	RegIP2Country(cur->LUA);
 
 	if(luaL_dofile(cur->LUA, (SCRIPT_PATH+cur->sName).c_str()) == 0) {
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
-                (string(LanguageManager->sTexts[LAN_NO_SYNERR_IN_SCRIPT_FILE], (size_t)LanguageManager->ui16TextsLens[LAN_NO_SYNERR_IN_SCRIPT_FILE]) + " " + string(cur->sName)).c_str());
-		#else
-			if(ScriptsForm != NULL) {
-				ScriptsForm->LuaErrMemo(string(LanguageManager->sTexts[LAN_NO_SYNERR_IN_SCRIPT_FILE], (size_t)LanguageManager->ui16TextsLens[LAN_NO_SYNERR_IN_SCRIPT_FILE]) +
-					" " + string(cur->sName));
-			}
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+        RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+            (string(LanguageManager->sTexts[LAN_NO_SYNERR_IN_SCRIPT_FILE], (size_t)LanguageManager->ui16TextsLens[LAN_NO_SYNERR_IN_SCRIPT_FILE]) + " " + string(cur->sName)).c_str());
 #endif
 
         return true;
 	} else {
-#ifdef _WIN32
-	#ifndef _SERVICE
-        if(SettingManager->bBools[SETBOOL_POPUP_SCRIPT_WINDOW] == true) {
-			#ifndef _MSC_VER
-				hubForm->ButtonScriptsClick(hubForm);
-			#endif
-		}
-	#endif
-#endif
-
         size_t iLen = 0;
         char * stmp = (char*)lua_tolstring(cur->LUA, -1, &iLen);
 
         string sMsg(stmp, iLen);
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
-                (string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
-		#else
-			if(ScriptsForm != NULL) {
-				ScriptsForm->LuaErrMemo(string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg);
-			}
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+        RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+            (string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
 #endif
 
 		UdpDebug->Broadcast("[LUA] "+sMsg);
@@ -470,24 +416,6 @@ int ScriptGetGC(Script * cur) {
 }
 //------------------------------------------------------------------------------
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			void ScriptGetGC(Script * cur, const uint32_t &i) {
-				if(i >= (uint32_t)ScriptMemoryForm->LuaMem->Items->Count) {
-	    			TListItem *it = ScriptMemoryForm->LuaMem->Items->Add();
-					it->Caption = cur->sName;
-					it->SubItems->Add(lua_gc(cur->LUA, LUA_GCCOUNT, 0));
-				} else {
-	    			ScriptMemoryForm->LuaMem->Items->Item[i]->Caption = cur->sName;
-					ScriptMemoryForm->LuaMem->Items->Item[i]->SubItems->Strings[0] = String(lua_gc(cur->LUA, LUA_GCCOUNT, 0));
-				}
-			}
-		#endif
-	#endif
-#endif
-//------------------------------------------------------------------------------
-
 void ScriptOnStartup(Script * cur) {
     lua_getglobal(cur->LUA, "OnStartup");
     int i = lua_gettop(cur->LUA);
@@ -549,29 +477,12 @@ static bool ScriptOnError(Script * cur, char * ErrorMsg, const size_t &iLen) {
 
 		string sMsg(stmp, iLen);
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-        if(SettingManager->bBools[SETBOOL_POPUP_SCRIPT_WINDOW] == true) {
-			#ifndef _MSC_VER
-				hubForm->ButtonScriptsClick(hubForm);
-			#endif
-        }
-
-		#ifdef _MSC_VER
-            RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
-                (string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
-            RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
-                (string(LanguageManager->sTexts[LAN_FATAL_ERR_SCRIPT], (size_t)LanguageManager->ui16TextsLens[LAN_FATAL_ERR_SCRIPT]) + " " + string(cur->sName) + " ! " +
-				string(LanguageManager->sTexts[LAN_SCRIPT_STOPPED], (size_t)LanguageManager->ui16TextsLens[LAN_SCRIPT_STOPPED]) + "!").c_str());
-		#else
-			if(ScriptsForm != NULL) {
-				ScriptsForm->LuaErrMemo(string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg);
-				ScriptsForm->LuaErrMemo(string(LanguageManager->sTexts[LAN_FATAL_ERR_SCRIPT], (size_t)LanguageManager->ui16TextsLens[LAN_FATAL_ERR_SCRIPT]) +
-					" " + string(cur->sName) + " ! " +
-					string(LanguageManager->sTexts[LAN_SCRIPT_STOPPED], (size_t)LanguageManager->ui16TextsLens[LAN_SCRIPT_STOPPED]) + "!");
-			}
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+        RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+            (string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
+        RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+            (string(LanguageManager->sTexts[LAN_FATAL_ERR_SCRIPT], (size_t)LanguageManager->ui16TextsLens[LAN_FATAL_ERR_SCRIPT]) + " " + string(cur->sName) + " ! " +
+			string(LanguageManager->sTexts[LAN_SCRIPT_STOPPED], (size_t)LanguageManager->ui16TextsLens[LAN_SCRIPT_STOPPED]) + "!").c_str());
 #endif
 
 		if(SettingManager->bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true) {
@@ -800,32 +711,14 @@ User * ScriptGetUser(lua_State * L, const int &iTop, const char * sFunction) {
 //------------------------------------------------------------------------------
 
 void ScriptError(Script * cur) {
-#ifdef _WIN32
-	#ifndef _SERVICE
-	    if(SettingManager->bBools[SETBOOL_POPUP_SCRIPT_WINDOW] == true) {
-			#ifndef _MSC_VER
-				hubForm->ButtonScriptsClick(hubForm);
-			#endif
-		}
-	#endif
-#endif
-
 	size_t iLen = 0;
 	char * stmp = (char*)lua_tolstring(cur->LUA, -1, &iLen);
 
 	string sMsg(stmp, iLen);
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifdef _MSC_VER
-            RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
-                (string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
-        #else
-			if(ScriptsForm != NULL) {
-				ScriptsForm->LuaErrMemo(string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg);
-			}
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+    RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+        (string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
 #endif
 
 	UdpDebug->Broadcast("[LUA] " + sMsg);
@@ -843,15 +736,7 @@ void ScriptError(Script * cur) {
 //------------------------------------------------------------------------------
 
 #ifdef _WIN32
-    #ifndef _SERVICE
-        #ifndef _MSC_VER
-            static void ScriptOnTimer(UINT_PTR uiTimerId, const bool &bCustom) {
-        #else
-            void ScriptOnTimer(const UINT_PTR &uiTimerId) {
-        #endif
-    #else
     void ScriptOnTimer(const UINT_PTR &uiTimerId) {
-    #endif
 #else
 	void ScriptOnTimer(ScriptTimer * AccTimer) {
 #endif
@@ -868,18 +753,8 @@ void ScriptError(Script * cur) {
             next = tmr->next;
 
 #ifdef _WIN32
-    #ifndef _SERVICE
-		#ifndef _MSC_VER
-			if(tmr->uiTimerId == uiTimerId) {
-				if(bCustom == false) {
-		#else
             if(tmr->uiTimerId == uiTimerId) {
-				if(tmr->sFunctionName == NULL) {
-		#endif
-    #else
-            if(tmr->uiTimerId == uiTimerId) {
-				if(tmr->sFunctionName == NULL) {
-    #endif
+                if(tmr->sFunctionName == NULL) {
 #else
 			if(tmr == AccTimer) {
 				if(tmr->sFunctionName == NULL) {
@@ -894,7 +769,7 @@ void ScriptError(Script * cur) {
 				lua_checkstack(cur->LUA, 1); // we need 1 empty slots in stack, check it to be sure
 
 #ifdef _WIN32
-				lua_pushnumber(cur->LUA, (double)uiTimerId);
+                lua_pushlightuserdata(cur->LUA, (void *)uiTimerId);
 #else
 				lua_pushlightuserdata(cur->LUA, (void *)tmr->TimerId);
 #endif
@@ -913,19 +788,4 @@ void ScriptError(Script * cur) {
 
 	}
 }
-//------------------------------------------------------------------------------
-#ifdef _WIN32
-    #ifndef _SERVICE
-		#ifndef _MSC_VER
-			VOID CALLBACK ScriptTimerProc(HWND /*hwnd*/,UINT /*uMsg*/, UINT_PTR idEvent, DWORD /*dwTime*/) {
-				ScriptOnTimer(idEvent, false);
-			}
-//------------------------------------------------------------------------------
-
-			VOID CALLBACK ScriptTimerCustomProc(HWND /*hwnd*/,UINT /*uMsg*/, UINT_PTR idEvent, DWORD /*dwTime*/) {
-				ScriptOnTimer(idEvent, true);
-			}
-		#endif
-    #endif
-#endif
 //------------------------------------------------------------------------------

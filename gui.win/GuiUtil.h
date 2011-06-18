@@ -30,7 +30,7 @@ extern int iUpDownWidth;
 extern int iOneLineGB;
 extern int iOneLineOneChecksGB;
 extern int iOneLineTwoChecksGB;
-extern HFONT hfFont;
+extern HFONT hFont;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int ScaleGui(const int &iValue);
@@ -46,6 +46,8 @@ int ListViewGetInsertPosition(const HWND &hListView, const void * pItem, const b
 void * ListViewGetItem(const HWND &hListView, const int &iPos);
 void ListViewUpdateArrow(const HWND &hListView, const bool &isAscending, const int &iSortColumn);
 int ListViewGetItemPosition(const HWND &hListView, void * pItem);
+void ListViewGetMenuPos(const HWND &hListView, int &iX, int &iY);
+void ListViewSelectFirstItem(const HWND &hListView);
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #endif

@@ -24,8 +24,6 @@
 
 class AboutDialog {
 public:
-    HWND m_hWnd;
-
     AboutDialog();
     ~AboutDialog();
 
@@ -33,13 +31,14 @@ public:
 
 	void DoModal(HWND hWndParent);
 private:
-    HICON hiSpider, hiLua;
+    HICON hSpider, hLua;
 
-    HFONT hfBigFont;
+    HFONT hBigFont;
 
-    HWND hWndWindowItems[3];
+    HWND hWndWindowItems[4];
 
     enum enmWindowItems {
+        WINDOW_HANDLE,
         LBL_PTOKAX_VERSION,
         LBL_LUA_VERSION,
         REDT_ABOUT

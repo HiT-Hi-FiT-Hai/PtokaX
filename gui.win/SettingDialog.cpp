@@ -48,12 +48,12 @@
 #include "SettingPageRules2.h"
 #include "../core/TextFileManager.h"
 //---------------------------------------------------------------------------
+SettingDialog * pSettingDialog = NULL;
+//---------------------------------------------------------------------------
 static ATOM atomSettingDialog = 0;
 //---------------------------------------------------------------------------
 
 SettingDialog::SettingDialog() {
-    m_hWnd = NULL;
-
     memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
 
     memset(&SettingPages, 0, 12 * sizeof(SettingPage *));
@@ -70,8 +70,6 @@ SettingDialog::SettingDialog() {
     SettingPages[9] = new SettingPageDeflood();
     SettingPages[10] = new SettingPageDeflood2();
     SettingPages[11] = new SettingPageDeflood3();
-
-    pSettingDialog = this;
 }
 //---------------------------------------------------------------------------
 
@@ -251,9 +249,7 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                     }
                 }
                 case IDCANCEL:
-                    ::EnableWindow(::GetParent(m_hWnd), TRUE);
-                    g_hWndActiveDialog = NULL;
-                    ::DestroyWindow(m_hWnd);
+                    ::PostMessage(hWndWindowItems[WINDOW_HANDLE], WM_CLOSE, 0, 0);
 					return 0;
             }
 
@@ -298,15 +294,15 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
 
             break;
         case WM_CLOSE:
-            ::EnableWindow(::GetParent(m_hWnd), TRUE);
+            ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
             g_hWndActiveDialog = NULL;
             break;
         case WM_NCDESTROY:
             delete this;
-            return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+            return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
     }
 
-	return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+	return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
 }
 //------------------------------------------------------------------------------
 
@@ -334,23 +330,23 @@ void SettingDialog::DoModal(HWND hWndParent) {
     int iX = (rcParent.left + (((rcParent.right - rcParent.left)) / 2)) - (iWidth / 2);
     int iY = (rcParent.top + ((rcParent.bottom - rcParent.top)/ 2 )) - (iHeight / 2);
 
-    m_hWnd = ::CreateWindowEx(WS_EX_CONTROLPARENT | WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomSettingDialog), LanguageManager->sTexts[LAN_SETTINGS],
+    hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomSettingDialog), LanguageManager->sTexts[LAN_SETTINGS],
         WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, iWidth, iHeight,
         hWndParent, NULL, g_hInstance, NULL);
 
-    if(m_hWnd == NULL) {
+    if(hWndWindowItems[WINDOW_HANDLE] == NULL) {
         return;
     }
 
-    g_hWndActiveDialog = m_hWnd;
+    g_hWndActiveDialog = hWndWindowItems[WINDOW_HANDLE];
 
-    ::SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
-    ::SetWindowLongPtr(m_hWnd, GWLP_WNDPROC, (LONG_PTR)StaticSettingDialogProc);
+    ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_USERDATA, (LONG_PTR)this);
+    ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_WNDPROC, (LONG_PTR)StaticSettingDialogProc);
 
-    ::GetClientRect(m_hWnd, &rcParent);
+    ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
     hWndWindowItems[TV_TREE] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_TREEVIEW, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_HASLINES | TVS_SHOWSELALWAYS |
-        TVS_DISABLEDRAGDROP, 5, 5, ScaleGui(154), rcParent.bottom - ( 2 * iEditHeight) - 16, m_hWnd, NULL, g_hInstance, NULL);
+        TVS_DISABLEDRAGDROP, 5, 5, ScaleGui(154), rcParent.bottom - ( 2 * iEditHeight) - 16, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
 
     TVINSERTSTRUCT tvIS;
     memset(&tvIS, 0, sizeof(TVINSERTSTRUCT));
@@ -377,22 +373,22 @@ void SettingDialog::DoModal(HWND hWndParent) {
     }
 
     hWndWindowItems[BTN_OK] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        4, rcParent.bottom - ( 2 * iEditHeight) - 7, ScaleGui(154) + 2, iEditHeight, m_hWnd, (HMENU)IDOK, g_hInstance, NULL);
+        4, rcParent.bottom - ( 2 * iEditHeight) - 7, ScaleGui(154) + 2, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDOK, g_hInstance, NULL);
 
     hWndWindowItems[BTN_CANCEL] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        4, rcParent.bottom - iEditHeight - 4, ScaleGui(154) + 2, iEditHeight, m_hWnd, (HMENU)IDCANCEL, g_hInstance, NULL);
+        4, rcParent.bottom - iEditHeight - 4, ScaleGui(154) + 2, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDCANCEL, g_hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
-        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
 
     wpOldTreeProc = (WNDPROC)::SetWindowLongPtr(hWndWindowItems[TV_TREE], GWLP_WNDPROC, (LONG_PTR)TreeProc);
 
     ::EnableWindow(hWndParent, FALSE);
 
-    if(SettingPages[0]->CreateSettingPage(m_hWnd) == false) {
-        ::MessageBox(m_hWnd, "Setting page creation failed!", SettingPages[0]->GetPageName(), MB_OK);
-        ::EndDialog(m_hWnd, IDCANCEL);
+    if(SettingPages[0]->CreateSettingPage(hWndWindowItems[WINDOW_HANDLE]) == false) {
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], "Setting page creation failed!", SettingPages[0]->GetPageName(), MB_OK);
+        ::PostMessage(hWndWindowItems[WINDOW_HANDLE], WM_CLOSE, 0, 0);
     }
 
     RECT rcPage = { 0 };
@@ -400,12 +396,12 @@ void SettingDialog::DoModal(HWND hWndParent) {
 
     int iDiff = rcParent.bottom - (rcPage.bottom-rcPage.top);
 
-    ::GetWindowRect(m_hWnd, &rcParent);
+    ::GetWindowRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
     if(iDiff != 0) {
-        ::SetWindowPos(m_hWnd, NULL, 0, 0, (rcParent.right-rcParent.left), (rcParent.bottom-rcParent.top) - iDiff, SWP_NOMOVE | SWP_NOZORDER);
+        ::SetWindowPos(hWndWindowItems[WINDOW_HANDLE], NULL, 0, 0, (rcParent.right-rcParent.left), (rcParent.bottom-rcParent.top) - iDiff, SWP_NOMOVE | SWP_NOZORDER);
 
-        ::GetClientRect(m_hWnd, &rcParent);
+        ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
         ::SetWindowPos(hWndWindowItems[TV_TREE], NULL, 0, 0, ScaleGui(154), rcParent.bottom - ( 2 * iEditHeight) - 16, SWP_NOMOVE | SWP_NOZORDER);
 
@@ -413,7 +409,7 @@ void SettingDialog::DoModal(HWND hWndParent) {
         ::SetWindowPos(hWndWindowItems[BTN_CANCEL], NULL, 4, rcParent.bottom - iEditHeight - 4, ScaleGui(154) + 2, iEditHeight, SWP_NOZORDER);
     }
 
-    ::ShowWindow(m_hWnd, SW_SHOW);
+    ::ShowWindow(hWndWindowItems[WINDOW_HANDLE], SW_SHOW);
 }
 //---------------------------------------------------------------------------
 
@@ -440,9 +436,9 @@ void SettingDialog::OnSelChanged() {
     SettingPage * curSetPage = (SettingPage *)tvItem.lParam;
 
     if(curSetPage->bCreated == false) {
-        if(curSetPage->CreateSettingPage(m_hWnd) == false) {
-            ::MessageBox(m_hWnd, "Setting page creation failed!", tvItem.pszText, MB_OK);
-            ::EndDialog(m_hWnd, IDCANCEL);
+        if(curSetPage->CreateSettingPage(hWndWindowItems[WINDOW_HANDLE]) == false) {
+            ::MessageBox(hWndWindowItems[WINDOW_HANDLE], "Setting page creation failed!", tvItem.pszText, MB_OK);
+            ::PostMessage(hWndWindowItems[WINDOW_HANDLE], WM_CLOSE, 0, 0);
         }
     }
 

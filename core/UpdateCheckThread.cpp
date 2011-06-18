@@ -47,6 +47,8 @@ UpdateCheckThread::UpdateCheckThread() {
 	sRecvBuf = NULL;
 
 	bOk = bData = bTerminated = false;
+
+    sMsg[0] = '\0';
 }
 //---------------------------------------------------------------------------
 

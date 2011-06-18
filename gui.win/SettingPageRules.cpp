@@ -528,7 +528,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
             return false;
         }
 
-        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
 
     if(SettingManager->iShorts[SETSHORT_MIN_SHARE_LIMIT] == 0 && SettingManager->iShorts[SETSHORT_MAX_SHARE_LIMIT] == 0) {

@@ -157,13 +157,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
                         size_t iLen = strlen(sParam+3);
                         if(iLen == 0) {
                             ::MessageBox(NULL, "Missing config directory!", "Error!", MB_OK);
-                            return EXIT_FAILURE;
+                            return 0;
                         }
 
                         if(iLen >= 1 && sParam[0] != '\\' && sParam[0] != '/') {
                             if(iLen < 4 || (sParam[1] != ':' || (sParam[2] != '\\' && sParam[2] != '/'))) {
                                 ::MessageBox(NULL, "Config directory must be absolute path!", "Error!", MB_OK);
-                                return EXIT_FAILURE;
+                                return 0;
                             }
                         }
 
@@ -176,7 +176,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
                         if(DirExist(PATH.c_str()) == false) {
                             if(CreateDirectory(PATH.c_str(), NULL) == 0) {
                                 ::MessageBox(NULL, "Config directory not exist and can't be created!", "Error!", MB_OK);
-                                return EXIT_FAILURE;
+                                return 0;
                             }
                         }
                     }
@@ -252,6 +252,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 
     ::FreeLibrary(hRichEdit);
 
-    return EXIT_SUCCESS;
+    return (int)msg.wParam;
 }
 //---------------------------------------------------------------------------

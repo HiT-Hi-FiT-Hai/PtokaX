@@ -39,24 +39,19 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
+#endif
 //---------------------------------------------------------------------------
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-			#include "TUsersChatForm.h"
-		#else
-            #include "../gui.win/MainWindowPageUsersChat.h"
-		#endif
-	#endif
+#include "LuaScript.h"
+#include "RegThread.h"
 //---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
-#else
+#ifdef _BUILD_GUI
+    #include "../gui.win/MainWindowPageUsersChat.h"
+#endif
+//---------------------------------------------------------------------------
+#ifndef _WIN32
 	#include "regtmrinc.h"
 	#include "scrtmrinc.h"
 #endif
-#include "LuaScript.h"
-#include "RegThread.h"
 //---------------------------------------------------------------------------
 theLoop *srvLoop = NULL;
 #ifdef _WIN32
@@ -94,15 +89,7 @@ static void RegTimerHandler() {
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
-    #ifndef _SERVICE
-        #ifndef _MSC_VER
-            VOID CALLBACK LooperProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*idEvent*/, DWORD /*dwTime*/) {
-        #else
-            void theLoop::Looper() {
-        #endif
-    #else
     void theLoop::Looper() {
-    #endif
 		KillTimer(NULL, srvLoopTimer);
 
 		// PPK ... two loop stategy for saving badwith
@@ -115,15 +102,8 @@ static void RegTimerHandler() {
 	
 		if(bServerTerminated == false) {
 			srvLoop->bRecv = !srvLoop->bRecv;
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-	    	srvLoopTimer = SetTimer(NULL, 0, 100, (TIMERPROC)LooperProc);
-		#else
-			srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
-		#endif
-    #else
+
             srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
-    #endif
 
 	        if(srvLoopTimer == 0) {
 				string sDbgstr = "[BUF] Cannot start Looper in LooperProc! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
@@ -189,15 +169,7 @@ theLoop::theLoop() {
 	dLoggedUsers = dActualSrvLoopLogins = 0;
 
 #ifdef _WIN32
-    #ifndef _SERVICE
-		#ifndef _MSC_VER
-			srvLoopTimer = SetTimer(NULL, 0, 100, (TIMERPROC)LooperProc);
-		#else
-			srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
-		#endif
-    #else
-		srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
-    #endif
+	srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
 
     if(srvLoopTimer == 0) {
 		string sDbgstr = "[BUF] Cannot start Looper in theLoop::theLoop! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
@@ -698,27 +670,10 @@ void theLoop::ReceiveLoop() {
                         SettingManager->SetShort(SETSHORT_MAX_USERS_PEAK, (int16_t)ui32Peak);
                 }
 
-#ifdef _WIN32
-	#ifndef _SERVICE
-		#ifndef _MSC_VER
-					if(UsersChatForm != NULL && UsersChatForm->UsersAutoUpd->Checked == true) {
-	               	    if(curUser->NickLen > 1) {
-	                   	    if(UsersChatForm->userList->Items->IndexOf(curUser->Nick) == -1) {
-	                            UsersChatForm->userList->AddItem(curUser->Nick, NULL);
-	                        }
-	                    } else {
-	                        int imsgLen = sprintf(msg, "[SYS] User nick length == 1, user wasn't added to UserList listbox. %s (%s)", curUser->Nick, curUser->IP);
-	                        if(CheckSprintf(imsgLen, 1024, "theLoop::ReceiveLoop5") == true) {
-	              		        UdpDebug->Broadcast(msg, imsgLen);
-	                        }
-	                    }
-					}
-        #else
-                    if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_AUTO_UPDATE_USERLIST], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                        pMainWindowPageUsersChat->AddUser(curUser);
-                    }
-		#endif
-	#endif
+#ifdef _BUILD_GUI
+                if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_AUTO_UPDATE_USERLIST], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+                    pMainWindowPageUsersChat->AddUser(curUser);
+                }
 #endif
 //                if(sqldb) sqldb->AddVisit(curUser);
 

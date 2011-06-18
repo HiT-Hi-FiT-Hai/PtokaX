@@ -42,48 +42,11 @@
 #include "Resources.h"
 #include "ScriptEditorDialog.h"
 //---------------------------------------------------------------------------
-MainWindowPageScripts *pMainWindowPageScripts = NULL;
-//---------------------------------------------------------------------------
-WNDPROC wpOldGroupBoxProc = NULL;
+MainWindowPageScripts * pMainWindowPageScripts = NULL;
 //---------------------------------------------------------------------------
 #define IDC_OPEN_IN_EXT_EDITOR      500
 #define IDC_OPEN_IN_SCRIPT_EDITOR   501
 #define IDC_DELETE_SCRIPT           502
-//---------------------------------------------------------------------------
-
-LRESULT CALLBACK GroupBoxProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    switch(uMsg) {
-        case WM_COMMAND: {
-            MainWindowPageScripts * pMainWindowPageScripts = (MainWindowPageScripts *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
-            if(pMainWindowPageScripts != NULL && RichEditCheckMenuCommands(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS], LOWORD(wParam)) == true) {
-                return 0;
-            }
-
-            break;
-        }
-        case WM_CONTEXTMENU: {
-            MainWindowPageScripts * pMainWindowPageScripts = (MainWindowPageScripts *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
-            if(pMainWindowPageScripts != NULL) {
-                RichEditPopupMenu(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS], pMainWindowPageScripts->m_hWnd, lParam);
-            }
-            break;
-        }
-        case WM_NOTIFY: {
-            MainWindowPageScripts * pMainWindowPageScripts = (MainWindowPageScripts *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
-            if(pMainWindowPageScripts != NULL) {
-                if(((LPNMHDR)lParam)->hwndFrom == pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS] && ((LPNMHDR)lParam)->code == EN_LINK) {
-                    if(((ENLINK *)lParam)->msg == WM_LBUTTONUP) {
-                        RichEditOpenLink(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS], (ENLINK *)lParam);
-                    }
-                }
-            }
-
-            break;
-        }
-    }
-
-    return ::CallWindowProc(wpOldGroupBoxProc, hWnd, uMsg, wParam, lParam);
-}
 //---------------------------------------------------------------------------
 
 MainWindowPageScripts::MainWindowPageScripts() {
@@ -125,9 +88,10 @@ LRESULT MainWindowPageScripts::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPAR
         }
         case WM_COMMAND:
             switch(LOWORD(wParam)) {
-                case BTN_OPEN_SCRIPT_EDITOR:
+                case BTN_OPEN_SCRIPT_EDITOR: {
                     OpenScriptEditor();
                     return 0;
+                }
                 case BTN_REFRESH_SCRIPTS:
                     RefreshScripts();
                     return 0;
@@ -169,8 +133,19 @@ LRESULT MainWindowPageScripts::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPAR
                     }
 
                     OnDoubleClick((LPNMITEMACTIVATE)lParam);
+
+                    return 0;
+                } else if(((LPNMHDR)lParam)->code == NM_RETURN) {
+                    OpenInScriptEditor();
+                    return 0;
+                }
+            } else if(((LPNMHDR)lParam)->hwndFrom == hWndPageItems[REDT_SCRIPTS_ERRORS] && ((LPNMHDR)lParam)->code == EN_LINK) {
+                if(((ENLINK *)lParam)->msg == WM_LBUTTONUP) {
+                    RichEditOpenLink(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS], (ENLINK *)lParam);
+                    return 1;
                 }
             }
+
             break;
     }
 
@@ -224,11 +199,8 @@ bool MainWindowPageScripts::CreateMainWindowPage(HWND hOwner) {
             return false;
         }
 
-        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
-
-    ::SetWindowLongPtr(hWndPageItems[GB_SCRIPTS_ERRORS], GWLP_USERDATA, (LONG_PTR)this);
-    wpOldGroupBoxProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[GB_SCRIPTS_ERRORS], GWLP_WNDPROC, (LONG_PTR)GroupBoxProc);
 
 	RECT rcScripts;
 	::GetClientRect(hWndPageItems[LV_SCRIPTS], &rcScripts);
@@ -281,63 +253,49 @@ char * MainWindowPageScripts::GetPageName() {
 //------------------------------------------------------------------------------
 
 void MainWindowPageScripts::OnContextMenu(HWND hWindow, LPARAM lParam) {
-    if(hWindow == hWndPageItems[LV_SCRIPTS]) {
-        int iSel = (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
-
-        if(iSel == -1) {
-            return;
-        }
-
-        HMENU hMenu = ::CreatePopupMenu();
-
-        ::AppendMenu(hMenu, MF_STRING, IDC_OPEN_IN_EXT_EDITOR, LanguageManager->sTexts[LAN_OPEN_EXT_EDIT]);
-        ::AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
-        ::AppendMenu(hMenu, MF_STRING, IDC_OPEN_IN_SCRIPT_EDITOR, LanguageManager->sTexts[LAN_OPEN_IN_SCRIPT_EDITOR]);
-        ::AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
-        ::AppendMenu(hMenu, MF_STRING, IDC_DELETE_SCRIPT, LanguageManager->sTexts[LAN_DELETE_SCRIPT]);
-
-        ::SetMenuDefaultItem(hMenu, IDC_OPEN_IN_SCRIPT_EDITOR, FALSE);
-
-        int iX = GET_X_LPARAM(lParam);
-        int iY = GET_Y_LPARAM(lParam);
-
-        // -1, -1 is menu created by key. We need few tricks to show menu on correct position ;o)
-        if(iX == -1 && iY == -1) {
-            POINT pt = { 0 };
-            if((BOOL)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_ISITEMVISIBLE, (WPARAM)iSel, 0) == FALSE) {
-                RECT rcList;
-                ::GetClientRect(hWndPageItems[LV_SCRIPTS], &rcList);
-
-                ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETITEMPOSITION, (WPARAM)iSel, (LPARAM)&pt);
-
-                pt.y = (pt.y < rcList.top) ? rcList.top : rcList.bottom;
-            } else {
-                RECT rcItem;
-                rcItem.left = LVIR_LABEL;
-                ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETITEMRECT, (WPARAM)iSel, (LPARAM)&rcItem);
-
-                pt.x = rcItem.left;
-                pt.y = rcItem.top + ((rcItem.bottom - rcItem.top) / 2);
-            }
-
-            ::ClientToScreen(hWndPageItems[LV_SCRIPTS], &pt);
-
-            iX = pt.x;
-            iY = pt.y;
-        }
-
-        ::TrackPopupMenuEx(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, iX, iY, m_hWnd, NULL);
-
-        ::DestroyMenu(hMenu);
+    if(hWindow == hWndPageItems[REDT_SCRIPTS_ERRORS]) {
+        RichEditPopupMenu(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS], pMainWindowPageScripts->m_hWnd, lParam);
+        return;
     }
+
+    if(hWindow != hWndPageItems[LV_SCRIPTS]) {
+        return;
+    }
+
+    int iSel = (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
+
+    if(iSel == -1) {
+        return;
+    }
+
+    HMENU hMenu = ::CreatePopupMenu();
+
+    ::AppendMenu(hMenu, MF_STRING, IDC_OPEN_IN_EXT_EDITOR, LanguageManager->sTexts[LAN_OPEN_EXT_EDIT]);
+    ::AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
+    ::AppendMenu(hMenu, MF_STRING, IDC_OPEN_IN_SCRIPT_EDITOR, LanguageManager->sTexts[LAN_OPEN_IN_SCRIPT_EDITOR]);
+    ::AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
+    ::AppendMenu(hMenu, MF_STRING, IDC_DELETE_SCRIPT, LanguageManager->sTexts[LAN_DELETE_SCRIPT]);
+
+    ::SetMenuDefaultItem(hMenu, IDC_OPEN_IN_SCRIPT_EDITOR, FALSE);
+
+    int iX = GET_X_LPARAM(lParam);
+    int iY = GET_Y_LPARAM(lParam);
+
+    ListViewGetMenuPos(hWndPageItems[LV_SCRIPTS], iX, iY);
+
+    ::TrackPopupMenuEx(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, iX, iY, m_hWnd, NULL);
+
+    ::DestroyMenu(hMenu);
 }
 //------------------------------------------------------------------------------
 
-ScriptEditorDialog * MainWindowPageScripts::OpenScriptEditor() {
-    ScriptEditorDialog * ScriptEditorDlg = new ScriptEditorDialog();
-    ScriptEditorDlg->DoModal(pMainWindow->m_hWnd);
+void MainWindowPageScripts::OpenScriptEditor(char * sScript/* = NULL*/) {
+    ScriptEditorDialog * pScriptEditorDialog = new ScriptEditorDialog();
+    pScriptEditorDialog->DoModal(pMainWindow->m_hWnd);
 
-    return ScriptEditorDlg;
+    if(sScript != NULL) {
+        pScriptEditorDialog->LoadScript(sScript);
+    }
 }
 //------------------------------------------------------------------------------
 
@@ -442,8 +400,8 @@ void MainWindowPageScripts::OnItemChanged(const LPNMLISTVIEW &pListView) {
 //------------------------------------------------------------------------------
 
 void MainWindowPageScripts::OnDoubleClick(const LPNMITEMACTIVATE &pItemActivate) {
-    ScriptEditorDialog * pScriptEditor = OpenScriptEditor();
-    pScriptEditor->LoadScript(SCRIPT_PATH + ScriptManager->ScriptTable[pItemActivate->iItem]->sName);
+    string sScript = SCRIPT_PATH + ScriptManager->ScriptTable[pItemActivate->iItem]->sName;
+    OpenScriptEditor(sScript.c_str());
 }
 //------------------------------------------------------------------------------
 
@@ -571,8 +529,8 @@ void MainWindowPageScripts::OpenInScriptEditor() {
         return;
     }
 
-    ScriptEditorDialog * pScriptEditor = OpenScriptEditor();
-    pScriptEditor->LoadScript(SCRIPT_PATH + ScriptManager->ScriptTable[iSel]->sName);
+    string sScript = SCRIPT_PATH + ScriptManager->ScriptTable[iSel]->sName;
+    OpenScriptEditor(sScript.c_str());
 }
 //------------------------------------------------------------------------------
 

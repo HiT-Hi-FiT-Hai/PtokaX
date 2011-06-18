@@ -53,7 +53,7 @@
 //---------------------------------------------------------------------------
 #define WM_TRAYICON (WM_USER+10)
 //---------------------------------------------------------------------------
-MainWindow *pMainWindow = NULL;
+MainWindow * pMainWindow = NULL;
 //---------------------------------------------------------------------------
 static int iHeight = 318;
 
@@ -114,7 +114,7 @@ MainWindow::MainWindow() {
         fScaleFactor = float(NCM.lfMessageFont.lfHeight / -12.0);
     }
 
-    hfFont = ::CreateFontIndirect(&NCM.lfMessageFont);
+    hFont = ::CreateFontIndirect(&NCM.lfMessageFont);
 
     iHeight = ScaleGui(iHeight);
 
@@ -143,7 +143,7 @@ MainWindow::~MainWindow() {
     nid.hWnd = m_hWnd;
     nid.uID = 0;
     ::Shell_NotifyIcon(NIM_DELETE, &nid);
-    ::DeleteObject(hfFont);
+    ::DeleteObject(hFont);
 }
 //---------------------------------------------------------------------------
 
@@ -169,7 +169,7 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     g_hInstance, NULL);
 
                 if(hCombo != NULL) {
-                    ::SendMessage(hCombo, WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+                    ::SendMessage(hCombo, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
 
                     iGroupBoxMargin = (int)::SendMessage(hCombo, CB_GETITEMHEIGHT, (WPARAM)-1, 0);
                     iEditHeight = iGroupBoxMargin + (::GetSystemMetrics(SM_CXFIXEDFRAME) * 2);
@@ -215,7 +215,7 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             }
 
             hWndWindowItems[TC_TABS] = ::CreateWindowEx(0, WC_TABCONTROL, "", dwTabsStyle, 0, 0, rcMain.right, iEditHeight, m_hWnd, NULL, g_hInstance, NULL);
-            ::SendMessage(hWndWindowItems[TC_TABS], WM_SETFONT, (WPARAM)hfFont, MAKELPARAM(TRUE, 0));
+            ::SendMessage(hWndWindowItems[TC_TABS], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
 
             TCITEM tcItem = { 0 };
             tcItem.mask = TCIF_TEXT | TCIF_PARAM;
@@ -376,31 +376,31 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     ::PostMessage(m_hWnd, WM_CLOSE, 0, 0);
                     return 0;
                 case IDC_SETTINGS: {
-                    SettingDialog * SettingDlg = new SettingDialog();
-                    SettingDlg->DoModal(m_hWnd);
+                    pSettingDialog = new SettingDialog();
+                    pSettingDialog->DoModal(m_hWnd);
 
                     return 0;
                 }
                 case IDC_REG_USERS: {
-                    RegisteredUsersDialog * pRegisteredUsersDialog = new RegisteredUsersDialog();
+                    pRegisteredUsersDialog = new RegisteredUsersDialog();
                     pRegisteredUsersDialog->DoModal(m_hWnd);
 
                     return 0;
                 }
                 case IDC_PROFILES: {
-                    ProfilesDialog * pProfilesDialog = new ProfilesDialog();
+                    pProfilesDialog = new ProfilesDialog();
                     pProfilesDialog->DoModal(m_hWnd);
 
                     return 0;
                 }
                 case IDC_BANS: {
-                    BansDialog * pBansDialog = new BansDialog();
+                    pBansDialog = new BansDialog();
                     pBansDialog->DoModal(m_hWnd);
 
                     return 0;
 				}
                 case IDC_RANGE_BANS: {
-                    RangeBansDialog * pRangeBansDialog = new RangeBansDialog();
+                    pRangeBansDialog = new RangeBansDialog();
                     pRangeBansDialog->DoModal(m_hWnd);
 
                     return 0;
@@ -494,7 +494,6 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
                 if(pUpdateDialog->ParseData(sMsg, m_hWnd) == false) {
                     delete pUpdateDialog;
-                    pUpdateDialog = NULL;
                 }
             } else {
                 pUpdateDialog->ParseData(sMsg, m_hWnd);
@@ -573,7 +572,7 @@ HWND MainWindow::CreateEx() {
 
 	ATOM atom = ::RegisterClassEx(&m_wc);
 
-    m_hWnd = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE | WS_EX_CONTROLPARENT, MAKEINTATOM(atom),
+    m_hWnd = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE, MAKEINTATOM(atom),
         (string(SettingManager->sTexts[SETTXT_HUB_NAME], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME]) + " | " + sTitle).c_str(),
         WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
         CW_USEDEFAULT, CW_USEDEFAULT, ScaleGui(400), iHeight, NULL, hMainMenu, g_hInstance, NULL);
