@@ -4889,7 +4889,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 
                 Statinfo+="Version: PtokaX DC Hub " PtokaXVersionString
 #ifdef _WIN32
-    #ifndef _M_X64
+    #ifdef _M_X64
                 " x64"
     #endif
 #endif

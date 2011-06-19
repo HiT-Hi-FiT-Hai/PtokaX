@@ -670,7 +670,6 @@ bool SettingPageDeflood2::CreateSettingPage(HWND hOwner) {
     ::EnableWindow(hWndPageItems[UD_SAME_MULTI_PM_LINES], SettingManager->iShorts[SETSHORT_SAME_MULTI_PM_ACTION] == 0 ? FALSE : TRUE);
     ::EnableWindow(hWndPageItems[LBL_SAME_MULTI_PM_LINES], SettingManager->iShorts[SETSHORT_SAME_MULTI_PM_ACTION] == 0 ? FALSE : TRUE);
 
-    ::SetWindowLongPtr(hWndPageItems[BTN_REPORT_FLOOD_TO_OPS], GWLP_USERDATA, (LONG_PTR)this);
     wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_REPORT_FLOOD_TO_OPS], GWLP_WNDPROC, (LONG_PTR)ButtonProc);
 
 	return true;

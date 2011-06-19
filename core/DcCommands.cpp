@@ -1149,7 +1149,7 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
     curUser->ui32BoolBits |= User::BIT_ACTIVE;
 
     // full data only and allow blocking
-	if(ScriptManager->Arrival(curUser, sData, iLen, bMulti == false ? ScriptMan::CONNECTTOME_ARRIVAL : ScriptMan::MULTICONNECTTOME_ARRIVAL) == true ||
+	if(ScriptManager->Arrival(curUser, sData, iLen, (uint8_t)(bMulti == false ? ScriptMan::CONNECTTOME_ARRIVAL : ScriptMan::MULTICONNECTTOME_ARRIVAL)) == true ||
 		curUser->iState >= User::STATE_CLOSING) {
 		return;
 	}

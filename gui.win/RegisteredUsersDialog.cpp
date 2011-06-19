@@ -42,8 +42,6 @@ RegisteredUsersDialog * pRegisteredUsersDialog = NULL;
 //---------------------------------------------------------------------------
 static ATOM atomRegisteredUsersDialog = 0;
 //---------------------------------------------------------------------------
-static WNDPROC wpOldEditProc = NULL;
-//---------------------------------------------------------------------------
 
 RegisteredUsersDialog::RegisteredUsersDialog() {
     memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));

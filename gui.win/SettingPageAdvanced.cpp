@@ -278,7 +278,6 @@ bool SettingPageAdvanced::CreateSettingPage(HWND hOwner) {
 
     ::EnableWindow(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM], SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true ? TRUE : FALSE);
 
-    ::SetWindowLongPtr(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM], GWLP_USERDATA, (LONG_PTR)this);
     wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM], GWLP_WNDPROC, (LONG_PTR)ButtonProc);
 
 	return true;

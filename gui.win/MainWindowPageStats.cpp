@@ -38,6 +38,7 @@
 #endif
 //---------------------------------------------------------------------------
 #include "LineDialog.h"
+#include "MainWindow.h"
 //---------------------------------------------------------------------------
 
 MainWindowPageStats::MainWindowPageStats() {
@@ -47,10 +48,6 @@ MainWindowPageStats::MainWindowPageStats() {
 
 LRESULT MainWindowPageStats::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch(uMsg) {
-        case WM_SETFOCUS:
-            ::SetFocus(hWndPageItems[BTN_START_STOP]);
-
-            return 0;
         case WM_COMMAND:
            switch(LOWORD(wParam)) {
                 case BTN_START_STOP:
@@ -59,9 +56,12 @@ LRESULT MainWindowPageStats::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM
                             ::SetWindowText(hWndPageItems[LBL_STATUS_VALUE],
                                 (string(LanguageManager->sTexts[LAN_READY], (size_t)LanguageManager->ui16TextsLens[LAN_READY])+".").c_str());
                         }
+                        ::SetFocus(hWndPageItems[BTN_START_STOP]);
                     } else {
                         ServerStop();
+                        ::SetFocus(pMainWindow->hWndWindowItems[MainWindow::TC_TABS]);
                     }
+
                     return 0;
                 case BTN_REDIRECT_ALL:
                     OnRedirectAll();
@@ -90,11 +90,33 @@ LRESULT MainWindowPageStats::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM
 
             return 0;
         }
+        case WM_SETFOCUS:
+            ::SetFocus(hWndPageItems[BTN_START_STOP]);
+            return 0;
     }
 
 	return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
 }
 //------------------------------------------------------------------------------
+
+LRESULT CALLBACK SSButtonProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return DLGC_WANTTAB;
+    } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
+        if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
+            if(bServerRunning == true) {
+                ::SetFocus(::GetNextDlgTabItem(pMainWindow->m_hWnd, hWnd, FALSE));
+				return 0;
+            }
+        }
+
+		::SetFocus(pMainWindow->hWndWindowItems[MainWindow::TC_TABS]);
+		return 0;
+    }
+
+    return ::CallWindowProc(wpOldButtonProc, hWnd, uMsg, wParam, lParam);
+}
+//---------------------------------------------------------------------------
 
 bool MainWindowPageStats::CreateMainWindowPage(HWND hOwner) {
     CreateHWND(hOwner);
@@ -182,6 +204,9 @@ bool MainWindowPageStats::CreateMainWindowPage(HWND hOwner) {
 
         ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
+
+    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_START_STOP], GWLP_WNDPROC, (LONG_PTR)SSButtonProc);
+    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_MASS_MSG], GWLP_WNDPROC, (LONG_PTR)LastButtonProc);
 
 	return true;
 }
@@ -290,3 +315,17 @@ void MainWindowPageStats::OnMassMessage() {
 	MassMsgDlg->DoModal(::GetParent(m_hWnd), LanguageManager->sTexts[LAN_MASS_MSG], "");
 }
 //---------------------------------------------------------------------------
+
+void MainWindowPageStats::FocusFirstItem() {
+    ::SetFocus(hWndPageItems[BTN_START_STOP]);
+}
+//------------------------------------------------------------------------------
+
+void MainWindowPageStats::FocusLastItem() {
+    if(bServerRunning == true) {
+        ::SetFocus(hWndPageItems[BTN_MASS_MSG]);
+    } else {
+        ::SetFocus(hWndPageItems[BTN_START_STOP]);
+    }
+}
+//------------------------------------------------------------------------------

@@ -34,11 +34,17 @@ public:
     virtual bool CreateMainWindowPage(HWND hOwner) = NULL;
     virtual void UpdateLanguage() = NULL;
     virtual char * GetPageName() = NULL;
+    virtual void FocusFirstItem() = NULL;
+    virtual void FocusLastItem() = NULL;
 protected:
     void CreateHWND(HWND hOwner);
 private:
     virtual LRESULT MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam) = NULL;
 };
+//------------------------------------------------------------------------------
+
+LRESULT CALLBACK FirstButtonProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK LastButtonProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 //------------------------------------------------------------------------------
 
 #endif

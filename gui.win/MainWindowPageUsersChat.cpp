@@ -279,12 +279,38 @@ static LRESULT CALLBACK EditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
         } else if(wParam == '|') {
             return 0;
         }
+    } if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return 0;
     }
 
     return ::CallWindowProc(wpOldEditProc, hWnd, uMsg, wParam, lParam);
 }
 
 //------------------------------------------------------------------------------
+
+static LRESULT CALLBACK ListProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return DLGC_WANTTAB;
+    } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
+        if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
+            MainWindowPageUsersChat * pParent = (MainWindowPageUsersChat *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
+
+            if(pParent != NULL && ::IsWindowEnabled(pParent->hWndPageItems[MainWindowPageUsersChat::BTN_UPDATE_USERS])) {
+                ::SetFocus(pParent->hWndPageItems[MainWindowPageUsersChat::BTN_UPDATE_USERS]);
+            } else {
+                ::SetFocus(pMainWindow->hWndWindowItems[MainWindow::TC_TABS]);
+            }
+
+            return 0;
+        } else {
+			::SetFocus(::GetNextDlgTabItem(pMainWindow->m_hWnd, hWnd, TRUE));
+            return 0;
+        }
+    }
+
+    return ::CallWindowProc(wpOldListViewProc, hWnd, uMsg, wParam, lParam);
+}
+//---------------------------------------------------------------------------
 
 bool MainWindowPageUsersChat::CreateMainWindowPage(HWND hOwner) {
     CreateHWND(hOwner);
@@ -298,23 +324,23 @@ bool MainWindowPageUsersChat::CreateMainWindowPage(HWND hOwner) {
     hWndPageItems[BTN_SHOW_COMMANDS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_CMDS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
         ((rcMain.right - ScaleGui(150)) / 2) + 1, 0, ((rcMain.right - ScaleGui(150)) / 2) - 3, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[BTN_AUTO_UPDATE_USERLIST] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_AUTO], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        rcMain.right - ScaleGui(150) - 4, 0, (rcMain.right - (rcMain.right - ScaleGui(150) - 2)) - 4, iCheckHeight, m_hWnd, (HMENU)BTN_AUTO_UPDATE_USERLIST, g_hInstance, NULL);
-
-    hWndPageItems[REDT_CHAT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_READONLY,
+    hWndPageItems[REDT_CHAT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL | ES_MULTILINE | ES_READONLY,
         2, iCheckHeight, rcMain.right - ScaleGui(150), rcMain.bottom - iEditHeight - iCheckHeight - 4, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[REDT_CHAT], EM_EXLIMITTEXT, 0, (LPARAM)262144);
     ::SendMessage(hWndPageItems[REDT_CHAT], EM_AUTOURLDETECT, TRUE, 0);
     ::SendMessage(hWndPageItems[REDT_CHAT], EM_SETEVENTMASK, 0, (LPARAM)::SendMessage(hWndPageItems[REDT_CHAT], EM_GETEVENTMASK, 0, 0) | ENM_LINK);
 
-    hWndPageItems[LV_USERS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, "", WS_CHILD | WS_VISIBLE | LVS_NOCOLUMNHEADER | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL |
-        LVS_SORTASCENDING, rcMain.right - ScaleGui(150) - 4, iCheckHeight, (rcMain.right - (rcMain.right - ScaleGui(150) - 2)) - 4, rcMain.bottom - iEditHeight - iCheckHeight - 4,
-        m_hWnd, NULL, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[LV_USERS], LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
-
     hWndPageItems[EDT_CHAT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOVSCROLL | ES_MULTILINE,
         2, rcMain.bottom - iEditHeight - 2, rcMain.right - ScaleGui(150), iEditHeight, m_hWnd, (HMENU)EDT_CHAT, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_CHAT], EM_SETLIMITTEXT, 8192, 0);
+
+    hWndPageItems[BTN_AUTO_UPDATE_USERLIST] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_AUTO], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+        rcMain.right - ScaleGui(150) - 4, 0, (rcMain.right - (rcMain.right - ScaleGui(150) - 2)) - 4, iCheckHeight, m_hWnd, (HMENU)BTN_AUTO_UPDATE_USERLIST, g_hInstance, NULL);
+
+    hWndPageItems[LV_USERS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | LVS_NOCOLUMNHEADER | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL |
+        LVS_SORTASCENDING, rcMain.right - ScaleGui(150) - 4, iCheckHeight, (rcMain.right - (rcMain.right - ScaleGui(150) - 2)) - 4, rcMain.bottom - iEditHeight - iCheckHeight - 4,
+        m_hWnd, NULL, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[LV_USERS], LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
     hWndPageItems[BTN_UPDATE_USERS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REFRESH_USERLIST], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_TABSTOP | BS_PUSHBUTTON,
         rcMain.right - ScaleGui(150) - 3, rcMain.bottom - iEditHeight - 2, (rcMain.right - (rcMain.right - ScaleGui(150) - 2)) - 2, iEditHeight,
@@ -338,8 +364,17 @@ bool MainWindowPageUsersChat::CreateMainWindowPage(HWND hOwner) {
 
     ::SendMessage(hWndPageItems[LV_USERS], LVM_INSERTCOLUMN, 0, (LPARAM)&lvColumn);
 
+    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_SHOW_CHAT], GWLP_WNDPROC, (LONG_PTR)FirstButtonProc);
+
+    wpOldMultiRichEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[REDT_CHAT], GWLP_WNDPROC, (LONG_PTR)MultiRichEditProc);
+
+    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_UPDATE_USERS], GWLP_WNDPROC, (LONG_PTR)LastButtonProc);
+
     ::SetWindowLongPtr(hWndPageItems[EDT_CHAT], GWLP_USERDATA, (LONG_PTR)this);
     wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_CHAT], GWLP_WNDPROC, (LONG_PTR)EditProc);
+
+    ::SetWindowLongPtr(hWndPageItems[LV_USERS], GWLP_USERDATA, (LONG_PTR)this);
+    wpOldListViewProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[LV_USERS], GWLP_WNDPROC, (LONG_PTR)ListProc);
 
 	return true;
 }
@@ -455,6 +490,8 @@ void MainWindowPageUsersChat::UpdateUserList() {
                 break;
         }
     }
+
+    ListViewSelectFirstItem(hWndPageItems[LV_USERS]);
 
     ::SendMessage(hWndPageItems[LV_USERS], WM_SETREDRAW, (WPARAM)TRUE, 0);
 
@@ -807,5 +844,19 @@ void MainWindowPageUsersChat::RedirectUser() {
 	LineDialog * RedirectDlg = new LineDialog(&OnRedirectOk);
 	RedirectDlg->DoModal(::GetParent(m_hWnd), LanguageManager->sTexts[LAN_PLEASE_ENTER_REDIRECT_ADDRESS],
         SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS] == NULL ? "" : SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS]);
+}
+//------------------------------------------------------------------------------
+
+void MainWindowPageUsersChat::FocusFirstItem() {
+    ::SetFocus(hWndPageItems[BTN_SHOW_CHAT]);
+}
+//------------------------------------------------------------------------------
+
+void MainWindowPageUsersChat::FocusLastItem() {
+    if(::IsWindowEnabled(hWndPageItems[BTN_UPDATE_USERS])) {
+        ::SetFocus(hWndPageItems[BTN_UPDATE_USERS]);
+    } else {
+        ::SetFocus(hWndPageItems[LV_USERS]);
+    }
 }
 //------------------------------------------------------------------------------

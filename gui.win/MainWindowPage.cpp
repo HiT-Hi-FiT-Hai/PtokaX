@@ -28,6 +28,8 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
+#include "MainWindow.h"
+//---------------------------------------------------------------------------
 static ATOM atomMainWindowPage = 0;
 //---------------------------------------------------------------------------
 
@@ -65,7 +67,7 @@ void MainWindowPage::CreateHWND(HWND hOwner) {
     RECT rcMain;
     ::GetClientRect(hOwner, &rcMain);
 
-    m_hWnd = ::CreateWindowEx(0, MAKEINTATOM(atomMainWindowPage), "", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+    m_hWnd = ::CreateWindowEx(WS_EX_CONTROLPARENT, MAKEINTATOM(atomMainWindowPage), "", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
         0, iEditHeight + 1, rcMain.right, rcMain.bottom - (iEditHeight + 1), hOwner, NULL, g_hInstance, NULL);
 
     if(m_hWnd != NULL) {
@@ -74,3 +76,48 @@ void MainWindowPage::CreateHWND(HWND hOwner) {
     }
 }
 //---------------------------------------------------------------------------
+
+LRESULT FirstItemProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, WNDPROC wpOldProc) {
+    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return DLGC_WANTTAB;
+    } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
+        if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
+            ::SetFocus(::GetNextDlgTabItem(pMainWindow->m_hWnd, hWnd, FALSE));
+            return 0;
+        } else {
+			::SetFocus(pMainWindow->hWndWindowItems[MainWindow::TC_TABS]);
+            return 0;
+        }
+    }
+
+    return ::CallWindowProc(wpOldProc, hWnd, uMsg, wParam, lParam);
+}
+//---------------------------------------------------------------------------
+
+LRESULT CALLBACK FirstButtonProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    return FirstItemProc(hWnd, uMsg, wParam, lParam, wpOldButtonProc);
+}
+//------------------------------------------------------------------------------
+
+LRESULT LastItemProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, WNDPROC wpOldProc) {
+    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return DLGC_WANTTAB;
+    } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
+        if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
+            ::SetFocus(pMainWindow->hWndWindowItems[MainWindow::TC_TABS]);
+            return 0;
+        } else {
+			::SetFocus(::GetNextDlgTabItem(pMainWindow->m_hWnd, hWnd, TRUE));
+            return 0;
+        }
+    }
+
+    return ::CallWindowProc(wpOldProc, hWnd, uMsg, wParam, lParam);
+}
+//---------------------------------------------------------------------------
+
+LRESULT CALLBACK LastButtonProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    return LastItemProc(hWnd, uMsg, wParam, lParam, wpOldButtonProc);
+}
+
+//------------------------------------------------------------------------------

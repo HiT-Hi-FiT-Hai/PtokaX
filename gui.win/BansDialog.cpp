@@ -41,8 +41,6 @@ BansDialog * pBansDialog = NULL;
 //---------------------------------------------------------------------------
 static ATOM atomBansDialog = 0;
 //---------------------------------------------------------------------------
-static WNDPROC wpOldEditProc = NULL;
-//---------------------------------------------------------------------------
 
 BansDialog::BansDialog() {
     memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
@@ -208,16 +206,6 @@ LRESULT BansDialog::BansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 }
 //------------------------------------------------------------------------------
 
-static LRESULT CALLBACK EditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    if(uMsg == WM_KEYDOWN && wParam == VK_RETURN) {
-        pBansDialog->FilterBans();
-        return 0;
-    }
-
-    return ::CallWindowProc(wpOldEditProc, hWnd, uMsg, wParam, lParam);
-}
-//------------------------------------------------------------------------------
-
 void BansDialog::DoModal(HWND hWndParent) {
     if(atomBansDialog == 0) {
         WNDCLASSEX m_wc;
@@ -286,8 +274,6 @@ void BansDialog::DoModal(HWND hWndParent) {
 
         ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
-
-    wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndWindowItems[EDT_FILTER], GWLP_WNDPROC, (LONG_PTR)EditProc);
 
 	RECT rcBans;
 	::GetClientRect(hWndWindowItems[LV_BANS], &rcBans);

@@ -205,7 +205,7 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             RECT rcMain;
             ::GetClientRect(m_hWnd, &rcMain);
 
-            DWORD dwTabsStyle = WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | TCS_TABS | TCS_FOCUSNEVER;
+            DWORD dwTabsStyle = WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | WS_TABSTOP | TCS_TABS | TCS_FOCUSNEVER;
 
             BOOL bHotTrackEnabled = FALSE;
             ::SystemParametersInfo(SPI_GETHOTTRACKING, 0, &bHotTrackEnabled, 0);
@@ -246,6 +246,8 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     }
                 }
             }
+
+            wpOldTabsProc = (WNDPROC)::SetWindowLongPtr(hWndWindowItems[TC_TABS], GWLP_WNDPROC, (LONG_PTR)TabsProc);
 
             if(SettingManager->bBools[SETBOOL_CHECK_NEW_RELEASES] == true) {
                 // Create update check thread
@@ -366,6 +368,36 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 if(((LPNMHDR)lParam)->code == TCN_SELCHANGE) {
                     OnSelChanged();
                     return 0;
+                } else if(((LPNMHDR)lParam)->code == TCN_KEYDOWN ) {
+                    NMTCKEYDOWN * ptckd = (NMTCKEYDOWN *)lParam;
+                    if(ptckd->wVKey == VK_TAB) {
+                        int iPage = (int)::SendMessage(hWndWindowItems[TC_TABS], TCM_GETCURSEL, 0, 0);
+
+                        if(iPage == -1) {
+                            break;
+                        }
+
+                        TCITEM tcItem = { 0 };
+                        tcItem.mask = TCIF_PARAM;
+
+                        if((BOOL)::SendMessage(hWndWindowItems[TC_TABS], TCM_GETITEM, iPage, (LPARAM)&tcItem) == FALSE) {
+                            break;
+                        }
+
+                        if(tcItem.lParam == NULL) {
+                            ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
+                        }
+
+                        MainWindowPage * curMainWindowPage = (MainWindowPage *)tcItem.lParam;
+
+                        if((::GetKeyState(VK_SHIFT) & 0x8000) > 0) {
+                            curMainWindowPage->FocusLastItem();
+                            return 0;
+                        } else {
+                            curMainWindowPage->FocusFirstItem();
+                            return 0;
+                        }
+                    }
                 }
             }
 
@@ -512,6 +544,9 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 pUpdateCheckThread = NULL;
             }
 
+            return 0;
+        case WM_SETFOCUS:
+            ::SetFocus(hWndWindowItems[TC_TABS]);
             return 0;
     }
 
@@ -723,6 +758,6 @@ void MainWindow::OnSelChanged() {
         ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
     }
 
-    ::BringWindowToTop(((SettingPage *)tcItem.lParam)->m_hWnd);
+    ::BringWindowToTop(((MainWindowPage *)tcItem.lParam)->m_hWnd);
 }
 //---------------------------------------------------------------------------

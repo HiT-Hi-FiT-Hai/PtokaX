@@ -797,7 +797,8 @@ bool ServerStart() {
 void ServerStop() {
 #ifdef _BUILD_GUI
     pMainWindow->EnableStartButton(FALSE);
-#else
+#endif
+#ifndef _WIN32
     struct itimerspec sectmrspec;
     sectmrspec.it_interval.tv_sec = 0;
     sectmrspec.it_interval.tv_nsec = 0;
@@ -1158,7 +1159,7 @@ void ServerUpdateAutoRegState() {
     }
 
     if(SettingManager->bBools[SETBOOL_AUTO_REG] == true) {
-#ifdef _BUILD_GUI
+#ifdef _WIN32
         regtimer = SetTimer(NULL, 0, 901000, NULL);
 
         if(regtimer == 0) {

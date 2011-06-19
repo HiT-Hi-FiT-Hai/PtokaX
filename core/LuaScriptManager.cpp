@@ -171,8 +171,12 @@ void ScriptMan::Start() {
 }
 //------------------------------------------------------------------------------
 
+#ifdef _BUILD_GUI
 bool ScriptMan::AddScript(char * sName, const bool &bEnabled, const bool &bNew) {
-    if(ui8ScriptCount == 254) {
+#else
+bool ScriptMan::AddScript(char * sName, const bool &bEnabled, const bool &/*bNew*/) {
+#endif
+	if(ui8ScriptCount == 254) {
         return false;
     }
 

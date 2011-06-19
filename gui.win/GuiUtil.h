@@ -31,6 +31,12 @@ extern int iOneLineGB;
 extern int iOneLineOneChecksGB;
 extern int iOneLineTwoChecksGB;
 extern HFONT hFont;
+extern WNDPROC wpOldButtonProc;
+extern WNDPROC wpOldListViewProc;
+extern WNDPROC wpOldMultiEditProc;
+extern WNDPROC wpOldMultiRichEditProc;
+extern WNDPROC wpOldTabsProc;
+extern WNDPROC wpOldTreeProc;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int ScaleGui(const int &iValue);
@@ -48,6 +54,12 @@ void ListViewUpdateArrow(const HWND &hListView, const bool &isAscending, const i
 int ListViewGetItemPosition(const HWND &hListView, void * pItem);
 void ListViewGetMenuPos(const HWND &hListView, int &iX, int &iY);
 void ListViewSelectFirstItem(const HWND &hListView);
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+LRESULT CALLBACK MultiEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK MultiRichEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK TabsProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK TreeProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #endif

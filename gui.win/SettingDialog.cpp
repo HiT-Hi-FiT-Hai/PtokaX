@@ -98,17 +98,6 @@ LRESULT CALLBACK SettingDialog::StaticSettingDialogProc(HWND hWnd, UINT uMsg, WP
 }
 //------------------------------------------------------------------------------
 
-WNDPROC wpOldTreeProc = NULL;
-
-LRESULT CALLBACK TreeProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
-        return DLGC_WANTTAB;
-    }
-
-    return ::CallWindowProc(wpOldTreeProc, hWnd, uMsg, wParam, lParam);
-}
-//------------------------------------------------------------------------------
-
 LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch(uMsg) {
         case WM_SETFOCUS:

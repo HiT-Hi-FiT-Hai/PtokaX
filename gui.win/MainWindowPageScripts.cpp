@@ -65,10 +65,12 @@ MainWindowPageScripts::~MainWindowPageScripts() {
 
 LRESULT MainWindowPageScripts::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch(uMsg) {
-        case WM_SETFOCUS:
+        case WM_SETFOCUS: {
+            CHARRANGE cr = { 0, 0 };
+            ::SendMessage(hWndPageItems[REDT_SCRIPTS_ERRORS], EM_EXSETSEL, 0, (LPARAM)&cr);
             ::SetFocus(hWndPageItems[REDT_SCRIPTS_ERRORS]);
-
             return 0;
+		}
         case WM_WINDOWPOSCHANGED: {
             int iX = ((WINDOWPOS*)lParam)->cx;
             int iY = ((WINDOWPOS*)lParam)->cy;
@@ -135,9 +137,6 @@ LRESULT MainWindowPageScripts::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPAR
                     OnDoubleClick((LPNMITEMACTIVATE)lParam);
 
                     return 0;
-                } else if(((LPNMHDR)lParam)->code == NM_RETURN) {
-                    OpenInScriptEditor();
-                    return 0;
                 }
             } else if(((LPNMHDR)lParam)->hwndFrom == hWndPageItems[REDT_SCRIPTS_ERRORS] && ((LPNMHDR)lParam)->code == EN_LINK) {
                 if(((ENLINK *)lParam)->msg == WM_LBUTTONUP) {
@@ -152,6 +151,123 @@ LRESULT MainWindowPageScripts::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPAR
 	return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
 }
 //------------------------------------------------------------------------------
+
+LRESULT CALLBACK PsRichEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return DLGC_WANTTAB;
+    } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
+        if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
+            ::SetFocus(::GetNextDlgTabItem(pMainWindow->m_hWnd, hWnd, FALSE));
+			return 0;
+        }
+
+		::SetFocus(pMainWindow->hWndWindowItems[MainWindow::TC_TABS]);
+		return 0;
+    }
+
+    return ::CallWindowProc(wpOldMultiRichEditProc, hWnd, uMsg, wParam, lParam);
+}
+//---------------------------------------------------------------------------
+
+static LRESULT CALLBACK ScriptsProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if(uMsg == WM_GETDLGCODE) {
+        if(wParam == VK_TAB) {
+            return DLGC_WANTTAB;
+        } else if(wParam == VK_RETURN) {
+            return DLGC_WANTALLKEYS;
+        }
+    } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
+        if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
+            MainWindowPageScripts * pParent = (MainWindowPageScripts *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
+
+            if(pParent != NULL) {
+                if(::IsWindowEnabled(pParent->hWndPageItems[MainWindowPageScripts::BTN_MOVE_UP])) {
+                    ::SetFocus(pParent->hWndPageItems[MainWindowPageScripts::BTN_MOVE_UP]);
+                    return 0;
+                } else if(::IsWindowEnabled(pParent->hWndPageItems[MainWindowPageScripts::BTN_MOVE_DOWN])) {
+                    ::SetFocus(pParent->hWndPageItems[MainWindowPageScripts::BTN_MOVE_DOWN]);
+                    return 0;
+                } else if(::IsWindowEnabled(pParent->hWndPageItems[MainWindowPageScripts::BTN_RESTART_SCRIPTS])) {
+                    ::SetFocus(pParent->hWndPageItems[MainWindowPageScripts::BTN_RESTART_SCRIPTS]);
+                    return 0;
+                }
+            }
+
+            ::SetFocus(pMainWindow->hWndWindowItems[MainWindow::TC_TABS]);
+
+            return 0;
+        } else {
+			::SetFocus(::GetNextDlgTabItem(pMainWindow->m_hWnd, hWnd, TRUE));
+            return 0;
+        }
+    } else if(uMsg == WM_CHAR && wParam == VK_RETURN) {
+        MainWindowPageScripts * pParent = (MainWindowPageScripts *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
+        if(pParent != NULL) {
+            pParent->OpenInScriptEditor();
+            return 0;
+        }
+    }
+
+    return ::CallWindowProc(wpOldListViewProc, hWnd, uMsg, wParam, lParam);
+}
+//---------------------------------------------------------------------------
+
+static LRESULT CALLBACK MoveUpProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return DLGC_WANTTAB;
+    } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
+        if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
+            MainWindowPageScripts * pParent = (MainWindowPageScripts *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
+
+            if(pParent != NULL) {
+                if(::IsWindowEnabled(pParent->hWndPageItems[MainWindowPageScripts::BTN_MOVE_DOWN])) {
+                    ::SetFocus(pParent->hWndPageItems[MainWindowPageScripts::BTN_MOVE_DOWN]);
+                    return 0;
+                } else if(::IsWindowEnabled(pParent->hWndPageItems[MainWindowPageScripts::BTN_RESTART_SCRIPTS])) {
+                    ::SetFocus(pParent->hWndPageItems[MainWindowPageScripts::BTN_RESTART_SCRIPTS]);
+                    return 0;
+                }
+            }
+
+            ::SetFocus(pMainWindow->hWndWindowItems[MainWindow::TC_TABS]);
+
+            return 0;
+        } else {
+			::SetFocus(::GetNextDlgTabItem(pMainWindow->m_hWnd, hWnd, TRUE));
+            return 0;
+        }
+    }
+
+    return ::CallWindowProc(wpOldButtonProc, hWnd, uMsg, wParam, lParam);
+}
+//---------------------------------------------------------------------------
+
+static LRESULT CALLBACK MoveDownProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return DLGC_WANTTAB;
+    } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
+        if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
+            MainWindowPageScripts * pParent = (MainWindowPageScripts *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
+
+            if(pParent != NULL) {
+                if(::IsWindowEnabled(pParent->hWndPageItems[MainWindowPageScripts::BTN_RESTART_SCRIPTS])) {
+                    ::SetFocus(pParent->hWndPageItems[MainWindowPageScripts::BTN_RESTART_SCRIPTS]);
+                    return 0;
+                }
+            }
+
+            ::SetFocus(pMainWindow->hWndWindowItems[MainWindow::TC_TABS]);
+
+            return 0;
+        } else {
+			::SetFocus(::GetNextDlgTabItem(pMainWindow->m_hWnd, hWnd, TRUE));
+            return 0;
+        }
+    }
+
+    return ::CallWindowProc(wpOldButtonProc, hWnd, uMsg, wParam, lParam);
+}
+//---------------------------------------------------------------------------
 
 bool MainWindowPageScripts::CreateMainWindowPage(HWND hOwner) {
     CreateHWND(hOwner);
@@ -174,7 +290,7 @@ bool MainWindowPageScripts::CreateMainWindowPage(HWND hOwner) {
     hWndPageItems[BTN_REFRESH_SCRIPTS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REFRESH_SCRIPTS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
         rcMain.right - ScaleGui(145) - 4, iEditHeight + 4, ScaleGui(145) + 2, iEditHeight, m_hWnd, (HMENU)BTN_REFRESH_SCRIPTS, g_hInstance, NULL);
 
-    hWndPageItems[LV_SCRIPTS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, "", WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL,
+    hWndPageItems[LV_SCRIPTS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL,
         rcMain.right - ScaleGui(145) - 3, (2 * iEditHeight) + 8, ScaleGui(145), rcMain.bottom - ((2 * iEditHeight) + 8) - ((2 * iEditHeight) - 5) - 14, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_LABELTIP | LVS_EX_CHECKBOXES);
 
@@ -221,6 +337,19 @@ bool MainWindowPageScripts::CreateMainWindowPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_INSERTCOLUMN, 1, (LPARAM)&lvColumn);
 
 	AddScriptsToList(false);
+
+    wpOldMultiRichEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[REDT_SCRIPTS_ERRORS], GWLP_WNDPROC, (LONG_PTR)PsRichEditProc);
+
+    ::SetWindowLongPtr(hWndPageItems[LV_SCRIPTS], GWLP_USERDATA, (LONG_PTR)this);
+    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[LV_SCRIPTS], GWLP_WNDPROC, (LONG_PTR)ScriptsProc);
+
+    ::SetWindowLongPtr(hWndPageItems[BTN_MOVE_UP], GWLP_USERDATA, (LONG_PTR)this);
+    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_MOVE_UP], GWLP_WNDPROC, (LONG_PTR)MoveUpProc);
+
+    ::SetWindowLongPtr(hWndPageItems[BTN_MOVE_DOWN], GWLP_USERDATA, (LONG_PTR)this);
+    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_MOVE_DOWN], GWLP_WNDPROC, (LONG_PTR)MoveDownProc);
+
+    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_RESTART_SCRIPTS], GWLP_WNDPROC, (LONG_PTR)LastButtonProc);
 
 	return true;
 }
@@ -317,6 +446,8 @@ void MainWindowPageScripts::AddScriptsToList(const bool &bDelete) {
 	for(uint8_t ui8i = 0; ui8i < ScriptManager->ui8ScriptCount; ui8i++) {
         ScriptToList(ui8i, true, false);
 	}
+
+    ListViewSelectFirstItem(hWndPageItems[LV_SCRIPTS]);
 
     ::SendMessage(hWndPageItems[LV_SCRIPTS], WM_SETREDRAW, (WPARAM)TRUE, 0);
 
@@ -434,6 +565,8 @@ void MainWindowPageScripts::UpdateMemUsage() {
 //------------------------------------------------------------------------------
 
 void MainWindowPageScripts::MoveUp() {
+    HWND hWndFocus = ::GetFocus();
+
     int iSel = (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
 
     if(iSel == -1) {
@@ -455,10 +588,20 @@ void MainWindowPageScripts::MoveUp() {
     ::SendMessage(hWndPageItems[LV_SCRIPTS], WM_SETREDRAW, (WPARAM)TRUE, 0);
 
     UpdateUpDown();
+
+    if(hWndFocus == hWndPageItems[BTN_MOVE_UP]) {
+        if(::IsWindowEnabled(hWndPageItems[MainWindowPageScripts::BTN_MOVE_UP])) {
+            ::SetFocus(hWndPageItems[BTN_MOVE_UP]);
+        } else {
+            ::SetFocus(hWndPageItems[BTN_MOVE_DOWN]);
+        }
+    }
 }
 //------------------------------------------------------------------------------
 
 void MainWindowPageScripts::MoveDown() {
+    HWND hWndFocus = ::GetFocus();
+
     int iSel = (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
 
     if(iSel == -1) {
@@ -480,6 +623,14 @@ void MainWindowPageScripts::MoveDown() {
     ::SendMessage(hWndPageItems[LV_SCRIPTS], WM_SETREDRAW, (WPARAM)TRUE, 0);
 
     UpdateUpDown();
+
+    if(hWndFocus == hWndPageItems[BTN_MOVE_DOWN]) {
+        if(::IsWindowEnabled(hWndPageItems[MainWindowPageScripts::BTN_MOVE_DOWN])) {
+            ::SetFocus(hWndPageItems[BTN_MOVE_DOWN]);
+        } else {
+            ::SetFocus(hWndPageItems[BTN_MOVE_UP]);
+        }
+    }
 }
 //------------------------------------------------------------------------------
 
@@ -595,5 +746,23 @@ void MainWindowPageScripts::ClearMemUsage(uint8_t ui8ScriptId) {
     lvItem.pszText = "";
 
     ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_SETITEM, 0, (LPARAM)&lvItem);
+}
+//------------------------------------------------------------------------------
+
+void MainWindowPageScripts::FocusFirstItem() {
+    ::SetFocus(hWndPageItems[REDT_SCRIPTS_ERRORS]);
+}
+//------------------------------------------------------------------------------
+
+void MainWindowPageScripts::FocusLastItem() {
+    if(::IsWindowEnabled(hWndPageItems[BTN_RESTART_SCRIPTS])) {
+        ::SetFocus(hWndPageItems[BTN_RESTART_SCRIPTS]);
+    } else if(::IsWindowEnabled(hWndPageItems[BTN_MOVE_DOWN])) {
+        ::SetFocus(hWndPageItems[BTN_MOVE_DOWN]);
+    } else if(::IsWindowEnabled(hWndPageItems[BTN_MOVE_UP])) {
+        ::SetFocus(hWndPageItems[BTN_MOVE_UP]);
+    } else if(::IsWindowEnabled(hWndPageItems[LV_SCRIPTS])) {
+        ::SetFocus(hWndPageItems[LV_SCRIPTS]);
+    }
 }
 //------------------------------------------------------------------------------

@@ -545,7 +545,6 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
         ::EnableWindow(hWndPageItems[EDT_HUBS_REDIR_ADDR], SettingManager->bBools[SETBOOL_MAX_HUBS_LIMIT_REDIR] == true ? TRUE : FALSE);
     }
 
-    ::SetWindowLongPtr(hWndPageItems[EDT_RCTM_LEN], GWLP_USERDATA, (LONG_PTR)this);
     wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_RCTM_LEN], GWLP_WNDPROC, (LONG_PTR)EditProc);
 
 	return true;

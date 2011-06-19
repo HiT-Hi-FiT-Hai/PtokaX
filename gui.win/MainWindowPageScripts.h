@@ -47,6 +47,8 @@ public:
     bool CreateMainWindowPage(HWND hOwner);
     void UpdateLanguage();
     char * GetPageName();
+    void FocusFirstItem();
+    void FocusLastItem();
 
     void ClearMemUsageAll();
     void UpdateMemUsage();
@@ -54,6 +56,7 @@ public:
     void AddScriptsToList(const bool &bDelete);
     void ScriptToList(const uint8_t &ui8ScriptId, const bool &bInsert, const bool &bSelected);
     void UpdateCheck(const uint8_t &ui8ScriptId);
+    void OpenInScriptEditor();
 private:
     bool bIgnoreItemChanged;
 
@@ -69,7 +72,6 @@ private:
     void RestartScripts();
     void UpdateUpDown();
     void OpenInExternalEditor();
-    void OpenInScriptEditor();
     void DeleteScript();
     void ClearMemUsage(uint8_t ui8ScriptId);
 };
