@@ -141,17 +141,6 @@ LRESULT ScriptEditorDialog::ScriptEditorDialogProc(UINT uMsg, WPARAM wParam, LPA
 	return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
 }
 //------------------------------------------------------------------------------
-static WNDPROC wpOldMultiEditProc = NULL;
-
-static LRESULT CALLBACK MultiEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
-        return 0;
-    }
-
-    return ::CallWindowProc(wpOldMultiEditProc, hWnd, uMsg, wParam, lParam);
-}
-
-//------------------------------------------------------------------------------
 
 void ScriptEditorDialog::DoModal(HWND hWndParent) {
     if(atomScriptEditorDialog == 0) {
@@ -220,7 +209,7 @@ void ScriptEditorDialog::DoModal(HWND hWndParent) {
         ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
 
-    wpOldMultiEditProc = (WNDPROC)::SetWindowLongPtr(hWndWindowItems[REDT_SCRIPT], GWLP_WNDPROC, (LONG_PTR)MultiEditProc);
+    wpOldMultiRichEditProc = (WNDPROC)::SetWindowLongPtr(hWndWindowItems[REDT_SCRIPT], GWLP_WNDPROC, (LONG_PTR)MultiRichEditProc);
 
     ::EnableWindow(hWndParent, FALSE);
 

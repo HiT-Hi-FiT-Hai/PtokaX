@@ -348,15 +348,20 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
 			::MessageBox(NULL, (string(LanguageManager->sTexts[LAN_SRV_BIND_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_BIND_ERR]) +
 				": " + string(WSErrorStr(err)) + " (" + string(err) + ") " + LanguageManager->sTexts[LAN_FOR_PORT_LWR] + ": " + string(port)).c_str(), sTitle.c_str(), MB_OK | MB_ICONERROR);
 		}
-
-        closesocket(server);
 #else
             AppendLog(string(LanguageManager->sTexts[LAN_SRV_BIND_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_BIND_ERR])+
+#ifdef _WIN32
+				": " + string(WSErrorStr(err))+" (" + string(err)+") "+
+#else
 				": " + string(ErrnoStr(errno))+" (" + string(errno)+") "+
+#endif
 				string(LanguageManager->sTexts[LAN_FOR_PORT_LWR], (size_t)LanguageManager->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+string(port));
 		}
-
+#ifdef _WIN32
+		closesocket(server);
+#else
         close(server);
+#endif
 #endif
         return false;
     }
@@ -380,15 +385,16 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
             ::MessageBox(NULL, (string(LanguageManager->sTexts[LAN_SRV_LISTEN_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_LISTEN_ERR]) +
 				": " + string(WSErrorStr(err)) + " (" + string(err) + ") " + LanguageManager->sTexts[LAN_FOR_PORT_LWR] + ": " + string(port)).c_str(), sTitle.c_str(), MB_OK | MB_ICONERROR);
         }
-
-        closesocket(server);
 #else
             AppendLog(string(LanguageManager->sTexts[LAN_SRV_LISTEN_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_LISTEN_ERR])+
 				": " + string(errno)+" "+
 				string(LanguageManager->sTexts[LAN_FOR_PORT_LWR], (size_t)LanguageManager->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+string(port));
         }
-
-        close(server);
+#ifdef _WIN32
+		closesocket(server);
+#else
+		close(server);
+#endif
 #endif
         return false;
     }

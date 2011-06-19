@@ -311,7 +311,11 @@ void hashBanMan::Add2IpTable(BanItem *Ban) {
 }
 //---------------------------------------------------------------------------
 
+#ifdef _BUILD_GUI
 void hashBanMan::Rem(BanItem * Ban, const bool &bFromGui/* = false*/) {
+#else
+void hashBanMan::Rem(BanItem * Ban, const bool &/*bFromGui = false*/) {
+#endif
 	RemFromTable(Ban);
 
     if(((Ban->ui8Bits & PERM) == PERM) == true) {
@@ -540,7 +544,11 @@ void hashBanMan::AddRange(RangeBanItem *RangeBan) {
 }
 //---------------------------------------------------------------------------
 
+#ifdef _BUILD_GUI
 void hashBanMan::RemRange(RangeBanItem *RangeBan, const bool &bFromGui/* = false*/) {
+#else
+void hashBanMan::RemRange(RangeBanItem *RangeBan, const bool &/*bFromGui = false*/) {
+#endif
     if(RangeBan->prev == NULL) {
         if(RangeBan->next == NULL) {
             RangeBanListS = NULL;

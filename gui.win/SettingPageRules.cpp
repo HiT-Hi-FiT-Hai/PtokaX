@@ -551,7 +551,6 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
         ::EnableWindow(hWndPageItems[EDT_SHARE_REDIR_ADDR], SettingManager->bBools[SETBOOL_SHARE_LIMIT_REDIR] == true ? TRUE : FALSE);
     }
 
-    ::SetWindowLongPtr(hWndPageItems[EDT_SEARCH_MAX_LEN], GWLP_USERDATA, (LONG_PTR)this);
     wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_SEARCH_MAX_LEN], GWLP_WNDPROC, (LONG_PTR)EditProc);
 
 	return true;

@@ -33,10 +33,10 @@ public:
     enum enmPageItems {
         BTN_SHOW_CHAT,
         BTN_SHOW_COMMANDS,
-        BTN_AUTO_UPDATE_USERLIST,
         REDT_CHAT,
-        LV_USERS,
         EDT_CHAT,
+        BTN_AUTO_UPDATE_USERLIST,
+        LV_USERS,
         BTN_UPDATE_USERS
     };
 
@@ -46,6 +46,9 @@ public:
     bool CreateMainWindowPage(HWND hOwner);
     void UpdateLanguage();
     char * GetPageName();
+    void FocusFirstItem();
+    void FocusLastItem();
+
     bool OnEditEnter();
     void AddUser(const User * curUser);
     void RemoveUser(const User * curUser);

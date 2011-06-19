@@ -309,7 +309,6 @@ bool SettingPageGeneral2::CreateSettingPage(HWND hOwner) {
     ::EnableWindow(hWndPageItems[EDT_NON_REG_REDIR_ADDR],
         (SettingManager->bBools[SETBOOL_REG_ONLY] == true && SettingManager->bBools[SETBOOL_REG_ONLY_REDIR] == true) ? TRUE : FALSE);
 
-    ::SetWindowLongPtr(hWndPageItems[BTN_KILL_THAT_DUCK], GWLP_USERDATA, (LONG_PTR)this);
     wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_KILL_THAT_DUCK], GWLP_WNDPROC, (LONG_PTR)ButtonProc);
 
 	return true;

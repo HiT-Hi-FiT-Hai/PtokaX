@@ -32,7 +32,6 @@
 //---------------------------------------------------------------------------
 static ATOM atomSettingPage = 0;
 //---------------------------------------------------------------------------
-WNDPROC wpOldButtonProc = NULL;
 WNDPROC wpOldEditProc = NULL;
 //---------------------------------------------------------------------------
 int SettingPage::iFullGB = 462 - 5;
@@ -176,12 +175,8 @@ LRESULT SettingWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, WN
             ::SetFocus(pSettingDialog->hWndWindowItems[SettingDialog::TV_TREE]);
             return 0;
         } else {
-            SettingPage * pSettingPage = (SettingPage *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
-
-            if(pSettingPage != NULL) {
-				::SetFocus(::GetNextDlgTabItem(pSettingDialog->hWndWindowItems[SettingDialog::WINDOW_HANDLE], hWnd, TRUE));
-                return 0;
-            }
+			::SetFocus(::GetNextDlgTabItem(pSettingDialog->hWndWindowItems[SettingDialog::WINDOW_HANDLE], hWnd, TRUE));
+            return 0;
         }
     }
 

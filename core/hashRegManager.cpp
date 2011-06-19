@@ -337,8 +337,12 @@ void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui
 }
 //---------------------------------------------------------------------------
 
+#ifdef _BUILD_GUI
 void hashRegMan::Delete(RegUser * pReg, const bool &bFromGui/* = false*/) {
-    if(bServerRunning == true) {
+#else
+void hashRegMan::Delete(RegUser * pReg, const bool &/*bFromGui = false*/) {
+#endif
+	if(bServerRunning == true) {
         User * pRemovedUser = hashManager->FindUser(pReg->sNick, strlen(pReg->sNick));
 
         if(pRemovedUser != NULL) {

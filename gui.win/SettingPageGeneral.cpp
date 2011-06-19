@@ -417,7 +417,6 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
         }
     }
 
-    ::SetWindowLongPtr(hWndPageItems[BTN_HUBLIST_AUTO_REG], GWLP_USERDATA, (LONG_PTR)this);
     wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_HUBLIST_AUTO_REG], GWLP_WNDPROC, (LONG_PTR)ButtonProc);
 
     return true;

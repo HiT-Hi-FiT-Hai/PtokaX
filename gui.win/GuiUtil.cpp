@@ -40,6 +40,12 @@ int iOneLineGB = 17 + 23 + 8;
 int iOneLineOneChecksGB = 17 + 16 + 23 + 12;
 int iOneLineTwoChecksGB = 17 + (2 * 16) + 23 + 15;
 HFONT hFont = NULL;
+WNDPROC wpOldButtonProc = NULL;
+WNDPROC wpOldListViewProc = NULL;
+WNDPROC wpOldMultiEditProc = NULL;
+WNDPROC wpOldMultiRichEditProc = NULL;
+WNDPROC wpOldTabsProc = NULL;
+WNDPROC wpOldTreeProc = NULL;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int ScaleGui(const int &iValue) {
@@ -285,5 +291,43 @@ void ListViewSelectFirstItem(const HWND &hListView) {
 
         ::SendMessage(hListView, LVM_SETITEMSTATE, 0, (LPARAM)&lvItem);
     }
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+static LRESULT EditWantTabProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, WNDPROC wpOldProc) {
+    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return 0;
+    }
+
+    return ::CallWindowProc(wpOldProc, hWnd, uMsg, wParam, lParam);
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+LRESULT CALLBACK MultiEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    return EditWantTabProc(hWnd, uMsg, wParam, lParam, wpOldMultiEditProc);
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+LRESULT CALLBACK MultiRichEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    return EditWantTabProc(hWnd, uMsg, wParam, lParam, wpOldMultiRichEditProc);
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+static LRESULT WantTabProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, WNDPROC wpOldProc) {
+    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return DLGC_WANTTAB;
+    }
+
+    return ::CallWindowProc(wpOldProc, hWnd, uMsg, wParam, lParam);
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+LRESULT CALLBACK TabsProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    return WantTabProc(hWnd, uMsg, wParam, lParam, wpOldTabsProc);
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+LRESULT CALLBACK TreeProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    return WantTabProc(hWnd, uMsg, wParam, lParam, wpOldTreeProc);
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

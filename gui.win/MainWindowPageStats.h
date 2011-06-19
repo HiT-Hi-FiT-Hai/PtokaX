@@ -57,6 +57,8 @@ public:
     bool CreateMainWindowPage(HWND hOwner);
     void UpdateLanguage();
     char * GetPageName();
+    void FocusFirstItem();
+    void FocusLastItem();
 private:
     LRESULT MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 

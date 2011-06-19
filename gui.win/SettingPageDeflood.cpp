@@ -830,7 +830,6 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::EnableWindow(hWndPageItems[UD_RCTM_SECS2], SettingManager->iShorts[SETSHORT_RCTM_ACTION2] == 0 ? FALSE : TRUE);
     ::EnableWindow(hWndPageItems[LBL_RCTM_SECONDS2], SettingManager->iShorts[SETSHORT_RCTM_ACTION2] == 0 ? FALSE : TRUE);
 
-    ::SetWindowLongPtr(hWndPageItems[EDT_MAX_USERS_LOGINS], GWLP_USERDATA, (LONG_PTR)this);
     wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_MAX_USERS_LOGINS], GWLP_WNDPROC, (LONG_PTR)EditProc);
 
 	return true;

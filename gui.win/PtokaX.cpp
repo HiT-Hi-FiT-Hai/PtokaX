@@ -235,7 +235,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
                 }
             }
 	
-	        if(g_hWndActiveDialog != NULL && ::IsDialogMessage(g_hWndActiveDialog, &msg) != 0) {
+	        if(g_hWndActiveDialog == NULL) {
+                if(::IsDialogMessage(pMainWindow->m_hWnd, &msg) != 0) {
+                    continue;
+                }
+            } else if(::IsDialogMessage(g_hWndActiveDialog, &msg) != 0) {
                 continue;
             }
 

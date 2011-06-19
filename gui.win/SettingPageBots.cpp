@@ -391,7 +391,6 @@ bool SettingPageBots::CreateSettingPage(HWND hOwner) {
     ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION], SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true ? TRUE : FALSE);
     ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true ? TRUE : FALSE);
 
-    ::SetWindowLongPtr(hWndPageItems[BTN_KEEP_SLOW_CLIENTS_ONLINE], GWLP_USERDATA, (LONG_PTR)this);
     wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_KEEP_SLOW_CLIENTS_ONLINE], GWLP_WNDPROC, (LONG_PTR)ButtonProc);
 
 	return true;

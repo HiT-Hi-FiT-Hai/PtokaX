@@ -278,7 +278,6 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
     ::EnableWindow(hWndPageItems[BTN_MODE_TO_MYINFO], SettingManager->iShorts[SETSHORT_FULL_MYINFO_OPTION] == 0 ? FALSE : TRUE);
     ::EnableWindow(hWndPageItems[BTN_MODE_TO_DESCRIPTION], SettingManager->iShorts[SETSHORT_FULL_MYINFO_OPTION] == 0 ? FALSE : TRUE);
 
-    ::SetWindowLongPtr(hWndPageItems[BTN_MODE_TO_DESCRIPTION], GWLP_USERDATA, (LONG_PTR)this);
     wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_MODE_TO_DESCRIPTION], GWLP_WNDPROC, (LONG_PTR)ButtonProc);
 
 	return true;

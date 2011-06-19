@@ -311,7 +311,6 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
     ::EnableWindow(hWndPageItems[LBL_TEMP_BAN_TIME_HOURS], SettingManager->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 2 ? TRUE : FALSE);
     ::EnableWindow(hWndPageItems[BTN_REPORT_3X_BAD_PASS], SettingManager->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 0 ? FALSE : TRUE);
 
-    ::SetWindowLongPtr(hWndPageItems[BTN_REPORT_3X_BAD_PASS], GWLP_USERDATA, (LONG_PTR)this);
     wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_REPORT_3X_BAD_PASS], GWLP_WNDPROC, (LONG_PTR)ButtonProc);
 
 	return true;
