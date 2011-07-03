@@ -106,8 +106,6 @@ MainWindow::MainWindow() {
 
 	::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), &NCM, 0);
 
-//NCM.lfMessageFont.lfHeight = -18;
-
     if(NCM.lfMessageFont.lfHeight > 0) {
         fScaleFactor = (float)(NCM.lfMessageFont.lfHeight / 12.0);
     } else if(NCM.lfMessageFont.lfHeight < 0) {
@@ -117,6 +115,9 @@ MainWindow::MainWindow() {
     hFont = ::CreateFontIndirect(&NCM.lfMessageFont);
 
     iHeight = ScaleGui(iHeight);
+
+    hArrowCursor = (HCURSOR)::LoadImage(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED | LR_DEFAULTSIZE);
+    hVerticalCursor = (HCURSOR)::LoadImage(NULL, IDC_SIZEWE, IMAGE_CURSOR, 0, 0, LR_SHARED | LR_DEFAULTSIZE);
 
 	if(::GetVersionEx((OSVERSIONINFO*)&ver) != 0 && ver.dwPlatformId == VER_PLATFORM_WIN32_NT && ver.dwMajorVersion >= 6) {
         pGTC64 = (GTC64)::GetProcAddress(::GetModuleHandle("kernel32.dll"), "GetTickCount64");
