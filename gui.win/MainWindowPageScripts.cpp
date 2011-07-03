@@ -55,6 +55,8 @@ MainWindowPageScripts::MainWindowPageScripts() {
     memset(&hWndPageItems, 0, (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])) * sizeof(HWND));
 
     bIgnoreItemChanged = false;
+
+    iPercentagePos = 60;
 }
 //---------------------------------------------------------------------------
 
@@ -72,19 +74,8 @@ LRESULT MainWindowPageScripts::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPAR
             return 0;
 		}
         case WM_WINDOWPOSCHANGED: {
-            int iX = ((WINDOWPOS*)lParam)->cx;
-            int iY = ((WINDOWPOS*)lParam)->cy;
-
-            ::SetWindowPos(hWndPageItems[BTN_RESTART_SCRIPTS], NULL, iX - ScaleGui(145) - 4, iY - iEditHeight - 2, ScaleGui(145) + 2, iEditHeight, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[BTN_MOVE_DOWN], NULL, iX - ScaleGui(72) - 2, iY - (2 * iEditHeight) - 5, ScaleGui(72), iEditHeight, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[BTN_MOVE_UP], NULL, iX - ScaleGui(145) - 4, iY - (2 * iEditHeight) - 5, ScaleGui(72), iEditHeight, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[LV_SCRIPTS], NULL, iX - ScaleGui(145) - 3, (2 * iEditHeight) + 8,
-                ScaleGui(145), iY - ((2 * iEditHeight) + 8) - ((2 * iEditHeight) - 5) - 14, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[BTN_REFRESH_SCRIPTS], NULL, iX - ScaleGui(145) - 4, iEditHeight + 4, ScaleGui(145) + 2, iEditHeight, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[BTN_OPEN_SCRIPT_EDITOR], NULL, iX - ScaleGui(145) - 4, 1, ScaleGui(145) + 2, iEditHeight, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[REDT_SCRIPTS_ERRORS], NULL, 0, 0, iX - ScaleGui(145) - 25, iY - (iGroupBoxMargin + 11), SWP_NOMOVE | SWP_NOZORDER);
-            ::SendMessage(hWndPageItems[REDT_SCRIPTS_ERRORS], WM_VSCROLL, SB_BOTTOM, NULL);
-            ::SetWindowPos(hWndPageItems[GB_SCRIPTS_ERRORS], NULL, 0, 0, iX - ScaleGui(145) - 9, iY - 3, SWP_NOMOVE | SWP_NOZORDER);
+            RECT rcMain = { 0, 0, ((WINDOWPOS*)lParam)->cx, ((WINDOWPOS*)lParam)->cy };
+            SetSplitterRect(&rcMain);
 
             return 0;
         }
@@ -146,6 +137,10 @@ LRESULT MainWindowPageScripts::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPAR
             }
 
             break;
+    }
+
+    if(BasicSplitterProc(uMsg, wParam, lParam) == true) {
+    	return 0;
     }
 
 	return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
@@ -317,6 +312,8 @@ bool MainWindowPageScripts::CreateMainWindowPage(HWND hOwner) {
 
         ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
+
+    SetSplitterRect(&rcMain);
 
 	RECT rcScripts;
 	::GetClientRect(hWndPageItems[LV_SCRIPTS], &rcScripts);
@@ -766,3 +763,26 @@ void MainWindowPageScripts::FocusLastItem() {
     }
 }
 //------------------------------------------------------------------------------
+
+HWND MainWindowPageScripts::GetWindowHandle() {
+    return m_hWnd;
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+
+void MainWindowPageScripts::UpdateSplitterParts() {
+    ::SetWindowPos(hWndPageItems[BTN_RESTART_SCRIPTS], NULL, iSplitterPos + 2, rcSplitter.bottom - iEditHeight - 2, rcSplitter.right - (iSplitterPos + 4), iEditHeight,
+        SWP_NOZORDER);
+
+    int iButtonWidth = (rcSplitter.right - (iSplitterPos + 7)) / 2;
+    ::SetWindowPos(hWndPageItems[BTN_MOVE_DOWN], NULL, rcSplitter.right - iButtonWidth - 2, rcSplitter.bottom - (2 * iEditHeight) - 5, iButtonWidth, iEditHeight, SWP_NOZORDER);
+    ::SetWindowPos(hWndPageItems[BTN_MOVE_UP], NULL, iSplitterPos + 2, rcSplitter.bottom - (2 * iEditHeight) - 5, iButtonWidth, iEditHeight, SWP_NOZORDER);
+
+    ::SetWindowPos(hWndPageItems[LV_SCRIPTS], NULL, iSplitterPos + 2, (2 * iEditHeight) + 8, rcSplitter.right - (iSplitterPos + 4),
+        rcSplitter.bottom - ((2 * iEditHeight) + 8) - ((2 * iEditHeight) - 5) - 14, SWP_NOZORDER);
+    ::SetWindowPos(hWndPageItems[BTN_REFRESH_SCRIPTS], NULL, iSplitterPos + 2, iEditHeight + 4, rcSplitter.right - (iSplitterPos + 4), iEditHeight, SWP_NOZORDER);
+    ::SetWindowPos(hWndPageItems[BTN_OPEN_SCRIPT_EDITOR], NULL, iSplitterPos + 2, 1, rcSplitter.right - (iSplitterPos + 4), iEditHeight, SWP_NOZORDER);
+    ::SetWindowPos(hWndPageItems[REDT_SCRIPTS_ERRORS], NULL, 0, 0, iSplitterPos - 19, rcSplitter.bottom - (iGroupBoxMargin + 11), SWP_NOMOVE | SWP_NOZORDER);
+    ::SendMessage(hWndPageItems[REDT_SCRIPTS_ERRORS], WM_VSCROLL, SB_BOTTOM, NULL);
+    ::SetWindowPos(hWndPageItems[GB_SCRIPTS_ERRORS], NULL, 0, 0, iSplitterPos - 3, rcSplitter.bottom - 3, SWP_NOMOVE | SWP_NOZORDER);
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------

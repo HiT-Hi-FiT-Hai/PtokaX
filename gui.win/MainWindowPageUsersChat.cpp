@@ -54,6 +54,8 @@ MainWindowPageUsersChat::MainWindowPageUsersChat() {
     pMainWindowPageUsersChat = this;
 
     memset(&hWndPageItems, 0, (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])) * sizeof(HWND));
+
+    iPercentagePos = 60;
 }
 //---------------------------------------------------------------------------
 
@@ -69,17 +71,14 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
 
             return 0;
         case WM_WINDOWPOSCHANGED: {
-            int iX = ((WINDOWPOS *)lParam)->cx;
-            int iY = ((WINDOWPOS *)lParam)->cy;
+            RECT rcMain = { 0, iCheckHeight, ((WINDOWPOS*)lParam)->cx, ((WINDOWPOS*)lParam)->cy };
 
-            ::SetWindowPos(hWndPageItems[BTN_SHOW_CHAT], NULL, 0, 0, ((iX - ScaleGui(150)) / 2) - 3, iCheckHeight, SWP_NOMOVE | SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[BTN_SHOW_COMMANDS], NULL, ((iX - ScaleGui(150)) / 2) + 1, 0, ((iX - ScaleGui(150)) / 2) - 3, iCheckHeight, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[BTN_AUTO_UPDATE_USERLIST], NULL, iX - (ScaleGui(150) - 4), 0, (iX - (iX - (ScaleGui(150) - 2))) - 4, iCheckHeight, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[REDT_CHAT], NULL, 0, 0, iX - ScaleGui(150), iY - iEditHeight - iCheckHeight - 4, SWP_NOMOVE | SWP_NOZORDER);
-            ::SendMessage(hWndPageItems[REDT_CHAT], WM_VSCROLL, SB_BOTTOM, NULL);
-            ::SetWindowPos(hWndPageItems[LV_USERS], NULL, iX - (ScaleGui(150) - 4), iCheckHeight, (iX - (iX - (ScaleGui(150) - 2))) - 4, iY - iEditHeight - iCheckHeight - 4, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[EDT_CHAT], NULL, 2, iY - iEditHeight - 2, iX - ScaleGui(150), iEditHeight, SWP_NOZORDER);
-            ::SetWindowPos(hWndPageItems[BTN_UPDATE_USERS], NULL, iX - (ScaleGui(150) - 3), iY - iEditHeight - 2, (iX - (iX - (ScaleGui(150) - 2))) - 2, iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[BTN_SHOW_CHAT], NULL, 0, 0, ((rcMain.right - ScaleGui(150)) / 2) - 3, iCheckHeight, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[BTN_SHOW_COMMANDS], NULL, ((rcMain.right - ScaleGui(150)) / 2) + 1, 0, ((rcMain.right - ScaleGui(150)) / 2) - 3, iCheckHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndPageItems[BTN_AUTO_UPDATE_USERLIST], NULL, rcMain.right - (ScaleGui(150) - 4), 0, (rcMain.right - (rcMain.right - (ScaleGui(150) - 2))) - 4, iCheckHeight,
+                SWP_NOZORDER);
+
+            SetSplitterRect(&rcMain);
 
             return 0;
         }
@@ -257,6 +256,10 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
             break;
     }
 
+    if(BasicSplitterProc(uMsg, wParam, lParam) == true) {
+    	return 0;
+    }
+
 	return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
 }
 //------------------------------------------------------------------------------
@@ -353,6 +356,9 @@ bool MainWindowPageUsersChat::CreateMainWindowPage(HWND hOwner) {
 
         ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
     }
+
+    rcMain.top = iCheckHeight;
+    SetSplitterRect(&rcMain);
 
 	RECT rcUsers;
 	::GetClientRect(hWndPageItems[LV_USERS], &rcUsers);
@@ -860,3 +866,17 @@ void MainWindowPageUsersChat::FocusLastItem() {
     }
 }
 //------------------------------------------------------------------------------
+
+HWND MainWindowPageUsersChat::GetWindowHandle() {
+    return m_hWnd;
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+
+void MainWindowPageUsersChat::UpdateSplitterParts() {
+    ::SetWindowPos(hWndPageItems[REDT_CHAT], NULL, 0, 0, iSplitterPos - 2, rcSplitter.bottom - iEditHeight - iCheckHeight - 4, SWP_NOMOVE | SWP_NOZORDER);
+    ::SendMessage(hWndPageItems[REDT_CHAT], WM_VSCROLL, SB_BOTTOM, NULL);
+    ::SetWindowPos(hWndPageItems[LV_USERS], NULL, iSplitterPos + 2, iCheckHeight, rcSplitter.right - (iSplitterPos + 4), rcSplitter.bottom - iEditHeight - iCheckHeight - 4, SWP_NOZORDER);
+    ::SetWindowPos(hWndPageItems[EDT_CHAT], NULL, 2, rcSplitter.bottom - iEditHeight - 2, iSplitterPos - 2, iEditHeight, SWP_NOZORDER);
+    ::SetWindowPos(hWndPageItems[BTN_UPDATE_USERS], NULL, iSplitterPos + 2, rcSplitter.bottom - iEditHeight - 2, rcSplitter.right - (iSplitterPos + 4), iEditHeight, SWP_NOZORDER);
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------

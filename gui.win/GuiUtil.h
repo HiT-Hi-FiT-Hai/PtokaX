@@ -31,6 +31,8 @@ extern int iOneLineGB;
 extern int iOneLineOneChecksGB;
 extern int iOneLineTwoChecksGB;
 extern HFONT hFont;
+extern HCURSOR hArrowCursor;
+extern HCURSOR hVerticalCursor;
 extern WNDPROC wpOldButtonProc;
 extern WNDPROC wpOldListViewProc;
 extern WNDPROC wpOldMultiEditProc;

@@ -21,12 +21,13 @@
 #ifndef MainWindowPageUsersChatH
 #define MainWindowPageUsersChatH
 //------------------------------------------------------------------------------
+#include "BasicSplitter.h"
 #include "MainWindowPage.h"
 //------------------------------------------------------------------------------
 struct User;
 //---------------------------------------------------------------------------
 
-class MainWindowPageUsersChat : public MainWindowPage {
+class MainWindowPageUsersChat : public MainWindowPage, private BasicSplitter {
 public:
     HWND hWndPageItems[7];
 
@@ -62,6 +63,9 @@ private:
     void KickUser();
     void BanUser();
     void RedirectUser();
+
+    HWND GetWindowHandle();
+    void UpdateSplitterParts();
 };
 //------------------------------------------------------------------------------
 extern MainWindowPageUsersChat * pMainWindowPageUsersChat;

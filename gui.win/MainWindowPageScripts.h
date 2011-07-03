@@ -21,12 +21,13 @@
 #ifndef MainWindowPageScriptsH
 #define MainWindowPageScriptsH
 //------------------------------------------------------------------------------
+#include "BasicSplitter.h"
 #include "MainWindowPage.h"
 //------------------------------------------------------------------------------
 class ScriptEditorDialog;
 //------------------------------------------------------------------------------
 
-class MainWindowPageScripts : public MainWindowPage {
+class MainWindowPageScripts : public MainWindowPage, private BasicSplitter {
 public:
     HWND hWndPageItems[8];
 
@@ -74,6 +75,9 @@ private:
     void OpenInExternalEditor();
     void DeleteScript();
     void ClearMemUsage(uint8_t ui8ScriptId);
+
+    HWND GetWindowHandle();
+    void UpdateSplitterParts();
 };
 //------------------------------------------------------------------------------
 extern MainWindowPageScripts * pMainWindowPageScripts;
