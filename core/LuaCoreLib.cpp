@@ -1249,12 +1249,44 @@ static int GetUserValue(lua_State * L) {
                 for(DWORD dwi = 0; dwi < pINT->dwNumEntries; dwi++) {
                     if(pINT->table[dwi].dwAddr == uiIP && pINT->table[dwi].dwType != MIB_IPNET_TYPE_INVALID) {
                         char sMac[18];
-                        sprintf(sMac, "%02X-%02X-%02X-%02X-%02X-%02X", pINT->table[dwi].bPhysAddr[0], pINT->table[dwi].bPhysAddr[1], pINT->table[dwi].bPhysAddr[2],
+                        sprintf(sMac, "%02x:%02x:%02x:%02x:%02x:%02x", pINT->table[dwi].bPhysAddr[0], pINT->table[dwi].bPhysAddr[1], pINT->table[dwi].bPhysAddr[2],
                             pINT->table[dwi].bPhysAddr[3], pINT->table[dwi].bPhysAddr[4], pINT->table[dwi].bPhysAddr[5]);
                         lua_pushlstring(L, sMac, 17);
                         return 1;
                     }
                 }
+            }
+#else
+            FILE *fp = fopen("/proc/net/arp", "r");
+            if(fp != NULL) {
+                char buf[1024];
+                while(fgets(buf, 1024, fp) != NULL) {
+                    if(strncmp(buf, u->IP, u->ui8IpLen) == 0 && buf[u->ui8IpLen] == ' ') {
+                        bool bLastCharSpace = true;
+                        uint8_t ui8NonSpaces = 0;
+                        uint16_t ui16i = u->ui8IpLen;
+                        while(buf[ui16i] != '\0') {
+                            if(buf[ui16i] == ' ') {
+                                bLastCharSpace = true;
+                            } else {
+                                if(bLastCharSpace == true) {
+                                    bLastCharSpace = false;
+                                    ui8NonSpaces++;
+                                }
+                            }
+
+                            if(ui8NonSpaces == 3) {
+                                lua_pushlstring(L, buf + ui16i, 17);
+                                fclose(fp);
+                                return 1;
+                            }
+
+                            ui16i++;
+                        }
+                    }
+                }
+
+                fclose(fp);
             }
 #endif
             lua_pushnil(L);

@@ -2,7 +2,7 @@
 Added: Missing PtokaX icon to 64bit service binary.
 Added: Project files for visual studio 2010.
 Added: Crash log generation to new gui windows version.
-Added: Core.GetUserValue(tUser, 27) return user MAC Address when it is possible (windoze only).
+Added: Core.GetUserValue(tUser, 27) return user MAC Address when it is possible.
 Added: Enabled Data Execution Prevention for 32bit windoze version when system support that. 
 Added: Line numbers to script editor.
 Added: Column sorting to registered users list in registered users window.
