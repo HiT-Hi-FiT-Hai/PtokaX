@@ -2027,6 +2027,9 @@ void RegCore(lua_State * L) {
 
     lua_pushliteral(L, "Version");
 	lua_pushliteral(L, PtokaXVersionString);
-	lua_settable (L, -3);
+	lua_settable(L, -3);
+	lua_pushliteral(L, "BuildNumber");
+	lua_pushnumber(L, (double)_strtoui64(BUILD_NUMBER, NULL, 10));
+	lua_settable(L, -3);
 }
 //---------------------------------------------------------------------------
