@@ -43,6 +43,7 @@ CloseArrival(tUser, sData)			- Incoming close command from user. If script retur
 Core.
 -------------------
 Version				- Return PtokaX version.
+BuildNumber		- Return PtokaX build number.
 
 Restart()			- Restart hub.
 Shutdown()			- Shutdown hub.
