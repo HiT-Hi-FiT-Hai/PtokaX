@@ -43,8 +43,8 @@ HFONT hFont = NULL;
 HCURSOR hArrowCursor = NULL;
 HCURSOR hVerticalCursor = NULL;
 WNDPROC wpOldButtonProc = NULL;
+WNDPROC wpOldEditProc = NULL;
 WNDPROC wpOldListViewProc = NULL;
-WNDPROC wpOldMultiEditProc = NULL;
 WNDPROC wpOldMultiRichEditProc = NULL;
 WNDPROC wpOldTabsProc = NULL;
 WNDPROC wpOldTreeProc = NULL;
@@ -293,25 +293,6 @@ void ListViewSelectFirstItem(const HWND &hListView) {
 
         ::SendMessage(hListView, LVM_SETITEMSTATE, 0, (LPARAM)&lvItem);
     }
-}
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-static LRESULT EditWantTabProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, WNDPROC wpOldProc) {
-    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
-        return 0;
-    }
-
-    return ::CallWindowProc(wpOldProc, hWnd, uMsg, wParam, lParam);
-}
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-LRESULT CALLBACK MultiEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    return EditWantTabProc(hWnd, uMsg, wParam, lParam, wpOldMultiEditProc);
-}
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-LRESULT CALLBACK MultiRichEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    return EditWantTabProc(hWnd, uMsg, wParam, lParam, wpOldMultiRichEditProc);
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

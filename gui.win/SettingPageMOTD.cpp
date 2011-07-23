@@ -32,6 +32,20 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
+static WNDPROC wpOldMultiEditProc = NULL;
+//---------------------------------------------------------------------------
+
+LRESULT CALLBACK MultiEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return 0;
+    } else if(uMsg == WM_KEYDOWN && wParam == VK_ESCAPE) {
+        ::SendMessage(::GetParent(::GetParent(hWnd)), WM_COMMAND, IDCANCEL, 0);
+        return 0;
+    }
+
+    return ::CallWindowProc(wpOldMultiEditProc, hWnd, uMsg, wParam, lParam);
+}
+//---------------------------------------------------------------------------
 
 SettingPageMOTD::SettingPageMOTD() {
     bUpdateMOTD = false;

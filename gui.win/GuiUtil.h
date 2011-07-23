@@ -34,8 +34,8 @@ extern HFONT hFont;
 extern HCURSOR hArrowCursor;
 extern HCURSOR hVerticalCursor;
 extern WNDPROC wpOldButtonProc;
+extern WNDPROC wpOldEditProc;
 extern WNDPROC wpOldListViewProc;
-extern WNDPROC wpOldMultiEditProc;
 extern WNDPROC wpOldMultiRichEditProc;
 extern WNDPROC wpOldTabsProc;
 extern WNDPROC wpOldTreeProc;
@@ -58,8 +58,6 @@ void ListViewGetMenuPos(const HWND &hListView, int &iX, int &iY);
 void ListViewSelectFirstItem(const HWND &hListView);
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-LRESULT CALLBACK MultiEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-LRESULT CALLBACK MultiRichEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK TabsProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK TreeProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

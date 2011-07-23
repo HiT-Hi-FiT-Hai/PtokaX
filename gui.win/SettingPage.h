@@ -69,7 +69,5 @@ private:
 LRESULT CALLBACK ButtonProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK EditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 //------------------------------------------------------------------------------
-extern WNDPROC wpOldEditProc;
-//------------------------------------------------------------------------------
 
 #endif
