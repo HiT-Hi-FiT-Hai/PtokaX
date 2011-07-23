@@ -147,7 +147,7 @@ LRESULT MainWindowPageScripts::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPAR
 }
 //------------------------------------------------------------------------------
 
-LRESULT CALLBACK PsRichEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+static LRESULT CALLBACK MultiRichEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
         return DLGC_WANTTAB;
     } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
@@ -158,6 +158,8 @@ LRESULT CALLBACK PsRichEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 		::SetFocus(pMainWindow->hWndWindowItems[MainWindow::TC_TABS]);
 		return 0;
+    } else if(uMsg == WM_KEYDOWN && wParam == VK_ESCAPE) {
+        return 0;
     }
 
     return ::CallWindowProc(wpOldMultiRichEditProc, hWnd, uMsg, wParam, lParam);
@@ -335,7 +337,7 @@ bool MainWindowPageScripts::CreateMainWindowPage(HWND hOwner) {
 
 	AddScriptsToList(false);
 
-    wpOldMultiRichEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[REDT_SCRIPTS_ERRORS], GWLP_WNDPROC, (LONG_PTR)PsRichEditProc);
+    wpOldMultiRichEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[REDT_SCRIPTS_ERRORS], GWLP_WNDPROC, (LONG_PTR)MultiRichEditProc);
 
     ::SetWindowLongPtr(hWndPageItems[LV_SCRIPTS], GWLP_USERDATA, (LONG_PTR)this);
     wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[LV_SCRIPTS], GWLP_WNDPROC, (LONG_PTR)ScriptsProc);

@@ -42,6 +42,15 @@
 static ATOM atomScriptEditorDialog = 0;
 //---------------------------------------------------------------------------
 
+static LRESULT CALLBACK MultiRichEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return 0;
+    }
+
+    return ::CallWindowProc(wpOldMultiRichEditProc, hWnd, uMsg, wParam, lParam);
+}
+//---------------------------------------------------------------------------
+
 ScriptEditorDialog::ScriptEditorDialog() {
     memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
 }
@@ -178,8 +187,8 @@ void ScriptEditorDialog::DoModal(HWND hWndParent) {
 
     ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
-    hWndWindowItems[REDT_SCRIPT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_HSCROLL | WS_VSCROLL | ES_AUTOVSCROLL | ES_MULTILINE,
-        ScaleGui(40), 0, rcParent.right - ScaleGui(40), rcParent.bottom - iEditHeight - 4, hWndWindowItems[WINDOW_HANDLE], (HMENU)(REDT_SCRIPT+100), g_hInstance, NULL);
+    hWndWindowItems[REDT_SCRIPT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_HSCROLL | WS_VSCROLL | ES_AUTOVSCROLL | ES_MULTILINE |
+        ES_WANTRETURN, ScaleGui(40), 0, rcParent.right - ScaleGui(40), rcParent.bottom - iEditHeight - 4, hWndWindowItems[WINDOW_HANDLE], (HMENU)(REDT_SCRIPT+100), g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_EXLIMITTEXT, 0, (LPARAM)16777216);
     ::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_AUTOURLDETECT, TRUE, 0);
     ::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_SETEVENTMASK, 0, (LPARAM)::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_GETEVENTMASK, 0, 0) | ENM_LINK);

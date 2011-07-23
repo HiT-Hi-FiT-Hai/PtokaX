@@ -47,8 +47,17 @@
 //---------------------------------------------------------------------------
 MainWindowPageUsersChat * pMainWindowPageUsersChat = NULL;
 //---------------------------------------------------------------------------
-static WNDPROC wpOldEditProc = NULL;
-//---------------------------------------------------------------------------
+
+static LRESULT CALLBACK MultiRichEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return 0;
+    } else if(uMsg == WM_KEYDOWN && wParam == VK_ESCAPE) {
+        return 0;
+    }
+
+    return ::CallWindowProc(wpOldMultiRichEditProc, hWnd, uMsg, wParam, lParam);
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 MainWindowPageUsersChat::MainWindowPageUsersChat() {
     pMainWindowPageUsersChat = this;

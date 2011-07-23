@@ -80,9 +80,6 @@ SettingDialog::~SettingDialog() {
         }
     }
 
-    wpOldButtonProc = NULL;
-    wpOldEditProc = NULL;
-
     pSettingDialog = NULL;
 }
 //---------------------------------------------------------------------------
