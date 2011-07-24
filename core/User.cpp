@@ -237,14 +237,14 @@ static void UserParseMyInfo(User * u) {
     if(((u->ui32BoolBits & User::BIT_HAVE_SHARECOUNTED) == User::BIT_HAVE_SHARECOUNTED) == true) {
         ui64TotalShare -= u->sharedSize;
 #ifdef _WIN32
-        u->sharedSize = _atoi64(sMyINFOParts[4]);
+        u->sharedSize = _strtoui64(sMyINFOParts[4], NULL, 10);
 #else
 		u->sharedSize = strtoull(sMyINFOParts[4], NULL, 10);
 #endif
         ui64TotalShare += u->sharedSize;
     } else {
 #ifdef _WIN32
-        u->sharedSize = _atoi64(sMyINFOParts[4]);
+        u->sharedSize = _strtoui64(sMyINFOParts[4], NULL, 10);
 #else
 		u->sharedSize = strtoull(sMyINFOParts[4], NULL, 10);
 #endif

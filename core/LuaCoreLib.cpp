@@ -2029,7 +2029,11 @@ void RegCore(lua_State * L) {
 	lua_pushliteral(L, PtokaXVersionString);
 	lua_settable(L, -3);
 	lua_pushliteral(L, "BuildNumber");
+#ifdef _WIN32
 	lua_pushnumber(L, (double)_strtoui64(BUILD_NUMBER, NULL, 10));
+#else
+    lua_pushnumber(L, (double)strtoull(BUILD_NUMBER, NULL, 10));
+#endif
 	lua_settable(L, -3);
 }
 //---------------------------------------------------------------------------
