@@ -388,7 +388,7 @@ void classUsers::DisconnectAll() {
     uint32_t iCloseLoops = 0;
 
 #ifndef _WIN32
-    struct timespec sleeptime = { 0 };
+    struct timespec sleeptime;
     sleeptime.tv_sec = 0;
     sleeptime.tv_nsec = 50000000;
 #endif

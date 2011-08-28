@@ -127,6 +127,7 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PtokaX-x64</TargetName>
     <PreBuildEventUseInBuild Condition="'$(Configuration)|$(Platform)'=='Testing|x64'">false</PreBuildEventUseInBuild>
     <PostBuildEventUseInBuild Condition="'$(Configuration)|$(Platform)'=='Testing|x64'">false</PostBuildEventUseInBuild>
+    <PreBuildEventUseInBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</PreBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -466,6 +467,7 @@
     <ClInclude Include="core\LuaTmrManLib.h" />
     <ClInclude Include="core\LuaUDPDbgLib.h" />
     <ClInclude Include="core\ProfileManager.h" />
+    <ClInclude Include="core\PXBReader.h" />
     <ClInclude Include="core\pxstring.h" />
     <ClInclude Include="core\RegThread.h" />
     <ClInclude Include="core\ResNickManager.h" />
@@ -488,6 +490,10 @@
     <ClInclude Include="gui.win\BanDialog.h" />
     <ClInclude Include="gui.win\BansDialog.h" />
     <ClInclude Include="gui.win\BasicSplitter.h" />
+    <ClInclude Include="gui.win\GuiSettingDefaults.h" />
+    <ClInclude Include="gui.win\GuiSettingIds.h" />
+    <ClInclude Include="gui.win\GuiSettingManager.h" />
+    <ClInclude Include="gui.win\GuiSettingStr.h" />
     <ClInclude Include="gui.win\GuiUtil.h" />
     <ClInclude Include="gui.win\LineDialog.h" />
     <ClInclude Include="gui.win\MainWindow.h" />
@@ -553,6 +559,7 @@
     <ClCompile Include="core\LuaTmrManLib.cpp" />
     <ClCompile Include="core\LuaUDPDbgLib.cpp" />
     <ClCompile Include="core\ProfileManager.cpp" />
+    <ClCompile Include="core\PXBReader.cpp" />
     <ClCompile Include="core\pxstring.cpp" />
     <ClCompile Include="core\RegThread.cpp" />
     <ClCompile Include="core\ResNickManager.cpp" />
@@ -571,6 +578,7 @@
     <ClCompile Include="gui.win\BanDialog.cpp" />
     <ClCompile Include="gui.win\BansDialog.cpp" />
     <ClCompile Include="gui.win\BasicSplitter.cpp" />
+    <ClCompile Include="gui.win\GuiSettingManager.cpp" />
     <ClCompile Include="gui.win\GuiUtil.cpp" />
     <ClCompile Include="gui.win\LineDialog.cpp" />
     <ClCompile Include="gui.win\MainWindow.cpp" />

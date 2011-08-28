@@ -26,6 +26,7 @@
 #include "../core/ProfileManager.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #ifdef _WIN32
@@ -91,7 +92,7 @@ LRESULT ProfilesDialog::ProfilesDialogProc(UINT uMsg, WPARAM wParam, LPARAM lPar
             ::SetWindowPos(hWndWindowItems[BTN_SET_ALL], NULL, iProfilesWidth + 11, rcParent.bottom - iEditHeight - 10, (iPermissionsWidth / 2) - 3, iEditHeight, SWP_NOZORDER);
             ::SetWindowPos(hWndWindowItems[LV_PERMISSIONS], NULL, iProfilesWidth + 12, rcParent.top + iGroupBoxMargin,
                 rcParent.right - (iProfilesWidth + 23), rcParent.bottom - iGroupBoxMargin - iEditHeight - 14, SWP_NOZORDER);
-            ::SendMessage(hWndWindowItems[LV_PERMISSIONS], LVM_SETCOLUMNWIDTH, 0, iPermissionsWidth-25);
+            ::SendMessage(hWndWindowItems[LV_PERMISSIONS], LVM_SETCOLUMNWIDTH, 0, iPermissionsWidth-30);
             ::SetWindowPos(hWndWindowItems[GB_PERMISSIONS], NULL, iProfilesWidth + 4, rcParent.top, rcParent.right - (iProfilesWidth + 7), rcParent.bottom - 3,
                 SWP_NOZORDER);
             ::SetWindowPos(hWndWindowItems[BTN_MOVE_DOWN], NULL, (iProfilesWidth / 2) + 2, rcParent.bottom - iEditHeight - 2,
@@ -210,15 +211,23 @@ LRESULT ProfilesDialog::ProfilesDialogProc(UINT uMsg, WPARAM wParam, LPARAM lPar
             break;
         case WM_GETMINMAXINFO: {
             MINMAXINFO *mminfo = (MINMAXINFO*)lParam;
-            mminfo->ptMinTrackSize.x = 443;
-            mminfo->ptMinTrackSize.y = 454;
+            mminfo->ptMinTrackSize.x = ScaleGui(g_GuiSettingManager->GetDefaultInteger(GUISETINT_PROFILES_WINDOW_WIDTH));
+            mminfo->ptMinTrackSize.y = ScaleGui(g_GuiSettingManager->GetDefaultInteger(GUISETINT_PROFILES_WINDOW_HEIGHT));
 
             return 0;
         }
-        case WM_CLOSE:
+        case WM_CLOSE: {
+            RECT rcProfiles;
+            ::GetWindowRect(hWndWindowItems[WINDOW_HANDLE], &rcProfiles);
+
+            g_GuiSettingManager->SetInteger(GUISETINT_PROFILES_WINDOW_WIDTH, rcProfiles.right - rcProfiles.left);
+            g_GuiSettingManager->SetInteger(GUISETINT_PROFILES_WINDOW_HEIGHT, rcProfiles.bottom - rcProfiles.top);
+
             ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
             g_hWndActiveDialog = NULL;
+
             break;
+        }
         case WM_NCDESTROY:
             delete this;
             return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
@@ -255,11 +264,12 @@ void ProfilesDialog::DoModal(HWND hWndParent) {
     RECT rcParent;
     ::GetWindowRect(hWndParent, &rcParent);
 
-    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(443) / 2);
-    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(454) / 2);
+    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGuiDefaultsOnly(GUISETINT_PROFILES_WINDOW_WIDTH) / 2);
+    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGuiDefaultsOnly(GUISETINT_PROFILES_WINDOW_HEIGHT) / 2);
 
     hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomProfilesDialog), LanguageManager->sTexts[LAN_PROFILES],
-        WS_POPUP | WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(443), ScaleGui(454),
+        WS_POPUP | WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+        iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGuiDefaultsOnly(GUISETINT_PROFILES_WINDOW_WIDTH), ScaleGuiDefaultsOnly(GUISETINT_PROFILES_WINDOW_HEIGHT),
         hWndParent, NULL, g_hInstance, NULL);
 
     if(hWndWindowItems[WINDOW_HANDLE] == NULL) {
@@ -320,7 +330,7 @@ void ProfilesDialog::DoModal(HWND hWndParent) {
     LVCOLUMN lvColumn = { 0 };
     lvColumn.mask = LVCF_FMT | LVCF_WIDTH;
     lvColumn.fmt = LVCFMT_LEFT;
-    lvColumn.cx = rcProfiles.right;
+    lvColumn.cx = rcProfiles.right-5;
 
     ::SendMessage(hWndWindowItems[LV_PROFILES], LVM_INSERTCOLUMN, 0, (LPARAM)&lvColumn);
 

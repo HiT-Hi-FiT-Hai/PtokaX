@@ -27,6 +27,7 @@
 #include "../core/ProfileManager.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #ifdef _WIN32
@@ -149,15 +150,27 @@ LRESULT RegisteredUsersDialog::RegisteredUsersDialogProc(UINT uMsg, WPARAM wPara
             break;
         case WM_GETMINMAXINFO: {
             MINMAXINFO *mminfo = (MINMAXINFO*)lParam;
-            mminfo->ptMinTrackSize.x = ScaleGui(443);
-            mminfo->ptMinTrackSize.y = ScaleGui(454);
+            mminfo->ptMinTrackSize.x = ScaleGui(g_GuiSettingManager->GetDefaultInteger(GUISETINT_REGS_WINDOW_WIDTH));
+            mminfo->ptMinTrackSize.y = ScaleGui(g_GuiSettingManager->GetDefaultInteger(GUISETINT_REGS_WINDOW_HEIGHT));
 
             return 0;
         }
-        case WM_CLOSE:
+        case WM_CLOSE: {
+            RECT rcRegs;
+            ::GetWindowRect(hWndWindowItems[WINDOW_HANDLE], &rcRegs);
+
+            g_GuiSettingManager->SetInteger(GUISETINT_REGS_WINDOW_WIDTH, rcRegs.right - rcRegs.left);
+            g_GuiSettingManager->SetInteger(GUISETINT_REGS_WINDOW_HEIGHT, rcRegs.bottom - rcRegs.top);
+
+            g_GuiSettingManager->SetInteger(GUISETINT_REGS_NICK, (int)::SendMessage(hWndWindowItems[LV_REGS], LVM_GETCOLUMNWIDTH, 0, 0));
+            g_GuiSettingManager->SetInteger(GUISETINT_REGS_PASSWORD, (int)::SendMessage(hWndWindowItems[LV_REGS], LVM_GETCOLUMNWIDTH, 1, 0));
+            g_GuiSettingManager->SetInteger(GUISETINT_REGS_PROFILE, (int)::SendMessage(hWndWindowItems[LV_REGS], LVM_GETCOLUMNWIDTH, 2, 0));
+
             ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
             g_hWndActiveDialog = NULL;
+
             break;
+        }
         case WM_NCDESTROY:
             delete this;
             return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
@@ -199,11 +212,12 @@ void RegisteredUsersDialog::DoModal(HWND hWndParent) {
     RECT rcParent;
     ::GetWindowRect(hWndParent, &rcParent);
 
-    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(443) / 2);
-    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(454) / 2);
+    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGuiDefaultsOnly(GUISETINT_REGS_WINDOW_WIDTH) / 2);
+    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGuiDefaultsOnly(GUISETINT_REGS_WINDOW_HEIGHT) / 2);
 
     hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomRegisteredUsersDialog), LanguageManager->sTexts[LAN_REG_USERS],
-        WS_POPUP | WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(443), ScaleGui(454),
+        WS_POPUP | WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+        iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGuiDefaultsOnly(GUISETINT_REGS_WINDOW_WIDTH), ScaleGuiDefaultsOnly(GUISETINT_REGS_WINDOW_HEIGHT),
         hWndParent, NULL, g_hInstance, NULL);
 
     if(hWndWindowItems[WINDOW_HANDLE] == NULL) {
@@ -255,17 +269,19 @@ void RegisteredUsersDialog::DoModal(HWND hWndParent) {
     LVCOLUMN lvColumn = { 0 };
     lvColumn.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
     lvColumn.fmt = LVCFMT_LEFT;
-    lvColumn.cx = ((rcRegs.right - rcRegs.left)-20)/3;
+    lvColumn.cx = g_GuiSettingManager->iIntegers[GUISETINT_REGS_NICK];
     lvColumn.pszText = LanguageManager->sTexts[LAN_NICK];
     lvColumn.iSubItem = 0;
 
     ::SendMessage(hWndWindowItems[LV_REGS], LVM_INSERTCOLUMN, 0, (LPARAM)&lvColumn);
 
     lvColumn.fmt = LVCFMT_RIGHT;
+    lvColumn.cx = g_GuiSettingManager->iIntegers[GUISETINT_REGS_PASSWORD];
     lvColumn.pszText = LanguageManager->sTexts[LAN_PASSWORD];
     lvColumn.iSubItem = 1;
     ::SendMessage(hWndWindowItems[LV_REGS], LVM_INSERTCOLUMN, 1, (LPARAM)&lvColumn);
 
+    lvColumn.cx = g_GuiSettingManager->iIntegers[GUISETINT_REGS_PROFILE];
     lvColumn.pszText = LanguageManager->sTexts[LAN_PROFILE];
     lvColumn.iSubItem = 2;
     ::SendMessage(hWndWindowItems[LV_REGS], LVM_INSERTCOLUMN, 2, (LPARAM)&lvColumn);

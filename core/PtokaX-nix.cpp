@@ -229,7 +229,7 @@ int main(int argc, char* argv[]) {
 	    printf((sTitle+" running...\n").c_str());
 	}
 
-    struct timespec sleeptime = { 0 };
+    struct timespec sleeptime;
     sleeptime.tv_sec = 0;
     sleeptime.tv_nsec = 100000000;
 

@@ -26,6 +26,7 @@
 #include "../core/LanguageManager.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #ifdef _WIN32
@@ -173,14 +174,28 @@ LRESULT RangeBansDialog::RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lP
             break;
         case WM_GETMINMAXINFO: {
             MINMAXINFO *mminfo = (MINMAXINFO*)lParam;
-            mminfo->ptMinTrackSize.x = ScaleGui(443);
-            mminfo->ptMinTrackSize.y = ScaleGui(454);
+            mminfo->ptMinTrackSize.x = ScaleGui(g_GuiSettingManager->GetDefaultInteger(GUISETINT_RANGE_BANS_WINDOW_WIDTH));
+            mminfo->ptMinTrackSize.y = ScaleGui(g_GuiSettingManager->GetDefaultInteger(GUISETINT_RANGE_BANS_WINDOW_HEIGHT));
 
             return 0;
         }
-        case WM_CLOSE:
+        case WM_CLOSE: {
+            RECT rcRangeBans;
+            ::GetWindowRect(hWndWindowItems[WINDOW_HANDLE], &rcRangeBans);
+
+            g_GuiSettingManager->SetInteger(GUISETINT_RANGE_BANS_WINDOW_WIDTH, rcRangeBans.right - rcRangeBans.left);
+            g_GuiSettingManager->SetInteger(GUISETINT_RANGE_BANS_WINDOW_HEIGHT, rcRangeBans.bottom - rcRangeBans.top);
+
+            g_GuiSettingManager->SetInteger(GUISETINT_RANGE_BANS_RANGE, (int)::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_GETCOLUMNWIDTH, 0, 0));
+            g_GuiSettingManager->SetInteger(GUISETINT_RANGE_BANS_REASON, (int)::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_GETCOLUMNWIDTH, 1, 0));
+            g_GuiSettingManager->SetInteger(GUISETINT_RANGE_BANS_EXPIRE, (int)::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_GETCOLUMNWIDTH, 2, 0));
+            g_GuiSettingManager->SetInteger(GUISETINT_RANGE_BANS_BY, (int)::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_GETCOLUMNWIDTH, 3, 0));
+
             ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
+            g_hWndActiveDialog = NULL;
+
             break;
+        }
         case WM_NCDESTROY:
             delete this;
             return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
@@ -223,11 +238,12 @@ void RangeBansDialog::DoModal(HWND hWndParent) {
     RECT rcParent;
     ::GetWindowRect(hWndParent, &rcParent);
 
-    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(443) / 2);
-    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(454) / 2);
+    int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGuiDefaultsOnly(GUISETINT_RANGE_BANS_WINDOW_WIDTH) / 2);
+    int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGuiDefaultsOnly(GUISETINT_RANGE_BANS_WINDOW_HEIGHT) / 2);
 
     hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomRangeBansDialog), LanguageManager->sTexts[LAN_RANGE_BANS],
-        WS_POPUP | WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(443), ScaleGui(454),
+        WS_POPUP | WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+        iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGuiDefaultsOnly(GUISETINT_RANGE_BANS_WINDOW_WIDTH), ScaleGuiDefaultsOnly(GUISETINT_RANGE_BANS_WINDOW_HEIGHT),
         hWndParent, NULL, g_hInstance, NULL);
 
     if(hWndWindowItems[WINDOW_HANDLE] == NULL) {
@@ -281,11 +297,12 @@ void RangeBansDialog::DoModal(HWND hWndParent) {
     LVCOLUMN lvColumn = { 0 };
     lvColumn.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
     lvColumn.fmt = LVCFMT_LEFT;
-    lvColumn.cx = 100;
 
     const int iRangeBansStrings[] = { LAN_RANGE, LAN_REASON, LAN_EXPIRE, LAN_BANNED_BY };
+    const int iRangeBansWidths[] = { GUISETINT_RANGE_BANS_RANGE, GUISETINT_RANGE_BANS_REASON, GUISETINT_RANGE_BANS_EXPIRE, GUISETINT_RANGE_BANS_BY };
 
     for(uint8_t ui8i = 0; ui8i < 4; ui8i++) {
+        lvColumn.cx = g_GuiSettingManager->iIntegers[iRangeBansWidths[ui8i]];
         lvColumn.pszText = LanguageManager->sTexts[iRangeBansStrings[ui8i]];
         lvColumn.iSubItem = ui8i;
 
@@ -299,18 +316,6 @@ void RangeBansDialog::DoModal(HWND hWndParent) {
     ::SendMessage(hWndWindowItems[CB_FILTER], CB_SETCURSEL, 0, 0);
 
     AddAllRangeBans();
-
-    const int iRangeBansWidths[] = { 250, 125, 125, 100 };
-
-    for(uint8_t ui8i = 0; ui8i < 4; ui8i++) {
-        ::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_SETCOLUMNWIDTH, ui8i, LVSCW_AUTOSIZE);
-        
-        int iWidth = (int)::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_GETCOLUMNWIDTH, ui8i, 0);
-
-        if(iWidth < iRangeBansWidths[ui8i]) {
-            ::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_SETCOLUMNWIDTH, ui8i, iRangeBansWidths[ui8i]);
-        }
-    }
 
     ::EnableWindow(hWndParent, FALSE);
 

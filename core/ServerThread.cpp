@@ -137,7 +137,7 @@ void ServerThread::Run() {
 #endif
 
 #ifndef _WIN32
-    struct timespec sleeptime = { 0 };
+    struct timespec sleeptime;
     sleeptime.tv_sec = 0;
     sleeptime.tv_nsec = 1000000;
 #endif
@@ -306,7 +306,8 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
 #endif
 
     // set the socket properties
-    sockaddr_in /*sockaddr_in6*/ sa = { 0 };
+    sockaddr_in /*sockaddr_in6*/ sa;
+    memset(&sa, 0, sizeof(sockaddr_in));
     sa.sin_family /*sa.sin6_family*/ = AF_INET /*AF_INET6*/;
     
 #ifdef _WIN32
