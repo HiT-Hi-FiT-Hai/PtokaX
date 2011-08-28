@@ -15,6 +15,7 @@ Added: Filter to range bans window.
 Added: DPI awareness.
 Added: Resizeable splitter to Users/Chat and Scripts pages.
 Added: Core.BuildNumber returning PtokaX build number to Lua api.
+Added: Saving of window sizes, column sizes, checkbox states and splitter positions in gui.
 Fixed: Compile with Lua 5.2.0 (beta)
 Fixed: Missing user input length checking in some commands (thx Rahim for report).
 Fixed: Multiple class member variables not initialized in the constructor.

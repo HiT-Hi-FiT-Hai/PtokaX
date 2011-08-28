@@ -109,7 +109,7 @@ void ServerOnSecTimer() {
 		CpuUsage[ui8MinTick] = dcpuSec;
 	}
 #else
-static void SecTimerHandler(int sig) {
+static void SecTimerHandler(int /*sig*/) {
     struct rusage rs;
 
     getrusage(RUSAGE_SELF, &rs);
@@ -536,7 +536,8 @@ bool ServerStart() {
 #ifdef _BUILD_GUI
             pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_RESOLVING_HUB_ADDRESS], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_HUB_ADDRESS])+"...").c_str());
 #endif
-            struct addrinfo hints = { 0 };
+            struct addrinfo hints;
+            memset(&hints, 0, sizeof(addrinfo));
             hints.ai_family = AF_INET;
 
             struct addrinfo *res;

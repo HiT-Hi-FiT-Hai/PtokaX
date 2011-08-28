@@ -31,6 +31,7 @@
 #include "../core/SettingManager.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #ifdef _WIN32
@@ -55,8 +56,6 @@
 //---------------------------------------------------------------------------
 MainWindow * pMainWindow = NULL;
 //---------------------------------------------------------------------------
-static int iHeight = 318;
-
 static uint64_t (*GetActualTick)();
 //---------------------------------------------------------------------------
 
@@ -75,6 +74,8 @@ uint64_t PXGetTickCount64() {
 //---------------------------------------------------------------------------
 
 MainWindow::MainWindow() {
+    g_GuiSettingManager = new GuiSettingManager();
+
 	INITCOMMONCONTROLSEX iccx = { sizeof(INITCOMMONCONTROLSEX), ICC_BAR_CLASSES | ICC_COOL_CLASSES | ICC_DATE_CLASSES | ICC_LINK_CLASS | ICC_LISTVIEW_CLASSES |
         ICC_STANDARD_CLASSES | ICC_TAB_CLASSES | ICC_TREEVIEW_CLASSES | ICC_UPDOWN_CLASS };
 	InitCommonControlsEx(&iccx);
@@ -114,8 +115,6 @@ MainWindow::MainWindow() {
 
     hFont = ::CreateFontIndirect(&NCM.lfMessageFont);
 
-    iHeight = ScaleGui(iHeight);
-
     hArrowCursor = (HCURSOR)::LoadImage(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED | LR_DEFAULTSIZE);
     hVerticalCursor = (HCURSOR)::LoadImage(NULL, IDC_SIZEWE, IMAGE_CURSOR, 0, 0, LR_SHARED | LR_DEFAULTSIZE);
 
@@ -132,6 +131,8 @@ MainWindow::MainWindow() {
 //---------------------------------------------------------------------------
 
 MainWindow::~MainWindow() {
+    delete g_GuiSettingManager;
+
     for(uint8_t ui8i = 0; ui8i < (sizeof(MainWindowPages) / sizeof(MainWindowPages[0])); ui8i++) {
         if(MainWindowPages[ui8i] != NULL) {
             delete MainWindowPages[ui8i];
@@ -232,7 +233,7 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     ::SendMessage(hWndWindowItems[TC_TABS], TCM_INSERTITEM, ui8i, (LPARAM)&tcItem);
                 }
 
-                if(ui8i == 0) {
+                if(ui8i == 0 && g_GuiSettingManager->iIntegers[GUISETINT_MAIN_WINDOW_HEIGHT] == g_GuiSettingManager->GetDefaultInteger(GUISETINT_MAIN_WINDOW_HEIGHT)) {
                     RECT rcPage = { 0 };
                     ::GetWindowRect(MainWindowPages[0]->m_hWnd, &rcPage);
 
@@ -241,8 +242,6 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     ::GetWindowRect(m_hWnd, &rcMain);
 
                     if(iDiff != 0) {
-                        iHeight = (rcMain.bottom-rcMain.top) - iDiff;
-
                         ::SetWindowPos(m_hWnd, NULL, 0, 0, (rcMain.right-rcMain.left), (rcMain.bottom-rcMain.top) - iDiff, SWP_NOMOVE | SWP_NOZORDER);
                     }
                 }
@@ -269,6 +268,12 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             if(::MessageBox(m_hWnd, (string(LanguageManager->sTexts[LAN_ARE_YOU_SURE], (size_t)LanguageManager->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(),
                 sTitle.c_str(), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDYES) {
                 bIsClose = true;
+
+                RECT rcMain;
+                ::GetWindowRect(m_hWnd, &rcMain);
+
+                g_GuiSettingManager->SetInteger(GUISETINT_MAIN_WINDOW_WIDTH, rcMain.right - rcMain.left);
+                g_GuiSettingManager->SetInteger(GUISETINT_MAIN_WINDOW_HEIGHT, rcMain.bottom - rcMain.top);
 
                 // stop server if running and save settings
                 if(bServerRunning == true) {
@@ -359,8 +364,8 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             return 0;
         case WM_GETMINMAXINFO: {
             MINMAXINFO *mminfo = (MINMAXINFO*)lParam;
-            mminfo->ptMinTrackSize.x = ScaleGui(400);
-            mminfo->ptMinTrackSize.y = iHeight;
+            mminfo->ptMinTrackSize.x = ScaleGui(g_GuiSettingManager->GetDefaultInteger(GUISETINT_MAIN_WINDOW_WIDTH));
+            mminfo->ptMinTrackSize.y = ScaleGui(g_GuiSettingManager->GetDefaultInteger(GUISETINT_MAIN_WINDOW_HEIGHT));
 
             return 0;
         }
@@ -611,7 +616,8 @@ HWND MainWindow::CreateEx() {
     m_hWnd = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE, MAKEINTATOM(atom),
         (string(SettingManager->sTexts[SETTXT_HUB_NAME], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME]) + " | " + sTitle).c_str(),
         WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-        CW_USEDEFAULT, CW_USEDEFAULT, ScaleGui(400), iHeight, NULL, hMainMenu, g_hInstance, NULL);
+        CW_USEDEFAULT, CW_USEDEFAULT, ScaleGuiDefaultsOnly(GUISETINT_MAIN_WINDOW_WIDTH), ScaleGuiDefaultsOnly(GUISETINT_MAIN_WINDOW_HEIGHT),
+        NULL, hMainMenu, g_hInstance, NULL);
 
 	return m_hWnd;
 }

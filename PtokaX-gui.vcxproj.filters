@@ -217,6 +217,12 @@
     <ClCompile Include="gui.win\BasicSplitter.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
+    <ClCompile Include="gui.win\GuiSettingManager.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
+    <ClCompile Include="core\PXBReader.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\eventqueue.h">
@@ -458,6 +464,21 @@
     </ClInclude>
     <ClInclude Include="gui.win\BasicSplitter.h">
       <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.win\GuiSettingDefaults.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.win\GuiSettingStr.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.win\GuiSettingIds.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.win\GuiSettingManager.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\PXBReader.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

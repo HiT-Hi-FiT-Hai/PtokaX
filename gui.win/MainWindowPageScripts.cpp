@@ -32,6 +32,7 @@
 #include "../core/UdpDebug.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #ifdef _WIN32
@@ -56,7 +57,7 @@ MainWindowPageScripts::MainWindowPageScripts() {
 
     bIgnoreItemChanged = false;
 
-    iPercentagePos = 60;
+    iPercentagePos = g_GuiSettingManager->iIntegers[GUISETINT_SCRIPTS_SPLITTER];
 }
 //---------------------------------------------------------------------------
 
@@ -135,6 +136,12 @@ LRESULT MainWindowPageScripts::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPAR
                     return 1;
                 }
             }
+
+            break;
+        case WM_DESTROY:
+            g_GuiSettingManager->SetInteger(GUISETINT_SCRIPTS_SPLITTER, iPercentagePos);
+            g_GuiSettingManager->SetInteger(GUISETINT_SCRIPT_NAMES, (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETCOLUMNWIDTH, 0, 0));
+            g_GuiSettingManager->SetInteger(GUISETINT_SCRIPT_MEMORY_USAGES, (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETCOLUMNWIDTH, 1, 0));
 
             break;
     }
@@ -317,20 +324,17 @@ bool MainWindowPageScripts::CreateMainWindowPage(HWND hOwner) {
 
     SetSplitterRect(&rcMain);
 
-	RECT rcScripts;
-	::GetClientRect(hWndPageItems[LV_SCRIPTS], &rcScripts);
-
     LVCOLUMN lvColumn = { 0 };
     lvColumn.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
     lvColumn.fmt = LVCFMT_LEFT;
-    lvColumn.cx = (((rcScripts.right - rcScripts.left)/3)*2);
+    lvColumn.cx = g_GuiSettingManager->iIntegers[GUISETINT_SCRIPT_NAMES];
     lvColumn.pszText = LanguageManager->sTexts[LAN_SCRIPT_FILE];
     lvColumn.iSubItem = 0;
 
     ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_INSERTCOLUMN, 0, (LPARAM)&lvColumn);
 
     lvColumn.fmt = LVCFMT_RIGHT;
-    lvColumn.cx = (lvColumn.cx/2);
+    lvColumn.cx = g_GuiSettingManager->iIntegers[GUISETINT_SCRIPT_MEMORY_USAGES];
     lvColumn.pszText = LanguageManager->sTexts[LAN_MEM_USAGE];
     lvColumn.iSubItem = 1;
     ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_INSERTCOLUMN, 1, (LPARAM)&lvColumn);

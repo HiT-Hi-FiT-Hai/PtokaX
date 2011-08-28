@@ -214,7 +214,7 @@ void SetMan::LoadMOTD() {
     if(fr != NULL) {
         fseek(fr, 0, SEEK_END);
         uint32_t ulflen = ftell(fr);
-        if(ulflen != 0) {
+        if(ulflen > 0) {
             fseek(fr, 0, SEEK_SET);
             ui16MOTDLen = (uint16_t)(ulflen < 65024 ? ulflen : 65024);
 

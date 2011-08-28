@@ -325,7 +325,7 @@ void RegThread::Resume() {
 
 void RegThread::Run() {
 #ifndef _WIN32
-    struct timespec sleeptime = { 0 };
+    struct timespec sleeptime;
     sleeptime.tv_sec = 0;
     sleeptime.tv_nsec = 1000000;
 #endif
@@ -352,7 +352,8 @@ void RegThread::Run() {
         if(isIP(cur->sAddress, cur->ui32AddrLen) == true) {
             target.sin_addr.s_addr = inet_addr(cur->sAddress);
         } else {
-            struct addrinfo hints = { 0 };
+            struct addrinfo hints;
+            memset(&hints, 0, sizeof(addrinfo));
             hints.ai_family = AF_INET;
 
             struct addrinfo *res;

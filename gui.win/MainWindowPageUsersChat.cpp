@@ -34,6 +34,7 @@
 #include "../core/User.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #ifdef _WIN32
@@ -64,7 +65,7 @@ MainWindowPageUsersChat::MainWindowPageUsersChat() {
 
     memset(&hWndPageItems, 0, (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])) * sizeof(HWND));
 
-    iPercentagePos = 60;
+    iPercentagePos = g_GuiSettingManager->iIntegers[GUISETINT_USERS_CHAT_SPLITTER];
 }
 //---------------------------------------------------------------------------
 
@@ -263,6 +264,14 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
         case WM_CONTEXTMENU:
             OnContextMenu((HWND)wParam, lParam);
             break;
+        case WM_DESTROY:
+            g_GuiSettingManager->SetBool(GUISETBOOL_SHOW_CHAT, ::SendMessage(hWndPageItems[BTN_SHOW_CHAT], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
+            g_GuiSettingManager->SetBool(GUISETBOOL_SHOW_COMMANDS, ::SendMessage(hWndPageItems[BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
+            g_GuiSettingManager->SetBool(GUISETBOOL_AUTO_UPDATE_USERLIST, ::SendMessage(hWndPageItems[BTN_AUTO_UPDATE_USERLIST], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
+
+            g_GuiSettingManager->SetInteger(GUISETINT_USERS_CHAT_SPLITTER, iPercentagePos);
+
+            break;
     }
 
     if(BasicSplitterProc(uMsg, wParam, lParam) == true) {
@@ -378,6 +387,10 @@ bool MainWindowPageUsersChat::CreateMainWindowPage(HWND hOwner) {
     lvColumn.cx = (rcUsers.right - rcUsers.left) - 5;
 
     ::SendMessage(hWndPageItems[LV_USERS], LVM_INSERTCOLUMN, 0, (LPARAM)&lvColumn);
+
+    ::SendMessage(hWndPageItems[BTN_SHOW_CHAT], BM_SETCHECK, g_GuiSettingManager->bBools[GUISETBOOL_SHOW_CHAT] == true ? BST_CHECKED : BST_UNCHECKED, 0);
+    ::SendMessage(hWndPageItems[BTN_SHOW_COMMANDS], BM_SETCHECK, g_GuiSettingManager->bBools[GUISETBOOL_SHOW_COMMANDS] == true ? BST_CHECKED : BST_UNCHECKED, 0);
+    ::SendMessage(hWndPageItems[BTN_AUTO_UPDATE_USERLIST], BM_SETCHECK, g_GuiSettingManager->bBools[GUISETBOOL_AUTO_UPDATE_USERLIST] == true ? BST_CHECKED : BST_UNCHECKED, 0);
 
     wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_SHOW_CHAT], GWLP_WNDPROC, (LONG_PTR)FirstButtonProc);
 

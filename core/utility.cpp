@@ -49,16 +49,17 @@ bool bCmdAutoStart = false, bCmdNoAutoStart = false, bCmdNoTray = false, bCmdNoK
 #endif
 //---------------------------------------------------------------------------
 
-void Cout(const string & msg) {
 #ifdef _WIN32
+void Cout(const string &msg) {
 	if(hConsole != NULL) {
 		WriteConsole(hConsole, (msg+"\n").c_str(), (DWORD)msg.size()+1, 0, 0);
-        return;
     }
-#else
-	return;
-#endif
 }
+#else
+void Cout(const string &/*msg*/) {
+	return;
+}
+#endif
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
