@@ -58,10 +58,6 @@ public:
         UNKNOWN_ARRIVAL
     };
 
-#ifdef _WIN32
-    HANDLE hLuaHeap;
-#endif
-
     Script *RunningScriptS;
 
     Script **ScriptTable;

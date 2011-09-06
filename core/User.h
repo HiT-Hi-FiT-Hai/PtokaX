@@ -119,7 +119,8 @@ struct User {
     	BIT_SUPPORT_USERIP2        = 0x400000,
     	BIT_SUPPORT_ZPIPE          = 0x800000, 
     	BIT_PRCSD_MYINFO           = 0x1000000, 
-    	BIT_RECV_FLOODER           = 0x2000000
+    	BIT_RECV_FLOODER           = 0x2000000,
+    	BIT_QUACK_SUPPORTS         = 0x4000000
     };
 
     uint64_t sharedSize;
@@ -161,7 +162,9 @@ struct User {
 
     char *sLastChat, *sLastPM, *sendbuf, *recvbuf, *sbplayhead, *sLastSearch;
     char *Nick, *Version, *MyInfo, *MyInfoOld, *Ver, Mode;
-    char *MyInfoTag, *Client, *Tag, *Description, *Connection, MagicByte, *Email;
+    char *MyInfoTag, *Client, *Tag, *Description, *Connection, *Email;
+    
+    unsigned char MagicByte;
     
     LoginLogout *uLogInOut;
 

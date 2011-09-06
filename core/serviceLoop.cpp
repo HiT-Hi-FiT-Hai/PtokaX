@@ -517,10 +517,10 @@ void theLoop::ReceiveLoop() {
             }
             HeapCompact(hSendHeap, HEAP_NO_SERIALIZE);
 
-            if(HeapValidate(ScriptManager->hLuaHeap, 0, 0) == 0) {
+            if(HeapValidate(hLuaHeap, 0, 0) == 0) {
                 AppendSpecialLog("Lua memory heap corrupted!");
             }
-            HeapCompact(ScriptManager->hLuaHeap, 0);
+            HeapCompact(hLuaHeap, 0);
         }
 #endif
 
@@ -968,8 +968,9 @@ void theLoop::SendLoop() {
                 UserAddUserList(curUser);
                 
                 // PPK ... UserIP2 supports
-                if(SettingManager->bBools[SETBOOL_SEND_USERIP2_TO_USER_ON_LOGIN] == true && ProfileMan->IsAllowed(curUser, ProfileManager::SENDALLUSERIP) == false && 
-                    ((curUser->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                if(((curUser->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true &&
+                    ((curUser->ui32BoolBits & User::BIT_QUACK_SUPPORTS) == User::BIT_QUACK_SUPPORTS) == false &&
+                    ProfileMan->IsAllowed(curUser, ProfileManager::SENDALLUSERIP) == false) {
             		int imsgLen = sprintf(msg, "$UserIP %s %s|", curUser->Nick, curUser->IP);
             		if(CheckSprintf(imsgLen, 1024, "theLoop::SendLoop1") == true) {
                         UserSendCharDelayed(curUser, msg, imsgLen);

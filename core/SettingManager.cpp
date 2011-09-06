@@ -408,7 +408,7 @@ void SetMan::Save() {
     TiXmlElement booleans("Booleans");
     for(size_t i = 0; i < SETBOOL_IDS_END; i++) {
         // Don't save setting with default value
-        if(bBools[i] == SetBoolDef[i]) {
+        if(bBools[i] == SetBoolDef[i] || strlen(SetBoolXmlStr[i]) == 0) {
             continue;
         }
 
@@ -424,7 +424,7 @@ void SetMan::Save() {
     char msg[8];
     for(size_t i = 0; i < SETSHORT_IDS_END; i++) {
         // Don't save setting with default value
-        if(iShorts[i] == SetShortDef[i]) {
+        if(iShorts[i] == SetShortDef[i] || strlen(SetShortXmlStr[i]) == 0) {
             continue;
         }
 
@@ -441,7 +441,8 @@ void SetMan::Save() {
     for(size_t i = 0; i < SETTXT_IDS_END; i++) {
         // Don't save setting with default value
         if((sTexts[i] == NULL && strlen(SetTxtDef[i]) == 0) || 
-            (sTexts[i] != NULL && strcmp(sTexts[i], SetTxtDef[i]) == 0)) {
+            (sTexts[i] != NULL && strcmp(sTexts[i], SetTxtDef[i]) == 0) ||
+            strlen(SetTxtXmlStr[i]) == 0) {
             continue;
         }
 

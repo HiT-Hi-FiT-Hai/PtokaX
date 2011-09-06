@@ -2691,7 +2691,19 @@ void UserGenerateMyINFO(User *u) {
     }
 
     // add magicbyte and $
-    msg[iLen] = u->MagicByte;
+    if(u->MagicByte < 16 || ((u->ui32BoolBits & User::BIT_QUACK_SUPPORTS) == User::BIT_QUACK_SUPPORTS) == false) {
+        msg[iLen] = u->MagicByte;
+    } else {
+        char cMagic = u->MagicByte;
+
+        cMagic &= ~0x10; // TLSv1 support
+        cMagic &= ~0x20; // TLSv1 support
+        cMagic &= ~0x40; // IPv4 support
+        cMagic &= ~0x80; // IPv6 support
+
+        msg[iLen] = cMagic;
+    }
+
     msg[iLen+1] = '$';
     iLen += 2;
 

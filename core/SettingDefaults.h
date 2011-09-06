@@ -26,14 +26,14 @@ bool SetBoolDef[] = {
     true, //ANTI_MOGLO
     false, //AUTO_START
     false, //REDIRECT_ALL
-    false, //REDIRECT_WHEN_HUB_FULL
+    true, //REDIRECT_WHEN_HUB_FULL
     true, //AUTO_REG
     false, //REG_ONLY
     false, //REG_ONLY_REDIR
-    false, //SHARE_LIMIT_REDIR
-    false, //SLOTS_LIMIT_REDIR
-    false, //HUB_SLOT_RATIO_REDIR
-    false, //MAX_HUBS_LIMIT_REDIR
+    true, //SHARE_LIMIT_REDIR
+    true, //SLOTS_LIMIT_REDIR
+    true, //HUB_SLOT_RATIO_REDIR
+    true, //MAX_HUBS_LIMIT_REDIR
     true, //MODE_TO_MYINFO
     false, //MODE_TO_DESCRIPTION
     false, //STRIP_DESCRIPTION
@@ -43,8 +43,8 @@ bool SetBoolDef[] = {
     true, //REG_BOT
     true, //USE_BOT_NICK_AS_HUB_SEC
     true, //REG_OP_CHAT
-    false, //TEMP_BAN_REDIR
-    false, //PERM_BAN_REDIR
+    true, //TEMP_BAN_REDIR
+    true, //PERM_BAN_REDIR
     true, //ENABLE_SCRIPTING
     true, //KEEP_SLOW_USERS
     true, //CHECK_NEW_RELEASES
@@ -67,8 +67,8 @@ bool SetBoolDef[] = {
     true, //ADVANCED_PASS_PROTECTION
     false, //BIND_ONLY_SINGLE_IP
     true, //RESOLVE_TO_IP
-    false, //NICK_LIMIT_REDIR
-    true, //SEND_USERIP2_TO_USER_ON_LOGIN
+    true, //NICK_LIMIT_REDIR
+/*ABSOLOTE*/true, //ABSOLOTE_SEND_USERIP2_TO_USER_ON_LOGIN
     true, //BAN_MSG_SHOW_IP
     true, //BAN_MSG_SHOW_RANGE
     true, //BAN_MSG_SHOW_NICK
@@ -77,7 +77,7 @@ bool SetBoolDef[] = {
     true, //REPORT_SUSPICIOUS_TAG
     true, //ACCEPT_UNKNOWN_TAG
     true, //CHECK_IP_IN_COMMANDS
-    false, //POPUP_SCRIPT_WINDOW
+/*ABSOLETE*/false, //ABSOLOTE_POPUP_SCRIPT_WINDOW
     false, //LOG_SCRIPT_ERRORS
     false, //NO_QUACK_SUPPORTS
 };
@@ -207,7 +207,7 @@ const char* SetTxtDef[] = {
     "1209;411", //TCP_PORTS
     "0", //UDP_PORT
     "<Enter hub description here>", //HUB_DESCRIPTION
-    "", //REDIRECT_ADDRESS
+    "PtokaX-Alpha.CzDC.org:6891", //REDIRECT_ADDRESS
     "reg.hublist.org;serv.hubs-list.com;hublist.cz;hublist.dreamland-net.eu;allhublista.myip.hu;hubinfo.myip.hu;publichublist-nl.no-ip.org;reg.hublist.dk", //REGISTER_SERVERS
     "Sorry, this hub is only for registered users.", //REG_ONLY_MSG
     "", //REG_ONLY_REDIR_ADDRESS

@@ -43,7 +43,7 @@ static const int MAX_ALPHABET_SIZE = 255;
 string PATH = "", SCRIPT_PATH = "", sTitle = "";
 bool bCmdAutoStart = false, bCmdNoAutoStart = false, bCmdNoTray = false, bCmdNoKeyCheck = false;
 #ifdef _WIN32
-	HANDLE hConsole = NULL, hPtokaXHeap = NULL, hRecvHeap = NULL, hSendHeap = NULL;
+	HANDLE hConsole = NULL, hLuaHeap = NULL, hPtokaXHeap = NULL, hRecvHeap = NULL, hSendHeap = NULL;
 	string PATH_LUA = "", sOs = "";
 	bool b2K = false;
 #endif
@@ -1304,5 +1304,21 @@ bool DirExist(char * sPath) {
 			sOs = "Windows NT4";
 		}
 	}
+//---------------------------------------------------------------------------
+
+    void * LuaAlocator(void * /*pOld*/, void * pData, size_t /*szOldSize*/, size_t szNewSize) {
+        if(szNewSize == 0) {
+            if(pData != NULL) {
+                ::HeapFree(hLuaHeap, 0, pData);
+            }
+            return NULL;
+        } else {
+            if(pData != NULL) {
+                return ::HeapReAlloc(hLuaHeap, 0, pData, szNewSize);
+            } else  {
+                return ::HeapAlloc(hLuaHeap, 0, szNewSize);
+            }
+        }
+    }
 #endif
 //---------------------------------------------------------------------------

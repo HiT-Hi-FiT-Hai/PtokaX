@@ -1955,7 +1955,7 @@ void hashBanMan::CreatePerm(char * first, char * second){
                 nxtBan = curBan->hashiptablenext;
 
                 if(((curBan->ui8Bits & PERM) == PERM) == true) {
-                    if(((curBan->ui8Bits & NICK) == NICK) == false && curBan->ui32NickHash == curBan->ui32NickHash) {
+                    if(((curBan->ui8Bits & NICK) == NICK) == false && Ban->ui32NickHash == curBan->ui32NickHash) {
                         // PPK ... ban with same ip and nick, set nickban to old ban and delete new ban
                         curBan->ui8Bits |= NICK;
 						Add2NickTable(curBan);
@@ -1965,7 +1965,7 @@ void hashBanMan::CreatePerm(char * first, char * second){
 						return;
                     }
                 } else {
-                    if(((curBan->ui8Bits & NICK) == NICK) == false && curBan->ui32NickHash == curBan->ui32NickHash) {
+                    if(((curBan->ui8Bits & NICK) == NICK) == false && Ban->ui32NickHash == curBan->ui32NickHash) {
                         // PPK ... old ban with same ip and nick is only tempban, delete it
                         Rem(curBan);
                         delete curBan;

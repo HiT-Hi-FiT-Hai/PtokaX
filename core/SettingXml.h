@@ -68,7 +68,7 @@ const char* SetBoolXmlStr[] = {
     "BindOnlySingleIp", 
     "ResolveToIp", 
     "NickLimitRedir", 
-    "SendUserIP2ToUserOnLogin", 
+/*Absolete "SendUserIP2ToUserOnLogin"*/"",
     "BanMessageShowIp", 
     "BanMessageShowRange", 
     "BanMessageShowNick", 
@@ -77,7 +77,7 @@ const char* SetBoolXmlStr[] = {
     "ReportSuspiciousTag", 
     "AcceptUnknownTag", 
     "CheckIpInCommands", 
-    "PopupScriptsWindow", 
+/*Absolete "PopupScriptsWindow"*/"",
     "LogScriptErrors", 
     "NoQuackSupports", 
 };

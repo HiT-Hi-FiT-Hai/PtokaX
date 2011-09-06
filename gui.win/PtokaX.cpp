@@ -152,6 +152,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 	                    bCmdNoAutoStart = true;
 	                }
 	                break;
+                case 20:
+	                if(strnicmp(sParam, "/generatexmllanguage", 20) == NULL) {
+	                    LangMan::GenerateXmlExample();
+	                    return 0;
+	                }
+	                break;
 	            default:
                     if(strnicmp(sParam, "-c ", 3) == NULL) {
                         size_t iLen = strlen(sParam+3);

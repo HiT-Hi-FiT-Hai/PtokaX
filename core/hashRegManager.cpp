@@ -37,6 +37,8 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
+//#include "../core/PXBReader.h"
+//---------------------------------------------------------------------------
 #ifdef _BUILD_GUI
     #include "../gui.win/RegisteredUserDialog.h"
     #include "../gui.win/RegisteredUsersDialog.h"
@@ -577,6 +579,72 @@ void hashRegMan::Load(void) {
 				Save();
         }
     }
+
+/*
+    uint16_t iProfilesCount = (uint16_t)(ProfileMan->iProfileCount-1);
+
+    PXBReader pxbRegs;
+
+    // Open regs file
+    if(pxbRegs.LoadFile((PATH + "\\cfg\\RegisteredUsers.pxb").c_str()) == false) {
+::MessageBox(NULL, "01", "01", MB_OK);
+        return;
+    }
+
+    // Read file header
+    uint16_t ui16Identificators[3] = { *((uint16_t *)"FI"), *((uint16_t *)"FV"), *((uint16_t *)"  ") };
+
+    if(pxbRegs.ReadNextItem(ui16Identificators, 2) == false) {
+::MessageBox(NULL, "02", "02", MB_OK);
+        return;
+    }
+
+    // Check header if we have correct file
+    if(pxbRegs.ui16ItemLengths[0] != 23 || strncmp((char *)pxbRegs.pItemDatas[0], "PtokaX Registered Users", 23) != 0) {
+::MessageBox(NULL, "03", "03", MB_OK);
+        return;
+    }
+
+    {
+        uint32_t ui32FileVersion = ntohl(*((uint32_t *)(pxbRegs.pItemDatas[1])));
+
+        if(ui32FileVersion < 1) {
+::MessageBox(NULL, "04", "04", MB_OK);
+            return;
+        }
+    }
+
+    // Read regs =)
+    ui16Identificators[0] = *((uint16_t *)"NI");
+    ui16Identificators[1] = *((uint16_t *)"PA");
+    ui16Identificators[2] = *((uint16_t *)"PR");
+
+    bool bSuccess = pxbRegs.ReadNextItem(ui16Identificators, 3);
+
+    while(bSuccess == true) {
+        uint16_t iProfile = (uint16_t)ntohl(*((uint32_t *)(pxbRegs.pItemDatas[2])));
+
+		if(pxbRegs.ui16ItemLengths[0] < 65 && pxbRegs.ui16ItemLengths[1] < 65) {
+            if(iProfile > iProfilesCount) {
+                iProfile = iProfilesCount;
+            }
+
+            RegUser *newUser = new RegUser(string((char *)pxbRegs.pItemDatas[0], pxbRegs.ui16ItemLengths[0]).c_str(),
+                string((char *)pxbRegs.pItemDatas[1], pxbRegs.ui16ItemLengths[1]).c_str(), iProfile);
+            if(newUser == NULL) {
+                string sDbgstr = "[BUF] Cannot allocate newUser in hashRegMan::LoadXmlRegList!";
+#ifdef _WIN32
+				sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
+				AppendSpecialLog(sDbgstr);
+                exit(EXIT_FAILURE);
+            }
+			Add(newUser);
+		}
+
+        bSuccess = pxbRegs.ReadNextItem(ui16Identificators, 3);
+    }
+*/
 }
 //---------------------------------------------------------------------------
 
@@ -611,5 +679,62 @@ void hashRegMan::Save(void) {
     }
     doc.InsertEndChild(registeredusers);
     doc.SaveFile();
+
+/*
+    PXBReader pxbRegs;
+
+    // Open regs file
+    if(pxbRegs.SaveFile((PATH + "\\cfg\\RegisteredUsers.pxb").c_str()) == false) {
+        return;
+    }
+
+    // Write file header
+    pxbRegs.sItemIdentifiers[0][0] = 'F';
+    pxbRegs.sItemIdentifiers[0][1] = 'I';
+    pxbRegs.ui16ItemLengths[0] = 23;
+    pxbRegs.pItemDatas[0] = "PtokaX Registered Users";
+    pxbRegs.ui8ItemValues[0] = 2;
+
+    pxbRegs.sItemIdentifiers[1][0] = 'F';
+    pxbRegs.sItemIdentifiers[1][1] = 'V';
+    pxbRegs.ui16ItemLengths[1] = 4;
+    pxbRegs.pItemDatas[1] = (void *)1;
+    pxbRegs.ui8ItemValues[1] = 1;
+
+    if(pxbRegs.WriteNextItem(27, 2) == false) {
+        return;
+    }
+
+    pxbRegs.sItemIdentifiers[0][0] = 'N';
+    pxbRegs.sItemIdentifiers[0][1] = 'I';
+    pxbRegs.sItemIdentifiers[1][0] = 'P';
+    pxbRegs.sItemIdentifiers[1][1] = 'A';
+    pxbRegs.sItemIdentifiers[2][0] = 'P';
+    pxbRegs.sItemIdentifiers[2][1] = 'R';
+
+    RegUser *next = hashRegManager->RegListS;
+    while(next != NULL) {
+        RegUser *curReg = next;
+		next = curReg->next;
+
+        pxbRegs.ui16ItemLengths[0] = (uint16_t)strlen(curReg->sNick);
+        pxbRegs.pItemDatas[0] = (void *)curReg->sNick;
+        pxbRegs.ui8ItemValues[0] = 2;
+
+        pxbRegs.ui16ItemLengths[1] = (uint16_t)strlen(curReg->sPass);
+        pxbRegs.pItemDatas[1] = (void *)curReg->sPass;
+        pxbRegs.ui8ItemValues[1] = 2;
+
+        pxbRegs.ui16ItemLengths[2] = 4;
+        pxbRegs.pItemDatas[2] = (void *)curReg->iProfile;
+        pxbRegs.ui8ItemValues[2] = 1;
+
+        if(pxbRegs.WriteNextItem(pxbRegs.ui16ItemLengths[0] + pxbRegs.ui16ItemLengths[1] + 4, 3) == false) {
+            break;
+        }
+    }
+
+    pxbRegs.WriteRemaining();
+*/
 }
 //---------------------------------------------------------------------------

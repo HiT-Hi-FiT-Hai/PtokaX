@@ -68,7 +68,7 @@ ScriptMan::ScriptMan() {
     bMoved = false;
 
 #ifdef _WIN32
-    hLuaHeap = luaL_createheap();
+    hLuaHeap = ::HeapCreate(HEAP_NO_SERIALIZE, 0x80000, 0);
 #endif
 
 	// PPK ... first start all script in order from xml file
@@ -140,7 +140,7 @@ ScriptMan::~ScriptMan() {
     ui8BotsCount = 0;
 
 #ifdef _WIN32
-    luaL_destroyheap();
+    ::HeapDestroy(hLuaHeap);
 #endif
 }
 //------------------------------------------------------------------------------
