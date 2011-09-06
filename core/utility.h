@@ -96,12 +96,13 @@ bool DirExist(char * sPath);
 
 #ifdef _WIN32
 	void SetupOsVersion();
+	void * LuaAlocator(void * pOld, void * pData, size_t szOldSize, size_t szNewSize);
 #endif
 //---------------------------------------------------------------------------
 extern string PATH, SCRIPT_PATH, sTitle;
 extern bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bCmdNoKeyCheck;
 #ifdef _WIN32
-	extern HANDLE hConsole, hPtokaXHeap, hRecvHeap, hSendHeap;
+	extern HANDLE hConsole, hLuaHeap, hPtokaXHeap, hRecvHeap, hSendHeap;
 	extern string PATH_LUA, sOs;
 	extern bool b2K;
 #endif

@@ -363,7 +363,13 @@ void ScriptEditorDialog::OnCheckSyntax() {
 
     ::GetWindowText(hWndWindowItems[REDT_SCRIPT], sBuf, iAllocLen+1);
 
-	lua_State * L = luaL_newstate();
+	lua_State * L = lua_newstate(LuaAlocator, NULL);
+
+    if(L == NULL) {
+		free(sBuf);
+        return;
+    }
+
 	luaL_openlibs(L);
 
 	if(luaL_dostring(L, sBuf) == 0) {

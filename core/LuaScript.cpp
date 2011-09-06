@@ -306,7 +306,15 @@ bool ScriptStart(Script * cur) {
 	cur->prev = NULL;
 	cur->next = NULL;
 
-	cur->LUA = luaL_newstate();
+#ifdef _WIN32
+	cur->LUA = lua_newstate(LuaAlocator, NULL);
+#else
+    cur->LUA = luaL_newstate();
+#endif
+
+    if(cur->LUA == NULL) {
+        return false;
+    }
 
 	luaL_openlibs(cur->LUA);
 

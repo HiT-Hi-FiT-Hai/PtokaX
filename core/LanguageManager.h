@@ -36,6 +36,8 @@ public:
     
 	char * GetLangStr(size_t TextId); //LanguageManager->GetLangStr
 	void LoadLanguage();
+	
+	static void GenerateXmlExample();
 };
 //--------------------------------------------------------------------------- 
 extern LangMan *LanguageManager;

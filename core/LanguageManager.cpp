@@ -171,3 +171,23 @@ void LangMan::LoadLanguage() {
     }
 }
 //---------------------------------------------------------------------------
+
+void LangMan::GenerateXmlExample() {
+    TiXmlDocument xmldoc;
+    xmldoc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
+    TiXmlElement xmllanguage("Language");
+    xmllanguage.SetAttribute("Name", "Example English Language");
+    xmllanguage.SetAttribute("Author", "PtokaX");
+    xmllanguage.SetAttribute("Version", PtokaXVersionString " build " BUILD_NUMBER);
+
+    for(int i = 0; i < LANG_IDS_END; i++) {
+        TiXmlElement xmlstring("String");
+        xmlstring.SetAttribute("Name", LangXmlStr[i]);
+        xmlstring.InsertEndChild(TiXmlText(LangStr[i]));
+        xmllanguage.InsertEndChild(xmlstring);
+    }
+
+    xmldoc.InsertEndChild(xmllanguage);
+    xmldoc.SaveFile("English.xml.example");
+}
+//---------------------------------------------------------------------------

@@ -1977,7 +1977,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 				Statinfo+="Send total uncommited: "+string((uint32_t)dwUnCommitted)+ NEW_LINE_CHARS;
 
                 dwCommitted = 0, dwUnCommitted = 0;
-                GetHeapStats(ScriptManager->hLuaHeap, dwCommitted, dwUnCommitted);
+                GetHeapStats(hLuaHeap, dwCommitted, dwUnCommitted);
 				Statinfo+="Lua total commited: "+string((uint32_t)dwCommitted)+ NEW_LINE_CHARS;
 				Statinfo+="Lua total uncommited: "+string((uint32_t)dwUnCommitted)+ NEW_LINE_CHARS;
 

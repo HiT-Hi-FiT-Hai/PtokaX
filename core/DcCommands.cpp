@@ -3201,51 +3201,55 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
         return;
     }
 
-    if(SettingManager->bBools[SETBOOL_NO_QUACK_SUPPORTS] == true && sData[iLen-2] == ' ') {
-        int imsgLen;
-        if(iLen < 768) {
-            imsgLen = sprintf(msg, "[SYS] Quack $Supports (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
-            if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports3") == true) {
-                UdpDebug->Broadcast(msg, imsgLen);
-            }
+    if(sData[iLen-2] == ' ') {
+        if(SettingManager->bBools[SETBOOL_NO_QUACK_SUPPORTS] == false) {
+            curUser->ui32BoolBits |= User::BIT_QUACK_SUPPORTS;
         } else {
-            size_t iWantLen = iLen+curUser->NickLen+15+64;
+            int imsgLen;
+            if(iLen < 768) {
+                imsgLen = sprintf(msg, "[SYS] Quack $Supports (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports3") == true) {
+                    UdpDebug->Broadcast(msg, imsgLen);
+                }
+            } else {
+                size_t iWantLen = iLen+curUser->NickLen+15+64;
 #ifdef _WIN32
-            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+                char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
 #else
-			char *MSG = (char *) malloc(iWantLen);
+                char *MSG = (char *) malloc(iWantLen);
 #endif
-            if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
-					string((uint64_t)iWantLen)+" bytes of memory for cDcCommands::Supports!";
+                if(MSG == NULL) {
+				    string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+					   string((uint64_t)iWantLen)+" bytes of memory for cDcCommands::Supports!";
 #ifdef _WIN32
-				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+				    sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
-				AppendSpecialLog(sDbgstr);
-                return;
-            }
-            imsgLen = sprintf(MSG, "[SYS] Quack $Supports (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
-            if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::Supports4") == true) {
-                UdpDebug->Broadcast(MSG, imsgLen);
-            }
+				    AppendSpecialLog(sDbgstr);
+                    return;
+                }
+                imsgLen = sprintf(MSG, "[SYS] Quack $Supports (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::Supports4") == true) {
+                    UdpDebug->Broadcast(MSG, imsgLen);
+                }
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::Supports! "+string((uint32_t)GetLastError())+" "+
-					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-				AppendSpecialLog(sDbgstr);
+                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
+				    string sDbgstr = "[BUF] Cannot deallocate MSG in cDcCommands::Supports! "+string((uint32_t)GetLastError())+" "+
+					   string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+				    AppendSpecialLog(sDbgstr);
+                }
+#else
+                free(MSG);
+#endif
+            }
+
+       		imsgLen = sprintf(msg, "<%s> %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_QUACK_SUPPORTS]);
+			if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports5") == true) {
+				UserSendCharDelayed(curUser, msg, imsgLen);
 			}
-#else
-			free(MSG);
-#endif
-        }
 
-       	imsgLen = sprintf(msg, "<%s> %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_QUACK_SUPPORTS]);
-        if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports5") == true) {
-            UserSendCharDelayed(curUser, msg, imsgLen);
-        }
-
-        UserClose(curUser);
-        return;
+			UserClose(curUser);
+			return;
+		}
     }
 
 	ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::SUPPORTS_ARRIVAL);
