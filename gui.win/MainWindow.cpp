@@ -571,7 +571,7 @@ HWND MainWindow::CreateEx() {
     HMENU hFileMenu = ::CreatePopupMenu();
     ::AppendMenu(hFileMenu, MF_STRING, IDC_RELOAD_TXTS, (string(LanguageManager->sTexts[LAN_RELOAD_TEXT_FILES], (size_t)LanguageManager->ui16TextsLens[LAN_RELOAD_TEXT_FILES]) + "...").c_str());
     ::AppendMenu(hFileMenu, MF_SEPARATOR, 0, 0);
-    ::AppendMenu(hFileMenu, MF_STRING, IDC_SETTINGS, (string(LanguageManager->sTexts[LAN_MENU_SETTINGS], (size_t)LanguageManager->ui16TextsLens[LAN_SETTINGS]) + "...").c_str());
+    ::AppendMenu(hFileMenu, MF_STRING, IDC_SETTINGS, (string(LanguageManager->sTexts[LAN_MENU_SETTINGS], (size_t)LanguageManager->ui16TextsLens[LAN_MENU_SETTINGS]) + "...").c_str());
     ::AppendMenu(hFileMenu, MF_STRING, IDC_SAVE_SETTINGS, (string(LanguageManager->sTexts[LAN_SAVE_SETTINGS], (size_t)LanguageManager->ui16TextsLens[LAN_SAVE_SETTINGS]) + "...").c_str());
     ::AppendMenu(hFileMenu, MF_SEPARATOR, 0, 0);
     ::AppendMenu(hFileMenu, MF_STRING, IDC_EXIT, LanguageManager->sTexts[LAN_EXIT]);
