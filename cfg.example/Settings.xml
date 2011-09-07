@@ -4,14 +4,14 @@
         <Bool Name="AntiMoGlo">1</Bool><!-- Anti MoGlo description -->
         <Bool Name="AutoStart">0</Bool><!-- Hub autostart, service version always start automatically! -->
         <Bool Name="RedirectAll">0</Bool><!-- Redirect all connecting users -->
-        <Bool Name="RedirectWhenHubFull">0</Bool><!-- Redirect users when hub is full -->
+        <Bool Name="RedirectWhenHubFull">1</Bool><!-- Redirect users when hub is full -->
         <Bool Name="AutoRegister">1</Bool><!-- Automatically register to hublist -->
         <Bool Name="RegOnly">0</Bool><!-- Hub for registered users only -->
         <Bool Name="RegOnlyRedir">0</Bool><!-- Redirect non-registered users when hub is for registered users only -->
-        <Bool Name="ShareLimitRedir">0</Bool><!-- Redirect user when he's don't have share limit -->
-        <Bool Name="SlotsLimitRedir">0</Bool><!-- Redirect user when he's don't have slot limit -->
-        <Bool Name="HubSlotRatioRedir">0</Bool><!-- Redirect user when he's don't have hub/slot ratio limit -->
-        <Bool Name="MaxHubsLimitRedir">0</Bool><!-- Redirect user when he's don't have max hubs limit -->
+        <Bool Name="ShareLimitRedir">1</Bool><!-- Redirect user when he's don't have share limit -->
+        <Bool Name="SlotsLimitRedir">1</Bool><!-- Redirect user when he's don't have slot limit -->
+        <Bool Name="HubSlotRatioRedir">1</Bool><!-- Redirect user when he's don't have hub/slot ratio limit -->
+        <Bool Name="MaxHubsLimitRedir">1</Bool><!-- Redirect user when he's don't have max hubs limit -->
         <Bool Name="ModeToMyINFO">1</Bool><!-- Add user mode to MyINFO command. -->
         <Bool Name="ModeToDescription">0</Bool><!-- Add user mode to description. -->
         <Bool Name="StripDescription">0</Bool><!-- Strip user description. -->
@@ -21,8 +21,8 @@
         <Bool Name="RegBot">1</Bool><!-- Register hub bot on hub. -->
         <Bool Name="UseBotNickAsHubSec">1</Bool><!-- Use hub bot nick instead of Hub-Security. -->
         <Bool Name="RegOpChat">1</Bool><!-- Register Opchat bot on hub. -->
-        <Bool Name="TempBanRedir">0</Bool><!-- Redirect user when is temp banned. -->
-        <Bool Name="PermBanRedir">0</Bool><!-- Redirect user when is perm banned. -->
+        <Bool Name="TempBanRedir">1</Bool><!-- Redirect user when is temp banned. -->
+        <Bool Name="PermBanRedir">1</Bool><!-- Redirect user when is perm banned. -->
         <Bool Name="EnableScripting">1</Bool><!-- Enable scripting interface. -->
         <Bool Name="KeepSlowUsers">1</Bool><!-- Keep slow clients. -->
         <Bool Name="CheckNewReleases">1</Bool><!-- Automatically check for new PtokaX releases on startup, working only in gui version. -->
@@ -45,8 +45,7 @@
         <Bool Name="AdvancedPassProtection">1</Bool><!-- Advanced password protection. -->
         <Bool Name="BindOnlySingleIp">0</Bool><!-- Listen only on single IP. -->
         <Bool Name="ResolveToIp">1</Bool><!-- Resolve hostname to IP. -->
-        <Bool Name="NickLimitRedir">0</Bool><!-- Redir user when he's don't have nick in length limits. -->
-        <Bool Name="SendUserIP2ToUserOnLogin">1</Bool><!-- Send UserIP to user on login. -->
+        <Bool Name="NickLimitRedir">1</Bool><!-- Redir user when he's don't have nick in length limits. -->
         <Bool Name="BanMessageShowIp">1</Bool><!-- Send ip in ban message. -->
         <Bool Name="BanMessageShowRange">1</Bool><!-- Send range in ban message. -->
         <Bool Name="BanMessageShowNick">1</Bool><!-- Send nick in ban message. -->
@@ -54,7 +53,6 @@
         <Bool Name="BanMessageShowBy">1</Bool><!-- Send who create ban in ban message. -->
         <Bool Name="ReportSuspiciousTag">1</Bool><!-- Report suspicious tag to OPs. -->
         <Bool Name="AcceptUnknownTag">1</Bool><!-- Accept tag from unknown clients. -->
-        <Bool Name="PopupScriptsWindow">0</Bool><!-- Popup scripts window on script error. -->
         <Bool Name="LogScriptErrors">0</Bool><!-- Save script errors to log. -->
         <Bool Name="NoQuackSupports">0</Bool><!-- Disallow clients sending buggy $Supports. -->
     </Booleans>
@@ -181,7 +179,7 @@
         <String Name="TCPPorts">1209;411</String><!-- TCP ports. Min length 1, max 64. -->
         <String Name="UDPPort">0</String><!-- UDP port. Min length 1, max 5. -->
         <String Name="HubDescription">&lt;Enter hub description here&gt;</String><!-- Hub description. Max length 256. -->
-        <String Name="RedirectAddress"></String><!-- Main redirect address. Max length 256. -->
+        <String Name="RedirectAddress">PtokaX-Alpha.CzDC.org:6891</String><!-- Main redirect address. Max length 256. -->
         <String Name="RegisterServers">reg.hublist.org;serv.hubs-list.com;hublist.cz;hublist.dreamland-net.eu;allhublista.myip.hu;hubinfo.myip.hu;publichublist-nl.no-ip.org;reg.hublist.dk</String><!-- Hublist register servers. Max length 1024. -->
         <String Name="RegOnlyMessage">Sorry, this hub is only for registered users.</String><!-- Registered users only message. Min length 1, max 256. -->
         <String Name="RegOnlyRedirAddress"></String><!-- Registered users only redirect address. Max length 256. -->

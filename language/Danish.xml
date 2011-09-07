@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1252" standalone="yes" ?>
-<Language Name="Danish Language" Author="Gnuff™" Version="0.4.1.2">
+<Language Name="Danish Language" Author="Gnuff™" Version="0.4.1.2a">
     <String Name="ThisHubIsRunning">Denne hub kører med</String>
     <String Name="HubName">Hub navn</String>
     <String Name="MOTD(motd)">MOTD Message Of The Day (Dagens meddelelse)</String>
@@ -21,7 +21,7 @@
     <String Name="HubAutoStart">Automatisk start af hub server ved opstart</String>
     <String Name="StartHub">Start hub</String>
     <String Name="StopHub">Stop hub</String>
-    <String Name="DisableMOTD">Frakobl MOTD</String>
+    <String Name="DisableMOTD">Slål MOTD fra</String>
     <String Name="SendMOTDinPM">Send MOTD som privat besked</String>
     <String Name="UsersChat">Brugere / Chat</String>
     <String Name="AdminChat">Admin chat</String>
@@ -88,9 +88,9 @@
     <String Name="FilteredKicksToOPs">Send sparkbeskeder til Operatører (når forrige indstilling er aktiveret)</String>
     <String Name="SendStatus">Send statusbeskeder til Operatører</String>
     <String Name="SendStatusPm">Send statusbeskeder som private beskeder</String>
-    <String Name="DisallowPingers">Tillad ikke hublist pingers at checke hubben</String>
-    <String Name="ReportPingers">Reporter hublist pingers til Operatørerne</String>
-    <String Name="ReportBadTags">Reporter mistænksomt beskrivelses tag til operatørerne</String>
+    <String Name="DisallowPingers">Tillad ikke hublist pingere at checke hubben</String>
+    <String Name="ReportPingers">Reporter hublist pingere til Operatørerne</String>
+    <String Name="ReportBadTags">Reporter mistænksomt beskrivelses mærke til operatørerne</String>
     <String Name="ReportBadPass">Reporter til Operatørerne når forkert kodeord modtages 3 gange for registreret bruger</String>
     <String Name="AdvPassProtect">Aktiver avanceret kodeordsbeskyttelse</String>
     <String Name="UseUserIP">Send bruger ved login hans IP med BrugerIP kommando (klienten bruger det til at opsætte aktiv tilstand)</String>
@@ -98,11 +98,11 @@
     <String Name="CheckIP">Check om brugeren sender korrekte ip i protocol kommando (DDOS beskyttelse)</String>
     <String Name="KeepSlow">Behold langsomme brugere online</String>
     <String Name="CheckStartupNewVersion">Tjek om ny PtokaX version er tilgængelig ved opstart</String>
-    <String Name="CheckUpdateNow">Kig efter update nu!</String>
+    <String Name="CheckUpdateNow">Kig efter opdatering nu!</String>
     <String Name="MyinfoProcess">MyINFO procedure</String>
     <String Name="ToAllUsers">Til alle brugere</String>
     <String Name="OnlyAllowedProfiles">Kun til tilladte profiler</String>
-    <String Name="DontSend">&apos; Send ikke</String>
+    <String Name="DontSend">Send ikke</String>
     <String Name="ModeToMyINFO">Tilføj bruger forbindelsestilstand til MyINFO (kræver support i klienten)</String>
     <String Name="ModeToDescr">Tilføj bruger forbindelsestilstand til brugerbeskrivelse</String>
     <String Name="MinBeforeNewSend">Minutter før ny MyINFO er accepteret til afsendelse</String>
@@ -198,7 +198,7 @@
     <String Name="EntFullHub">Komme ind selvom fuld hub</String>
     <String Name="AllowLoginBannedIp">Tilladelse til at logge ind fra bannet IP (uden fuld banning)</String>
     <String Name="Drop">Drop</String>
-    <String Name="GetUserInfo">Hente bruger info</String>
+    <String Name="GetUserInfo">Hent bruger info</String>
     <String Name="Redir">Viderestille</String>
     <String Name="TemporaryBan">Midlertidig ban</String>
     <String Name="TemporaryUnban">Midlertidig unban</String>
@@ -217,7 +217,7 @@
     <String Name="GagUngag">Gag, Ungag</String>
     <String Name="TempOP">Midlertidig OP</String>
     <String Name="StartStopRestartScripts">Starte/Stoppe/Genstarte script(s)</String>
-    <String Name="RestartHub">Genstarte hub</String>
+    <String Name="RestartHub">Genstart hub</String>
     <String Name="RldTxtFiles">Opdatere text filer</String>
     <String Name="NoShareLimit">Ingen share begrænsning</String>
     <String Name="NoSlotCheck">Ingen slot check</String>
@@ -248,13 +248,13 @@
     <String Name="RegisteredUser">Registrerede bruger</String>
     <String Name="Nickname">Brugernavn</String>
     <String Name="UserProfile">Brugerprofil</String>
-    <String Name="Discard">Afvis</String>
+    <String Name="Discard">Afbryd</String>
     <String Name="Error">Fejl</String>
     <String Name="Note">Note</String>
     <String Name="NickMustBeSpecified">Navnet skal være skrevet ind!</String>
     <String Name="PassMustBeSpecified">Kodeordet skal være skrevet ind!</String>
     <String Name="NoBadCharsInNick">Ingen $|&lt;&gt;:?*&quot;/\ og &lt;space&gt; i Brugernavn!</String>
-    <String Name="NoBadCharsInPass">Ingen $ | og &lt;space&gt; i Kodeord!</String>
+    <String Name="NoPipeInPass">Ingen pipe i kodeord</String>
     <String Name="UserIsAlredyReg">Brugeren er allerede registreret!</String>
     <String Name="UserWithSameNickAlredyExist">En bruger med samme navn findes allerede!</String>
     <String Name="ErrorInScript">Fejl i script</String>
@@ -524,7 +524,7 @@
     <String Name="NewVersion">Ny version</String>
     <String Name="ReleasedOn">frigivet den</String>
     <String Name="Changes">Ændringer</String>
-    <String Name="OpenPtokaXHomepage">Åben PtokaX hjemmeside</String>
+    <String Name="OpenPtokaXHomepage">Åbn PtokaX hjemmeside</String>
     <String Name="SorryNoNewVersionAvailable">Beklager, ingen ny version tilgængelig</String>
     <String Name="ReadyLwr">klar</String>
     <String Name="Total">Total</String>
@@ -543,7 +543,7 @@
     <String Name="Permanent">Permanent</String>
     <String Name="GlobalChatFloodDetected">Global chat flood opdaget</String>
     <String Name="YouMyINFOIsCorrupted">Din MyINFO er ødelagt</String>
-    <String Name="FakeTag">Fake mærke</String>
+    <String Name="FakeTag">Falsk mærke</String>
     <String Name="HasSuspiciousTagCheckHim">har mistænkeligt mærke, check ham</String>
     <String Name="FullDescription">Fuld beskrivelse</String>
     <String Name="PingerFromIP">Pinger fra IP</String>
@@ -575,11 +575,11 @@
     <String Name="YouAreRedirectedTo">Du er blevet viderestillet til</String>
     <String Name="IsRedirectedTo">er viderestillet til</String>
     <String Name="SorryThisHubNotAllowPingerChecking">Beklager denne hub tillader ikke pinger checking</String>
-    <String Name="PleaseDontFloodWithPM">Vær venlig &apos;IKKE at floode med PM</String>
+    <String Name="PleaseDontFloodWithPM">Vær venlig IKKE at floode med PM</String>
     <String Name="PMFlooding">PM flooding</String>
     <String Name="PMFlooder">PM flooder</String>
     <String Name="TheMessageWasTooLong">Beskeden var for lang</String>
-    <String Name="PleaseDontFloodChat">Vær venlig  IKKE at floode chatten</String>
+    <String Name="PleaseDontFloodChat">Vær venlig IKKE at floode chatten</String>
     <String Name="ChatFlooding">Chat flooding</String>
     <String Name="ChatFlooder">Chat flooder</String>
     <String Name="YourNickContainsIllegalCharacter">Dit navn indeholder forbudte tegn</String>
@@ -593,10 +593,10 @@
     <String Name="KickUser">Spark bruger af hubben</String>
     <String Name="BanUser">Ban bruger</String>
     <String Name="OpUser">Op bruger</String>
-    <String Name="YouCantDropYourself">Du kan &apos;IKKE droppe dig selv. Båtnakke</String>
-    <String Name="YouCantGagYourself">Du kan &apos; IKKE gagge dig selv. Blødning</String>
+    <String Name="YouCantDropYourself">Du kan IKKE droppe dig selv. Båtnakke</String>
+    <String Name="YouCantGagYourself">Du kan IKKE gagge dig selv. Blødning</String>
     <String Name="Close">Luk</String>
-    <String Name="YouCantCloseYourself">Du kan &apos;IKKE lukke dig selv. Din tegning</String>
+    <String Name="YouCantCloseYourself">Du kan IKKE lukke dig selv. Din tegning</String>
     <String Name="YouAreNotAllowedToClose">Du har ikke tilladelse til at lukke</String>
     <String Name="WasClosedBy">blev lukket af</String>
     <String Name="WasClosed">blev lukket</String>
@@ -661,7 +661,7 @@
     <String Name="RangeBans">Række bannede</String>
     <String Name="AreYouSureDDOS">Er du sikker på at du ønsker potentielt brug af brugere på denne hub til DDOS angreb ?</String>
     <String Name="SettingsSaved">Indstillinger gemt.</String>
-    <String Name="OpenExternalEditor">Ã…ben i extern editor</String>
+    <String Name="OpenExternalEditor">Åben i extern editor</String>
     <String Name="DeleteScript">Slet script</String>
     <String Name="RefreshScripts">Opdater scripts</String>
     <String Name="PopupScriptsWindow">Popup scripts vindue ved script fejl</String>
@@ -702,7 +702,7 @@
     <String Name="BadTimeSpecifiedBanExpired">Forkert tid specificeret. Med den tid, ville banningen allerede være udløbet!</String>
     <String Name="SimilarBanExist">En banning magen til findes allerede!</String>
     <String Name="YouCantCreateBanWithoutNickOrIP">Du kan&apos;ikke oprette banning hvis du&apos;ikke banner navn eller IP!</String>
-    <String Name="FromIP">fraIP</String>
+    <String Name="FromIP">fra IP</String>
     <String Name="To IP">Til IP</String>
     <String Name="RangeBan">Række banning</String>
     <String Name="BanNotFound">Banning ikke fundet!</String>
@@ -772,8 +772,11 @@
     <String Name="SecBeforeReconn">Sekunder før reconnect</String>
     <String Name="Rename">Omdøb</String>
     <String Name="Country">Land</String>
-    <String Name="LogScriptErrors">Gem script fejl til log</String> 
-    <String Name="QuackSupports">Beklager, denne hub tillader ikke klienter at sende ugyldige $Supports kommandoer</String> 
-    <String Name="ClientsBuggySupports">Klienter med ugyldige $Supports kommandoer</String> 
-    <String Name="DisallowBuggySupports">Tillad ikke klienter at sende ugyldige $Supports kommandoer</String> 
+    <String Name="LogScriptErrors">Gem script fejl til log</String>
+    <String Name="QuackSupports">Beklager, denne hub tillader ikke klienter at sende ugyldige $Supports kommandoer</String>
+    <String Name="ClientsBuggySupports">Klienter med ugyldige $Supports kommandoer</String>
+    <String Name="DisallowBuggySupports">Forbyd klienter at sende ugyldige $Supports kommandoer</String>
+    <String Name="MaxAlwdTopicLen256Chars">Max tilladte emne længde er 256 tegn</String>
+    <String Name="MaxAlwdScriptNameLen256Chars">Max tilladte scriptnavn længde er 256 tegn</String>
+    <String Name="MaxAlwdIPLen15Chars">Max tilladte IP længde er 15 tegn</String>
 </Language>
