@@ -1,4 +1,4 @@
-PtokaX 0.4.1.2
+PtokaX 0.4.2.0
 ---------------
 
 This is PtokaX version without gui able to run from console or as windows service.
@@ -9,6 +9,7 @@ Command line commands available:
 -d			- run as daemon.
 -h			- show help.
 -v			- show PtokaX version with build date and time.
+/generatexmllanguage	- generate english language example file.
 
 In case when that version not start for you check logs directory, in most cases it log problem.
 
