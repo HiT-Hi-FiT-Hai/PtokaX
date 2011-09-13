@@ -671,7 +671,7 @@ void classUsers::SendChat2All(User * cur, char * data, const size_t &iChatLen) {
                         AppendSpecialLog(sDbgstr);
                         return;
                     }
-                	int iMsgLen = sprintf(MSG, "%s ", cur->IP);
+                	int iMsgLen = sprintf(MSG, "%s ", cur->sIP);
                 	if(CheckSprintf(iMsgLen, iWantLen, "classUsers::SendChat2All3") == true) {
                         memcpy(MSG+iMsgLen, data, iChatLen);
                         iMsgLen += (uint32_t)iChatLen;
@@ -700,7 +700,7 @@ void classUsers::SendChat2All(User * cur, char * data, const size_t &iChatLen) {
 //---------------------------------------------------------------------------
 
 void classUsers::Add2MyInfos(User * u) {
-    if(myInfosSize < myInfosLen+u->iMyInfoLen) {
+    if(myInfosSize < myInfosLen+u->ui16MyInfoShortLen) {
         char * oldbuf = myInfos;
 #ifdef _WIN32
         myInfos = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, myInfosSize+MYINFOLISTSIZE+1);
@@ -709,7 +709,7 @@ void classUsers::Add2MyInfos(User * u) {
 #endif
         if(myInfos == NULL) {
 			string sDbgstr = "[BUF] Cannot reallocate "+string(myInfosSize)+"/"+string(myInfosSize+MYINFOLISTSIZE+1)+
-				" bytes of memory in classUsers::Add2MyInfos! "+string(u->MyInfo, u->iMyInfoLen);
+				" bytes of memory in classUsers::Add2MyInfos! "+string(u->sMyInfoShort, u->ui16MyInfoShortLen);
 #ifdef _WIN32
 			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
             HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
@@ -722,8 +722,8 @@ void classUsers::Add2MyInfos(User * u) {
         myInfosSize += MYINFOLISTSIZE;
     }
 
-    memcpy(myInfos+myInfosLen, u->MyInfo, u->iMyInfoLen);
-    myInfosLen += u->iMyInfoLen;
+    memcpy(myInfos+myInfosLen, u->sMyInfoShort, u->ui16MyInfoShortLen);
+    myInfosLen += u->ui16MyInfoShortLen;
 
     myInfos[myInfosLen] = '\0';
 
@@ -732,18 +732,18 @@ void classUsers::Add2MyInfos(User * u) {
 //---------------------------------------------------------------------------
 
 void classUsers::DelFromMyInfos(User * u) {
-	char *match = strstr(myInfos, u->MyInfo+8);
+	char *match = strstr(myInfos, u->sMyInfoShort+8);
     if(match != NULL) {
 		match -= 8;
-		memmove(match, match+u->iMyInfoLen, myInfosLen-((match+(u->iMyInfoLen-1))-myInfos));
-        myInfosLen -= u->iMyInfoLen;
+		memmove(match, match+u->ui16MyInfoShortLen, myInfosLen-((match+(u->ui16MyInfoShortLen-1))-myInfos));
+        myInfosLen -= u->ui16MyInfoShortLen;
         iZMyInfosLen = 0;
     }
 }
 //---------------------------------------------------------------------------
 
 void classUsers::Add2MyInfosTag(User * u) {
-    if(myInfosTagSize < myInfosTagLen+u->iMyInfoTagLen) {
+    if(myInfosTagSize < myInfosTagLen+u->ui16MyInfoLongLen) {
         char * oldbuf = myInfosTag;
 #ifdef _WIN32
         myInfosTag = (char *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, myInfosTagSize+MYINFOLISTSIZE+1);
@@ -752,7 +752,7 @@ void classUsers::Add2MyInfosTag(User * u) {
 #endif
         if(myInfosTag == NULL) {
 			string sDbgstr = "[BUF] Cannot reallocate "+string(myInfosTagSize)+"/"+string(myInfosTagSize+MYINFOLISTSIZE+1)+
-				" bytes of memory in classUsers::Add2MyInfosTag! "+string(u->MyInfoTag, u->iMyInfoTagLen);
+				" bytes of memory in classUsers::Add2MyInfosTag! "+string(u->sMyInfoLong, u->ui16MyInfoLongLen);
 #ifdef _WIN32
 			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
             HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
@@ -765,8 +765,8 @@ void classUsers::Add2MyInfosTag(User * u) {
         myInfosTagSize += MYINFOLISTSIZE;
     }
 
-    memcpy(myInfosTag+myInfosTagLen, u->MyInfoTag, u->iMyInfoTagLen);
-    myInfosTagLen += u->iMyInfoTagLen;
+    memcpy(myInfosTag+myInfosTagLen, u->sMyInfoLong, u->ui16MyInfoLongLen);
+    myInfosTagLen += u->ui16MyInfoLongLen;
 
     myInfosTag[myInfosTagLen] = '\0';
 
@@ -775,11 +775,11 @@ void classUsers::Add2MyInfosTag(User * u) {
 //---------------------------------------------------------------------------
 
 void classUsers::DelFromMyInfosTag(User * u) {
-	char *match = strstr(myInfosTag, u->MyInfoTag+8);
+	char *match = strstr(myInfosTag, u->sMyInfoLong+8);
     if(match != NULL) {
 		match -= 8;
-        memmove(match, match+u->iMyInfoTagLen, myInfosTagLen-((match+(u->iMyInfoTagLen-1))-myInfosTag));
-        myInfosTagLen -= u->iMyInfoTagLen;
+        memmove(match, match+u->ui16MyInfoLongLen, myInfosTagLen-((match+(u->ui16MyInfoLongLen-1))-myInfosTag));
+        myInfosTagLen -= u->ui16MyInfoLongLen;
         iZMyInfosTagLen = 0;
     }
 }
@@ -870,7 +870,7 @@ void classUsers::DelBotFromMyInfos(char * MyInfo) {
 //---------------------------------------------------------------------------
 
 void classUsers::Add2UserIP(User * cur) {
-    int m = sprintf(msg,"$%s %s$", cur->Nick, cur->IP);
+    int m = sprintf(msg,"$%s %s$", cur->sNick, cur->sIP);
     if(CheckSprintf(m, 1024, "classUsers::Add2UserIP") == false) {
         return;
     }
@@ -909,7 +909,7 @@ void classUsers::Add2UserIP(User * cur) {
 //---------------------------------------------------------------------------
 
 void classUsers::DelFromUserIP(User * cur) {
-    int m = sprintf(msg,"$%s %s$", cur->Nick, cur->IP);
+    int m = sprintf(msg,"$%s %s$", cur->sNick, cur->sIP);
     if(CheckSprintf(m, 1024, "classUsers::DelFromUserIP") == false) {
         return;
     }
@@ -948,12 +948,12 @@ void classUsers::Add2RecTimes(User * curUser) {
 	}
 
 #ifdef _WIN32
-    cur->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, curUser->NickLen+1);
+    cur->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, curUser->ui8NickLen+1);
 #else
-	cur->sNick = (char *) malloc(curUser->NickLen+1);
+	cur->sNick = (char *) malloc(curUser->ui8NickLen+1);
 #endif
 	if(cur->sNick == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(curUser->NickLen+1)+" bytes of memory in classUsers::Add2RecTimes!";
+		string sDbgstr = "[BUF] Cannot allocate "+string(curUser->ui8NickLen+1)+" bytes of memory in classUsers::Add2RecTimes!";
 #ifdef _WIN32
 		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
 #endif
@@ -961,8 +961,8 @@ void classUsers::Add2RecTimes(User * curUser) {
         exit(EXIT_FAILURE);
     }
 
-    memcpy(cur->sNick, curUser->Nick, curUser->NickLen);
-    cur->sNick[curUser->NickLen] = '\0';
+    memcpy(cur->sNick, curUser->sNick, curUser->ui8NickLen);
+    cur->sNick[curUser->ui8NickLen] = '\0';
 
 	cur->ui64DisConnTick = ui64ActualTick-(acc_time-curUser->LoginTime);
     cur->ui32NickHash = curUser->ui32NickHash;
@@ -1020,10 +1020,10 @@ bool classUsers::CheckRecTime(User * curUser) {
 
         if(cur->ui32NickHash == curUser->ui32NickHash && cur->ui32IpHash == curUser->ui32IpHash &&
 #ifdef _WIN32
-            stricmp(cur->sNick, curUser->Nick) == 0) {
+            stricmp(cur->sNick, curUser->sNick) == 0) {
             int imsgLen = sprintf(msg, "<%s> %s %I64d %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
 #else
-			strcasecmp(cur->sNick, curUser->Nick) == 0) {
+			strcasecmp(cur->sNick, curUser->sNick) == 0) {
             int imsgLen = sprintf(msg, "<%s> %s %" PRIu64 " %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
 #endif
                 LanguageManager->sTexts[LAN_PLEASE_WAIT], 

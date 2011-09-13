@@ -229,9 +229,9 @@ User * hashMan::FindUser(char * sNick, const size_t &iNickLen) {
 
             // we are looking for duplicate string
 #ifdef _WIN32
-			if(cur->ui32NickHash == ui32Hash && cur->NickLen == iNickLen && stricmp(cur->Nick, sNick) == 0) {
+			if(cur->ui32NickHash == ui32Hash && cur->ui8NickLen == iNickLen && stricmp(cur->sNick, sNick) == 0) {
 #else
-			if(cur->ui32NickHash == ui32Hash && cur->NickLen == iNickLen && strcasecmp(cur->Nick, sNick) == 0) {
+			if(cur->ui32NickHash == ui32Hash && cur->ui8NickLen == iNickLen && strcasecmp(cur->sNick, sNick) == 0) {
 #endif
                 return cur;
             }
@@ -256,9 +256,9 @@ User * hashMan::FindUser(User * u) {
 
             // we are looking for duplicate string
 #ifdef _WIN32
-            if(cur->ui32NickHash == u->ui32NickHash && cur->NickLen == u->NickLen && stricmp(cur->Nick, u->Nick) == 0) {
+            if(cur->ui32NickHash == u->ui32NickHash && cur->ui8NickLen == u->ui8NickLen && stricmp(cur->sNick, u->sNick) == 0) {
 #else
-			if(cur->ui32NickHash == u->ui32NickHash && cur->NickLen == u->NickLen && strcasecmp(cur->Nick, u->Nick) == 0) {
+			if(cur->ui32NickHash == u->ui32NickHash && cur->ui8NickLen == u->ui8NickLen && strcasecmp(cur->sNick, u->sNick) == 0) {
 #endif
                 return cur;
             }

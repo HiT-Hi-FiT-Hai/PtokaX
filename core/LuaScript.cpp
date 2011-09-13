@@ -514,7 +514,7 @@ void ScriptPushUser(lua_State * L, User * u, const bool &bFullTable/* = false*/)
 	int i = lua_gettop(L);
 
 	lua_pushliteral(L, "sNick");
-	lua_pushlstring(L, u->Nick, u->NickLen);
+	lua_pushlstring(L, u->sNick, u->ui8NickLen);
 	lua_rawset(L, i);
 
 	lua_pushliteral(L, "uptr");
@@ -522,7 +522,7 @@ void ScriptPushUser(lua_State * L, User * u, const bool &bFullTable/* = false*/)
 	lua_rawset(L, i);
 
 	lua_pushliteral(L, "sIP");
-	lua_pushlstring(L, u->IP, u->ui8IpLen);
+	lua_pushlstring(L, u->sIP, u->ui8IpLen);
 	lua_rawset(L, i);
 
 	lua_pushliteral(L, "iProfile");
@@ -537,72 +537,72 @@ void ScriptPushUser(lua_State * L, User * u, const bool &bFullTable/* = false*/)
 
 void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_pushliteral(L, "sMode");
-	if(u->Mode != '\0') {
-		lua_pushlstring(L, (char *)&u->Mode, 1);
+	if(u->cMode != '\0') {
+		lua_pushlstring(L, (char *)&u->cMode, 1);
 	} else {
 		lua_pushnil(L);
 	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sMyInfoString");
-	if(u->MyInfoTag != NULL) {
-		lua_pushlstring(L, u->MyInfoTag, u->iMyInfoTagLen);
+	if(u->sMyInfoOriginal != NULL) {
+		lua_pushlstring(L, u->sMyInfoOriginal, u->ui16MyInfoOriginalLen);
 	} else {
 		lua_pushnil(L);
 	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sDescription");
-	if(u->Description != NULL) {
-		lua_pushlstring(L, u->Description, (size_t)u->ui8DescrLen);
+	if(u->sDescription != NULL) {
+		lua_pushlstring(L, u->sDescription, (size_t)u->ui8DescriptionLen);
 	} else {
 		lua_pushnil(L);
 	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sTag");
-	if(u->Tag != NULL) {
-		lua_pushlstring(L, u->Tag, (size_t)u->ui8TagLen);
+	if(u->sTag != NULL) {
+		lua_pushlstring(L, u->sTag, (size_t)u->ui8TagLen);
 	} else {
 		lua_pushnil(L);
 	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sConnection");
-	if(u->Connection != NULL) {
-		lua_pushlstring(L, u->Connection, (size_t)u->ui8ConnLen);
+	if(u->sConnection != NULL) {
+		lua_pushlstring(L, u->sConnection, (size_t)u->ui8ConnectionLen);
 	} else {
 		lua_pushnil(L);
 	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sEmail");
-	if(u->Email != NULL) {
-		lua_pushlstring(L, u->Email, (size_t)u->ui8EmailLen);
+	if(u->sEmail != NULL) {
+		lua_pushlstring(L, u->sEmail, (size_t)u->ui8EmailLen);
 	} else {
 		lua_pushnil(L);
 	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sClient");
-	if(u->Client != NULL) {
-		lua_pushlstring(L, u->Client, (size_t)u->ui8ClientLen);
+	if(u->sClient != NULL) {
+		lua_pushlstring(L, u->sClient, (size_t)u->ui8ClientLen);
 	} else {
 		lua_pushnil(L);
 	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sClientVersion");
-	if(u->Ver != NULL) {
-		lua_pushlstring(L, u->Ver, (size_t)u->ui8VerLen);
+	if(u->sTagVersion != NULL) {
+		lua_pushlstring(L, u->sTagVersion, (size_t)u->ui8TagVersionLen);
 	} else {
 		lua_pushnil(L);
 	}
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sVersion");
-	if(u->Version != NULL) {
-		lua_pushstring(L, u->Version);
+	if(u->sVersion != NULL) {
+		lua_pushstring(L, u->sVersion);
 	} else {
 		lua_pushnil(L);
 	}
@@ -617,7 +617,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "bConnected");
-	u->iState == User::STATE_ADDED ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+	u->ui8State == User::STATE_ADDED ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "bActive");
@@ -641,7 +641,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iShareSize");
-	lua_pushnumber(L, (double)u->sharedSize);
+	lua_pushnumber(L, (double)u->ui64SharedSize);
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iHubs");

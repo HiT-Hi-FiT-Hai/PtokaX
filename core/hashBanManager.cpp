@@ -643,9 +643,9 @@ BanItem* hashBanMan::FindNick(User* u) {
         next = cur->hashnicktablenext;
 
 #ifdef _WIN32
-        if(cur->ui32NickHash == u->ui32NickHash && stricmp(cur->sNick, u->Nick) == 0) {
+        if(cur->ui32NickHash == u->ui32NickHash && stricmp(cur->sNick, u->sNick) == 0) {
 #else
-		if(cur->ui32NickHash == u->ui32NickHash && strcasecmp(cur->sNick, u->Nick) == 0) {
+		if(cur->ui32NickHash == u->ui32NickHash && strcasecmp(cur->sNick, u->sNick) == 0) {
 #endif
             // PPK ... check if temban expired
 			if(((cur->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
@@ -2073,7 +2073,7 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
     }
     Ban->ui8Bits |= PERM;
 
-    strcpy(Ban->sIp, u->IP);
+    strcpy(Ban->sIp, u->sIP);
     Ban->ui32IpHash = u->ui32IpHash;
     Ban->ui8Bits |= IP;
     
@@ -2081,14 +2081,14 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
         Ban->ui8Bits |= FULL;
     
     // PPK ... check for <unknown> nick -> bad ban from script
-    if(u->Nick[0] != '<') {
+    if(u->sNick[0] != '<') {
 #ifdef _WIN32
-        Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->NickLen+1);
+        Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
 #else
-		Ban->sNick = (char *) malloc(u->NickLen+1);
+		Ban->sNick = (char *) malloc(u->ui8NickLen+1);
 #endif
 		if(Ban->sNick == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(u->NickLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string(u->ui8NickLen+1)+
 				" bytes of memory for sNick in hashBanMan::Ban!";
 #ifdef _WIN32
 			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2098,8 +2098,8 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
 
 			return;
 		}
-		memcpy(Ban->sNick, u->Nick, u->NickLen);
-		Ban->sNick[u->NickLen] = '\0';
+		memcpy(Ban->sNick, u->sNick, u->ui8NickLen);
+		Ban->sNick[u->ui8NickLen] = '\0';
 		Ban->ui32NickHash = u->ui32NickHash;
 		Ban->ui8Bits |= NICK;
         
@@ -2261,7 +2261,7 @@ char hashBanMan::BanIp(User * u, char * sIp, char * sReason, char * sBy, const b
     Ban->ui8Bits |= PERM;
 
     if(u != NULL) {
-        strcpy(Ban->sIp, u->IP);
+        strcpy(Ban->sIp, u->sIP);
         Ban->ui32IpHash = u->ui32IpHash;
     } else {
         uint32_t a, b, c, d;
@@ -2425,19 +2425,19 @@ bool hashBanMan::NickBan(User * u, char * sNick, char * sReason, char * sBy) {
         Ban->ui32NickHash = HashNick(sNick, strlen(sNick));
     } else {
         // PPK ... bad script ban check
-        if(u->Nick[0] == '<') {
+        if(u->sNick[0] == '<') {
             delete Ban;
 
             return false;
         }
 
 #ifdef _WIN32
-        Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->NickLen+1);
+        Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
 #else
-		Ban->sNick = (char *) malloc(u->NickLen+1);
+		Ban->sNick = (char *) malloc(u->ui8NickLen+1);
 #endif
         if(Ban->sNick == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(u->NickLen+1)+
+			string sDbgstr = "[BUF] Cannot allocate "+string(u->ui8NickLen+1)+
 				" bytes of memory for sNick1 in hashBanMan::NickBan!";
 #ifdef _WIN32
 			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2447,11 +2447,11 @@ bool hashBanMan::NickBan(User * u, char * sNick, char * sReason, char * sBy) {
 
             return false;
         }   
-        memcpy(Ban->sNick, u->Nick, u->NickLen);
-        Ban->sNick[u->NickLen] = '\0';
+        memcpy(Ban->sNick, u->sNick, u->ui8NickLen);
+        Ban->sNick[u->ui8NickLen] = '\0';
         Ban->ui32NickHash = u->ui32NickHash;
 
-        strcpy(Ban->sIp, u->IP);
+        strcpy(Ban->sIp, u->sIP);
         Ban->ui32IpHash = u->ui32IpHash;
     }
 
@@ -2558,7 +2558,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
     }
     Ban->ui8Bits |= TEMP;
 
-    strcpy(Ban->sIp, u->IP);
+    strcpy(Ban->sIp, u->sIP);
     Ban->ui32IpHash = u->ui32IpHash;
     Ban->ui8Bits |= IP;
     
@@ -2576,8 +2576,8 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
     }
     
     // PPK ... check for <unknown> nick -> bad ban from script
-    if(u->Nick[0] != '<') {
-        size_t iNickLen = strlen(u->Nick);
+    if(u->sNick[0] != '<') {
+        size_t iNickLen = strlen(u->sNick);
 #ifdef _WIN32
         Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
 #else
@@ -2594,7 +2594,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
 
             return;
         }   
-        memcpy(Ban->sNick, u->Nick, iNickLen);
+        memcpy(Ban->sNick, u->sNick, iNickLen);
         Ban->sNick[iNickLen] = '\0';
         Ban->ui32NickHash = u->ui32NickHash;
         Ban->ui8Bits |= NICK;
@@ -2789,7 +2789,7 @@ char hashBanMan::TempBanIp(User * u, char * sIp, char * sReason, char * sBy, con
     Ban->ui8Bits |= TEMP;
 
     if(u != NULL) {
-        strcpy(Ban->sIp, u->IP);
+        strcpy(Ban->sIp, u->sIP);
         Ban->ui32IpHash = u->ui32IpHash;
     } else {
         uint32_t a, b, c, d;
@@ -2957,19 +2957,19 @@ bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy,
         Ban->ui32NickHash = HashNick(sNick, strlen(sNick));
     } else {
         // PPK ... bad script ban check
-        if(u->Nick[0] == '<') {
+        if(u->sNick[0] == '<') {
             delete Ban;
 
             return false;
         }
 
 #ifdef _WIN32
-        Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->NickLen+1);
+        Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
 #else
-		Ban->sNick = (char *) malloc(u->NickLen+1);
+		Ban->sNick = (char *) malloc(u->ui8NickLen+1);
 #endif
         if(Ban->sNick == NULL) {
-            string sDbgstr = "[BUF] Cannot allocate "+string(u->NickLen+1)+
+            string sDbgstr = "[BUF] Cannot allocate "+string(u->ui8NickLen+1)+
             	" bytes of memory for sNick1 in hashBanMan::NickTempBan!";
 #ifdef _WIN32
 			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2979,11 +2979,11 @@ bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy,
 
             return false;
         }   
-        memcpy(Ban->sNick, u->Nick, u->NickLen);
-        Ban->sNick[u->NickLen] = '\0';
+        memcpy(Ban->sNick, u->sNick, u->ui8NickLen);
+        Ban->sNick[u->ui8NickLen] = '\0';
         Ban->ui32NickHash = u->ui32NickHash;
 
-        strcpy(Ban->sIp, u->IP);
+        strcpy(Ban->sIp, u->sIP);
         Ban->ui32IpHash = u->ui32IpHash;
     }
 

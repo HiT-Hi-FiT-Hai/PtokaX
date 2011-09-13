@@ -361,7 +361,7 @@ void eventq::ProcessEvents() {
 #ifdef _BUILD_GUI
     if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
         char msg[128];
-        int imsglen = sprintf(msg, "UDP > %s (%s) > ", u->Nick, u->IP);
+        int imsglen = sprintf(msg, "UDP > %s (%s) > ", u->sNick, u->sIP);
         if(CheckSprintf(imsglen, 128, "eventq::ProcessEvents") == true) {
             RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], (string(msg, imsglen)+cur->sMsg).c_str());
         }

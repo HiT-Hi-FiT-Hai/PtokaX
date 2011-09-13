@@ -122,15 +122,15 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
                     }
                 }
 
-                string sInfoTip = string(LanguageManager->sTexts[LAN_NICK], (size_t)LanguageManager->ui16TextsLens[LAN_NICK]) + ": " + string(curUser->Nick, curUser->NickLen) +
-                    "\n" + string(LanguageManager->sTexts[LAN_IP], (size_t)LanguageManager->ui16TextsLens[LAN_IP]) + ": " + string(curUser->IP);
+                string sInfoTip = string(LanguageManager->sTexts[LAN_NICK], (size_t)LanguageManager->ui16TextsLens[LAN_NICK]) + ": " + string(curUser->sNick, curUser->ui8NickLen) +
+                    "\n" + string(LanguageManager->sTexts[LAN_IP], (size_t)LanguageManager->ui16TextsLens[LAN_IP]) + ": " + string(curUser->sIP);
 
                 sInfoTip += "\n\n" + string(LanguageManager->sTexts[LAN_CLIENT], (size_t)LanguageManager->ui16TextsLens[LAN_CLIENT]) + ": " +
-                    string(curUser->Client, (size_t)curUser->ui8ClientLen) +
-                    "\n" + string(LanguageManager->sTexts[LAN_VERSION], (size_t)LanguageManager->ui16TextsLens[LAN_VERSION]) + ": " + string(curUser->Ver, (size_t)curUser->ui8VerLen);
+                    string(curUser->sClient, (size_t)curUser->ui8ClientLen) +
+                    "\n" + string(LanguageManager->sTexts[LAN_VERSION], (size_t)LanguageManager->ui16TextsLens[LAN_VERSION]) + ": " + string(curUser->sTagVersion, (size_t)curUser->ui8TagVersionLen);
 
                 char sMode[2];
-                sMode[0] = curUser->Mode;
+                sMode[0] = curUser->cMode;
                 sMode[1] = '\0';
                 sInfoTip += "\n\n" + string(LanguageManager->sTexts[LAN_MODE], (size_t)LanguageManager->ui16TextsLens[LAN_MODE]) + ": " + string(sMode) +
                     "\n" + string(LanguageManager->sTexts[LAN_SLOTS], (size_t)LanguageManager->ui16TextsLens[LAN_SLOTS]) + ": " + string(curUser->Slots) +
@@ -469,7 +469,7 @@ void MainWindowPageUsersChat::AddUser(const User * curUser) {
     lvItem.mask = LVIF_PARAM | LVIF_TEXT;
     lvItem.iItem = 0;
     lvItem.lParam = (LPARAM)curUser;
-    lvItem.pszText = curUser->Nick;
+    lvItem.pszText = curUser->sNick;
 
     ::SendMessage(hWndPageItems[LV_USERS], LVM_INSERTITEM, 0, (LPARAM)&lvItem);
 }
@@ -502,7 +502,7 @@ void MainWindowPageUsersChat::UpdateUserList() {
         User *u = next;
         next = u->next;
 
-        switch(u->iState) {
+        switch(u->ui8State) {
             case User::STATE_ADDED:
                 ui32LoggedIn++;
 
@@ -626,7 +626,7 @@ void MainWindowPageUsersChat::DisconnectUser() {
     char msg[1024];
 
     // disconnect the user
-    int imsgLen = sprintf(msg, "[SYS] User %s (%s) closed by %s", curUser->Nick, curUser->IP, SettingManager->sTexts[SETTXT_ADMIN_NICK]);
+    int imsgLen = sprintf(msg, "[SYS] User %s (%s) closed by %s", curUser->sNick, curUser->sIP, SettingManager->sTexts[SETTXT_ADMIN_NICK]);
     if(CheckSprintf(imsgLen, 1024, "MainWindowPageUsersChat::DisconnectUser1") == true) {
         UdpDebug->Broadcast(msg, imsgLen);
     }
@@ -636,13 +636,13 @@ void MainWindowPageUsersChat::DisconnectUser() {
     if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
         if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
             imsgLen = sprintf(msg, "%s $<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
-                curUser->Nick, LanguageManager->sTexts[LAN_WITH_IP], curUser->IP, LanguageManager->sTexts[LAN_WAS_CLOSED_BY], SettingManager->sTexts[SETTXT_ADMIN_NICK]);
+                curUser->sNick, LanguageManager->sTexts[LAN_WITH_IP], curUser->sIP, LanguageManager->sTexts[LAN_WAS_CLOSED_BY], SettingManager->sTexts[SETTXT_ADMIN_NICK]);
             if(CheckSprintf(imsgLen, 1024, "MainWindowPageUsersChat::DisconnectUser2") == true) {
 				QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                 globalQ->SingleItemsStore(newItem);
             }
         } else {
-            imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_WITH_IP], curUser->IP,
+            imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_WITH_IP], curUser->sIP,
                 LanguageManager->sTexts[LAN_WAS_CLOSED_BY], SettingManager->sTexts[SETTXT_ADMIN_NICK]);
             if(CheckSprintf(imsgLen, 1024, "MainWindowPageUsersChat::DisconnectUser3") == true) {
                 globalQ->OPStore(msg, imsgLen);
@@ -650,7 +650,7 @@ void MainWindowPageUsersChat::DisconnectUser() {
         }
     }
 
-    imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_WITH_IP], curUser->IP,
+    imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_WITH_IP], curUser->sIP,
         LanguageManager->sTexts[LAN_WAS_CLOSED]);
     if(CheckSprintf(imsgLen, 1024, "MainWindowPageUsersChat::DisconnectUser4") == true) {
         RichEditAppendText(hWndPageItems[REDT_CHAT], msg);
@@ -694,7 +694,7 @@ void OnKickOk(char * sLine, const int &iLen) {
             CheckSprintf(imsgLen, 1024, "OnKickOk2");
         }
 
-        int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_WITH_IP], curUser->IP,
+        int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_WITH_IP], curUser->sIP,
             LanguageManager->sTexts[LAN_WAS_KICKED_BY], SettingManager->sTexts[SETTXT_ADMIN_NICK]);
         imsgLen += iret;
         if(CheckSprintf1(iret, imsgLen, 1024, "OnKickOk3") == true) {
@@ -707,14 +707,14 @@ void OnKickOk(char * sLine, const int &iLen) {
         }
     }
 
-    int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_WITH_IP], curUser->IP,
+    int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_WITH_IP], curUser->sIP,
         LanguageManager->sTexts[LAN_WAS_KICKED]);
     if(CheckSprintf(imsgLen, 1024, "OnKickOk4") == true) {
         RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], msg);
     }
 
     // disconnect the user
-    imsgLen = sprintf(msg, "[SYS] User %s (%s) kicked by %s", curUser->Nick, curUser->IP, SettingManager->sTexts[SETTXT_ADMIN_NICK]);
+    imsgLen = sprintf(msg, "[SYS] User %s (%s) kicked by %s", curUser->sNick, curUser->sIP, SettingManager->sTexts[SETTXT_ADMIN_NICK]);
     if(CheckSprintf(imsgLen, 1024, "OnKickOk5") == true) {
         UdpDebug->Broadcast(msg, imsgLen);
     }
@@ -771,8 +771,8 @@ void OnBanOk(char * sLine, const int &iLen) {
             CheckSprintf(imsgLen, 1024, "OnBanOk2");
         }
 
-        int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_WITH_IP],
-            curUser->IP, LanguageManager->sTexts[LAN_HAS_BEEN], LanguageManager->sTexts[LAN_BANNED_LWR], LanguageManager->sTexts[LAN_BY_LWR], SettingManager->sTexts[SETTXT_ADMIN_NICK]);
+        int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_WITH_IP],
+            curUser->sIP, LanguageManager->sTexts[LAN_HAS_BEEN], LanguageManager->sTexts[LAN_BANNED_LWR], LanguageManager->sTexts[LAN_BY_LWR], SettingManager->sTexts[SETTXT_ADMIN_NICK]);
         imsgLen += iret;
         if(CheckSprintf1(iret, imsgLen, 1024, "OnBanOk3") == true) {
             if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
@@ -784,14 +784,14 @@ void OnBanOk(char * sLine, const int &iLen) {
         }
     }
 
-    int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_WITH_IP], curUser->IP,
+    int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_WITH_IP], curUser->sIP,
         LanguageManager->sTexts[LAN_HAS_BEEN], LanguageManager->sTexts[LAN_BANNED_LWR]);
     if(CheckSprintf(imsgLen, 1024, "OnBanOk4") == true) {
         RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], msg);
     }
 
     // disconnect the user
-    imsgLen = sprintf(msg, "[SYS] User %s (%s) kicked by %s", curUser->Nick, curUser->IP, SettingManager->sTexts[SETTXT_ADMIN_NICK]);
+    imsgLen = sprintf(msg, "[SYS] User %s (%s) kicked by %s", curUser->sNick, curUser->sIP, SettingManager->sTexts[SETTXT_ADMIN_NICK]);
     if(CheckSprintf(imsgLen, 1024, "OnBanOk5") == true) {
         UdpDebug->Broadcast(msg, imsgLen);
     }
@@ -834,7 +834,7 @@ void OnRedirectOk(char * sLine, const int &iLen) {
             CheckSprintf(imsgLen, 2048, "OnRedirectOk1");
         }
 
-        int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick,
+        int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick,
             LanguageManager->sTexts[LAN_WAS_REDIRECTED_TO], sLine, LanguageManager->sTexts[LAN_BY_LWR], SettingManager->sTexts[SETTXT_ADMIN_NICK]);
         imsgLen += iret;
         if(CheckSprintf1(iret, imsgLen, 2048, "OnRedirectOk2") == true) {
@@ -847,13 +847,13 @@ void OnRedirectOk(char * sLine, const int &iLen) {
         }
     }
 
-    imsgLen = sprintf(msg, "<%s> *** %s %s %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->Nick, LanguageManager->sTexts[LAN_WAS_REDIRECTED_TO], sLine);
+    imsgLen = sprintf(msg, "<%s> *** %s %s %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_WAS_REDIRECTED_TO], sLine);
     if(CheckSprintf(imsgLen, 2048, "OnRedirectOk3") == true) {
         RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], msg);
     }
 
     // disconnect the user
-    imsgLen = sprintf(msg, "[SYS] User %s (%s) redirected by %s", curUser->Nick, curUser->IP, SettingManager->sTexts[SETTXT_ADMIN_NICK]);
+    imsgLen = sprintf(msg, "[SYS] User %s (%s) redirected by %s", curUser->sNick, curUser->sIP, SettingManager->sTexts[SETTXT_ADMIN_NICK]);
     if(CheckSprintf(imsgLen, 2048, "OnRedirectOk4") == true) {
         UdpDebug->Broadcast(msg, imsgLen);
     }

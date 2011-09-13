@@ -38,7 +38,7 @@ struct LoginLogout {
 
     uint64_t logonClk;
     uint32_t iToCloseLoops, iUserConnectedLen;
-    char *sLockUsrConn, *Password, *sKickMsg;
+    char *sLockUsrConn, *sPassword, *sKickMsg;
     UserBan *uBan;
 };
 //---------------------------------------------------------------------------
@@ -94,36 +94,52 @@ struct User {
     //  u->ui32BoolBits &= ~BIT_PRCSD_MYINFO;  <- set to 0
     //  (u->ui32BoolBits & BIT_PRCSD_MYINFO) == BIT_PRCSD_MYINFO    <- test if is 1/true
     enum UserBits {
-    	BIT_HASHED                 = 0x1,
-    	BIT_ERROR                  = 0x2,
-    	BIT_OPERATOR               = 0x4,
-    	BIT_GAGGED                 = 0x8,
-    	BIT_GETNICKLIST            = 0x10,
-    	BIT_ACTIVE                 = 0x20,
-    	BIT_OLDHUBSTAG             = 0x40,
-    	BIT_TEMP_OPERATOR          = 0x80,
-    	BIT_PINGER                 = 0x100,
-    	BIT_BIG_SEND_BUFFER        = 0x200,
-    	BIT_HAVE_SUPPORTS          = 0x400,
-    	BIT_HAVE_VALIDATENICK      = 0x800,
-    	BIT_HAVE_VERSION           = 0x1000,
-    	BIT_HAVE_BADTAG            = 0x2000,
-    	BIT_HAVE_GETNICKLIST       = 0x4000,
-    	BIT_HAVE_BOTINFO           = 0x8000,
-    	BIT_HAVE_KEY               = 0x10000,
-    	BIT_HAVE_SHARECOUNTED      = 0x20000,
-    	BIT_SUPPORT_NOGETINFO      = 0x40000,
-    	BIT_SUPPORT_USERCOMMAND    = 0x80000,
-    	BIT_SUPPORT_NOHELLO        = 0x100000,
-    	BIT_SUPPORT_QUICKLIST      = 0x200000,
-    	BIT_SUPPORT_USERIP2        = 0x400000,
-    	BIT_SUPPORT_ZPIPE          = 0x800000, 
-    	BIT_PRCSD_MYINFO           = 0x1000000, 
-    	BIT_RECV_FLOODER           = 0x2000000,
-    	BIT_QUACK_SUPPORTS         = 0x4000000
+    	BIT_HASHED                     = 0x1,
+    	BIT_ERROR                      = 0x2,
+    	BIT_OPERATOR                   = 0x4,
+    	BIT_GAGGED                     = 0x8,
+    	BIT_GETNICKLIST                = 0x10,
+    	BIT_ACTIVE                     = 0x20,
+    	BIT_OLDHUBSTAG                 = 0x40,
+    	BIT_TEMP_OPERATOR              = 0x80,
+    	BIT_PINGER                     = 0x100,
+    	BIT_BIG_SEND_BUFFER            = 0x200,
+    	BIT_HAVE_SUPPORTS              = 0x400,
+    	BIT_HAVE_BADTAG                = 0x800,
+    	BIT_HAVE_GETNICKLIST           = 0x1000,
+    	BIT_HAVE_BOTINFO               = 0x2000,
+    	BIT_HAVE_KEY                   = 0x4000,
+    	BIT_HAVE_SHARECOUNTED          = 0x8000,
+    	BIT_SUPPORT_NOGETINFO          = 0x10000,
+    	BIT_SUPPORT_USERCOMMAND        = 0x20000,
+    	BIT_SUPPORT_NOHELLO            = 0x40000,
+    	BIT_SUPPORT_QUICKLIST          = 0x80000,
+    	BIT_SUPPORT_USERIP2            = 0x100000,
+    	BIT_SUPPORT_ZPIPE              = 0x200000,
+    	BIT_PRCSD_MYINFO               = 0x400000,
+    	BIT_RECV_FLOODER               = 0x800000,
+    	BIT_QUACK_SUPPORTS             = 0x1000000
     };
 
-    uint64_t sharedSize;
+    enum UserInfoBits {
+    	INFOBIT_DESCRIPTION_CHANGED        = 0x1,
+    	INFOBIT_TAG_CHANGED                = 0x2,
+    	INFOBIT_CONNECTION_CHANGED         = 0x4,
+    	INFOBIT_EMAIL_CHANGED              = 0x8,
+    	INFOBIT_SHARE_CHANGED              = 0x10,
+    	INFOBIT_DESCRIPTION_SHORT_PERM     = 0x20,
+    	INFOBIT_DESCRIPTION_LONG_PERM      = 0x40,
+    	INFOBIT_TAG_SHORT_PERM             = 0x80,
+    	INFOBIT_TAG_LONG_PERM              = 0x100,
+    	INFOBIT_CONNECTION_SHORT_PERM      = 0x200,
+    	INFOBIT_CONNECTION_LONG_PERM       = 0x400,
+    	INFOBIT_EMAIL_SHORT_PERM           = 0x800,
+    	INFOBIT_EMAIL_LONG_PERM            = 0x1000,
+    	INFOBIT_SHARE_SHORT_PERM           = 0x2000,
+    	INFOBIT_SHARE_LONG_PERM            = 0x4000
+    };
+
+    uint64_t ui64SharedSize, ui64ChangedSharedSizeShort, ui64ChangedSharedSizeLong;
 	uint64_t ui64GetNickListsTick, ui64MyINFOsTick, ui64SearchsTick, ui64ChatMsgsTick;
     uint64_t ui64PMsTick, ui64SameSearchsTick, ui64SamePMsTick, ui64SameChatsTick;
     uint64_t iLastMyINFOSendTick, iLastNicklist, iReceivedPmTick, ui64ChatMsgsTick2;
@@ -131,6 +147,7 @@ struct User {
     uint64_t ui64CTMsTick2, ui64RCTMsTick, ui64RCTMsTick2, ui64SRsTick;
     uint64_t ui64SRsTick2, ui64RecvsTick, ui64RecvsTick2, ui64ChatIntMsgsTick;
     uint64_t ui64PMsIntTick, ui64SearchsIntTick;
+    uint64_t ui32BoolBits, ui32InfoBits;
 
     uint32_t ui32Recvs, ui32Recvs2;
 
@@ -152,17 +169,20 @@ struct User {
 
     time_t LoginTime;
 
-    uint32_t NickLen, iMyInfoTagLen, iMyInfoLen, iMyInfoOldLen;
     uint32_t sendbuflen, recvbuflen, sbdatalen, rbdatalen;
 
-    uint32_t ui32BoolBits;
     uint32_t ui32NickHash, ui32IpHash;
 
     int32_t iProfile;
 
-    char *sLastChat, *sLastPM, *sendbuf, *recvbuf, *sbplayhead, *sLastSearch;
-    char *Nick, *Version, *MyInfo, *MyInfoOld, *Ver, Mode;
-    char *MyInfoTag, *Client, *Tag, *Description, *Connection, *Email;
+    char * sNick, *sVersion;
+    char * sMyInfoOriginal, *sMyInfoShort, *sMyInfoLong;
+    char * sDescription, *sTag, *sConnection, *sEmail;
+    char * sClient, *sTagVersion;
+    char * sLastChat, *sLastPM, *sLastSearch;
+    char * sendbuf, *recvbuf, *sbplayhead;
+    char * sChangedDescriptionShort, *sChangedDescriptionLong, *sChangedTagShort, *sChangedTagLong;
+    char * sChangedConnectionShort, *sChangedConnectionLong, *sChangedEmailShort, *sChangedEmailLong;
     
     unsigned char MagicByte;
     
@@ -175,6 +195,7 @@ struct User {
 
     User *prev, *next, *hashtableprev, *hashtablenext, *hashiptableprev, *hashiptablenext;
 
+    uint16_t ui16MyInfoOriginalLen, ui16MyInfoShortLen, ui16MyInfoLongLen;
     uint16_t ui16GetNickLists, ui16MyINFOs, ui16Searchs, ui16ChatMsgs, ui16PMs;
     uint16_t ui16SameSearchs, ui16LastSearchLen, ui16SamePMs, ui16LastPMLen;
     uint16_t ui16SameChatMsgs, ui16LastChatLen, ui16LastPmLines, ui16SameMultiPms; 
@@ -183,10 +204,15 @@ struct User {
     uint16_t ui16RCTMs, ui16RCTMs2, ui16SRs, ui16SRs2;
     uint16_t ui16ChatIntMsgs, ui16PMsInt, ui16SearchsInt;
 
-    uint8_t ui8IpLen, ui8ConnLen, ui8DescrLen, ui8EmailLen, ui8TagLen, ui8ClientLen, ui8VerLen;
-    uint8_t ui8Country, iState;
+    uint8_t ui8NickLen;
+    uint8_t ui8IpLen, ui8ConnectionLen, ui8DescriptionLen, ui8EmailLen, ui8TagLen, ui8ClientLen, ui8TagVersionLen;
+    uint8_t ui8Country, ui8State;
+    uint8_t ui8ChangedDescriptionShortLen, ui8ChangedDescriptionLongLen, ui8ChangedTagShortLen, ui8ChangedTagLongLen;
+    uint8_t ui8ChangedConnectionShortLen, ui8ChangedConnectionLongLen, ui8ChangedEmailShortLen, ui8ChangedEmailLongLen;
 
-    char IP[16/*46*/];
+    char sIP[16/*46*/];
+
+    char cMode;
 };
 //---------------------------------------------------------------------------
 
@@ -207,30 +233,31 @@ void UserSendQueue(User * u, QzBuf * Queue, bool bChckActSr = true);
 bool UserPutInSendBuf(User * u, const char * Text, const size_t &iTxtLen);
 bool UserTry2Send(User * u);
 
-void UserSetIP(User * u, char * newIP);
-void UserSetNick(User * u, char * newNick, const size_t &iNewNickLen);
-void UserSetMyInfoTag(User * u, char * newInfoTag, const size_t &MyInfoTagLen);
-void UserSetVersion(User * u, char * newVer);
-void UserSetPasswd(User * u, char * newPass);
-void UserSetLastChat(User * u, char * newData, const size_t &iLen);
-void UserSetLastPM(User * u, char * newData, const size_t &iLen);
-void UserSetLastSearch(User * u, char * newData, const size_t &iLen);
-void UserSetKickMsg(User * u, char * kickmsg, size_t iLen = 0);
+void UserSetIP(User * u, char * sNewIP);
+void UserSetNick(User * u, char * sNewNick, const uint8_t &ui8NewNickLen);
+void UserSetMyInfoOriginal(User * u, char * sNewMyInfo, const uint16_t &ui16NewMyInfoLen);
+void UserSetVersion(User * u, char * sNewVer);
+void UserSetPasswd(User * u, char * sNewPass);
+void UserSetLastChat(User * u, char * sNewData, const size_t &iLen);
+void UserSetLastPM(User * u, char * sNewData, const size_t &iLen);
+void UserSetLastSearch(User * u, char * sNewData, const size_t &iLen);
+void UserSetKickMsg(User * u, char * sKickMsg, size_t iLen = 0);
 
 void UserClose(User * u, bool bNoQuit = false);
 
 void UserAdd2Userlist(User * u);
 void UserAddUserList(User * u);
 
-void UserClearMyINFOTag(User * u);
+bool UserGenerateMyInfoLong(User * u);
+bool UserGenerateMyInfoShort(User * u);
 
-void UserGenerateMyINFO(User * u);
+void UserFreeInfo(char * sInfo, const char * sName);
 
 void UserHasSuspiciousTag(User * curUser);
 
 bool UserProcessRules(User * u);
 
-void UserAddPrcsdCmd(User * u, unsigned char cType, char *sCommand, const size_t &iCommandLen, User * to, bool bIsPm = false);
+void UserAddPrcsdCmd(User * u, const unsigned char &cType, char * sCommand, const size_t &iCommandLen, User * to, const bool &bIsPm = false);
 //---------------------------------------------------------------------------
 
 #endif
