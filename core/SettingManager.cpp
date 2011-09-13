@@ -2492,7 +2492,7 @@ void SetMan::DisableBot(const bool &bNickChanged/* = true*/) {
                 while(next != NULL) {
                     User *curUser = next;
                     next = curUser->next;
-                    if(curUser->iState == User::STATE_ADDED && ProfileMan->IsAllowed(curUser, ProfileManager::ALLOWEDOPCHAT) == false) {
+                    if(curUser->ui8State == User::STATE_ADDED && ProfileMan->IsAllowed(curUser, ProfileManager::ALLOWEDOPCHAT) == false) {
                         UserSendCharDelayed(curUser, msg, iMsgLen);
                     }
                 }
@@ -2613,7 +2613,7 @@ void SetMan::UpdateOpChat(const bool &bNickChanged/* = true*/) {
         while(next != NULL) {
             User *curUser = next;
             next = curUser->next;
-            if(curUser->iState == User::STATE_ADDED && ProfileMan->IsAllowed(curUser, ProfileManager::ALLOWEDOPCHAT) == true) {
+            if(curUser->ui8State == User::STATE_ADDED && ProfileMan->IsAllowed(curUser, ProfileManager::ALLOWEDOPCHAT) == true) {
                 if(bNickChanged == true && (((curUser->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) == false)) {
                     UserSendCharDelayed(curUser, SettingManager->sPreTexts[SETPRETXT_OP_CHAT_HELLO], 
                         SettingManager->ui16PreTextsLens[SETPRETXT_OP_CHAT_HELLO]);
@@ -2644,7 +2644,7 @@ void SetMan::DisableOpChat(const bool &bNickChanged/* = true*/) {
             while(next != NULL) {
                 User *curUser = next;
                 next = curUser->next;
-                if(curUser->iState == User::STATE_ADDED && ProfileMan->IsAllowed(curUser, ProfileManager::ALLOWEDOPCHAT) == true) {
+                if(curUser->ui8State == User::STATE_ADDED && ProfileMan->IsAllowed(curUser, ProfileManager::ALLOWEDOPCHAT) == true) {
                     UserSendCharDelayed(curUser, msg, iMsgLen);
                 }
             }

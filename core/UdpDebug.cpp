@@ -182,12 +182,12 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
 
     // initialize dbg item
 #ifdef _WIN32
-    NewDbg->Nick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->NickLen+1);
+    NewDbg->Nick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
 #else
-	NewDbg->Nick = (char *) malloc(u->NickLen+1);
+	NewDbg->Nick = (char *) malloc(u->ui8NickLen+1);
 #endif
     if(NewDbg->Nick == NULL) {
-		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot allocate "+string(u->NickLen+1)+
+		string sDbgstr = "[BUF] "+string(u->sNick, u->ui8NickLen)+" ("+string(u->sIP, u->ui8IpLen)+") Cannot allocate "+string(u->ui8NickLen+1)+
 			" bytes of memory for Nick in clsUdpDebug::New!";
 #ifdef _WIN32
 		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -196,8 +196,8 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
         return false;
     }
         
-    memcpy(NewDbg->Nick, u->Nick, u->NickLen);
-    NewDbg->Nick[u->NickLen] = '\0';
+    memcpy(NewDbg->Nick, u->sNick, u->ui8NickLen);
+    NewDbg->Nick[u->ui8NickLen] = '\0';
         
     NewDbg->ui32Hash = u->ui32NickHash;
         
@@ -205,14 +205,14 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
     NewDbg->to.sin_port = htons((unsigned short)port);
 
 #ifdef _WIN32
-    NewDbg->to.sin_addr.S_un.S_addr = inet_addr(u->IP);
+    NewDbg->to.sin_addr.S_un.S_addr = inet_addr(u->sIP);
         
     NewDbg->s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
         
     if(NewDbg->s == INVALID_SOCKET) {
         int err = WSAGetLastError();
 #else
-    NewDbg->to.sin_addr.s_addr = inet_addr(u->IP);
+    NewDbg->to.sin_addr.s_addr = inet_addr(u->sIP);
         
     NewDbg->s = socket(AF_INET, SOCK_DGRAM, 0);
         
@@ -493,9 +493,9 @@ bool clsUdpDebug::Remove(User * u) {
         UdpDbgItem *cur = next;
         next = cur->next;
 #ifdef _WIN32
-    	if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && stricmp(cur->Nick, u->Nick) == 0) {
+    	if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && stricmp(cur->Nick, u->sNick) == 0) {
 #else
-		if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->Nick, u->Nick) == 0) {
+		if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->Nick, u->sNick) == 0) {
 #endif
             if(cur->prev == NULL) {
                 if(cur->next == NULL) {
@@ -586,9 +586,9 @@ bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) {
         UdpDbgItem *cur = next;
         next = cur->next;
 #ifdef _WIN32
-        if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && stricmp(cur->Nick, u->Nick) == 0) {
+        if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && stricmp(cur->Nick, u->sNick) == 0) {
 #else
-		if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->Nick, u->Nick) == 0) {
+		if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->Nick, u->sNick) == 0) {
 #endif
             if(bSndMess == true) {
 				string Txt = "<"+string(SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], (size_t)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC])+

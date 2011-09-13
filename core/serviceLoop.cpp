@@ -421,7 +421,7 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
     u->ui32IpHash = hash;
     UserSetIP(u, AccptSocket->IP);
 //    u->PORT = ntohs(u->addr.sin_port);
-    u->iState = User::STATE_KEY_OR_SUP;
+    u->ui8State = User::STATE_KEY_OR_SUP;
 
     UserMakeLock(u);
     
@@ -568,11 +568,11 @@ void theLoop::ReceiveLoop() {
         //    curUser->ProcessLines();
         //}
 
-        switch(curUser->iState) {
+        switch(curUser->ui8State) {
             case User::STATE_KEY_OR_SUP:{
                 // check logon timeout for iState 1
                 if(ui64ActualTick - curUser->uLogInOut->logonClk > 20) {
-                    int imsgLen = sprintf(msg, "[SYS] Login timeout 1 for %s - user disconnected.", curUser->IP);
+                    int imsgLen = sprintf(msg, "[SYS] Login timeout 1 for %s - user disconnected.", curUser->sIP);
                     if(CheckSprintf(imsgLen, 1024, "theLoop::ReceiveLoop3") == true) {
                         UdpDebug->Broadcast(msg, imsgLen);
                     }
@@ -583,21 +583,21 @@ void theLoop::ReceiveLoop() {
             }
             case User::STATE_ADDME: {
                 // PPK ... Add user, but only if send $GetNickList (or have quicklist supports) <- important, used by flooders !!!
-                if(((curUser->ui32BoolBits & User::BIT_GETNICKLIST) == User::BIT_GETNICKLIST) == false && 
-                    ((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == false && 
+                if(((curUser->ui32BoolBits & User::BIT_GETNICKLIST) == User::BIT_GETNICKLIST) == false &&
+                    ((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == false &&
                     ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true)
                     continue;
 
                 int imsgLen = GetWlcmMsg(msg);
                 UserSendCharDelayed(curUser, msg, imsgLen);
-                curUser->iState = User::STATE_ADDME_1LOOP;
+                curUser->ui8State = User::STATE_ADDME_1LOOP;
                 continue;
             }
             case User::STATE_ADDME_1LOOP: {
                 // PPK ... added login delay.
                 if(dLoggedUsers >= dActualSrvLoopLogins && ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
                     if(ui64ActualTick - curUser->uLogInOut->logonClk > 300) {
-                        int imsgLen = sprintf(msg, "[SYS] Login timeout (%d) 3 for %s (%s) - user disconnected.", curUser->iState, curUser->Nick, curUser->IP);
+                        int imsgLen = sprintf(msg, "[SYS] Login timeout (%d) 3 for %s (%s) - user disconnected.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                         if(CheckSprintf(imsgLen, 1024, "theLoop::ReceiveLoop4") == true) {
                             UdpDebug->Broadcast(msg, imsgLen);
                         }
@@ -624,7 +624,7 @@ void theLoop::ReceiveLoop() {
                 uint32_t iBeforeLuaLen = curUser->sbdatalen;
 
 				ScriptManager->UserConnected(curUser);
-				if(curUser->iState >= User::STATE_CLOSING) {// connection closed by script?
+				if(curUser->ui8State >= User::STATE_CLOSING) {// connection closed by script?
 					continue;
 				}
 
@@ -660,8 +660,8 @@ void theLoop::ReceiveLoop() {
                 
                 ui32Logged++;
                 dLoggedUsers++;
-                curUser->iState = User::STATE_ADDME_2LOOP;
-                ui64TotalShare += curUser->sharedSize;
+                curUser->ui8State = User::STATE_ADDME_2LOOP;
+                ui64TotalShare += curUser->ui64SharedSize;
                 curUser->ui32BoolBits |= User::BIT_HAVE_SHARECOUNTED;
                 
                 if(ui32Peak < ui32Logged) {
@@ -678,7 +678,7 @@ void theLoop::ReceiveLoop() {
 //                if(sqldb) sqldb->AddVisit(curUser);
 
                 // PPK ... change to NoHello supports
-            	int imsgLen = sprintf(msg, "$Hello %s|", curUser->Nick);
+            	int imsgLen = sprintf(msg, "$Hello %s|", curUser->sNick);
             	if(CheckSprintf(imsgLen, 1024, "theLoop::ReceiveLoop6") == true) {
                     globalQ->HStore(msg, imsgLen);
                 }
@@ -687,21 +687,21 @@ void theLoop::ReceiveLoop() {
 
                 switch(SettingManager->ui8FullMyINFOOption) {
                     case 0:
-                        globalQ->InfoStore(curUser->MyInfoTag, curUser->iMyInfoTagLen);
+                        globalQ->InfoStore(curUser->sMyInfoLong, curUser->ui16MyInfoLongLen);
                         break;
                     case 1:
-                        globalQ->FullInfoStore(curUser->MyInfoTag, curUser->iMyInfoTagLen);
-                        globalQ->StrpInfoStore(curUser->MyInfo, curUser->iMyInfoLen);
+                        globalQ->FullInfoStore(curUser->sMyInfoLong, curUser->ui16MyInfoLongLen);
+                        globalQ->StrpInfoStore(curUser->sMyInfoShort, curUser->ui16MyInfoShortLen);
                         break;
                     case 2:
-                        globalQ->InfoStore(curUser->MyInfo, curUser->iMyInfoLen);
+                        globalQ->InfoStore(curUser->sMyInfoShort, curUser->ui16MyInfoShortLen);
                         break;
                     default:
                         break;
                 }
                 
                 if(((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
-                    globalQ->OpListStore(curUser->Nick);
+                    globalQ->OpListStore(curUser->sNick);
                 }
                 
                 curUser->iLastMyINFOSendTick = ui64ActualTick;
@@ -734,12 +734,12 @@ void theLoop::ReceiveLoop() {
                                             bool bSprintfCheck;
                                             int imsgLen;
                                             if(cur->iPmCount == 1) {
-                                                imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s %s %s!|", curUser->Nick, cur->ToNick, 
+                                                imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s %s %s!|", curUser->sNick, cur->ToNick, 
                                                     SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SRY_LST_MSG_BCS], 
                                                     cur->ToNick, LanguageManager->sTexts[LAN_EXC_MSG_LIMIT]);
                                                 bSprintfCheck = CheckSprintf(imsgLen, 1024, "theLoop::ReceiveLoop1");
                                             } else {
-                                                imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s %d %s %s %s!|", curUser->Nick, 
+                                                imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s %d %s %s %s!|", curUser->sNick, 
                                                     cur->ToNick, SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SORRY_LAST], 
                                                     cur->iPmCount, LanguageManager->sTexts[LAN_MSGS_NOT_SENT], cur->ToNick, 
                                                     LanguageManager->sTexts[LAN_EXC_MSG_LIMIT]);
@@ -901,7 +901,7 @@ void theLoop::ReceiveLoop() {
                 		continue;
                 	}
                 }
-            	curUser->iState = User::STATE_REMME;
+            	curUser->ui8State = User::STATE_REMME;
             	continue;
             }
             // if user is marked as dead, remove him
@@ -923,7 +923,7 @@ void theLoop::ReceiveLoop() {
             default: {
                 // check logon timeout
                 if(ui64ActualTick - curUser->uLogInOut->logonClk > 60) {
-                    int imsgLen = sprintf(msg, "[SYS] Login timeout (%d) 2 for %s (%s) - user disconnected.", curUser->iState, curUser->Nick, curUser->IP);
+                    int imsgLen = sprintf(msg, "[SYS] Login timeout (%d) 2 for %s (%s) - user disconnected.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                     if(CheckSprintf(imsgLen, 1024, "theLoop::ReceiveLoop7") == true) {
                         UdpDebug->Broadcast(msg, imsgLen);
                     }
@@ -960,9 +960,9 @@ void theLoop::SendLoop() {
         User *curUser = nextUser;
         nextUser = curUser->next;
 
-        switch(curUser->iState) {
+        switch(curUser->ui8State) {
             case User::STATE_ADDME_2LOOP: {
-            	curUser->iState = User::STATE_ADDED;
+            	curUser->ui8State = User::STATE_ADDED;
 
             	// finaly send the nicklist/myinfos/oplist
                 UserAddUserList(curUser);
@@ -971,7 +971,7 @@ void theLoop::SendLoop() {
                 if(((curUser->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true &&
                     ((curUser->ui32BoolBits & User::BIT_QUACK_SUPPORTS) == User::BIT_QUACK_SUPPORTS) == false &&
                     ProfileMan->IsAllowed(curUser, ProfileManager::SENDALLUSERIP) == false) {
-            		int imsgLen = sprintf(msg, "$UserIP %s %s|", curUser->Nick, curUser->IP);
+            		int imsgLen = sprintf(msg, "$UserIP %s %s|", curUser->sNick, curUser->sIP);
             		if(CheckSprintf(imsgLen, 1024, "theLoop::SendLoop1") == true) {
                         UserSendCharDelayed(curUser, msg, imsgLen);
                     }
@@ -997,7 +997,7 @@ void theLoop::SendLoop() {
                             exit(EXIT_FAILURE);
                         }
 
-                        int imsgLen = sprintf(sMSG, SettingManager->sPreTexts[SetMan::SETPRETXT_MOTD], curUser->Nick);
+                        int imsgLen = sprintf(sMSG, SettingManager->sPreTexts[SetMan::SETPRETXT_MOTD], curUser->sNick);
                         if(CheckSprintf(imsgLen, SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MOTD]+65, "theLoop::SendLoop2") == true) {
                             UserSendCharDelayed(curUser, sMSG, imsgLen);
                         }

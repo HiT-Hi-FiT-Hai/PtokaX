@@ -99,7 +99,7 @@ bool TextFileMan::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = fals
 
             // PPK ... to chat or to PM ???
             if(bInPM == true) {
-                iChatLen = 18+u->NickLen+(2*iHubSecLen)+strlen(cur->sText);
+                iChatLen = 18+u->ui8NickLen+(2*iHubSecLen)+strlen(cur->sText);
             } else {
                 iChatLen = 4+iHubSecLen+strlen(cur->sText);
             }
@@ -110,7 +110,7 @@ bool TextFileMan::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = fals
 			char *MSG = (char *) malloc(iChatLen);
 #endif
             if(MSG == NULL) {
-        		string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot allocate "+string((uint64_t)iChatLen)+
+        		string sDbgstr = "[BUF] "+string(u->sNick,u->ui8NickLen)+" ("+string(u->sIP, u->ui8IpLen)+") Cannot allocate "+string((uint64_t)iChatLen)+
         			" bytes of memory in TextFileMan::ProcessTextFilesCmd!";
 #ifdef _WIN32
         		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -120,7 +120,7 @@ bool TextFileMan::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = fals
             }
 
             if(bInPM == true) {
-                int iret = sprintf(MSG, "$To: %s From: %s $<%s> %s", u->Nick, SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+                int iret = sprintf(MSG, "$To: %s From: %s $<%s> %s", u->sNick, SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                     SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], cur->sText);
                 if(CheckSprintf(iret, iChatLen, "TextFileMan::ProcessTextFilesCmd1") == false) {
                     free(MSG);

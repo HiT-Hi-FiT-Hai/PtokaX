@@ -205,7 +205,7 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
     hWndPageItems[GB_MYINFO_PROCESSING] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MYINFO_PROCESSING], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         0, iPosX, iFullGB, (2 * iGroupBoxMargin) + (2 * iEditHeight) + 10 + (6 * iCheckHeight) + 28, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[LBL_ORIGINAL_MYINFO] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SEND_ORIGINAL_MYINFO], WS_CHILD | WS_VISIBLE | SS_LEFT,
+    hWndPageItems[LBL_ORIGINAL_MYINFO] = ::CreateWindowEx(0, WC_STATIC, LanguageManager->sTexts[LAN_SEND_LONG_MYINFO], WS_CHILD | WS_VISIBLE | SS_LEFT,
         8, iPosX + iGroupBoxMargin + ((iEditHeight - iTextHeight) / 2), ((rcThis.right - rcThis.left) - 21) / 2, iTextHeight, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[CB_ORIGINAL_MYINFO_ACTION] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
@@ -219,7 +219,7 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
 
     iPosX += iGroupBoxMargin + iEditHeight + 2;
 
-    hWndPageItems[GB_MODIFIED_MYINFO_OPTIONS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_OPTIONS_FOR_MODIFIED_MYINFO], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+    hWndPageItems[GB_MODIFIED_MYINFO_OPTIONS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_OPTIONS_FOR_SHORT_MYINFO], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         5, iPosX, iGBinGB, iGroupBoxMargin + (6 * iCheckHeight) + 15 + 8, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[BTN_REMOVE_DESCRIPTION] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REMOVE_DESCRIPTION], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,

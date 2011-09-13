@@ -101,7 +101,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
 #ifdef _BUILD_GUI
     // Full raw data trace for better logging
     if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-		int imsglen = sprintf(msg, "%s (%s) > ", curUser->Nick, curUser->IP);
+		int imsglen = sprintf(msg, "%s (%s) > ", curUser->sNick, curUser->sIP);
 		if(CheckSprintf(imsglen, 1024, "cDcCommands::PreProcessData1") == true) {
 			RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], (msg+string(sData, iLen)).c_str());
 		}
@@ -116,7 +116,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                 Memo(msg);
             }
         #endif
-        int imsgLen = sprintf(msg, "[SYS] Garbage DATA from %s (%s) -> %s", curUser->Nick, curUser->IP, sData);
+        int imsgLen = sprintf(msg, "[SYS] Garbage DATA from %s (%s) -> %s", curUser->sNick, curUser->sIP, sData);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData3") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -127,7 +127,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
     static const uint32_t ui32ulti = ((uint32_t *)"ulti")[0];
     static const uint32_t ui32ick = ((uint32_t *)"ick ")[0];
 
-    switch(curUser->iState) {
+    switch(curUser->ui8State) {
         case User::STATE_KEY_OR_SUP: {
             if(sData[0] == '$') {
                 if(memcmp(sData+1, "Supports ", 9) == 0) {
@@ -172,7 +172,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                         Memo(msg);
                                     }
                                 #endif
-                                int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $MyINFO %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                                int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $MyINFO %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData5") == true) {
                                     UdpDebug->Broadcast(msg, imsgLen);
                                 }
@@ -189,18 +189,18 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                             if((cTemp = strchr(sData+13, ' ')) == NULL) {
                                 int imsgLen;
                                 if(iLen < 768) {
-                                    imsgLen = sprintf(msg, "[SYS] Attempt to validate empty nick (QuickList -> %s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                                    imsgLen = sprintf(msg, "[SYS] Attempt to validate empty nick (QuickList -> %s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
                                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData6") == true) {
                                         UdpDebug->Broadcast(msg, imsgLen);
                                     }
                                 } else {
 #ifdef _WIN32
-                                    char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+                                    char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->ui8NickLen+15+64);
 #else
-									char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+									char *MSG = (char *) malloc(iLen+curUser->ui8NickLen+15+64);
 #endif
                                     if(MSG == NULL) {
-										string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+curUser->NickLen+15+64)+
+										string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+curUser->ui8NickLen+15+64)+
 											" bytes of memory for DcCommands::StateValidateMyinfo!";
 #ifdef _WIN32
 										sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -209,7 +209,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                         AppendSpecialLog(sDbgstr);
                                 		return;
                                     }
-                                    imsgLen = sprintf(MSG, "[SYS] Attempt to validate empty nick (QuickList -> %s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                                    imsgLen = sprintf(MSG, "[SYS] Attempt to validate empty nick (QuickList -> %s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
                                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData7") == true) {
                                         UdpDebug->Broadcast(MSG, imsgLen);
                                     }
@@ -234,11 +234,11 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                             cTemp[0] = ' ';
                             
                             // 1st time MyINFO, user is being added to nicklist
-                            if(MyINFO(curUser, sData, iLen) == false || curUser->uLogInOut->Password != NULL || 
+                            if(MyINFO(curUser, sData, iLen) == false || curUser->uLogInOut->sPassword != NULL || 
                                 ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true)
                                 return;
 
-                            curUser->iState = User::STATE_ADDME;
+                            curUser->ui8State = User::STATE_ADDME;
 
                             return;
                         }
@@ -246,7 +246,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                     case 'G':
                         if(iLen == 13 && memcmp(sData+2, "etNickList", 10) == 0) {
                             iStatCmdGetNickList++;
-                            if(((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == false && 
+                            if(((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == false &&
                                 ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == false) {
                                 // bad state
                                 #ifdef _DBG
@@ -255,7 +255,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                         Memo(msg);
                                     }
                                 #endif
-                                int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $GetNickList %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                                int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $GetNickList %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData9") == true) {
                                     UdpDebug->Broadcast(msg, imsgLen);
                                 }
@@ -287,7 +287,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                             iStatCmdGetNickList++;
                             if(GetNickList(curUser, sData, iLen, bCheck) == true && 
                                 ((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == false) {
-                        	   curUser->ui32BoolBits |= User::BIT_GETNICKLIST;	
+                        	   curUser->ui32BoolBits |= User::BIT_GETNICKLIST;
                             }
                             return;
                         }
@@ -302,22 +302,22 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 
                                 // Am I sending MyINFO of someone other ?
                                 // OR i try to fuck up hub with some chars after my nick ??? ... PPK
-                                if((sData[13+curUser->NickLen] != ' ') ||
-                                    (memcmp(curUser->Nick, sData+13, curUser->NickLen) != 0)) {
+                                if((sData[13+curUser->ui8NickLen] != ' ') ||
+                                    (memcmp(curUser->sNick, sData+13, curUser->ui8NickLen) != 0)) {
                                     int imsgLen;
                                     if(iLen < 768) {
-                                        imsgLen = sprintf(msg, "[SYS] Nick spoofing in myinfo (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                                        imsgLen = sprintf(msg, "[SYS] Nick spoofing in myinfo (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
                                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData10") == true) {
                                             UdpDebug->Broadcast(msg, imsgLen);
                                         }
                                     } else {
 #ifdef _WIN32
-                                        char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+                                        char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->ui8NickLen+15+64);
 #else
-										char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+										char *MSG = (char *) malloc(iLen+curUser->ui8NickLen+15+64);
 #endif
 										if(MSG == NULL) {
-											string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+curUser->NickLen+15+64)+
+											string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+curUser->ui8NickLen+15+64)+
 												" bytes of memory for DcCommands::StateVerPassMyinfo!";
 #ifdef _WIN32
 											sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -325,7 +325,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
 											AppendSpecialLog(sDbgstr);
                                             return;
                                         }
-                                        imsgLen = sprintf(MSG, "[SYS] Nick spoofing in myinfo (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                                        imsgLen = sprintf(MSG, "[SYS] Nick spoofing in myinfo (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
                                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData11") == true) {
                                             UdpDebug->Broadcast(MSG, imsgLen);
                                         }
@@ -343,11 +343,11 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                     return;
                                 }
         
-                                if(MyINFO(curUser, sData, iLen) == false || curUser->uLogInOut->Password != NULL || 
+                                if(MyINFO(curUser, sData, iLen) == false || curUser->uLogInOut->sPassword != NULL || 
                                     ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true)
                                     return;
                                 
-                                curUser->iState = User::STATE_ADDME;
+                                curUser->ui8State = User::STATE_ADDME;
 
                                 return;
                             } else if(memcmp(sData+3, "Pass ", 5) == 0) {
@@ -368,7 +368,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                 if(iLen == 13 && memcmp(sData+1, "GetNickList", 11) == 0) {
                     iStatCmdGetNickList++;
                     if(GetNickList(curUser, sData, iLen, bCheck) == true) {
-                        curUser->ui32BoolBits |= User::BIT_GETNICKLIST;	
+                        curUser->ui32BoolBits |= User::BIT_GETNICKLIST;
                     }
                     return;
                 } else if(memcmp(sData+1, "MyINFO $ALL ", 12) == 0) {
@@ -379,22 +379,22 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 
                     // Am I sending MyINFO of someone other ?
                     // OR i try to fuck up hub with some chars after my nick ??? ... PPK
-                    if((sData[13+curUser->NickLen] != ' ') ||
-                        (memcmp(curUser->Nick, sData+13, curUser->NickLen) != 0)) {
+                    if((sData[13+curUser->ui8NickLen] != ' ') ||
+                        (memcmp(curUser->sNick, sData+13, curUser->ui8NickLen) != 0)) {
                         int imsgLen;
                         if(iLen < 768) {
-                            imsgLen = sprintf(msg, "[SYS] Nick spoofing in myinfo (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                            imsgLen = sprintf(msg, "[SYS] Nick spoofing in myinfo (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
                             if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData12") == true) {
                                 UdpDebug->Broadcast(msg, imsgLen);
                             }
                         } else {
 #ifdef _WIN32
-                            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+                            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->ui8NickLen+15+64);
 #else
-							char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+							char *MSG = (char *) malloc(iLen+curUser->ui8NickLen+15+64);
 #endif
                             if(MSG == NULL) {
-								string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+curUser->NickLen+15+64)+
+								string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+curUser->ui8NickLen+15+64)+
 									" bytes of memory for DcCommands::StateNickListMyinfo!";
 #ifdef _WIN32
 								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -402,7 +402,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
 								AppendSpecialLog(sDbgstr);
                                 return;
                             }
-                            imsgLen = sprintf(MSG, "[SYS] Nick spoofing in myinfo (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                            imsgLen = sprintf(MSG, "[SYS] Nick spoofing in myinfo (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
                             if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData13") == true) {
                                 UdpDebug->Broadcast(MSG, imsgLen);
                             }
@@ -420,11 +420,11 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                         return;
                     }
         
-                    if(MyINFO(curUser, sData, iLen) == false || curUser->uLogInOut->Password != NULL || 
+                    if(MyINFO(curUser, sData, iLen) == false || curUser->uLogInOut->sPassword != NULL || 
                         ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true)
                         return;
                     
-                    curUser->iState = User::STATE_ADDME;
+                    curUser->ui8State = User::STATE_ADDME;
 
                     return;
                 }
@@ -453,22 +453,22 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
 
                             // Am I sending MyINFO of someone other ?
                             // OR i try to fuck up hub with some chars after my nick ??? ... PPK
-                            if((sData[13+curUser->NickLen] != ' ') ||
-                                (memcmp(curUser->Nick, sData+13, curUser->NickLen) != 0)) {
+                            if((sData[13+curUser->ui8NickLen] != ' ') ||
+                                (memcmp(curUser->sNick, sData+13, curUser->ui8NickLen) != 0)) {
                                 int imsgLen;
                                 if(iLen < 768) {
-                                    imsgLen = sprintf(msg, "[SYS] Nick spoofing in myinfo (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                                    imsgLen = sprintf(msg, "[SYS] Nick spoofing in myinfo (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
                                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData14") == true) {
                                         UdpDebug->Broadcast(msg, imsgLen);
                                     }
                                 } else {
 #ifdef _WIN32
-                                    char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+                                    char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->ui8NickLen+15+64);
 #else
-									char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+									char *MSG = (char *) malloc(iLen+curUser->ui8NickLen+15+64);
 #endif
                                     if(MSG == NULL) {
-										string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+curUser->NickLen+15+64)+
+										string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+curUser->ui8NickLen+15+64)+
 											" bytes of memory for DcCommands::State1LoopMyinfo!";
 #ifdef _WIN32
 										sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -476,7 +476,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
 										AppendSpecialLog(sDbgstr);
                                         return;
                                     }
-                                    imsgLen = sprintf(MSG, "[SYS] Nick spoofing in myinfo (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                                    imsgLen = sprintf(MSG, "[SYS] Nick spoofing in myinfo (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
                                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData15") == true) {
                                         UdpDebug->Broadcast(MSG, imsgLen);
                                     }
@@ -565,22 +565,22 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                     
                             // Am I sending MyINFO of someone other ?
                             // OR i try to fuck up hub with some chars after my nick ??? ... PPK
-                            if((sData[13+curUser->NickLen] != ' ') ||
-                                (memcmp(curUser->Nick, sData+13, curUser->NickLen) != 0)) {
+                            if((sData[13+curUser->ui8NickLen] != ' ') ||
+                                (memcmp(curUser->sNick, sData+13, curUser->ui8NickLen) != 0)) {
                                 int imsgLen;
                                 if(iLen < 768) {
-                                    imsgLen = sprintf(msg, "[SYS] Nick spoofing in myinfo (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                                    imsgLen = sprintf(msg, "[SYS] Nick spoofing in myinfo (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
                                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData16") == true) {
                                         UdpDebug->Broadcast(msg, imsgLen);
                                     }
                                 } else {
 #ifdef _WIN32
-                                    char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+                                    char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->ui8NickLen+15+64);
 #else
-									char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+									char *MSG = (char *) malloc(iLen+curUser->ui8NickLen+15+64);
 #endif
                                     if(MSG == NULL) {
-										string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+curUser->NickLen+15+64)+
+										string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+curUser->ui8NickLen+15+64)+
 											" bytes of memory for DcCommands::StateAddedMyinfo!";
 #ifdef _WIN32
 										sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -588,7 +588,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
 										AppendSpecialLog(sDbgstr);
                                         return;
                                     }
-                                    imsgLen = sprintf(MSG, "[SYS] Nick spoofing in myinfo (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                                    imsgLen = sprintf(MSG, "[SYS] Nick spoofing in myinfo (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
                                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData17") == true) {
                                         UdpDebug->Broadcast(MSG, imsgLen);
                                     }
@@ -696,7 +696,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $ConnectToMe %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $ConnectToMe %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData19") == true) {
                             UdpDebug->Broadcast(msg, imsgLen);
                         }
@@ -710,7 +710,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Close %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Close %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData21") == true) {
                             UdpDebug->Broadcast(msg, imsgLen);
                         }
@@ -728,7 +728,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                     Memo(msg);
                                 }
                             #endif
-                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $GetINFO %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $GetINFO %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                             if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData23") == true) {
                                 UdpDebug->Broadcast(msg, imsgLen);
                             }
@@ -742,7 +742,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                     Memo(msg);
                                 }
                             #endif
-                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $GetNickList %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $GetNickList %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                             if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData25") == true) {
                                 UdpDebug->Broadcast(msg, imsgLen);
                             }
@@ -761,7 +761,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Key %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Key %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData27") == true) {
                             UdpDebug->Broadcast(msg, imsgLen);
                         }
@@ -775,7 +775,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Kick %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Kick %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData29") == true) {
                             UdpDebug->Broadcast(msg, imsgLen);
                         }
@@ -793,7 +793,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                     Memo(msg);
                                 }
                             #endif
-                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $MultiConnectToMe %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $MultiConnectToMe %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                             if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData31") == true) {
                                 UdpDebug->Broadcast(msg, imsgLen);
                             }
@@ -807,7 +807,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                     Memo(msg);
                                 }
                             #endif
-                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $MultiSearch %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $MultiSearch %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                             if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData33") == true) {
                                 UdpDebug->Broadcast(msg, imsgLen);
                             }
@@ -823,7 +823,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                     Memo(msg);
                                 }
                             #endif
-                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $MyINFO %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $MyINFO %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                             if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData35") == true) {
                                 UdpDebug->Broadcast(msg, imsgLen);
                             }
@@ -837,7 +837,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                     Memo(msg);
                                 }
                             #endif
-                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $MyPass %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $MyPass %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                             if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData37") == true) {
                                 UdpDebug->Broadcast(msg, imsgLen);
                             }
@@ -855,7 +855,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $OpForceMove %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $OpForceMove %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData39") == true) {
                             UdpDebug->Broadcast(msg, imsgLen);
                         }
@@ -872,7 +872,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $RevConnectToMe %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $RevConnectToMe %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData41") == true) {
                             UdpDebug->Broadcast(msg, imsgLen);
                         }
@@ -891,7 +891,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                         Memo(msg);
                                     }
                                 #endif
-                                int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Search %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                                int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Search %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData43") == true) {
                                     UdpDebug->Broadcast(msg, imsgLen);
                                 }
@@ -909,7 +909,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                         Memo(msg);
                                     }
                                 #endif
-                                int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $SR %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                                int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $SR %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData45") == true) {
                                     UdpDebug->Broadcast(msg, imsgLen);
                                 }
@@ -926,7 +926,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                         Memo(msg);
                                     }
                                 #endif
-                                int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Supports %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                                int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Supports %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData47") == true) {
                                     UdpDebug->Broadcast(msg, imsgLen);
                                 }
@@ -948,7 +948,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $To %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $To %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData49") == true) {
                             UdpDebug->Broadcast(msg, imsgLen);
                         }
@@ -965,7 +965,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $ValidateNick %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $ValidateNick %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData51") == true) {
                             UdpDebug->Broadcast(msg, imsgLen);
                         }
@@ -979,7 +979,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Version %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Version %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData53") == true) {
                             UdpDebug->Broadcast(msg, imsgLen);
                         }
@@ -999,7 +999,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                     Memo(msg);
                 }
             #endif
-            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in Chat %s (%s) - user closed.", curUser->iState, curUser->Nick, curUser->IP);
+            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in Chat %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData55") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
@@ -1024,7 +1024,7 @@ void cDcCommands::BotINFO(User * curUser, char * sData, const uint32_t &iLen) {
                 Memo(msg);
             }
         #endif
-        int imsgLen = sprintf(msg, "[SYS] Not pinger $BotINFO or $BotINFO flood from %s (%s)", curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] Not pinger $BotINFO or $BotINFO flood from %s (%s)", curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::BotINFO2") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -1033,7 +1033,7 @@ void cDcCommands::BotINFO(User * curUser, char * sData, const uint32_t &iLen) {
     }
 
     if(iLen < 9) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $BotINFO (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] Bad $BotINFO (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::BotINFO3") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -1044,7 +1044,7 @@ void cDcCommands::BotINFO(User * curUser, char * sData, const uint32_t &iLen) {
     curUser->ui32BoolBits |= User::BIT_HAVE_BOTINFO;
 
 	if(ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::BOTINFO_ARRIVAL) == true ||
-		curUser->iState >= User::STATE_CLOSING) {
+		curUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
 
@@ -1073,7 +1073,7 @@ void cDcCommands::BotINFO(User * curUser, char * sData, const uint32_t &iLen) {
 void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck, const bool &bMulti) {
     if((bMulti == false && iLen < 25) || (bMulti == true && iLen < 30)) {
         int imsgLen = sprintf(msg, "[SYS] Bad $%sConnectToMe (%s) from %s (%s) - user closed.", bMulti == false ? "" : "Multi", sData, 
-            curUser->Nick, curUser->IP);
+            curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::ConnectToMe1") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -1107,19 +1107,19 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
         }
 
         if(iLen < 768) {
-            imsgLen = sprintf(msg, "[SYS] Long $ConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(msg, "[SYS] Long $ConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::ConnectToMe3") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            int iWantLen = iLen+curUser->NickLen+15+64;
+            int iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
             char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
 #else
 			char *MSG = (char *) malloc(iWantLen);
 #endif
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
 					" bytes of memory for DcCommands::ConnectToMe!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -1127,7 +1127,7 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
 				AppendSpecialLog(sDbgstr);
 				return;
             }
-            imsgLen = sprintf(MSG, "[SYS] Long $ConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(MSG, "[SYS] Long $ConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::ConnectToMe4") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
@@ -1150,7 +1150,7 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
 
     // full data only and allow blocking
 	if(ScriptManager->Arrival(curUser, sData, iLen, (uint8_t)(bMulti == false ? ScriptMan::CONNECTTOME_ARRIVAL : ScriptMan::MULTICONNECTTOME_ARRIVAL)) == true ||
-		curUser->iState >= User::STATE_CLOSING) {
+		curUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
 
@@ -1160,23 +1160,23 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
 
     // IP check
     if(bCheck == true && SettingManager->bBools[SETBOOL_CHECK_IP_IN_COMMANDS] == true && ProfileMan->IsAllowed(curUser, ProfileManager::NOIPCHECK) == false) {
-        if(towho[1+curUser->ui8IpLen] != ':' || strncmp(towho+1, curUser->IP, curUser->ui8IpLen) != 0) {
+        if(towho[1+curUser->ui8IpLen] != ':' || strncmp(towho+1, curUser->sIP, curUser->ui8IpLen) != 0) {
             SendIncorrectIPMsg(curUser, towho+1, true);
 
             if(iLen < 768) {
-                int imsgLen = sprintf(msg, "[SYS] Bad IP in %sCTM (%s) from %s (%s).", bMulti == false ? "" : "M", sData, curUser->Nick, curUser->IP);
+                int imsgLen = sprintf(msg, "[SYS] Bad IP in %sCTM (%s) from %s (%s).", bMulti == false ? "" : "M", sData, curUser->sNick, curUser->sIP);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::ConnectToMe5") == true) {
                     UdpDebug->Broadcast(msg, imsgLen);
                 }
             } else {
-                int iWantLen = iLen+curUser->NickLen+15+64;
+                int iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
                 char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
 #else
 				char *MSG = (char *) malloc(iWantLen);
 #endif
                 if(MSG == NULL) {
-					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
+					string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
 						" bytes of memory for DcCommands::CTM!";
 #ifdef _WIN32
 					sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -1184,7 +1184,7 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
                     AppendSpecialLog(sDbgstr);
                     return;
                 }
-                int imsgLen = sprintf(MSG, "[SYS] Bad IP in %sCTM (%s) from %s (%s).", bMulti == false ? "" : "M", sData, curUser->Nick, curUser->IP);
+                int imsgLen = sprintf(MSG, "[SYS] Bad IP in %sCTM (%s) from %s (%s).", bMulti == false ? "" : "M", sData, curUser->sNick, curUser->sIP);
                 if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::ConnectToMe6") == true) {
                     UdpDebug->Broadcast(MSG, imsgLen);
                 }
@@ -1208,7 +1208,7 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
     
     User *OtherUser = hashManager->FindUser(sData+(bMulti == false ? 13 : 18), towho-(sData+(bMulti == false ? 13 : 18)));
     // PPK ... no connection to yourself !!!
-    if(OtherUser != NULL && OtherUser != curUser && OtherUser->iState == User::STATE_ADDED) {
+    if(OtherUser != NULL && OtherUser != curUser && OtherUser->ui8State == User::STATE_ADDED) {
         towho[0] = ' ';
         if(bMulti == true) {
             sData[5] = '$';
@@ -1221,9 +1221,9 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
 // $GetINFO <nickname> <ownnickname>
 void cDcCommands::GetINFO(User * curUser, char * sData, const uint32_t &iLen) {
 	if(((curUser->ui32BoolBits & User::BIT_SUPPORT_NOGETINFO) == User::BIT_SUPPORT_NOGETINFO) == true ||
-        ((curUser->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) == true || 
+        ((curUser->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) == true ||
         ((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == true) {
-        int imsgLen = sprintf(msg, "[SYS] Not allowed user %s (%s) send $GetINFO - user closed.", curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] Not allowed user %s (%s) send $GetINFO - user closed.", curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::GetINFO1") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -1232,23 +1232,23 @@ void cDcCommands::GetINFO(User * curUser, char * sData, const uint32_t &iLen) {
     }
     
     // PPK ... code change, added own nick and space on right place check
-    if(iLen < 12+curUser->NickLen || iLen > (75+curUser->NickLen) || sData[iLen-curUser->NickLen-2] != ' ' ||
-      memcmp(sData+(iLen-curUser->NickLen-1), curUser->Nick, curUser->NickLen) != 0) {
+    if(iLen < (12u+curUser->ui8NickLen) || iLen > (75u+curUser->ui8NickLen) || sData[iLen-curUser->ui8NickLen-2] != ' ' ||
+      memcmp(sData+(iLen-curUser->ui8NickLen-1), curUser->sNick, curUser->ui8NickLen) != 0) {
         int imsgLen;
         if(iLen < 768) {
-			imsgLen = sprintf(msg, "[SYS] Bad $GetINFO (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+			imsgLen = sprintf(msg, "[SYS] Bad $GetINFO (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::GetINFO2") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            int iWantLen = iLen+curUser->NickLen+15+64;
+            int iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
             char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
 #else
 			char *MSG = (char *) malloc(iWantLen);
 #endif
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
 					" bytes of memory for DcCommands::GetINFO!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -1256,7 +1256,7 @@ void cDcCommands::GetINFO(User * curUser, char * sData, const uint32_t &iLen) {
 				AppendSpecialLog(sDbgstr);
                 return;
             }
-            imsgLen = sprintf(MSG, "[SYS] Bad $GetINFO (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(MSG, "[SYS] Bad $GetINFO (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::GetINFO3") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
@@ -1275,7 +1275,7 @@ void cDcCommands::GetINFO(User * curUser, char * sData, const uint32_t &iLen) {
     }
 
 	if(ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::GETINFO_ARRIVAL) == true ||
-		curUser->iState >= User::STATE_CLOSING) {
+		curUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
 
@@ -1296,7 +1296,7 @@ void cDcCommands::GetINFO(User * curUser, char * sData, const uint32_t &iLen) {
 
 // $GetNickList
 bool cDcCommands::GetNickList(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {
-    if(((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == true && 
+    if(((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == true &&
         ((curUser->ui32BoolBits & User::BIT_HAVE_GETNICKLIST) == User::BIT_HAVE_GETNICKLIST) == true) {
         // PPK ... refresh not allowed !
         #ifdef _DBG
@@ -1305,7 +1305,7 @@ bool cDcCommands::GetNickList(User * curUser, char * sData, const uint32_t &iLen
                	Memo(msg);
             }
         #endif
-        int imsgLen = sprintf(msg, "[SYS] Bad $GetNickList request %s (%s) - user closed.", curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] Bad $GetNickList request %s (%s) - user closed.", curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::GetNickList2") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -1402,21 +1402,21 @@ bool cDcCommands::GetNickList(User * curUser, char * sData, const uint32_t &iLen
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
                     int imsgLen = sprintf(msg, "%s $<%s> *** %s: %s %s: %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                         SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_PINGER_FROM_IP], 
-                        curUser->IP, LanguageManager->sTexts[LAN_WITH_NICK], curUser->Nick, 
+                        curUser->sIP, LanguageManager->sTexts[LAN_WITH_NICK], curUser->sNick, 
                         LanguageManager->sTexts[LAN_DETECTED_LWR]);
                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::GetNickList3") == true) {
 						QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                         globalQ->SingleItemsStore(newItem);
                     }
                     imsgLen = sprintf(msg, "<%s> *** Pinger from IP: %s with nick: %s detected.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                        curUser->IP, curUser->Nick);
+                        curUser->sIP, curUser->sNick);
                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::GetNickList4") == true) {
                         UdpDebug->Broadcast(msg, imsgLen);
                     }
                 } else {
                     int imsgLen = sprintf(msg, "<%s> *** %s: %s %s: %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                        LanguageManager->sTexts[LAN_PINGER_FROM_IP], curUser->IP, LanguageManager->sTexts[LAN_WITH_NICK], 
-                        curUser->Nick, LanguageManager->sTexts[LAN_DETECTED_LWR]);
+                        LanguageManager->sTexts[LAN_PINGER_FROM_IP], curUser->sIP, LanguageManager->sTexts[LAN_WITH_NICK], 
+                        curUser->sNick, LanguageManager->sTexts[LAN_DETECTED_LWR]);
                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::GetNickList5") == true) {
                         UdpDebug->Broadcast(msg, imsgLen);
                         globalQ->OPStore(msg, imsgLen);
@@ -1428,7 +1428,7 @@ bool cDcCommands::GetNickList(User * curUser, char * sData, const uint32_t &iLen
             }
 			return false;
 		} else {
-			int imsgLen = sprintf(msg, "[SYS] $GetNickList flood from pinger %s (%s) - user closed.", curUser->Nick, curUser->IP);
+			int imsgLen = sprintf(msg, "[SYS] $GetNickList flood from pinger %s (%s) - user closed.", curUser->sNick, curUser->sIP);
 			if(CheckSprintf(imsgLen, 1024, "cDcCommands::GetNickList6") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
@@ -1450,7 +1450,7 @@ bool cDcCommands::GetNickList(User * curUser, char * sData, const uint32_t &iLen
     }
 
 	if(ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::GETNICKLIST_ARRIVAL) == true ||
-		curUser->iState >= User::STATE_CLOSING ||
+		curUser->ui8State >= User::STATE_CLOSING ||
 		((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == true) {
 		return false;
 	}
@@ -1462,7 +1462,7 @@ bool cDcCommands::GetNickList(User * curUser, char * sData, const uint32_t &iLen
 // $Key
 void cDcCommands::Key(User * curUser, char * sData, const uint32_t &iLen) {
     if(((curUser->ui32BoolBits & User::BIT_HAVE_KEY) == User::BIT_HAVE_KEY) == true) {
-        int imsgLen = sprintf(msg, "[SYS] $Key flood from %s (%s) - user closed.", curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] $Key flood from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::Key1") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -1481,19 +1481,19 @@ void cDcCommands::Key(User * curUser, char * sData, const uint32_t &iLen) {
     if(iLen < 6 || strcmp(Lock2Key(curUser->uLogInOut->sLockUsrConn), sData+5) != 0) {
         int imsgLen;
         if(iLen < 768) {
-            imsgLen = sprintf(msg, "[SYS] Bad $Key (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(msg, "[SYS] Bad $Key (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::Key2") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            int iWantLen = iLen+curUser->NickLen+15+64;
+            int iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
             char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
 #else
 			char *MSG = (char *) malloc(iWantLen);
 #endif
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+string(iWantLen)+
 					" bytes of memory for DcCommands::Key!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -1501,7 +1501,7 @@ void cDcCommands::Key(User * curUser, char * sData, const uint32_t &iLen) {
 				AppendSpecialLog(sDbgstr);
                 return;
             }
-            imsgLen = sprintf(MSG, "[SYS] Bad $Key (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(MSG, "[SYS] Bad $Key (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::Key3") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
@@ -1523,11 +1523,11 @@ void cDcCommands::Key(User * curUser, char * sData, const uint32_t &iLen) {
 
 	ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::KEY_ARRIVAL);
 
-	if(curUser->iState >= User::STATE_CLOSING) {
+	if(curUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
 
-    curUser->iState = User::STATE_VALIDATE;
+    curUser->ui8State = User::STATE_VALIDATE;
 }
 //---------------------------------------------------------------------------
 
@@ -1542,7 +1542,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
     } 
 
     if(iLen < 8) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $Kick (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] Bad $Kick (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::Kick2") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -1551,7 +1551,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
     }
 
 	if(ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::KICK_ARRIVAL) == true ||
-		curUser->iState >= User::STATE_CLOSING) {
+		curUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
 
@@ -1570,7 +1570,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
     	
         if(OtherUser->iProfile != -1 && curUser->iProfile > OtherUser->iProfile) {
         	int imsgLen = sprintf(msg, "<%s> %s %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                LanguageManager->sTexts[LAN_YOU_ARE_NOT_ALLOWED_TO_KICK], OtherUser->Nick);
+                LanguageManager->sTexts[LAN_YOU_ARE_NOT_ALLOWED_TO_KICK], OtherUser->sNick);
         	if(CheckSprintf(imsgLen, 1024, "cDcCommands::Kick4") == true) {
                 UserSendCharDelayed(curUser, msg, imsgLen);
             }
@@ -1637,7 +1637,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
 			sBanTime[0] = '\0';
 
 			if(sBanTime[5] == '\0' || sBanTime[5] == ' ') { // permban
-				hashBanManager->Ban(OtherUser, OtherUser->uLogInOut->sKickMsg, curUser->Nick, false);
+				hashBanManager->Ban(OtherUser, OtherUser->uLogInOut->sKickMsg, curUser->sNick, false);
     
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
                     int imsgLen = 0;
@@ -1647,8 +1647,8 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
                     }
                     
                     int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                        OtherUser->Nick, LanguageManager->sTexts[LAN_WITH_IP], OtherUser->IP, LanguageManager->sTexts[LAN_HAS_BEEN], 
-						LanguageManager->sTexts[LAN_BANNED_LWR], LanguageManager->sTexts[LAN_BY_LWR], curUser->Nick);
+                        OtherUser->sNick, LanguageManager->sTexts[LAN_WITH_IP], OtherUser->sIP, LanguageManager->sTexts[LAN_HAS_BEEN], 
+						LanguageManager->sTexts[LAN_BANNED_LWR], LanguageManager->sTexts[LAN_BY_LWR], curUser->sNick);
 					imsgLen += iret;
                     if(CheckSprintf1(iret, imsgLen, 1024, "cDcCommands::Kick6") == true) {
                         if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
@@ -1662,7 +1662,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
 
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == false || ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
                     int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                        OtherUser->Nick, LanguageManager->sTexts[LAN_WITH_IP], OtherUser->IP, 
+                        OtherUser->sNick, LanguageManager->sTexts[LAN_WITH_IP], OtherUser->sIP, 
                         LanguageManager->sTexts[LAN_HAS_BEEN], LanguageManager->sTexts[LAN_BANNED_LWR]);
 					if(CheckSprintf(imsgLen, 1024, "cDcCommands::Kick7") == true) {
                         UserSendCharDelayed(curUser, msg, imsgLen);
@@ -1670,7 +1670,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
                 }
 
         		// disconnect the user
-        		int imsgLen = sprintf(msg, "[SYS] User %s (%s) kicked by %s", OtherUser->Nick, OtherUser->IP, curUser->Nick);
+        		int imsgLen = sprintf(msg, "[SYS] User %s (%s) kicked by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
                 	if(CheckSprintf(imsgLen, 1024, "cDcCommands::Kick8") == true) {
 					UdpDebug->Broadcast(msg, imsgLen);
 				}
@@ -1689,7 +1689,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
 				time_t acc_time, ban_time;
 
 				if(cTime != '\0' && iTime > 0 && GenerateTempBanTime(cTime, iTime, acc_time, ban_time) == true) {
-					hashBanManager->TempBan(OtherUser, OtherUser->uLogInOut->sKickMsg, curUser->Nick, 0, ban_time, false);
+					hashBanManager->TempBan(OtherUser, OtherUser->uLogInOut->sKickMsg, curUser->sNick, 0, ban_time, false);
 
                     static char sTime[256];
                     strcpy(sTime, formatTime((ban_time-acc_time)/60));
@@ -1702,8 +1702,8 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
                         }
                         
                         int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s %s %s %s: %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                            OtherUser->Nick, LanguageManager->sTexts[LAN_WITH_IP], OtherUser->IP, LanguageManager->sTexts[LAN_HAS_BEEN], 
-                            LanguageManager->sTexts[LAN_TEMP_BANNED], LanguageManager->sTexts[LAN_BY_LWR], curUser->Nick, 
+                            OtherUser->sNick, LanguageManager->sTexts[LAN_WITH_IP], OtherUser->sIP, LanguageManager->sTexts[LAN_HAS_BEEN], 
+                            LanguageManager->sTexts[LAN_TEMP_BANNED], LanguageManager->sTexts[LAN_BY_LWR], curUser->sNick, 
 							LanguageManager->sTexts[LAN_TO_LWR], sTime);
 						imsgLen += iret;
                         if(CheckSprintf1(iret, imsgLen, 1024, "cDcCommands::Kick10") == true) {
@@ -1718,7 +1718,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
                 
                     if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == false || ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
                         int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s %s: %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                            OtherUser->Nick, LanguageManager->sTexts[LAN_WITH_IP], OtherUser->IP, 
+                            OtherUser->sNick, LanguageManager->sTexts[LAN_WITH_IP], OtherUser->sIP, 
                             LanguageManager->sTexts[LAN_HAS_BEEN], LanguageManager->sTexts[LAN_TEMP_BANNED], 
                             LanguageManager->sTexts[LAN_TO_LWR], sTime);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::Kick11") == true) {
@@ -1727,7 +1727,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
                 	}
     
                     // disconnect the user
-                    int imsgLen = sprintf(msg, "[SYS] User %s (%s) kicked by %s", OtherUser->Nick, OtherUser->IP, curUser->Nick);
+                    int imsgLen = sprintf(msg, "[SYS] User %s (%s) kicked by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::Kick12") == true) {
                         UdpDebug->Broadcast(msg, imsgLen);
                     }
@@ -1738,7 +1738,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
             }
 		}
 
-        hashBanManager->TempBan(OtherUser, OtherUser->uLogInOut != NULL ? OtherUser->uLogInOut->sKickMsg : NULL, curUser->Nick, 0, 0, false);
+        hashBanManager->TempBan(OtherUser, OtherUser->uLogInOut != NULL ? OtherUser->uLogInOut->sKickMsg : NULL, curUser->sNick, 0, 0, false);
 
         if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
             int imsgLen = 0;
@@ -1747,9 +1747,9 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
                 CheckSprintf(imsgLen, 1024, "cDcCommands::Kick13");
             }
 
-            int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->Nick, 
-                LanguageManager->sTexts[LAN_WITH_IP], OtherUser->IP, 
-                LanguageManager->sTexts[LAN_WAS_KICKED_BY], curUser->Nick);
+            int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->sNick, 
+                LanguageManager->sTexts[LAN_WITH_IP], OtherUser->sIP, 
+                LanguageManager->sTexts[LAN_WAS_KICKED_BY], curUser->sNick);
             imsgLen += iret;
             if(CheckSprintf1(iret, imsgLen, 1024, "cDcCommands::Kick14") == true) {
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
@@ -1762,15 +1762,15 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
         }
 
         if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == false || ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
-            int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->Nick, 
-                LanguageManager->sTexts[LAN_WITH_IP], OtherUser->IP, LanguageManager->sTexts[LAN_WAS_KICKED]);
+            int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->sNick, 
+                LanguageManager->sTexts[LAN_WITH_IP], OtherUser->sIP, LanguageManager->sTexts[LAN_WAS_KICKED]);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::Kick15") == true) {
                 UserSendCharDelayed(curUser, msg, imsgLen);
             }
         }
 
         // disconnect the user
-        int imsgLen = sprintf(msg, "[SYS] User %s (%s) kicked by %s", OtherUser->Nick, OtherUser->IP, curUser->Nick);
+        int imsgLen = sprintf(msg, "[SYS] User %s (%s) kicked by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::Kick16") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -1825,7 +1825,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
     uint32_t iAfterCmd;
     if(bMulti == false) {
         if(iLen < 10) {
-            int imsgLen = sprintf(msg, "[SYS] Bad $Search (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            int imsgLen = sprintf(msg, "[SYS] Bad $Search (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search1") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
@@ -1835,7 +1835,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
         iAfterCmd = 8;
     } else {
         if(iLen < 15) {
-            int imsgLen = sprintf(msg, "[SYS] Bad $MultiSearch (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            int imsgLen = sprintf(msg, "[SYS] Bad $MultiSearch (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search2") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
@@ -1854,7 +1854,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
     }
 
 	if(ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::SEARCH_ARRIVAL) == true ||
-		curUser->iState >= User::STATE_CLOSING) {
+		curUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
 
@@ -1863,23 +1863,23 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
     if(bMulti == false && ((uint32_t *)(sData+iAfterCmd))[0] == ((uint32_t *)"Hub:")[0]) {
         curUser->ui32BoolBits &= ~User::BIT_ACTIVE;
         // PPK ... check nick !!!
-        if((sData[iAfterCmd+4+curUser->NickLen] != ' ') ||
-            (memcmp(sData+iAfterCmd+4, curUser->Nick, curUser->NickLen) != 0)) {
+        if((sData[iAfterCmd+4+curUser->ui8NickLen] != ' ') ||
+            (memcmp(sData+iAfterCmd+4, curUser->sNick, curUser->ui8NickLen) != 0)) {
             int imsgLen;
             if(iLen < 768) {
-                imsgLen = sprintf(msg, "[SYS] Nick spoofing in search (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                imsgLen = sprintf(msg, "[SYS] Nick spoofing in search (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search3") == true) {
                     UdpDebug->Broadcast(msg, imsgLen);
                 }
             } else {
-                size_t iWantLen = iLen+curUser->NickLen+15+64;
+                size_t iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
                 char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
 #else
 				char *MSG = (char *) malloc(iWantLen);
 #endif
                 if(MSG == NULL) {
-					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+					string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
 						string((uint64_t)iWantLen)+ " bytes of memory for DcCommands::Search!";
 #ifdef _WIN32
 					sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -1887,7 +1887,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
                     AppendSpecialLog(sDbgstr);
                     return;
                 }
-                imsgLen = sprintf(MSG, "[SYS] Nick spoofing in search (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                imsgLen = sprintf(MSG, "[SYS] Nick spoofing in search (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
                 if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::Search4") == true) {
                     UdpDebug->Broadcast(MSG, imsgLen);
                 }
@@ -1908,7 +1908,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
             (SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN] != 0 || SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0)) {
             // PPK ... search string len check
             // $Search Hub:PPK F?T?0?2?test|
-            uint32_t iChar = iAfterCmd+8+curUser->NickLen+1;
+            uint32_t iChar = iAfterCmd+8+curUser->ui8NickLen+1;
             uint32_t iCount = 0;
             for(; iChar < iLen; iChar++) {
                 if(sData[iChar] == '?') {
@@ -1954,7 +1954,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
 			curUser->cmdPSearch->sCommand = (char *) realloc(oldbuf, curUser->cmdPSearch->iLen+iLen+1);
 #endif
             if(curUser->cmdPSearch->sCommand == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(curUser->cmdPSearch->iLen+iLen+1)+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+string(curUser->cmdPSearch->iLen+iLen+1)+
 					" bytes of memory for DcCommands::Search1!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -1987,7 +1987,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
 			curUser->cmdPSearch->sCommand = (char *) malloc(iLen+1);
 #endif
             if(curUser->cmdPSearch->sCommand == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+1)+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+1)+
 					" bytes of memory for DcCommands::Search2!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2005,23 +2005,23 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
         curUser->ui32BoolBits |= User::BIT_ACTIVE;
         // IP check
         if(bCheck == true && SettingManager->bBools[SETBOOL_CHECK_IP_IN_COMMANDS] == true && ProfileMan->IsAllowed(curUser, ProfileManager::NOIPCHECK) == false) {
-            if(sData[iAfterCmd+curUser->ui8IpLen] != ':' || strncmp(sData+iAfterCmd, curUser->IP, curUser->ui8IpLen) != 0) {
+            if(sData[iAfterCmd+curUser->ui8IpLen] != ':' || strncmp(sData+iAfterCmd, curUser->sIP, curUser->ui8IpLen) != 0) {
                 SendIncorrectIPMsg(curUser, sData+iAfterCmd, false);
 
                 if(iLen < 768) {
-                    int imsgLen = sprintf(msg, "[SYS] Bad IP in Search (%s) from %s (%s).", sData, curUser->Nick, curUser->IP);
+                    int imsgLen = sprintf(msg, "[SYS] Bad IP in Search (%s) from %s (%s).", sData, curUser->sNick, curUser->sIP);
                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search8") == true) {
                         UdpDebug->Broadcast(msg, imsgLen);
                     }
                 } else {
-                    size_t iWantLen = iLen+curUser->NickLen+15+64;
+                    size_t iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
                     char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
 #else
 					char *MSG = (char *) malloc(iWantLen);
 #endif
                     if(MSG == NULL) {
-						string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+						string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
 							string((uint64_t)iWantLen)+" bytes of memory for DcCommands::Search3!";
 #ifdef _WIN32
 						sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2029,7 +2029,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
 						AppendSpecialLog(sDbgstr);
                         return;
                     }
-                    int imsgLen = sprintf(MSG, "[SYS] Bad IP in Search (%s) from %s (%s).", sData, curUser->Nick, curUser->IP);
+                    int imsgLen = sprintf(MSG, "[SYS] Bad IP in Search (%s) from %s (%s).", sData, curUser->sNick, curUser->sIP);
                     if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::Search9") == true) {
                         UdpDebug->Broadcast(MSG, imsgLen);
                     }
@@ -2104,7 +2104,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
 			curUser->cmdASearch->sCommand = (char *) realloc(oldbuf, curUser->cmdASearch->iLen+iLen+1);
 #endif
             if(curUser->cmdASearch->sCommand == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(curUser->cmdASearch->iLen+iLen+1)+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+string(curUser->cmdASearch->iLen+iLen+1)+
 					" bytes of memory for DcCommands::Search4!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2136,7 +2136,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
 			curUser->cmdASearch->sCommand = (char *) malloc(iLen+1);
 #endif
 			if(curUser->cmdASearch->sCommand == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+1)+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+string(iLen+1)+
 					" bytes of memory for DcCommands::Search5!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2157,8 +2157,8 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
 
 // $MyINFO $ALL  $ $$$$|
 bool cDcCommands::MyINFODeflood(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {
-    if(iLen < (22+curUser->NickLen)) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $MyINFO (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+    if(iLen < (22u+curUser->ui8NickLen)) {
+        int imsgLen = sprintf(msg, "[SYS] Bad $MyINFO (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyINFODeflood1") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -2192,19 +2192,19 @@ bool cDcCommands::MyINFODeflood(User * curUser, char * sData, const uint32_t &iL
         }
 
         if(iLen < 768) {
-            imsgLen = sprintf(msg, "[SYS] Bad $MyINFO (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(msg, "[SYS] Bad $MyINFO (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyINFODeflood3") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            size_t iWantLen = iLen+curUser->NickLen+15+64;
+            size_t iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
             char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
 #else
 			char *MSG = (char *) malloc(iWantLen);
 #endif
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
 					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::MyINFODeflood!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2212,7 +2212,7 @@ bool cDcCommands::MyINFODeflood(User * curUser, char * sData, const uint32_t &iL
 				AppendSpecialLog(sDbgstr);
 				return false;
             }
-            imsgLen = sprintf(MSG, "[SYS] Bad $MyINFO (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(MSG, "[SYS] Bad $MyINFO (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::MyINFODeflood4") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
@@ -2238,61 +2238,19 @@ bool cDcCommands::MyINFODeflood(User * curUser, char * sData, const uint32_t &iL
 bool cDcCommands::MyINFO(User * curUser, char * sData, const uint32_t &iLen) {
     // if no change, just return
     // else store MyINFO and perform all checks again
-    if(curUser->MyInfoTag != NULL) {
-        // PPK ... optimizations
-       	if(iLen == curUser->iMyInfoTagLen && 
-           memcmp(curUser->MyInfoTag+14+curUser->NickLen, sData+14+curUser->NickLen, curUser->iMyInfoTagLen-14-curUser->NickLen) == 0) {
+    if(curUser->sMyInfoOriginal != NULL) { // PPK ... optimizations
+       	if(iLen == curUser->ui16MyInfoOriginalLen && memcmp(curUser->sMyInfoOriginal+14+curUser->ui8NickLen, sData+14+curUser->ui8NickLen, curUser->ui16MyInfoOriginalLen-14-curUser->ui8NickLen) == 0) {
            return false;
         }
-
-        if(SettingManager->ui8FullMyINFOOption != 0) {
-            if(((curUser->ui32BoolBits & User::BIT_PRCSD_MYINFO) == User::BIT_PRCSD_MYINFO) == false) {
-                if(curUser->MyInfoOld != NULL) {
-#ifdef _WIN32
-                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->MyInfoOld) == 0) {
-						string sDbgstr = "[BUF] Cannot deallocate curUser->MyInfoOld in cDcCommands::MyINFO! "+string((uint32_t)GetLastError())+" "+
-							string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-						AppendSpecialLog(sDbgstr);
-                    }
-#else
-					free(curUser->MyInfoOld);
-#endif
-                    curUser->MyInfoOld = NULL;
-                    curUser->iMyInfoOldLen = 0;
-                }
-
-                if(curUser->MyInfo != NULL) {
-#ifdef _WIN32
-                    curUser->MyInfoOld = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, curUser->iMyInfoLen+1);
-#else
-					curUser->MyInfoOld = (char *) malloc(curUser->iMyInfoLen+1);
-#endif
-                    if(curUser->MyInfoOld == NULL) {
-						string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(curUser->iMyInfoLen+1)+
-							" bytes of memory for DcCommands::MyINFO!";
-#ifdef _WIN32
-						sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-						AppendSpecialLog(sDbgstr);
-                        return false;
-                    }   
-                    memcpy(curUser->MyInfoOld, curUser->MyInfo, curUser->iMyInfoLen);
-                    curUser->MyInfoOld[curUser->iMyInfoLen] = '\0';
-                    curUser->iMyInfoOldLen = curUser->iMyInfoLen;
-                }
-            }
-        }
-        UserSetMyInfoTag(curUser, sData, iLen);
-    } else {
-        UserSetMyInfoTag(curUser, sData, iLen);
     }
-    
-    if(curUser->iState >= User::STATE_CLOSING) {
+
+    UserSetMyInfoOriginal(curUser, sData, (uint16_t)iLen);
+
+    if(curUser->ui8State >= User::STATE_CLOSING) {
         return false;
     }
 
     if(UserProcessRules(curUser) == false) {
-        UserClearMyINFOTag(curUser);
         UserClose(curUser);
         return false;
     }
@@ -2311,7 +2269,7 @@ bool cDcCommands::MyINFO(User * curUser, char * sData, const uint32_t &iLen) {
     // PPK ... moved lua here -> another "optimization" ;o)
 	ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::MYINFO_ARRIVAL);
 
-	if(curUser->iState >= User::STATE_CLOSING) {
+	if(curUser->ui8State >= User::STATE_CLOSING) {
 		return false;
 	}
     
@@ -2321,9 +2279,9 @@ bool cDcCommands::MyINFO(User * curUser, char * sData, const uint32_t &iLen) {
 
 // $MyPass
 void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
-    if(curUser->uLogInOut->Password == NULL) {
+    if(curUser->uLogInOut->sPassword == NULL) {
         // no password required
-        int imsgLen = sprintf(msg, "[SYS] $MyPass without request from %s (%s) - user closed.", curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] $MyPass without request from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass1") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -2334,19 +2292,19 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
     if(iLen < 10|| iLen > 73) {
         int imsgLen;
         if(iLen < 768) {
-            imsgLen = sprintf(msg, "[SYS] Bad $MyPass (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(msg, "[SYS] Bad $MyPass (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass2") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            size_t iWantLen = iLen+curUser->NickLen+15+64;
+            size_t iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
-            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->ui8NickLen+15+64);
 #else
-			char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+			char *MSG = (char *) malloc(iLen+curUser->ui8NickLen+15+64);
 #endif
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
 					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::MyPass!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2354,7 +2312,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
 				AppendSpecialLog(sDbgstr);
                 return;
             }
-            imsgLen = sprintf(MSG, "[SYS] Bad $MyPass (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(MSG, "[SYS] Bad $MyPass (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::MyPass3") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
@@ -2375,7 +2333,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
     sData[iLen-1] = '\0'; // cutoff pipe
 
     // if password is wrong, close the connection
-    if(strcmp(curUser->uLogInOut->Password, sData+8) != 0) {
+    if(strcmp(curUser->uLogInOut->sPassword, sData+8) != 0) {
         if(SettingManager->bBools[SETBOOL_ADVANCED_PASS_PROTECTION] == true) {
 			RegUser *Reg = hashRegManager->Find(curUser);
             if(Reg != NULL) {
@@ -2409,7 +2367,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
                     int imsgLen;
                     BanItem *Ban = hashBanManager->FindFull(curUser->ui32IpHash);
                     if(Ban == NULL || ((Ban->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false) {
-                        int iret = sprintf(msg, "3x bad password for nick %s", curUser->Nick);
+                        int iret = sprintf(msg, "3x bad password for nick %s", curUser->sNick);
                         if(CheckSprintf(iret, 1024, "cDcCommands::MyPass4") == false) {
                             msg[0] = '\0';
                         }
@@ -2434,14 +2392,14 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
                         if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
                             int imsgLen = sprintf(msg, "%s $<%s> *** %s %s %s %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                                 SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_IP], 
-                                curUser->IP, LanguageManager->sTexts[LAN_BANNED_BECAUSE_3X_BAD_PASS_FOR_NICK], curUser->Nick);
+                                curUser->sIP, LanguageManager->sTexts[LAN_BANNED_BECAUSE_3X_BAD_PASS_FOR_NICK], curUser->sNick);
                             if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass7") == true) {
 								QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                                 globalQ->SingleItemsStore(newItem);
                             }
                         } else {
                             int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                                LanguageManager->sTexts[LAN_IP], curUser->IP, LanguageManager->sTexts[LAN_BANNED_BECAUSE_3X_BAD_PASS_FOR_NICK], curUser->Nick);
+                                LanguageManager->sTexts[LAN_IP], curUser->sIP, LanguageManager->sTexts[LAN_BANNED_BECAUSE_3X_BAD_PASS_FOR_NICK], curUser->sNick);
                             if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass8") == true) {
                                 globalQ->OPStore(msg, imsgLen);
                             }
@@ -2449,19 +2407,19 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
                     }
 
                     if(iLen < 768) {
-                        int imsgLen = sprintf(msg, "[SYS] Bad 3x password (%s) from %s (%s) - user banned.", sData, curUser->Nick, curUser->IP);
+                        int imsgLen = sprintf(msg, "[SYS] Bad 3x password (%s) from %s (%s) - user banned.", sData, curUser->sNick, curUser->sIP);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass10") == true) {
                             UdpDebug->Broadcast(msg, imsgLen);
                         }
                     } else {
-                        size_t iWantLen = iLen+curUser->NickLen+15+64;
+                        size_t iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
-                        char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+                        char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->ui8NickLen+15+64);
 #else
-                        char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+                        char *MSG = (char *) malloc(iLen+curUser->ui8NickLen+15+64);
 #endif
                         if(MSG == NULL) {
-				            string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+				            string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
                                 string((uint64_t)iWantLen)+" bytes of memory for DcCommands::MyPass1!";
 #ifdef _WIN32
 				            sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2469,7 +2427,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
 				            AppendSpecialLog(sDbgstr);
                             return;
                         }
-                        int imsgLen = sprintf(MSG, "[SYS] Bad 3x password (%s) from %s (%s) - user banned.", sData, curUser->Nick, curUser->IP);
+                        int imsgLen = sprintf(MSG, "[SYS] Bad 3x password (%s) from %s (%s) - user banned.", sData, curUser->sNick, curUser->sIP);
                         if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::MyPass11") == true) {
                             UdpDebug->Broadcast(MSG, imsgLen);
                         }
@@ -2498,19 +2456,19 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
         }
 
         if(iLen < 768) {
-            imsgLen = sprintf(msg, "[SYS] Bad password (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(msg, "[SYS] Bad password (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass13") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            size_t iWantLen = iLen+curUser->NickLen+15+64;
+            size_t iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
-            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->ui8NickLen+15+64);
 #else
-            char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+            char *MSG = (char *) malloc(iLen+curUser->ui8NickLen+15+64);
 #endif
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
                     string((uint64_t)iWantLen)+" bytes of memory for DcCommands::MyPass2!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2518,7 +2476,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
 				AppendSpecialLog(sDbgstr);
                 return;
             }
-            imsgLen = sprintf(MSG, "[SYS] Bad password (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(MSG, "[SYS] Bad password (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::MyPass14") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
@@ -2547,22 +2505,22 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
 
         // PPK ... memory clean up, is not needed anymore
 #ifdef _WIN32
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->uLogInOut->Password) == 0) {
+        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->uLogInOut->sPassword) == 0) {
 			string sDbgstr = "[BUF] Cannot deallocate curUser->uLogInOut->Password in cDcCommands::MyPass! "+string((uint32_t)GetLastError())+" "+
 				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
 			AppendSpecialLog(sDbgstr);
         }
 #else
-		free(curUser->uLogInOut->Password);
+		free(curUser->uLogInOut->sPassword);
 #endif
-        curUser->uLogInOut->Password = NULL;
+        curUser->uLogInOut->sPassword = NULL;
 
         sData[iLen-1] = '|'; // add back pipe
 
         // PPK ... Lua DataArrival only if pass is ok
 		ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::PASSWORD_ARRIVAL);
 
-		if(curUser->iState >= User::STATE_CLOSING) {
+		if(curUser->ui8State >= User::STATE_CLOSING) {
     		return;
     	}
 
@@ -2574,9 +2532,9 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
         
         // PPK ... addition for registered users, kill your own ghost >:-]
         if(((curUser->ui32BoolBits & User::BIT_HASHED) == User::BIT_HASHED) == false) {
-            User *OtherUser = hashManager->FindUser(curUser->Nick, curUser->NickLen);
+            User *OtherUser = hashManager->FindUser(curUser->sNick, curUser->ui8NickLen);
             if(OtherUser != NULL) {
-                int imsgLen = sprintf(msg, "[SYS] Ghost %s (%s) closed.", OtherUser->Nick, OtherUser->IP);
+                int imsgLen = sprintf(msg, "[SYS] Ghost %s (%s) closed.", OtherUser->sNick, OtherUser->sIP);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass12") == true) {
                     UdpDebug->Broadcast(msg, imsgLen);
                 }
@@ -2595,12 +2553,12 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
             // registered DC1 users have enabled OP menu :)))))))))
             int imsgLen;
             if(((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
-                imsgLen = sprintf(msg, "$Hello %s|$LogedIn %s|", curUser->Nick, curUser->Nick);
+                imsgLen = sprintf(msg, "$Hello %s|$LogedIn %s|", curUser->sNick, curUser->sNick);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass15") == false) {
                     return;
                 }
             } else {
-                imsgLen = sprintf(msg, "$Hello %s|", curUser->Nick);
+                imsgLen = sprintf(msg, "$Hello %s|", curUser->sNick);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass16") == false) {
                     return;
                 }
@@ -2609,7 +2567,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
             return;
         } else {
             if(((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == false) {
-                curUser->iState = User::STATE_ADDME;
+                curUser->ui8State = User::STATE_ADDME;
             }
         }
     }     
@@ -2627,7 +2585,7 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
     }
 
     if(iLen < 31) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $OpForceMove (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] Bad $OpForceMove (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::OpForceMove2") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -2636,7 +2594,7 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
     }
 
 	if(ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::OPFORCEMOVE_ARRIVAL) == true ||
-		curUser->iState >= User::STATE_CLOSING) {
+		curUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
 
@@ -2673,7 +2631,7 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
     if(OtherUser) {
    	    if(OtherUser->iProfile != -1 && curUser->iProfile > OtherUser->iProfile) {
             int imsgLen = sprintf(msg, "<%s> %s %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                LanguageManager->sTexts[LAN_YOU_ARE_NOT_ALLOWED_TO_REDIRECT], OtherUser->Nick);
+                LanguageManager->sTexts[LAN_YOU_ARE_NOT_ALLOWED_TO_REDIRECT], OtherUser->sNick);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::OpForceMove3") == true) {
                 UserSendCharDelayed(curUser, msg, imsgLen);
             }
@@ -2682,19 +2640,19 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
             if(iCmdPartsLen[1]+iCmdPartsLen[2] < 768) {
                 int imsgLen = sprintf(msg, "<%s> %s %s %s %s. %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                     LanguageManager->sTexts[LAN_YOU_ARE_REDIRECTED_TO], sCmdParts[1]+6, LanguageManager->sTexts[LAN_BY_LWR], 
-                    curUser->Nick, LanguageManager->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
+                    curUser->sNick, LanguageManager->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::OpForceMove4") == true) {
                     UserSendCharDelayed(OtherUser, msg, imsgLen);
                 }
             } else {
-                size_t iWantLen = iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64;
+                size_t iWantLen = iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->ui8NickLen+64;
 #ifdef _WIN32
                 char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
 #else
 				char *MSG = (char *) malloc(iWantLen);
 #endif
                 if(MSG == NULL) {
-					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+					string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
 						string((uint64_t)iWantLen)+" bytes of memory for DcCommands::OpForceMove!";
 #ifdef _WIN32
 					sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2704,7 +2662,7 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
                 }
                 int imsgLen = sprintf(MSG, "<%s> %s %s %s %s. %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                     LanguageManager->sTexts[LAN_YOU_ARE_REDIRECTED_TO], sCmdParts[1]+6, LanguageManager->sTexts[LAN_BY_LWR], 
-                    curUser->Nick, LanguageManager->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
+                    curUser->sNick, LanguageManager->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
                 if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::OpForceMove5") == true) {
                     UserSendCharDelayed(OtherUser, MSG, imsgLen);
                 }
@@ -2726,8 +2684,8 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
                     if(iCmdPartsLen[1]+iCmdPartsLen[2] < 768) {
                         int imsgLen = sprintf(msg, "%s $<%s> *** %s %s %s %s %s. %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                            SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->Nick, LanguageManager->sTexts[LAN_IS_REDIRECTED_TO], 
-                            sCmdParts[1]+6, LanguageManager->sTexts[LAN_BY_LWR], curUser->Nick, 
+                            SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->sNick, LanguageManager->sTexts[LAN_IS_REDIRECTED_TO], 
+                            sCmdParts[1]+6, LanguageManager->sTexts[LAN_BY_LWR], curUser->sNick, 
                             LanguageManager->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::OpForceMove7") == true) {
 							QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
@@ -2735,12 +2693,12 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
                         }
                     } else {
 #ifdef _WIN32
-                        char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64);
+                        char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->ui8NickLen+64);
 #else
-						char *MSG = (char *) malloc(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64);
+						char *MSG = (char *) malloc(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->ui8NickLen+64);
 #endif
                         if(MSG == NULL) {
-							string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64)+
+							string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+string(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->ui8NickLen+64)+
 								" bytes of memory for DcCommands::OpForceMove1!";
 #ifdef _WIN32
 							sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2749,8 +2707,8 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
                             return;
                         }
                         int imsgLen = sprintf(MSG, "%s $<%s> *** %s %s %s %s %s. %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                            SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->Nick, LanguageManager->sTexts[LAN_IS_REDIRECTED_TO], 
-                            sCmdParts[1]+6, LanguageManager->sTexts[LAN_BY_LWR], curUser->Nick, 
+                            SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->sNick, LanguageManager->sTexts[LAN_IS_REDIRECTED_TO], 
+                            sCmdParts[1]+6, LanguageManager->sTexts[LAN_BY_LWR], curUser->sNick, 
                             LanguageManager->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::OpForceMove8") == true) {
 							QueueDataItem *newItem = globalQ->CreateQueueDataItem(MSG, imsgLen, NULL, 0, globalqueue::PM2OPS);
@@ -2768,20 +2726,20 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
                     }
                 } else {
                     if(iCmdPartsLen[1]+iCmdPartsLen[2] < 768) {
-                        imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s. %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->Nick, 
-                            LanguageManager->sTexts[LAN_IS_REDIRECTED_TO], sCmdParts[1]+6, LanguageManager->sTexts[LAN_BY_LWR], curUser->Nick, 
+                        imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s. %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->sNick, 
+                            LanguageManager->sTexts[LAN_IS_REDIRECTED_TO], sCmdParts[1]+6, LanguageManager->sTexts[LAN_BY_LWR], curUser->sNick, 
                             LanguageManager->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::OpForceMove9") == true) {
                             globalQ->OPStore(msg, imsgLen);
                         }
                     } else {
 #ifdef _WIN32
-                        char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64);
+                        char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->ui8NickLen+64);
 #else
-						char *MSG = (char *) malloc(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64);
+						char *MSG = (char *) malloc(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->ui8NickLen+64);
 #endif
                         if(MSG == NULL) {
-							string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->NickLen+64)+
+							string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+string(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->ui8NickLen+64)+
 								" bytes of memory for DcCommands::OpForceMove2!";
 #ifdef _WIN32
 							sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2789,8 +2747,8 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
 							AppendSpecialLog(sDbgstr);
                             return;
                         }
-                        imsgLen = sprintf(MSG, "<%s> *** %s %s %s %s %s. %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->Nick, 
-                            LanguageManager->sTexts[LAN_IS_REDIRECTED_TO], sCmdParts[1]+6, LanguageManager->sTexts[LAN_BY_LWR], curUser->Nick, 
+                        imsgLen = sprintf(MSG, "<%s> *** %s %s %s %s %s. %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->sNick, 
+                            LanguageManager->sTexts[LAN_IS_REDIRECTED_TO], sCmdParts[1]+6, LanguageManager->sTexts[LAN_BY_LWR], curUser->sNick, 
                             LanguageManager->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
                         if(CheckSprintf(imsgLen, 1024, "cDcCommands::OpForceMove10") == true) {
                             globalQ->OPStore(MSG, imsgLen);
@@ -2810,7 +2768,7 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
             
             if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == false || ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
                 if(iCmdPartsLen[1]+iCmdPartsLen[2] < 768) {
-                    imsgLen = sprintf(msg, "<%s> *** %s %s %s. %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->Nick, 
+                    imsgLen = sprintf(msg, "<%s> *** %s %s %s. %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->sNick, 
                         LanguageManager->sTexts[LAN_IS_REDIRECTED_TO], sCmdParts[1]+6, LanguageManager->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::OpForceMove11") == true) {
                         UserSendCharDelayed(curUser, msg, imsgLen);
@@ -2822,7 +2780,7 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
 					char *MSG = (char *) malloc(iCmdPartsLen[1]+iCmdPartsLen[2]+128);
 #endif
                     if(MSG == NULL) {
-						string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+string(iCmdPartsLen[1]+iCmdPartsLen[2]+128)+
+						string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+string(iCmdPartsLen[1]+iCmdPartsLen[2]+128)+
 							" bytes of memory for DcCommands::OpForceMove3!";
 #ifdef _WIN32
 						sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2830,7 +2788,7 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
 						AppendSpecialLog(sDbgstr);
                         return;
                     }
-                    imsgLen = sprintf(MSG, "<%s> *** %s %s %s. %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->Nick, 
+                    imsgLen = sprintf(MSG, "<%s> *** %s %s %s. %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->sNick, 
                         LanguageManager->sTexts[LAN_IS_REDIRECTED_TO], sCmdParts[1]+6, LanguageManager->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::OpForceMove12") == true) {
                         UserSendCharDelayed(curUser, MSG, imsgLen);
@@ -2848,7 +2806,7 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
             }
             
             // PPK ... close user !!!
-            imsgLen = sprintf(msg, "[SYS] User %s (%s) redirected by %s", OtherUser->Nick, OtherUser->IP, curUser->Nick);
+            imsgLen = sprintf(msg, "[SYS] User %s (%s) redirected by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::OpForceMove13") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
@@ -2861,7 +2819,7 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
 // $RevConnectToMe <ownnick> <nickname>
 void cDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {
     if(iLen < 19) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $RevConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] Bad $RevConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::RevConnectToMe1") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -2870,23 +2828,23 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &i
     }
 
     // PPK ... optimizations
-    if((sData[16+curUser->NickLen] != ' ') ||
-        (memcmp(sData+16, curUser->Nick, curUser->NickLen) != 0)) {
+    if((sData[16+curUser->ui8NickLen] != ' ') ||
+        (memcmp(sData+16, curUser->sNick, curUser->ui8NickLen) != 0)) {
         int imsgLen;
         if(iLen < 768) {
-            imsgLen = sprintf(msg, "[SYS] Nick spoofing in RCTM (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(msg, "[SYS] Nick spoofing in RCTM (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::RevConnectToMe5") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            size_t iWantLen = iLen+curUser->NickLen+15+64;
+            size_t iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
-            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->ui8NickLen+15+64);
 #else
-			char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+			char *MSG = (char *) malloc(iLen+curUser->ui8NickLen+15+64);
 #endif
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
 					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::RevConnectToMe!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2894,7 +2852,7 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &i
 				AppendSpecialLog(sDbgstr);
                 return;
             }
-            imsgLen = sprintf(MSG, "[SYS] Nick spoofing in RCTM (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(MSG, "[SYS] Nick spoofing in RCTM (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::RevConnectToMe6") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
@@ -2938,19 +2896,19 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &i
         }
 
         if(iLen < 768) {
-            imsgLen = sprintf(msg, "[SYS] Long $RevConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(msg, "[SYS] Long $RevConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::RevConnectToMe3") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            size_t iWantLen = iLen+curUser->NickLen+15+64;
+            size_t iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
             char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
 #else
 			char *MSG = (char *) malloc(iWantLen);
 #endif
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
 					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::RevConnectToMe!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -2958,7 +2916,7 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &i
 				AppendSpecialLog(sDbgstr);
 				return;
             }
-            imsgLen = sprintf(MSG, "[SYS] Long $RevConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(MSG, "[SYS] Long $RevConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::RevConnectToMe4") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
@@ -2981,15 +2939,15 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &i
 
 
 	if(ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::REVCONNECTTOME_ARRIVAL) == true ||
-		curUser->iState >= User::STATE_CLOSING) {
+		curUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
 
     sData[iLen-1] = '\0'; // cutoff pipe
        
-    User *OtherUser = hashManager->FindUser(sData+17+curUser->NickLen, iLen-(18+curUser->NickLen));
+    User *OtherUser = hashManager->FindUser(sData+17+curUser->ui8NickLen, iLen-(18+curUser->ui8NickLen));
     // PPK ... no connection to yourself !!!
-    if(OtherUser != NULL && OtherUser != curUser && OtherUser->iState == User::STATE_ADDED) {
+    if(OtherUser != NULL && OtherUser != curUser && OtherUser->ui8State == User::STATE_ADDED) {
         sData[iLen-1] = '|'; // add back pipe
         UserAddPrcsdCmd(curUser, PrcsdUsrCmd::CTM_MCTM_RCTM_SR_TO, sData, iLen, OtherUser);
     }   
@@ -2998,8 +2956,8 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &i
 
 // $SR <nickname> - Search Respond for passive users
 void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {
-    if(iLen < 6+curUser->NickLen) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $SR (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+    if(iLen < 6u+curUser->ui8NickLen) {
+        int imsgLen = sprintf(msg, "[SYS] Bad $SR (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::SR1") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -3033,19 +2991,19 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
         }
 
         if(iLen < 768) {
-            imsgLen = sprintf(msg, "[SYS] Long $SR (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(msg, "[SYS] Long $SR (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::SR3") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            size_t iWantLen = iLen+curUser->NickLen+15+64;
+            size_t iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
             char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
 #else
 			char *MSG = (char *) malloc(iWantLen);
 #endif
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
 					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::SR!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -3053,7 +3011,7 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
 				AppendSpecialLog(sDbgstr);
 				return;
             }
-            imsgLen = sprintf(MSG, "[SYS] Long $SR (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(MSG, "[SYS] Long $SR (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::SR4") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
@@ -3073,23 +3031,23 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
 
     // check $SR spoofing (thanx Fusbar)
     // PPK... added checking for empty space after nick
-    if(sData[4+curUser->NickLen] != ' ' ||
-        memcmp(sData+4, curUser->Nick, curUser->NickLen) != 0) {
+    if(sData[4+curUser->ui8NickLen] != ' ' ||
+        memcmp(sData+4, curUser->sNick, curUser->ui8NickLen) != 0) {
         int imsgLen;
         if(iLen < 768) {
-            imsgLen = sprintf(msg, "[SYS] Nick spoofing in SR from %s (%s) -> (%s) - user closed.", curUser->Nick, curUser->IP, sData);
+            imsgLen = sprintf(msg, "[SYS] Nick spoofing in SR from %s (%s) -> (%s) - user closed.", curUser->sNick, curUser->sIP, sData);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::SR5") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            size_t iWantLen = iLen+curUser->NickLen+15+64;
+            size_t iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
             char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
 #else
 			char *MSG = (char *) malloc(iWantLen);
 #endif
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
 					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::SR!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -3097,7 +3055,7 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
 				AppendSpecialLog(sDbgstr);
                 return;
             }
-            imsgLen = sprintf(MSG, "[SYS] Nick spoofing in SR from %s (%s) -> (%s) - user closed.", curUser->Nick, curUser->IP, sData);
+            imsgLen = sprintf(MSG, "[SYS] Nick spoofing in SR from %s (%s) -> (%s) - user closed.", curUser->sNick, curUser->sIP, sData);
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::SR6") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
@@ -3141,7 +3099,7 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
 
     // past SR to script only if it's not a data for SlotFetcher
 	if(ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::SR_ARRIVAL) == true ||
-		curUser->iState >= User::STATE_CLOSING) {
+		curUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
 
@@ -3152,7 +3110,7 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
 
     User *OtherUser = hashManager->FindUser(towho+1, iLen-2-(towho-sData));
     // PPK ... no $SR to yourself !!!
-    if(OtherUser != NULL && OtherUser != curUser && OtherUser->iState == User::STATE_ADDED) {
+    if(OtherUser != NULL && OtherUser != curUser && OtherUser->ui8State == User::STATE_ADDED) {
         // PPK ... search replies limiting
         if(SettingManager->iShorts[SETSHORT_MAX_PASIVE_SR] != 0) {
 			if(OtherUser->iSR >= (uint32_t)SettingManager->iShorts[SETSHORT_MAX_PASIVE_SR])
@@ -3164,7 +3122,7 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
         // cutoff the last part // PPK ... and do it fast ;)
         towho[0] = '|';
         towho[1] = '\0';
-        UserAddPrcsdCmd(curUser, PrcsdUsrCmd::CTM_MCTM_RCTM_SR_TO, sData, iLen-OtherUser->NickLen-1, OtherUser);
+        UserAddPrcsdCmd(curUser, PrcsdUsrCmd::CTM_MCTM_RCTM_SR_TO, sData, iLen-OtherUser->ui8NickLen-1, OtherUser);
     }   
 }
 
@@ -3173,7 +3131,7 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
 // $SR <nickname> - Search Respond for active users from UDP
 void cDcCommands::SRFromUDP(User * curUser, char * sData, const size_t &iLen) {
 	if(ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::UDP_SR_ARRIVAL) == true ||
-		curUser->iState >= User::STATE_CLOSING) {
+		curUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
 }
@@ -3182,7 +3140,7 @@ void cDcCommands::SRFromUDP(User * curUser, char * sData, const size_t &iLen) {
 // $Supports item item item... PPK $Supports UserCommand NoGetINFO NoHello UserIP2 QuickList|
 void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
     if(((curUser->ui32BoolBits & User::BIT_HAVE_SUPPORTS) == User::BIT_HAVE_SUPPORTS) == true) {
-        int imsgLen = sprintf(msg, "[SYS] $Supports flood from %s (%s) - user closed.", curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] $Supports flood from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports1") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -3193,7 +3151,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
     curUser->ui32BoolBits |= User::BIT_HAVE_SUPPORTS;
     
     if(iLen < 13) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $Supports (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] Bad $Supports (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports2") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -3207,19 +3165,19 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
         } else {
             int imsgLen;
             if(iLen < 768) {
-                imsgLen = sprintf(msg, "[SYS] Quack $Supports (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                imsgLen = sprintf(msg, "[SYS] Quack $Supports (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports3") == true) {
                     UdpDebug->Broadcast(msg, imsgLen);
                 }
             } else {
-                size_t iWantLen = iLen+curUser->NickLen+15+64;
+                size_t iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
                 char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
 #else
                 char *MSG = (char *) malloc(iWantLen);
 #endif
                 if(MSG == NULL) {
-				    string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+				    string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
 					   string((uint64_t)iWantLen)+" bytes of memory for cDcCommands::Supports!";
 #ifdef _WIN32
 				    sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -3227,7 +3185,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
 				    AppendSpecialLog(sDbgstr);
                     return;
                 }
-                imsgLen = sprintf(MSG, "[SYS] Quack $Supports (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                imsgLen = sprintf(MSG, "[SYS] Quack $Supports (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
                 if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::Supports4") == true) {
                     UdpDebug->Broadcast(MSG, imsgLen);
                 }
@@ -3254,7 +3212,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
 
 	ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::SUPPORTS_ARRIVAL);
 
-	if(curUser->iState >= User::STATE_CLOSING) {
+	if(curUser->ui8State >= User::STATE_CLOSING) {
     	return;
     }
 
@@ -3275,17 +3233,17 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
         switch(sSupport[0]) {
             case 'N':
                 if(sSupport[1] == 'o') {
-                    if(((curUser->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) == false && 
+                    if(((curUser->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) == false &&
                         iDataLen == 7 && memcmp(sSupport+2, "Hello", 5) == 0) {
                         curUser->ui32BoolBits |= User::BIT_SUPPORT_NOHELLO;
-                    } else if(((curUser->ui32BoolBits & User::BIT_SUPPORT_NOGETINFO) == User::BIT_SUPPORT_NOGETINFO) == false && iDataLen == 9 && 
+                    } else if(((curUser->ui32BoolBits & User::BIT_SUPPORT_NOGETINFO) == User::BIT_SUPPORT_NOGETINFO) == false && iDataLen == 9 &&
                         memcmp(sSupport+2, "GetINFO", 7) == 0) {
                         curUser->ui32BoolBits |= User::BIT_SUPPORT_NOGETINFO;
                     }
                 }
                 break;
             case 'Q': {
-                if(((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == false && 
+                if(((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == false &&
                     iDataLen == 9 && ((uint64_t *)(sSupport+1))[0] == ((uint64_t *)"uickList")[0]) {
                     curUser->ui32BoolBits |= User::BIT_SUPPORT_QUICKLIST;
                     // PPK ... in fact NoHello is only not fully implemented Quicklist (without diferent login sequency)
@@ -3298,14 +3256,14 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
                 if(((curUser->ui32BoolBits & User::BIT_SUPPORT_USERCOMMAND) == User::BIT_SUPPORT_USERCOMMAND) == false &&
                     iDataLen == 11 && memcmp(sSupport+1, "serCommand", 10) == 0) {
                     curUser->ui32BoolBits |= User::BIT_SUPPORT_USERCOMMAND;
-                } else if(((curUser->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == false && 
+                } else if(((curUser->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == false &&
                     iDataLen == 7 && memcmp(sSupport+1, "serIP2", 6) == 0) {
                     curUser->ui32BoolBits |= User::BIT_SUPPORT_USERIP2;
                 }
                 break;
             }
             case 'B': {
-                if(((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == false && 
+                if(((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == false &&
                     iDataLen == 7 && memcmp(sSupport+1, "otINFO", 6) == 0) {
                     if(SettingManager->bBools[SETBOOL_DONT_ALLOW_PINGERS] == true) {
                         int imsgLen = sprintf(msg, "<%s> %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -3342,7 +3300,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
             }
             case '\0': {
                 // PPK ... corrupted $Supports ???
-                int imsgLen = sprintf(msg, "[SYS] Bad $Supports from %s (%s) - user closed.", curUser->Nick, curUser->IP);
+                int imsgLen = sprintf(msg, "[SYS] Bad $Supports from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::Supports8") == true) {
                     UdpDebug->Broadcast(msg, imsgLen);
                 }
@@ -3357,7 +3315,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
         sSupport = sData+i+1;
     }
     
-    curUser->iState = User::STATE_VALIDATE;
+    curUser->ui8State = User::STATE_VALIDATE;
     
     UserAddPrcsdCmd(curUser, PrcsdUsrCmd::SUPPORTS, NULL, 0, NULL);
 }
@@ -3370,19 +3328,19 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
     if(iLen < 19 || cTemp == NULL) {
         int imsgLen;
         if(iLen < 768) {
-            imsgLen = sprintf(msg, "[SYS] Bad To (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(msg, "[SYS] Bad To (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::To1") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            size_t iWantLen = iLen+curUser->NickLen+15+64;
+            size_t iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
             char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
 #else
 			char *MSG = (char *) malloc(iWantLen);
 #endif
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
 					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::To!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -3390,7 +3348,7 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
                 AppendSpecialLog(sDbgstr);
                 return;
             }
-            imsgLen = sprintf(MSG, "[SYS] Bad To (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(MSG, "[SYS] Bad To (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::To2") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
@@ -3421,24 +3379,24 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
 
     // is the mesg really from us ?
     // PPK ... replaced by better and faster code ;)
-    int imsgLen = sprintf(msg, "From: %s $<%s> ", curUser->Nick, curUser->Nick);
+    int imsgLen = sprintf(msg, "From: %s $<%s> ", curUser->sNick, curUser->sNick);
     if(CheckSprintf(imsgLen, 1024, "cDcCommands::To4") == true) {
         if(strncmp(cTemp+1, msg, imsgLen) != 0) {
             int imsgLen;
             if(iLen < 768) {
-                imsgLen = sprintf(msg, "[SYS] Nick spoofing in To (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                imsgLen = sprintf(msg, "[SYS] Nick spoofing in To (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::To5") == true) {
                     UdpDebug->Broadcast(msg, imsgLen);
                 }
             } else {
-                size_t iWantLen = iLen+curUser->NickLen+15+64;
+                size_t iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
-                char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->NickLen+15+64);
+                char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+curUser->ui8NickLen+15+64);
 #else
-				char *MSG = (char *) malloc(iLen+curUser->NickLen+15+64);
+				char *MSG = (char *) malloc(iLen+curUser->ui8NickLen+15+64);
 #endif
                 if(MSG == NULL) {
-					string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+					string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
 						string((uint64_t)iWantLen)+" bytes of memory for DcCommands::To1!";
 #ifdef _WIN32
 					sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -3446,7 +3404,7 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
 					AppendSpecialLog(sDbgstr);
                     return;
                 }
-                imsgLen = sprintf(MSG, "[SYS] Nick spoofing in To (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+                imsgLen = sprintf(MSG, "[SYS] Nick spoofing in To (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
                 if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::To6") == true) {
                     UdpDebug->Broadcast(MSG, imsgLen);
                 }
@@ -3495,25 +3453,25 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
 			if(DeFloodCheckForSameFlood(curUser, DEFLOOD_SAME_PM, SettingManager->iShorts[SETSHORT_SAME_PM_ACTION],
                 curUser->ui16SamePMs, curUser->ui64SamePMsTick, 
                 SettingManager->iShorts[SETSHORT_SAME_PM_MESSAGES], SettingManager->iShorts[SETSHORT_SAME_PM_TIME], 
-                cTemp+(12+(2*curUser->NickLen)), (iLen-(cTemp-sData))-(12+(2*curUser->NickLen)), 
+                cTemp+(12+(2*curUser->ui8NickLen)), (iLen-(cTemp-sData))-(12+(2*curUser->ui8NickLen)), 
 				curUser->sLastPM, curUser->ui16LastPMLen, bNewData, sData+5) == true) {
                 return;
             }
             cTemp[0] = ' ';
 
 			if(bNewData == true) {
-				UserSetLastPM(curUser, cTemp+(12+(2*curUser->NickLen)), (iLen-(cTemp-sData))-(12+(2*curUser->NickLen)));
+				UserSetLastPM(curUser, cTemp+(12+(2*curUser->ui8NickLen)), (iLen-(cTemp-sData))-(12+(2*curUser->ui8NickLen)));
 			}
         }
     }
 
     if(ProfileMan->IsAllowed(curUser, ProfileManager::NOCHATLIMITS) == false) {
         // 1st check for length limit for PM message
-        size_t iMessLen = iLen-(2*curUser->NickLen)-(cTemp-sData)-13;
+        size_t iMessLen = iLen-(2*curUser->ui8NickLen)-(cTemp-sData)-13;
         if(SettingManager->iShorts[SETSHORT_MAX_PM_LEN] != 0 && iMessLen > (size_t)SettingManager->iShorts[SETSHORT_MAX_PM_LEN]) {
        	    // PPK ... hubsec alias
        	    cTemp[0] = '\0';
-       	   	int imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s!|", curUser->Nick, sData+5, SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
+       	   	int imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s!|", curUser->sNick, sData+5, SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                 LanguageManager->sTexts[LAN_THE_MESSAGE_WAS_TOO_LONG]);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::To14") == true) {
                	UserSendCharDelayed(curUser, msg, imsgLen);
@@ -3525,7 +3483,7 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
         if(SettingManager->iShorts[SETSHORT_MAX_PM_LINES] != 0 || SettingManager->iShorts[SETSHORT_SAME_MULTI_PM_ACTION] != 0) {
 			if(curUser->ui16SamePMs < 2) {
 				uint16_t iLines = 1;
-                for(uint32_t i = 9+curUser->NickLen; i < iLen-(cTemp-sData)-1; i++) {
+                for(uint32_t i = 9+curUser->ui8NickLen; i < iLen-(cTemp-sData)-1; i++) {
                     if(cTemp[i] == '\n') {
                         iLines++;
                     }
@@ -3550,7 +3508,7 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
 
             if(SettingManager->iShorts[SETSHORT_MAX_PM_LINES] != 0 && curUser->ui16LastPmLines > SettingManager->iShorts[SETSHORT_MAX_PM_LINES]) {
                 cTemp[0] = '\0';
-                int imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s!|", curUser->Nick, sData+5, SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
+                int imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s!|", curUser->sNick, sData+5, SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                     LanguageManager->sTexts[LAN_THE_MESSAGE_WAS_TOO_LONG]);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::To15") == true) {
                     UserSendCharDelayed(curUser, msg, imsgLen);
@@ -3571,7 +3529,7 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
     }
 
 	if(ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::TO_ARRIVAL) == true ||
-		curUser->iState >= User::STATE_CLOSING) {
+		curUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
 
@@ -3585,14 +3543,14 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
     // Everything's ok lets chat
     // if this is a PM to OpChat or Hub bot, process the message
     if(SettingManager->bBools[SETBOOL_REG_BOT] == true && strcmp(sData+5, SettingManager->sTexts[SETTXT_BOT_NICK]) == 0) {
-        cTemp += 9+curUser->NickLen;
+        cTemp += 9+curUser->ui8NickLen;
         // PPK ... check message length, return if no mess found
-        size_t iLen1 = (iLen-(cTemp-sData))+1;
-        if(iLen1 <= curUser->NickLen+4)
+        uint32_t iLen1 = (uint32_t)((iLen-(cTemp-sData))+1);
+        if(iLen1 <= curUser->ui8NickLen+4u)
             return;
 
         // find chat message data
-        char *sBuff = cTemp+curUser->NickLen+3;
+        char *sBuff = cTemp+curUser->ui8NickLen+3;
 
         // non-command chat msg
         for(uint8_t i = 0; i < (uint8_t)SettingManager->ui16TextsLens[SETTXT_CHAT_COMMANDS_PREFIXES]; i++) {
@@ -3605,7 +3563,7 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
                 }
            
                 // HubCommands
-                if(iLen1-curUser->NickLen >= 10) {
+                if(iLen1-curUser->ui8NickLen >= 10) {
                     if(HubCmds->DoCommand(curUser, sBuff, iLen1, true)) return;
                 }
                         
@@ -3623,14 +3581,14 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
     } else if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true && 
         ProfileMan->IsAllowed(curUser, ProfileManager::ALLOWEDOPCHAT) == true && 
         strcmp(sData+5, SettingManager->sTexts[SETTXT_OP_CHAT_NICK]) == 0) {
-        cTemp += 9+curUser->NickLen;
+        cTemp += 9+curUser->ui8NickLen;
         uint32_t iOpChatLen = SettingManager->ui16TextsLens[SETTXT_OP_CHAT_NICK];
         memcpy(cTemp-iOpChatLen-2, SettingManager->sTexts[SETTXT_OP_CHAT_NICK], iOpChatLen);
         UserAddPrcsdCmd(curUser, PrcsdUsrCmd::TO_OP_CHAT, cTemp-iOpChatLen-2, (iLen-(cTemp-sData))+iOpChatLen+2, NULL);
     } else {       
         User *OtherUser = hashManager->FindUser(sData+5, iNickLen);
         // PPK ... pm to yourself ?!? NO!
-        if(OtherUser != NULL && OtherUser != curUser && OtherUser->iState == User::STATE_ADDED) {
+        if(OtherUser != NULL && OtherUser != curUser && OtherUser->ui8State == User::STATE_ADDED) {
             cTemp[0] = ' ';
             UserAddPrcsdCmd(curUser, PrcsdUsrCmd::CTM_MCTM_RCTM_SR_TO, sData, iLen, OtherUser, true);
         }
@@ -3641,7 +3599,7 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
 // $ValidateNick
 void cDcCommands::ValidateNick(User * curUser, char * sData, const uint32_t &iLen) {
     if(((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == true) {
-        int imsgLen = sprintf(msg, "[SYS] $ValidateNick with QuickList support from %s (%s) - user closed.", curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] $ValidateNick with QuickList support from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateNick1") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -3649,18 +3607,8 @@ void cDcCommands::ValidateNick(User * curUser, char * sData, const uint32_t &iLe
         return;
     }
 
-    // PPK ... Check if not flooder...
-    if(((curUser->ui32BoolBits & User::BIT_HAVE_VALIDATENICK) == User::BIT_HAVE_VALIDATENICK) == true) {
-        int imsgLen = sprintf(msg, "[SYS] ValidateNick flood from %s (%s) - user closed.", curUser->Nick, curUser->IP);
-        if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateNick2") == true) {
-            UdpDebug->Broadcast(msg, imsgLen);
-        }
-        UserClose(curUser);
-        return;
-    }
-    curUser->ui32BoolBits |= User::BIT_HAVE_VALIDATENICK;
     if(iLen < 16) {
-        int imsgLen = sprintf(msg, "[SYS] Attempt to Validate empty nick (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] Attempt to Validate empty nick (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateNick3") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -3679,26 +3627,8 @@ void cDcCommands::ValidateNick(User * curUser, char * sData, const uint32_t &iLe
 
 // $Version
 void cDcCommands::Version(User * curUser, char * sData, const uint32_t &iLen) {
-    if(((curUser->ui32BoolBits & User::BIT_HAVE_VERSION) == User::BIT_HAVE_VERSION) == true || 
-        ((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == true) {
-        #ifdef _DBG
-            int iret = sprintf(msg, "%s (%s) bad $Version!", curUser->Nick, curUser->IP);
-            if(CheckSprintf(iret, 1024, "cDcCommands::Version1") == true) {
-                Memo(msg);
-            }
-        #endif
-        int imsgLen = sprintf(msg, "[SYS] Bad $Version from %s (%s) - user closed.", curUser->Nick, curUser->IP);
-        if(CheckSprintf(imsgLen, 1024, "cDcCommands::Version2") == true) {
-            UdpDebug->Broadcast(msg, imsgLen);
-        }
-        UserClose(curUser);
-        return;
-    }
-    
-    curUser->ui32BoolBits |= User::BIT_HAVE_VERSION;
-    
     if(iLen < 11) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $Version (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] Bad $Version (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::Version3") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -3706,11 +3636,11 @@ void cDcCommands::Version(User * curUser, char * sData, const uint32_t &iLen) {
         return;
     }
 
-	curUser->iState = User::STATE_GETNICKLIST_OR_MYINFO;
+	curUser->ui8State = User::STATE_GETNICKLIST_OR_MYINFO;
 
 	ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::VERSION_ARRIVAL);
 
-	if(curUser->iState >= User::STATE_CLOSING) {
+	if(curUser->ui8State >= User::STATE_CLOSING) {
     	return;
     }
     
@@ -3730,23 +3660,23 @@ bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen
 #endif
     
 	// if the user is sending chat as other user, kick him
-	if(sData[1+curUser->NickLen] != '>' || sData[2+curUser->NickLen] != ' ' ||
-        memcmp(curUser->Nick, sData+1, curUser->NickLen) != 0) {
+	if(sData[1+curUser->ui8NickLen] != '>' || sData[2+curUser->ui8NickLen] != ' ' ||
+        memcmp(curUser->sNick, sData+1, curUser->ui8NickLen) != 0) {
         int imsgLen;
         if(iLen < 768) {
-            imsgLen = sprintf(msg, "[SYS] Nick spoofing in chat (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(msg, "[SYS] Nick spoofing in chat (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::ChatDeflood1") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            size_t iWantLen = iLen+curUser->NickLen+15+64;
+            size_t iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
             char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
 #else
 			char *MSG = (char *) malloc(iWantLen);
 #endif
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
 					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::ChatDeflood!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -3754,7 +3684,7 @@ bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen
 				AppendSpecialLog(sDbgstr);
                 return false;
             }
-            imsgLen = sprintf(MSG, "[SYS] Nick spoofing in chat (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(MSG, "[SYS] Nick spoofing in chat (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::ChatDeflood2") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
@@ -3796,18 +3726,18 @@ bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen
 			if(DeFloodCheckForSameFlood(curUser, DEFLOOD_SAME_CHAT, SettingManager->iShorts[SETSHORT_SAME_MAIN_CHAT_ACTION],
 			  curUser->ui16SameChatMsgs, curUser->ui64SameChatsTick,
               SettingManager->iShorts[SETSHORT_SAME_MAIN_CHAT_MESSAGES], SettingManager->iShorts[SETSHORT_SAME_MAIN_CHAT_TIME], 
-			  sData+curUser->NickLen+3, iLen-(curUser->NickLen+3), curUser->sLastChat, curUser->ui16LastChatLen, bNewData) == true) {
+			  sData+curUser->ui8NickLen+3, iLen-(curUser->ui8NickLen+3), curUser->sLastChat, curUser->ui16LastChatLen, bNewData) == true) {
 				return false;
 			}
 
 			if(bNewData == true) {
-				UserSetLastChat(curUser, sData+curUser->NickLen+3, iLen-(curUser->NickLen+3));
+				UserSetLastChat(curUser, sData+curUser->ui8NickLen+3, iLen-(curUser->ui8NickLen+3));
 			}
         }
     }
 
     // PPK ... ignore empty chat ;)
-    if(iLen < curUser->NickLen+5) {
+    if(iLen < curUser->ui8NickLen+5u) {
         return false;
     }
 
@@ -3819,7 +3749,7 @@ bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen
 void cDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {   
     if(bCheck == true && ProfileMan->IsAllowed(curUser, ProfileManager::NOCHATLIMITS) == false) {
     	// PPK ... check for message limit length
- 	    if(SettingManager->iShorts[SETSHORT_MAX_CHAT_LEN] != 0 && (iLen-curUser->NickLen-4) > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_CHAT_LEN]) {
+ 	    if(SettingManager->iShorts[SETSHORT_MAX_CHAT_LEN] != 0 && (iLen-curUser->ui8NickLen-4) > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_CHAT_LEN]) {
      		// PPK ... hubsec alias
 	   		int imsgLen = sprintf(msg, "<%s> %s !|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_THE_MESSAGE_WAS_TOO_LONG]);
 	   		if(CheckSprintf(imsgLen, 1024, "cDcCommands::Chat1") == true) {
@@ -3833,7 +3763,7 @@ void cDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, const
             if(curUser->ui16SameChatMsgs < 2) {
                 uint16_t iLines = 1;
 
-                for(uint32_t i = curUser->NickLen+3; i < iLen-1; i++) {
+                for(uint32_t i = curUser->ui8NickLen+3; i < iLen-1; i++) {
                     if(sData[i] == '\n') {
                         iLines++;
                     }
@@ -3880,21 +3810,21 @@ void cDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, const
         return;
 
 	if(ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::CHAT_ARRIVAL) == true ||
-		curUser->iState >= User::STATE_CLOSING) {
+		curUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
 
 	// PPK ... filtering kick messages
 	if(ProfileMan->IsAllowed(curUser, ProfileManager::KICK) == true) {
-    	if(iLen > curUser->NickLen+21) {
+    	if(iLen > curUser->ui8NickLen+21u) {
         	bool bMultiline = false;
-            char *cTemp = strchr(sData+curUser->NickLen+3, '\n');
+            char *cTemp = strchr(sData+curUser->ui8NickLen+3, '\n');
             if(cTemp != NULL) {
             	cTemp[0] = '\0';
             	bMultiline = true;
             }
             char *temp, *temp1;
-            if((temp = stristr(sData+curUser->NickLen+3, "is kicking ")) != NULL &&
+            if((temp = stristr(sData+curUser->ui8NickLen+3, "is kicking ")) != NULL &&
             	(temp1 = stristr(temp+12, " because: ")) != NULL) {
                 // PPK ... catch kick message and store for later use in $Kick for tempban reason
                 temp1[0] = '\0';               
@@ -3926,7 +3856,7 @@ void cDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, const
 							char *MSG = (char *) malloc(iWantLen);
 #endif
                             if(MSG == NULL) {
-								string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+								string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
 									string((uint64_t)iWantLen)+" bytes of memory for DcCommands::Chat!";
 #ifdef _WIN32
 								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -3977,7 +3907,7 @@ void cDcCommands::Close(User * curUser, char * sData, const uint32_t &iLen) {
     } 
 
     if(iLen < 9) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $Close (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] Bad $Close (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::Close2") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -3986,7 +3916,7 @@ void cDcCommands::Close(User * curUser, char * sData, const uint32_t &iLen) {
     }
 
 	if(ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::CLOSE_ARRIVAL) == true ||
-		curUser->iState >= User::STATE_CLOSING) {
+		curUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
 
@@ -4006,7 +3936,7 @@ void cDcCommands::Close(User * curUser, char * sData, const uint32_t &iLen) {
     	
         if(OtherUser->iProfile != -1 && curUser->iProfile > OtherUser->iProfile) {
         	int imsgLen = sprintf(msg, "<%s> %s %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                LanguageManager->sTexts[LAN_YOU_ARE_NOT_ALLOWED_TO_CLOSE], OtherUser->Nick);
+                LanguageManager->sTexts[LAN_YOU_ARE_NOT_ALLOWED_TO_CLOSE], OtherUser->sNick);
         	if(CheckSprintf(imsgLen, 1024, "cDcCommands::Close4") == true) {
                 UserSendCharDelayed(curUser, msg, imsgLen);
             }
@@ -4014,7 +3944,7 @@ void cDcCommands::Close(User * curUser, char * sData, const uint32_t &iLen) {
         }
 
         // disconnect the user
-        int imsgLen = sprintf(msg, "[SYS] User %s (%s) closed by %s", OtherUser->Nick, OtherUser->IP, curUser->Nick);
+        int imsgLen = sprintf(msg, "[SYS] User %s (%s) closed by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::Close5") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -4023,15 +3953,15 @@ void cDcCommands::Close(User * curUser, char * sData, const uint32_t &iLen) {
         if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
             if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
                 int imsgLen = sprintf(msg, "%s $<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                    SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->Nick, 
-                    LanguageManager->sTexts[LAN_WITH_IP], OtherUser->IP, LanguageManager->sTexts[LAN_WAS_CLOSED_BY], curUser->Nick);
+                    SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->sNick, 
+                    LanguageManager->sTexts[LAN_WITH_IP], OtherUser->sIP, LanguageManager->sTexts[LAN_WAS_CLOSED_BY], curUser->sNick);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::Close6") == true) {
 					QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                     globalQ->SingleItemsStore(newItem);
                 }
             } else {
-                int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->Nick, 
-                    LanguageManager->sTexts[LAN_WITH_IP], OtherUser->IP, LanguageManager->sTexts[LAN_WAS_CLOSED_BY], curUser->Nick);
+                int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->sNick, 
+                    LanguageManager->sTexts[LAN_WITH_IP], OtherUser->sIP, LanguageManager->sTexts[LAN_WAS_CLOSED_BY], curUser->sNick);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::Close7") == true) {
                     globalQ->OPStore(msg, imsgLen);
                 }
@@ -4039,8 +3969,8 @@ void cDcCommands::Close(User * curUser, char * sData, const uint32_t &iLen) {
         }
         
         if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == false || ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
-        	int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->Nick, 
-                LanguageManager->sTexts[LAN_WITH_IP], OtherUser->IP, LanguageManager->sTexts[LAN_WAS_CLOSED]);
+        	int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->sNick, 
+                LanguageManager->sTexts[LAN_WITH_IP], OtherUser->sIP, LanguageManager->sTexts[LAN_WAS_CLOSED]);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::Close8") == true) {
                 UserSendCharDelayed(curUser, msg, imsgLen);
             }
@@ -4060,19 +3990,19 @@ void cDcCommands::Unknown(User * curUser, char * sData, const uint32_t &iLen) {
     // if this is unkncwn command and script dont clarify that it's ok, disconnect the user
     if(ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::UNKNOWN_ARRIVAL) == false) {
         if(iLen < 768) {
-            int imsgLen = sprintf(msg, "[SYS] Unknown command (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            int imsgLen = sprintf(msg, "[SYS] Unknown command (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::Unknown1") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
         } else {
-            size_t iWantLen = iLen+curUser->NickLen+15+64;
+            size_t iWantLen = iLen+curUser->ui8NickLen+15+64;
 #ifdef _WIN32
             char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
 #else
 			char *MSG = (char *) malloc(iWantLen);
 #endif
             if(MSG == NULL) {
-				string sDbgstr = "[BUF] "+string(curUser->Nick, curUser->NickLen)+" ("+string(curUser->IP, curUser->ui8IpLen)+") Cannot allocate "+
+				string sDbgstr = "[BUF] "+string(curUser->sNick, curUser->ui8NickLen)+" ("+string(curUser->sIP, curUser->ui8IpLen)+") Cannot allocate "+
 					string((uint64_t)iWantLen)+" bytes of memory for DcCommands::Unknown!";
 #ifdef _WIN32
 				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
@@ -4080,7 +4010,7 @@ void cDcCommands::Unknown(User * curUser, char * sData, const uint32_t &iLen) {
 				AppendSpecialLog(sDbgstr);
                 return;
             }
-            int imsgLen = sprintf(MSG, "[SYS] Unknown command (%s) from %s (%s) - user closed.", sData, curUser->Nick, curUser->IP);
+            int imsgLen = sprintf(MSG, "[SYS] Unknown command (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, iWantLen, "cDcCommands::Unknown2") == true) {
                 UdpDebug->Broadcast(MSG, imsgLen);
             }
@@ -4130,10 +4060,10 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
         }
     }
 
-    UserSetNick(curUser, Nick, iNickLen);
+    UserSetNick(curUser, Nick, (uint8_t)iNickLen);
     
     // check for reserved nicks
-    if(ResNickManager->CheckReserved(curUser->Nick, curUser->ui32NickHash) == true) {
+    if(ResNickManager->CheckReserved(curUser->sNick, curUser->ui32NickHash) == true) {
    	    int imsgLen = sprintf(msg, "<%s> %s. %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
             LanguageManager->sTexts[LAN_THE_NICK_IS_RESERVED_FOR_SOMEONE_OTHER], LanguageManager->sTexts[LAN_CHANGE_YOUR_NICK_AND_GET_BACK_AGAIN]);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick2") == true) {
@@ -4151,7 +4081,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
     // PPK ... check if we already have ban for this user
     if(curUser->uLogInOut->uBan != NULL && curUser->ui32NickHash == curUser->uLogInOut->uBan->ui32NickHash) {
         UserSendChar(curUser, curUser->uLogInOut->uBan->sMessage, curUser->uLogInOut->uBan->iLen);
-        int imsgLen = sprintf(msg, "[SYS] Banned user %s (%s) - user closed.", curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] Banned user %s (%s) - user closed.", curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick3") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -4165,7 +4095,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
         int imsgLen;
         char *messg = GenerateBanMessage(UserBan, imsgLen, acc_time);
         UserSendChar(curUser, messg, imsgLen);
-        imsgLen = sprintf(msg, "[SYS] Banned user %s (%s) - user closed.", curUser->Nick, curUser->IP);
+        imsgLen = sprintf(msg, "[SYS] Banned user %s (%s) - user closed.", curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick4") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -4193,10 +4123,10 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
                     UserSendChar(curUser, msg, imsgLen);
                 }
 #ifdef _WIN32
-                imsgLen = sprintf(msg, "[SYS] User %s (%s) not allowed to send password (%d) - user closed.", curUser->Nick, curUser->IP, 
+                imsgLen = sprintf(msg, "[SYS] User %s (%s) not allowed to send password (%d) - user closed.", curUser->sNick, curUser->sIP, 
                     (Reg->tLastBadPass+(60*iMinutes2Wait))-acc_time);
 #else
-				imsgLen = sprintf(msg, "[SYS] User %s (%s) not allowed to send password (%" PRIu64 ") - user closed.", curUser->Nick, curUser->IP, 
+				imsgLen = sprintf(msg, "[SYS] User %s (%s) not allowed to send password (%" PRIu64 ") - user closed.", curUser->sNick, curUser->sIP, 
                     (uint64_t)((Reg->tLastBadPass+(60*iMinutes2Wait))-acc_time));
 #endif
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick6") == true) {
@@ -4216,7 +4146,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
         // PPK ... check if we already have ban for this user
         if(curUser->uLogInOut->uBan != NULL) {
             UserSendChar(curUser, curUser->uLogInOut->uBan->sMessage, curUser->uLogInOut->uBan->iLen);
-            int imsgLen = sprintf(msg, "[SYS] uBanned user %s (%s) - user closed.", curUser->Nick, curUser->IP);
+            int imsgLen = sprintf(msg, "[SYS] uBanned user %s (%s) - user closed.", curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick7") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
@@ -4277,9 +4207,9 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
             }
             UserSendChar(curUser, msg, imsgLen);
 #ifdef _WIN32
-            imsgLen = sprintf(msg, "[SYS] Max connections from same IP (%I32d) for %s (%s) - user closed. ", ui32Count, curUser->Nick, curUser->IP);
+            imsgLen = sprintf(msg, "[SYS] Max connections from same IP (%I32d) for %s (%s) - user closed. ", ui32Count, curUser->sNick, curUser->sIP);
 #else
-			imsgLen = sprintf(msg, "[SYS] Max connections from same IP (%d) for %s (%s) - user closed. ", ui32Count, curUser->Nick, curUser->IP);
+			imsgLen = sprintf(msg, "[SYS] Max connections from same IP (%d) for %s (%s) - user closed. ", ui32Count, curUser->sNick, curUser->sIP);
 #endif
             string tmp;
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick10") == true) {
@@ -4293,7 +4223,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
         		User *cur = nxt;
                 nxt = cur->hashiptablenext;
 
-                tmp += " "+string(cur->Nick, cur->NickLen);
+                tmp += " "+string(cur->sNick, cur->ui8NickLen);
             }
 
             UdpDebug->Broadcast(tmp);
@@ -4306,7 +4236,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
     // Check for reconnect time
     if(ProfileMan->IsAllowed(curUser, ProfileManager::NORECONNTIME) == false &&
         colUsers->CheckRecTime(curUser) == true) {
-        int imsgLen = sprintf(msg, "[SYS] Fast reconnect from %s (%s) - user closed.", curUser->Nick, curUser->IP);
+        int imsgLen = sprintf(msg, "[SYS] Fast reconnect from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick11") == true) {
             UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -4321,7 +4251,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
     User *OtherUser = hashManager->FindUser(curUser);
 
     if(OtherUser != NULL) {
-   	    if(OtherUser->iState < User::STATE_CLOSING) {
+   	    if(OtherUser->ui8State < User::STATE_CLOSING) {
             // check for socket error, or if user closed connection
             int iRet = recv(OtherUser->Sck, msg, 16, MSG_PEEK);
 
@@ -4332,7 +4262,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
 			if((iRet == -1 && errno != EAGAIN) || iRet == 0) {
 #endif
                 OtherUser->ui32BoolBits |= User::BIT_ERROR;
-                int imsgLen = sprintf(msg, "[SYS] Ghost in validate nick %s (%s) - user closed.", OtherUser->Nick, OtherUser->IP);
+                int imsgLen = sprintf(msg, "[SYS] Ghost in validate nick %s (%s) - user closed.", OtherUser->sNick, OtherUser->sIP);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick13") == true) {
                     UdpDebug->Broadcast(msg, imsgLen);
                 }
@@ -4344,7 +4274,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
            	        if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick14") == true) {
                         UserSendChar(curUser, msg, imsgLen);
                     }
-                    imsgLen = sprintf(msg, "[SYS] Nick taken [%s (%s)] %s (%s) - user closed.", OtherUser->Nick, OtherUser->IP, curUser->Nick, curUser->IP);
+                    imsgLen = sprintf(msg, "[SYS] Nick taken [%s (%s)] %s (%s) - user closed.", OtherUser->sNick, OtherUser->sIP, curUser->sNick, curUser->sIP);
                     if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick15") == true) {
                         UdpDebug->Broadcast(msg, imsgLen);
                     }
@@ -4352,7 +4282,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
                     return false;
                 } else {
                     // PPK ... addition for registered users, kill your own ghost >:-]
-                    curUser->iState = User::STATE_VERSION_OR_MYPASS;
+                    curUser->ui8State = User::STATE_VERSION_OR_MYPASS;
                     UserAddPrcsdCmd(curUser, PrcsdUsrCmd::GETPASS, NULL, 0, NULL);
                     return true;
                 }
@@ -4368,7 +4298,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
             (SettingManager->iShorts[SETSHORT_MAX_NICK_LEN] != 0 && iNickLen > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_NICK_LEN])) {
             UserSendChar(curUser, SettingManager->sPreTexts[SetMan::SETPRETXT_NICK_LIMIT_MSG],
                 SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_NICK_LIMIT_MSG]);
-            int imsgLen = sprintf(msg, "[SYS] Bad nick length (%d) from %s (%s) - user closed.", (int)iNickLen, curUser->Nick, curUser->IP);
+            int imsgLen = sprintf(msg, "[SYS] Bad nick length (%d) from %s (%s) - user closed.", (int)iNickLen, curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick16") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }
@@ -4388,7 +4318,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
             hashManager->Add(curUser);
             curUser->ui32BoolBits |= User::BIT_HASHED;
             if(ValidateNick == true) {
-                curUser->iState = User::STATE_VERSION_OR_MYPASS; // waiting for $Version
+                curUser->ui8State = User::STATE_VERSION_OR_MYPASS; // waiting for $Version
                 UserAddPrcsdCmd(curUser, PrcsdUsrCmd::LOGINHELLO, NULL, 0, NULL);
             }
             return true;
@@ -4397,7 +4327,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
         // user is registered, wait for password
         hashManager->Add(curUser);
         curUser->ui32BoolBits |= User::BIT_HASHED;
-        curUser->iState = User::STATE_VERSION_OR_MYPASS;
+        curUser->ui8State = User::STATE_VERSION_OR_MYPASS;
         UserAddPrcsdCmd(curUser, PrcsdUsrCmd::GETPASS, NULL, 0, NULL);
         return true;
     }
@@ -4475,7 +4405,7 @@ void cDcCommands::ProcessCmds(User * curUser) {
                 break;
             }
             case PrcsdUsrCmd::LOGINHELLO: {
-                int imsgLen = sprintf(msg, "$Hello %s|", curUser->Nick);
+                int imsgLen = sprintf(msg, "$Hello %s|", curUser->sNick);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::ProcessCmds1") == true) {
                     UserSendCharDelayed(curUser, msg, imsgLen);
                 }
@@ -4488,7 +4418,7 @@ void cDcCommands::ProcessCmds(User * curUser) {
             }
             case PrcsdUsrCmd::CHAT: {
             	// find chat message data
-                char *sBuff = cur->sCommand+curUser->NickLen+3;
+                char *sBuff = cur->sCommand+curUser->ui8NickLen+3;
 
             	// non-command chat msg
                 bool bNonChat = false;
@@ -4512,8 +4442,8 @@ void cDcCommands::ProcessCmds(User * curUser) {
                     }
     
                     // built-in commands
-                    if(cur->iLen-curUser->NickLen >= 9) {
-                        if(HubCmds->DoCommand(curUser, sBuff-(curUser->NickLen-1), cur->iLen)) break;
+                    if(cur->iLen-curUser->ui8NickLen >= 9) {
+                        if(HubCmds->DoCommand(curUser, sBuff-(curUser->ui8NickLen-1), cur->iLen)) break;
                         
                         cur->sCommand[cur->iLen-1] = '|'; // add back pipe
                     }
@@ -4550,102 +4480,48 @@ void cDcCommands::ProcessCmds(User * curUser) {
 
     if((curUser->ui32BoolBits & User::BIT_PRCSD_MYINFO) == User::BIT_PRCSD_MYINFO) {
         curUser->ui32BoolBits &= ~User::BIT_PRCSD_MYINFO;
-        
+
         if(((curUser->ui32BoolBits & User::BIT_HAVE_BADTAG) == User::BIT_HAVE_BADTAG) == true) {
             UserHasSuspiciousTag(curUser);
         }
-                        
+
         if(SettingManager->ui8FullMyINFOOption == 0) {
-            colUsers->Add2MyInfosTag(curUser);
-            if(SettingManager->iShorts[SETSHORT_MYINFO_DELAY] == 0 || 
-                ui64ActualTick > ((60*SettingManager->iShorts[SETSHORT_MYINFO_DELAY])+curUser->iLastMyINFOSendTick)) {
-                globalQ->InfoStore(curUser->MyInfoTag, curUser->iMyInfoTagLen);
-                curUser->iLastMyINFOSendTick = ui64ActualTick;
-            } else {
-                globalQ->FullInfoStore(curUser->MyInfoTag, curUser->iMyInfoTagLen);
-            }
-            return;
-        }
-                        
-        UserGenerateMyINFO(curUser);
-        colUsers->Add2MyInfos(curUser);
-                                    
-        if(SettingManager->ui8FullMyINFOOption == 1) {
-            colUsers->Add2MyInfosTag(curUser);
-            globalQ->FullInfoStore(curUser->MyInfoTag, curUser->iMyInfoTagLen);
-                        
-            // PPK ... optimizations
-            if(curUser->MyInfoOld != NULL) {
-                if(curUser->iMyInfoLen == curUser->iMyInfoOldLen && memcmp(curUser->MyInfoOld+14+curUser->NickLen, curUser->MyInfo+14+curUser->NickLen, curUser->iMyInfoOldLen-14-curUser->NickLen) == 0) {
-#ifdef _WIN32
-                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->MyInfoOld) == 0) {
-						string sDbgstr = "[BUF] Cannot deallocate curUser->MyInfoOld in cDcCommands::ProcessCmds! "+string((uint32_t)GetLastError())+" "+
-							string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-						AppendSpecialLog(sDbgstr);
-                    }
-#else
-					free(curUser->MyInfoOld);
-#endif
-                    curUser->MyInfoOld = NULL;
-                    curUser->iMyInfoOldLen = 0;
-                    return;
-                }
-#ifdef _WIN32
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->MyInfoOld) == 0) {
-					string sDbgstr = "[BUF] Cannot deallocate curUser->MyInfoOld1 in cDcCommands::ProcessCmds! "+string((uint32_t)GetLastError())+" "+
-						string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-					AppendSpecialLog(sDbgstr);
-                }
-#else
-				free(curUser->MyInfoOld);
-#endif
-                curUser->MyInfoOld = NULL;
-                curUser->iMyInfoOldLen = 0;
-            }
-                        
-            if(SettingManager->iShorts[SETSHORT_MYINFO_DELAY] == 0 || 
-                ui64ActualTick > ((60*SettingManager->iShorts[SETSHORT_MYINFO_DELAY])+curUser->iLastMyINFOSendTick)) {
-                globalQ->StrpInfoStore(curUser->MyInfo, curUser->iMyInfoLen);
-                curUser->iLastMyINFOSendTick = ui64ActualTick;
-            }
-            return;
-        }
-                                         
-        // PPK ... optimizations
-        if(curUser->MyInfoOld != NULL) {
-            if(curUser->iMyInfoLen == curUser->iMyInfoOldLen && memcmp(curUser->MyInfoOld+14+curUser->NickLen, curUser->MyInfo+14+curUser->NickLen, curUser->iMyInfoOldLen-14-curUser->NickLen) == 0) {
-#ifdef _WIN32
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->MyInfoOld) == 0) {
-					string sDbgstr = "[BUF] Cannot deallocate curUser->MyInfoOld2 in cDcCommands::ProcessCmds! "+string((uint32_t)GetLastError())+" "+
-						string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-					AppendSpecialLog(sDbgstr);
-                }
-#else
-				free(curUser->MyInfoOld);
-#endif
-                curUser->MyInfoOld = NULL;
-                curUser->iMyInfoOldLen = 0;
+            if(UserGenerateMyInfoLong(curUser) == false) {
                 return;
             }
-#ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->MyInfoOld) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate curUser->MyInfoOld3 in cDcCommands::ProcessCmds! "+string((uint32_t)GetLastError())+" "+
-					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-				AppendSpecialLog(sDbgstr);
+
+            colUsers->Add2MyInfosTag(curUser);
+
+            if(SettingManager->iShorts[SETSHORT_MYINFO_DELAY] == 0 || 
+                ui64ActualTick > ((60*SettingManager->iShorts[SETSHORT_MYINFO_DELAY])+curUser->iLastMyINFOSendTick)) {
+                globalQ->InfoStore(curUser->sMyInfoLong, curUser->ui16MyInfoLongLen);
+                curUser->iLastMyINFOSendTick = ui64ActualTick;
+            } else {
+                globalQ->FullInfoStore(curUser->sMyInfoLong, curUser->ui16MyInfoLongLen);
             }
-#else
-			free(curUser->MyInfoOld);
-#endif
-            curUser->MyInfoOld = NULL;
-            curUser->iMyInfoOldLen = 0;
+
+            return;
         }
-                        
+
+        if(SettingManager->ui8FullMyINFOOption == 1) {
+            if(UserGenerateMyInfoLong(curUser) == true) {
+                colUsers->Add2MyInfosTag(curUser);
+                globalQ->FullInfoStore(curUser->sMyInfoLong, curUser->ui16MyInfoLongLen);
+            }
+        }
+
+        if(UserGenerateMyInfoShort(curUser) == false) {
+            return;
+        }
+
+        colUsers->Add2MyInfos(curUser);
+
         if(SettingManager->iShorts[SETSHORT_MYINFO_DELAY] == 0 || 
             ui64ActualTick > ((60*SettingManager->iShorts[SETSHORT_MYINFO_DELAY])+curUser->iLastMyINFOSendTick)) {
-            globalQ->InfoStore(curUser->MyInfo, curUser->iMyInfoLen);
+            globalQ->InfoStore(curUser->sMyInfoShort, curUser->ui16MyInfoShortLen);
             curUser->iLastMyINFOSendTick = ui64ActualTick;
-        } else {
-            globalQ->FullInfoStore(curUser->MyInfo, curUser->iMyInfoLen);
+        } else if(SettingManager->ui8FullMyINFOOption == 2) {
+            globalQ->FullInfoStore(curUser->sMyInfoShort, curUser->ui16MyInfoShortLen);
         }
     }
 }
@@ -4671,7 +4547,7 @@ void cDcCommands::SendIncorrectIPMsg(User * curUser, char * sBadIP, const bool &
 
 	int iret = sprintf(msg+imsgLen, " %s %s.|", 
         bCTM == true ? LanguageManager->sTexts[LAN_IN_CTM_REQ_REAL_IP_IS] : LanguageManager->sTexts[LAN_IN_SEARCH_REQ_REAL_IP_IS], 
-        curUser->IP);
+        curUser->sIP);
 	imsgLen += iret;
 	if(CheckSprintf1(iret, imsgLen, 1024, "SendIncorrectIPMsg2") == true) {
 		UserSendCharDelayed(curUser, msg, imsgLen);

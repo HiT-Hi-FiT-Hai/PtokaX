@@ -97,7 +97,7 @@ bool DeFloodCheckForSameFlood(User * u, const uint8_t &ui8DefloodType, const int
             return false;
 		} else if(ui16Count == ui16DefloodCount) {
 			DeFloodDoAction(u, ui8DefloodType, ui16Action, ui16Count, sOtherNick);
-            if(u->iState < User::STATE_CLOSING) {
+            if(u->ui8State < User::STATE_CLOSING) {
                 ui16Count++;
             }
 
@@ -155,7 +155,7 @@ void DeFloodDoAction(User * u, const uint8_t &ui8DefloodType, const int16_t &ui1
     uint16_t &ui16Count, char * sOtherNick) {
     int imsgLen = 0;
     if(sOtherNick != NULL) {
-		imsgLen = sprintf(msg, "$To: %s From: %s $", u->Nick, sOtherNick);
+		imsgLen = sprintf(msg, "$To: %s From: %s $", u->sNick, sOtherNick);
 		if(CheckSprintf(imsgLen, 1024, "DeFloodDoAction1") == false) {
             return;
         }
@@ -256,7 +256,7 @@ bool DeFloodCheckForWarn(User * u, const uint8_t &ui8DefloodType, char * sOtherN
     } else {
         int imsgLen = 0;
         if(sOtherNick != NULL) {
-			imsgLen = sprintf(msg, "$To: %s From: %s $", u->Nick, sOtherNick);
+			imsgLen = sprintf(msg, "$To: %s From: %s $", u->sNick, sOtherNick);
 			if(CheckSprintf(imsgLen, 1024, "DeFloodCheckForWarn2") == false) {
                 return true;
             }
@@ -465,15 +465,15 @@ void DeFloodReport(User * u, const uint8_t ui8DefloodType, char *sAction) {
         if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
             int imsgLen = sprintf(msg, "%s $<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                 SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], DeFloodGetMessage(ui8DefloodType, 2), 
-				u->Nick, LanguageManager->sTexts[LAN_WITH_IP], u->IP, sAction);
+				u->sNick, LanguageManager->sTexts[LAN_WITH_IP], u->sIP, sAction);
             if(CheckSprintf(imsgLen, 1024, "DeFloodReport1") == true) {
 				QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                 globalQ->SingleItemsStore(newItem);
             }
         } else {
             int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-				DeFloodGetMessage(ui8DefloodType, 2), u->Nick, LanguageManager->sTexts[LAN_WITH_IP],
-				u->IP, sAction);
+				DeFloodGetMessage(ui8DefloodType, 2), u->sNick, LanguageManager->sTexts[LAN_WITH_IP],
+				u->sIP, sAction);
             if(CheckSprintf(imsgLen, 1024, "DeFloodReport2") == true) {
                 globalQ->OPStore(msg, imsgLen);
             }
@@ -481,9 +481,9 @@ void DeFloodReport(User * u, const uint8_t ui8DefloodType, char *sAction) {
     }
 
 #ifdef _WIN32
-	int imsgLen = sprintf(msg, "[SYS] Flood type %hu from %s (%s) - user closed.", (uint16_t)ui8DefloodType, u->Nick, u->IP);
+	int imsgLen = sprintf(msg, "[SYS] Flood type %hu from %s (%s) - user closed.", (uint16_t)ui8DefloodType, u->sNick, u->sIP);
 #else
-	int imsgLen = sprintf(msg, "[SYS] Flood type %u from %s (%s) - user closed.", (uint16_t)ui8DefloodType, u->Nick, u->IP);
+	int imsgLen = sprintf(msg, "[SYS] Flood type %u from %s (%s) - user closed.", (uint16_t)ui8DefloodType, u->sNick, u->sIP);
 #endif
 
     if(CheckSprintf(imsgLen, 1024, "DeFloodReport3") == true) {
@@ -503,7 +503,7 @@ bool DeFloodCheckInterval(User * u, const uint8_t &ui8DefloodType,
 
             int imsgLen = 0;
             if(sOtherNick != NULL) {
-                imsgLen = sprintf(msg, "$To: %s From: %s $", u->Nick, sOtherNick);
+                imsgLen = sprintf(msg, "$To: %s From: %s $", u->sNick, sOtherNick);
                 if(CheckSprintf(imsgLen, 1024, "DeFloodCheckInterval1") == false) {
 					return true;
                 }

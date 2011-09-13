@@ -677,7 +677,7 @@ Setting string IDs for SetMan.(G/S)etString (| is not allowed in all strings, if
 34	- Language. When language is default then return nil.
 
 
-User data IDs for Core.GetUserData call.
+User data IDs for Core.GetUserData and Core.GetUserValue call.
 -------------------
 0	- sMode
 1	- sMyInfoString

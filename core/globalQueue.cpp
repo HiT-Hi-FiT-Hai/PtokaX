@@ -840,10 +840,10 @@ void globalqueue::OpListStore(char * sNick) {
 // appends data to the userip queue
 void globalqueue::UserIPStore(User * curUser) {
     if(UserIPQueue.len == 0) {
-        UserIPQueue.len = sprintf(UserIPQueue.buffer, "$UserIP %s %s|", curUser->Nick, curUser->IP);
+        UserIPQueue.len = sprintf(UserIPQueue.buffer, "$UserIP %s %s|", curUser->sNick, curUser->sIP);
         UserIPQueue.bHaveDollars = false;
     } else {
-        int iDataLen = sprintf(msg, "%s %s$$|", curUser->Nick, curUser->IP);
+        int iDataLen = sprintf(msg, "%s %s$$|", curUser->sNick, curUser->sIP);
         if(CheckSprintf(iDataLen, 128, "globalqueue::UserIPStore2") == true) {
             if(UserIPQueue.bHaveDollars == false) {
                 UserIPQueue.buffer[UserIPQueue.len-1] = '$';
@@ -1093,7 +1093,7 @@ void globalqueue::ProcessQueues(User * u) {
         StrpIpOpQ = StrpIpOpQa; StrpIpOpActQ = StrpIpOpActQa; StrpIpOpPasQ = StrpIpOpPasQa; FullIpOpQ = FullIpOpQa; FullIpOpActQ = FullIpOpActQa; FullIpOpPasQ = FullIpOpPasQa;
     }
         
-    if(u->sharedSize == 0 || (bHaveA == false && bHaveP == false)) {
+    if(u->ui64SharedSize == 0 || (bHaveA == false && bHaveP == false)) {
         if(((u->ui32BoolBits & User::BIT_GETNICKLIST) == User::BIT_GETNICKLIST) == true) {
             UserAddUserList(u);
             u->ui32BoolBits &= ~User::BIT_GETNICKLIST;
@@ -1349,8 +1349,8 @@ void globalqueue::ProcessSingleItems(User * u) {
         if(qdicur->FromUser != u) {
             switch(qdicur->iType) {
                 case globalqueue::PM2ALL: { // send PM to ALL
-                    if(MSGSize < MSGLen+qdicur->iDataLen+u->NickLen+13) {
-                        size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->NickLen+13);
+                    if(MSGSize < MSGLen+qdicur->iDataLen+u->ui8NickLen+13) {
+                        size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->ui8NickLen+13);
                         char * oldbuf = MSG;
                         if(MSG == NULL) {
 #ifdef _WIN32
@@ -1366,7 +1366,7 @@ void globalqueue::ProcessSingleItems(User * u) {
 #endif
 						}
                         if(MSG == NULL) {
-							string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+
+							string sDbgstr = "[BUF] "+string(u->sNick,u->ui8NickLen)+" ("+string(u->sIP, u->ui8IpLen)+") Cannot (re)allocate "+
                                 string((uint64_t)qdicur->iDataLen)+"/"+string((uint64_t)MSGLen)+"/"+string((uint64_t)iAllignLen)+
                                 " bytes of memory in globalqueue::ProcessSingleItems! "+string(qdicur->sData, qdicur->iDataLen);
 #ifdef _WIN32
@@ -1385,7 +1385,7 @@ void globalqueue::ProcessSingleItems(User * u) {
                         }
                         MSGSize = (uint32_t)(iAllignLen-1);
                     }
-                    int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->Nick);
+                    int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->sNick);
                     MSGLen += iret;
                     CheckSprintf1(iret, MSGLen, MSGSize, "globalqueue::ProcessSingleItems1");
                     memcpy(MSG+MSGLen, qdicur->sData, qdicur->iDataLen);
@@ -1395,8 +1395,8 @@ void globalqueue::ProcessSingleItems(User * u) {
                 }
                 case globalqueue::PM2OPS: { // send PM only to operators
                     if(((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
-                        if(MSGSize < MSGLen+qdicur->iDataLen+u->NickLen+13) {
-                            size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->NickLen+13);
+                        if(MSGSize < MSGLen+qdicur->iDataLen+u->ui8NickLen+13) {
+                            size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->ui8NickLen+13);
                             char * oldbuf = MSG;
                             if(MSG == NULL) {
 #ifdef _WIN32
@@ -1412,7 +1412,7 @@ void globalqueue::ProcessSingleItems(User * u) {
 #endif
                             }
                             if(MSG == NULL) {
-								string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+
+								string sDbgstr = "[BUF] "+string(u->sNick,u->ui8NickLen)+" ("+string(u->sIP, u->ui8IpLen)+") Cannot (re)allocate "+
                                     string((uint64_t)qdicur->iDataLen)+"/"+string((uint64_t)MSGLen)+"/"+string((uint64_t)iAllignLen)+
                                     " bytes of memory in globalqueue::ProcessSingleItems1! "+string(qdicur->sData, qdicur->iDataLen);
 #ifdef _WIN32
@@ -1431,7 +1431,7 @@ void globalqueue::ProcessSingleItems(User * u) {
                             }
                             MSGSize = (uint32_t)(iAllignLen-1);
                         }
-                        int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->Nick);
+                        int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->sNick);
                         MSGLen += iret;
                         CheckSprintf1(iret, MSGLen, MSGSize, "globalqueue::ProcessSingleItems2");
                         memcpy(MSG+MSGLen, qdicur->sData, qdicur->iDataLen);
@@ -1442,8 +1442,8 @@ void globalqueue::ProcessSingleItems(User * u) {
                 }
                 case globalqueue::OPCHAT: { // send OpChat only to allowed users...
                     if(ProfileMan->IsAllowed(u, ProfileManager::ALLOWEDOPCHAT) == true) {
-                        if(MSGSize < MSGLen+qdicur->iDataLen+u->NickLen+13) {
-                            size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->NickLen+13);
+                        if(MSGSize < MSGLen+qdicur->iDataLen+u->ui8NickLen+13) {
+                            size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->ui8NickLen+13);
                             char * oldbuf = MSG;
                             if(MSG == NULL) {
 #ifdef _WIN32
@@ -1459,7 +1459,7 @@ void globalqueue::ProcessSingleItems(User * u) {
 #endif
                             }
                             if(MSG == NULL) {
-								string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+
+								string sDbgstr = "[BUF] "+string(u->sNick,u->ui8NickLen)+" ("+string(u->sIP, u->ui8IpLen)+") Cannot (re)allocate "+
                                     string((uint64_t)qdicur->iDataLen)+"/"+string((uint64_t)MSGLen)+"/"+string((uint64_t)iAllignLen)+
                                     " bytes of memory in globalqueue::ProcessSingleItems2! "+string(qdicur->sData, qdicur->iDataLen);
 #ifdef _WIN32
@@ -1478,7 +1478,7 @@ void globalqueue::ProcessSingleItems(User * u) {
                             }
                             MSGSize = (uint32_t)(iAllignLen-1);
                         }
-                        int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->Nick);
+                        int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->sNick);
                         MSGLen += iret;
                         CheckSprintf1(iret, MSGLen, MSGSize, "globalqueue::ProcessSingleItems3");
                         memcpy(MSG+MSGLen, qdicur->sData, qdicur->iDataLen);
@@ -1506,7 +1506,7 @@ void globalqueue::ProcessSingleItems(User * u) {
 #endif
                             }
                             if(MSG == NULL) {
-								string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+
+								string sDbgstr = "[BUF] "+string(u->sNick,u->ui8NickLen)+" ("+string(u->sIP, u->ui8IpLen)+") Cannot (re)allocate "+
                                     string((uint64_t)qdicur->iDataLen)+"/"+string((uint64_t)MSGLen)+"/"+string((uint64_t)iAllignLen)+
                                     " bytes of memory in globalqueue::ProcessSingleItems3! "+string(qdicur->sData, qdicur->iDataLen);
 #ifdef _WIN32
@@ -1533,8 +1533,8 @@ void globalqueue::ProcessSingleItems(User * u) {
                 }
                 case globalqueue::PM2PROFILE: { // send pm only to given profile...
                     if(u->iProfile == qdicur->iProfile) {
-                        if(MSGSize < MSGLen+qdicur->iDataLen+u->NickLen+13) {
-                            size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->NickLen+13);
+                        if(MSGSize < MSGLen+qdicur->iDataLen+u->ui8NickLen+13) {
+                            size_t iAllignLen = Allign1024(MSGLen+qdicur->iDataLen+u->ui8NickLen+13);
                             char * oldbuf = MSG;
                             if(MSG == NULL) {
 #ifdef _WIN32
@@ -1550,7 +1550,7 @@ void globalqueue::ProcessSingleItems(User * u) {
 #endif
                             }
                             if(MSG == NULL) {
-								string sDbgstr = "[BUF] "+string(u->Nick,u->NickLen)+" ("+string(u->IP, u->ui8IpLen)+") Cannot (re)allocate "+
+								string sDbgstr = "[BUF] "+string(u->sNick,u->ui8NickLen)+" ("+string(u->sIP, u->ui8IpLen)+") Cannot (re)allocate "+
                                     string((uint64_t)qdicur->iDataLen)+"/"+string((uint64_t)MSGLen)+"/"+string((uint64_t)iAllignLen)+
                                     " bytes of memory in globalqueue::ProcessSingleItems4! "+string(qdicur->sData, qdicur->iDataLen);
 #ifdef _WIN32
@@ -1569,7 +1569,7 @@ void globalqueue::ProcessSingleItems(User * u) {
                             }
                             MSGSize = (uint32_t)(iAllignLen-1);
                         }
-                        int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->Nick);
+                        int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->sNick);
                         MSGLen += iret;
                         CheckSprintf1(iret, MSGLen, MSGSize, "globalqueue::ProcessSingleItems4");
                         memcpy(MSG+MSGLen, qdicur->sData, qdicur->iDataLen);

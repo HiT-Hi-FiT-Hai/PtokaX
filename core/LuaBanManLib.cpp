@@ -1193,7 +1193,7 @@ static int Ban(lua_State * L) {
 
     hashBanManager->Ban(u, sReason, sBy, bFull);
 
-    int imsgLen = sprintf(ScriptManager->lua_msg, "[SYS] User %s (%s) banned by script.", u->Nick, u->IP);
+    int imsgLen = sprintf(ScriptManager->lua_msg, "[SYS] User %s (%s) banned by script.", u->sNick, u->sIP);
     if(CheckSprintf(imsgLen, 131072, "Ban") == true) {
         UdpDebug->Broadcast(ScriptManager->lua_msg, imsgLen);
     }
@@ -1298,7 +1298,7 @@ static int BanNick(lua_State * L) {
     User *curUser = hashManager->FindUser(sNick, iNickLen);
     if(curUser != NULL) {
         if(hashBanManager->NickBan(curUser, NULL, sReason, sBy) == true) {
-            int imsgLen = sprintf(ScriptManager->lua_msg, "[SYS] User %s (%s) nickbanned by script.", curUser->Nick, curUser->IP);
+            int imsgLen = sprintf(ScriptManager->lua_msg, "[SYS] User %s (%s) nickbanned by script.", curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 131072, "NickBan") == true) {
                 UdpDebug->Broadcast(ScriptManager->lua_msg, imsgLen);
             }
@@ -1370,7 +1370,7 @@ static int TempBan(lua_State * L) {
 
     hashBanManager->TempBan(u, sReason, sBy, iMinutes, 0, bFull);
 
-    int imsgLen = sprintf(ScriptManager->lua_msg, "[SYS] User %s (%s) tempbanned by script.", u->Nick, u->IP);
+    int imsgLen = sprintf(ScriptManager->lua_msg, "[SYS] User %s (%s) tempbanned by script.", u->sNick, u->sIP);
     if(CheckSprintf(imsgLen, 131072, "TempBan2") == true) {
         UdpDebug->Broadcast(ScriptManager->lua_msg, imsgLen);
     }
@@ -1482,7 +1482,7 @@ static int TempBanNick(lua_State * L) {
     User *curUser = hashManager->FindUser(sNick, iNickLen);
     if(curUser != NULL) {
         if(hashBanManager->NickTempBan(curUser, NULL, sReason, sBy, iMinutes, 0) == true) {
-            int imsgLen = sprintf(ScriptManager->lua_msg, "[SYS] User %s (%s) nickbanned by script.", curUser->Nick, curUser->IP);
+            int imsgLen = sprintf(ScriptManager->lua_msg, "[SYS] User %s (%s) nickbanned by script.", curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 131072, "NickTempBan2") == true) {
                 UdpDebug->Broadcast(ScriptManager->lua_msg, imsgLen);
             }

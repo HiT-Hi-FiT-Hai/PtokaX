@@ -183,8 +183,8 @@ bool hashRegMan::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) 
             }
 
             if(((AddedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
-				colUsers->Add2OpList(AddedUser->Nick, AddedUser->NickLen);
-                globalQ->OpListStore(AddedUser->Nick);
+				colUsers->Add2OpList(AddedUser->sNick, AddedUser->ui8NickLen);
+                globalQ->OpListStore(AddedUser->sNick);
 
                 if(bAllowedOpChat != ProfileMan->IsAllowed(AddedUser, ProfileManager::ALLOWEDOPCHAT)) {
 					if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true &&
@@ -293,11 +293,11 @@ void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui
             ProfileMan->IsAllowed(ChangedUser, ProfileManager::HASKEYICON)) {
             if(ProfileMan->IsAllowed(ChangedUser, ProfileManager::HASKEYICON) == true) {
                 ChangedUser->ui32BoolBits |= User::BIT_OPERATOR;
-                colUsers->Add2OpList(ChangedUser->Nick, ChangedUser->NickLen);
-                globalQ->OpListStore(ChangedUser->Nick);
+                colUsers->Add2OpList(ChangedUser->sNick, ChangedUser->ui8NickLen);
+                globalQ->OpListStore(ChangedUser->sNick);
             } else {
                 ChangedUser->ui32BoolBits &= ~User::BIT_OPERATOR;
-                colUsers->DelFromOpList(ChangedUser->Nick);
+                colUsers->DelFromOpList(ChangedUser->sNick);
             }
         }
 
@@ -350,7 +350,7 @@ void hashRegMan::Delete(RegUser * pReg, const bool &/*bFromGui = false*/) {
         if(pRemovedUser != NULL) {
             pRemovedUser->iProfile = -1;
             if(((pRemovedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
-                colUsers->DelFromOpList(pRemovedUser->Nick);
+                colUsers->DelFromOpList(pRemovedUser->sNick);
                 pRemovedUser->ui32BoolBits &= ~User::BIT_OPERATOR;
 
                 if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true && (SettingManager->bBools[SETBOOL_REG_BOT] == false || SettingManager->bBotsSameNick == false)) {
@@ -461,9 +461,9 @@ RegUser* hashRegMan::Find(User * u) {
         next = cur->hashtablenext;
 
 #ifdef _WIN32
-		if(cur->ui32Hash == u->ui32NickHash && stricmp(cur->sNick, u->Nick) == 0) {
+		if(cur->ui32Hash == u->ui32NickHash && stricmp(cur->sNick, u->sNick) == 0) {
 #else
-		if(cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->sNick, u->Nick) == 0) {
+		if(cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->sNick, u->sNick) == 0) {
 #endif
             return cur;
         }
