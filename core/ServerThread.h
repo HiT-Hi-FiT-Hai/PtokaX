@@ -25,9 +25,12 @@
 class ServerThread {
 private:
     struct AntiConFlood {
+        uint8_t ui128IpHash[16];
+
         uint64_t Time;
-        uint32_t addr;
+
         AntiConFlood *prev, *next;
+
         int16_t hits;
     };
 
@@ -69,9 +72,9 @@ public:
 	void WaitFor();
 	bool Listen(const uint16_t &port, bool bSilent = false);
 #ifdef _WIN32
-	bool isFlooder(const SOCKET &s, const sockaddr_in /*sockaddr_in6*/ &addr, const int &sin_len);
+	bool isFlooder(const SOCKET &s, const sockaddr_storage &addr);
 #else
-	bool isFlooder(const int &s, const sockaddr_in &addr, const socklen_t &sin_len);
+	bool isFlooder(const int &s, const sockaddr_storage &addr);
 #endif
 	void RemoveConFlood(AntiConFlood * cur);
 	void ResumeSck();

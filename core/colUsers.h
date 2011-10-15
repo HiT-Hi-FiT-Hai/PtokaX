@@ -33,9 +33,10 @@ class classUsers {
 private:
     struct RecTime {
         uint64_t ui64DisConnTick;
-        uint32_t ui32NickHash, ui32IpHash;
+        uint32_t ui32NickHash;
         RecTime *prev, *next;
         char * sNick;
+        uint8_t ui128IpHash[16];
     };
 
     uint64_t iChatMsgsTick, iChatLockFromTick;

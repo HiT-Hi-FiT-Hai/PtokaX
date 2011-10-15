@@ -431,7 +431,6 @@ void classUsers::DisconnectAll() {
 #ifdef _WIN32
         ::Sleep(50);
 #else
-//		usleep(50000);
         nanosleep(&sleeptime, NULL);
 #endif
     }
@@ -966,7 +965,8 @@ void classUsers::Add2RecTimes(User * curUser) {
 
 	cur->ui64DisConnTick = ui64ActualTick-(acc_time-curUser->LoginTime);
     cur->ui32NickHash = curUser->ui32NickHash;
-    cur->ui32IpHash = curUser->ui32IpHash;
+
+    memcpy(cur->ui128IpHash, curUser->ui128IpHash, 16);
 
     cur->prev = NULL;
     cur->next = RecTimeList;
@@ -1018,7 +1018,7 @@ bool classUsers::CheckRecTime(User * curUser) {
             continue;
         }
 
-        if(cur->ui32NickHash == curUser->ui32NickHash && cur->ui32IpHash == curUser->ui32IpHash &&
+        if(cur->ui32NickHash == curUser->ui32NickHash && memcmp(cur->ui128IpHash, curUser->ui128IpHash, 16) == 0 &&
 #ifdef _WIN32
             stricmp(cur->sNick, curUser->sNick) == 0) {
             int imsgLen = sprintf(msg, "<%s> %s %I64d %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 

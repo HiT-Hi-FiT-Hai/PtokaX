@@ -56,17 +56,17 @@ cDcCommands *DcCommands = NULL;
 //---------------------------------------------------------------------------
 
 struct PassBf {
-	uint32_t ui32Hash;
 	int iCount;
 	PassBf *prev, *next;
+	uint8_t ui128IpHash[16];
 
-	PassBf(uint32_t hash);
+	PassBf(const uint8_t * ui128Hash);
 	~PassBf(void) { };
 };
 //---------------------------------------------------------------------------
 
-PassBf::PassBf(uint32_t hash) {
-    ui32Hash = hash;
+PassBf::PassBf(const uint8_t * ui128Hash) {
+	memcpy(ui128IpHash, ui128Hash, 16);
     iCount = 1;
     prev = NULL;
     next = NULL;
@@ -124,8 +124,8 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
         return;
     }
 
-    static const uint32_t ui32ulti = ((uint32_t *)"ulti")[0];
-    static const uint32_t ui32ick = ((uint32_t *)"ick ")[0];
+    static const uint32_t ui32ulti = *((uint32_t *)"ulti");
+    static const uint32_t ui32ick = *((uint32_t *)"ick ");
 
     switch(curUser->ui8State) {
         case User::STATE_KEY_OR_SUP: {
@@ -134,9 +134,12 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                     iStatCmdSupports++;
                     Supports(curUser, sData, iLen);
                     return;
-                } else if(((uint32_t *)(sData+1))[0] == ((uint32_t *)"Key ")[0]) {
+                } else if(*((uint32_t *)(sData+1)) == *((uint32_t *)"Key ")) {
 					iStatCmdKey++;
                     Key(curUser, sData, iLen);
+                    return;
+                } else if(memcmp(sData+1, "MyNick ", 7) == 0) {
+                    MyNick(curUser, sData, iLen);
                     return;
                 }
             }
@@ -238,7 +241,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true)
                                 return;
 
-                            curUser->ui8State = User::STATE_ADDME;
+                            UserAddMeOrIPv4Check(curUser);
 
                             return;
                         }
@@ -349,6 +352,8 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 
                                 curUser->ui8State = User::STATE_ADDME;
 
+                                UserAddMeOrIPv4Check(curUser);
+
                                 return;
                             } else if(memcmp(sData+3, "Pass ", 5) == 0) {
                                 iStatCmdMyPass++;
@@ -424,13 +429,14 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                         ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true)
                         return;
                     
-                    curUser->ui8State = User::STATE_ADDME;
+                    UserAddMeOrIPv4Check(curUser);
 
                     return;
                 }
             }
             break;
         }
+        case User::STATE_IPV4_CHECK:
         case User::STATE_ADDME:
         case User::STATE_ADDME_1LOOP: {
             if(sData[0] == '$') {
@@ -531,7 +537,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 Search(curUser, sData, iLen, bCheck, false);
                             }
                             return;
-                        } else if(((uint16_t *)(sData+2))[0] == ((uint16_t *)"R ")[0]) {
+                        } else if(*((uint16_t *)(sData+2)) == *((uint16_t *)"R ")) {
                             iStatCmdSR++;
                             SR(curUser, sData, iLen, bCheck);
                             return;
@@ -610,7 +616,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 curUser->ui32BoolBits |= User::BIT_PRCSD_MYINFO;
                             }
                             return;
-                        } else if(((uint32_t *)(sData+2))[0] == ui32ulti) {
+                        } else if(*((uint32_t *)(sData+2)) == ui32ulti) {
                             if(memcmp(sData+6, "Search ", 7) == 0) {
                                 iStatCmdMultiSearch++;
                                 if(SearchDeflood(curUser, sData, iLen, bCheck, true) == true) {
@@ -645,7 +651,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                             return;
                         }
                     case 'K':
-                        if(((uint32_t *)(sData+2))[0] == ui32ick) {
+                        if(*((uint32_t *)(sData+2)) == ui32ick) {
 							iStatCmdKick++;
                             Kick(curUser, sData, iLen);
                             return;
@@ -719,7 +725,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                     }
                     break;
                 case 'G': {
-                    if(((uint16_t *)(sData+2))[0] == ((uint16_t *)"et")[0]) {
+                    if(*((uint16_t *)(sData+2)) == *((uint16_t *)"et")) {
                         if(memcmp(sData+4, "INFO ", 5) == 0) {
                             iStatCmdGetInfo++;
                             #ifdef _DBG
@@ -734,7 +740,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                             }
                             UserClose(curUser);
                             return;
-                        } else if(iLen == 13 && ((uint64_t *)(sData+4))[0] == ((uint64_t *)"NickList")[0]) {
+                        } else if(iLen == 13 && *((uint64_t *)(sData+4)) == *((uint64_t *)"NickList")) {
                             iStatCmdGetNickList++;
                             #ifdef _DBG
                                 int iret = sprintf(msg, "%s (%s) bad state in case $GetNickList: %d", curUser->Nick, curUser->IP, curUser->iState);
@@ -767,7 +773,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                         }
                         UserClose(curUser);
                         return;
-                    } else if(((uint32_t *)(sData+2))[0] == ui32ick) {
+                    } else if(*((uint32_t *)(sData+2)) == ui32ick) {
                         iStatCmdKick++;
                         #ifdef _DBG
                             int iret = sprintf(msg, "%s (%s) bad state in case $Kick: %d", curUser->Nick, curUser->IP, curUser->iState);
@@ -784,7 +790,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                     }
                     break;
                 case 'M':
-                    if(((uint32_t *)(sData+2))[0] == ui32ulti) {
+                    if(*((uint32_t *)(sData+2)) == ui32ulti) {
                         if(memcmp(sData+6, "ConnectToMe ", 12) == 0) {
                             iStatCmdMultiConnectToMe++;
                             #ifdef _DBG
@@ -1160,7 +1166,7 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
 
     // IP check
     if(bCheck == true && SettingManager->bBools[SETBOOL_CHECK_IP_IN_COMMANDS] == true && ProfileMan->IsAllowed(curUser, ProfileManager::NOIPCHECK) == false) {
-        if(towho[1+curUser->ui8IpLen] != ':' || strncmp(towho+1, curUser->sIP, curUser->ui8IpLen) != 0) {
+        if(CheckIP(curUser, towho+1) == false) {
             SendIncorrectIPMsg(curUser, towho+1, true);
 
             if(iLen < 768) {
@@ -1860,7 +1866,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
 
     // send search from actives to all, from passives to actives only
     // PPK ... optimization ;o)
-    if(bMulti == false && ((uint32_t *)(sData+iAfterCmd))[0] == ((uint32_t *)"Hub:")[0]) {
+    if(bMulti == false && *((uint32_t *)(sData+iAfterCmd)) == *((uint32_t *)"Hub:")) {
         curUser->ui32BoolBits &= ~User::BIT_ACTIVE;
         // PPK ... check nick !!!
         if((sData[iAfterCmd+4+curUser->ui8NickLen] != ' ') ||
@@ -2005,7 +2011,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
         curUser->ui32BoolBits |= User::BIT_ACTIVE;
         // IP check
         if(bCheck == true && SettingManager->bBools[SETBOOL_CHECK_IP_IN_COMMANDS] == true && ProfileMan->IsAllowed(curUser, ProfileManager::NOIPCHECK) == false) {
-            if(sData[iAfterCmd+curUser->ui8IpLen] != ':' || strncmp(sData+iAfterCmd, curUser->sIP, curUser->ui8IpLen) != 0) {
+            if(CheckIP(curUser, sData+iAfterCmd) == false) {
                 SendIncorrectIPMsg(curUser, sData+iAfterCmd, false);
 
                 if(iLen < 768) {
@@ -2345,9 +2351,9 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
     
         if(SettingManager->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] != 0) {
             // brute force password protection
-			PassBf * PassBfItem = Find(curUser->ui32IpHash);
+			PassBf * PassBfItem = Find(curUser->ui128IpHash);
             if(PassBfItem == NULL) {
-                PassBfItem = new PassBf(curUser->ui32IpHash);
+                PassBfItem = new PassBf(curUser->ui128IpHash);
                 if(PassBfItem == NULL) {
                 	string sDbgstr = "[BUF] Cannot allocate new PassBfItem in cDcCommands::MyPass!";
 #ifdef _WIN32
@@ -2365,7 +2371,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
             } else {
                 if(PassBfItem->iCount == 2) {
                     int imsgLen;
-                    BanItem *Ban = hashBanManager->FindFull(curUser->ui32IpHash);
+                    BanItem *Ban = hashBanManager->FindFull(curUser->ui128IpHash);
                     if(Ban == NULL || ((Ban->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false) {
                         int iret = sprintf(msg, "3x bad password for nick %s", curUser->sNick);
                         if(CheckSprintf(iret, 1024, "cDcCommands::MyPass4") == false) {
@@ -2498,7 +2504,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
         if(Reg != NULL) {
             Reg->iBadPassCount = 0;
         }
-        PassBf * PassBfItem = Find(curUser->ui32IpHash);
+        PassBf * PassBfItem = Find(curUser->ui128IpHash);
         if(PassBfItem != NULL) {
             Remove(PassBfItem);
         }
@@ -2567,7 +2573,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
             return;
         } else {
             if(((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == false) {
-                curUser->ui8State = User::STATE_ADDME;
+                UserAddMeOrIPv4Check(curUser);
             }
         }
     }     
@@ -3244,7 +3250,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
                 break;
             case 'Q': {
                 if(((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == false &&
-                    iDataLen == 9 && ((uint64_t *)(sSupport+1))[0] == ((uint64_t *)"uickList")[0]) {
+                    iDataLen == 9 && *((uint64_t *)(sSupport+1)) == *((uint64_t *)"uickList")) {
                     curUser->ui32BoolBits |= User::BIT_SUPPORT_QUICKLIST;
                     // PPK ... in fact NoHello is only not fully implemented Quicklist (without diferent login sequency)
                     // That's why i overide NoHello here and use bQuicklist only for login, on other places is same as NoHello ;)
@@ -3291,10 +3297,20 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
             }
             case 'Z': {
                 if(((curUser->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false &&
-                    ((iDataLen == 5 && ((uint32_t *)(sSupport+1))[0] == ((uint32_t *)"Pipe")[0]) ||
+                    ((iDataLen == 5 && *((uint32_t *)(sSupport+1)) == *((uint32_t *)"Pipe")) ||
                     (iDataLen == 6 && memcmp(sSupport+1, "Pipe0", 5) == 0))) {
                     curUser->ui32BoolBits |= User::BIT_SUPPORT_ZPIPE;
                     iStatZPipe++;
+                }
+                break;
+            }
+            case 'I': {
+                if(iDataLen == 4) {
+                    if(*((uint32_t *)sSupport) == *((uint32_t *)"IP64")) {
+                        curUser->ui32BoolBits |= User::BIT_SUPPORT_IP64;
+                    } else if(*((uint32_t *)sSupport) == *((uint32_t *)"IPv4")) {
+                        curUser->ui32BoolBits |= User::BIT_SUPPORT_IPV4;
+                    }
                 }
                 break;
             }
@@ -4217,7 +4233,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
                 tmp = msg;
             }
 
-            User *nxt = hashManager->FindUser(curUser->ui32IpHash);
+            User *nxt = hashManager->FindUser(curUser->ui128IpHash);
 
             while(nxt != NULL) {
         		User *cur = nxt;
@@ -4244,7 +4260,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
         return false;
     }
 
-    curUser->ui8Country = IP2Country->Find(curUser->ui32IpHash);
+    curUser->ui8Country = IP2Country->Find(curUser->ui128IpHash);
 
     // check for nick in userlist. If taken, check for dupe's socket state
     // if still active, send $ValidateDenide and close()
@@ -4334,13 +4350,13 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
 }
 //---------------------------------------------------------------------------
 
-PassBf * cDcCommands::Find(const uint32_t &hash) {
+PassBf * cDcCommands::Find(const uint8_t * ui128IpHash) {
 	PassBf *next = PasswdBfCheck;
 
     while(next != NULL) {
         PassBf *cur = next;
         next = cur->next;
-		if(cur->ui32Hash == hash) {
+		if(memcmp(cur->ui128IpHash, ui128IpHash, 16) == 0) {
             return cur;
         }
     }
@@ -4384,22 +4400,35 @@ void cDcCommands::ProcessCmds(User * curUser) {
                 }*/
                 
                 // PPK ... yes yes yes finally QuickList support in PtokaX !!! ;))
-                if(((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == true) {
+                if((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) {
                     memcpy(msg+iSupportsLen, " QuickList", 10);
                     iSupportsLen += 10;
-                } else if(((curUser->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) == true) { // PPK ... Hmmm Client not really need it, but for now send it ;-)
+                } else if((curUser->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) {
+                    // PPK ... Hmmm Client not really need it, but for now send it ;-)
                     memcpy(msg+iSupportsLen, " NoHello", 8);
                     iSupportsLen += 8;
-                } else if(((curUser->ui32BoolBits & User::BIT_SUPPORT_NOGETINFO) == User::BIT_SUPPORT_NOGETINFO) == true) { // PPK ... if client support NoHello automatically supports NoGetINFO another badwith wasting !
+                } else if((curUser->ui32BoolBits & User::BIT_SUPPORT_NOGETINFO) == User::BIT_SUPPORT_NOGETINFO) {
+                    // PPK ... if client support NoHello automatically supports NoGetINFO another badwith wasting !
                     memcpy(msg+iSupportsLen, " NoGetINFO", 10);
                     iSupportsLen += 10;
                 }
             
-                if(((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true) {
+                if((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) {
                     memcpy(msg+iSupportsLen, " BotINFO HubINFO", 16);
                     iSupportsLen += 16;
                 }
-            
+
+                if((curUser->ui32BoolBits & User::BIT_SUPPORT_IP64) == User::BIT_SUPPORT_IP64) {
+                    memcpy(msg+iSupportsLen, " IP64", 5);
+                    iSupportsLen += 5;
+                }
+
+                if(((curUser->ui32BoolBits & User::BIT_SUPPORT_IPV4) == User::BIT_SUPPORT_IPV4) && ((curUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6)) {
+                    // Only client connected with IPv6 sending this, so only that client is getting reply
+                    memcpy(msg+iSupportsLen, " IPv4", 5);
+                    iSupportsLen += 5;
+                }
+
                 memcpy(msg+iSupportsLen, "|\0", 2);
                 UserSendCharDelayed(curUser, msg, iSupportsLen+1);
                 break;
@@ -4527,22 +4556,59 @@ void cDcCommands::ProcessCmds(User * curUser) {
 }
 //---------------------------------------------------------------------------
 
+bool cDcCommands::CheckIP(const User * curUser, const char * sIP) {
+    if((curUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
+        if(sIP[0] == '[' && sIP[1+curUser->ui8IpLen] == ']' && sIP[2+curUser->ui8IpLen] == ':' && strncmp(sIP+1, curUser->sIP, curUser->ui8IpLen) == 0) {
+            return true;
+        } else if(((curUser->ui32BoolBits & User::BIT_IPV4) == User::BIT_IPV4) && sIP[curUser->ui8IPv4Len] == ':' && strncmp(sIP, curUser->sIPv4, curUser->ui8IPv4Len) == 0) {
+            return true;
+        }
+    } else if(sIP[curUser->ui8IpLen] == ':' && strncmp(sIP, curUser->sIP, curUser->ui8IpLen) == 0) {
+        return true;
+    }
+
+    return false;
+}
+//---------------------------------------------------------------------------
+
 void cDcCommands::SendIncorrectIPMsg(User * curUser, char * sBadIP, const bool &bCTM) {
 	int imsgLen = sprintf(msg, "<%s> %s ", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOUR_CLIENT_SEND_INCORRECT_IP]);
 	if(CheckSprintf(imsgLen, 1024, "SendIncorrectIPMsg1") == false) {
 		return;
 	}
 
-	for(uint8_t ui8i = 0; ui8i < 15; ui8i++) {
-		if(isdigit(sBadIP[ui8i]) == false && sBadIP[ui8i] != '.') {
-            if(ui8i == 0) {
-                imsgLen--;
-            }
-            break;
-        }
+    if((curUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
+        uint8_t ui8i = 1;
+        while(sBadIP[ui8i] != '\0') {
+            if(isxdigit(sBadIP[ui8i]) == false && sBadIP[ui8i] != ':') {
+                if(ui8i == 0) {
+                    imsgLen--;
+                }
 
-		msg[imsgLen] = sBadIP[ui8i];
-        imsgLen++;    
+                break;
+            }
+
+            msg[imsgLen] = sBadIP[ui8i];
+            imsgLen++;
+
+            ui8i++;
+        }
+    } else {
+        uint8_t ui8i = 0;
+        while(sBadIP[ui8i] != '\0') {
+            if(isdigit(sBadIP[ui8i]) == false && sBadIP[ui8i] != '.') {
+                if(ui8i == 0) {
+                    imsgLen--;
+                }
+
+                break;
+            }
+
+            msg[imsgLen] = sBadIP[ui8i];
+            imsgLen++;
+
+            ui8i++;
+        }
     }
 
 	int iret = sprintf(msg+imsgLen, " %s %s.|", 
@@ -4552,5 +4618,53 @@ void cDcCommands::SendIncorrectIPMsg(User * curUser, char * sBadIP, const bool &
 	if(CheckSprintf1(iret, imsgLen, 1024, "SendIncorrectIPMsg2") == true) {
 		UserSendCharDelayed(curUser, msg, imsgLen);
     }
+}
+//---------------------------------------------------------------------------
+
+void cDcCommands::MyNick(User * pUser, char * sData, const uint32_t &ui32Len) {
+    if((pUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
+        int imsgLen = sprintf(msg, "[SYS] IPv6 $MyNick (%s) from %s (%s) - user closed.", sData, pUser->sNick, pUser->sIP);
+        if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyNick") == true) {
+            UdpDebug->Broadcast(msg, imsgLen);
+        }
+        UserClose(pUser);
+        return;
+    }
+
+    if(ui32Len < 10) {
+        int imsgLen = sprintf(msg, "[SYS] Short $MyNick (%s) from %s (%s) - user closed.", sData, pUser->sNick, pUser->sIP);
+        if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyNick1") == true) {
+            UdpDebug->Broadcast(msg, imsgLen);
+        }
+        UserClose(pUser);
+        return;
+    }
+
+    sData[ui32Len-1] = '\0'; // cutoff pipe
+
+    User * pOtherUser = hashManager->FindUser(sData+8, ui32Len-9);
+
+    if(pOtherUser == NULL || pOtherUser->ui8State != User::STATE_IPV4_CHECK) {
+        int imsgLen = sprintf(msg, "[SYS] Bad $MyNick (%s) from %s (%s) - user closed.", sData, pUser->sNick, pUser->sIP);
+        if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyNick2") == true) {
+            UdpDebug->Broadcast(msg, imsgLen);
+        }
+        UserClose(pUser);
+        return;
+    }
+
+    strcpy(pOtherUser->sIPv4, pUser->sIP);
+    pOtherUser->ui8IPv4Len = pUser->ui8IpLen;
+    pOtherUser->ui32BoolBits |= User::BIT_IPV4;
+
+    pOtherUser->ui8State = User::STATE_ADDME;
+
+    UserClose(pUser);
+/*
+	int imsgLen = sprintf(msg, "<%s> Found IPv4: %s =)|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], pOtherUser->sIPv4);
+	if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyNick3") == true) {
+        UserSendCharDelayed(pOtherUser, msg, imsgLen);
+	}
+*/
 }
 //---------------------------------------------------------------------------

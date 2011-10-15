@@ -805,16 +805,17 @@ static int GetUsers(lua_State * L) {
         return 1;
     }
 
-    uint32_t ui32Hash = 0;
+    uint8_t ui128Hash[16];
+    memset(ui128Hash, 0, 16);
 
-    if(iLen == 0 || HashIP(sIP, iLen, ui32Hash) == false) {
+    if(iLen == 0 || HashIP(sIP, ui128Hash) == false) {
         lua_settop(L, 0);
-
         lua_pushnil(L);
+
         return 1;
     }
 
-    User *next = hashManager->FindUser(ui32Hash);
+    User *next = hashManager->FindUser(ui128Hash);
 
     lua_settop(L, 0);
 
@@ -2070,9 +2071,9 @@ static int SetUserInfo(lua_State * L) {
         return 0;
     }
 
-    User * u = ScriptGetUser(L, 4, "SetUserInfo");
+    User * pUser = ScriptGetUser(L, 4, "SetUserInfo");
 
-    if(u == NULL) {
+    if(pUser == NULL) {
 		lua_settop(L, 0);
         return 0;
     }
@@ -2086,16 +2087,8 @@ static int SetUserInfo(lua_State * L) {
 
     bool bPermanent = lua_toboolean(L, 4) == 0 ? false : true;
 
-    static const int64_t i64Bits[] = { User::INFOBIT_DESCRIPTION_SHORT_PERM, User::INFOBIT_DESCRIPTION_LONG_PERM, User::INFOBIT_TAG_SHORT_PERM, User::INFOBIT_TAG_LONG_PERM,
-        User::INFOBIT_CONNECTION_SHORT_PERM, User::INFOBIT_CONNECTION_LONG_PERM, User::INFOBIT_EMAIL_SHORT_PERM, User::INFOBIT_EMAIL_LONG_PERM,
-        User::INFOBIT_SHARE_SHORT_PERM, User::INFOBIT_SHARE_LONG_PERM };
     static const char * sMyInfoPartsNames[] = { "sChangedDescriptionShort", "sChangedDescriptionLong", "sChangedTagShort", "sChangedTagLong",
         "sChangedConnectionShort", "sChangedConnectionLong", "sChangedEmailShort", "sChangedEmailLong" };
-
-    char ** sMyInfoParts[] = { &u->sChangedDescriptionShort, &u->sChangedDescriptionLong, &u->sChangedTagShort, &u->sChangedTagLong,
-        &u->sChangedConnectionShort, &u->sChangedConnectionLong, &u->sChangedEmailShort, &u->sChangedEmailLong };
-    uint8_t * ui8MyInfoPartsLen[] = { &u->ui8ChangedDescriptionShortLen, &u->ui8ChangedDescriptionLongLen, &u->ui8ChangedTagShortLen, &u->ui8ChangedTagLongLen,
-        &u->ui8ChangedConnectionShortLen, &u->ui8ChangedConnectionLongLen, &u->ui8ChangedEmailShortLen, &u->ui8ChangedEmailLongLen };
 
     if(lua_type(L, 3) == LUA_TSTRING) {
         if(iDataToChange > 7) {
@@ -2111,57 +2104,151 @@ static int SetUserInfo(lua_State * L) {
             return 0;
         }
 
-        if(*sMyInfoParts[iDataToChange] != NULL) {
-            UserFreeInfo(*sMyInfoParts[iDataToChange], sMyInfoPartsNames[iDataToChange]);
-            *sMyInfoParts[iDataToChange] = NULL;
-            *ui8MyInfoPartsLen[iDataToChange] = 0;
-        }
-
-        if(iDataLen > 0) {
-#ifdef _WIN32
-            *sMyInfoParts[iDataToChange] = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iDataLen+1);
-#else
-            *sMyInfoParts[iDataToChange] = (char *) malloc(iDataLen+1);
-#endif
-            if(*sMyInfoParts[iDataToChange] == NULL) {
-                string sDbgstr = "[BUF] Cannot allocate "+string(iDataLen+1)+
-                    " bytes of memory in SetUserInfo!";
-#ifdef _WIN32
-                sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-                AppendSpecialLog(sDbgstr);
-                lua_settop(L, 0);
-                return 0;
-            }
-
-            memcpy(*sMyInfoParts[iDataToChange], sData, iDataLen);
-            (*sMyInfoParts[iDataToChange])[iDataLen] = '\0';
-            *ui8MyInfoPartsLen[iDataToChange] = (uint8_t)iDataLen;
-        } else {
-            *ui8MyInfoPartsLen[iDataToChange] = 1;
-        }
-
-        if(bPermanent == true) {
-            u->ui32InfoBits |= i64Bits[iDataToChange];
-        } else {
-            u->ui32InfoBits &= ~i64Bits[iDataToChange];
+        switch(iDataToChange) {
+            case 0:
+                pUser->sChangedDescriptionShort = UserSetUserInfo(pUser->sChangedDescriptionShort, pUser->ui8ChangedDescriptionShortLen, sData, iDataLen, sMyInfoPartsNames[iDataToChange]);
+                if(bPermanent == true) {
+                    pUser->ui32InfoBits |= User::INFOBIT_DESCRIPTION_SHORT_PERM;
+                } else {
+                    pUser->ui32InfoBits &= ~User::INFOBIT_DESCRIPTION_SHORT_PERM;
+                }
+                break;
+            case 1:
+                pUser->sChangedDescriptionLong = UserSetUserInfo(pUser->sChangedDescriptionLong, pUser->ui8ChangedDescriptionLongLen, sData, iDataLen, sMyInfoPartsNames[iDataToChange]);
+                if(bPermanent == true) {
+                    pUser->ui32InfoBits |= User::INFOBIT_DESCRIPTION_LONG_PERM;
+                } else {
+                    pUser->ui32InfoBits &= ~User::INFOBIT_DESCRIPTION_LONG_PERM;
+                }
+                break;
+            case 2:
+                pUser->sChangedTagShort = UserSetUserInfo(pUser->sChangedTagShort, pUser->ui8ChangedTagShortLen, sData, iDataLen, sMyInfoPartsNames[iDataToChange]);
+                if(bPermanent == true) {
+                    pUser->ui32InfoBits |= User::INFOBIT_TAG_SHORT_PERM;
+                } else {
+                    pUser->ui32InfoBits &= ~User::INFOBIT_TAG_SHORT_PERM;
+                }
+                break;
+            case 3:
+                pUser->sChangedTagLong = UserSetUserInfo(pUser->sChangedTagLong, pUser->ui8ChangedTagLongLen, sData, iDataLen, sMyInfoPartsNames[iDataToChange]);
+                if(bPermanent == true) {
+                    pUser->ui32InfoBits |= User::INFOBIT_TAG_LONG_PERM;
+                } else {
+                    pUser->ui32InfoBits &= ~User::INFOBIT_TAG_LONG_PERM;
+                }
+                break;
+            case 4:
+                pUser->sChangedConnectionShort = UserSetUserInfo(pUser->sChangedConnectionShort, pUser->ui8ChangedConnectionShortLen, sData, iDataLen, sMyInfoPartsNames[iDataToChange]);
+                if(bPermanent == true) {
+                    pUser->ui32InfoBits |= User::INFOBIT_CONNECTION_SHORT_PERM;
+                } else {
+                    pUser->ui32InfoBits &= ~User::INFOBIT_CONNECTION_SHORT_PERM;
+                }
+                break;
+            case 5:
+                pUser->sChangedConnectionLong = UserSetUserInfo(pUser->sChangedConnectionLong, pUser->ui8ChangedConnectionLongLen, sData, iDataLen, sMyInfoPartsNames[iDataToChange]);
+                if(bPermanent == true) {
+                    pUser->ui32InfoBits |= User::INFOBIT_CONNECTION_LONG_PERM;
+                } else {
+                    pUser->ui32InfoBits &= ~User::INFOBIT_CONNECTION_LONG_PERM;
+                }
+                break;
+            case 6:
+                pUser->sChangedEmailShort = UserSetUserInfo(pUser->sChangedEmailShort, pUser->ui8ChangedEmailShortLen, sData, iDataLen, sMyInfoPartsNames[iDataToChange]);
+                if(bPermanent == true) {
+                    pUser->ui32InfoBits |= User::INFOBIT_EMAIL_SHORT_PERM;
+                } else {
+                    pUser->ui32InfoBits &= ~User::INFOBIT_EMAIL_SHORT_PERM;
+                }
+                break;
+            case 7:
+                pUser->sChangedEmailLong = UserSetUserInfo(pUser->sChangedEmailLong, pUser->ui8ChangedEmailLongLen, sData, iDataLen, sMyInfoPartsNames[iDataToChange]);
+                if(bPermanent == true) {
+                    pUser->ui32InfoBits |= User::INFOBIT_EMAIL_LONG_PERM;
+                } else {
+                    pUser->ui32InfoBits &= ~User::INFOBIT_EMAIL_LONG_PERM;
+                }
+                break;
+            default:
+                break;
         }
     } else if(lua_type(L, 3) == LUA_TNIL) {
-        if(iDataToChange > 7) {
-            if(iDataToChange == 8) {
-                u->ui64ChangedSharedSizeShort = u->ui64SharedSize;
-            } else if(iDataToChange == 9) {
-                u->ui64ChangedSharedSizeLong = u->ui64SharedSize;
-            }
-        } else {
-            if(*sMyInfoParts[iDataToChange] != NULL) {
-                UserFreeInfo(*sMyInfoParts[iDataToChange], sMyInfoPartsNames[iDataToChange]);
-                *sMyInfoParts[iDataToChange] = NULL;
-                *ui8MyInfoPartsLen[iDataToChange] = 0;
-            }
+        switch(iDataToChange) {
+            case 0:
+                if(pUser->sChangedDescriptionShort != NULL) {
+                    UserFreeInfo(pUser->sChangedDescriptionShort, sMyInfoPartsNames[iDataToChange]);
+                    pUser->sChangedDescriptionShort = NULL;
+                    pUser->ui8ChangedDescriptionShortLen = 0;
+                }
+                pUser->ui32InfoBits &= ~User::INFOBIT_DESCRIPTION_SHORT_PERM;
+                break;
+            case 1:
+                if(pUser->sChangedDescriptionLong != NULL) {
+                    UserFreeInfo(pUser->sChangedDescriptionLong, sMyInfoPartsNames[iDataToChange]);
+                    pUser->sChangedDescriptionLong = NULL;
+                    pUser->ui8ChangedDescriptionLongLen = 0;
+                }
+                pUser->ui32InfoBits &= ~User::INFOBIT_DESCRIPTION_LONG_PERM;
+                break;
+            case 2:
+                if(pUser->sChangedTagShort != NULL) {
+                    UserFreeInfo(pUser->sChangedTagShort, sMyInfoPartsNames[iDataToChange]);
+                    pUser->sChangedTagShort = NULL;
+                    pUser->ui8ChangedTagShortLen = 0;
+                }
+                pUser->ui32InfoBits &= ~User::INFOBIT_TAG_SHORT_PERM;
+                break;
+            case 3:
+                if(pUser->sChangedTagLong != NULL) {
+                    UserFreeInfo(pUser->sChangedTagLong, sMyInfoPartsNames[iDataToChange]);
+                    pUser->sChangedTagLong = NULL;
+                    pUser->ui8ChangedTagLongLen = 0;
+                }
+                pUser->ui32InfoBits &= ~User::INFOBIT_TAG_LONG_PERM;
+                break;
+            case 4:
+                if(pUser->sChangedConnectionShort != NULL) {
+                    UserFreeInfo(pUser->sChangedConnectionShort, sMyInfoPartsNames[iDataToChange]);
+                    pUser->sChangedConnectionShort = NULL;
+                    pUser->ui8ChangedConnectionShortLen = 0;
+                }
+                pUser->ui32InfoBits &= ~User::INFOBIT_CONNECTION_SHORT_PERM;
+                break;
+            case 5:
+                if(pUser->sChangedConnectionLong != NULL) {
+                    UserFreeInfo(pUser->sChangedConnectionLong, sMyInfoPartsNames[iDataToChange]);
+                    pUser->sChangedConnectionLong = NULL;
+                    pUser->ui8ChangedConnectionLongLen = 0;
+                }
+                pUser->ui32InfoBits &= ~User::INFOBIT_CONNECTION_LONG_PERM;
+                break;
+            case 6:
+                if(pUser->sChangedEmailShort != NULL) {
+                    UserFreeInfo(pUser->sChangedEmailShort, sMyInfoPartsNames[iDataToChange]);
+                    pUser->sChangedEmailShort = NULL;
+                    pUser->ui8ChangedEmailShortLen = 0;
+                }
+                pUser->ui32InfoBits &= ~User::INFOBIT_EMAIL_SHORT_PERM;
+                break;
+            case 7:
+                if(pUser->sChangedEmailLong != NULL) {
+                    UserFreeInfo(pUser->sChangedEmailLong, sMyInfoPartsNames[iDataToChange]);
+                    pUser->sChangedEmailLong = NULL;
+                    pUser->ui8ChangedEmailLongLen = 0;
+                }
+                pUser->ui32InfoBits &= ~User::INFOBIT_EMAIL_LONG_PERM;
+                break;
+            case 8:
+                pUser->ui64ChangedSharedSizeShort = pUser->ui64SharedSize;
+                pUser->ui32InfoBits &= ~User::INFOBIT_SHARE_SHORT_PERM;
+                break;
+            case 9:
+                pUser->ui64ChangedSharedSizeLong = pUser->ui64SharedSize;
+                pUser->ui32InfoBits &= ~User::INFOBIT_SHARE_LONG_PERM;
+                break;
+            default:
+                break;
         }
-
-        u->ui32InfoBits &= ~i64Bits[iDataToChange];
     } else if(lua_type(L, 3) == LUA_TNUMBER) {
         if(iDataToChange < 8) {
             lua_settop(L, 0);
@@ -2169,15 +2256,19 @@ static int SetUserInfo(lua_State * L) {
         }
 
         if(iDataToChange == 8) {
-            u->ui64ChangedSharedSizeShort = (uint64_t)lua_tonumber(L, 3);
+            pUser->ui64ChangedSharedSizeShort = (uint64_t)lua_tonumber(L, 3);
+            if(bPermanent == true) {
+                pUser->ui32InfoBits |= User::INFOBIT_SHARE_SHORT_PERM;
+            } else {
+                pUser->ui32InfoBits &= ~User::INFOBIT_SHARE_SHORT_PERM;
+            }
         } else if(iDataToChange == 9) {
-            u->ui64ChangedSharedSizeLong = (uint64_t)lua_tonumber(L, 3);
-        }
-
-        if(bPermanent == true) {
-            u->ui32InfoBits |= i64Bits[iDataToChange];
-        } else {
-            u->ui32InfoBits &= ~i64Bits[iDataToChange];
+            pUser->ui64ChangedSharedSizeLong = (uint64_t)lua_tonumber(L, 3);
+            if(bPermanent == true) {
+                pUser->ui32InfoBits |= User::INFOBIT_SHARE_LONG_PERM;
+            } else {
+                pUser->ui32InfoBits &= ~User::INFOBIT_SHARE_LONG_PERM;
+            }
         }
     } else {
         luaL_error(L, "bad argument #3 to 'SetUserInfo' (string or number or nil expected, got %s)", lua_typename(L, lua_type(L, 3)));

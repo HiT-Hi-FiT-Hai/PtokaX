@@ -29,7 +29,7 @@ private:
 
         event *prev, *next;
 
-        uint32_t ui32Hash;
+        uint8_t ui128IpHash[16];
         uint8_t ui8Id;
     };
 
@@ -59,7 +59,7 @@ public:
     ~eventq();
 
     void AddNormal(uint8_t ui8Id, char * sMsg);
-    void AddThread(uint8_t ui8Id, char * sMsg, const uint32_t &ui32Hash = 0);
+    void AddThread(uint8_t ui8Id, char * sMsg, const sockaddr_storage * sas = NULL);
     void ProcessEvents();
 };
 

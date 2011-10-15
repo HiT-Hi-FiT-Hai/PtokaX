@@ -3699,10 +3699,11 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 
                 sCommand += 11;
 
-                uint32_t hash;
+				uint8_t ui128Hash[16];
+				memset(ui128Hash, 0, 16);
 
                 // check ip
-                if(HashIP(sCommand, dlen-11, hash) == false) {
+                if(HashIP(sCommand, ui128Hash) == false) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
                	    int iret = sprintf(msg+imsgLen, "<%s> *** %s %ccheckipban <%s>. %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -3718,7 +3719,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 time_t acc_time;
                 time(&acc_time);
 
-                BanItem *nxtBan = hashBanManager->FindIP(hash, acc_time);
+                BanItem *nxtBan = hashBanManager->FindIP(ui128Hash, acc_time);
 
                 if(nxtBan != NULL) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
@@ -3807,23 +3808,23 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                         return true;
                     }
 
-					RangeBanItem *nxtRangeBan = hashBanManager->FindRange(hash, acc_time);
+					RangeBanItem *nxtRangeBan = hashBanManager->FindRange(ui128Hash, acc_time);
 
                     while(nxtRangeBan != NULL) {
                         RangeBanItem *curRangeBan = nxtRangeBan;
                         nxtRangeBan = curRangeBan->next;
 
-                        if(curRangeBan->ui32FromIpHash <= hash && curRangeBan->ui32ToIpHash >= hash) {
-                            if(((curRangeBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
-                                // PPK ... check if temban expired
-                                if(acc_time >= curRangeBan->tempbanexpire) {
-									hashBanManager->RemRange(curRangeBan);
-                                    delete curRangeBan;
+						if(((curRangeBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
+							// PPK ... check if temban expired
+							if(acc_time >= curRangeBan->tempbanexpire) {
+								hashBanManager->RemRange(curRangeBan);
+								delete curRangeBan;
 
-									continue;
-                                }
-                            }
+								continue;
+							}
+						}
 
+                        if(memcmp(curRangeBan->ui128FromIpHash, ui128Hash, 16) <= 0 && memcmp(curRangeBan->ui128ToIpHash, ui128Hash, 16) >= 0) {
                             iBanNum++;
                             imsgLen = sprintf(msg, "[%d] %s: %s-%s", iBanNum, LanguageManager->sTexts[LAN_RANGE], curRangeBan->sIpFrom, curRangeBan->sIpTo);
                             if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand282") == false) {
@@ -3868,7 +3869,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 					UserSendTextDelayed(curUser, Bans);
                     return true;
                 } else if(ProfileMan->IsAllowed(curUser, ProfileManager::GET_RANGE_BANS) == true) {
-					RangeBanItem *nxtBan = hashBanManager->FindRange(hash, acc_time);
+					RangeBanItem *nxtBan = hashBanManager->FindRange(ui128Hash, acc_time);
 
                     if(nxtBan != NULL) {
                         int imsgLen = CheckFromPm(curUser, fromPM);
@@ -3886,17 +3887,17 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                             RangeBanItem *curBan = nxtBan;
                             nxtBan = curBan->next;
 
-                            if(curBan->ui32FromIpHash <= hash && curBan->ui32ToIpHash >= hash) {
-                                if(((curBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
-                                    // PPK ... check if temban expired
-                                    if(acc_time >= curBan->tempbanexpire) {
-										hashBanManager->RemRange(curBan);
-                                        delete curBan;
+							if(((curBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
+								// PPK ... check if temban expired
+								if(acc_time >= curBan->tempbanexpire) {
+									hashBanManager->RemRange(curBan);
+									delete curBan;
 
-										continue;
-                                    }
-                                }
+									continue;
+								}
+							}
 
+                            if(memcmp(curBan->ui128FromIpHash, ui128Hash, 16) <= 0 && memcmp(curBan->ui128ToIpHash, ui128Hash, 16) >= 0) {
                                 iBanNum++;
                                 imsgLen = sprintf(msg, "[%d] %s: %s-%s", iBanNum, LanguageManager->sTexts[LAN_RANGE], curBan->sIpFrom, curBan->sIpTo);
                                 if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand288") == false) {
@@ -4014,9 +4015,11 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
             		return true;
                 }
 
-                uint32_t fromhash, tohash;
+				uint8_t ui128FromHash[16], ui128ToHash[16];
+				memset(ui128FromHash, 0, 16);
+				memset(ui128ToHash, 0, 16);
 
-                if(HashIP(sCommand, strlen(sCommand), fromhash) == false || HashIP(ipto, strlen(ipto), tohash) == false) {
+                if(HashIP(sCommand, ui128FromHash) == false || HashIP(ipto, ui128ToHash) == false) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
                	    int iret = sprintf(msg+imsgLen, "<%s> *** %s %ccheckrangeban <%s> <%s>. %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -4033,7 +4036,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                 time_t acc_time;
                 time(&acc_time);
 
-				RangeBanItem *RangeBan = hashBanManager->FindRange(fromhash, tohash, acc_time);
+				RangeBanItem *RangeBan = hashBanManager->FindRange(ui128FromHash, ui128ToHash, acc_time);
                 if(RangeBan == NULL) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
@@ -4930,41 +4933,39 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 				//Statinfo+="ClientSocket Errors: "+string(iStatUserSocketErrors)+" x" NEW_LINE_CHARS;
 				Statinfo+="------------------------------------------------------------" NEW_LINE_CHARS;
 #ifdef _WIN32
-				if(b2K == true) {
-					FILETIME tmpa, tmpb, kernelTimeFT, userTimeFT;
-					GetProcessTimes(GetCurrentProcess(), &tmpa, &tmpb, &kernelTimeFT, &userTimeFT);
-					int64_t kernelTime = kernelTimeFT.dwLowDateTime | (((int64_t)kernelTimeFT.dwHighDateTime) << 32);
-					int64_t userTime = userTimeFT.dwLowDateTime | (((int64_t)userTimeFT.dwHighDateTime) << 32);
-					int64_t icpuSec = (kernelTime + userTime) / (10000000I64);
+				FILETIME tmpa, tmpb, kernelTimeFT, userTimeFT;
+				GetProcessTimes(GetCurrentProcess(), &tmpa, &tmpb, &kernelTimeFT, &userTimeFT);
+				int64_t kernelTime = kernelTimeFT.dwLowDateTime | (((int64_t)kernelTimeFT.dwHighDateTime) << 32);
+				int64_t userTime = userTimeFT.dwLowDateTime | (((int64_t)userTimeFT.dwHighDateTime) << 32);
+				int64_t icpuSec = (kernelTime + userTime) / (10000000I64);
 
-					char cpuusage[32];
-					int iLen = sprintf(cpuusage, "%.2f%%\r\n", cpuUsage/0.6);
-					if(CheckSprintf(iLen, 32, "HubCommands::DoCommand3921") == false) {
-						return true;
-					}
-					Statinfo+="CPU usage (60 sec avg): "+string(cpuusage, iLen);
-
-					char cputime[64];
-					iLen = sprintf(cputime, "%01I64d:%02d:%02d", icpuSec / (60*60), (int32_t)((icpuSec / 60) % 60), (int32_t)(icpuSec % 60));
-					if(CheckSprintf(iLen, 64, "HubCommands::DoCommand392") == false) {
-						return true;
-					}
-					Statinfo+="CPU time: "+string(cputime, iLen)+"\r\n";
-
-					PROCESS_MEMORY_COUNTERS pmc;
-					memset(&pmc, 0, sizeof(PROCESS_MEMORY_COUNTERS));
-					pmc.cb = sizeof(pmc);
-
-					typedef BOOL (WINAPI *PGPMI)(HANDLE, PPROCESS_MEMORY_COUNTERS, DWORD);
-					PGPMI pGPMI = (PGPMI)GetProcAddress(LoadLibrary("psapi.dll"), "GetProcessMemoryInfo");
-
-                    if(pGPMI != NULL) {
-					   pGPMI(GetCurrentProcess(), &pmc, sizeof(pmc));
-
-					   Statinfo+="Mem usage (Peak): "+string(formatBytes(pmc.WorkingSetSize))+ " ("+string(formatBytes(pmc.PeakWorkingSetSize))+")\r\n";
-					   Statinfo+="VM size (Peak): "+string(formatBytes(pmc.PagefileUsage))+ " ("+string(formatBytes(pmc.PeakPagefileUsage))+")\r\n";
-                    }
+				char cpuusage[32];
+				int iLen = sprintf(cpuusage, "%.2f%%\r\n", cpuUsage/0.6);
+				if(CheckSprintf(iLen, 32, "HubCommands::DoCommand3921") == false) {
+					return true;
 				}
+				Statinfo+="CPU usage (60 sec avg): "+string(cpuusage, iLen);
+
+				char cputime[64];
+				iLen = sprintf(cputime, "%01I64d:%02d:%02d", icpuSec / (60*60), (int32_t)((icpuSec / 60) % 60), (int32_t)(icpuSec % 60));
+				if(CheckSprintf(iLen, 64, "HubCommands::DoCommand392") == false) {
+					return true;
+				}
+				Statinfo+="CPU time: "+string(cputime, iLen)+"\r\n";
+
+				PROCESS_MEMORY_COUNTERS pmc;
+				memset(&pmc, 0, sizeof(PROCESS_MEMORY_COUNTERS));
+				pmc.cb = sizeof(pmc);
+
+				typedef BOOL (WINAPI *PGPMI)(HANDLE, PPROCESS_MEMORY_COUNTERS, DWORD);
+				PGPMI pGPMI = (PGPMI)GetProcAddress(LoadLibrary("psapi.dll"), "GetProcessMemoryInfo");
+
+                if(pGPMI != NULL) {
+					pGPMI(GetCurrentProcess(), &pmc, sizeof(pmc));
+
+					Statinfo+="Mem usage (Peak): "+string(formatBytes(pmc.WorkingSetSize))+ " ("+string(formatBytes(pmc.PeakWorkingSetSize))+")\r\n";
+					Statinfo+="VM size (Peak): "+string(formatBytes(pmc.PagefileUsage))+ " ("+string(formatBytes(pmc.PeakPagefileUsage))+")\r\n";
+                }
 #else // _WIN32
 				char cpuusage[32];
 				int iLen = sprintf(cpuusage, "%.2f%%\n", (cpuUsage/0.6)/(double)ui32CpuCount);
@@ -5937,10 +5938,12 @@ bool HubCommands::BanIp(User * curUser, char * sCommand, bool fromPM, bool bFull
         case 0: {
 			UncountDeflood(curUser, fromPM);
 
-            uint32_t ui32IpHash = 0;
-            HashIP(sCommand, strlen(sCommand), ui32IpHash);
+			uint8_t ui128Hash[16];
+			memset(ui128Hash, 0, 16);
+
+            HashIP(sCommand, ui128Hash);
           
-            User *next = hashManager->FindUser(ui32IpHash);
+            User *next = hashManager->FindUser(ui128Hash);
             while(next != NULL) {
             	User *cur = next;
                 next = cur->hashiptablenext;
@@ -6436,10 +6439,12 @@ bool HubCommands::TempBanIp(User * curUser, char * sCommand, const size_t &dlen,
 
     switch(hashBanManager->TempBanIp(NULL, sCmdParts[0], sCmdParts[2], curUser->sNick, 0, ban_time, bFull)) {
         case 0: {
-            uint32_t ui32IpHash = 0;
-            HashIP(sCommand, strlen(sCommand), ui32IpHash);
+			uint8_t ui128Hash[16];
+			memset(ui128Hash, 0, 16);
+
+            HashIP(sCommand, ui128Hash);
           
-            User *next = hashManager->FindUser(ui32IpHash);
+            User *next = hashManager->FindUser(ui128Hash);
             while(next != NULL) {
             	User *cur = next;
                 next = cur->hashiptablenext;
@@ -6674,10 +6679,11 @@ bool HubCommands::RangeBan(User * curUser, char * sCommand, const size_t &dlen, 
         return true;
     }
 
-	uint32_t fromhash = 0, tohash = 0;
+	uint8_t ui128FromHash[16], ui128ToHash[16];
+	memset(ui128FromHash, 0, 16);
+	memset(ui128ToHash, 0, 16);
 
-    if(iCmdPartsLen[0] == 0 || iCmdPartsLen[1] == 0 || HashIP(sCmdParts[0], iCmdPartsLen[0], fromhash) == false || 
-        HashIP(sCmdParts[1], iCmdPartsLen[1], tohash) == false) {
+    if(iCmdPartsLen[0] == 0 || iCmdPartsLen[1] == 0 || HashIP(sCmdParts[0], ui128FromHash) == false || HashIP(sCmdParts[1], ui128ToHash) == false) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> %s %c%srangeban <%s> <%s> <%s>. %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -6691,7 +6697,7 @@ bool HubCommands::RangeBan(User * curUser, char * sCommand, const size_t &dlen, 
         return true;
     }
 
-    if(tohash <= fromhash) {
+    if(memcmp(ui128ToHash, ui128FromHash, 16) <= 0) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -6704,7 +6710,7 @@ bool HubCommands::RangeBan(User * curUser, char * sCommand, const size_t &dlen, 
         return true;
     }
 
-    if(hashBanManager->RangeBan(sCmdParts[0], fromhash, sCmdParts[1], tohash, sCmdParts[2], curUser->sNick, bFull) == false) {
+    if(hashBanManager->RangeBan(sCmdParts[0], ui128FromHash, sCmdParts[1], ui128ToHash, sCmdParts[2], curUser->sNick, bFull) == false) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> *** %s %s-%s %s %s%s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -6862,10 +6868,11 @@ bool HubCommands::RangeTempBan(User * curUser, char * sCommand, const size_t &dl
         return true;
     }
 
-	uint32_t fromhash = 0, tohash = 0;
+	uint8_t ui128FromHash[16], ui128ToHash[16];
+	memset(ui128FromHash, 0, 16);
+	memset(ui128ToHash, 0, 16);
 
-    if(iCmdPartsLen[0] == 0 || iCmdPartsLen[1] == 0 || iCmdPartsLen[2] == 0 || HashIP(sCmdParts[0], iCmdPartsLen[0], fromhash) == false || 
-		HashIP(sCmdParts[1], iCmdPartsLen[1], tohash) == false) {
+    if(iCmdPartsLen[0] == 0 || iCmdPartsLen[1] == 0 || iCmdPartsLen[2] == 0 || HashIP(sCmdParts[0], ui128FromHash) == false || HashIP(sCmdParts[1], ui128ToHash) == false) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> %s %c%srangetempban <%s> <%s> <%s> <%s>. %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -6880,7 +6887,7 @@ bool HubCommands::RangeTempBan(User * curUser, char * sCommand, const size_t &dl
         return true;
     }
 
-    if(tohash <= fromhash) {
+    if(memcmp(ui128ToHash, ui128FromHash, 16) <= 0) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -6913,7 +6920,7 @@ bool HubCommands::RangeTempBan(User * curUser, char * sCommand, const size_t &dl
         return true;
     }
 
-    if(hashBanManager->RangeTempBan(sCmdParts[0], fromhash, sCmdParts[1], tohash, sCmdParts[3], curUser->sNick, 0, ban_time, bFull) == false) {
+    if(hashBanManager->RangeTempBan(sCmdParts[0], ui128FromHash, sCmdParts[1], ui128ToHash, sCmdParts[3], curUser->sNick, 0, ban_time, bFull) == false) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> *** %s %s-%s %s %s%s %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -7030,8 +7037,6 @@ bool HubCommands::RangeTempBan(User * curUser, char * sCommand, const size_t &dl
 //---------------------------------------------------------------------------
 
 bool HubCommands::RangeUnban(User * curUser, char * sCommand, bool fromPM, unsigned char cType) {
-	uint32_t fromhash = 0, tohash = 0;
-
 	char *toip = strchr(sCommand, ' ');
 
 	if(toip != NULL) {
@@ -7039,8 +7044,11 @@ bool HubCommands::RangeUnban(User * curUser, char * sCommand, bool fromPM, unsig
         toip++;
     }
 
-	if(toip == NULL || sCommand[0] == '\0' || toip[0] == '\0' || HashIP(sCommand, strlen(sCommand), fromhash) == false || 
-        HashIP(toip, strlen(toip), tohash) == false) {
+	uint8_t ui128FromHash[16], ui128ToHash[16];
+	memset(ui128FromHash, 0, 16);
+	memset(ui128ToHash, 0, 16);
+
+	if(toip == NULL || sCommand[0] == '\0' || toip[0] == '\0' || HashIP(sCommand, ui128FromHash) == false || HashIP(toip, ui128ToHash) == false) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret= sprintf(msg+imsgLen, "<%s> *** %s. %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -7052,7 +7060,7 @@ bool HubCommands::RangeUnban(User * curUser, char * sCommand, bool fromPM, unsig
         return true;
     }
 
-    if(tohash <= fromhash) {
+    if(memcmp(ui128ToHash, ui128FromHash, 16) <= 0) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -7065,7 +7073,7 @@ bool HubCommands::RangeUnban(User * curUser, char * sCommand, bool fromPM, unsig
         return true;
     }
 
-    if(hashBanManager->RangeUnban(fromhash, tohash, cType) == false) {
+    if(hashBanManager->RangeUnban(ui128FromHash, ui128ToHash, cType) == false) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> %s %s-%s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -7117,8 +7125,6 @@ bool HubCommands::RangeUnban(User * curUser, char * sCommand, bool fromPM, unsig
 //---------------------------------------------------------------------------
 
 bool HubCommands::RangeUnban(User * curUser, char * sCommand, bool fromPM) {
-	uint32_t fromhash = 0, tohash = 0;
-
 	char *toip = strchr(sCommand, ' ');
 
 	if(toip != NULL) {
@@ -7126,8 +7132,11 @@ bool HubCommands::RangeUnban(User * curUser, char * sCommand, bool fromPM) {
         toip++;
     }
 
-	if(toip == NULL || sCommand[0] == '\0' || toip[0] == '\0' || HashIP(sCommand, strlen(sCommand), fromhash) == false || 
-        HashIP(toip, strlen(toip), tohash) == false) {
+	uint8_t ui128FromHash[16], ui128ToHash[16];
+	memset(ui128FromHash, 0, 16);
+	memset(ui128ToHash, 0, 16);
+
+	if(toip == NULL || sCommand[0] == '\0' || toip[0] == '\0' || HashIP(sCommand, ui128FromHash) == false || HashIP(toip, ui128ToHash) == false) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> *** %s. %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -7139,7 +7148,7 @@ bool HubCommands::RangeUnban(User * curUser, char * sCommand, bool fromPM) {
         return true;
     }
 
-    if(tohash <= fromhash) {
+    if(memcmp(ui128ToHash, ui128FromHash, 16) <= 0) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -7152,7 +7161,7 @@ bool HubCommands::RangeUnban(User * curUser, char * sCommand, bool fromPM) {
         return true;
     }
 
-    if(hashBanManager->RangeUnban(fromhash, tohash) == false) {
+    if(hashBanManager->RangeUnban(ui128FromHash, ui128ToHash) == false) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> %s %s-%s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 

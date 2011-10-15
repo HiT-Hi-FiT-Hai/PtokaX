@@ -62,7 +62,7 @@ hashMan::~hashMan() {
 //---------------------------------------------------------------------------
 
 void hashMan::Add(User * u) {
-    uint16_t ui16dx = ((uint16_t *)&u->ui32NickHash)[0];
+    uint16_t ui16dx = *((uint16_t *)&u->ui32NickHash);
     
     if(nicktable[ui16dx] != NULL) {
         nicktable[ui16dx]->hashtableprev = u;
@@ -71,7 +71,7 @@ void hashMan::Add(User * u) {
 
     nicktable[ui16dx] = u;
 
-    ui16dx = ((uint16_t *)&u->ui32IpHash)[0];
+    ui16dx = *((uint16_t *)(u->ui128IpHash+13));
 
     if(iptable[ui16dx] == NULL) {
         iptable[ui16dx] = new IpTableItem();
@@ -100,7 +100,7 @@ void hashMan::Add(User * u) {
         IpTableItem * cur = next;
         next = cur->next;
 
-        if(cur->FirstUser->ui32IpHash == u->ui32IpHash) {
+        if(memcmp(cur->FirstUser->ui128IpHash, u->ui128IpHash, 16) == 0) {
             cur->FirstUser->hashiptableprev = u;
             u->hashiptablenext = cur->FirstUser;
             cur->FirstUser = u;
@@ -134,7 +134,7 @@ void hashMan::Add(User * u) {
 
 void hashMan::Remove(User * u) {
     if(u->hashtableprev == NULL) {
-        uint16_t ui16dx = ((uint16_t *)&u->ui32NickHash)[0];
+        uint16_t ui16dx = *((uint16_t *)&u->ui32NickHash);
 
         if(u->hashtablenext == NULL) {
             nicktable[ui16dx] = NULL;
@@ -152,7 +152,7 @@ void hashMan::Remove(User * u) {
     u->hashtableprev = NULL;
     u->hashtablenext = NULL;
 
-	uint16_t ui16dx = ((uint16_t *)&u->ui32IpHash)[0];
+	uint16_t ui16dx = *((uint16_t *)(u->ui128IpHash+13));
 
 	if(u->hashiptableprev == NULL) {
         IpTableItem * next = iptable[ui16dx];
@@ -160,8 +160,8 @@ void hashMan::Remove(User * u) {
         while(next != NULL) {
             IpTableItem * cur = next;
             next = cur->next;
-    
-            if(cur->FirstUser->ui32IpHash == u->ui32IpHash) {
+
+            if(memcmp(cur->FirstUser->ui128IpHash, u->ui128IpHash, 16) == 0) {
 				cur->ui16Count--;
 
                 if(u->hashiptablenext == NULL) {
@@ -206,7 +206,7 @@ void hashMan::Remove(User * u) {
         IpTableItem * cur = next;
         next = cur->next;
 
-        if(cur->FirstUser->ui32IpHash == u->ui32IpHash) {
+        if(memcmp(cur->FirstUser->ui128IpHash, u->ui128IpHash, 16) == 0) {
 			cur->ui16Count--;
 
             return;
@@ -217,7 +217,7 @@ void hashMan::Remove(User * u) {
 
 User * hashMan::FindUser(char * sNick, const size_t &iNickLen) {
     uint32_t ui32Hash = HashNick(sNick, iNickLen);
-    uint16_t ui16dx = ((uint16_t *)&ui32Hash)[0]; 
+    uint16_t ui16dx = *((uint16_t *)&ui32Hash);
 
     User *next = nicktable[ui16dx];
 
@@ -244,7 +244,7 @@ User * hashMan::FindUser(char * sNick, const size_t &iNickLen) {
 //---------------------------------------------------------------------------
 
 User * hashMan::FindUser(User * u) {
-    uint16_t ui16dx = ((uint16_t *)&u->ui32NickHash)[0];
+    uint16_t ui16dx = *((uint16_t *)&u->ui32NickHash);
 
     User *next = nicktable[ui16dx];  
 
@@ -270,8 +270,8 @@ User * hashMan::FindUser(User * u) {
 }
 //---------------------------------------------------------------------------
 
-User * hashMan::FindUser(const uint32_t &ui32IpHash) {
-    uint16_t ui16dx = ((uint16_t *)&ui32IpHash)[0];
+User * hashMan::FindUser(const uint8_t * ui128IpHash) {
+    uint16_t ui16dx = *((uint16_t *)(ui128IpHash+13));
 
 	IpTableItem * next = iptable[ui16dx];
 
@@ -279,7 +279,7 @@ User * hashMan::FindUser(const uint32_t &ui32IpHash) {
 		IpTableItem * cur = next;
         next = cur->next;
 
-        if(cur->FirstUser->ui32IpHash == ui32IpHash) {
+        if(memcmp(cur->FirstUser->ui128IpHash, ui128IpHash, 16) == 0) {
             return cur->FirstUser;
         }
     }
@@ -289,7 +289,7 @@ User * hashMan::FindUser(const uint32_t &ui32IpHash) {
 //---------------------------------------------------------------------------
 
 uint32_t hashMan::GetUserIpCount(User * u) {
-    uint16_t ui16dx = ((uint16_t *)&u->ui32IpHash)[0];
+    uint16_t ui16dx = *((uint16_t *)(u->ui128IpHash+13));
 
 	IpTableItem * next = iptable[ui16dx];
 
@@ -297,7 +297,7 @@ uint32_t hashMan::GetUserIpCount(User * u) {
 		IpTableItem * cur = next;
 		next = cur->next;
 
-        if(cur->FirstUser->ui32IpHash == u->ui32IpHash) {
+        if(memcmp(cur->FirstUser->ui128IpHash, u->ui128IpHash, 16) == 0) {
             return cur->ui16Count;
         }
 	}

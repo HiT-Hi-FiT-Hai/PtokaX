@@ -57,7 +57,7 @@ bool GetIpParts(char * sIP, const size_t ui32Len, uint32_t &a, uint32_t &b, uint
 
 uint32_t HashNick(const char * sNick, const size_t &sNickLen);
 
-bool HashIP(char * sIP, const size_t ui32Len, uint32_t &ui32Hash);
+bool HashIP(const char * sIP, uint8_t * ui128IpHash);
 
 char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_time);
 char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const time_t &acc_time);
@@ -97,14 +97,16 @@ bool DirExist(char * sPath);
 #ifdef _WIN32
 	void SetupOsVersion();
 	void * LuaAlocator(void * pOld, void * pData, size_t szOldSize, size_t szNewSize);
+    INT WSAAPI win_inet_pton(INT Family, PCTSTR pszAddrString, PVOID pAddrBuf);
+    PCTSTR WSAAPI win_inet_ntop(INT Family, PVOID pAddr, PTSTR pStringBuf, size_t StringBufSize);
 #endif
+    void CheckForIPv6();
 //---------------------------------------------------------------------------
 extern string PATH, SCRIPT_PATH, sTitle;
-extern bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bCmdNoKeyCheck;
+extern bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bCmdNoKeyCheck, bUseIPv6;
 #ifdef _WIN32
 	extern HANDLE hConsole, hLuaHeap, hPtokaXHeap, hRecvHeap, hSendHeap;
 	extern string PATH_LUA, sOs;
-	extern bool b2K;
 #endif
 //---------------------------------------------------------------------------
 

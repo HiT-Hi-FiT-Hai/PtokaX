@@ -283,11 +283,12 @@ static int GetBan(lua_State * L) {
     size_t iLen;
     char *sValue = (char *)lua_tolstring(L, 1, &iLen);
 
-    uint32_t hash;
-
 	BanItem *Ban = hashBanManager->FindNick(sValue, iLen);
 
-	if(HashIP(sValue, iLen, hash) == true) {
+	uint8_t ui128Hash[16];
+	memset(ui128Hash, 0, 16);
+
+	if(HashIP(sValue, ui128Hash) == true) {
         lua_settop(L, 0);
         
         lua_newtable(L);
@@ -299,7 +300,7 @@ static int GetBan(lua_State * L) {
             lua_rawset(L, t);
         }
 
-		Ban = hashBanManager->FindIP(hash, acc_time);
+		Ban = hashBanManager->FindIP(ui128Hash, acc_time);
         if(Ban != NULL) {
             lua_pushnumber(L, ++i);
             PushBan(L, Ban);        
@@ -356,11 +357,12 @@ static int GetPermBan(lua_State * L) {
     size_t iLen;
     char *sValue = (char *)lua_tolstring(L, 1, &iLen);
 
-    uint32_t hash;
-
 	BanItem *Ban = hashBanManager->FindPermNick(sValue, iLen);
 
-    if(HashIP(sValue, iLen, hash) == true) {
+	uint8_t ui128Hash[16];
+	memset(ui128Hash, 0, 16);
+
+    if(HashIP(sValue, ui128Hash) == true) {
         lua_settop(L, 0);
         
         lua_newtable(L);
@@ -372,7 +374,7 @@ static int GetPermBan(lua_State * L) {
             lua_rawset(L, t);
         }
 
-		Ban = hashBanManager->FindPermIP(hash);
+		Ban = hashBanManager->FindPermIP(ui128Hash);
         if(Ban != NULL) {
             lua_pushnumber(L, ++i);
             PushBan(L, Ban);        
@@ -429,11 +431,12 @@ static int GetTempBan(lua_State * L) {
     size_t iLen;
     char *sValue = (char *)lua_tolstring(L, 1, &iLen);
 
-    uint32_t hash;
-
 	BanItem *Ban = hashBanManager->FindTempNick(sValue, iLen);
 
-    if(HashIP(sValue, iLen, hash) == true) {
+	uint8_t ui128Hash[16];
+	memset(ui128Hash, 0, 16);
+
+    if(HashIP(sValue, ui128Hash) == true) {
         lua_settop(L, 0);
         
         lua_newtable(L);
@@ -445,7 +448,7 @@ static int GetTempBan(lua_State * L) {
             lua_rawset(L, t);
         }
 
-		Ban = hashBanManager->FindTempIP(hash, acc_time);
+		Ban = hashBanManager->FindTempIP(ui128Hash, acc_time);
         if(Ban != NULL) {
             lua_pushnumber(L, ++i);
             PushBan(L, Ban);        
@@ -612,9 +615,11 @@ static int GetRangeBan(lua_State * L) {
     char *sFrom = (char *)lua_tolstring(L, 1, &iFromLen);
     char *sTo = (char *)lua_tolstring(L, 2, &iToLen);
 
-	uint32_t fromhash, tohash;
+	uint8_t ui128FromHash[16], ui128ToHash[16];
+	memset(ui128FromHash, 0, 16);
+	memset(ui128ToHash, 0, 16);
 
-    if(iFromLen == 0 || iToLen == 0 ||HashIP(sFrom, iFromLen, fromhash) == false || HashIP(sTo, iToLen, tohash) == false || tohash <= fromhash) {
+    if(iFromLen == 0 || iToLen == 0 || HashIP(sFrom, ui128FromHash) == false || HashIP(sTo, ui128ToHash) == false || memcmp(ui128ToHash, ui128FromHash, 16) <= 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -631,7 +636,7 @@ static int GetRangeBan(lua_State * L) {
         RangeBanItem *cur = next;
         next = cur->next;
 
-        if(cur->ui32FromIpHash == fromhash && cur->ui32ToIpHash == tohash) {
+        if(memcmp(cur->ui128FromIpHash, ui128FromHash, 16) == 0 && memcmp(cur->ui128ToIpHash, ui128ToHash, 16) == 0) {
             // PPK ... check if it's temban and then if it's expired
             if(((cur->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
                 if(acc_time >= cur->tempbanexpire) {
@@ -671,9 +676,11 @@ static int GetRangePermBan(lua_State * L) {
     char *sFrom = (char *)lua_tolstring(L, 1, &iFromLen);
     char *sTo = (char *)lua_tolstring(L, 2, &iToLen);
 
-	uint32_t fromhash, tohash;
+	uint8_t ui128FromHash[16], ui128ToHash[16];
+	memset(ui128FromHash, 0, 16);
+	memset(ui128ToHash, 0, 16);
 
-	if(iFromLen == 0 || iToLen == 0 ||HashIP(sFrom, iFromLen, fromhash) == false || HashIP(sTo, iToLen, tohash) == false || tohash <= fromhash) {
+	if(iFromLen == 0 || iToLen == 0 || HashIP(sFrom, ui128FromHash) == false || HashIP(sTo, ui128ToHash) == false || memcmp(ui128ToHash, ui128FromHash, 16) <= 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -687,7 +694,7 @@ static int GetRangePermBan(lua_State * L) {
         RangeBanItem *cur = next;
         next = cur->next;
 
-        if(cur->ui32FromIpHash == fromhash && cur->ui32ToIpHash == tohash) {
+        if(memcmp(cur->ui128FromIpHash, ui128FromHash, 16) == 0 && memcmp(cur->ui128ToIpHash, ui128ToHash, 16) == 0) {
             if(((cur->ui8Bits & hashBanMan::PERM) == hashBanMan::PERM) == true) {
                 PushRangeBan(L, cur);
                 return 1;
@@ -720,9 +727,11 @@ static int GetRangeTempBan(lua_State * L) {
     char *sFrom = (char *)lua_tolstring(L, 1, &iFromLen);
     char *sTo = (char *)lua_tolstring(L, 2, &iToLen);
 
-	uint32_t fromhash, tohash;
+	uint8_t ui128FromHash[16], ui128ToHash[16];
+	memset(ui128FromHash, 0, 16);
+	memset(ui128ToHash, 0, 16);
 
-	if(iFromLen == 0 || iToLen == 0 ||HashIP(sFrom, iFromLen, fromhash) == false || HashIP(sTo, iToLen, tohash) == false || tohash <= fromhash) {
+	if(iFromLen == 0 || iToLen == 0 || HashIP(sFrom, ui128FromHash) == false || HashIP(sTo, ui128ToHash) == false || memcmp(ui128ToHash, ui128FromHash, 16) <= 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -739,7 +748,7 @@ static int GetRangeTempBan(lua_State * L) {
         RangeBanItem *cur = next;
         next = cur->next;
 
-        if(cur->ui32FromIpHash == fromhash && cur->ui32ToIpHash == tohash) {
+        if(memcmp(cur->ui128FromIpHash, ui128FromHash, 16) == 0 && memcmp(cur->ui128ToIpHash, ui128ToHash, 16) == 0) {
             // PPK ... check if it's temban and then if it's expired
             if(((cur->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
                 if(acc_time >= cur->tempbanexpire) {
@@ -884,16 +893,17 @@ static int UnbanAll(lua_State * L) {
     size_t iLen;
     char *sIP = (char *)lua_tolstring(L, 1, &iLen);
 
-    uint32_t hash;
+	uint8_t ui128Hash[16];
+	memset(ui128Hash, 0, 16);
 
-    if(iLen == 0 || HashIP(sIP, iLen, hash) == false) {
+    if(iLen == 0 || HashIP(sIP, ui128Hash) == false) {
 		lua_settop(L, 0);
         return 0;
     }
 
     lua_settop(L, 0);
 
-	hashBanManager->RemoveAllIP(hash);
+	hashBanManager->RemoveAllIP(ui128Hash);
 
     return 0;
 }
@@ -915,16 +925,17 @@ static int UnbanPermAll(lua_State * L) {
     size_t iLen;
     char *sIP = (char *)lua_tolstring(L, 1, &iLen);
 
-    uint32_t hash;
+	uint8_t ui128Hash[16];
+	memset(ui128Hash, 0, 16);
 
-    if(iLen == 0 || HashIP(sIP, iLen, hash) == false) {
+    if(iLen == 0 || HashIP(sIP, ui128Hash) == false) {
 		lua_settop(L, 0);
         return 0;
     }
 
     lua_settop(L, 0);
 
-	hashBanManager->RemovePermAllIP(hash);
+	hashBanManager->RemovePermAllIP(ui128Hash);
 
     return 0;
 }
@@ -946,16 +957,17 @@ static int UnbanTempAll(lua_State * L) {
     size_t iLen;
     char *sIP = (char *)lua_tolstring(L, 1, &iLen);
 
-    uint32_t hash;
+	uint8_t ui128Hash[16];
+	memset(ui128Hash, 0, 16);
 
-    if(iLen == 0 || HashIP(sIP, iLen, hash) == false) {
+    if(iLen == 0 || HashIP(sIP, ui128Hash) == false) {
 		lua_settop(L, 0);
         return 0;
     }
 
     lua_settop(L, 0);
 
-	hashBanManager->RemoveTempAllIP(hash);
+	hashBanManager->RemoveTempAllIP(ui128Hash);
 
     return 0;
 }
@@ -981,10 +993,12 @@ static int RangeUnban(lua_State * L) {
     char *sFromIp = (char *)lua_tolstring(L, 1, &iFromIpLen);
     char *sToIp = (char *)lua_tolstring(L, 2, &iToIpLen);
 
-	uint32_t fromhash, tohash;
+	uint8_t ui128FromHash[16], ui128ToHash[16];
+	memset(ui128FromHash, 0, 16);
+	memset(ui128ToHash, 0, 16);
 
-	if(iFromIpLen != 0 && iToIpLen != 0 && HashIP(sFromIp, iFromIpLen, fromhash) == true &&
-        HashIP(sToIp, iToIpLen, tohash) == true && tohash > fromhash && hashBanManager->RangeUnban(fromhash, tohash) == true) {
+	if(iFromIpLen != 0 && iToIpLen != 0 && HashIP(sFromIp, ui128FromHash) == true && HashIP(sToIp, ui128ToHash) == true && 
+		memcmp(ui128ToHash, ui128FromHash, 16) > 0 && hashBanManager->RangeUnban(ui128FromHash, ui128ToHash) == true) {
         lua_settop(L, 0);
         lua_pushboolean(L, 1);
         return 1;
@@ -1016,10 +1030,12 @@ static int RangeUnbanPerm(lua_State * L) {
     char *sFromIp = (char *)lua_tolstring(L, 1, &iFromIpLen);
     char *sToIp = (char *)lua_tolstring(L, 2, &iToIpLen);
 
-	uint32_t fromhash, tohash;
+	uint8_t ui128FromHash[16], ui128ToHash[16];
+	memset(ui128FromHash, 0, 16);
+	memset(ui128ToHash, 0, 16);
 
-	if(iFromIpLen != 0 && iToIpLen != 0 && HashIP(sFromIp, iFromIpLen, fromhash) == true &&
-        HashIP(sToIp, iToIpLen, tohash) == true && tohash > fromhash && hashBanManager->RangeUnban(fromhash, tohash, hashBanMan::PERM) == true) {
+	if(iFromIpLen != 0 && iToIpLen != 0 && HashIP(sFromIp, ui128FromHash) == true && HashIP(sToIp, ui128ToHash) == true && 
+		memcmp(ui128ToHash, ui128FromHash, 16) > 0 && hashBanManager->RangeUnban(ui128FromHash, ui128ToHash, hashBanMan::PERM) == true) {
         lua_settop(L, 0);
         lua_pushboolean(L, 1);
         return 1;
@@ -1051,10 +1067,12 @@ static int RangeUnbanTemp(lua_State * L) {
     char *sFromIp = (char *)lua_tolstring(L, 1, &iFromIpLen);
     char *sToIp = (char *)lua_tolstring(L, 2, &iToIpLen);
 
-	uint32_t fromhash, tohash;
+	uint8_t ui128FromHash[16], ui128ToHash[16];
+	memset(ui128FromHash, 0, 16);
+	memset(ui128ToHash, 0, 16);
 
-	if(iFromIpLen != 0 && iToIpLen != 0 && HashIP(sFromIp, iFromIpLen, fromhash) == true &&
-        HashIP(sToIp, iToIpLen, tohash) == true && tohash > fromhash && hashBanManager->RangeUnban(fromhash, tohash, hashBanMan::TEMP) == true) {
+	if(iFromIpLen != 0 && iToIpLen != 0 && HashIP(sFromIp, ui128FromHash) == true && HashIP(sToIp, ui128ToHash) == true && 
+		memcmp(ui128ToHash, ui128FromHash, 16) > 0 && hashBanManager->RangeUnban(ui128FromHash, ui128ToHash, hashBanMan::TEMP) == true) {
         lua_settop(L, 0);
         lua_pushboolean(L, 1);
         return 1;
@@ -1548,10 +1566,12 @@ static int RangeBan(lua_State * L) {
 
     bool bFull = lua_toboolean(L, 5) == 0 ? false : true;
 
-	uint32_t fromhash, tohash;
+	uint8_t ui128FromHash[16], ui128ToHash[16];
+	memset(ui128FromHash, 0, 16);
+	memset(ui128ToHash, 0, 16);
 
-	if(iFromIpLen != 0 && iToIpLen != 0 && HashIP(sFromIP, iFromIpLen, fromhash) == true && HashIP(sToIP, iToIpLen, tohash) == true &&
-        tohash > fromhash && hashBanManager->RangeBan(sFromIP, fromhash, sToIP, tohash, sReason, sBy, bFull) == true) {
+	if(iFromIpLen != 0 && iToIpLen != 0 && HashIP(sFromIP, ui128FromHash) == true && HashIP(sToIP, ui128ToHash) == true &&
+        memcmp(ui128ToHash, ui128FromHash, 16) > 0 && hashBanManager->RangeBan(sFromIP, ui128FromHash, sToIP, ui128ToHash, sReason, sBy, bFull) == true) {
 		lua_settop(L, 0);
 		lua_pushboolean(L, 1);
         return 1;
@@ -1606,10 +1626,12 @@ static int RangeTempBan(lua_State * L) {
 
     bool bFull = lua_toboolean(L, 6) == 0 ? false : true;
 
-    uint32_t fromhash, tohash;
+	uint8_t ui128FromHash[16], ui128ToHash[16];
+	memset(ui128FromHash, 0, 16);
+	memset(ui128ToHash, 0, 16);
 
-	if(iFromIpLen != 0 && iToIpLen != 0 && HashIP(sFromIP, iFromIpLen, fromhash) == true && HashIP(sToIP, iToIpLen, tohash) == true &&
-         tohash > fromhash && hashBanManager->RangeTempBan(sFromIP, fromhash, sToIP, tohash, sReason, sBy, iMinutes, 0, bFull) == true) {
+	if(iFromIpLen != 0 && iToIpLen != 0 && HashIP(sFromIP, ui128FromHash) == true && HashIP(sToIP, ui128ToHash) == true &&
+		memcmp(ui128ToHash, ui128FromHash, 16) > 0 && hashBanManager->RangeTempBan(sFromIP, ui128FromHash, sToIP, ui128ToHash, sReason, sBy, iMinutes, 0, bFull) == true) {
 		lua_settop(L, 0);
 		lua_pushboolean(L, 1);
         return 1;

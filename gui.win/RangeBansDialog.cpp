@@ -404,9 +404,10 @@ int RangeBansDialog::CompareRangeBans(const void * pItem, const void * pOtherIte
 
     switch(pRangeBansDialog->iSortColumn) {
         case 0:
-            return (pFirstRangeBan->ui32FromIpHash > pSecondRangeBan->ui32FromIpHash) ? 1 : ((pFirstRangeBan->ui32FromIpHash == pSecondRangeBan->ui32FromIpHash) ?
-                (pFirstRangeBan->ui32ToIpHash > pSecondRangeBan->ui32ToIpHash) ? 1 : ((pFirstRangeBan->ui32ToIpHash == pSecondRangeBan->ui32ToIpHash) ? 0 : -1)
-                : -1);
+			return (memcmp(pFirstRangeBan->ui128FromIpHash, pSecondRangeBan->ui128FromIpHash, 16) > 0) ? 1 : 
+				((memcmp(pFirstRangeBan->ui128FromIpHash, pSecondRangeBan->ui128FromIpHash, 16) == 0) ?
+				(memcmp(pFirstRangeBan->ui128ToIpHash, pSecondRangeBan->ui128ToIpHash, 16) > 0) ? 1 : 
+				((memcmp(pFirstRangeBan->ui128ToIpHash, pSecondRangeBan->ui128ToIpHash, 16) == 0) ? 0 : -1) : -1);
         case 1:
             return _stricmp(pFirstRangeBan->sReason == NULL ? "" : pFirstRangeBan->sReason, pSecondRangeBan->sReason == NULL ? "" : pSecondRangeBan->sReason);
         case 2:

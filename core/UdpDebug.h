@@ -35,9 +35,12 @@ private:
 #else
 		int s;
 #endif
-        sockaddr_in to;
+        sockaddr_storage sas_to;
+        int sas_len;
+
         uint32_t ui32Hash;
         char *Nick;
+
         UdpDbgItem *prev, *next;
         bool bIsScript;
     };

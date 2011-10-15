@@ -91,19 +91,20 @@ void UpdateCheckThread::Resume() {
 //---------------------------------------------------------------------------
 
 void UpdateCheckThread::Run() {
-    sockaddr_in target;
-    target.sin_family = AF_INET;
-    target.sin_port = htons(80);
+    struct addrinfo * pResult = NULL;
 
-    struct addrinfo * pResult;
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(addrinfo));
 
-    struct addrinfo hints = { 0 };
-    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
 
-    if(::getaddrinfo("www.PtokaX.org", NULL, &hints, &pResult) == 0 && pResult->ai_family == AF_INET) {
-        target.sin_addr.s_addr = ((sockaddr_in *)(pResult->ai_addr))->sin_addr.s_addr;
-        ::freeaddrinfo(pResult);
+    if(bUseIPv6 == true) {
+        hints.ai_family = AF_UNSPEC;
     } else {
+        hints.ai_family = AF_INET;
+    }
+
+    if(::getaddrinfo("www.PtokaX.org", "80", &hints, &pResult) != 0 || (pResult->ai_family != AF_INET && pResult->ai_family != AF_INET6)) {
         int iError = WSAGetLastError();
         int iMsgLen = sprintf(sMsg, "Update check resolve error %s (%d).", WSErrorStr(iError), iError);
         if(CheckSprintf(iMsgLen, 2048, "UpdateCheckThread::Run") == true) {
@@ -112,16 +113,20 @@ void UpdateCheckThread::Run() {
 
         ::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
+        if(pResult != NULL) {
+            ::freeaddrinfo(pResult);
+        }
+
         return;
     }
 
     // Initialise socket we want to use for connect
 #ifdef _WIN32
-    if((sSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET) {
+    if((sSocket = socket(pResult->ai_family, pResult->ai_socktype, pResult->ai_protocol)) == INVALID_SOCKET) {
         int iError = WSAGetLastError();
         int iMsgLen = sprintf(sMsg, "Update check create error %s (%d).", WSErrorStr(iError), iError);
 #else
-    if((sSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1) {
+    if((sSocket = socket(pResult->ai_family, pResult->ai_socktype, pResult->ai_protocol)) == -1) {
         int iMsgLen = sprintf(sMsg, "Update check create error %s (%d).", WSErrorStr(errno), errno);
 #endif
         if(CheckSprintf(iMsgLen, 2048, "UpdateCheckThread::Run1") == true) {
@@ -129,6 +134,8 @@ void UpdateCheckThread::Run() {
         }
 
         ::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+
+        ::freeaddrinfo(pResult);
 
         return;
     }
@@ -149,6 +156,8 @@ void UpdateCheckThread::Run() {
 
 		::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
+        ::freeaddrinfo(pResult);
+
         return;
 	}
 
@@ -168,6 +177,8 @@ void UpdateCheckThread::Run() {
 			
 		::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
+        ::freeaddrinfo(pResult);
+
         return;
     }
 
@@ -175,12 +186,12 @@ void UpdateCheckThread::Run() {
 
     // Finally, time to connect ! ;)
 #ifdef _WIN32
-    if(connect(sSocket, (sockaddr *)&target, sizeof(target)) == SOCKET_ERROR) {
+    if(connect(sSocket, pResult->ai_addr, (int)pResult->ai_addrlen) == SOCKET_ERROR) {
         int iError = WSAGetLastError();
         if(iError != WSAEWOULDBLOCK) {
             int iMsgLen = sprintf(sMsg, "Update check connect error %s (%d).", WSErrorStr(iError), iError);
-#else  
-    if(connect(sSocket, (sockaddr *)&target, sizeof(target)) == -1) {
+#else
+    if(connect(sSocket, pResult->ai_addr, (int)pResult->ai_addrlen) == -1) {
         if(errno != EAGAIN) {
             int iMsgLen = sprintf(sMsg, "Update check connect error %s (%d).", WSErrorStr(errno), errno);
 #endif
@@ -190,9 +201,13 @@ void UpdateCheckThread::Run() {
 
 			::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
+            ::freeaddrinfo(pResult);
+
             return;
         }
     }
+
+    ::freeaddrinfo(pResult);
 
 	Message("Connected to PtokaX.org, sending request...", 43);
 

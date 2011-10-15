@@ -53,12 +53,14 @@ private:
 	void Close(User * curUser, char * sData, const uint32_t &iLen);
     
     void Unknown(User * curUser, char * sData, const uint32_t &iLen);
+    void MyNick(User * pUser, char * sData, const uint32_t &ui32Len);
     
     bool ValidateUserNick(User * curUser, char * Nick, const size_t &iNickLen, const bool &ValidateNick);
 
-	PassBf * Find(const uint32_t &hash);
+	PassBf * Find(const uint8_t * ui128IpHash);
 	void Remove(PassBf * PassBfItem);
 
+    bool CheckIP(const User * curUser, const char * sIP);
     void SendIncorrectIPMsg(User * curUser, char * sBadIP, const bool &bCTM);
 protected:
 public:

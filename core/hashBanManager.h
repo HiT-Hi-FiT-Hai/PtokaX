@@ -27,7 +27,9 @@ struct User;
 struct BanItem {
     time_t tempbanexpire;
 
-    uint32_t ui32NickHash, ui32IpHash;
+    uint32_t ui32NickHash;
+
+    uint8_t ui128IpHash[16];
 
     char *sNick, *sReason, *sBy;
 
@@ -36,7 +38,7 @@ struct BanItem {
     BanItem *hashiptableprev, *hashiptablenext;
 
     uint8_t ui8Bits;
-    char sIp[16];
+    char sIp[46];
 
     BanItem(void);
     ~BanItem(void);
@@ -46,7 +48,7 @@ struct BanItem {
 struct RangeBanItem {
     time_t tempbanexpire;
 
-    uint32_t ui32FromIpHash, ui32ToIpHash;
+    uint8_t ui128FromIpHash[16], ui128ToIpHash[16];
 
     char *sReason, *sBy;
 
@@ -54,7 +56,7 @@ struct RangeBanItem {
 
     uint8_t ui8Bits;
 
-    char sIpFrom[16], sIpTo[16] ;
+    char sIpFrom[46], sIpTo[46] ;
 
     RangeBanItem(void);
     ~RangeBanItem(void);
@@ -111,23 +113,23 @@ public:
     BanItem* FindIP(User* u);
     RangeBanItem* FindRange(User* u);
 
-	BanItem* FindFull(const uint32_t &hash);
-    BanItem* FindFull(const uint32_t &hash, const time_t &acc_time);
-    RangeBanItem* FindFullRange(const uint32_t &hash, const time_t &acc_time);
+	BanItem* FindFull(const uint8_t * ui128IpHash);
+    BanItem* FindFull(const uint8_t * ui128IpHash, const time_t &acc_time);
+    RangeBanItem* FindFullRange(const uint8_t * ui128IpHash, const time_t &acc_time);
 
     BanItem* FindNick(char * sNick, const size_t &iNickLen);
     BanItem* FindNick(const uint32_t &hash, const time_t &acc_time, char * sNick);
-    BanItem* FindIP(const uint32_t &hash, const time_t &acc_time);
-    RangeBanItem* FindRange(const uint32_t &hash, const time_t &acc_time);
-    RangeBanItem* FindRange(const uint32_t &fromhash, const uint32_t &tohash, const time_t &acc_time);
+    BanItem* FindIP(const uint8_t * ui128IpHash, const time_t &acc_time);
+    RangeBanItem* FindRange(const uint8_t * ui128IpHash, const time_t &acc_time);
+    RangeBanItem* FindRange(const uint8_t * ui128FromHash, const uint8_t * ui128ToHash, const time_t &acc_time);
 
     BanItem* FindTempNick(char * sNick, const size_t &iNickLen);
     BanItem* FindTempNick(const uint32_t &hash, const time_t &acc_time, char * sNick);
-    BanItem* FindTempIP(const uint32_t &hash, const time_t &acc_time);
+    BanItem* FindTempIP(const uint8_t * ui128IpHash, const time_t &acc_time);
     
     BanItem* FindPermNick(char * sNick, const size_t &iNickLen);
     BanItem* FindPermNick(const uint32_t &hash, char * sNick);
-    BanItem* FindPermIP(const uint32_t &hash);
+    BanItem* FindPermIP(const uint8_t * ui128IpHash);
 
     void Load(void);
     void Save(bool bForce = false);
@@ -153,17 +155,16 @@ public:
     bool PermUnban(char * sWhat);
     bool TempUnban(char * sWhat);
 
-    void RemoveAllIP(const uint32_t &hash);
-    void RemovePermAllIP(const uint32_t &hash);
-    void RemoveTempAllIP(const uint32_t &hash);
+    void RemoveAllIP(const uint8_t * ui128IpHash);
+    void RemovePermAllIP(const uint8_t * ui128IpHash);
+    void RemoveTempAllIP(const uint8_t * ui128IpHash);
 
-    bool RangeBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char * sIpTo, const uint32_t &ui32ToIpHash, 
-        char * sReason, char * sBy, const bool &bFull);
-    bool RangeTempBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char * sIpTo, const uint32_t &ui32ToIpHash,
-        char * sReason, char * sBy, const uint32_t &minutes, const time_t &expiretime, const bool &bFull);
+    bool RangeBan(char * sIpFrom, const uint8_t * ui128FromIpHash, char * sIpTo, const uint8_t * ui128ToIpHash, char * sReason, char * sBy, const bool &bFull);
+    bool RangeTempBan(char * sIpFrom, const uint8_t * ui128FromIpHash, char * sIpTo, const uint8_t * ui128ToIpHash, char * sReason, char * sBy, const uint32_t &minutes,
+        const time_t &expiretime, const bool &bFull);
         
-    bool RangeUnban(const uint32_t &ui32FromIpHash, const uint32_t &ui32ToIpHash);
-    bool RangeUnban(const uint32_t &ui32FromIpHash, const uint32_t &ui32ToIpHash, unsigned char cType);
+    bool RangeUnban(const uint8_t * ui128FromIpHash, const uint8_t * ui128ToIpHash);
+    bool RangeUnban(const uint8_t * ui128FromIpHash, const uint8_t * ui128ToIpHash, unsigned char cType);
 };
 
 //--------------------------------------------------------------------------- 

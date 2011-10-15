@@ -129,12 +129,8 @@ void ServerThread::Run() {
 #else
 	int s;
 #endif
-    sockaddr_in /*sockaddr_in6*/ addr; //addr.sin_family = AF_INET;
-#ifdef _WIN32
-    int len = sizeof(addr);
-#else
+    sockaddr_storage addr;
 	socklen_t len = sizeof(addr);
-#endif
 
 #ifndef _WIN32
     struct timespec sleeptime;
@@ -143,7 +139,7 @@ void ServerThread::Run() {
 #endif
 
 	while(bTerminated == false) {
-		s = accept(server, (sockaddr *)&addr, &len);
+		s = accept(server, (struct sockaddr *)&addr, &len);
 
 		if(iSuspendTime == 0) {
 			if(bTerminated == true) {
@@ -178,7 +174,7 @@ void ServerThread::Run() {
 				}
 #endif
 			} else {
-				if(isFlooder(s, addr, len) == true) {
+				if(isFlooder(s, addr) == true) {
 #ifdef _WIN32
 					shutdown(s, SD_SEND);
 					closesocket(s);
@@ -191,7 +187,6 @@ void ServerThread::Run() {
 #ifdef _WIN32
 				::Sleep(1);
 #else
-//                usleep(1000);
                 nanosleep(&sleeptime, NULL);
 #endif
 			}
@@ -263,11 +258,10 @@ void ServerThread::WaitFor() {
 bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
     usPort = port;
 
+    server = socket((bUseIPv6 == true ? AF_INET6 : AF_INET), SOCK_STREAM, IPPROTO_TCP);
 #ifdef _WIN32
-    server = socket(AF_INET /*AF_INET6*/, SOCK_STREAM, IPPROTO_TCP);
     if(server == INVALID_SOCKET) {
 #else
-    server = socket(AF_INET /*AF_INET6*/, SOCK_STREAM, 0);
     if(server == -1) {
 #endif
         if(bSilent == true) {
@@ -305,37 +299,45 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
     }
 #endif
 
-    // set the socket properties
-    sockaddr_in /*sockaddr_in6*/ sa;
-    memset(&sa, 0, sizeof(sockaddr_in));
-    sa.sin_family /*sa.sin6_family*/ = AF_INET /*AF_INET6*/;
-    
+    if(bUseIPv6 == true) {
 #ifdef _WIN32
-    sa.sin_port /*sa.sin6_port*/ = htons((unsigned short)usPort);
+        DWORD dwIPv6 = 0;
+        setsockopt(server, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&dwIPv6, sizeof(dwIPv6));
 #else
-	sa.sin_port /*sa6.sin6_port*/ = htons(usPort);
+        int iIPv6 = 0;
+        setsockopt(server, IPPROTO_IPV6, IPV6_V6ONLY, &iIPv6, sizeof(iIPv6));
 #endif
+    }
 
-    if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP[0] != '\0') {
-#ifdef _WIN32
-        sa.sin_addr.S_un.S_addr = inet_addr(sHubIP);
-#else
-		sa.sin_addr.s_addr = inet_addr(sHubIP);
-#endif
+    // set the socket properties
+    sockaddr_storage sas;
+    memset(&sas, 0, sizeof(sockaddr_storage));
+    socklen_t sas_len;
+
+    if(bUseIPv6 == true) {
+        ((struct sockaddr_in6 *)&sas)->sin6_family = AF_INET6;
+        ((struct sockaddr_in6 *)&sas)->sin6_port = htons(usPort);
+        sas_len = sizeof(struct sockaddr_in6);
     } else {
-#ifdef _WIN32
-        sa.sin_addr.S_un.S_addr /*sa.sin6_addr*/ = INADDR_ANY /*in6addr_any*/;
-#else
-		sa.sin_addr.s_addr /*sa6.sin6_addr*/ = INADDR_ANY /*in6addr_any*/;
-#endif
+        ((struct sockaddr_in *)&sas)->sin_family = AF_INET;
+        ((struct sockaddr_in *)&sas)->sin_port = htons(usPort);
+        sas_len = sizeof(struct sockaddr_in);
+    }
+
+    if(bUseIPv6 == true) {
+        ((struct sockaddr_in6 *)&sas)->sin6_addr = in6addr_any;
+    } else if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP[0] != '\0') {
+		((struct sockaddr_in *)&sas)->sin_addr.s_addr = inet_addr(sHubIP);
+    } else {
+		((struct sockaddr_in *)&sas)->sin_addr.s_addr = INADDR_ANY;
     }
 
     // bind it
 #ifdef _WIN32
-    if(bind(server, (sockaddr *)&sa, sizeof(sa)) == SOCKET_ERROR) {
+    if(bind(server, (struct sockaddr *)&sas, sas_len) == SOCKET_ERROR) {
     	int err = WSAGetLastError();
 #else
-	if(bind(server, (sockaddr *)&sa, sizeof(sa)) == -1) {
+	if(bind(server, (struct sockaddr *)&sas, sas_len) == -1) {
 #endif
         if(bSilent == true) {
             eventqueue->AddThread(eventq::EVENT_SRVTHREAD_MSG, 
@@ -405,12 +407,18 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
-bool ServerThread::isFlooder(const SOCKET &s, const sockaddr_in /*sockaddr_in6*/ &addr, const int &sin_len) {
-    uint32_t iAddr = addr.sin_addr.S_un.S_addr;
+bool ServerThread::isFlooder(const SOCKET &s, const sockaddr_storage &addr) {
 #else
-bool ServerThread::isFlooder(const int &s, const sockaddr_in &addr, const socklen_t &sin_len) {
-    uint32_t iAddr = addr.sin_addr.s_addr;
+bool ServerThread::isFlooder(const int &s, const sockaddr_storage &addr) {
 #endif
+    uint8_t ui128IpHash[16];
+    memset(ui128IpHash, 0, 16);
+
+    if(addr.ss_family == AF_INET6) {
+        memcpy(ui128IpHash, &((struct sockaddr_in6 *)&addr)->sin6_addr, 16);
+    } else {
+        memcpy(ui128IpHash, &((struct sockaddr_in *)&addr)->sin_addr.s_addr, 4);
+    }
 
     int16_t iConDefloodCount = SettingManager->GetShort(SETSHORT_NEW_CONNECTIONS_COUNT);
     int16_t iConDefloodTime = SettingManager->GetShort(SETSHORT_NEW_CONNECTIONS_TIME);
@@ -419,13 +427,14 @@ bool ServerThread::isFlooder(const int &s, const sockaddr_in &addr, const sockle
 	while(nxt != NULL) {
 		AntiConFlood *cur = nxt;
 		nxt = cur->next;
-    	if(iAddr == cur->addr) {
+
+    	if(memcmp(ui128IpHash, cur->ui128IpHash, 16) == 0) {
             if(cur->Time+((uint64_t)iConDefloodTime) >= ui64ActualTick) {
                 cur->hits++;
                 if(cur->hits > iConDefloodCount) {
                     return true;
                 } else {
-                    srvLoop->AcceptSocket(s, addr, sin_len);
+                    srvLoop->AcceptSocket(s, addr);
                     return false;
                 }
             } else {
@@ -447,17 +456,22 @@ bool ServerThread::isFlooder(const int &s, const sockaddr_in &addr, const sockle
 		AppendSpecialLog(sDbgstr);
     	return true;
     }
-    newItem->addr = iAddr;
+
+    memcpy(newItem->ui128IpHash, ui128IpHash, 16);
+
     newItem->Time = ui64ActualTick;
+
     newItem->prev = NULL;
     newItem->next = AntiFloodList;
+
     newItem->hits = 1;
+
     if(AntiFloodList != NULL) {
         AntiFloodList->prev = newItem;
     }
     AntiFloodList = newItem;
 
-    srvLoop->AcceptSocket(s, addr, sin_len);
+    srvLoop->AcceptSocket(s, addr);
 
     return false;
 }

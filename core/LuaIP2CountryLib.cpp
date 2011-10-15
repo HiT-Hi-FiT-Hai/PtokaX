@@ -59,14 +59,17 @@ static int GetCountryCode(lua_State * L) {
 
     size_t iLen;
     char *sIP = (char *)lua_tolstring(L, 1, &iLen);
-    uint32_t ui32Hash;
-    if(iLen == 0 || HashIP(sIP, iLen, ui32Hash) == false) {
+
+    uint8_t ui128Hash[16];
+    memset(ui128Hash, 0, 16);
+
+    if(iLen == 0 || HashIP(sIP, ui128Hash) == false) {
         lua_settop(L, 0);
         lua_pushnil(L);
         return 1;
     }
 
-    const char * sCountry = IP2Country->Find(ui32Hash, false);
+    const char * sCountry = IP2Country->Find(ui128Hash, false);
 
     lua_settop(L, 0);
 
@@ -89,14 +92,17 @@ static int GetCountryName(lua_State * L) {
     if(lua_type(L, 1) == LUA_TSTRING) {
         size_t iLen;
         char *sIP = (char *)lua_tolstring(L, 1, &iLen);
-        uint32_t ui32Hash;
-        if(iLen == 0 || HashIP(sIP, iLen, ui32Hash) == false) {
+
+        uint8_t ui128Hash[16];
+        memset(ui128Hash, 0, 16);
+
+        if(iLen == 0 || HashIP(sIP, ui128Hash) == false) {
             lua_settop(L, 0);
             lua_pushnil(L);
             return 1;
         }
 
-        sCountry = IP2Country->Find(ui32Hash, true);
+        sCountry = IP2Country->Find(ui128Hash, true);
     } else if(lua_type(L, 1) == LUA_TTABLE) {
 		User * u = ScriptGetUser(L, 1, "GetCountryName");
         if(u == NULL) {

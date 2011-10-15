@@ -24,17 +24,18 @@
 
 class IP2CC {
 private:
-    uint32_t ui32Size;
+    uint32_t ui32Size, ui32IPv6Size;
     uint32_t * ui32RangeFrom, * ui32RangeTo;
-    uint8_t * ui8RangeCI;
+    uint8_t * ui8RangeCI, * ui8IPv6RangeCI;
+    uint8_t * ui128IPv6RangeFrom, * ui128IPv6RangeTo;
 public:
-    uint32_t ui32Count;
+    uint32_t ui32Count, ui32IPv6Count;
 
 	IP2CC();
 	~IP2CC();
 
-	const char * Find(const uint32_t &ui32Hash, const bool &bCountryName);
-	uint8_t Find(const uint32_t &ui32Hash);
+	const char * Find(const uint8_t * ui128IpHash, const bool &bCountryName);
+	uint8_t Find(const uint8_t * ui128IpHash);
 
     const char * GetCountry(const uint8_t &ui8dx, const bool &bCountryName);
 };

@@ -217,7 +217,7 @@ void BanDialog::DoModal(HWND hWndParent, BanItem * pBan/* = NULL*/) {
 
     hWndWindowItems[EDT_IP] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
         11, iPosX + iGroupBoxMargin, rcParent.right - 22, iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
-    ::SendMessage(hWndWindowItems[EDT_IP], EM_SETLIMITTEXT, 15, 0);
+    ::SendMessage(hWndWindowItems[EDT_IP], EM_SETLIMITTEXT, 39, 0);
 
     hWndWindowItems[BTN_IP_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_IP_BAN], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
         11, iPosX + iGroupBoxMargin + iEditHeight + 4, rcParent.right - 22, iCheckHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)BTN_IP_BAN, g_hInstance, NULL);
@@ -360,14 +360,17 @@ bool BanDialog::OnAccept() {
 
     int iIpLen = ::GetWindowTextLength(hWndWindowItems[EDT_IP]);
 
-    char sIP[16];
-    ::GetWindowText(hWndWindowItems[EDT_IP], sIP, 16);
+    char sIP[40];
+    ::GetWindowText(hWndWindowItems[EDT_IP], sIP, 40);
+
+    uint8_t ui128IpHash[16];
+    memset(ui128IpHash, 0, 16);
 
 	if(bIpBan == true) {
 		if(iIpLen == 0) {
 			::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_FOR_IP_BAN_SPECIFY_IP], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 			return false;
-		} else if(isIP(sIP, iIpLen) == false) {
+		} else if(HashIP(sIP, ui128IpHash) == false) {
 			::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(sIP) + " " + LanguageManager->sTexts[LAN_IS_NOT_VALID_IP_ADDRESS]).c_str(), sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 			return false;
         }
@@ -379,7 +382,6 @@ bool BanDialog::OnAccept() {
 	time_t ban_time = 0;
 
     bool bTempBan = ::SendMessage(hWndWindowItems[RB_TEMP_BAN], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false;
-    bool bPermBan = ::SendMessage(hWndWindowItems[RB_PERM_BAN], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false;
 
 	if(bTempBan == true) {
         SYSTEMTIME stDate = { 0 };
@@ -423,9 +425,7 @@ bool BanDialog::OnAccept() {
 
         if(iIpLen != 0) {
             strcpy(pBan->sIp, sIP);
-            pBan->ui32IpHash = 0;
-
-            HashIP(pBan->sIp, iIpLen, pBan->ui32IpHash);
+            memcpy(pBan->ui128IpHash, ui128IpHash, 16);
 
             if(bIpBan == true) {
 				pBan->ui8Bits |= hashBanMan::IP;
@@ -464,304 +464,24 @@ bool BanDialog::OnAccept() {
 				BanItem *nxtBan = hashBanManager->FindNick(pBan->ui32NickHash, acc_time, pBan->sNick);
 
                 if(nxtBan != NULL) {
-                    if(bIpBan == true) {
-                        if(bPermBan == true) {
-							if(((nxtBan->ui8Bits & hashBanMan::PERM) == hashBanMan::PERM) == true) {
-								if(((nxtBan->ui8Bits & hashBanMan::IP) == hashBanMan::IP) == true) {
-                                    if(pBan->ui32IpHash == nxtBan->ui32IpHash) {
-										if(((pBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false) {
-                                            // PPK ... same ban and new is not full, delete new
-                                            delete pBan;
+                    // PPK ... same ban exist, delete new
+                    delete pBan;
 
-                                            ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
-                                            return false;
-                                        } else {
-											if(((nxtBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
-                                                // PPK ... same ban and both full, delete new
-                                                delete pBan;
-
-                                                ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
-                                                return false;
-                                            } else {
-                                                // PPK ... same ban but only new is full, delete old
-												hashBanManager->Rem(nxtBan);
-                                                delete nxtBan;
-                							}
-                                        }
-                                    } else {
-										pBan->ui8Bits &= ~hashBanMan::NICK;
-                                    }
-                                } else {
-                                    // PPK ... old ban is only nickban, remove it
-									hashBanManager->Rem(nxtBan);
-                                    delete nxtBan;
-                				}
-                            } else {
-								if(((nxtBan->ui8Bits & hashBanMan::IP) == hashBanMan::IP) == true) {
-                                    if(pBan->ui32IpHash == nxtBan->ui32IpHash) {
-										if(((nxtBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false) {
-                                            // PPK ... same ban and old is only temp, delete old
-											hashBanManager->Rem(nxtBan);
-                                            delete nxtBan;
-                						} else {
-											if(((pBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
-                                                // PPK ... same full ban and old is only temp, delete old
-												hashBanManager->Rem(nxtBan);
-                                                delete nxtBan;
-                							} else {
-                                                // PPK ... old ban is full, new not... set old ban to only ipban
-												hashBanManager->RemFromNickTable(nxtBan);
-												nxtBan->ui8Bits &= ~hashBanMan::NICK;
-                                            }
-                                        }
-                                    } else {
-										// PPK ... set old ban to ip ban only
-										hashBanManager->RemFromNickTable(nxtBan);
-										nxtBan->ui8Bits &= ~hashBanMan::NICK;
-                                    }
-                                } else {
-                                    // PPK ... old ban is only nickban, remove it
-									hashBanManager->Rem(nxtBan);
-                                    delete nxtBan;
-                				}
-                            }
-                        } else { // tempban
-                            if(nxtBan != NULL) {
-								if(((nxtBan->ui8Bits & hashBanMan::PERM) == hashBanMan::PERM) == true) {
-									if(((nxtBan->ui8Bits & hashBanMan::IP) == hashBanMan::IP) == true) {
-                                        if(pBan->ui32IpHash == nxtBan->ui32IpHash) {
-											if(((pBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false) {
-                                                // PPK ... same ban and old is perm, delete new
-                                                delete pBan;
-
-                                                ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
-                                                return false;
-                                            } else {
-												if(((nxtBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
-                                                    // PPK ... same ban and old is full perm, delete new
-                                                    delete pBan;
-
-                                                    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
-                                                    return false;
-                                                } else {
-                                                    // PPK ... same ban and only new is full, set new to ipban only
-													pBan->ui8Bits &= ~hashBanMan::NICK;
-                                                }
-                                            }
-                                        }
-                                    } else {
-                                        // PPK ... perm ban to same nick already exist, set new to ipban only
-										pBan->ui8Bits &= ~hashBanMan::NICK;
-                                    }
-                                } else {
-                                    if(nxtBan->tempbanexpire < pBan->tempbanexpire) {
-										if(((nxtBan->ui8Bits & hashBanMan::IP) == hashBanMan::IP) == true) {
-                                            if(pBan->ui32IpHash == nxtBan->ui32IpHash) {
-												if(((nxtBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false) {
-                                                    // PPK ... same bans, but old with lower expiration -> delete old
-													hashBanManager->Rem(nxtBan);
-                                                    delete nxtBan;
-                    							} else {
-													if(((pBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false) {
-                                                        // PPK ... old ban with lower expiration is full ban, set old to ipban only
-														hashBanManager->RemFromNickTable(nxtBan);
-														nxtBan->ui8Bits &= ~hashBanMan::NICK;
-                                                    } else {
-                                                        // PPK ... same bans, old have lower expiration -> delete old
-														hashBanManager->Rem(nxtBan);
-                                                        delete nxtBan;
-                    								}
-                                                }
-                                            } else {
-                                                // PPK ... set old ban to ipban only
-												hashBanManager->RemFromNickTable(nxtBan);
-                                                nxtBan->ui8Bits &= ~hashBanMan::NICK;
-                                            }
-                                        } else {
-                                            // PPK ... old ban is only nickban with lower bantime, remove it
-											hashBanManager->Rem(nxtBan);
-                                            delete nxtBan;
-                    					}
-                                    } else {
-										if(((nxtBan->ui8Bits & hashBanMan::IP) == hashBanMan::IP) == true) {
-                                            if(pBan->ui32IpHash == nxtBan->ui32IpHash) {
-												if(((pBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false) {
-                                                    // PPK ... same bans, but new with lower expiration -> delete new
-                                                    delete pBan;
-
-                                                    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
-                    								return false;
-                                                } else {
-													if(((nxtBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false) {
-                                                        // PPK ... new ban with lower expiration is full ban, set new to ipban only
-														pBan->ui8Bits &= ~hashBanMan::NICK;
-                                                    } else {
-                                                        // PPK ... same bans, new have lower expiration -> delete new
-                                                        delete pBan;
-
-                                                        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
-                                                        return false;
-                                                    }
-                                                }
-                                            } else {
-                                                // PPK ... set new ban to ipban only
-												pBan->ui8Bits &= ~hashBanMan::NICK;
-                                            }
-                                        } else {
-                                            // PPK ... old ban is only nickban with higher bantime, set new to ipban only
-                                            pBan->ui8Bits &= ~hashBanMan::NICK;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else { // nick ban only
-                        if(bPermBan == true) {
-							if(((nxtBan->ui8Bits & hashBanMan::PERM) == hashBanMan::PERM) == true) {
-                                delete pBan;
-
-                                ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
-                                return false;
-                            } else {
-								if(((nxtBan->ui8Bits & hashBanMan::IP) == hashBanMan::IP) == true) {
-                                    // PPK ... set old ban to ip ban only
-									hashBanManager->RemFromNickTable(nxtBan);
-									nxtBan->ui8Bits &= ~hashBanMan::NICK;
-                                } else {
-                                    // PPK ... old ban is only nickban, remove it
-									hashBanManager->Rem(nxtBan);
-                                    delete nxtBan;
-                    			}
-                            }
-                        } else { // temp ban
-							if(((nxtBan->ui8Bits & hashBanMan::PERM) == hashBanMan::PERM) == true) {
-                                delete pBan;
-
-                                ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
-								return false;
-                            } else {
-                                if(nxtBan->tempbanexpire < pBan->tempbanexpire) {
-									if(((nxtBan->ui8Bits & hashBanMan::IP) == hashBanMan::IP) == true) {
-                                        // PPK ... set old ban to ip ban only
-										hashBanManager->RemFromNickTable(nxtBan);
-                                        nxtBan->ui8Bits &= ~hashBanMan::NICK;
-                                    } else {
-                                        // PPK ... old ban is only nickban, remove it
-										hashBanManager->Rem(nxtBan);
-                                        delete nxtBan;
-                    				}
-                                } else {
-                                    delete pBan;
-
-                                    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
-									return false;
-                                }
-                            }
-                        }
-                    }
+                    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+                    return false;
                 }
 			}
 		}
 
         if(bIpBan == true) {
-			BanItem *nxtBan = hashBanManager->FindIP(pBan->ui32IpHash, acc_time);
+			BanItem *nxtBan = hashBanManager->FindIP(pBan->ui128IpHash, acc_time);
 
-            if(bNickBan == true) {
-                if(bPermBan == true) {
-                    while(nxtBan != NULL) {
-                        BanItem *curBan = nxtBan;
-                        nxtBan = curBan->hashiptablenext;
+            if(nxtBan != NULL) {
+                // PPK ... same ban exist, delete new
+                delete pBan;
 
-						if(((curBan->ui8Bits & hashBanMan::NICK) == hashBanMan::NICK) == true) {
-                            continue;
-                        }
-
-						if(((curBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true && ((pBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false) {
-                            continue;
-                        }
-
-						hashBanManager->Rem(curBan);
-                        delete curBan;
-                	}
-                } else { // temp ban
-                    while(nxtBan != NULL) {
-                        BanItem *curBan = nxtBan;
-                        nxtBan = curBan->hashiptablenext;
-
-						if(((curBan->ui8Bits & hashBanMan::PERM) == hashBanMan::PERM) == true) {
-                            continue;
-                        }
-
-						if(((curBan->ui8Bits & hashBanMan::NICK) == hashBanMan::NICK) == true) {
-                            continue;
-                        }
-
-						if(((curBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true && ((pBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false) {
-                            continue;
-                        }
-
-                        if(curBan->tempbanexpire > pBan->tempbanexpire) {
-                            continue;
-                        }
-
-						hashBanManager->Rem(curBan);
-                        delete curBan;
-                	}
-                }
-            } else { // ip ban only
-                if(bPermBan == true) {
-                    while(nxtBan != NULL) {
-                        BanItem *curBan = nxtBan;
-                        nxtBan = curBan->hashiptablenext;
-
-						if(((curBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
-							if(((curBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false || ((pBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
-								if(((curBan->ui8Bits & hashBanMan::NICK) == hashBanMan::NICK) == false) {
-									hashBanManager->Rem(curBan);
-                                    delete curBan;
-                				}
-                            }
-                            continue;
-                        }
-
-						if(((curBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false && ((pBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
-							if(((curBan->ui8Bits & hashBanMan::NICK) == hashBanMan::NICK) == false) {
-								hashBanManager->Rem(curBan);
-                                delete curBan;
-                			}
-                            continue;
-                        }
-
-                        delete pBan;
-
-                        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
-                        return false;
-                    }
-                } else { // temp ban
-                    while(nxtBan != NULL) {
-                        BanItem *curBan = nxtBan;
-                        nxtBan = curBan->hashiptablenext;
-
-						if(((curBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true && curBan->tempbanexpire < pBan->tempbanexpire) {
-							if(((curBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false || ((pBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
-								if(((curBan->ui8Bits & hashBanMan::NICK) == hashBanMan::NICK) == false) {
-									hashBanManager->Rem(curBan);
-                                    delete curBan;
-                				}
-                            }
-                            continue;
-                        }
-
-                        if(((curBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false && ((pBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
-                            continue;
-                        }
-
-                        delete pBan;
-
-                        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
-                        return false;
-                    }
-                }
+                ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+                return false;
             }
         }
 
@@ -807,7 +527,7 @@ bool BanDialog::OnAccept() {
             }
 
 			pBanToChange->sIp[0] = '\0';
-			pBanToChange->ui32IpHash = 0;
+			memset(pBanToChange->ui128IpHash, 0, 16);
 
 			pBanToChange->ui8Bits &= ~hashBanMan::IP;
 			pBanToChange->ui8Bits &= ~hashBanMan::FULL;
@@ -818,9 +538,7 @@ bool BanDialog::OnAccept() {
 			}
 
 			strcpy(pBanToChange->sIp, sIP);
-			pBanToChange->ui32IpHash = 0;
-
-			HashIP(pBanToChange->sIp, iIpLen, pBanToChange->ui32IpHash);
+			memcpy(pBanToChange->ui128IpHash, ui128IpHash, 16);
 
 			if(bIpBan == true) {
 				pBanToChange->ui8Bits |= hashBanMan::IP;

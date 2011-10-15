@@ -33,16 +33,9 @@ private:
 		int s;
 #endif
 
-        sockaddr_in /*sockaddr_in6*/ addr;
-
-#ifdef _WIN32
-        int sin_len;
-#else
-		socklen_t sin_len;
-#endif
+        sockaddr_storage addr;
 
         AcceptedSocket *next;
-        char IP[16 /*46*/ ];
     };
 
     uint64_t iLstUptmTck;
@@ -79,9 +72,9 @@ public:
     bool bRecv;
 
 #ifdef _WIN32
-	void AcceptSocket(const SOCKET &s, const sockaddr_in /*sockaddr_in6*/ &addr, const int &sin_len);
+	void AcceptSocket(const SOCKET &s, const sockaddr_storage &addr);
 #else
-	void AcceptSocket(const int &s, const sockaddr_in &addr, const socklen_t &sin_len);
+	void AcceptSocket(const int &s, const sockaddr_storage &addr);
 #endif
 	void ReceiveLoop();
 	void SendLoop();

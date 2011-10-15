@@ -194,13 +194,8 @@ static int RemoveTimer(lua_State * L) {
         return 0;
     }
 
-#ifdef _WIN32
-    if(lua_type(L, 1) != LUA_TNUMBER) {
-        luaL_checktype(L, 1, LUA_TNUMBER);
-#else
     if(lua_type(L, 1) != LUA_TLIGHTUSERDATA) {
         luaL_checktype(L, 1, LUA_TLIGHTUSERDATA);
-#endif
 		lua_settop(L, 0);
         return 0;
     }
@@ -212,7 +207,7 @@ static int RemoveTimer(lua_State * L) {
 	}
 
 #ifdef _WIN32
-    UINT_PTR timer = (UINT_PTR)lua_tonumber(L, 1);
+    UINT_PTR timer = (UINT_PTR)lua_touserdata(L, 1);
 #else
 	timer_t timer = (timer_t)lua_touserdata(L, 1);
 #endif

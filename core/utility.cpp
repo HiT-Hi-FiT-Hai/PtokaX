@@ -41,11 +41,10 @@ static const int MAX_PAT_SIZE = 64;
 static const int MAX_ALPHABET_SIZE = 255;
 //---------------------------------------------------------------------------
 string PATH = "", SCRIPT_PATH = "", sTitle = "";
-bool bCmdAutoStart = false, bCmdNoAutoStart = false, bCmdNoTray = false, bCmdNoKeyCheck = false;
+bool bCmdAutoStart = false, bCmdNoAutoStart = false, bCmdNoTray = false, bCmdNoKeyCheck = false, bUseIPv6 = true;
 #ifdef _WIN32
 	HANDLE hConsole = NULL, hLuaHeap = NULL, hPtokaXHeap = NULL, hRecvHeap = NULL, hSendHeap = NULL;
 	string PATH_LUA = "", sOs = "";
-	bool b2K = false;
 #endif
 //---------------------------------------------------------------------------
 
@@ -757,13 +756,31 @@ uint32_t HashNick(const char * sNick, const size_t &iNickLen) {
 }
 //---------------------------------------------------------------------------
 
-bool HashIP(char * sIP, const size_t ui32Len, uint32_t &ui32Hash) {
-	uint32_t a, b, c, d;
-    if(GetIpParts(sIP, ui32Len, a, b, c, d) == false) {
-        return false;
-    }
+bool HashIP(const char * sIP, uint8_t * ui128IpHash) {
+    if(bUseIPv6 == true && strchr(sIP, '.') == NULL) {
+#ifdef _WIN32
+        if(win_inet_pton(AF_INET6, sIP, ui128IpHash) != 1) {
+#else
+        if(inet_pton(AF_INET6, sIP, ui128IpHash) != 1) {
+#endif
+            return false;
+        }
+    } else {
+        uint32_t ui32IpHash = inet_addr(sIP);
 
-	ui32Hash = 16777216 * a + 65536 * b + 256 * c + d;
+        if(ui32IpHash == INADDR_NONE) {
+            return false;
+        }
+
+        memset(ui128IpHash, 0, 16);
+
+        if(bUseIPv6 == true) {
+            ui128IpHash[10] = 255;
+            ui128IpHash[11] = 255;
+        }
+
+        memcpy(ui128IpHash+12, &ui32IpHash, 4);
+    }
 
 	return true;
 }
@@ -1016,20 +1033,20 @@ int GetWlcmMsg(char * sWlcmMsg) {
 #ifdef _WIN32
 	string GetMemStat() {
 		string sStat = "";
-	    if(b2K == true) {
-	        PROCESS_MEMORY_COUNTERS pmc;
-	        pmc.cb = sizeof(pmc);
 
-			typedef BOOL (WINAPI *PGPMI)(HANDLE, PPROCESS_MEMORY_COUNTERS, DWORD);
-			PGPMI pGPMI = (PGPMI)GetProcAddress(LoadLibrary("psapi.dll"), "GetProcessMemoryInfo");
+	    PROCESS_MEMORY_COUNTERS pmc;
+	    pmc.cb = sizeof(pmc);
 
-            if(pGPMI != NULL) {
-				pGPMI(GetCurrentProcess(), &pmc, sizeof(pmc));
+		typedef BOOL (WINAPI *PGPMI)(HANDLE, PPROCESS_MEMORY_COUNTERS, DWORD);
+		PGPMI pGPMI = (PGPMI)GetProcAddress(LoadLibrary("psapi.dll"), "GetProcessMemoryInfo");
+
+        if(pGPMI != NULL) {
+			pGPMI(GetCurrentProcess(), &pmc, sizeof(pmc));
 					   
-                sStat += "\r\nMem usage (Peak): "+string(formatBytes(pmc.WorkingSetSize))+ " ("+string(formatBytes(pmc.PeakWorkingSetSize))+")";
-                sStat += "\r\nVM size (Peak): "+string(formatBytes(pmc.PagefileUsage))+ " ("+string(formatBytes(pmc.PeakPagefileUsage))+")";
-            }
-	    }
+            sStat += "\r\nMem usage (Peak): "+string(formatBytes(pmc.WorkingSetSize))+ " ("+string(formatBytes(pmc.PeakWorkingSetSize))+")";
+            sStat += "\r\nVM size (Peak): "+string(formatBytes(pmc.PagefileUsage))+ " ("+string(formatBytes(pmc.PeakPagefileUsage))+")";
+        }
+
 		return sStat;
 	}
 #endif
@@ -1249,15 +1266,21 @@ bool DirExist(char * sPath) {
 		OSVERSIONINFOEX ver;
 		memset(&ver, 0, sizeof(OSVERSIONINFOEX));
 		ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-	
-		if(GetVersionEx((OSVERSIONINFO*)&ver) == 0) {
+
+		if(::GetVersionEx((OSVERSIONINFO*)&ver) == 0) {
+            bUseIPv6 = false;
 			sOs = "Windows (unknown version)";
+
+			return;
 		}
-	
+
 		if(ver.dwPlatformId != VER_PLATFORM_WIN32_NT) {
+            bUseIPv6 = false;
 			sOs = "Windows 9x/ME";
 	    } else if(ver.dwMajorVersion == 6) {
-            if(ver.dwMinorVersion == 1) {
+            if(ver.dwMinorVersion == 2) {
+                sOs = "Windows 8";
+            } else if(ver.dwMinorVersion == 1) {
 	           if(ver.wProductType == VER_NT_WORKSTATION) {
 	               sOs = "Windows 7";
 	           } else {
@@ -1271,6 +1294,7 @@ bool DirExist(char * sPath) {
 	           }
             }
 		} else if(ver.dwMajorVersion == 5) {
+            bUseIPv6 = false;
 	        if(ver.dwMinorVersion == 2) {
                 if(ver.wProductType != VER_NT_WORKSTATION) {
 				    sOs = "Windows 2003";
@@ -1301,6 +1325,7 @@ bool DirExist(char * sPath) {
 				sOs = "Windows 2000";
 			}
 		} else if(ver.dwMajorVersion == 4) {
+            bUseIPv6 = false;
 			sOs = "Windows NT4";
 		}
 	}
@@ -1322,3 +1347,82 @@ bool DirExist(char * sPath) {
     }
 #endif
 //---------------------------------------------------------------------------
+
+#ifdef _WIN32
+typedef INT (WSAAPI * pInetPton)(INT, PCTSTR, PVOID);
+pInetPton MyInetPton = NULL;
+typedef PCTSTR (WSAAPI *pInetNtop)(INT, PVOID, PTSTR, size_t);
+pInetNtop MyInetNtop = NULL;
+#endif
+//---------------------------------------------------------------------------
+
+void CheckForIPv6() {
+#ifdef _WIN32
+    if(bUseIPv6 == false) { // is false when we have windoze older than 6
+        return;
+    }
+#endif
+
+#ifdef _WIN32
+    SOCKET sock = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
+
+    if(sock == INVALID_SOCKET) {
+        int iError = WSAGetLastError();
+        if(iError == WSAEAFNOSUPPORT) {
+#else
+    int sock = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
+    if(sock == -1) {
+        if(errno == EAFNOSUPPORT) {
+#endif
+            bUseIPv6 = false;
+            return;
+        }
+    }
+
+#ifdef _WIN32
+    DWORD dwIPv6 = 0;
+    if(setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&dwIPv6, sizeof(dwIPv6)) == SOCKET_ERROR) {
+#else
+    int iIPv6 = 0;
+    if(setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &iIPv6, sizeof(iIPv6)) == -1) {
+#endif
+        bUseIPv6 = false;
+    }
+
+#ifdef _WIN32
+    closesocket(sock);
+#else
+    close(sock);
+#endif
+
+#ifdef _WIN32
+    HINSTANCE hWs2_32 = ::LoadLibrary("Ws2_32.dll");
+
+    MyInetPton = (pInetPton)::GetProcAddress(hWs2_32, "inet_pton");
+
+    if(MyInetPton == NULL) {
+        bUseIPv6 = false;
+    }
+
+    MyInetNtop = (pInetNtop)::GetProcAddress(hWs2_32, "inet_ntop");
+
+    if(MyInetNtop == NULL) {
+        bUseIPv6 = false;
+    }
+
+    ::FreeLibrary(hWs2_32);
+#endif
+}
+//---------------------------------------------------------------------------
+
+#ifdef _WIN32
+INT WSAAPI win_inet_pton(INT Family, PCTSTR pszAddrString, PVOID pAddrBuf) {
+    return MyInetPton(Family, pszAddrString, pAddrBuf);
+}
+//---------------------------------------------------------------------------
+
+PCTSTR WSAAPI win_inet_ntop(INT Family, PVOID pAddr, PTSTR pStringBuf, size_t StringBufSize) {
+    return MyInetNtop(Family, pAddr, pStringBuf, StringBufSize);
+}
+//---------------------------------------------------------------------------
+#endif

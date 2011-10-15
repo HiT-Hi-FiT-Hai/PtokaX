@@ -431,7 +431,7 @@ int BansDialog::CompareBans(const void * pItem, const void * pOtherItem) {
         case 0:
             return _stricmp(pFirstBan->sNick == NULL ? "" : pFirstBan->sNick, pSecondBan->sNick == NULL ? "" : pSecondBan->sNick);
         case 1:
-            return (pFirstBan->ui32IpHash > pSecondBan->ui32IpHash) ? 1 : ((pFirstBan->ui32IpHash == pSecondBan->ui32IpHash) ? 0 : -1);
+            return memcmp(pFirstBan->ui128IpHash, pSecondBan->ui128IpHash, 16);
         case 2:
             return _stricmp(pFirstBan->sReason == NULL ? "" : pFirstBan->sReason, pSecondBan->sReason == NULL ? "" : pSecondBan->sReason);
         case 3:

@@ -48,7 +48,8 @@ BanItem::BanItem(void) {
     ui8Bits = 0;
     
     ui32NickHash = 0;
-    ui32IpHash = 0;
+
+    memset(ui128IpHash, 0, 16);
 
     tempbanexpire = 0;
 
@@ -108,8 +109,8 @@ RangeBanItem::RangeBanItem(void) {
 
     ui8Bits = 0;
 
-    ui32FromIpHash = 0;
-    ui32ToIpHash = 0;
+    memset(ui128FromIpHash, 0, 16);
+    memset(ui128ToIpHash, 0, 16);
 
     tempbanexpire = 0;
 
@@ -241,7 +242,7 @@ void hashBanMan::Add2Table(BanItem *Ban) {
 //---------------------------------------------------------------------------
 
 void hashBanMan::Add2NickTable(BanItem *Ban) {
-    uint16_t ui16dx = ((uint16_t *)&Ban->ui32NickHash)[0];
+    uint16_t ui16dx = *((uint16_t *)&Ban->ui32NickHash);
 
     if(nicktable[ui16dx] != NULL) {
         nicktable[ui16dx]->hashnicktableprev = Ban;
@@ -253,7 +254,7 @@ void hashBanMan::Add2NickTable(BanItem *Ban) {
 //---------------------------------------------------------------------------
 
 void hashBanMan::Add2IpTable(BanItem *Ban) {
-    uint16_t ui16dx = ((uint16_t *)&Ban->ui32IpHash)[0];
+    uint16_t ui16dx = *((uint16_t *)(Ban->ui128IpHash+13));
     
     if(iptable[ui16dx] == NULL) {
 		iptable[ui16dx] = new IpTableItem();
@@ -281,7 +282,7 @@ void hashBanMan::Add2IpTable(BanItem *Ban) {
         IpTableItem * cur = next;
         next = cur->next;
 
-		if(cur->FirstBan->ui32IpHash == Ban->ui32IpHash) {
+		if(memcmp(cur->FirstBan->ui128IpHash, Ban->ui128IpHash, 16) == 0) {
 			cur->FirstBan->hashiptableprev = Ban;
 			Ban->hashiptablenext = cur->FirstBan;
             cur->FirstBan = Ban;
@@ -373,7 +374,7 @@ void hashBanMan::RemFromTable(BanItem *Ban) {
 
 void hashBanMan::RemFromNickTable(BanItem *Ban) {
     if(Ban->hashnicktableprev == NULL) {
-        uint16_t ui16dx = ((uint16_t *)&Ban->ui32NickHash)[0];
+        uint16_t ui16dx = *((uint16_t *)&Ban->ui32NickHash);
 
         if(Ban->hashnicktablenext == NULL) {
             nicktable[ui16dx] = NULL;
@@ -394,7 +395,7 @@ void hashBanMan::RemFromNickTable(BanItem *Ban) {
 //---------------------------------------------------------------------------
 
 void hashBanMan::RemFromIpTable(BanItem *Ban) {   
-	uint16_t ui16dx = ((uint16_t *)&Ban->ui32IpHash)[0];
+	uint16_t ui16dx = *((uint16_t *)(Ban->ui128IpHash+13));
 
 	if(Ban->hashiptableprev == NULL) {
         IpTableItem * next = iptable[ui16dx];
@@ -403,7 +404,7 @@ void hashBanMan::RemFromIpTable(BanItem *Ban) {
             IpTableItem * cur = next;
             next = cur->next;
 
-			if(cur->FirstBan->ui32IpHash == Ban->ui32IpHash) {
+			if(memcmp(cur->FirstBan->ui128IpHash, Ban->ui128IpHash, 16) == 0) {
 				if(Ban->hashiptablenext == NULL) {
 					if(cur->prev == NULL) {
 						if(cur->next == NULL) {
@@ -631,7 +632,7 @@ void hashBanMan::RemoveRange(RangeBanItem *RangeBan) {
 //---------------------------------------------------------------------------
 
 BanItem* hashBanMan::FindNick(User* u) {
-    uint16_t ui16dx = ((uint16_t *)&u->ui32NickHash)[0];
+    uint16_t ui16dx = *((uint16_t *)&u->ui32NickHash);
 
     time_t acc_time;
     time(&acc_time);
@@ -665,7 +666,7 @@ BanItem* hashBanMan::FindNick(User* u) {
 //---------------------------------------------------------------------------
 
 BanItem* hashBanMan::FindIP(User* u) {
-    uint16_t ui16dx = ((uint16_t *)&u->ui32IpHash)[0];
+    uint16_t ui16dx = *((uint16_t *)(u->ui128IpHash+13));
 
     IpTableItem * next = iptable[ui16dx];
 
@@ -676,7 +677,7 @@ BanItem* hashBanMan::FindIP(User* u) {
         IpTableItem * cur = next;
         next = cur->next;
 
-		if(cur->FirstBan->ui32IpHash == u->ui32IpHash) {
+		if(memcmp(cur->FirstBan->ui128IpHash, u->ui128IpHash, 16) == 0) {
 			BanItem * nextBan = cur->FirstBan;
 
 			while(nextBan != NULL) {
@@ -712,7 +713,7 @@ RangeBanItem* hashBanMan::FindRange(User* u) {
         RangeBanItem *cur = next;
         next = cur->next;
 
-        if(cur->ui32FromIpHash <= u->ui32IpHash && cur->ui32ToIpHash >= u->ui32IpHash) {
+        if(memcmp(cur->ui128FromIpHash, u->ui128IpHash, 16) <= 0 && memcmp(cur->ui128ToIpHash, u->ui128IpHash, 16) >= 0) {
             // PPK ... check if temban expired
             if(((cur->ui8Bits & TEMP) == TEMP) == true) {
                 if(acc_time >= cur->tempbanexpire) {
@@ -730,16 +731,16 @@ RangeBanItem* hashBanMan::FindRange(User* u) {
 }
 //---------------------------------------------------------------------------
 
-BanItem* hashBanMan::FindFull(const uint32_t &hash) {
+BanItem* hashBanMan::FindFull(const uint8_t * ui128IpHash) {
     time_t acc_time;
     time(&acc_time);
 
-    return FindFull(hash, acc_time);
+    return FindFull(ui128IpHash, acc_time);
 }
 //---------------------------------------------------------------------------
 
-BanItem* hashBanMan::FindFull(const uint32_t &hash, const time_t &acc_time) {
-    uint16_t ui16dx = ((uint16_t *)&hash)[0];
+BanItem* hashBanMan::FindFull(const uint8_t * ui128IpHash, const time_t &acc_time) {
+    uint16_t ui16dx = *((uint16_t *)(ui128IpHash+13));
 
 	IpTableItem * next = iptable[ui16dx];
 
@@ -749,7 +750,7 @@ BanItem* hashBanMan::FindFull(const uint32_t &hash, const time_t &acc_time) {
         IpTableItem * cur = next;
         next = cur->next;
 
-		if(cur->FirstBan->ui32IpHash == hash) {
+        if(memcmp(cur->FirstBan->ui128IpHash, ui128IpHash, 16) == 0) {
 			BanItem * nextBan = cur->FirstBan;
 
             while(nextBan != NULL) {
@@ -779,7 +780,7 @@ BanItem* hashBanMan::FindFull(const uint32_t &hash, const time_t &acc_time) {
 }
 //---------------------------------------------------------------------------
 
-RangeBanItem* hashBanMan::FindFullRange(const uint32_t &hash, const time_t &acc_time) {
+RangeBanItem* hashBanMan::FindFullRange(const uint8_t * ui128IpHash, const time_t &acc_time) {
     RangeBanItem *fnd = NULL,
         *next = RangeBanListS;
 
@@ -787,7 +788,7 @@ RangeBanItem* hashBanMan::FindFullRange(const uint32_t &hash, const time_t &acc_
         RangeBanItem *cur = next;
         next = cur->next;
 
-        if(cur->ui32FromIpHash <= hash && cur->ui32ToIpHash >= hash) {
+        if(memcmp(cur->ui128FromIpHash, ui128IpHash, 16) <= 0 && memcmp(cur->ui128ToIpHash, ui128IpHash, 16) >= 0) {
             // PPK ... check if temban expired
             if(((cur->ui8Bits & TEMP) == TEMP) == true) {
                 if(acc_time >= cur->tempbanexpire) {
@@ -821,7 +822,7 @@ BanItem* hashBanMan::FindNick(char * sNick, const size_t &iNickLen) {
 //---------------------------------------------------------------------------
 
 BanItem* hashBanMan::FindNick(const uint32_t &ui32Hash, const time_t &acc_time, char * sNick) {
-    uint16_t ui16dx = ((uint16_t *)&ui32Hash)[0];
+    uint16_t ui16dx = *((uint16_t *)&ui32Hash);
 
 	BanItem *next = nicktable[ui16dx];
 
@@ -851,8 +852,8 @@ BanItem* hashBanMan::FindNick(const uint32_t &ui32Hash, const time_t &acc_time, 
 }
 //---------------------------------------------------------------------------
 
-BanItem* hashBanMan::FindIP(const uint32_t &hash, const time_t &acc_time) {
-    uint16_t ui16dx = ((uint16_t *)&hash)[0];
+BanItem* hashBanMan::FindIP(const uint8_t * ui128IpHash, const time_t &acc_time) {
+    uint16_t ui16dx = *((uint16_t *)(ui128IpHash+13));
 
     IpTableItem * next = iptable[ui16dx];
 
@@ -860,7 +861,7 @@ BanItem* hashBanMan::FindIP(const uint32_t &hash, const time_t &acc_time) {
         IpTableItem * cur = next;
         next = cur->next;
 
-        if(cur->FirstBan->ui32IpHash == hash) {
+        if(memcmp(cur->FirstBan->ui128IpHash, ui128IpHash, 16) == 0) {
 			BanItem * nextBan = cur->FirstBan;
 
             while(nextBan != NULL) {
@@ -886,23 +887,24 @@ BanItem* hashBanMan::FindIP(const uint32_t &hash, const time_t &acc_time) {
 }
 //---------------------------------------------------------------------------
 
-RangeBanItem* hashBanMan::FindRange(const uint32_t &hash, const time_t &acc_time) {
+RangeBanItem* hashBanMan::FindRange(const uint8_t * ui128IpHash, const time_t &acc_time) {
     RangeBanItem *next = RangeBanListS;
 
     while(next != NULL) {
         RangeBanItem *cur = next;
         next = cur->next;
 
-        if(cur->ui32FromIpHash <= hash && cur->ui32ToIpHash >= hash) {
-            // PPK ... check if temban expired
-            if(((cur->ui8Bits & TEMP) == TEMP) == true) {
-                if(acc_time >= cur->tempbanexpire) {
-                    RemRange(cur);
-                    delete cur;
+        // PPK ... check if temban expired
+        if(((cur->ui8Bits & TEMP) == TEMP) == true) {
+            if(acc_time >= cur->tempbanexpire) {
+                RemRange(cur);
+                delete cur;
 
-					continue;
-                }
+				continue;
             }
+        }
+
+        if(memcmp(cur->ui128FromIpHash, ui128IpHash, 16) <= 0 && memcmp(cur->ui128ToIpHash, ui128IpHash, 16) >= 0) {
             return cur;
         }
     }
@@ -911,14 +913,14 @@ RangeBanItem* hashBanMan::FindRange(const uint32_t &hash, const time_t &acc_time
 }
 //---------------------------------------------------------------------------
 
-RangeBanItem* hashBanMan::FindRange(const uint32_t &fromhash, const uint32_t &tohash, const time_t &acc_time) {
+RangeBanItem* hashBanMan::FindRange(const uint8_t * ui128FromHash, const uint8_t * ui128ToHash, const time_t &acc_time) {
     RangeBanItem *next = RangeBanListS;
 
     while(next != NULL) {
         RangeBanItem *cur = next;
         next = cur->next;
 
-        if(cur->ui32FromIpHash == fromhash && cur->ui32ToIpHash == tohash) {
+        if(memcmp(cur->ui128FromIpHash, ui128FromHash, 16) == 0 && memcmp(cur->ui128ToIpHash, ui128ToHash, 16) == 0) {
             // PPK ... check if temban expired
             if(((cur->ui8Bits & TEMP) == TEMP) == true) {
                 if(acc_time >= cur->tempbanexpire) {
@@ -928,6 +930,7 @@ RangeBanItem* hashBanMan::FindRange(const uint32_t &fromhash, const uint32_t &to
 					continue;
                 }
             }
+
             return cur;
         }
     }
@@ -947,7 +950,7 @@ BanItem* hashBanMan::FindTempNick(char * sNick, const size_t &iNickLen) {
 //---------------------------------------------------------------------------
 
 BanItem* hashBanMan::FindTempNick(const uint32_t &ui32Hash,  const time_t &acc_time, char * sNick) {
-    uint16_t ui16dx = ((uint16_t *)&ui32Hash)[0];
+    uint16_t ui16dx = *((uint16_t *)&ui32Hash);
 
 	BanItem *next = nicktable[ui16dx];
 
@@ -977,8 +980,8 @@ BanItem* hashBanMan::FindTempNick(const uint32_t &ui32Hash,  const time_t &acc_t
 }
 //---------------------------------------------------------------------------
 
-BanItem* hashBanMan::FindTempIP(const uint32_t &hash, const time_t &acc_time) {
-    uint16_t ui16dx = ((uint16_t *)&hash)[0];
+BanItem* hashBanMan::FindTempIP(const uint8_t * ui128IpHash, const time_t &acc_time) {
+    uint16_t ui16dx = *((uint16_t *)(ui128IpHash+13));
 
     IpTableItem * next = iptable[ui16dx];
 
@@ -986,7 +989,7 @@ BanItem* hashBanMan::FindTempIP(const uint32_t &hash, const time_t &acc_time) {
         IpTableItem * cur = next;
         next = cur->next;
 
-        if(cur->FirstBan->ui32IpHash == hash) {
+        if(memcmp(cur->FirstBan->ui128IpHash, ui128IpHash, 16) == 0) {
 			BanItem * nextBan = cur->FirstBan;
 
             while(nextBan != NULL) {
@@ -1020,7 +1023,7 @@ BanItem* hashBanMan::FindPermNick(char * sNick, const size_t &iNickLen) {
 //---------------------------------------------------------------------------
 
 BanItem* hashBanMan::FindPermNick(const uint32_t &ui32Hash, char * sNick) {
-    uint16_t ui16dx = ((uint16_t *)&ui32Hash)[0];
+    uint16_t ui16dx = *((uint16_t *)&ui32Hash);
 
     BanItem *next = nicktable[ui16dx];
 
@@ -1043,8 +1046,8 @@ BanItem* hashBanMan::FindPermNick(const uint32_t &ui32Hash, char * sNick) {
 }
 //---------------------------------------------------------------------------
 
-BanItem* hashBanMan::FindPermIP(const uint32_t &hash) {
-    uint16_t ui16dx = ((uint16_t *)&hash)[0];
+BanItem* hashBanMan::FindPermIP(const uint8_t * ui128IpHash) {
+    uint16_t ui16dx = *((uint16_t *)(ui128IpHash+13));
 
 	IpTableItem * next = iptable[ui16dx];
 
@@ -1052,7 +1055,7 @@ BanItem* hashBanMan::FindPermIP(const uint32_t &hash) {
         IpTableItem * cur = next;
         next = cur->next;
 
-        if(cur->FirstBan->ui32IpHash == hash) {
+        if(memcmp(cur->FirstBan->ui128IpHash, ui128IpHash, 16) == 0) {
             BanItem * nextBan = cur->FirstBan;
 
             while(nextBan != NULL) {
@@ -1162,14 +1165,13 @@ void hashBanMan::Load(void) {
 
                     // PPK ... ipban
                     if(ipban == true) {
-                        uint32_t a, b, c, d;
-                        if(GetIpParts((char *)ip, strlen(ip), a, b, c, d) == true) {
+                        if(HashIP(ip, Ban->ui128IpHash) == true) {
                             strcpy(Ban->sIp, ip);
-                            Ban->ui32IpHash = 16777216 * a + 65536 * b + 256 * c + d;
                             Ban->ui8Bits |= IP;
 
-                            if(fullipban == true)
+                            if(fullipban == true) {
                                 Ban->ui8Bits |= FULL;
+							}
                         } else {
 							delete Ban;
 
@@ -1380,7 +1382,7 @@ void hashBanMan::Load(void) {
                     }
 
                     // PPK ... fromip
-                    if(HashIP((char *)ipfrom, strlen(ipfrom), RangeBan->ui32FromIpHash) == true) {
+                    if(HashIP(ipfrom, RangeBan->ui128FromIpHash) == true) {
                         strcpy(RangeBan->sIpFrom, ipfrom);
                     } else {
                         delete RangeBan;
@@ -1389,7 +1391,7 @@ void hashBanMan::Load(void) {
                     }
 
                     // PPK ... toip
-                    if(HashIP((char *)ipto, strlen(ipto), RangeBan->ui32ToIpHash) == true && RangeBan->ui32ToIpHash > RangeBan->ui32FromIpHash) {
+                    if(HashIP(ipto, RangeBan->ui128ToIpHash) == true && memcmp(RangeBan->ui128ToIpHash, RangeBan->ui128FromIpHash, 16) > 0) {
                         strcpy(RangeBan->sIpTo, ipto);
                     } else {
                         delete RangeBan;
@@ -1739,12 +1741,17 @@ void hashBanMan::CreateTemp(char * first, char * second, const uint32_t &iTime, 
         exit(EXIT_FAILURE);
     }
 
+	if(HashIP(first, Ban->ui128IpHash) == false) {
+        delete Ban;
+
+        return;
+	}
+
     // PPK ... set ban type to TEMP
     Ban->ui8Bits |= TEMP;
 
     // PPK ... temp ban ip
     strcpy(Ban->sIp, first);
-    Ban->ui32IpHash = 16777216 * a + 65536 * b + 256 * c + d;
     Ban->ui8Bits |= IP;
 
     // PPK ... temp ban nick
@@ -1792,11 +1799,9 @@ void hashBanMan::CreatePerm(char * first, char * second){
     // PPK ... set ban type to perm
     Ban->ui8Bits |= PERM;
 
-    uint32_t a, b, c, d;
-    if(GetIpParts(first, strlen(first), a, b, c, d) == true) {
+    if(HashIP(first, Ban->ui128IpHash) == true) {
         // PPK ... perm ban ip
         strcpy(Ban->sIp, first);
-        Ban->ui32IpHash = 16777216 * a + 65536 * b + 256 * c + d;
         Ban->ui8Bits |= IP;
         
         if(second != NULL) {
@@ -1874,10 +1879,9 @@ void hashBanMan::CreatePerm(char * first, char * second){
         Ban->ui32NickHash = HashNick(Ban->sNick, strlen(Ban->sNick));
         Ban->ui8Bits |= NICK;
         
-        if(second != NULL && GetIpParts(second, strlen(second), a, b, c, d) == true) {
+        if(second != NULL && HashIP(second, Ban->ui128IpHash) == true) {
             // PPK ... perm ban ip
             strcpy(Ban->sIp, second);
-            Ban->ui32IpHash = 16777216 * a + 65536 * b + 256 * c + d;
             Ban->ui8Bits |= IP;
         }
     }
@@ -1894,7 +1898,7 @@ void hashBanMan::CreatePerm(char * first, char * second){
             if(((nxtBan->ui8Bits & PERM) == PERM) == true) {
                 if(((nxtBan->ui8Bits & IP) == IP) == true) {
                     if(((Ban->ui8Bits & IP) == IP) == true) {
-                        if(nxtBan->ui32IpHash == Ban->ui32IpHash) {
+                        if(memcmp(nxtBan->ui128IpHash, Ban->ui128IpHash, 16) == 0) {
                             // PPK ... same perm ban already exist, delete new
                             delete Ban;
 
@@ -1924,7 +1928,7 @@ void hashBanMan::CreatePerm(char * first, char * second){
             } else {
                 if(((nxtBan->ui8Bits & IP) == IP) == true) {
                     if(((Ban->ui8Bits & IP) == IP) == true) {
-                        if(nxtBan->ui32IpHash == Ban->ui32IpHash) {
+                        if(memcmp(nxtBan->ui128IpHash, Ban->ui128IpHash, 16) == 0) {
                             // PPK ... same ban already exist, delete old tempban
                             Rem(nxtBan);
                             delete nxtBan;
@@ -1948,7 +1952,7 @@ void hashBanMan::CreatePerm(char * first, char * second){
 
         // PPK ... not allow bans with same ip and nick !
         if(((Ban->ui8Bits & IP) == IP) == true) {
-			nxtBan = FindIP(Ban->ui32IpHash, acc_time);
+			nxtBan = FindIP(Ban->ui128IpHash, acc_time);
             
             while(nxtBan != NULL) {
                 BanItem *curBan = nxtBan;
@@ -2074,7 +2078,7 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
     Ban->ui8Bits |= PERM;
 
     strcpy(Ban->sIp, u->sIP);
-    Ban->ui32IpHash = u->ui32IpHash;
+    memcpy(Ban->ui128IpHash, u->ui128IpHash, 16);
     Ban->ui8Bits |= IP;
     
     if(bFull == true)
@@ -2109,7 +2113,7 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
         if(nxtBan != NULL) {
             if(((nxtBan->ui8Bits & PERM) == PERM) == true) {
                 if(((nxtBan->ui8Bits & IP) == IP) == true) {
-                    if(Ban->ui32IpHash == nxtBan->ui32IpHash) {
+                    if(memcmp(Ban->ui128IpHash, nxtBan->ui128IpHash, 16) == 0) {
                         if(((Ban->ui8Bits & FULL) == FULL) == false) {
                             // PPK ... same ban and new is not full, delete new
                             delete Ban;
@@ -2137,7 +2141,7 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
 				}
             } else {
                 if(((nxtBan->ui8Bits & IP) == IP) == true) {
-                    if(Ban->ui32IpHash == nxtBan->ui32IpHash) {
+                    if(memcmp(Ban->ui128IpHash, nxtBan->ui128IpHash, 16) == 0) {
                         if(((nxtBan->ui8Bits & FULL) == FULL) == false) {
                             // PPK ... same ban and old is only temp, delete old
                             Rem(nxtBan);
@@ -2168,7 +2172,7 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
     }
     
     // PPK ... clear bans with same ip without nickban and fullban if new ban is fullban
-	BanItem *nxtBan = FindIP(Ban->ui32IpHash, acc_time);
+	BanItem *nxtBan = FindIP(Ban->ui128IpHash, acc_time);
 
     while(nxtBan != NULL) {
         BanItem *curBan = nxtBan;
@@ -2262,12 +2266,10 @@ char hashBanMan::BanIp(User * u, char * sIp, char * sReason, char * sBy, const b
 
     if(u != NULL) {
         strcpy(Ban->sIp, u->sIP);
-        Ban->ui32IpHash = u->ui32IpHash;
+        memcpy(Ban->ui128IpHash, u->ui128IpHash, 16);
     } else {
-        uint32_t a, b, c, d;
-        if(sIp != NULL && GetIpParts(sIp, strlen(sIp), a, b, c, d) == true) {
+        if(sIp != NULL && HashIP(sIp, Ban->ui128IpHash) == true) {
             strcpy(Ban->sIp, sIp);
-            Ban->ui32IpHash = 16777216 * a + 65536 * b + 256 * c + d;
         } else {
 			delete Ban;
 
@@ -2283,7 +2285,7 @@ char hashBanMan::BanIp(User * u, char * sIp, char * sReason, char * sBy, const b
     time_t acc_time;
     time(&acc_time);
 
-	BanItem *nxtBan = FindIP(Ban->ui32IpHash, acc_time);
+	BanItem *nxtBan = FindIP(Ban->ui128IpHash, acc_time);
         
     // PPK ... don't add ban if is already here perm (full) ban for same ip
     while(nxtBan != NULL) {
@@ -2452,7 +2454,7 @@ bool hashBanMan::NickBan(User * u, char * sNick, char * sReason, char * sBy) {
         Ban->ui32NickHash = u->ui32NickHash;
 
         strcpy(Ban->sIp, u->sIP);
-        Ban->ui32IpHash = u->ui32IpHash;
+        memcpy(Ban->ui128IpHash, u->ui128IpHash, 16);
     }
 
     Ban->ui8Bits |= NICK;
@@ -2559,7 +2561,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
     Ban->ui8Bits |= TEMP;
 
     strcpy(Ban->sIp, u->sIP);
-    Ban->ui32IpHash = u->ui32IpHash;
+    memcpy(Ban->ui128IpHash, u->ui128IpHash, 16);
     Ban->ui8Bits |= IP;
     
     if(bFull == true)
@@ -2605,7 +2607,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
         if(nxtBan != NULL) {
             if(((nxtBan->ui8Bits & PERM) == PERM) == true) {
                 if(((nxtBan->ui8Bits & IP) == IP) == true) {
-                    if(Ban->ui32IpHash == nxtBan->ui32IpHash) {
+                    if(memcmp(Ban->ui128IpHash, nxtBan->ui128IpHash, 16) == 0) {
                         if(((Ban->ui8Bits & FULL) == FULL) == false) {
                             // PPK ... same ban and old is perm, delete new
                             delete Ban;
@@ -2630,7 +2632,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
             } else {
                 if(nxtBan->tempbanexpire < Ban->tempbanexpire) {
                     if(((nxtBan->ui8Bits & IP) == IP) == true) {
-                        if(Ban->ui32IpHash == nxtBan->ui32IpHash) {
+                        if(memcmp(Ban->ui128IpHash, nxtBan->ui128IpHash, 16) == 0) {
                             if(((nxtBan->ui8Bits & FULL) == FULL) == false) {
                                 // PPK ... same bans, but old with lower expiration -> delete old
                                 Rem(nxtBan);
@@ -2658,7 +2660,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
 					}
                 } else {
                     if(((nxtBan->ui8Bits & IP) == IP) == true) {
-                        if(Ban->ui32IpHash == nxtBan->ui32IpHash) {
+                        if(memcmp(Ban->ui128IpHash, nxtBan->ui128IpHash, 16) == 0) {
                             if(((Ban->ui8Bits & FULL) == FULL) == false) {
                                 // PPK ... same bans, but new with lower expiration -> delete new
                                 delete Ban;
@@ -2689,7 +2691,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
     }
 
     // PPK ... clear bans with lower timeban and same ip without nickban and fullban if new ban is fullban
-	BanItem *nxtBan = FindIP(Ban->ui32IpHash, acc_time);
+	BanItem *nxtBan = FindIP(Ban->ui128IpHash, acc_time);
 
     while(nxtBan != NULL) {
         BanItem *curBan = nxtBan;
@@ -2790,12 +2792,10 @@ char hashBanMan::TempBanIp(User * u, char * sIp, char * sReason, char * sBy, con
 
     if(u != NULL) {
         strcpy(Ban->sIp, u->sIP);
-        Ban->ui32IpHash = u->ui32IpHash;
+        memcpy(Ban->ui128IpHash, u->ui128IpHash, 16);
     } else {
-        uint32_t a, b, c, d;
-        if(sIp != NULL && GetIpParts(sIp, strlen(sIp), a, b, c, d) == true) {
+        if(sIp != NULL && HashIP(sIp, Ban->ui128IpHash) == true) {
             strcpy(Ban->sIp, sIp);
-            Ban->ui32IpHash = 16777216 * a + 65536 * b + 256 * c + d;
         } else {
             delete Ban;
 
@@ -2821,7 +2821,7 @@ char hashBanMan::TempBanIp(User * u, char * sIp, char * sReason, char * sBy, con
         }
     }
     
-	BanItem *nxtBan = FindIP(Ban->ui32IpHash, acc_time);
+	BanItem *nxtBan = FindIP(Ban->ui128IpHash, acc_time);
 
     // PPK ... don't add ban if is already here perm (full) ban or longer temp ban for same ip
     while(nxtBan != NULL) {
@@ -2984,7 +2984,7 @@ bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy,
         Ban->ui32NickHash = u->ui32NickHash;
 
         strcpy(Ban->sIp, u->sIP);
-        Ban->ui32IpHash = u->ui32IpHash;
+        memcpy(Ban->ui128IpHash, u->ui128IpHash, 16);
     }
 
     Ban->ui8Bits |= NICK;
@@ -3100,7 +3100,10 @@ bool hashBanMan::Unban(char * sWhat) {
 	BanItem *Ban = FindNick(hash, acc_time, sWhat);
 
     if(Ban == NULL) {
-		if(HashIP(sWhat, strlen(sWhat), hash) == true && (Ban = FindIP(hash, acc_time)) != NULL) {
+		uint8_t ui128Hash[16];
+		memset(ui128Hash, 0, 16);
+
+		if(HashIP(sWhat, ui128Hash) == true && (Ban = FindIP(ui128Hash, acc_time)) != NULL) {
             Rem(Ban);
             delete Ban;
 		} else {
@@ -3122,7 +3125,10 @@ bool hashBanMan::PermUnban(char * sWhat) {
 	BanItem *Ban = FindPermNick(hash, sWhat);
 
     if(Ban == NULL) {
-		if(HashIP(sWhat, strlen(sWhat), hash) == true && (Ban = FindPermIP(hash)) != NULL) {
+		uint8_t ui128Hash[16];
+		memset(ui128Hash, 0, 16);
+
+		if(HashIP(sWhat, ui128Hash) == true && (Ban = FindPermIP(ui128Hash)) != NULL) {
             Rem(Ban);
             delete Ban;
 		} else {
@@ -3147,7 +3153,10 @@ bool hashBanMan::TempUnban(char * sWhat) {
     BanItem *Ban = FindTempNick(hash, acc_time, sWhat);
 
     if(Ban == NULL) {
-        if(HashIP(sWhat, strlen(sWhat), hash) == true && (Ban = FindTempIP(hash, acc_time)) != NULL) {
+		uint8_t ui128Hash[16];
+		memset(ui128Hash, 0, 16);
+
+        if(HashIP(sWhat, ui128Hash) == true && (Ban = FindTempIP(ui128Hash, acc_time)) != NULL) {
             Rem(Ban);
             delete Ban;
 		} else {
@@ -3163,8 +3172,8 @@ bool hashBanMan::TempUnban(char * sWhat) {
 }
 //---------------------------------------------------------------------------
 
-void hashBanMan::RemoveAllIP(const uint32_t &hash) {
-    uint16_t ui16dx = ((uint16_t *)&hash)[0];
+void hashBanMan::RemoveAllIP(const uint8_t * ui128IpHash) {
+    uint16_t ui16dx = *((uint16_t *)(ui128IpHash+13));
 
     IpTableItem * next = iptable[ui16dx];
 
@@ -3172,7 +3181,7 @@ void hashBanMan::RemoveAllIP(const uint32_t &hash) {
         IpTableItem * cur = next;
         next = cur->next;
 
-        if(cur->FirstBan->ui32IpHash == hash) {
+        if(memcmp(cur->FirstBan->ui128IpHash, ui128IpHash, 16) == 0) {
 			BanItem * nextBan = cur->FirstBan;
 
             while(nextBan != NULL) {
@@ -3189,8 +3198,8 @@ void hashBanMan::RemoveAllIP(const uint32_t &hash) {
 }
 //---------------------------------------------------------------------------
 
-void hashBanMan::RemovePermAllIP(const uint32_t &hash) {
-    uint16_t ui16dx = ((uint16_t *)&hash)[0];
+void hashBanMan::RemovePermAllIP(const uint8_t * ui128IpHash) {
+    uint16_t ui16dx = *((uint16_t *)(ui128IpHash+13));
 
     IpTableItem * next = iptable[ui16dx];
 
@@ -3198,7 +3207,7 @@ void hashBanMan::RemovePermAllIP(const uint32_t &hash) {
         IpTableItem * cur = next;
         next = cur->next;
 
-        if(cur->FirstBan->ui32IpHash == hash) {
+        if(memcmp(cur->FirstBan->ui128IpHash, ui128IpHash, 16) == 0) {
 			BanItem * nextBan = cur->FirstBan;
 
             while(nextBan != NULL) {
@@ -3217,8 +3226,8 @@ void hashBanMan::RemovePermAllIP(const uint32_t &hash) {
 }
 //---------------------------------------------------------------------------
 
-void hashBanMan::RemoveTempAllIP(const uint32_t &hash) {
-    uint16_t ui16dx = ((uint16_t *)&hash)[0];
+void hashBanMan::RemoveTempAllIP(const uint8_t * ui128IpHash) {
+    uint16_t ui16dx = *((uint16_t *)(ui128IpHash+13));
 
     IpTableItem * next = iptable[ui16dx];
 
@@ -3226,7 +3235,7 @@ void hashBanMan::RemoveTempAllIP(const uint32_t &hash) {
         IpTableItem * cur = next;
         next = cur->next;
 
-        if(cur->FirstBan->ui32IpHash == hash) {
+        if(memcmp(cur->FirstBan->ui128IpHash, ui128IpHash, 16) == 0) {
 			BanItem * nextBan = cur->FirstBan;
 
             while(nextBan != NULL) {
@@ -3245,8 +3254,7 @@ void hashBanMan::RemoveTempAllIP(const uint32_t &hash) {
 }
 //---------------------------------------------------------------------------
 
-bool hashBanMan::RangeBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char * sIpTo, const uint32_t &ui32ToIpHash, 
-    char * sReason, char * sBy, const bool &bFull) {
+bool hashBanMan::RangeBan(char * sIpFrom, const uint8_t * ui128FromIpHash, char * sIpTo, const uint8_t * ui128ToIpHash, char * sReason, char * sBy, const bool &bFull) {
     RangeBanItem *RangeBan = new RangeBanItem();
     if(RangeBan == NULL) {
     	string sDbgstr = "[BUF] Cannot allocate RangeBan in hashBanMan::RangeBan!";
@@ -3259,10 +3267,10 @@ bool hashBanMan::RangeBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char *
     RangeBan->ui8Bits |= PERM;
 
     strcpy(RangeBan->sIpFrom, sIpFrom);
-    RangeBan->ui32FromIpHash = ui32FromIpHash;
+    memcpy(RangeBan->ui128FromIpHash, ui128FromIpHash, 16);
 
     strcpy(RangeBan->sIpTo, sIpTo);
-    RangeBan->ui32ToIpHash = ui32ToIpHash;
+    memcpy(RangeBan->ui128ToIpHash, ui128ToIpHash, 16);
 
     if(bFull == true)
         RangeBan->ui8Bits |= FULL;
@@ -3274,17 +3282,12 @@ bool hashBanMan::RangeBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char *
         RangeBanItem *curBan = nxtBan;
         nxtBan = curBan->next;
 
-        if(curBan->ui32FromIpHash != RangeBan->ui32FromIpHash || curBan->ui32ToIpHash != RangeBan->ui32ToIpHash) {
+        if(memcmp(curBan->ui128FromIpHash, RangeBan->ui128FromIpHash, 16) != 0 || memcmp(curBan->ui128ToIpHash, RangeBan->ui128ToIpHash, 16) != 0) {
             continue;
         }
 
-        if(((curBan->ui8Bits & TEMP) == TEMP) == true) {
-            if(((curBan->ui8Bits & FULL) == FULL) == false || ((RangeBan->ui8Bits & FULL) == FULL) == true) {
-                RemRange(curBan);
-                delete curBan;
-
-                continue;
-            }
+        if((curBan->ui8Bits & TEMP) == TEMP) {
+            continue;
         }
         
         if(((curBan->ui8Bits & FULL) == FULL) == false && ((RangeBan->ui8Bits & FULL) == FULL) == true) {
@@ -3357,12 +3360,13 @@ bool hashBanMan::RangeBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char *
 
     AddRange(RangeBan);
 	Save();
+
     return true;
 }
 //---------------------------------------------------------------------------
 
-bool hashBanMan::RangeTempBan(char * sIpFrom, const uint32_t &ui32FromIpHash, char * sIpTo, const uint32_t &ui32ToIpHash, 
-    char * sReason, char * sBy, const uint32_t &minutes, const time_t &expiretime, const bool &bFull) {
+bool hashBanMan::RangeTempBan(char * sIpFrom, const uint8_t * ui128FromIpHash, char * sIpTo, const uint8_t * ui128ToIpHash, char * sReason, char * sBy, const uint32_t &minutes,
+    const time_t &expiretime, const bool &bFull) {
     RangeBanItem *RangeBan = new RangeBanItem();
     if(RangeBan == NULL) {
     	string sDbgstr = "[BUF] Cannot allocate RangeBan in hashBanMan::RangeTempBan!";
@@ -3375,13 +3379,14 @@ bool hashBanMan::RangeTempBan(char * sIpFrom, const uint32_t &ui32FromIpHash, ch
     RangeBan->ui8Bits |= TEMP;
 
     strcpy(RangeBan->sIpFrom, sIpFrom);
-    RangeBan->ui32FromIpHash = ui32FromIpHash;
+    memcpy(RangeBan->ui128FromIpHash, ui128FromIpHash, 16);
 
     strcpy(RangeBan->sIpTo, sIpTo);
-    RangeBan->ui32ToIpHash = ui32ToIpHash;
+    memcpy(RangeBan->ui128ToIpHash, ui128ToIpHash, 16);
 
-    if(bFull == true)
+    if(bFull == true) {
         RangeBan->ui8Bits |= FULL;
+    }
 
     time_t acc_time;
     time(&acc_time);
@@ -3403,7 +3408,7 @@ bool hashBanMan::RangeTempBan(char * sIpFrom, const uint32_t &ui32FromIpHash, ch
         RangeBanItem *curBan = nxtBan;
         nxtBan = curBan->next;
 
-        if(curBan->ui32FromIpHash != RangeBan->ui32FromIpHash || curBan->ui32ToIpHash != RangeBan->ui32ToIpHash) {
+        if(memcmp(curBan->ui128FromIpHash, RangeBan->ui128FromIpHash, 16) != 0 || memcmp(curBan->ui128ToIpHash, RangeBan->ui128ToIpHash, 16) != 0) {
             continue;
         }
 
@@ -3414,10 +3419,13 @@ bool hashBanMan::RangeTempBan(char * sIpFrom, const uint32_t &ui32FromIpHash, ch
 
                 continue;
             }
+
             continue;
         }
         
-        if(((curBan->ui8Bits & FULL) == FULL) == false && ((RangeBan->ui8Bits & FULL) == FULL) == true) continue;
+        if(((curBan->ui8Bits & FULL) == FULL) == false && ((RangeBan->ui8Bits & FULL) == FULL) == true) {
+            continue;
+        }
 
         delete RangeBan;
 
@@ -3486,14 +3494,14 @@ bool hashBanMan::RangeTempBan(char * sIpFrom, const uint32_t &ui32FromIpHash, ch
 }
 //---------------------------------------------------------------------------
 
-bool hashBanMan::RangeUnban(const uint32_t &ui32FromIpHash, const uint32_t &ui32ToIpHash) {
+bool hashBanMan::RangeUnban(const uint8_t * ui128FromIpHash, const uint8_t * ui128ToIpHash) {
     RangeBanItem *next = RangeBanListS;
 
     while(next != NULL) {
         RangeBanItem *cur = next;
         next = cur->next;
 
-        if(cur->ui32FromIpHash == ui32FromIpHash && cur->ui32ToIpHash == ui32ToIpHash) {
+        if(memcmp(cur->ui128FromIpHash, ui128FromIpHash, 16) == 0 && memcmp(cur->ui128ToIpHash, ui128ToIpHash, 16) == 0) {
             RemRange(cur);
             delete cur;
 
@@ -3506,14 +3514,14 @@ bool hashBanMan::RangeUnban(const uint32_t &ui32FromIpHash, const uint32_t &ui32
 }
 //---------------------------------------------------------------------------
 
-bool hashBanMan::RangeUnban(const uint32_t &ui32FromIpHash, const uint32_t &ui32ToIpHash, unsigned char cType) {
+bool hashBanMan::RangeUnban(const uint8_t * ui128FromIpHash, const uint8_t * ui128ToIpHash, unsigned char cType) {
     RangeBanItem *next = RangeBanListS;
 
     while(next != NULL) {
         RangeBanItem *cur = next;
         next = cur->next;
 
-        if(((cur->ui8Bits & cType) == cType) == true && cur->ui32FromIpHash == ui32FromIpHash && cur->ui32ToIpHash == ui32ToIpHash) {
+        if((cur->ui8Bits & cType) == cType && memcmp(cur->ui128FromIpHash, ui128FromIpHash, 16) == 0 && memcmp(cur->ui128ToIpHash, ui128ToIpHash, 16) == 0) {
             RemRange(cur);
             delete cur;
 

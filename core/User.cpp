@@ -277,8 +277,8 @@ static void UserParseMyInfo(User * u) {
             u->sTag = u->sMyInfoOriginal+(DCTag-msg);
             u->ui8TagLen = (uint8_t)(iMyINFOPartsLen[0]-(DCTag-sMyINFOParts[0]));
 
-            static const uint16_t ui16plusplus = ((uint16_t *)"++")[0];
-            if(DCTag[3] == ' ' && ((uint16_t *)(DCTag+1))[0] == ui16plusplus) {
+            static const uint16_t ui16plusplus = *((uint16_t *)"++");
+            if(DCTag[3] == ' ' && *((uint16_t *)(DCTag+1)) == ui16plusplus) {
                 u->ui32BoolBits |= User::BIT_SUPPORT_NOHELLO;
             }
                 
@@ -287,8 +287,8 @@ static void UserParseMyInfo(User * u) {
             size_t iTagPattLen = 0;
             uint32_t k = 0;
             while(ClientTagManager->cliTags[k].PattLen) { // PattLen == 0 means end of tags list
-                static const uint16_t ui16V = ((uint16_t *)" V")[0];
-                if(((uint16_t *)(DCTag+ClientTagManager->cliTags[k].PattLen+1))[0] == ui16V &&
+                static const uint16_t ui16V = *((uint16_t *)" V");
+                if(*((uint16_t *)(DCTag+ClientTagManager->cliTags[k].PattLen+1)) == ui16V &&
 #ifdef _WIN32
                     strnicmp(DCTag+1, ClientTagManager->cliTags[k].TagPatt, ClientTagManager->cliTags[k].PattLen) == 0) {
 #else
@@ -305,9 +305,9 @@ static void UserParseMyInfo(User * u) {
             // no match ? set NoDCTag and return
             if(ClientTagManager->cliTags[k].PattLen == 0) {
                 char * sTemp;
-                static const uint16_t ui16V = ((uint16_t *)"V:")[0];
+                static const uint16_t ui16V = *((uint16_t *)"V:");
                 if(SettingManager->bBools[SETBOOL_ACCEPT_UNKNOWN_TAG] == true && (sTemp = strchr(DCTag, ' ')) != NULL &&
-                    ((uint16_t *)(sTemp+1))[0] == ui16V) {
+                    *((uint16_t *)(sTemp+1)) == ui16V) {
                     sTemp[0] = '\0';
                     u->sClient = u->sMyInfoOriginal+((DCTag+1)-msg);
                     u->ui8ClientLen = (uint8_t)((sTemp-DCTag)-1);
@@ -562,6 +562,7 @@ LoginLogout::LoginLogout() {
     iUserConnectedLen = 0;
 
     logonClk = 0;
+    ui64IPv4CheckTick = 0;
 }
 //---------------------------------------------------------------------------
 
@@ -634,6 +635,7 @@ User::User() {
 	sLastSearch = NULL;
 	sNick = (char *)sDefaultNick;
 	sIP[0] = '\0';
+	sIPv4[0] = '\0';
 	sVersion = NULL;
 	sClient = (char *)sOtherNoTag;
 	sTag = NULL;
@@ -654,6 +656,7 @@ User::User() {
     sChangedEmailLong = NULL;
 
 	ui8IpLen = 0;
+	ui8IPv4Len = 0;
 
     ui16MyInfoOriginalLen = 0;
     ui16MyInfoShortLen = 0;
@@ -702,19 +705,20 @@ User::User() {
 	iRegHubs = 0;
 	iOpHubs = 0;
 	ui8State = User::STATE_SOCKET_ACCEPTED;
-//    PORT = 0;
+
 	iProfile = -1;
 	sendbuflen = 0;
 	recvbuflen = 0;
 	sbdatalen = 0;
 	rbdatalen = 0;
-//    sin_len = 0;
+
 	iReceivedPmCount = 0;
 
 	time(&LoginTime);
 
 	ui32NickHash = 0;
-	ui32IpHash = 0;
+
+    memset(&ui128IpHash, 0, 16);
 
 	ui32BoolBits = 0;
 	ui32BoolBits |= User::BIT_ACTIVE;
@@ -2863,26 +2867,6 @@ bool UserGenerateMyInfoLong(User *u) { // true == changed
         return false;
     }
 
-    // Add mode to start of description if is enabled
-    if(SettingManager->bBools[SETBOOL_MODE_TO_DESCRIPTION] == true && u->cMode != 0) {
-        char * sDescription = NULL;
-
-        if(u->ui8ChangedDescriptionLongLen != 0) {
-            sDescription = u->sChangedDescriptionLong;
-        } else {
-            sDescription = u->sDescription;
-        }
-
-        if(sDescription == NULL) {
-            msg[iLen] = u->cMode;
-            iLen++;
-        } else if(sDescription[0] != u->cMode && sDescription[1] != ' ') {
-            msg[iLen] = u->cMode;
-            msg[iLen+1] = ' ';
-            iLen += 2;
-        }
-    }
-
     // Add description
     if(u->ui8ChangedDescriptionLongLen != 0) {
         if(u->sChangedDescriptionLong != NULL) {
@@ -2921,17 +2905,8 @@ bool UserGenerateMyInfoLong(User *u) { // true == changed
         iLen += (int)u->ui8TagLen;
     }
 
-    // Add mode to myinfo if is enabled
-    if(SettingManager->bBools[SETBOOL_MODE_TO_MYINFO] == true && u->cMode != 0) {
-        int iRet = sprintf(msg+iLen, "$%c$", u->cMode);
-        iLen += iRet;
-        if(CheckSprintf1(iRet, iLen, 1024, "UserGenerateMyInfoLong1") == false) {
-            return false;
-        }
-    } else {
-        memcpy(msg+iLen, "$ $", 3);
-        iLen += 3;
-    }
+    memcpy(msg+iLen, "$ $", 3);
+    iLen += 3;
 
     // Add connection
     if(u->ui8ChangedConnectionLongLen != 0) {
@@ -2952,20 +2927,27 @@ bool UserGenerateMyInfoLong(User *u) { // true == changed
         iLen += u->ui8ConnectionLen;
     }
 
-    // add magicbyte and $
-    if(u->MagicByte < 16 || ((u->ui32BoolBits & User::BIT_QUACK_SUPPORTS) == User::BIT_QUACK_SUPPORTS) == false) {
-        msg[iLen] = u->MagicByte;
-    } else {
-        char cMagic = u->MagicByte;
+    // add magicbyte
+    char cMagic = u->MagicByte;
 
+    if((u->ui32BoolBits & User::BIT_QUACK_SUPPORTS) == User::BIT_QUACK_SUPPORTS) {
         cMagic &= ~0x10; // TLSv1 support
         cMagic &= ~0x20; // TLSv1 support
-        cMagic &= ~0x40; // IPv4 support
-        cMagic &= ~0x80; // IPv6 support
-
-        msg[iLen] = cMagic;
     }
 
+    if((u->ui32BoolBits & User::BIT_IPV4) == User::BIT_IPV4) {
+        cMagic |= 0x40; // IPv4 support
+    } else {
+        cMagic &= ~0x40; // IPv4 support
+    }
+
+    if((u->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
+        cMagic |= 0x80; // IPv6 support
+    } else {
+        cMagic &= ~0x80; // IPv6 support
+    }
+
+    msg[iLen] = cMagic;
     msg[iLen+1] = '$';
     iLen += 2;
 
@@ -3112,20 +3094,27 @@ bool UserGenerateMyInfoShort(User *u) { // true == changed
         iLen += u->ui8ConnectionLen;
     }
 
-    // add magicbyte and $
-    if(u->MagicByte < 16 || ((u->ui32BoolBits & User::BIT_QUACK_SUPPORTS) == User::BIT_QUACK_SUPPORTS) == false) {
-        msg[iLen] = u->MagicByte;
-    } else {
-        char cMagic = u->MagicByte;
+    // add magicbyte
+    char cMagic = u->MagicByte;
 
+    if((u->ui32BoolBits & User::BIT_QUACK_SUPPORTS) == User::BIT_QUACK_SUPPORTS) {
         cMagic &= ~0x10; // TLSv1 support
         cMagic &= ~0x20; // TLSv1 support
-        cMagic &= ~0x40; // IPv4 support
-        cMagic &= ~0x80; // IPv6 support
-
-        msg[iLen] = cMagic;
     }
 
+    if((u->ui32BoolBits & User::BIT_IPV4) == User::BIT_IPV4) {
+        cMagic |= 0x40; // IPv4 support
+    } else {
+        cMagic &= ~0x40; // IPv4 support
+    }
+
+    if((u->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
+        cMagic |= 0x80; // IPv6 support
+    } else {
+        cMagic &= ~0x80; // IPv6 support
+    }
+
+    msg[iLen] = cMagic;
     msg[iLen+1] = '$';
     iLen += 2;
 
@@ -3421,5 +3410,56 @@ void UserAddPrcsdCmd(User * u, const unsigned char &cType, char * sCommand, cons
         u->cmdEnd->next = newcmd;
         u->cmdEnd = newcmd;
     }
+}
+//---------------------------------------------------------------------------
+
+void UserAddMeOrIPv4Check(User * pUser) {
+    if(((pUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) && ((pUser->ui32BoolBits & User::BIT_SUPPORT_IPV4) == User::BIT_SUPPORT_IPV4) && sHubIP[0] != '\0') {
+        pUser->ui8State = User::STATE_IPV4_CHECK;
+
+        int imsgLen = sprintf(msg, "$ConnectToMe %s %s:%s|", pUser->sNick, sHubIP, string(SettingManager->iPortNumbers[0]).c_str());
+        if(CheckSprintf(imsgLen, 1024, "UserAddMeOrIPv4Check") == false) {
+            return;
+        }
+
+        pUser->uLogInOut->ui64IPv4CheckTick = ui64ActualTick;
+
+        UserSendCharDelayed(pUser, msg, imsgLen);
+    } else {
+        pUser->ui8State = User::STATE_ADDME;
+    }
+}
+//---------------------------------------------------------------------------
+
+char * UserSetUserInfo(char * sOldData, uint8_t &ui8OldDataLen, char * sNewData, size_t &sz8NewDataLen, const char * sDataName) {
+    if(sOldData != NULL) {
+        UserFreeInfo(sOldData, sDataName);
+        sOldData = NULL;
+        ui8OldDataLen = 0;
+    }
+
+    if(sz8NewDataLen > 0) {
+#ifdef _WIN32
+        sOldData = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, sz8NewDataLen+1);
+#else
+        sOldData = (char *)malloc(sz8NewDataLen+1);
+#endif
+        if(sOldData == NULL) {
+            string sDbgstr = "[BUF] Cannot allocate "+string(sz8NewDataLen+1)+" bytes of memory in UserSetUserInfo!";
+#ifdef _WIN32
+            sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+#endif
+            AppendSpecialLog(sDbgstr);
+            return sOldData;
+        }
+
+        memcpy(sOldData, sNewData, sz8NewDataLen);
+        sOldData[sz8NewDataLen] = '\0';
+        ui8OldDataLen = (uint8_t)sz8NewDataLen;
+    } else {
+        ui8OldDataLen = 1;
+    }
+
+    return sOldData;
 }
 //---------------------------------------------------------------------------
