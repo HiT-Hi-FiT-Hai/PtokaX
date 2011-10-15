@@ -64,7 +64,7 @@ extern bool bServerRunning, bServerTerminated, bIsRestart, bIsClose;
 #else
 	extern bool bDaemon;
 #endif
-extern char sHubIP[16];
+extern char sHubIP[16], sHubIP6[46];
 extern uint8_t ui8SrCntr, ui8MinTick;
 //--------------------------------------------------------------------------- 
 

@@ -36,7 +36,7 @@ struct LoginLogout {
     LoginLogout();
     ~LoginLogout();
 
-    uint64_t logonClk;
+    uint64_t logonClk, ui64IPv4CheckTick;
     uint32_t iToCloseLoops, iUserConnectedLen;
     char *sLockUsrConn, *sPassword, *sKickMsg;
     UserBan *uBan;
@@ -82,6 +82,7 @@ struct User {
         STATE_VALIDATE,
         STATE_VERSION_OR_MYPASS,
         STATE_GETNICKLIST_OR_MYINFO,
+        STATE_IPV4_CHECK,
         STATE_ADDME,
         STATE_ADDME_1LOOP,
         STATE_ADDME_2LOOP,
@@ -118,7 +119,11 @@ struct User {
     	BIT_SUPPORT_ZPIPE              = 0x200000,
     	BIT_PRCSD_MYINFO               = 0x400000,
     	BIT_RECV_FLOODER               = 0x800000,
-    	BIT_QUACK_SUPPORTS             = 0x1000000
+    	BIT_QUACK_SUPPORTS             = 0x1000000,
+    	BIT_IPV6                       = 0x2000000,
+    	BIT_SUPPORT_IP64               = 0x4000000,
+    	BIT_SUPPORT_IPV4               = 0x8000000,
+    	BIT_IPV4                       = 0x10000000,
     };
 
     enum UserInfoBits {
@@ -155,23 +160,16 @@ struct User {
     uint32_t iSendCalled, iRecvCalled, iReceivedPmCount, iSR, iDefloodWarnings;
 
 #ifdef _WIN32
-//    int sin_len, PORT;
-
 	SOCKET Sck;
 #else
-//    socklen_t sin_len;
-//    int PORT;
-
 	int Sck;
 #endif
-
-//    sockaddr_in addr;
 
     time_t LoginTime;
 
     uint32_t sendbuflen, recvbuflen, sbdatalen, rbdatalen;
 
-    uint32_t ui32NickHash, ui32IpHash;
+    uint32_t ui32NickHash;
 
     int32_t iProfile;
 
@@ -206,11 +204,13 @@ struct User {
 
     uint8_t ui8NickLen;
     uint8_t ui8IpLen, ui8ConnectionLen, ui8DescriptionLen, ui8EmailLen, ui8TagLen, ui8ClientLen, ui8TagVersionLen;
-    uint8_t ui8Country, ui8State;
+    uint8_t ui8Country, ui8State, ui8IPv4Len;
     uint8_t ui8ChangedDescriptionShortLen, ui8ChangedDescriptionLongLen, ui8ChangedTagShortLen, ui8ChangedTagLongLen;
     uint8_t ui8ChangedConnectionShortLen, ui8ChangedConnectionLongLen, ui8ChangedEmailShortLen, ui8ChangedEmailLongLen;
 
-    char sIP[16/*46*/];
+    uint8_t ui128IpHash[16];
+
+    char sIP[46], sIPv4[16];
 
     char cMode;
 };
@@ -258,6 +258,10 @@ void UserHasSuspiciousTag(User * curUser);
 bool UserProcessRules(User * u);
 
 void UserAddPrcsdCmd(User * u, const unsigned char &cType, char * sCommand, const size_t &iCommandLen, User * to, const bool &bIsPm = false);
+
+void UserAddMeOrIPv4Check(User * pUser);
+
+char * UserSetUserInfo(char * sOldData, uint8_t &ui8OldDataLen, char * sNewData, size_t &szNewDataLen, const char * sDataName);
 //---------------------------------------------------------------------------
 
 #endif

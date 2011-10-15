@@ -41,61 +41,50 @@
 IP2CC * IP2Country = NULL;
 //---------------------------------------------------------------------------
 
-static const char * CountryNames[] = { "Andorra", "United Arab Emirates", "Afghanistan", "Antigua and Barbuda", "Anguilla", "Albania", "Armenia",
-	"Netherlands Antilles", "Angola", "Antarctica", "Argentina", "American Samoa", "Austria", "Australia",
-	"Aruba", "A*Land Islands", "Azerbaijan", "Bosnia and Herzegovina", "Barbados", "Bangladesh", "Belgium",
-	"Burkina Faso", "Bulgaria", "Bahrain", "Burundi", "Benin", "Saint Barthélemy", "Bermuda",
-	"Brunei Darussalam", "Bolivia", "Brazil", "Bahamas", "Bhutan", "Bouvet Island", "Botswana",
-	"Belarus", "Belize", "Canada", "Cocos (Keeling) Islands", "The Democratic Republic of the Congo", "Central African Republic", "Congo",
-	"Côte D'Ivoire", "Cook Islands", "Chile", "Cameroon", "China", "Colombia", "Costa Rica",
-	"Cuba", "Cape Verde", "Christmas Island", "Cyprus", "Czech Republic", "Germany", "Djibouti",
-    "Denmark", "Dominica", "Dominican Republic", "Algeria", "Ecuador", "Estonia", "Egypt",
-    "Western Sahara", "Eritrea", "Spain", "Ethiopia", "Finland", "Fiji", "Falkland Islands (Malvinas)",
-    "Federated States of Micronesia", "Faroe Islands", "France", "Gabon", "United Kingdom", "Grenada", "Georgia",
-    "French Guiana", "Guernsey", "Ghana", "Gibraltar", "Greenland", "Gambia", "Guinea",
-    "Guadeloupe", "Equatorial Guinea", "Greece", "South Georgia and the South Sandwich Islands", "Guatemala", "Guam", "Guinea-Bissau",
-    "Guyana", "Hong Kong", "Heard Island and McDonald Islands", "Honduras", "Croatia", "Haiti", "Hungary",
-    "Switzerland", "Indonesia", "Ireland", "Israel", "Isle of Man", "India", "British Indian Ocean Territory",
-    "Iraq", "Islamic Republic of Iran", "Iceland", "Italy", "Jersey", "Jamaica", "Jordan",
-    "Japan", "Kenya", "Kyrgyzstan", "Cambodia", "Kiribati", "Comoros", "Saint Kitts and Nevis",
-    "Democratic People's Republic of Korea", "Republic of Korea", "Kuwait", "Cayman Islands", "Kazakhstan", "Lao People's Democratic Republic", "Lebanon",
-    "Saint Lucia", "Liechtenstein", "Sri Lanka", "Liberia", "Lesotho", "Lithuania", "Luxembourg",
-    "Latvia", "Libyan Arab Jamahiriya", "Morocco", "Monaco", "Republic of Moldova", "Montenegro", "Saint Martin",
-    "Madagascar", "Marshall Islands", "The Former Yugoslav Republic of Macedonia", "Mali", "Myanmar", "Mongolia", "Macao",
-    "Northern Mariana Islands", "Martinique", "Mauritania", "Montserrat", "Malta", "Mauritius", "Maldives",
-    "Malawi", "Mexico", "Malaysia", "Mozambique", "Namibia", "New Caledonia", "Niger",
-    "Norfolk Island", "Nigeria", "Nicaragua", "Netherlands", "Norway", "Nepal", "Nauru",
-    "Niue", "New Zealand", "Oman", "Panama", "Peru", "French Polynesia", "Papua New Guinea",
-    "Philippines", "Pakistan", "Poland", "Saint Pierre and Miquelon", "Pitcairn", "Puerto Rico", "Palestinian Territory, Occupied",
-    "Portugal", "Palau", "Paraguay", "Qatar", "Réunion", "Romania", "Serbia",
-    "Russian Federation", "Rwanda", "Saudi Arabia", "Solomon Islands", "Seychelles", "Sudan", "Sweden",
-    "Singapore", "Saint Helena", "Slovenia", "Svalbard and Jan Mayen", "Slovakia", "Sierra Leone", "San Marino",
-    "Senegal", "Somalia", "Suriname", "Sao Tome and Principe", "El Salvador", "Syrian Arab Republic", "Swaziland",
-    "Turks and Caicos Islands", "Chad", "French Southern Territories", "Togo", "Thailand", "Tajikistan", "Tokelau",
-    "Timor-Leste", "Turkmenistan", "Tunisia", "Tonga", "Turkey", "Trinidad and Tobago", "Tuvalu",
-    "Taiwan", "United Republic of Tanzania", "Ukraine", "Uganda", "United States Minor Outlying Islands", "United States", "Uruguay",
-    "Uzbekistan", "Holy See (Vatican City State)", "Saint Vincent and the Grenadines", "Venezuela", "Virgin Islands, British", "Virgin Islands, U.S.", "Viet Nam",
-    "Vanuatu", "Wallis and Futuna", "Samoa", "Yemen", "Mayotte", "South Africa", "Zambia",
-    "Zimbabwe", "Unknown",
+static const char * CountryNames[] = { "Andorra", "United Arab Emirates", "Afghanistan", "Antigua and Barbuda", "Anguilla", "Albania", "Armenia", "Angola", "Antarctica", "Argentina",
+    "American Samoa", "Austria", "Australia", "Aruba", "Aland Islands", "Azerbaijan", "Bosnia and Herzegovina", "Barbados", "Bangladesh", "Belgium", "Burkina Faso", "Bulgaria", "Bahrain",
+    "Burundi", "Benin", "Saint Barthelemy", "Bermuda", "Brunei Darussalam", "Bolivia", "Bonaire", "Brazil", "Bahamas", "Bhutan", "Bouvet Island", "Botswana", "Belarus", "Belize", "Canada",
+    "Cocos (Keeling) Islands", "The Democratic Republic of the Congo", "Central African Republic", "Congo", "Cote D'Ivoire", "Cook Islands", "Chile", "Cameroon", "China", "Colombia",
+    "Costa Rica", "Cuba", "Cape Verde", "Curacao", "Christmas Island", "Cyprus", "Czech Republic", "Germany", "Djibouti", "Denmark", "Dominica", "Dominican Republic", "Algeria", "Ecuador",
+    "Estonia", "Egypt", "Western Sahara", "Eritrea", "Spain", "Ethiopia", "Finland", "Fiji", "Falkland Islands (Malvinas)", "Micronesia", "Faroe Islands", "France", "Gabon", "United Kingdom",
+    "Grenada", "Georgia", "French Guiana", "Guernsey", "Ghana", "Gibraltar", "Greenland", "Gambia", "Guinea", "Guadeloupe", "Equatorial Guinea", "Greece",
+    "South Georgia and the South Sandwich Islands", "Guatemala", "Guam", "Guinea-Bissau", "Guyana", "Hong Kong", "Heard Island and McDonald Islands", "Honduras", "Croatia", "Haiti", "Hungary",
+    "Switzerland", "Indonesia", "Ireland", "Israel", "Isle of Man", "India", "British Indian Ocean Territory", "Iraq", "Iran", "Iceland", "Italy", "Jersey", "Jamaica", "Jordan", "Japan",
+    "Kenya", "Kyrgyzstan", "Cambodia", "Kiribati", "Comoros", "Saint Kitts and Nevis", "Democratic People's Republic of Korea", "Republic of Korea", "Kuwait", "Cayman Islands", "Kazakhstan",
+    "Lao People's Democratic Republic", "Lebanon", "Saint Lucia", "Liechtenstein", "Sri Lanka", "Liberia", "Lesotho", "Lithuania", "Luxembourg", "Latvia", "Libyan Arab Jamahiriya", "Morocco",
+    "Monaco", "Moldova", "Montenegro", "Saint Martin", "Madagascar", "Marshall Islands", "Macedonia", "Mali", "Myanmar", "Mongolia", "Macao", "Northern Mariana Islands", "Martinique",
+    "Mauritania", "Montserrat", "Malta", "Mauritius", "Maldives", "Malawi", "Mexico", "Malaysia", "Mozambique", "Namibia", "New Caledonia", "Niger", "Norfolk Island", "Nigeria", "Nicaragua",
+    "Netherlands", "Norway", "Nepal", "Nauru", "Niue", "New Zealand", "Oman", "Panama", "Peru", "French Polynesia", "Papua New Guinea", "Philippines", "Pakistan", "Poland",
+    "Saint Pierre and Miquelon", "Pitcairn", "Puerto Rico", "Palestinian Territory", "Portugal", "Palau", "Paraguay", "Qatar", "Reunion", "Romania", "Serbia", "Russian Federation",
+    "Rwanda", "Saudi Arabia", "Solomon Islands", "Seychelles", "Sudan", "Sweden", "Singapore", "Saint Helena", "Slovenia", "Svalbard and Jan Mayen", "Slovakia", "Sierra Leone", "San Marino",
+    "Senegal", "Somalia", "Suriname", "South Sudan", "Sao Tome and Principe", "El Salvador", "Sint Maarten (Dutch Part)", "Syrian Arab Republic", "Swaziland", "Turks and Caicos Islands", "Chad",
+    "French Southern Territories", "Togo", "Thailand", "Tajikistan", "Tokelau", "Timor-Leste", "Turkmenistan", "Tunisia", "Tonga", "Turkey", "Trinidad and Tobago", "Tuvalu", "Taiwan",
+    "Tanzania", "Ukraine", "Uganda", "United States Minor Outlying Islands", "United States", "Uruguay", "Uzbekistan", "Holy See (Vatican City State)",
+    "Saint Vincent and the Grenadines", "Venezuela", "Virgin Islands, British", "Virgin Islands, U.S.", "Viet Nam", "Vanuatu", "Wallis and Futuna", "Samoa", "Yemen", "Mayotte", "South Africa",
+    "Zambia", "Zimbabwe", "Netherlands Antilles", "Unknown (Asia-Pacific)", "Unknown (European Union)", "Unknown",
 };
-
-static const char * CountryCodes[] = { "AD", "AE", "AF", "AG", "AI", "AL", "AM", "AN", "AO", "AQ", "AR", "AS", "AT", "AU", "AW",
-	"AX", "AZ", "BA", "BB", "BD", "BE", "BF", "BG", "BH", "BI", "BJ", "BL", "BM", "BN", "BO",
-	"BR", "BS", "BT", "BV", "BW", "BY", "BZ", "CA", "CC", "CD", "CF", "CG", "CI", "CK", "CL",
-	"CM", "CN", "CO", "CR", "CU", "CV", "CX", "CY", "CZ", "DE", "DJ", "DK", "DM", "DO", "DZ",
-	"EC", "EE", "EG", "EH", "ER", "ES", "ET", "FI", "FJ", "FK", "FM", "FO", "FR", "GA", "GB",
-	"GD", "GE", "GF", "GG", "GH", "GI", "GL", "GM", "GN", "GP", "GQ", "GR", "GS", "GT", "GU",
-	"GW", "GY", "HK", "HM", "HN", "HR", "HT", "HU", "CH", "ID", "IE", "IL", "IM", "IN", "IO",
-	"IQ", "IR", "IS", "IT", "JE", "JM", "JO", "JP", "KE", "KG", "KH", "KI", "KM", "KN", "KP",
-	"KR", "KW", "KY", "KZ", "LA", "LB", "LC", "LI", "LK", "LR", "LS", "LT", "LU", "LV", "LY",
-	"MA", "MC", "MD", "ME", "MF", "MG", "MH", "MK", "ML", "MM", "MN", "MO", "MP", "MQ", "MR",
-	"MS", "MT", "MU", "MV", "MW", "MX", "MY", "MZ", "NA", "NC", "NE", "NF", "NG", "NI", "NL",
-	"NO", "NP", "NR", "NU", "NZ", "OM", "PA", "PE", "PF", "PG", "PH", "PK", "PL", "PM", "PN",
-	"PR", "PS", "PT", "PW", "PY", "QA", "RE", "RO", "RS", "RU", "RW", "SA", "SB", "SC", "SD",
-	"SE", "SG", "SH", "SI", "SJ", "SK", "SL", "SM", "SN", "SO", "SR", "ST", "SV", "SY", "SZ",
-	"TC", "TD", "TF", "TG", "TH", "TJ", "TK", "TL", "TM", "TN", "TO", "TR", "TT", "TV", "TW",
-	"TZ", "UA", "UG", "UM", "US", "UY", "UZ", "VA", "VC", "VE", "VG", "VI", "VN", "VU", "WF",
-	"WS", "YE", "YT", "ZA", "ZM", "ZW", "??",
+// last updated 25 sep 2011
+static const char * CountryCodes[] = { "AD", "AE", "AF", "AG", "AI", "AL", "AM", "AO", "AQ", "AR",
+    "AS", "AT", "AU", "AW", "AX", "AZ", "BA", "BB", "BD", "BE", "BF", "BG", "BH",
+    "BI", "BJ", "BL", "BM", "BN", "BO", "BQ", "BR", "BS", "BT", "BV", "BW", "BY", "BZ", "CA",
+    "CC", "CD", "CF", "CG", "CI", "CK", "CL", "CM", "CN", "CO",
+    "CR", "CU", "CV", "CW", "CX", "CY", "CZ", "DE", "DJ", "DK", "DM", "DO", "DZ", "EC",
+    "EE", "EG", "EH", "ER", "ES", "ET", "FI", "FJ", "FK", "FM", "FO", "FR", "GA", "GB",
+	"GD", "GE", "GF", "GG", "GH", "GI", "GL", "GM", "GN", "GP", "GQ", "GR",
+    "GS", "GT", "GU", "GW", "GY", "HK", "HM", "HN", "HR", "HT", "HU",
+    "CH", "ID", "IE", "IL", "IM", "IN", "IO", "IQ", "IR", "IS", "IT", "JE", "JM", "JO", "JP",
+    "KE", "KG", "KH", "KI", "KM", "KN", "KP", "KR", "KW", "KY", "KZ",
+    "LA", "LB", "LC", "LI", "LK", "LR", "LS", "LT", "LU", "LV", "LY", "MA",
+    "MC", "MD", "ME", "MF", "MG", "MH", "MK", "ML", "MM", "MN", "MO", "MP", "MQ",
+    "MR", "MS", "MT", "MU", "MV", "MW", "MX", "MY", "MZ", "NA", "NC", "NE", "NF", "NG", "NI",
+    "NL", "NO", "NP", "NR", "NU", "NZ", "OM", "PA", "PE", "PF", "PG", "PH", "PK", "PL",
+    "PM", "PN", "PR", "PS", "PT", "PW", "PY", "QA", "RE", "RO", "RS", "RU",
+    "RW", "SA", "SB", "SC", "SD", "SE", "SG", "SH", "SI", "SJ", "SK", "SL", "SM",
+    "SN", "SO", "SR", "SS", "ST", "SV", "SX", "SY", "SZ", "TC", "TD",
+    "TF", "TG", "TH", "TJ", "TK", "TL", "TM", "TN", "TO", "TR", "TT", "TV", "TW",
+	"TZ", "UA", "UG", "UM", "US", "UY", "UZ", "VA",
+    "VC", "VE", "VG", "VI", "VN", "VU", "WF", "WS", "YE", "YT", "ZA",
+    "ZM", "ZW", "AN", "AP", "EU", "??",
 };
 //---------------------------------------------------------------------------
 
@@ -103,17 +92,24 @@ IP2CC::IP2CC() {
     ui32Count = 0;
     ui32Size = 65536;
 
+	ui32RangeFrom = NULL;
+    ui32RangeTo = NULL;
+    ui8RangeCI = NULL;
+
+    ui32IPv6Count = 0;
+    ui32IPv6Size = 65536;
+
+	ui128IPv6RangeFrom = NULL;
+    ui128IPv6RangeTo = NULL;
+    ui8IPv6RangeCI = NULL;
+
 #ifdef _WIN32
-	FILE * ip2country = fopen((PATH + "\\cfg\\ip-to-country.csv").c_str(), "r");
+	FILE * ip2country = fopen((PATH + "\\cfg\\IpToCountry.csv").c_str(), "r");
 #else
-	FILE * ip2country = fopen((PATH + "/cfg/ip-to-country.csv").c_str(), "r");
+	FILE * ip2country = fopen((PATH + "/cfg/IpToCountry.csv").c_str(), "r");
 #endif
 
     if(ip2country == NULL) {
-		ui32RangeFrom = NULL;
-        ui32RangeTo = NULL;
-        ui8RangeCI = NULL;
-
         return;
     }
 
@@ -235,10 +231,11 @@ IP2CC::IP2CC() {
                     ui32RangeFrom[ui32Count] = strtoul(sStart, NULL, 10);
                 } else if(ui8d == 1) {
                     ui32RangeTo[ui32Count] = strtoul(sStart, NULL, 10);
-                } else {
-                    for(uint8_t ui8i = 0; ui8i < 246; ui8i++) {
-                        if(((uint16_t *)CountryCodes[ui8i])[0] == ((uint16_t *)sStart)[0]) {
+                } else if(ui8d == 4) {
+                    for(uint8_t ui8i = 0; ui8i < 252; ui8i++) {
+                        if(*((uint16_t *)CountryCodes[ui8i]) == *((uint16_t *)sStart)) {
                             ui8RangeCI[ui32Count] = ui8i;
+                            ui32Count++;
                             break;
                         }
                     }
@@ -252,8 +249,168 @@ IP2CC::IP2CC() {
                 
             }
         }
+    }
 
-        ui32Count++;
+	fclose(ip2country);
+
+    if(bUseIPv6 == false) {
+        return;
+    }
+
+#ifdef _WIN32
+	ip2country = fopen((PATH + "\\cfg\\IpToCountry.6R.csv").c_str(), "r");
+#else
+	ip2country = fopen((PATH + "/cfg/IpToCountry.6R.csv").c_str(), "r");
+#endif
+
+    if(ip2country == NULL) {
+        return;
+    }
+
+#ifdef _WIN32
+    ui128IPv6RangeFrom = (uint8_t *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui32IPv6Size * (sizeof(uint8_t)*16));
+#else
+	ui128IPv6RangeFrom = (uint8_t *) calloc(ui32IPv6Size, sizeof(uint8_t) * 16);
+#endif
+
+    if(ui128IPv6RangeFrom == NULL) {
+		AppendSpecialLog("Cannot create IP2CC::ui128IPv6RangeFrom!");
+		fclose(ip2country);
+		return;
+    }
+
+#ifdef _WIN32
+    ui128IPv6RangeTo = (uint8_t *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui32IPv6Size * (sizeof(uint8_t)*16));
+#else
+	ui128IPv6RangeTo = (uint8_t *) calloc(ui32IPv6Size, sizeof(uint8_t) * 16);
+#endif
+
+    if(ui128IPv6RangeTo == NULL) {
+		AppendSpecialLog("Cannot create IP2CC::ui128IPv6RangeTo!");
+		fclose(ip2country);
+		return;
+    }
+
+#ifdef _WIN32
+    ui8IPv6RangeCI = (uint8_t *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui32IPv6Size * sizeof(uint8_t));
+#else
+	ui8IPv6RangeCI = (uint8_t *) calloc(ui32IPv6Size, sizeof(uint8_t));
+#endif
+
+    if(ui8IPv6RangeCI == NULL) {
+		AppendSpecialLog("Cannot create IP2CC::ui8IPv6RangeCI!");
+		fclose(ip2country);
+		return;
+	}
+
+    while(fgets(sLine, 1024, ip2country) != NULL) {
+        if(sLine[0] == '#' || sLine[0] < 32) {
+            continue;
+        }
+
+        if(ui32IPv6Count == ui32IPv6Size) {
+            ui32IPv6Size += 512;
+            void * oldbuf = ui128IPv6RangeFrom;
+#ifdef _WIN32
+			ui128IPv6RangeFrom = (uint8_t *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, ui32IPv6Size * (sizeof(uint8_t)*16));
+#else
+			ui128IPv6RangeFrom = (uint8_t *) realloc(oldbuf, ui32IPv6Size * (sizeof(uint8_t)*16));
+#endif
+            if(ui128IPv6RangeFrom == NULL) {
+    			string sDbgstr = "[BUF] Cannot reallocate "+string(ui32IPv6Size)+
+    				" bytes of memory in IP2CC::IP2CC for ui128IPv6RangeFrom!";
+#ifdef _WIN32
+    			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+                HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
+#else
+                free(oldbuf);
+#endif
+    			AppendSpecialLog(sDbgstr);
+    			fclose(ip2country);
+                return;
+    		}
+
+            oldbuf = ui128IPv6RangeTo;
+#ifdef _WIN32
+			ui128IPv6RangeTo = (uint8_t *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, ui32IPv6Size * (sizeof(uint8_t)*16));
+#else
+			ui128IPv6RangeTo = (uint8_t *) realloc(oldbuf, ui32IPv6Size * (sizeof(uint8_t)*16));
+#endif
+            if(ui128IPv6RangeTo == NULL) {
+    			string sDbgstr = "[BUF] Cannot reallocate "+string(ui32IPv6Size)+
+    				" bytes of memory in IP2CC::IP2CC for ui128IPv6RangeTo!";
+#ifdef _WIN32
+    			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+                HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
+#else
+                free(oldbuf);
+#endif
+    			AppendSpecialLog(sDbgstr);
+    			fclose(ip2country);
+                return;
+    		}
+
+            oldbuf = ui8IPv6RangeCI;
+#ifdef _WIN32
+            ui8IPv6RangeCI = (uint8_t *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, ui32IPv6Size * sizeof(uint8_t));
+#else
+			ui8IPv6RangeCI = (uint8_t *) realloc(oldbuf, ui32IPv6Size * sizeof(uint8_t));
+#endif
+            if(ui8IPv6RangeCI == NULL) {
+    			string sDbgstr = "[BUF] Cannot reallocate "+string(ui32IPv6Size)+
+    				" bytes of memory in IP2CC::IP2CC for ui8IPv6RangeCI!";
+#ifdef _WIN32
+    			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+                HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
+#else
+                free(oldbuf);
+#endif
+    			AppendSpecialLog(sDbgstr);
+    			fclose(ip2country);
+                return;
+    		}
+        }
+
+        char * sStart = sLine;
+        uint8_t ui8d = 0;
+
+        size_t iLineLen = strlen(sLine);
+
+		for(size_t ui16i = 0; ui16i < iLineLen; ui16i++) {
+            if(ui8d == 0 && sLine[ui16i] == '-') {
+                sLine[ui16i] = '\0';
+#ifdef _WIN32
+                win_inet_pton(AF_INET6, sStart, ui128IPv6RangeFrom + (ui32IPv6Count*16));
+#else
+                inet_pton(AF_INET6, sStart, ui128IPv6RangeFrom + (ui32IPv6Count*16));
+#endif
+            } else if(sLine[ui16i] == ',') {
+                sLine[ui16i] = '\0';
+                if(ui8d == 1) {
+#ifdef _WIN32
+                    win_inet_pton(AF_INET6, sStart, ui128IPv6RangeTo + (ui32IPv6Count*16));
+#else
+                    inet_pton(AF_INET6, sStart, ui128IPv6RangeTo + (ui32IPv6Count*16));
+#endif
+                } else {
+                    for(uint8_t ui8i = 0; ui8i < 252; ui8i++) {
+                        if(*((uint16_t *)CountryCodes[ui8i]) == *((uint16_t *)sStart)) {
+                            ui8IPv6RangeCI[ui32IPv6Count] = ui8i;
+                            ui32IPv6Count++;
+
+                            break;
+                        }
+                    }
+
+                    break;
+                }
+            } else {
+                continue;
+            }
+
+            ui8d++;
+            sStart = sLine+ui16i+1;
+        }
     }
 
 	fclose(ip2country);
@@ -296,38 +453,110 @@ IP2CC::~IP2CC() {
 #else
 	free(ui8RangeCI);
 #endif
+
+#ifdef _WIN32
+    if(ui128IPv6RangeFrom != NULL) {
+        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ui128IPv6RangeFrom) == 0) {
+			string sDbgstr = "[BUF] Cannot deallocate IP2CC::ui128IPv6RangeFrom! "+string((uint32_t)GetLastError())+" "+
+				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+            AppendSpecialLog(sDbgstr);
+        }
+    }
+#else
+	free(ui128IPv6RangeFrom);
+#endif
+
+#ifdef _WIN32
+    if(ui128IPv6RangeTo != NULL) {
+        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ui128IPv6RangeTo) == 0) {
+			string sDbgstr = "[BUF] Cannot deallocate IP2CC::ui128IPv6RangeTo! "+string((uint32_t)GetLastError())+" "+
+				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+            AppendSpecialLog(sDbgstr);
+        }
+    }
+#else
+	free(ui128IPv6RangeTo);
+#endif
+
+#ifdef _WIN32
+    if(ui8IPv6RangeCI != NULL) {
+        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ui8IPv6RangeCI) == 0) {
+			string sDbgstr = "[BUF] Cannot deallocate IP2CC::ui8IPv6RangeCI! "+string((uint32_t)GetLastError())+" "+
+				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
+            AppendSpecialLog(sDbgstr);
+        }
+    }
+#else
+	free(ui8IPv6RangeCI);
+#endif
 }
 //---------------------------------------------------------------------------
 
-const char * IP2CC::Find(const uint32_t &ui32Hash, const bool &bCountryName) {
-	uint32_t ui32i = 0;
-	for(; ui32i < ui32Count; ui32i++) {
-        if(ui32RangeFrom[ui32i] < ui32Hash && ui32RangeTo[ui32i] > ui32Hash) {
-            if(bCountryName == false) {
-                return CountryCodes[ui8RangeCI[ui32i]];
-            } else {
-                return CountryNames[ui8RangeCI[ui32i]];
+const char * IP2CC::Find(const uint8_t * ui128IpHash, const bool &bCountryName) {
+    bool bIPv4 = false;
+    uint32_t ui32IpHash = 0;
+
+    if(bUseIPv6 == false || IN6_IS_ADDR_V4MAPPED((in6_addr *)ui128IpHash)) {
+        bIPv4 = true;
+
+        ui32IpHash = 16777216 * ui128IpHash[12] + 65536 * ui128IpHash[13] + 256 * ui128IpHash[14] + ui128IpHash[15];
+    }
+
+    if(bIPv4 == true) {
+        for(uint32_t ui32i = 0; ui32i < ui32Count; ui32i++) {
+            if(ui32RangeFrom[ui32i] < ui32IpHash && ui32RangeTo[ui32i] > ui32IpHash) {
+                if(bCountryName == false) {
+                    return CountryCodes[ui8RangeCI[ui32i]];
+                } else {
+                    return CountryNames[ui8RangeCI[ui32i]];
+                }
+            }
+        }
+    } else {
+        for(uint32_t ui32i = 0; ui32i < ui32IPv6Count; ui32i++) {
+            if(memcmp(ui128IPv6RangeFrom+(ui32i*16), ui128IpHash, 16) <= 0 && memcmp(ui128IPv6RangeTo+(ui32i*16), ui128IpHash, 16) >= 0) {
+                if(bCountryName == false) {
+                    return CountryCodes[ui8IPv6RangeCI[ui32i]];
+                } else {
+                    return CountryNames[ui8IPv6RangeCI[ui32i]];
+                }
             }
         }
     }
 
     if(bCountryName == false) {
-        return CountryCodes[246];
+        return CountryCodes[252];
     } else {
-        return CountryNames[246];
+        return CountryNames[252];
     }
 }
 //---------------------------------------------------------------------------
 
-uint8_t IP2CC::Find(const uint32_t &ui32Hash) {
-	uint32_t ui32i = 0;
-	for(; ui32i < ui32Count; ui32i++) {
-        if(ui32RangeFrom[ui32i] < ui32Hash && ui32RangeTo[ui32i] > ui32Hash) {
-            return ui8RangeCI[ui32i];
+uint8_t IP2CC::Find(const uint8_t * ui128IpHash) {
+    bool bIPv4 = false;
+    uint32_t ui32IpHash = 0;
+
+    if(bUseIPv6 == false || IN6_IS_ADDR_V4MAPPED((in6_addr *)ui128IpHash)) {
+        bIPv4 = true;
+
+        ui32IpHash = 16777216 * ui128IpHash[12] + 65536 * ui128IpHash[13] + 256 * ui128IpHash[14] + ui128IpHash[15];
+    }
+
+    if(bIPv4 == true) {
+        for(uint32_t ui32i = 0; ui32i < ui32Count; ui32i++) {
+            if(ui32RangeFrom[ui32i] < ui32IpHash && ui32RangeTo[ui32i] > ui32IpHash) {
+                return ui8RangeCI[ui32i];
+            }
+        }
+    } else {
+        for(uint32_t ui32i = 0; ui32i < ui32IPv6Count; ui32i++) {
+            if(memcmp(ui128IPv6RangeFrom+(ui32i*16), ui128IpHash, 16) <= 0 && memcmp(ui128IPv6RangeTo+(ui32i*16), ui128IpHash, 16) >= 0) {
+                return ui8IPv6RangeCI[ui32i];
+            }
         }
     }
 
-    return 246;
+    return 252;
 }
 //---------------------------------------------------------------------------
 

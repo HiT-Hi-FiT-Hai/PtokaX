@@ -168,11 +168,11 @@ void RangeBanDialog::DoModal(HWND hWndParent, RangeBanItem * pRangeBan/* = NULL*
 
     hWndWindowItems[EDT_FROM_IP] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
         11, iGroupBoxMargin, (rcParent.right / 2) - 13, iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
-    ::SendMessage(hWndWindowItems[EDT_FROM_IP], EM_SETLIMITTEXT, 15, 0);
+    ::SendMessage(hWndWindowItems[EDT_FROM_IP], EM_SETLIMITTEXT, 39, 0);
 
     hWndWindowItems[EDT_TO_IP] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
         (rcParent.right / 2) + 3, iGroupBoxMargin, (rcParent.right / 2) - 13, iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
-    ::SendMessage(hWndWindowItems[EDT_TO_IP], EM_SETLIMITTEXT, 15, 0);
+    ::SendMessage(hWndWindowItems[EDT_TO_IP], EM_SETLIMITTEXT, 39, 0);
 
     hWndWindowItems[BTN_FULL_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_FULL_BAN], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
         11, iGroupBoxMargin + iEditHeight + 4, rcParent.right - 22, iCheckHeight, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
@@ -284,36 +284,37 @@ void RangeBanDialog::DoModal(HWND hWndParent, RangeBanItem * pRangeBan/* = NULL*
 bool RangeBanDialog::OnAccept() {
     int iIpFromLen = ::GetWindowTextLength(hWndWindowItems[EDT_FROM_IP]);
 
-    char sFromIP[16];
-    ::GetWindowText(hWndWindowItems[EDT_FROM_IP], sFromIP, 16);
+    char sFromIP[40];
+    ::GetWindowText(hWndWindowItems[EDT_FROM_IP], sFromIP, 40);
+
+    uint8_t ui128FromIpHash[16];
+    memset(ui128FromIpHash, 0, 16);
 
 	if(iIpFromLen == 0) {
 		::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_NO_VALID_IP_SPECIFIED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 		return false;
-	} else if(isIP(sFromIP, iIpFromLen) == false) {
+	} else if(HashIP(sFromIP, ui128FromIpHash) == false) {
 		::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(sFromIP) + " " + LanguageManager->sTexts[LAN_IS_NOT_VALID_IP_ADDRESS]).c_str(), sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	}
 
     int iIpToLen = ::GetWindowTextLength(hWndWindowItems[EDT_TO_IP]);
 
-    char sToIP[16];
-    ::GetWindowText(hWndWindowItems[EDT_TO_IP], sToIP, 16);
+    char sToIP[40];
+    ::GetWindowText(hWndWindowItems[EDT_TO_IP], sToIP, 40);
+
+    uint8_t ui128ToIpHash[16];
+    memset(ui128ToIpHash, 0, 16);
 
 	if(iIpToLen == 0) {
 		::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_NO_VALID_IP_SPECIFIED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 		return false;
-	} else if(isIP(sToIP, iIpToLen) == false) {
+	} else if(HashIP(sToIP, ui128ToIpHash) == false) {
 		::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(sToIP) + " " + LanguageManager->sTexts[LAN_IS_NOT_VALID_IP_ADDRESS]).c_str(), sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	}
 
-    uint32_t ui32FromIpHash = 0, ui32ToIpHash = 0;
-
-	HashIP(sFromIP, iIpFromLen, ui32FromIpHash);
-	HashIP(sToIP, iIpToLen, ui32ToIpHash);
-
-    if(ui32ToIpHash <= ui32FromIpHash) {
+    if(memcmp(ui128ToIpHash, ui128FromIpHash, 16) <= 0) {
 		::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_NO_VALID_IP_RANGE_SPECIFIED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 		return false;
     }
@@ -324,7 +325,6 @@ bool RangeBanDialog::OnAccept() {
 	time_t ban_time = 0;
 
     bool bTempBan = ::SendMessage(hWndWindowItems[RB_TEMP_BAN], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false;
-    bool bPermBan = ::SendMessage(hWndWindowItems[RB_PERM_BAN], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false;
 
 	if(bTempBan == true) {
         SYSTEMTIME stDate = { 0 };
@@ -374,10 +374,10 @@ bool RangeBanDialog::OnAccept() {
 		}
 
 		strcpy(pRangeBan->sIpFrom, sFromIP);
-		pRangeBan->ui32FromIpHash = ui32FromIpHash;
+		memcpy(pRangeBan->ui128FromIpHash, ui128FromIpHash, 16);
 
 		strcpy(pRangeBan->sIpTo, sToIP);
-		pRangeBan->ui32ToIpHash = ui32ToIpHash;
+		memcpy(pRangeBan->ui128ToIpHash, ui128ToIpHash, 16);
 
         if(::SendMessage(hWndWindowItems[BTN_FULL_BAN], BM_GETCHECK, 0, 0) == BST_CHECKED) {
 			pRangeBan->ui8Bits |= hashBanMan::FULL;
@@ -385,60 +385,19 @@ bool RangeBanDialog::OnAccept() {
 
 		RangeBanItem *nxtBan = hashBanManager->RangeBanListS;
 
-		if(bPermBan == true) {
-			// PPK ... don't add range ban if is already here same perm (full) range ban
-			while(nxtBan != NULL) {
-				RangeBanItem *curBan = nxtBan;
-				nxtBan = curBan->next;
+		// PPK ... don't add range ban if is already here same range ban
+		while(nxtBan != NULL) {
+			RangeBanItem *curBan = nxtBan;
+			nxtBan = curBan->next;
 
-				if(curBan->ui32FromIpHash != pRangeBan->ui32FromIpHash || curBan->ui32ToIpHash != pRangeBan->ui32ToIpHash) {
-					continue;
-				}
+			if(((curBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true && acc_time > curBan->tempbanexpire) {
+				hashBanManager->RemRange(curBan);
+				delete curBan;
 
-				if(((curBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
-					if(((curBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false || ((pRangeBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
-						hashBanManager->RemRange(curBan);
-						delete curBan;
-
-						continue;
-					}
-				}
-
-				if(((curBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false && ((pRangeBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
-					hashBanManager->RemRange(curBan);
-					delete curBan;
-
-					continue;
-				}
-
-				delete pRangeBan;
-
-				::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
-				return false;
+				continue;
 			}
-		} else { // temp ban
-			// PPK ... don't add range ban if is already here same perm (full) range ban or longer temp ban for same range
-			while(nxtBan != NULL) {
-				RangeBanItem *curBan = nxtBan;
-				nxtBan = curBan->next;
 
-				if(curBan->ui32FromIpHash != pRangeBan->ui32FromIpHash || curBan->ui32ToIpHash != pRangeBan->ui32ToIpHash) {
-					continue;
-				}
-
-				if(((curBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true && curBan->tempbanexpire < pRangeBan->tempbanexpire) {
-					if(((curBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false || ((pRangeBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
-						hashBanManager->RemRange(curBan);
-						delete curBan;
-					}
-
-					continue;
-				}
-
-				if(((curBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == false && ((pRangeBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
-					continue;
-				}
-
+			if(memcmp(curBan->ui128FromIpHash, pRangeBan->ui128FromIpHash, 16) == 0 && memcmp(curBan->ui128ToIpHash, pRangeBan->ui128ToIpHash, 16) == 0) {
 				delete pRangeBan;
 
 				::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
@@ -494,10 +453,10 @@ bool RangeBanDialog::OnAccept() {
 		}
 
 		strcpy(pRangeBanToChange->sIpFrom, sFromIP);
-		pRangeBanToChange->ui32FromIpHash = ui32FromIpHash;
+		memcpy(pRangeBanToChange->ui128FromIpHash, ui128FromIpHash, 16);
 
 		strcpy(pRangeBanToChange->sIpTo, sToIP);
-		pRangeBanToChange->ui32ToIpHash = ui32ToIpHash;
+		memcpy(pRangeBanToChange->ui128ToIpHash, ui128ToIpHash, 16);
 
 		if(::SendMessage(hWndWindowItems[BTN_FULL_BAN], BM_GETCHECK, 0, 0) == BST_CHECKED) {
 			pRangeBanToChange->ui8Bits |= hashBanMan::FULL;

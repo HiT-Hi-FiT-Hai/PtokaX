@@ -93,21 +93,19 @@ bool bServerRunning = false, bServerTerminated = false, bIsRestart = false, bIsC
 #else
 	bool bDaemon = false;
 #endif
-char sHubIP[16];
+char sHubIP[16], sHubIP6[46];
 uint8_t ui8SrCntr = 0, ui8MinTick = 0;
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
 void ServerOnSecTimer() {
-	if(b2K == true) {
-		FILETIME tmpa, tmpb, kernelTimeFT, userTimeFT;
-		GetProcessTimes(GetCurrentProcess(), &tmpa, &tmpb, &kernelTimeFT, &userTimeFT);
-		int64_t kernelTime = kernelTimeFT.dwLowDateTime | (((int64_t)kernelTimeFT.dwHighDateTime) << 32);
-		int64_t userTime = userTimeFT.dwLowDateTime | (((int64_t)userTimeFT.dwHighDateTime) << 32);
-		double dcpuSec = double(kernelTime + userTime) / double(10000000I64);
-		cpuUsage = dcpuSec - CpuUsage[ui8MinTick];
-		CpuUsage[ui8MinTick] = dcpuSec;
-	}
+	FILETIME tmpa, tmpb, kernelTimeFT, userTimeFT;
+	GetProcessTimes(GetCurrentProcess(), &tmpa, &tmpb, &kernelTimeFT, &userTimeFT);
+	int64_t kernelTime = kernelTimeFT.dwLowDateTime | (((int64_t)kernelTimeFT.dwHighDateTime) << 32);
+	int64_t userTime = userTimeFT.dwLowDateTime | (((int64_t)userTimeFT.dwHighDateTime) << 32);
+	double dcpuSec = double(kernelTime + userTime) / double(10000000I64);
+	cpuUsage = dcpuSec - CpuUsage[ui8MinTick];
+	CpuUsage[ui8MinTick] = dcpuSec;
 #else
 static void SecTimerHandler(int /*sig*/) {
     struct rusage rs;
@@ -194,7 +192,7 @@ void ServerInitialize() {
 	#endif
 
 	WSADATA wsaData;
-	WSAStartup(MAKEWORD(1, 1), &wsaData);
+	WSAStartup(MAKEWORD(2, 2), &wsaData);
 
     hPtokaXHeap = HeapCreate(HEAP_NO_SERIALIZE, 0x100000, 0);
 
@@ -272,6 +270,7 @@ void ServerInitialize() {
         ui32CpuCount = 1;
     }
 #endif
+    CheckForIPv6();
 
 	ResNickManager = new ResNickMan();
 	if(ResNickManager == NULL) {
@@ -300,6 +299,7 @@ void ServerInitialize() {
     bServerRunning = bIsRestart = bIsClose = false;
 
     sHubIP[0] = '\0';
+    sHubIP6[0] = '\0';
 
     ui8SrCntr = 0;
 
@@ -322,17 +322,6 @@ void ServerInitialize() {
 		AppendSpecialLog(sDbgstr);
     	exit(EXIT_FAILURE);
     }
-
-#ifdef _WIN32
-    // PPK ... check OS if is NT
-    OSVERSIONINFOEX osvi;
-	memset(&osvi, 0, sizeof(OSVERSIONINFOEX));
-	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-	if(GetVersionEx((OSVERSIONINFO *)&osvi) && osvi.dwMajorVersion >= 5) {
-        // PPK ... set b2K to true
-        b2K = true;
-	}
-#endif
 
     ui8MinTick = 0;
 
@@ -531,18 +520,28 @@ bool ServerStart() {
 
     ui8SrCntr = 0;
 
+    sHubIP[0] = '\0';
+    sHubIP6[0] = '\0';
+
     if(SettingManager->bBools[SETBOOL_RESOLVE_TO_IP] == true) {
         if(isIP(SettingManager->sTexts[SETTXT_HUB_ADDRESS], SettingManager->ui16TextsLens[SETTXT_HUB_ADDRESS]) == false) {
 #ifdef _BUILD_GUI
             pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_RESOLVING_HUB_ADDRESS], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_HUB_ADDRESS])+"...").c_str());
 #endif
+
             struct addrinfo hints;
             memset(&hints, 0, sizeof(addrinfo));
-            hints.ai_family = AF_INET;
+
+            if(bUseIPv6 == true) {
+                hints.ai_family = AF_UNSPEC;
+            } else {
+                hints.ai_family = AF_INET;
+            }
 
             struct addrinfo *res;
 
-            if(::getaddrinfo(SettingManager->sTexts[SETTXT_HUB_ADDRESS], NULL, &hints, &res) != 0 || res->ai_family != AF_INET) {
+            if(::getaddrinfo(SettingManager->sTexts[SETTXT_HUB_ADDRESS], NULL, &hints, &res) != 0 ||
+                (res->ai_family != AF_INET && res->ai_family != AF_INET6)) {
 #ifdef _WIN32
             	int err = WSAGetLastError();
 	#ifdef _BUILD_GUI
@@ -567,10 +566,60 @@ bool ServerStart() {
 #endif
                 return false;
             } else {
-				Memo("*** "+string(SettingManager->sTexts[SETTXT_HUB_ADDRESS], (size_t)LanguageManager->ui16TextsLens[SETTXT_HUB_ADDRESS])+" "+
+				Memo("*** "+string(SettingManager->sTexts[SETTXT_HUB_ADDRESS], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_ADDRESS])+" "+
 					string(LanguageManager->sTexts[LAN_RESOLVED_SUCCESSFULLY], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVED_SUCCESSFULLY])+".");
-                strcpy(sHubIP, inet_ntoa(((sockaddr_in *)(res->ai_addr))->sin_addr));
-				Memo("*** "+string(sHubIP));
+
+                if(bUseIPv6 == true) {
+                    struct addrinfo *next = res;
+                    while(next != NULL) {
+                        if(next->ai_family == AF_INET) {
+                            if(((sockaddr_in *)(next->ai_addr))->sin_addr.s_addr != INADDR_ANY) {
+                                strcpy(sHubIP, inet_ntoa(((sockaddr_in *)(next->ai_addr))->sin_addr));
+                            }
+                        } else if(next->ai_family == AF_INET6) {
+#ifdef _WIN32
+                            win_inet_ntop(AF_INET6, &((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, sHubIP6, 46);
+#else
+                            inet_ntop(AF_INET6, &((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, sHubIP6, 46);
+#endif
+                        }
+
+                        next = next->ai_next;
+                    }
+                } else if(((sockaddr_in *)(res->ai_addr))->sin_addr.s_addr != INADDR_ANY) {
+                    strcpy(sHubIP, inet_ntoa(((sockaddr_in *)(res->ai_addr))->sin_addr));
+                }
+
+                if(sHubIP[0] == '\0') {
+                    char sHostName[256];
+                    ::gethostname(sHostName, 256);
+
+                    struct addrinfo aiHints;
+                    memset(&aiHints, 0, sizeof(addrinfo));
+                    aiHints.ai_family = AF_INET;
+
+                    struct addrinfo * pRes;
+
+                    if(::getaddrinfo(sHostName, NULL, &aiHints, &pRes) == 0) {
+                        if(pRes->ai_family == AF_INET && ((sockaddr_in *)(pRes->ai_addr))->sin_addr.s_addr != INADDR_ANY) {
+                            strcpy(sHubIP, inet_ntoa(((sockaddr_in *)(pRes->ai_addr))->sin_addr));
+                        }
+
+                        freeaddrinfo(pRes);
+                    }
+                }
+
+                if(sHubIP[0] != '\0') {
+                    string msg = "*** "+string(sHubIP);
+                    if(sHubIP6[0] != '\0') {
+                        msg += " / "+string(sHubIP6);
+                    }
+
+				    Memo(msg);
+                } else if(sHubIP6[0] != '\0') {
+				    Memo("*** "+string(sHubIP6));
+                }
+
 				freeaddrinfo(res);
             }
         } else {

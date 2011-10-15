@@ -166,7 +166,7 @@ void eventq::AddNormal(uint8_t ui8Id, char * sMsg) {
 }
 //---------------------------------------------------------------------------
 
-void eventq::AddThread(uint8_t ui8Id, char * sMsg, const uint32_t &ui32Hash/* = 0*/) {
+void eventq::AddThread(uint8_t ui8Id, char * sMsg, const sockaddr_storage * sas/* = NULL*/) {
 	event * newevent = new event();
 
 	if(newevent == NULL) {
@@ -199,7 +199,17 @@ void eventq::AddThread(uint8_t ui8Id, char * sMsg, const uint32_t &ui32Hash/* = 
     }
 
     newevent->ui8Id = ui8Id;
-    newevent->ui32Hash = ui32Hash;
+
+    if(sas != NULL) {
+        if(sas->ss_family == AF_INET6) {
+            memcpy(newevent->ui128IpHash, &((struct sockaddr_in6 *)sas)->sin6_addr.s6_addr, 16);
+        } else {
+            memset(newevent->ui128IpHash, 0, 16);
+            memcpy(newevent->ui128IpHash+12, &((struct sockaddr_in *)sas)->sin_addr.s_addr, 4);
+        }
+    } else {
+        memset(newevent->ui128IpHash, 0, 16);
+    }
 
 #ifdef _WIN32
     EnterCriticalSection(&csEventQueue);
@@ -354,7 +364,7 @@ void eventq::ProcessEvents() {
                 // add back space after nick...
                 temp[0] = ' ';
 
-                if(cur->ui32Hash != u->ui32IpHash) {
+                if(memcmp(cur->ui128IpHash, u->ui128IpHash, 16) != 0) {
                     break;
                 }
 

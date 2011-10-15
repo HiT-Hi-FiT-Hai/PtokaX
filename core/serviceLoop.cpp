@@ -219,18 +219,41 @@ theLoop::~theLoop() {
 //---------------------------------------------------------------------------
 
 void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
+    bool bIPv6 = false;
+
+    char sIP[46];
+
+    uint8_t ui128IpHash[16];
+    memset(ui128IpHash, 0, 16);
+
+    if(AccptSocket->addr.ss_family == AF_INET6) {
+        if(IN6_IS_ADDR_V4MAPPED(&((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr)) {
+            strcpy(sIP, inet_ntoa(*((in_addr *)(((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr.s6_addr + 12))));
+        } else {
+            bIPv6 = true;
+#ifdef _WIN32
+            win_inet_ntop(AF_INET6, &((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr, sIP, 46);
+#else
+            inet_ntop(AF_INET6, &((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr, sIP, 46);
+#endif
+        }
+
+        memcpy(ui128IpHash, &((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr.s6_addr, 16);
+    } else {
+        strcpy(sIP, inet_ntoa(((struct sockaddr_in *)&AccptSocket->addr)->sin_addr));
+        memcpy(ui128IpHash+12, &((struct sockaddr_in *)&AccptSocket->addr)->sin_addr.s_addr, 4);
+    }
+
     // set the recv buffer
 #ifdef _WIN32
     int32_t bufsize = 8192;
     if(setsockopt(AccptSocket->s, SOL_SOCKET, SO_RCVBUF, (char *) &bufsize, sizeof(bufsize)) == SOCKET_ERROR) {
     	int iError = WSAGetLastError();
-    	int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_RCVBUF. IP: %s Err: %s (%d)", 
-            inet_ntoa(AccptSocket->addr.sin_addr), WSErrorStr(iError), iError);
+    	int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_RCVBUF. IP: %s Err: %s (%d)",  sIP, WSErrorStr(iError), iError);
 #else
     int bufsize = 8192;
     if(setsockopt(AccptSocket->s, SOL_SOCKET, SO_RCVBUF, &bufsize, sizeof(bufsize)) == -1) {
-    	int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_RCVBUF. IP: %s Err: %d", 
-            inet_ntoa(AccptSocket->addr.sin_addr), errno);
+    	int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_RCVBUF. IP: %s Err: %d", sIP, errno);
 #endif
         if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser1") == true) {
     	   UdpDebug->Broadcast(msg, imsgLen);
@@ -250,12 +273,10 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 #ifdef _WIN32
     if(setsockopt(AccptSocket->s, SOL_SOCKET, SO_SNDBUF, (char *) &bufsize, sizeof(bufsize)) == SOCKET_ERROR) {
         int iError = WSAGetLastError();
-        int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_SNDBUF. IP: %s Err: %s (%d)", 
-            inet_ntoa(AccptSocket->addr.sin_addr), WSErrorStr(iError), iError);
+        int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_SNDBUF. IP: %s Err: %s (%d)", sIP, WSErrorStr(iError), iError);
 #else
     if(setsockopt(AccptSocket->s, SOL_SOCKET, SO_SNDBUF, &bufsize, sizeof(bufsize)) == -1) {
-        int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_SNDBUF. IP: %s Err: %d", 
-            inet_ntoa(AccptSocket->addr.sin_addr), errno);
+        int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_SNDBUF. IP: %s Err: %d", sIP, errno);
 #endif
         if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser2") == true) {
 	       UdpDebug->Broadcast(msg, imsgLen);
@@ -277,8 +298,7 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 #else
     int iKeepAlive = 1;
     if(setsockopt(AccptSocket->s, SOL_SOCKET, SO_KEEPALIVE, &iKeepAlive, sizeof(iKeepAlive)) == -1) {
-        int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_KEEPALIVE. IP: %s Err: %d", 
-            inet_ntoa(AccptSocket->addr.sin_addr), errno);
+        int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_KEEPALIVE. IP: %s Err: %d", sIP, errno);
         if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser3") == true) {
 	       UdpDebug->Broadcast(msg, imsgLen);
         }
@@ -293,14 +313,12 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
     uint32_t block = 1;
 	if(ioctlsocket(AccptSocket->s, FIONBIO, (unsigned long *)&block) == SOCKET_ERROR) {
     	int iError = WSAGetLastError();
-    	int imsgLen = sprintf(msg, "[SYS] ioctlsocket failed on attempt to set FIONBIO. IP: %s Err: %s (%d)", 
-            inet_ntoa(AccptSocket->addr.sin_addr), WSErrorStr(iError), iError);
+    	int imsgLen = sprintf(msg, "[SYS] ioctlsocket failed on attempt to set FIONBIO. IP: %s Err: %s (%d)", sIP, WSErrorStr(iError), iError);
         if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser3") == true) {
 #else
     int oldFlag = fcntl(AccptSocket->s, F_GETFL, 0);
     if(fcntl(AccptSocket->s, F_SETFL, oldFlag | O_NONBLOCK) == -1) {
-    	int imsgLen = sprintf(msg, "[SYS] fcntl failed on attempt to set O_NONBLOCK. IP: %s Err: %d", 
-            inet_ntoa(AccptSocket->addr.sin_addr), errno);
+    	int imsgLen = sprintf(msg, "[SYS] fcntl failed on attempt to set O_NONBLOCK. IP: %s Err: %d", sIP, errno);
         if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser4") == true) {
 #endif
 		  UdpDebug->Broadcast(msg, imsgLen);
@@ -336,20 +354,10 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 		return;
     }
 
-#ifdef _WIN32
-    uint32_t hash = 16777216 * AccptSocket->addr.sin_addr.S_un.S_un_b.s_b1 + 65536 * AccptSocket->addr.sin_addr.S_un.S_un_b.s_b2
-		+ 256 * AccptSocket->addr.sin_addr.S_un.S_un_b.s_b3 + AccptSocket->addr.sin_addr.S_un.S_un_b.s_b4;
-/*	uint32_t hash = 16777216 * AccptSocket->addr.sin6_addr.u.Byte[12] + 65536 * AccptSocket->addr.sin6_addr.u.Byte[13]
-		+ 256 * AccptSocket->addr.sin6_addr.u.Byte[14] + AccptSocket->addr.sin6_addr.u.Byte[15];*/
-#else
-    uint32_t hash;
-    HashIP(AccptSocket->IP, strlen(AccptSocket->IP), hash);
-#endif
-
     time_t acc_time;
     time(&acc_time);
 
-	BanItem *Ban = hashBanManager->FindFull(hash, acc_time);
+	BanItem *Ban = hashBanManager->FindFull(ui128IpHash, acc_time);
 
 	if(Ban != NULL) {
         if(((Ban->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
@@ -363,7 +371,7 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
             shutdown(AccptSocket->s, SHUT_RD);
             close(AccptSocket->s);
 #endif
-/*            int imsgLen = sprintf(msg, "[SYS] Banned ip %s - connection closed.", AccptSocket->IP);
+/*            int imsgLen = sprintf(msg, "[SYS] Banned ip %s - connection closed.", sIP);
             if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser5") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }*/
@@ -371,7 +379,7 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
         }
     }
 
-	RangeBanItem *RangeBan = hashBanManager->FindFullRange(hash, acc_time);
+	RangeBanItem *RangeBan = hashBanManager->FindFullRange(ui128IpHash, acc_time);
 
 	if(RangeBan != NULL) {
         if(((RangeBan->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
@@ -385,7 +393,7 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
             shutdown(AccptSocket->s, SHUT_RD);
             close(AccptSocket->s);
 #endif
-/*            int imsgLen = sprintf(msg, "[SYS] Range Banned ip %s - connection closed.", AccptSocket->IP);
+/*            int imsgLen = sprintf(msg, "[SYS] Range Banned ip %s - connection closed.", sIP);
             if(CheckSprintf(imsgLen, 1024, "theLoop::AcceptUser6") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);
             }*/
@@ -416,12 +424,17 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 
     u->uLogInOut->logonClk = ui64ActualTick;
     u->Sck = AccptSocket->s;
-//    u->sin_len = AccptSocket->sin_len;
-//    u->addr = AccptSocket->addr;
-    u->ui32IpHash = hash;
-    UserSetIP(u, AccptSocket->IP);
-//    u->PORT = ntohs(u->addr.sin_port);
     u->ui8State = User::STATE_KEY_OR_SUP;
+
+    memcpy(u->ui128IpHash, ui128IpHash, 16);
+
+    UserSetIP(u, sIP);
+
+    if(bIPv6 == true) {
+        u->ui32BoolBits |= User::BIT_IPV6;
+    } else {
+        u->ui32BoolBits |= User::BIT_IPV4;
+    }
 
     UserMakeLock(u);
     
@@ -577,6 +590,18 @@ void theLoop::ReceiveLoop() {
                         UdpDebug->Broadcast(msg, imsgLen);
                     }
                     UserClose(curUser);
+                    continue;
+                }
+                break;
+            }
+            case User::STATE_IPV4_CHECK: {
+                // check IPv4Check timeout
+                if((ui64ActualTick - curUser->uLogInOut->ui64IPv4CheckTick) > 10) {
+                    int imsgLen = sprintf(msg, "[SYS] IPv4Check timeout for %s (%s).", curUser->sNick, curUser->sIP);
+                    if(CheckSprintf(imsgLen, 1024, "theLoop::ReceiveLoop31") == true) {
+                        UdpDebug->Broadcast(msg, imsgLen);
+                    }
+                    curUser->ui8State = User::STATE_ADDME;
                     continue;
                 }
                 break;
@@ -971,7 +996,12 @@ void theLoop::SendLoop() {
                 if(((curUser->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true &&
                     ((curUser->ui32BoolBits & User::BIT_QUACK_SUPPORTS) == User::BIT_QUACK_SUPPORTS) == false &&
                     ProfileMan->IsAllowed(curUser, ProfileManager::SENDALLUSERIP) == false) {
-            		int imsgLen = sprintf(msg, "$UserIP %s %s|", curUser->sNick, curUser->sIP);
+            		int imsgLen = 0;
+            		if(curUser->sIPv4[0] == '\0') {
+                        imsgLen = sprintf(msg, "$UserIP %s %s|", curUser->sNick, curUser->sIP);
+                    } else {
+                        imsgLen = sprintf(msg, "$UserIP %s %s|", curUser->sNick, curUser->sIPv4);
+                    }
             		if(CheckSprintf(imsgLen, 1024, "theLoop::SendLoop1") == true) {
                         UserSendCharDelayed(curUser, msg, imsgLen);
                     }
@@ -1098,10 +1128,10 @@ void theLoop::SendLoop() {
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
-void theLoop::AcceptSocket(const SOCKET &s, const sockaddr_in /*sockaddr_in6*/ &addr, const int &sin_len) {
+void theLoop::AcceptSocket(const SOCKET &s, const sockaddr_storage &addr) {
     EnterCriticalSection(&csAcceptQueue);
 #else
-void theLoop::AcceptSocket(const int &s, const sockaddr_in &addr, const socklen_t &sin_len) {
+void theLoop::AcceptSocket(const int &s, const sockaddr_storage &addr) {
     pthread_mutex_lock(&mtxAcceptQueue);
 #endif
     
@@ -1121,10 +1151,9 @@ void theLoop::AcceptSocket(const int &s, const sockaddr_in &addr, const socklen_
     }
 
     newSocket->s = s;
-    newSocket->addr = addr;
-    newSocket->sin_len = sin_len;
-    strcpy(newSocket->IP, inet_ntoa(addr.sin_addr));
-//    inet_ntop(AF_INET6, (void *)&addr.sin6_addr, newSocket->IP, 46);
+
+    memcpy(&newSocket->addr, &addr, sizeof(sockaddr_storage));
+
     newSocket->next = NULL;
 
     if(AcceptedSocketsS == NULL) {

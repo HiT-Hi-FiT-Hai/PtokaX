@@ -27,7 +27,7 @@ private:
     struct RegSocket {
         RegSocket();
         ~RegSocket();
-    
+
         uint64_t iTotalShare;
 
 #ifdef _WIN32
@@ -41,7 +41,7 @@ private:
         uint32_t ui32AddrLen;
 
 		char *sAddress, *sRecvBuf, *sSendBuf, *sSendBufHead;
-    
+
         RegSocket *prev, *next;    
     };
 
@@ -58,7 +58,7 @@ private:
     bool bTerminated;
 
     char sMsg[2048];
-    
+
 	void AddSock(char * sAddress, const size_t &ui32Len);
 	bool Receive(RegSocket * Sock);
     void Add2SendBuf(RegSocket * Sock, char * sData);
@@ -66,10 +66,10 @@ private:
     void RemoveSock(RegSocket * Sock);
 public:
     uint32_t iBytesRead, iBytesSent;
-    
+
 	RegThread();
 	~RegThread();
-	
+
 	void Setup(char * sAddresses, const uint16_t &ui16AddrsLen);
 	void Resume();
 	void Run();

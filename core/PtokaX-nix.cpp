@@ -243,8 +243,6 @@ int main(int argc, char* argv[]) {
 	        break;
 	    }
 	
-
-//	    usleep(100000);
         nanosleep(&sleeptime, NULL);
 	}
 	

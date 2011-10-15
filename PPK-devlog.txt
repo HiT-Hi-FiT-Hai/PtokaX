@@ -1,4 +1,17 @@
 ----------------------------------------Next Release...---------------------------------------
+Added: Core.SetUserInfo call to Lua api.
+Added: IDs 28 - 42 for Core.GetUserValue Lua api call (see Lua API docs).
+Added: IPv6 support to sockets.
+Added: IPv6 support to bans and range bans.
+Added: IPv6 country database support.
+Added: IPv6 client to client connections support.
+Added: IPv6 search support.
+Added: IP64 and IPv4 protocol extensions support.
+Added: Check for IPv4 connection for user connected to hub by IPv6.
+Added: IPv4 client connection support for users connected to hub by IPv6 when IPv4 connection check success.
+Added: IPv4 search support for users connected to hub by IPv6 when IPv4 connection check success.
+Changed: Country database for IPv4 from ip-to-country to IpToCountry.
+Fixed: TmrMan.RemoveTimer Lua api call in windoze version (thx Cêñoßy†ê for report)
 
 
 ----------------------------------------0.4.2.0 11 September 2011-----------------------------

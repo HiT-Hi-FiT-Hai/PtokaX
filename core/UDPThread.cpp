@@ -59,40 +59,59 @@ UDPRecvThread::UDPRecvThread() {
 }
 
 bool UDPRecvThread::Listen() {
-    sockaddr_in sin;
-    sin.sin_family = AF_INET;
-	sin.sin_port = htons((unsigned short)atoi(SettingManager->sTexts[SETTXT_UDP_PORT]));
+    sockaddr_storage sas;
+    memset(&sas, 0, sizeof(sockaddr_storage));
+    socklen_t sas_len;
 
-    if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP[0] != '\0') {
-#ifdef _WIN32
-        sin.sin_addr.S_un.S_addr = inet_addr(sHubIP);
-#else
-		sin.sin_addr.s_addr = inet_addr(sHubIP);
-#endif
+    if(bUseIPv6 == true) {
+        ((struct sockaddr_in6 *)&sas)->sin6_family = AF_INET6;
+        ((struct sockaddr_in6 *)&sas)->sin6_port = htons((unsigned short)atoi(SettingManager->sTexts[SETTXT_UDP_PORT]));
+        sas_len = sizeof(struct sockaddr_in6);
     } else {
-#ifdef _WIN32
-        sin.sin_addr.S_un.S_addr = INADDR_ANY;
-#else
-		sin.sin_addr.s_addr = htonl(INADDR_ANY);
-#endif
+        ((struct sockaddr_in *)&sas)->sin_family = AF_INET;
+        ((struct sockaddr_in *)&sas)->sin_port = htons((unsigned short)atoi(SettingManager->sTexts[SETTXT_UDP_PORT]));
+        sas_len = sizeof(struct sockaddr_in);
     }
 
-#ifdef _WIN32
-	sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if(bUseIPv6 == true) {
+        ((struct sockaddr_in6 *)&sas)->sin6_addr = in6addr_any;
+    } else if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP[0] != '\0') {
+		((struct sockaddr_in *)&sas)->sin_addr.s_addr = inet_addr(sHubIP);
+    } else {
+		((struct sockaddr_in *)&sas)->sin_addr.s_addr = INADDR_ANY;
+    }
 
+    sock = socket((bUseIPv6 == true ? AF_INET6 : AF_INET), SOCK_DGRAM, IPPROTO_UDP);
+
+#ifdef _WIN32
 	if(sock == INVALID_SOCKET) {
 #else
-	sock = socket(AF_INET, SOCK_DGRAM, 0);
-
 	if(sock == -1) {
 #endif
 		AppendLog("[ERR] UDP Socket creation error.");
 		return false;
+    }
+
+#ifndef _WIN32
+    int on = 1;
+    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+#endif
+
+    if(bUseIPv6 == true) {
 #ifdef _WIN32
-    } else if(bind(sock, (sockaddr *)&sin, sizeof (sin)) == SOCKET_ERROR) {
+        DWORD dwIPv6 = 0;
+        setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&dwIPv6, sizeof(dwIPv6));
+#else
+        int iIPv6 = 0;
+        setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &iIPv6, sizeof(iIPv6));
+#endif
+    }
+
+#ifdef _WIN32
+    if(bind(sock, (struct sockaddr *)&sas, sas_len) == SOCKET_ERROR) {
 		AppendLog("[ERR] UDP Socket bind error: "+string(WSAGetLastError()));
 #else
-    } else if(bind(sock, (sockaddr *)&sin, sizeof (sin)) == -1) {
+    if(bind(sock, (struct sockaddr *)&sas, sas_len) == -1) {
 		AppendLog("[ERR] UDP Socket bind error: "+string(ErrnoStr(errno))+" ("+string(errno)+")");
 #endif
         return false;
@@ -145,15 +164,11 @@ void UDPRecvThread::Resume() {
 //---------------------------------------------------------------------------
 
 void UDPRecvThread::Run() {
-	sockaddr_in addr;
-#ifdef _WIN32
-	int addr_len = sizeof(addr);
-#else
-	socklen_t addr_len = sizeof(addr);
-#endif
+    sockaddr_storage sas;
+	socklen_t sas_len = sizeof(sockaddr_storage);
 
 	while(bTerminated == false) {
-		int len = recvfrom(sock, rcvbuf, 4095, 0, (sockaddr *)&addr, &addr_len);
+		int len = recvfrom(sock, rcvbuf, 4095, 0, (struct sockaddr *)&sas, &sas_len);
 
 		if(len < 5 || strncmp(rcvbuf, "$SR ", 4) != 0) {
 			continue;
@@ -162,16 +177,7 @@ void UDPRecvThread::Run() {
 		rcvbuf[len] = '\0';
 
 		// added ip check, we don't want fake $SR causing kick of innocent user...
-#ifdef _WIN32
-		uint32_t ui32Hash = 16777216 * addr.sin_addr.S_un.S_un_b.s_b1 + 65536 * addr.sin_addr.S_un.S_un_b.s_b2
-			+ 256 * addr.sin_addr.S_un.S_un_b.s_b3 + addr.sin_addr.S_un.S_un_b.s_b4;
-#else
-        uint32_t ui32Hash;
-        char * sIP = inet_ntoa(addr.sin_addr);
-        HashIP(sIP, strlen(sIP), ui32Hash);
-#endif
-
-        eventqueue->AddThread(eventq::EVENT_UDP_SR, rcvbuf, ui32Hash);
+        eventqueue->AddThread(eventq::EVENT_UDP_SR, rcvbuf, &sas);
     }
 }
 //---------------------------------------------------------------------------

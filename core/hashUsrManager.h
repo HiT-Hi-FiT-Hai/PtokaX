@@ -43,7 +43,7 @@ public:
 
     User * FindUser(char * sNick, const size_t &iNickLen);
     User * FindUser(User * u);
-    User * FindUser(const uint32_t &ui32IpHash);
+    User * FindUser(const uint8_t * ui128IpHash);
 
     uint32_t GetUserIpCount(User * u);
 };

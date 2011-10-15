@@ -45,6 +45,8 @@ clsUdpDebug::UdpDbgItem::UdpDbgItem() {
 #else
     s = -1;
 #endif
+    memset(&sas_to, 0, sizeof(sockaddr_storage));
+    sas_len = 0;
 
     prev = NULL;
     next = NULL;
@@ -145,9 +147,9 @@ void clsUdpDebug::Broadcast(const char * msg, const size_t &iLen) {
         UdpDbgItem *cur = next;
         next = cur->next;
 #ifdef _WIN32
-    	sendto(cur->s, full, (int)pktLen, 0, (sockaddr *)&cur->to, sizeof(cur->to));
+    	sendto(cur->s, full, (int)pktLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
 #else
-		sendto(cur->s, full, pktLen, 0, (sockaddr *)&cur->to, sizeof(cur->to));
+		sendto(cur->s, full, pktLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
 #endif
         ui64BytesSent += pktLen;
     }
@@ -195,27 +197,29 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
 		AppendSpecialLog(sDbgstr);
         return false;
     }
-        
+
     memcpy(NewDbg->Nick, u->sNick, u->ui8NickLen);
     NewDbg->Nick[u->ui8NickLen] = '\0';
-        
-    NewDbg->ui32Hash = u->ui32NickHash;
-        
-    NewDbg->to.sin_family = AF_INET;
-    NewDbg->to.sin_port = htons((unsigned short)port);
 
+    NewDbg->ui32Hash = u->ui32NickHash;
+
+    if(bUseIPv6 == true) {
+        ((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_family = AF_INET6;
+        ((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_port = htons((unsigned short)port);
+        memcpy(((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_addr.s6_addr, u->ui128IpHash, 16);
+        NewDbg->sas_len = sizeof(struct sockaddr_in6);
+    } else {
+        ((struct sockaddr_in *)&NewDbg->sas_to)->sin_family = AF_INET;
+        ((struct sockaddr_in *)&NewDbg->sas_to)->sin_port = htons((unsigned short)port);
+        ((struct sockaddr_in *)&NewDbg->sas_to)->sin_addr.s_addr = inet_addr(u->sIP);
+        NewDbg->sas_len = sizeof(struct sockaddr_in);
+    }
+
+    NewDbg->s = socket((bUseIPv6 == true ? AF_INET6 : AF_INET), SOCK_DGRAM, IPPROTO_UDP);
 #ifdef _WIN32
-    NewDbg->to.sin_addr.S_un.S_addr = inet_addr(u->sIP);
-        
-    NewDbg->s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-        
     if(NewDbg->s == INVALID_SOCKET) {
         int err = WSAGetLastError();
 #else
-    NewDbg->to.sin_addr.s_addr = inet_addr(u->sIP);
-        
-    NewDbg->s = socket(AF_INET, SOCK_DGRAM, 0);
-        
     if(NewDbg->s == -1) {
 #endif
 		string Txt = "*** [ERR] "+string(LanguageManager->sTexts[LAN_UDP_SCK_CREATE_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_UDP_SCK_CREATE_ERR])+
@@ -228,7 +232,17 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
         delete NewDbg;
         return false;
     }
-        
+
+    if(bUseIPv6 == true) {
+#ifdef _WIN32
+        DWORD dwIPv6 = 0;
+        setsockopt(NewDbg->s, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&dwIPv6, sizeof(dwIPv6));
+#else
+        int iIPv6 = 0;
+        setsockopt(NewDbg->s, IPPROTO_IPV6, IPV6_V6ONLY, &iIPv6, sizeof(iIPv6));
+#endif
+    }
+
     // set non-blocking
 #ifdef _WIN32
     uint32_t block = 1;
@@ -248,7 +262,7 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
         delete NewDbg;
         return false;
     }
-        
+
     NewDbg->prev = NULL;
     NewDbg->next = NULL;
 
@@ -291,9 +305,9 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
 	    memcpy(full+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME], msg, iLen);
 	
 #ifdef _WIN32
-		sendto(NewDbg->s, full, (int)pktLen, 0, (sockaddr *)&NewDbg->to, sizeof(NewDbg->to));
+		sendto(NewDbg->s, full, (int)pktLen, 0, (struct sockaddr *)&NewDbg->sas_to, NewDbg->sas_len);
 #else
-		sendto(NewDbg->s, full, pktLen, 0, (sockaddr *)&NewDbg->to, sizeof(NewDbg->to));
+		sendto(NewDbg->s, full, pktLen, 0, (struct sockaddr *)&NewDbg->sas_to, NewDbg->sas_len);
 #endif
         ui64BytesSent += iLen;
 
@@ -347,22 +361,25 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
     NewDbg->Nick[iScriptLen] = '\0';
         
     NewDbg->ui32Hash = 0;
-        
-    NewDbg->to.sin_family = AF_INET;
+
+    if(bUseIPv6 == true) {
+        ((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_family = AF_INET6;
+        ((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_port = htons(usPort);
+        HashIP(sIP, ((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_addr.s6_addr);
+        NewDbg->sas_len = sizeof(struct sockaddr_in6);
+    } else {
+        ((struct sockaddr_in *)&NewDbg->sas_to)->sin_family = AF_INET;
+        ((struct sockaddr_in *)&NewDbg->sas_to)->sin_port = htons(usPort);
+        ((struct sockaddr_in *)&NewDbg->sas_to)->sin_addr.s_addr = inet_addr(sIP);
+        NewDbg->sas_len = sizeof(struct sockaddr_in);
+    }
+
+    NewDbg->s = socket((bUseIPv6 == true ? AF_INET6 : AF_INET), SOCK_DGRAM, IPPROTO_UDP);
+
 #ifdef _WIN32
-    NewDbg->to.sin_port = htons((unsigned short)usPort);
-    NewDbg->to.sin_addr.S_un.S_addr = inet_addr(sIP);
-        
-    NewDbg->s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-        
     if(NewDbg->s == INVALID_SOCKET) {
         int err = WSAGetLastError();
 #else
-    NewDbg->to.sin_port = htons(usPort);
-    NewDbg->to.sin_addr.s_addr = inet_addr(sIP);
-        
-    NewDbg->s = socket(AF_INET, SOCK_DGRAM, 0);
-        
     if(NewDbg->s == -1) {
 #endif
 		string sDbgstr = "*** [ERR] "+string(LanguageManager->sTexts[LAN_UDP_SCK_CREATE_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_UDP_SCK_CREATE_ERR])+
@@ -375,7 +392,17 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
         delete NewDbg;
         return false;
     }
-        
+
+    if(bUseIPv6 == true) {
+#ifdef _WIN32
+        DWORD dwIPv6 = 0;
+        setsockopt(NewDbg->s, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&dwIPv6, sizeof(dwIPv6));
+#else
+        int iIPv6 = 0;
+        setsockopt(NewDbg->s, IPPROTO_IPV6, IPV6_V6ONLY, &iIPv6, sizeof(iIPv6));
+#endif
+    }
+
     // set non-blocking
 #ifdef _WIN32
     uint32_t block = 1;
@@ -464,9 +491,9 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
         }
 
 #ifdef _WIN32
-		sendto(NewDbg->s, full, (int)pktLen, 0, (sockaddr *)&NewDbg->to, sizeof(NewDbg->to));
+		sendto(NewDbg->s, full, (int)pktLen, 0, (struct sockaddr *)&NewDbg->sas_to, NewDbg->sas_len);
 #else
-		sendto(NewDbg->s, full, pktLen, 0, (sockaddr *)&NewDbg->to, sizeof(NewDbg->to));
+		sendto(NewDbg->s, full, pktLen, 0, (struct sockaddr *)&NewDbg->sas_to, NewDbg->sas_len);
 #endif
         ui64BytesSent += iLen;
 
@@ -593,7 +620,7 @@ bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) {
             if(bSndMess == true) {
 				string Txt = "<"+string(SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], (size_t)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC])+
 					"> *** "+string(LanguageManager->sTexts[LAN_YOU_SUBSCRIBED_UDP_DBG], (size_t)LanguageManager->ui16TextsLens[LAN_YOU_SUBSCRIBED_UDP_DBG])+
-					" "+string(ntohs(cur->to.sin_port))+". "+
+					" "+string(ntohs(bUseIPv6 == true ? ((struct sockaddr_in6 *)&cur->sas_to)->sin6_port : ((struct sockaddr_in *)&cur->sas_to)->sin_port))+". "+
                     string(LanguageManager->sTexts[LAN_TO_UNSUB_UDP_DBG], (size_t)LanguageManager->ui16TextsLens[LAN_TO_UNSUB_UDP_DBG])+".|";
 				UserSendTextDelayed(u, Txt);
             }
@@ -646,9 +673,9 @@ void clsUdpDebug::Send(char * sScriptName, char * sMsg, const size_t &iLen) {
             memcpy(full+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iScriptLen+2, sMsg, iLen);
 
 #ifdef _WIN32
-            sendto(cur->s, full, (int)pktLen, 0, (sockaddr *)&cur->to, sizeof(cur->to));
+            sendto(cur->s, full, (int)pktLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
 #else
-			sendto(cur->s, full, pktLen, 0, (sockaddr *)&cur->to, sizeof(cur->to));
+			sendto(cur->s, full, pktLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
 #endif
             ui64BytesSent += pktLen;
 
