@@ -23,6 +23,7 @@
 #include "SettingPageGeneral.h"
 //---------------------------------------------------------------------------
 #include "../core/LanguageManager.h"
+#include "../core/ServerManager.h"
 #include "../core/SettingManager.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
@@ -46,7 +47,6 @@ LRESULT SettingPageGeneral::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPa
             case EDT_HUB_NAME:
             case EDT_HUB_TOPIC:
             case EDT_HUB_DESCRIPTION:
-            case EDT_ADMIN_NICK:
                 if(HIWORD(wParam) == EN_CHANGE) {
                     RemovePipes((HWND)lParam);
 
@@ -99,6 +99,18 @@ LRESULT SettingPageGeneral::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPa
                 }
 
                 break;
+            case BTN_RESOLVE_ADDRESS:
+                if(HIWORD(wParam) == BN_CLICKED) {
+                    BOOL bEnable = ::SendMessage(hWndPageItems[BTN_RESOLVE_ADDRESS], BM_GETCHECK, 0, 0) == BST_CHECKED ? FALSE : TRUE;
+                    ::SetWindowText(hWndPageItems[EDT_IPV4_ADDRESS], bEnable == FALSE ? sHubIP :
+                        (SettingManager->sTexts[SETTXT_IPV4_ADDRESS] != NULL ? SettingManager->sTexts[SETTXT_IPV4_ADDRESS] : ""));
+                    ::EnableWindow(hWndPageItems[EDT_IPV4_ADDRESS], bEnable);
+                    ::SetWindowText(hWndPageItems[EDT_IPV6_ADDRESS], bEnable == FALSE ? sHubIP6 :
+                        (SettingManager->sTexts[SETTXT_IPV6_ADDRESS] != NULL ? SettingManager->sTexts[SETTXT_IPV6_ADDRESS] : "");
+                    ::EnableWindow(hWndPageItems[EDT_IPV6_ADDRESS], bEnable);
+                }
+
+                break;
         }
     }
 
@@ -141,6 +153,14 @@ void SettingPageGeneral::Save() {
 
     SettingManager->SetBool(SETBOOL_RESOLVE_TO_IP, ::SendMessage(hWndPageItems[BTN_RESOLVE_ADDRESS], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 
+    if(SettingManager->bBools[SETBOOL_RESOLVE_TO_IP] == false) {
+        iLen = ::GetWindowText(hWndPageItems[EDT_IPV4_ADDRESS], buf, 1025);
+        SettingManager->SetText(SETTXT_IPV4_ADDRESS, buf, iLen);
+
+        iLen = ::GetWindowText(hWndPageItems[EDT_IPV6_ADDRESS], buf, 1025);
+        SettingManager->SetText(SETTXT_IPV6_ADDRESS, buf, iLen);
+    }
+
     SettingManager->SetBool(SETBOOL_BIND_ONLY_SINGLE_IP, ::SendMessage(hWndPageItems[BTN_BIND_ADDRESS], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 
     iLen = ::GetWindowText(hWndPageItems[EDT_TCP_PORTS], buf, 1025);
@@ -158,9 +178,6 @@ void SettingPageGeneral::Save() {
     }
 
     SettingManager->SetText(SETTXT_UDP_PORT, buf, iLen);
-
-    iLen = ::GetWindowText(hWndPageItems[EDT_ADMIN_NICK], buf, 1025);
-    SettingManager->SetText(SETTXT_ADMIN_NICK, buf, iLen);
 
     iLen = ::GetWindowText(hWndPageItems[EDT_HUB_LISTS], buf, 1025);
     SettingManager->SetText(SETTXT_REGISTER_SERVERS, buf, iLen);
@@ -298,21 +315,40 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
     iPosX += iOneLineOneChecksGB;
 
     hWndPageItems[GB_HUB_ADDRESS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_HUB_ADDRESS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, iPosX, iFullGB, iOneLineTwoChecksGB, m_hWnd, NULL, g_hInstance, NULL);
+        0, iPosX, iFullGB, iOneLineTwoChecksGB + iOneLineGB + 3, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_HUB_ADDRESS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_HUB_ADDRESS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
         8, iPosX + iGroupBoxMargin, iFullEDT, iEditHeight, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_ADDRESS], EM_SETLIMITTEXT, 256, 0);
 
-    hWndPageItems[BTN_RESOLVE_ADDRESS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_RESOLVE_HOST], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, iPosX + iGroupBoxMargin + iEditHeight + 4, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[BTN_RESOLVE_ADDRESS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_RESOLVE_HOSTNAME], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+        8, iPosX + iGroupBoxMargin + iEditHeight + 4, iFullEDT, iCheckHeight, m_hWnd, (HMENU)BTN_RESOLVE_ADDRESS, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_RESOLVE_ADDRESS], BM_SETCHECK, (SettingManager->bBools[SETBOOL_RESOLVE_TO_IP] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    hWndPageItems[BTN_BIND_ADDRESS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_BIND_ONLY_ADDR], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, iPosX + iGroupBoxMargin + iEditHeight + iCheckHeight + 7, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
+    int iFourtyPercent = (int)(iGBinGB * 0.4);
+    hWndPageItems[GB_IPV4_ADDRESS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_IPV4_ADDRESS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        5, iPosX + iGroupBoxMargin + iEditHeight + iCheckHeight + 5, iFourtyPercent - 3, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[EDT_IPV4_ADDRESS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->bBools[SETBOOL_RESOLVE_TO_IP] == true ? sHubIP :
+        (SettingManager->sTexts[SETTXT_IPV4_ADDRESS] != NULL ? SettingManager->sTexts[SETTXT_IPV4_ADDRESS] : ""),
+        WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL, 13, iPosX + iGroupBoxMargin + iEditHeight + iCheckHeight + 5 + iGroupBoxMargin, iFourtyPercent - 19, iEditHeight,
+        m_hWnd, NULL, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[EDT_IPV4_ADDRESS], EM_SETLIMITTEXT, 15, 0);
+
+    hWndPageItems[GB_IPV6_ADDRESS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_IPV6_ADDRESS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        10 + (iFourtyPercent - 3), iPosX + iGroupBoxMargin + iEditHeight + iCheckHeight + 5, (iGBinGB - (iFourtyPercent - 3)) - 5, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[EDT_IPV6_ADDRESS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->bBools[SETBOOL_RESOLVE_TO_IP] == true ? sHubIP6 :
+        (SettingManager->sTexts[SETTXT_IPV6_ADDRESS] != NULL ? SettingManager->sTexts[SETTXT_IPV6_ADDRESS] : ""),
+        WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL, 18 + (iFourtyPercent - 3), iPosX + iGroupBoxMargin + iEditHeight + iCheckHeight + 5 + iGroupBoxMargin,
+        (iGBinGB - (iFourtyPercent - 3)) - 21, iEditHeight, m_hWnd, NULL, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[EDT_IPV6_ADDRESS], EM_SETLIMITTEXT, 39, 0);
+
+    hWndPageItems[BTN_BIND_ADDRESS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_BIND_ONLY_ADDRS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+        8, iPosX + iGroupBoxMargin + iEditHeight + iCheckHeight + iOneLineGB + 10, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_BIND_ADDRESS], BM_SETCHECK, (SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    iPosX += iOneLineTwoChecksGB;
+    iPosX += iOneLineTwoChecksGB + iOneLineGB + 3;
 
     hWndPageItems[GB_TCP_PORTS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_TCP_PORTS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         0, iPosX, ScaleGui(362), iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
@@ -329,15 +365,6 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
         ScaleGui(362) + 13, iPosX + iGroupBoxMargin, (rcThis.right - rcThis.left) - (ScaleGui(362) + 26), iEditHeight, m_hWnd, (HMENU)EDT_UDP_PORT, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_UDP_PORT], EM_SETLIMITTEXT, 5, 0);
     AddToolTip(hWndPageItems[EDT_UDP_PORT], LanguageManager->sTexts[LAN_ZERO_DISABLED]);
-
-    iPosX += iOneLineGB;
-
-    hWndPageItems[GB_ADMIN_NICK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_ADMIN_NICK], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, iPosX, iFullGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
-
-    hWndPageItems[EDT_ADMIN_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_ADMIN_NICK], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        8, iPosX + iGroupBoxMargin, iFullEDT, iEditHeight, m_hWnd, (HMENU)EDT_ADMIN_NICK, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[EDT_ADMIN_NICK], EM_SETLIMITTEXT, 64, 0);
 
     iPosX += iOneLineGB;
 
@@ -415,6 +442,11 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
                 }
             }
         }
+    }
+
+    if(SettingManager->bBools[SETBOOL_RESOLVE_TO_IP] == true) {
+        ::EnableWindow(hWndPageItems[EDT_IPV4_ADDRESS], FALSE);
+        ::EnableWindow(hWndPageItems[EDT_IPV6_ADDRESS], FALSE);
     }
 
     wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_HUBLIST_AUTO_REG], GWLP_WNDPROC, (LONG_PTR)ButtonProc);

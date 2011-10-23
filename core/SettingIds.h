@@ -238,6 +238,8 @@ enum SetTxtIds {
     SETTXT_NICK_LIMIT_REDIR_ADDRESS, 
     SETTXT_MSG_TO_ADD_TO_BAN_MSG, 
     SETTXT_LANGUAGE, 
+    SETTXT_IPV4_ADDRESS,
+    SETTXT_IPV6_ADDRESS,
     SETTXT_IDS_END
 };//SETTXT_, 
 //---------------------------------------------------------------------------

@@ -10,8 +10,9 @@ Added: IP64 and IPv4 protocol extensions support.
 Added: Check for IPv4 connection for user connected to hub by IPv6.
 Added: IPv4 client connection support for users connected to hub by IPv6 when IPv4 connection check success.
 Added: IPv4 search support for users connected to hub by IPv6 when IPv4 connection check success.
+Added: Setting for manual IPv4 and IPv6 addresses.
 Changed: Country database for IPv4 from ip-to-country to IpToCountry.
-Fixed: TmrMan.RemoveTimer Lua api call in windoze version (thx Cêñoßy†ê for report)
+Fixed: TmrMan.RemoveTimer Lua api call in windoze version (thx Cêñoßy†ê for report).
 
 
 ----------------------------------------0.4.2.0 11 September 2011-----------------------------

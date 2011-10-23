@@ -2109,7 +2109,7 @@ void UserSetMyInfoOriginal(User * u, char * sNewMyInfo, const uint16_t &ui16NewM
         u->ui64ChangedSharedSizeShort = u->ui64SharedSize;
     }
 
-    if(((u->ui32InfoBits & User::INFOBIT_SHARE_SHORT_PERM) == User::INFOBIT_SHARE_LONG_PERM) == false) {
+    if(((u->ui32InfoBits & User::INFOBIT_SHARE_LONG_PERM) == User::INFOBIT_SHARE_LONG_PERM) == false) {
         u->ui64ChangedSharedSizeLong = u->ui64SharedSize;
     }
 

@@ -41,7 +41,7 @@
 #endif
 //---------------------------------------------------------------------------
 
-ServerThread::ServerThread() {
+ServerThread::ServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber) {
 #ifdef _WIN32
     server = INVALID_SOCKET;
 #else
@@ -54,7 +54,9 @@ ServerThread::ServerThread() {
 
     threadId = 0;
 	iSuspendTime = 0;
-	usPort = 0;
+
+    iAdressFamily = iAddrFamily;
+    ui16Port = ui16PortNumber;
 
 #ifdef _WIN32
     threadHandle = INVALID_HANDLE_VALUE;
@@ -168,7 +170,7 @@ void ServerThread::Run() {
                     } else {
 #endif
 						eventqueue->AddThread(eventq::EVENT_SRVTHREAD_MSG, 
-                            ("[ERR] accept() for port "+string(usPort)+" has returned error.").c_str());
+                            ("[ERR] accept() for port "+string(ui16Port)+" has returned error.").c_str());
                     }
 #ifndef _WIN32
 				}
@@ -217,9 +219,9 @@ void ServerThread::Run() {
 				pthread_mutex_unlock(&mtxServerThread);
 #endif
 
-				if(Listen(usPort, true) == true) {
+				if(Listen(true) == true) {
 					eventqueue->AddThread(eventq::EVENT_SRVTHREAD_MSG, 
-						("[SYS] Server socket for port "+string(usPort)+" sucessfully recovered from suspend state.").c_str());
+						("[SYS] Server socket for port "+string(ui16Port)+" sucessfully recovered from suspend state.").c_str());
 				} else {
 					Close();
 				}
@@ -255,10 +257,8 @@ void ServerThread::WaitFor() {
 }
 //---------------------------------------------------------------------------
 
-bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
-    usPort = port;
-
-    server = socket((bUseIPv6 == true ? AF_INET6 : AF_INET), SOCK_STREAM, IPPROTO_TCP);
+bool ServerThread::Listen(bool bSilent/* = false*/) {
+    server = socket(iAdressFamily, SOCK_STREAM, IPPROTO_TCP);
 #ifdef _WIN32
     if(server == INVALID_SOCKET) {
 #else
@@ -267,17 +267,17 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
         if(bSilent == true) {
             eventqueue->AddThread(eventq::EVENT_SRVTHREAD_MSG, 
 #ifdef _WIN32
-                ("[ERR] Unable to create server socket for port "+string(port)+" ! ErrorCode "+string(WSAGetLastError())).c_str());
+                ("[ERR] Unable to create server socket for port "+string(ui16Port)+" ! ErrorCode "+string(WSAGetLastError())).c_str());
 #else
-				("[ERR] Unable to create server socket for port "+string(port)+" ! ErrorCode "+string(errno)).c_str());
+				("[ERR] Unable to create server socket for port "+string(ui16Port)+" ! ErrorCode "+string(errno)).c_str());
 #endif
 		} else {
 #ifdef _BUILD_GUI
             ::MessageBox(NULL, (string(LanguageManager->sTexts[LAN_UNB_CRT_SRVR_SCK], (size_t)LanguageManager->ui16TextsLens[LAN_UNB_CRT_SRVR_SCK]) + " " +
-				string(port) + " ! " + LanguageManager->sTexts[LAN_ERROR_CODE] + " " + string(WSAGetLastError())).c_str(), sTitle.c_str(), MB_OK | MB_ICONERROR);
+				string(ui16Port) + " ! " + LanguageManager->sTexts[LAN_ERROR_CODE] + " " + string(WSAGetLastError())).c_str(), sTitle.c_str(), MB_OK | MB_ICONERROR);
 #else
             AppendLog(string(LanguageManager->sTexts[LAN_UNB_CRT_SRVR_SCK], (size_t)LanguageManager->ui16TextsLens[LAN_UNB_CRT_SRVR_SCK]) + " " +
-				string(port) + " ! " + LanguageManager->sTexts[LAN_ERROR_CODE] + " " + string(errno));
+				string(ui16Port) + " ! " + LanguageManager->sTexts[LAN_ERROR_CODE] + " " + string(errno));
 #endif
         }
         return false;
@@ -288,18 +288,18 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
     if(setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1) {
         if(bSilent == true) {
             eventqueue->AddThread(eventq::EVENT_SRVTHREAD_MSG,
-                ("[ERR] Server socket setsockopt error: " + string(errno)+" for port: "+string(port)).c_str());
+                ("[ERR] Server socket setsockopt error: " + string(errno)+" for port: "+string(ui16Port)).c_str());
         } else {
             AppendLog(string(LanguageManager->sTexts[LAN_SRV_SCKOPT_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_SCKOPT_ERR])+
                 ": " + string(ErrnoStr(errno))+" (" + string(errno)+") "+
-                string(LanguageManager->sTexts[LAN_FOR_PORT_LWR], (size_t)LanguageManager->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+string(port));
+                string(LanguageManager->sTexts[LAN_FOR_PORT_LWR], (size_t)LanguageManager->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+string(ui16Port));
         }
         close(server);
         return false;
     }
 #endif
 
-    if(bUseIPv6 == true) {
+    if(iAdressFamily == AF_INET6) {
 #ifdef _WIN32
         DWORD dwIPv6 = 0;
         setsockopt(server, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&dwIPv6, sizeof(dwIPv6));
@@ -314,22 +314,32 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
     memset(&sas, 0, sizeof(sockaddr_storage));
     socklen_t sas_len;
 
-    if(bUseIPv6 == true) {
+    if(iAdressFamily == AF_INET6) {
         ((struct sockaddr_in6 *)&sas)->sin6_family = AF_INET6;
-        ((struct sockaddr_in6 *)&sas)->sin6_port = htons(usPort);
+        ((struct sockaddr_in6 *)&sas)->sin6_port = htons(ui16Port);
         sas_len = sizeof(struct sockaddr_in6);
     } else {
         ((struct sockaddr_in *)&sas)->sin_family = AF_INET;
-        ((struct sockaddr_in *)&sas)->sin_port = htons(usPort);
+        ((struct sockaddr_in *)&sas)->sin_port = htons(ui16Port);
         sas_len = sizeof(struct sockaddr_in);
     }
 
-    if(bUseIPv6 == true) {
-        ((struct sockaddr_in6 *)&sas)->sin6_addr = in6addr_any;
-    } else if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP[0] != '\0') {
-		((struct sockaddr_in *)&sas)->sin_addr.s_addr = inet_addr(sHubIP);
+    if(iAdressFamily == AF_INET6) {
+        if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP6[0] != '\0') {
+#ifdef _WIN32
+            win_inet_pton(AF_INET6, sHubIP6, &((struct sockaddr_in6 *)&sas)->sin6_addr);
+#else
+            inet_pton(AF_INET6, sHubIP6, &((struct sockaddr_in6 *)&sas)->sin6_addr);
+#endif
+        } else {
+            ((struct sockaddr_in6 *)&sas)->sin6_addr = in6addr_any;
+        }
     } else {
-		((struct sockaddr_in *)&sas)->sin_addr.s_addr = INADDR_ANY;
+        if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP[0] != '\0') {
+            ((struct sockaddr_in *)&sas)->sin_addr.s_addr = inet_addr(sHubIP);
+        } else {
+            ((struct sockaddr_in *)&sas)->sin_addr.s_addr = INADDR_ANY;
+        }
     }
 
     // bind it
@@ -342,14 +352,14 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
         if(bSilent == true) {
             eventqueue->AddThread(eventq::EVENT_SRVTHREAD_MSG, 
 #ifdef _WIN32
-                ("[ERR] Server socket bind error: " + string(WSErrorStr(err))+" ("+string(err)+") for port: "+string(port)).c_str());
+                ("[ERR] Server socket bind error: " + string(WSErrorStr(err))+" ("+string(err)+") for port: "+string(ui16Port)).c_str());
 #else
-				("[ERR] Server socket bind error: " + string(ErrnoStr(errno))+" ("+string(errno)+") for port: "+string(port)).c_str());
+				("[ERR] Server socket bind error: " + string(ErrnoStr(errno))+" ("+string(errno)+") for port: "+string(ui16Port)).c_str());
 #endif
 		} else {
 #ifdef _BUILD_GUI
 			::MessageBox(NULL, (string(LanguageManager->sTexts[LAN_SRV_BIND_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_BIND_ERR]) +
-				": " + string(WSErrorStr(err)) + " (" + string(err) + ") " + LanguageManager->sTexts[LAN_FOR_PORT_LWR] + ": " + string(port)).c_str(), sTitle.c_str(), MB_OK | MB_ICONERROR);
+				": " + string(WSErrorStr(err)) + " (" + string(err) + ") " + LanguageManager->sTexts[LAN_FOR_PORT_LWR] + ": " + string(ui16Port)).c_str(), sTitle.c_str(), MB_OK | MB_ICONERROR);
 		}
 #else
             AppendLog(string(LanguageManager->sTexts[LAN_SRV_BIND_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_BIND_ERR])+
@@ -358,7 +368,7 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
 #else
 				": " + string(ErrnoStr(errno))+" (" + string(errno)+") "+
 #endif
-				string(LanguageManager->sTexts[LAN_FOR_PORT_LWR], (size_t)LanguageManager->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+string(port));
+				string(LanguageManager->sTexts[LAN_FOR_PORT_LWR], (size_t)LanguageManager->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+string(ui16Port));
 		}
 #ifdef _WIN32
 		closesocket(server);
@@ -379,19 +389,19 @@ bool ServerThread::Listen(const uint16_t &port, bool bSilent/* = false*/) {
         if(bSilent == true) {
             eventqueue->AddThread(eventq::EVENT_SRVTHREAD_MSG, 
 #ifdef _WIN32
-                ("[ERR] Server socket listen() error: " + string(WSErrorStr(err))+" ("+string(err)+") for port: "+string(port)).c_str());
+                ("[ERR] Server socket listen() error: " + string(WSErrorStr(err))+" ("+string(err)+") for port: "+string(ui16Port)).c_str());
 #else
-				("[ERR] Server socket listen() error: " + string(errno)+" for port: "+string(port)).c_str());
+				("[ERR] Server socket listen() error: " + string(errno)+" for port: "+string(ui16Port)).c_str());
 #endif
         } else {
 #ifdef _BUILD_GUI
             ::MessageBox(NULL, (string(LanguageManager->sTexts[LAN_SRV_LISTEN_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_LISTEN_ERR]) +
-				": " + string(WSErrorStr(err)) + " (" + string(err) + ") " + LanguageManager->sTexts[LAN_FOR_PORT_LWR] + ": " + string(port)).c_str(), sTitle.c_str(), MB_OK | MB_ICONERROR);
+				": " + string(WSErrorStr(err)) + " (" + string(err) + ") " + LanguageManager->sTexts[LAN_FOR_PORT_LWR] + ": " + string(ui16Port)).c_str(), sTitle.c_str(), MB_OK | MB_ICONERROR);
         }
 #else
             AppendLog(string(LanguageManager->sTexts[LAN_SRV_LISTEN_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_LISTEN_ERR])+
 				": " + string(errno)+" "+
-				string(LanguageManager->sTexts[LAN_FOR_PORT_LWR], (size_t)LanguageManager->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+string(port));
+				string(LanguageManager->sTexts[LAN_FOR_PORT_LWR], (size_t)LanguageManager->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+string(ui16Port));
         }
 #ifdef _WIN32
 		closesocket(server);
@@ -417,6 +427,8 @@ bool ServerThread::isFlooder(const int &s, const sockaddr_storage &addr) {
     if(addr.ss_family == AF_INET6) {
         memcpy(ui128IpHash, &((struct sockaddr_in6 *)&addr)->sin6_addr, 16);
     } else {
+        ui128IpHash[10] = 255;
+        ui128IpHash[11] = 255;
         memcpy(ui128IpHash, &((struct sockaddr_in *)&addr)->sin_addr.s_addr, 4);
     }
 

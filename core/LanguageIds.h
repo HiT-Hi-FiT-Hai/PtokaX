@@ -30,8 +30,8 @@ enum LangIds {
     LAN_HUB_DESCRIPTION,
     LAN_ANTI_MOGLO,
     LAN_HUB_ADDRESS,
-    LAN_RESOLVE_HOST,
-    LAN_BIND_ONLY_ADDR,
+    LAN_RESOLVE_HOSTNAME,
+    LAN_BIND_ONLY_ADDRS,
     LAN_TCP_PORTS,
     LAN_TCP_PORTS_HINT,
     LAN_UDP_PORT,
@@ -781,6 +781,8 @@ enum LangIds {
     LAN_FILTER_RANGE_BANS,
     LAN_RANGE_BAN_DELETED_ACCEPT_TO_NEW,
     LAN_IS_AVAILABLE,
+    LAN_IPV4_ADDRESS,
+    LAN_IPV6_ADDRESS,
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------

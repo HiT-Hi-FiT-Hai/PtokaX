@@ -30,8 +30,8 @@ const char* LangStr[] = {
     "Hub description",
     "Anti MoGLO description",
     "Hub address (hostname or IP address)",
-    "Resolve hostname to IP address (needed for setting below)",
-    "Accept connections only on this address",
+    "Resolve hostname to IP addresses",
+    "Accept connections only on this addresses",
     "TCP ports",
     "More ports like 4861;666;411",
     "UDP port",
@@ -781,6 +781,8 @@ const char* LangStr[] = {
     "Filter range bans",
     "Range ban was deleted. When you now press accept then new range ban will be created!",
     "is available",
+    "IPv4 address",
+    "IPv6 address",
 };
 //---------------------------------------------------------------------------
 

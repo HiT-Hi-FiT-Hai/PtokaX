@@ -241,6 +241,9 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
         memcpy(ui128IpHash, &((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr.s6_addr, 16);
     } else {
         strcpy(sIP, inet_ntoa(((struct sockaddr_in *)&AccptSocket->addr)->sin_addr));
+
+        ui128IpHash[10] = 255;
+        ui128IpHash[11] = 255;
         memcpy(ui128IpHash+12, &((struct sockaddr_in *)&AccptSocket->addr)->sin_addr.s_addr, 4);
     }
 

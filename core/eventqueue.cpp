@@ -205,6 +205,8 @@ void eventq::AddThread(uint8_t ui8Id, char * sMsg, const sockaddr_storage * sas/
             memcpy(newevent->ui128IpHash, &((struct sockaddr_in6 *)sas)->sin6_addr.s6_addr, 16);
         } else {
             memset(newevent->ui128IpHash, 0, 16);
+            newevent->ui128IpHash[10] = 255;
+            newevent->ui128IpHash[11] = 255;
             memcpy(newevent->ui128IpHash+12, &((struct sockaddr_in *)sas)->sin_addr.s_addr, 4);
         }
     } else {
