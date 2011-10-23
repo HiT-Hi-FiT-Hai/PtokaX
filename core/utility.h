@@ -100,7 +100,10 @@ bool DirExist(char * sPath);
     INT WSAAPI win_inet_pton(INT Family, PCTSTR pszAddrString, PVOID pAddrBuf);
     PCTSTR WSAAPI win_inet_ntop(INT Family, PVOID pAddr, PTSTR pStringBuf, size_t StringBufSize);
 #endif
-    void CheckForIPv6();
+
+void CheckForIPv6();
+
+bool GetMacAddress(const char * sIP, char * sMac);
 //---------------------------------------------------------------------------
 extern string PATH, SCRIPT_PATH, sTitle;
 extern bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bCmdNoKeyCheck, bUseIPv6;
