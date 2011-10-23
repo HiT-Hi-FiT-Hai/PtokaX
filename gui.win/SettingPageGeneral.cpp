@@ -106,7 +106,7 @@ LRESULT SettingPageGeneral::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPa
                         (SettingManager->sTexts[SETTXT_IPV4_ADDRESS] != NULL ? SettingManager->sTexts[SETTXT_IPV4_ADDRESS] : ""));
                     ::EnableWindow(hWndPageItems[EDT_IPV4_ADDRESS], bEnable);
                     ::SetWindowText(hWndPageItems[EDT_IPV6_ADDRESS], bEnable == FALSE ? sHubIP6 :
-                        (SettingManager->sTexts[SETTXT_IPV6_ADDRESS] != NULL ? SettingManager->sTexts[SETTXT_IPV6_ADDRESS] : "");
+                        (SettingManager->sTexts[SETTXT_IPV6_ADDRESS] != NULL ? SettingManager->sTexts[SETTXT_IPV6_ADDRESS] : ""));
                     ::EnableWindow(hWndPageItems[EDT_IPV6_ADDRESS], bEnable);
                 }
 

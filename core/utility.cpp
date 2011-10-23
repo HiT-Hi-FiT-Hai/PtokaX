@@ -1424,3 +1424,59 @@ PCTSTR WSAAPI win_inet_ntop(INT Family, PVOID pAddr, PTSTR pStringBuf, size_t St
 }
 //---------------------------------------------------------------------------
 #endif
+
+bool GetMacAddress(const char * sIP, char * sMac) {
+#ifdef _WIN32
+    uint32_t uiIP = ::inet_addr(sIP);
+    MIB_IPNETTABLE * pINT = (MIB_IPNETTABLE *)new char[131072];
+    ULONG ulSize = 131072;
+    DWORD dwRes = ::GetIpNetTable(pINT, &ulSize, TRUE);
+    if(dwRes == NO_ERROR) {
+        for(DWORD dwi = 0; dwi < pINT->dwNumEntries; dwi++) {
+            if(pINT->table[dwi].dwAddr == uiIP && pINT->table[dwi].dwType != MIB_IPNET_TYPE_INVALID) {
+                sprintf(sMac, "%02x:%02x:%02x:%02x:%02x:%02x", pINT->table[dwi].bPhysAddr[0], pINT->table[dwi].bPhysAddr[1], pINT->table[dwi].bPhysAddr[2],
+                    pINT->table[dwi].bPhysAddr[3], pINT->table[dwi].bPhysAddr[4], pINT->table[dwi].bPhysAddr[5]);
+                delete []pINT;
+                return true;
+            }
+        }
+    }
+    delete []pINT;
+#else
+    FILE *fp = fopen("/proc/net/arp", "r");
+    if(fp != NULL) {
+        char buf[1024];
+        while(fgets(buf, 1024, fp) != NULL) {
+            if(strncmp(buf, sIP, u->ui8IpLen) == 0 && buf[u->ui8IpLen] == ' ') {
+                bool bLastCharSpace = true;
+                uint8_t ui8NonSpaces = 0;
+                uint16_t ui16i = u->ui8IpLen;
+                while(buf[ui16i] != '\0') {
+                    if(buf[ui16i] == ' ') {
+                        bLastCharSpace = true;
+                    } else {
+                        if(bLastCharSpace == true) {
+                            bLastCharSpace = false;
+                            ui8NonSpaces++;
+                        }
+                    }
+
+                    if(ui8NonSpaces == 3) {
+                        strncpy(sMac, buf + ui16i, 17);
+                        sMac[17] = '\0';
+                        fclose(fp);
+                        return true;
+                    }
+
+                    ui16i++;
+                }
+            }
+        }
+
+        fclose(fp);
+    }
+#endif
+
+    return false;
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

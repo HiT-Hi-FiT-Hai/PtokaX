@@ -103,6 +103,8 @@ SendPmToOps(sFromNick, sData)		- Send data to operators. Max FromNick length 64 
 SendPmToProfile(nProfileNumber, sFromNick, sData)	- Send data as private message to users with given profile. Max FromNick length 64 chars, max Data length 128000 chars.
 SendPmToUser(tUser, sFromNick, sData)		- Send private message to user. Max FromNick length 64 chars, max Data length 128000 chars.
 
+Core.SetUserInfo(tUser, nValueId, nil/sValue/nValue, bPermanent)    - Set user info in MyINFO. Max sValue lenght 64 chars, $ and | is not allowed. Use bPermanent when you want to apply change permanently.
+
 
 SetMan.
 -------------------
@@ -706,4 +708,19 @@ User data IDs for Core.GetUserData and Core.GetUserValue call.
 24	- iMagicByte
 25	- iLoginTime
 26	- sCountryCode
-27	- sMac / only for Core.GetUserValue call (windoze/linux only).
+27  - sMac (windoze/linux only).
+28  - bDescriptionChanged
+29  - bTagChanged
+30  - bConnectionChanged
+31  - bEmailChanged
+32  - bShareChanged
+33  - sScriptedDescriptionShort
+34  - sScriptedDescriptionLong
+35  - sScriptedTagShort
+36  - sScriptedTagLong
+37  - sScriptedConnectionShort
+38  - sScriptedConnectionLong
+39  - sScriptedEmailShort
+40  - sScriptedEmailLong
+41  - iScriptediShareSizeShort
+42  - iScriptediShareSizeLong
