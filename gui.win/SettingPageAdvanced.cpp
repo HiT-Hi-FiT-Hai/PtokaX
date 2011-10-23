@@ -116,6 +116,14 @@ LRESULT SettingPageAdvanced::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lP
                 }
 
                 break;
+            case EDT_ADMIN_NICK:
+                if(HIWORD(wParam) == EN_CHANGE) {
+                    RemovePipes((HWND)lParam);
+
+                    return 0;
+                }
+
+                break;
         }
     }
 
@@ -138,7 +146,7 @@ void SettingPageAdvanced::Save() {
     SettingManager->SetBool(SETBOOL_ENABLE_TRAY_ICON, ::SendMessage(hWndPageItems[BTN_ENABLE_TRAY_ICON], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
     SettingManager->SetBool(SETBOOL_START_MINIMIZED, ::SendMessage(hWndPageItems[BTN_MINIMIZE_ON_STARTUP], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 
-    char buf[6];
+    char buf[1025];
     int iLen = ::GetWindowText(hWndPageItems[EDT_PREFIXES_FOR_HUB_COMMANDS], buf, 6);
     SettingManager->SetText(SETTXT_CHAT_COMMANDS_PREFIXES, buf, iLen);
 
@@ -157,6 +165,9 @@ void SettingPageAdvanced::Save() {
 
     SettingManager->SetBool(SETBOOL_SEND_STATUS_MESSAGES, ::SendMessage(hWndPageItems[BTN_SEND_STATUS_MESSAGES_TO_OPS], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
     SettingManager->SetBool(SETBOOL_SEND_STATUS_MESSAGES_AS_PM, ::SendMessage(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
+
+    iLen = ::GetWindowText(hWndPageItems[EDT_ADMIN_NICK], buf, 1025);
+    SettingManager->SetText(SETTXT_ADMIN_NICK, buf, iLen);
 }
 //------------------------------------------------------------------------------
 
@@ -260,6 +271,15 @@ bool SettingPageAdvanced::CreateSettingPage(HWND hOwner) {
     hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_SEND_STATUS_PM], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
         8, iPosX + iGroupBoxMargin + iCheckHeight + 3, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM], BM_SETCHECK, (SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true ? BST_CHECKED : BST_UNCHECKED), 0);
+
+    iPosX += iTwoChecksGB;
+
+    hWndPageItems[GB_ADMIN_NICK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_ADMIN_NICK], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        0, iPosX, iFullGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[EDT_ADMIN_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_ADMIN_NICK], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
+        8, iPosX + iGroupBoxMargin, iFullEDT, iEditHeight, m_hWnd, (HMENU)EDT_ADMIN_NICK, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[EDT_ADMIN_NICK], EM_SETLIMITTEXT, 64, 0);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {

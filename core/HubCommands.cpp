@@ -1389,10 +1389,10 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 
                 char cTime = sCmdParts[1][iCmdPartsLen[1]-1];
                 sCmdParts[1][iCmdPartsLen[1]-1] = '\0';
-                uint32_t iTime = atoi(sCmdParts[1]);
+                int iTime = atoi(sCmdParts[1]);
                 time_t acc_time, ban_time;
 
-                if(iTime <= 0 || GenerateTempBanTime(cTime, iTime, acc_time, ban_time) == false) {
+                if(iTime <= 0 || GenerateTempBanTime(cTime, (uint32_t)iTime, acc_time, ban_time) == false) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
                     int iret = sprintf(msg+imsgLen, "<%s> *** %s %cnicktempban <%s> <%s> <%s>. %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -5192,7 +5192,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 				if(dlen < 13) {
 					int imsgLen = CheckFromPm(curUser, fromPM);
 
-					int iret = sprintf(msg+imsgLen, "<%s> *** %s %cstopscript <%s>. %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
+					int iret = sprintf(msg+imsgLen, "<%s> *** %s %cstartscript <%s>. %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
 						LanguageManager->sTexts[LAN_SNTX_ERR_IN_CMD], SettingManager->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0],
 						LanguageManager->sTexts[LAN_SCRIPTNAME_LWR], LanguageManager->sTexts[LAN_NO_PARAM_GIVEN]);
 					imsgLen += iret;
@@ -5202,12 +5202,12 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 					return true;
 				}
 
-				sCommand+= 12;
+				sCommand += 12;
 
                 if(dlen-12 > 256) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
-                    int iret = sprintf(msg+imsgLen, "<%s> *** %s %cstopscript <%s>. %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
+                    int iret = sprintf(msg+imsgLen, "<%s> *** %s %cstartscript <%s>. %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
 						LanguageManager->sTexts[LAN_SNTX_ERR_IN_CMD], SettingManager->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0],
 						LanguageManager->sTexts[LAN_SCRIPTNAME_LWR], LanguageManager->sTexts[LAN_MAX_ALWD_SCRIPT_NAME_LEN_256_CHARS]);
                     imsgLen += iret;
@@ -5217,7 +5217,8 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                     return true;
                 }
 
-				if(FileExist((SCRIPT_PATH+sCommand).c_str()) == false) {
+                char * sBadChar = strpbrk(sCommand, "/\\");
+				if(sBadChar != NULL || FileExist((SCRIPT_PATH+sCommand).c_str()) == false) {
 					int imsgLen = CheckFromPm(curUser, fromPM);
 
 					int iret = sprintf(msg+imsgLen, "<%s> *** %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
@@ -6222,10 +6223,10 @@ bool HubCommands::TempBan(User * curUser, char * sCommand, const size_t &dlen, b
 
     char cTime = sCmdParts[1][iCmdPartsLen[1]-1];
     sCmdParts[1][iCmdPartsLen[1]-1] = '\0';
-    uint32_t iTime = atoi(sCmdParts[1]);
+    int iTime = atoi(sCmdParts[1]);
     time_t acc_time, ban_time;
 
-    if(iTime <= 0 || GenerateTempBanTime(cTime, iTime, acc_time, ban_time) == false) {
+    if(iTime <= 0 || GenerateTempBanTime(cTime, (uint32_t)iTime, acc_time, ban_time) == false) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> *** %s %c%stempban <%s> <%s> <%s>. %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -6420,10 +6421,10 @@ bool HubCommands::TempBanIp(User * curUser, char * sCommand, const size_t &dlen,
 
     char cTime = sCmdParts[1][iCmdPartsLen[1]-1];
     sCmdParts[1][iCmdPartsLen[1]-1] = '\0';
-    uint32_t iTime = atoi(sCmdParts[1]);
+    int iTime = atoi(sCmdParts[1]);
     time_t acc_time, ban_time;
 
-    if(iTime <= 0 || GenerateTempBanTime(cTime, iTime, acc_time, ban_time) == false) {
+    if(iTime <= 0 || GenerateTempBanTime(cTime, (uint32_t)iTime, acc_time, ban_time) == false) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> *** %s %c%stempbanip <%s> <%s> <%s>. %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -6902,10 +6903,10 @@ bool HubCommands::RangeTempBan(User * curUser, char * sCommand, const size_t &dl
 
     char cTime = sCmdParts[2][iCmdPartsLen[2]-1];
     sCmdParts[2][iCmdPartsLen[2]-1] = '\0';
-    uint32_t iTime = atoi(sCmdParts[2]);
+    int iTime = atoi(sCmdParts[2]);
     time_t acc_time, ban_time;
 
-    if(iTime <= 0 || GenerateTempBanTime(cTime, iTime, acc_time, ban_time) == false) {
+    if(iTime <= 0 || GenerateTempBanTime(cTime, (uint32_t)iTime, acc_time, ban_time) == false) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> *** %s %c%srangetempban <%s> <%s> <%s> <%s>. %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 

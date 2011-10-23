@@ -218,9 +218,9 @@ int main(int argc, char* argv[]) {
 	    AppendSpecialLog(sDbgstr);
 	    exit(EXIT_FAILURE);
 	}
-	
+
 	ServerInitialize();
-	
+
 	if(ServerStart() == false) {
 	    if(bDaemon == false) {
 	        printf("Server start failed!\n");
@@ -245,7 +245,7 @@ int main(int argc, char* argv[]) {
 	
         nanosleep(&sleeptime, NULL);
 	}
-	
+
 	if(bDaemon == false) {
 	    printf((sTitle+" ending...\n").c_str());
 	}

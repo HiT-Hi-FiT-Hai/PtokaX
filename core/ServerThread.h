@@ -54,23 +54,25 @@ private:
 #endif
 
 	AntiConFlood *AntiFloodList;
-	
+
+    int iAdressFamily;
+
 	bool bTerminated;
 public:
     ServerThread *prev, *next;
 
-    uint16_t usPort;
+    uint16_t ui16Port;
 
     bool bActive, bSuspended;
 
-	ServerThread();
+	ServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber);
 	~ServerThread();
 
 	void Resume();
 	void Run();
 	void Close();
 	void WaitFor();
-	bool Listen(const uint16_t &port, bool bSilent = false);
+	bool Listen(bool bSilent = false);
 #ifdef _WIN32
 	bool isFlooder(const SOCKET &s, const sockaddr_storage &addr);
 #else

@@ -30,8 +30,8 @@ const char* LangXmlStr[] = {
     "HubDescription",
     "AntiMoGLODescription",
     "HubAddress",
-    "ResolveHostToIP",
-    "ListenOnlyOnIP",
+    "ResolveHostToIPs",
+    "ListenOnlyOnIPs",
     "TCPPorts",
     "TCPPortsHint",
     "UDPPort",
@@ -781,6 +781,8 @@ const char* LangXmlStr[] = {
     "FilterRangeBans",
     "RangeBanDeletedAcceptToNew",
     "IsAvailable",
+    "IPv4Address",
+    "IPv6Address",
 };
 //---------------------------------------------------------------------------
 

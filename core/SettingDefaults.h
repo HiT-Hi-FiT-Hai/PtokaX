@@ -236,6 +236,8 @@ const char* SetTxtDef[] = {
     "", //NICK_LIMIT_REDIR_ADDRESS
     "", //MSG_TO_ADD_TO_BAN_MSG
     "", //LANGUAGE
+    "", //IPV4_ADDRESS
+    "", //IPV6_ADDRESS
 };
 //---------------------------------------------------------------------------
 

@@ -44,7 +44,7 @@ public:
     char * GetPageName();
     void FocusLastItem();
 private:
-    HWND hWndPageItems[25];
+    HWND hWndPageItems[27];
     
     enum enmPageItems {
         GB_LANGUAGE,
@@ -62,13 +62,15 @@ private:
         GB_HUB_ADDRESS,
         EDT_HUB_ADDRESS,
         BTN_RESOLVE_ADDRESS,
+        GB_IPV4_ADDRESS,
+        EDT_IPV4_ADDRESS,
+        GB_IPV6_ADDRESS,
+        EDT_IPV6_ADDRESS,
         BTN_BIND_ADDRESS,
         GB_TCP_PORTS,
         EDT_TCP_PORTS,
         GB_UDP_PORT,
         EDT_UDP_PORT,
-        GB_ADMIN_NICK,
-        EDT_ADMIN_NICK,
         GB_HUB_LISTS,
         EDT_HUB_LISTS,
         BTN_HUBLIST_AUTO_REG

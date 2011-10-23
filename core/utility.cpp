@@ -774,10 +774,8 @@ bool HashIP(const char * sIP, uint8_t * ui128IpHash) {
 
         memset(ui128IpHash, 0, 16);
 
-        if(bUseIPv6 == true) {
-            ui128IpHash[10] = 255;
-            ui128IpHash[11] = 255;
-        }
+        ui128IpHash[10] = 255;
+        ui128IpHash[11] = 255;
 
         memcpy(ui128IpHash+12, &ui32IpHash, 4);
     }

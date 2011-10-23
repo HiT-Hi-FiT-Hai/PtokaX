@@ -590,25 +590,6 @@ bool ServerStart() {
                     strcpy(sHubIP, inet_ntoa(((sockaddr_in *)(res->ai_addr))->sin_addr));
                 }
 
-                if(sHubIP[0] == '\0') {
-                    char sHostName[256];
-                    ::gethostname(sHostName, 256);
-
-                    struct addrinfo aiHints;
-                    memset(&aiHints, 0, sizeof(addrinfo));
-                    aiHints.ai_family = AF_INET;
-
-                    struct addrinfo * pRes;
-
-                    if(::getaddrinfo(sHostName, NULL, &aiHints, &pRes) == 0) {
-                        if(pRes->ai_family == AF_INET && ((sockaddr_in *)(pRes->ai_addr))->sin_addr.s_addr != INADDR_ANY) {
-                            strcpy(sHubIP, inet_ntoa(((sockaddr_in *)(pRes->ai_addr))->sin_addr));
-                        }
-
-                        freeaddrinfo(pRes);
-                    }
-                }
-
                 if(sHubIP[0] != '\0') {
                     string msg = "*** "+string(sHubIP);
                     if(sHubIP6[0] != '\0') {
@@ -626,7 +607,17 @@ bool ServerStart() {
             strcpy(sHubIP, SettingManager->sTexts[SETTXT_HUB_ADDRESS]);
         }
     } else {
-        sHubIP[0] = '\0';
+        if(SettingManager->sTexts[SETTXT_IPV4_ADDRESS] != NULL) {
+            strcpy(sHubIP, SettingManager->sTexts[SETTXT_IPV4_ADDRESS]);
+        } else {
+            sHubIP[0] = '\0';
+        }
+
+        if(SettingManager->sTexts[SETTXT_IPV6_ADDRESS] != NULL) {
+            strcpy(sHubIP6, SettingManager->sTexts[SETTXT_IPV6_ADDRESS]);
+        } else {
+            sHubIP6[0] = '\0';
+        }
     }
 
     for(uint8_t i = 0; i < 25; i++) {
@@ -634,27 +625,13 @@ bool ServerStart() {
             break;
         }
 
-		ServerThread *Server = new ServerThread();
-        if(Server == NULL) {
-        	string sDbgstr = "[BUF] Cannot allocate Server in ServerMan::StartServer!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            exit(EXIT_FAILURE);
-        }
-
-		if(Server->Listen(SettingManager->iPortNumbers[i]) == true) {
-		    if(ServersE == NULL) {
-                ServersS = Server;
-                ServersE = Server;
-            } else {
-                Server->prev = ServersE;
-                ServersE->next = Server;
-                ServersE = Server;
-            }
+        if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == false) {
+            ServerCreateServerThread(bUseIPv6 == true ? AF_INET6 : AF_INET, SettingManager->iPortNumbers[i]);
         } else {
-            delete Server;
+            if(bUseIPv6 == true) {
+                ServerCreateServerThread(AF_INET6, SettingManager->iPortNumbers[i]);
+            }
+            ServerCreateServerThread(AF_INET, SettingManager->iPortNumbers[i]);
         }
     }
 
@@ -784,7 +761,7 @@ bool ServerStart() {
     if(SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == true) {
 		ScriptManager->Start();
     }
-    
+
     srvLoop = new theLoop();
     if(srvLoop == NULL) {
     	string sDbgstr = "[BUF] Cannot allocate srvLoop!";
@@ -1089,7 +1066,7 @@ void ServerUpdateServers() {
                 break;
             }
 
-            if(cur->usPort == SettingManager->iPortNumbers[i]) {
+            if(cur->ui16Port == SettingManager->iPortNumbers[i]) {
                 bFound = true;
                 break;
             }
@@ -1131,36 +1108,20 @@ void ServerUpdateServers() {
             ServerThread *cur = next;
             next = cur->next;
 
-            if(cur->usPort == SettingManager->iPortNumbers[i]) {
+            if(cur->ui16Port == SettingManager->iPortNumbers[i]) {
                 bFound = true;
                 break;
             }
         }
 
         if(bFound == false) {
-        	ServerThread *Server = new ServerThread();
-            if(Server == NULL) {
-            	string sDbgstr = "[BUF] Cannot allocate Server in ServerMan::UpdateServers!";
-#ifdef _WIN32
-				sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-				AppendSpecialLog(sDbgstr);
-                exit(EXIT_FAILURE);
-            }
-    
-    		if(Server->Listen(SettingManager->iPortNumbers[i]) == true) {
-    		    if(ServersE == NULL) {
-                    ServersS = Server;
-                    ServersE = Server;
-                } else {
-                    Server->prev = ServersE;
-                    ServersE->next = Server;
-                    ServersE = Server;
-                }
-
-    		    Server->Resume();
+            if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == false) {
+                ServerCreateServerThread(bUseIPv6 == true ? AF_INET6 : AF_INET, SettingManager->iPortNumbers[i]);
             } else {
-                delete Server;
+                if(bUseIPv6 == true) {
+                    ServerCreateServerThread(AF_INET6, SettingManager->iPortNumbers[i]);
+                }
+                ServerCreateServerThread(AF_INET, SettingManager->iPortNumbers[i]);
             }
         }
     }
@@ -1248,3 +1209,29 @@ void ServerUpdateAutoRegState() {
     }
 }
 //---------------------------------------------------------------------------
+
+void ServerCreateServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber) {
+	ServerThread *Server = new ServerThread(iAddrFamily, ui16PortNumber);
+    if(Server == NULL) {
+        string sDbgstr = "[BUF] Cannot allocate Server in ServerCreateServerThread!";
+#ifdef _WIN32
+		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
+		AppendSpecialLog(sDbgstr);
+        exit(EXIT_FAILURE);
+    }
+
+	if(Server->Listen() == true) {
+		if(ServersE == NULL) {
+            ServersS = Server;
+            ServersE = Server;
+        } else {
+            Server->prev = ServersE;
+            ServersE->next = Server;
+            ServersE = Server;
+        }
+    } else {
+        delete Server;
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

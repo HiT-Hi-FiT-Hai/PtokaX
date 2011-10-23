@@ -236,6 +236,8 @@ const char* SetTxtXmlStr[] = {
     "NickLimitRedirAddress", 
     "MessageToAddToBanMessage", 
     "Language", 
+    "IPv4Address",
+    "IPv6Address",
 };
 //---------------------------------------------------------------------------
 
