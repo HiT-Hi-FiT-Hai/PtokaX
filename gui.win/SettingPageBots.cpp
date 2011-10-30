@@ -277,21 +277,51 @@ void SettingPageBots::GetUpdates(bool &bUpdatedHubNameWelcome, bool & /*bUpdated
 	bool &bUpdatedNickLimitMessage, bool &bUpdatedBotsSameNick, bool &bUpdatedBotNick, bool &bUpdatedBot, bool &bUpdatedOpChatNick,
 	bool &bUpdatedOpChat, bool & /*bUpdatedLanguage*/, bool & /*bUpdatedTextFiles*/, bool & /*bUpdatedRedirectAddress*/, bool & /*bUpdatedTempBanRedirAddress*/,
     bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/, bool & /*bUpdatedMinShare*/, bool & /*bUpdatedMaxShare*/) {
-    bUpdatedHubNameWelcome = bUpdateHubNameWelcome;
-	bUpdatedMOTD = bUpdateMOTD;
-	bUpdatedHubSec = bUpdateHubSec;
-	bUpdatedRegOnlyMessage = bUpdateRegOnlyMessage;
-	bUpdatedShareLimitMessage = bUpdateShareLimitMessage;
-	bUpdatedSlotsLimitMessage = bUpdateSlotsLimitMessage;
-	bUpdatedHubSlotRatioMessage = bUpdateHubSlotRatioMessage;
-	bUpdatedMaxHubsLimitMessage = bUpdateMaxHubsLimitMessage;
-	bUpdatedNoTagMessage = bUpdateNoTagMessage;
-	bUpdatedNickLimitMessage = bUpdateNickLimitMessage;
-	bUpdatedBotsSameNick = bUpdateBotsSameNick;
-	bUpdatedBotNick = bBotNickChanged;
-	bUpdatedBot = bUpdateBot;
-	bUpdatedOpChatNick = bOpChatNickChanged;
-	bUpdatedOpChat = bUpdateOpChat;
+    if(bUpdatedHubNameWelcome == false) {
+        bUpdatedHubNameWelcome = bUpdateHubNameWelcome;
+    }
+    if(bUpdatedMOTD == false) {
+        bUpdatedMOTD = bUpdateMOTD;
+	}
+    if(bUpdatedHubSec == false) {
+        bUpdatedHubSec = bUpdateHubSec;
+	}
+    if(bUpdatedRegOnlyMessage == false) {
+        bUpdatedRegOnlyMessage = bUpdateRegOnlyMessage;
+	}
+    if(bUpdatedShareLimitMessage == false) {
+        bUpdatedShareLimitMessage = bUpdateShareLimitMessage;
+	}
+    if(bUpdatedSlotsLimitMessage == false) {
+        bUpdatedSlotsLimitMessage = bUpdateSlotsLimitMessage;
+	}
+    if(bUpdatedHubSlotRatioMessage == false) {
+        bUpdatedHubSlotRatioMessage = bUpdateHubSlotRatioMessage;
+	}
+    if(bUpdatedMaxHubsLimitMessage == false) {
+        bUpdatedMaxHubsLimitMessage = bUpdateMaxHubsLimitMessage;
+	}
+    if(bUpdatedNoTagMessage == false) {
+        bUpdatedNoTagMessage = bUpdateNoTagMessage;
+	}
+    if(bUpdatedNickLimitMessage == false) {
+        bUpdatedNickLimitMessage = bUpdateNickLimitMessage;
+	}
+    if(bUpdatedBotsSameNick == false) {
+        bUpdatedBotsSameNick = bUpdateBotsSameNick;
+	}
+    if(bUpdatedBotNick == false) {
+        bUpdatedBotNick = bBotNickChanged;
+	}
+    if(bUpdatedBot == false) {
+        bUpdatedBot = bUpdateBot;
+	}
+    if(bUpdatedOpChatNick == false) {
+        bUpdatedOpChatNick = bOpChatNickChanged;
+	}
+    if(bUpdatedOpChat == false) {
+        bUpdatedOpChat = bUpdateOpChat;
+    }
 }
 
 //------------------------------------------------------------------------------

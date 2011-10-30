@@ -177,8 +177,12 @@ void SettingPageAdvanced::GetUpdates(bool & /*bUpdatedHubNameWelcome*/, bool & /
     bool & /*bUpdatedNickLimitMessage*/, bool & /*bUpdatedBotsSameNick*/, bool & /*bUpdatedBotNick*/, bool & /*bUpdatedBot*/, bool & /*bUpdatedOpChatNick*/,
     bool & /*bUpdatedOpChat*/, bool & /*bUpdatedLanguage*/, bool & /*bUpdatedTextFiles*/, bool & /*bUpdatedRedirectAddress*/, bool & /*bUpdatedTempBanRedirAddress*/,
     bool & /*bUpdatedPermBanRedirAddress*/, bool &bUpdatedSysTray, bool &bUpdatedScripting, bool & /*bUpdatedMinShare*/, bool & /*bUpdatedMaxShare*/) {
-    bUpdatedSysTray = bUpdateSysTray;
-    bUpdatedScripting = bUpdateScripting;
+    if(bUpdatedSysTray == false) {
+        bUpdatedSysTray = bUpdateSysTray;
+    }
+    if(bUpdatedScripting == false) {
+        bUpdatedScripting = bUpdateScripting;
+    }
 }
 
 //------------------------------------------------------------------------------

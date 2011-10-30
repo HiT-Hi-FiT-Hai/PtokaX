@@ -97,8 +97,8 @@ bool DirExist(char * sPath);
 #ifdef _WIN32
 	void SetupOsVersion();
 	void * LuaAlocator(void * pOld, void * pData, size_t szOldSize, size_t szNewSize);
-    INT WSAAPI win_inet_pton(INT Family, PCTSTR pszAddrString, PVOID pAddrBuf);
-    PCTSTR WSAAPI win_inet_ntop(INT Family, PVOID pAddr, PTSTR pStringBuf, size_t StringBufSize);
+    INT win_inet_pton(PCTSTR pAddrString, PVOID pAddrBuf);
+    void win_inet_ntop(PVOID pAddr, PTSTR pStringBuf, size_t szStringBufSize);
 #endif
 
 void CheckForIPv6();
@@ -106,7 +106,7 @@ void CheckForIPv6();
 bool GetMacAddress(const char * sIP, char * sMac);
 //---------------------------------------------------------------------------
 extern string PATH, SCRIPT_PATH, sTitle;
-extern bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bCmdNoKeyCheck, bUseIPv6;
+extern bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bCmdNoKeyCheck, bUseIPv6, bIPv6DualStack;
 #ifdef _WIN32
 	extern HANDLE hConsole, hLuaHeap, hPtokaXHeap, hRecvHeap, hSendHeap;
 	extern string PATH_LUA, sOs;

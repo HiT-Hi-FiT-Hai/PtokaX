@@ -238,12 +238,24 @@ void SettingPageGeneral::GetUpdates(bool &bUpdatedHubNameWelcome, bool &bUpdated
     bool & /*bUpdatedNickLimitMessage*/, bool & /*bUpdatedBotsSameNick*/, bool & /*bUpdatedBotNick*/, bool & /*bUpdatedBot*/, bool & /*bUpdatedOpChatNick*/,
     bool & /*bUpdatedOpChat*/, bool &bUpdatedLanguage, bool & /*bUpdatedTextFiles*/, bool & /*bUpdatedRedirectAddress*/, bool & /*bUpdatedTempBanRedirAddress*/,
     bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/, bool & /*bUpdatedMinShare*/, bool & /*bUpdatedMaxShare*/) {
-    bUpdatedHubNameWelcome = bUpdateHubNameWelcome;
-    bUpdatedHubName = bUpdateHubName;
-    bUpdatedTCPPorts = bUpdateTCPPorts;
-    bUpdatedUDPPort = bUpdateUDPPort;
-    bUpdatedAutoReg = bUpdateAutoReg;
-    bUpdatedLanguage = bUpdateLanguage;
+    if(bUpdatedHubNameWelcome == false) {
+        bUpdatedHubNameWelcome = bUpdateHubNameWelcome;
+    }
+    if(bUpdatedHubName == false) {
+        bUpdatedHubName = bUpdateHubName;
+    }
+    if(bUpdatedTCPPorts == false) {
+        bUpdatedTCPPorts = bUpdateTCPPorts;
+    }
+    if(bUpdatedUDPPort == false) {
+        bUpdatedUDPPort = bUpdateUDPPort;
+    }
+    if(bUpdatedAutoReg == false) {
+        bUpdatedAutoReg = bUpdateAutoReg;
+    }
+    if(bUpdatedLanguage == false) {
+        bUpdatedLanguage = bUpdateLanguage;
+    }
 }
 
 //------------------------------------------------------------------------------

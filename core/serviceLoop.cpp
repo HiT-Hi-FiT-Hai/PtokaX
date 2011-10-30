@@ -232,7 +232,7 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
         } else {
             bIPv6 = true;
 #ifdef _WIN32
-            win_inet_ntop(AF_INET6, &((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr, sIP, 46);
+            win_inet_ntop(&((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr, sIP, 46);
 #else
             inet_ntop(AF_INET6, &((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr, sIP, 46);
 #endif

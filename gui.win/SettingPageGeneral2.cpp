@@ -178,17 +178,39 @@ void SettingPageGeneral2::GetUpdates(bool & /*bUpdatedHubNameWelcome*/, bool & /
     bool &bUpdatedNickLimitMessage, bool &/*bUpdatedBotsSameNick*/, bool &/*bUpdatedBotNick*/, bool &/*bUpdatedBot*/, bool &/*bUpdatedOpChatNick*/,
     bool &/*bUpdatedOpChat*/, bool & /*bUpdatedLanguage*/, bool &bUpdatedTextFiles, bool &bUpdatedRedirectAddress, bool &bUpdatedTempBanRedirAddress,
     bool &bUpdatedPermBanRedirAddress, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/, bool & /*bUpdatedMinShare*/, bool & /*bUpdatedMaxShare*/) {
-    bUpdatedTextFiles = bUpdateTextFiles;
-    bUpdatedRedirectAddress = bUpdateRedirectAddress;
-    bUpdatedRegOnlyMessage = bUpdateRegOnlyMessage;
-    bUpdatedShareLimitMessage = bUpdateShareLimitMessage;
-    bUpdatedSlotsLimitMessage = bUpdateSlotsLimitMessage;
-    bUpdatedHubSlotRatioMessage = bUpdateHubSlotRatioMessage;
-    bUpdatedMaxHubsLimitMessage = bUpdateMaxHubsLimitMessage;
-    bUpdatedNoTagMessage = bUpdateNoTagMessage;
-    bUpdatedTempBanRedirAddress = bUpdateTempBanRedirAddress;
-    bUpdatedPermBanRedirAddress = bUpdatePermBanRedirAddress;
-    bUpdatedNickLimitMessage = bUpdateNickLimitMessage;
+    if(bUpdatedTextFiles == false) {
+        bUpdatedTextFiles = bUpdateTextFiles;
+    }
+    if(bUpdatedRedirectAddress == false) {
+        bUpdatedRedirectAddress = bUpdateRedirectAddress;
+    }
+    if(bUpdatedRegOnlyMessage == false) {
+        bUpdatedRegOnlyMessage = bUpdateRegOnlyMessage;
+    }
+    if(bUpdatedShareLimitMessage == false) {
+        bUpdatedShareLimitMessage = bUpdateShareLimitMessage;
+    }
+    if(bUpdatedSlotsLimitMessage == false) {
+        bUpdatedSlotsLimitMessage = bUpdateSlotsLimitMessage;
+    }
+    if(bUpdatedHubSlotRatioMessage == false) {
+        bUpdatedHubSlotRatioMessage = bUpdateHubSlotRatioMessage;
+    }
+    if(bUpdatedMaxHubsLimitMessage == false) {
+        bUpdatedMaxHubsLimitMessage = bUpdateMaxHubsLimitMessage;
+    }
+    if(bUpdatedNoTagMessage == false) {
+        bUpdatedNoTagMessage = bUpdateNoTagMessage;
+    }
+    if(bUpdatedTempBanRedirAddress == false) {
+        bUpdatedTempBanRedirAddress = bUpdateTempBanRedirAddress;
+    }
+    if(bUpdatedPermBanRedirAddress == false) {
+        bUpdatedPermBanRedirAddress = bUpdatePermBanRedirAddress;
+    }
+    if(bUpdatedNickLimitMessage == false) {
+        bUpdatedNickLimitMessage = bUpdateNickLimitMessage;
+    }
 }
 
 //------------------------------------------------------------------------------

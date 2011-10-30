@@ -2658,29 +2658,21 @@ void SetMan::UpdateUDPPort() {
         return;
     }
 
-    if(UDPThread != NULL) {
-        UDPThread->Close();
-        UDPThread->WaitFor();
-        delete UDPThread;
-        UDPThread = NULL;
-    }
+    UDPThread::Destroy(g_pUDPThread6);
+    g_pUDPThread6 = NULL;
+
+    UDPThread::Destroy(g_pUDPThread4);
+    g_pUDPThread4 = NULL;
 
     if((uint16_t)atoi(sTexts[SETTXT_UDP_PORT]) != 0) {
-        UDPThread = new UDPRecvThread();
-        if(UDPThread == NULL) {
-        	string sDbgstr = "[BUF] Cannot allocate UDPThread!";
-#ifdef _WIN32
-    		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-        	AppendSpecialLog(sDbgstr);
-        	exit(EXIT_FAILURE);
-        }
+        if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true || (bUseIPv6 == true && bIPv6DualStack == false)) {
+            if(bUseIPv6 == true) {
+                g_pUDPThread6 = UDPThread::Create(AF_INET6);
+            }
 
-        if(UDPThread->Listen() == true) {
-            UDPThread->Resume();
+            g_pUDPThread4 = UDPThread::Create(AF_INET);
         } else {
-            delete UDPThread;
-            UDPThread = NULL;
+            g_pUDPThread6 = UDPThread::Create(bUseIPv6 == true ? AF_INET6 : AF_INET);
         }
     }
 }

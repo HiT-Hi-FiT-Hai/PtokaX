@@ -380,7 +380,7 @@ IP2CC::IP2CC() {
             if(ui8d == 0 && sLine[ui16i] == '-') {
                 sLine[ui16i] = '\0';
 #ifdef _WIN32
-                win_inet_pton(AF_INET6, sStart, ui128IPv6RangeFrom + (ui32IPv6Count*16));
+                win_inet_pton(sStart, ui128IPv6RangeFrom + (ui32IPv6Count*16));
 #else
                 inet_pton(AF_INET6, sStart, ui128IPv6RangeFrom + (ui32IPv6Count*16));
 #endif
@@ -388,7 +388,7 @@ IP2CC::IP2CC() {
                 sLine[ui16i] = '\0';
                 if(ui8d == 1) {
 #ifdef _WIN32
-                    win_inet_pton(AF_INET6, sStart, ui128IPv6RangeTo + (ui32IPv6Count*16));
+                    win_inet_pton(sStart, ui128IPv6RangeTo + (ui32IPv6Count*16));
 #else
                     inet_pton(AF_INET6, sStart, ui128IPv6RangeTo + (ui32IPv6Count*16));
 #endif
