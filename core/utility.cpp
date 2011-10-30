@@ -41,7 +41,7 @@ static const int MAX_PAT_SIZE = 64;
 static const int MAX_ALPHABET_SIZE = 255;
 //---------------------------------------------------------------------------
 string PATH = "", SCRIPT_PATH = "", sTitle = "";
-bool bCmdAutoStart = false, bCmdNoAutoStart = false, bCmdNoTray = false, bCmdNoKeyCheck = false, bUseIPv6 = true;
+bool bCmdAutoStart = false, bCmdNoAutoStart = false, bCmdNoTray = false, bCmdNoKeyCheck = false, bUseIPv6 = true, bIPv6DualStack = false;
 #ifdef _WIN32
 	HANDLE hConsole = NULL, hLuaHeap = NULL, hPtokaXHeap = NULL, hRecvHeap = NULL, hSendHeap = NULL;
 	string PATH_LUA = "", sOs = "";
@@ -759,7 +759,7 @@ uint32_t HashNick(const char * sNick, const size_t &iNickLen) {
 bool HashIP(const char * sIP, uint8_t * ui128IpHash) {
     if(bUseIPv6 == true && strchr(sIP, '.') == NULL) {
 #ifdef _WIN32
-        if(win_inet_pton(AF_INET6, sIP, ui128IpHash) != 1) {
+        if(win_inet_pton(sIP, ui128IpHash) != 1) {
 #else
         if(inet_pton(AF_INET6, sIP, ui128IpHash) != 1) {
 #endif
@@ -1266,14 +1266,12 @@ bool DirExist(char * sPath) {
 		ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 
 		if(::GetVersionEx((OSVERSIONINFO*)&ver) == 0) {
-            bUseIPv6 = false;
 			sOs = "Windows (unknown version)";
 
 			return;
 		}
 
 		if(ver.dwPlatformId != VER_PLATFORM_WIN32_NT) {
-            bUseIPv6 = false;
 			sOs = "Windows 9x/ME";
 	    } else if(ver.dwMajorVersion == 6) {
             if(ver.dwMinorVersion == 2) {
@@ -1292,7 +1290,6 @@ bool DirExist(char * sPath) {
 	           }
             }
 		} else if(ver.dwMajorVersion == 5) {
-            bUseIPv6 = false;
 	        if(ver.dwMinorVersion == 2) {
                 if(ver.wProductType != VER_NT_WORKSTATION) {
 				    sOs = "Windows 2003";
@@ -1323,7 +1320,6 @@ bool DirExist(char * sPath) {
 				sOs = "Windows 2000";
 			}
 		} else if(ver.dwMajorVersion == 4) {
-            bUseIPv6 = false;
 			sOs = "Windows NT4";
 		}
 	}
@@ -1356,12 +1352,6 @@ pInetNtop MyInetNtop = NULL;
 
 void CheckForIPv6() {
 #ifdef _WIN32
-    if(bUseIPv6 == false) { // is false when we have windoze older than 6
-        return;
-    }
-#endif
-
-#ifdef _WIN32
     SOCKET sock = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
 
     if(sock == INVALID_SOCKET) {
@@ -1384,7 +1374,7 @@ void CheckForIPv6() {
     int iIPv6 = 0;
     if(setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &iIPv6, sizeof(iIPv6)) == -1) {
 #endif
-        bUseIPv6 = false;
+        bIPv6DualStack = false;
     }
 
 #ifdef _WIN32
@@ -1397,16 +1387,7 @@ void CheckForIPv6() {
     HINSTANCE hWs2_32 = ::LoadLibrary("Ws2_32.dll");
 
     MyInetPton = (pInetPton)::GetProcAddress(hWs2_32, "inet_pton");
-
-    if(MyInetPton == NULL) {
-        bUseIPv6 = false;
-    }
-
     MyInetNtop = (pInetNtop)::GetProcAddress(hWs2_32, "inet_ntop");
-
-    if(MyInetNtop == NULL) {
-        bUseIPv6 = false;
-    }
 
     ::FreeLibrary(hWs2_32);
 #endif
@@ -1414,13 +1395,37 @@ void CheckForIPv6() {
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
-INT WSAAPI win_inet_pton(INT Family, PCTSTR pszAddrString, PVOID pAddrBuf) {
-    return MyInetPton(Family, pszAddrString, pAddrBuf);
+INT win_inet_pton(PCTSTR pAddrString, PVOID pAddrBuf) {
+    if(MyInetPton != NULL) {
+        return MyInetPton(AF_INET6, pAddrString, pAddrBuf);
+    } else {
+        sockaddr_storage sas_addr;
+        socklen_t sas_len = sizeof(sockaddr_storage);
+        memset(&sas_addr, 0, sas_len);
+
+        if(::WSAStringToAddressA((LPSTR)pAddrString, AF_INET6, NULL, (struct sockaddr *)&sas_addr, &sas_len) == 0) {
+            memcpy(pAddrBuf, &((struct sockaddr_in6 *)&sas_addr)->sin6_addr.s6_addr, 16);
+            return 1;
+        } else {
+            return 0;
+        }
+    }
 }
 //---------------------------------------------------------------------------
 
-PCTSTR WSAAPI win_inet_ntop(INT Family, PVOID pAddr, PTSTR pStringBuf, size_t StringBufSize) {
-    return MyInetNtop(Family, pAddr, pStringBuf, StringBufSize);
+void win_inet_ntop(PVOID pAddr, PTSTR pStringBuf, size_t szStringBufSize) {
+    if(MyInetNtop != NULL) {
+        MyInetNtop(AF_INET6, pAddr, pStringBuf, szStringBufSize);
+    } else {
+        struct sockaddr_in6 sin6;
+        socklen_t sin6_len = sizeof(sockaddr_in6);
+
+        memset(&sin6, 0, sin6_len);
+        sin6.sin6_family = AF_INET6;
+        memcpy(&sin6.sin6_addr, pAddr, 16);
+
+        ::WSAAddressToStringA((struct sockaddr *)&sin6, sin6_len, NULL, pStringBuf, (LPDWORD)&szStringBufSize);
+    }
 }
 //---------------------------------------------------------------------------
 #endif
@@ -1445,14 +1450,14 @@ bool GetMacAddress(const char * sIP, char * sMac) {
 #else
     FILE *fp = fopen("/proc/net/arp", "r");
     if(fp != NULL) {
+        uint16_t ui16IpLen = (uint16_t)strlen(sIP);
         char buf[1024];
         while(fgets(buf, 1024, fp) != NULL) {
-            if(strncmp(buf, sIP, u->ui8IpLen) == 0 && buf[u->ui8IpLen] == ' ') {
+            if(strncmp(buf, sIP, ui16IpLen) == 0 && buf[ui16IpLen] == ' ') {
                 bool bLastCharSpace = true;
                 uint8_t ui8NonSpaces = 0;
-                uint16_t ui16i = u->ui8IpLen;
-                while(buf[ui16i] != '\0') {
-                    if(buf[ui16i] == ' ') {
+                while(buf[ui16IpLen] != '\0') {
+                    if(buf[ui16IpLen] == ' ') {
                         bLastCharSpace = true;
                     } else {
                         if(bLastCharSpace == true) {
@@ -1462,13 +1467,13 @@ bool GetMacAddress(const char * sIP, char * sMac) {
                     }
 
                     if(ui8NonSpaces == 3) {
-                        strncpy(sMac, buf + ui16i, 17);
+                        strncpy(sMac, buf + ui16IpLen, 17);
                         sMac[17] = '\0';
                         fclose(fp);
                         return true;
                     }
 
-                    ui16i++;
+                    ui16IpLen++;
                 }
             }
         }

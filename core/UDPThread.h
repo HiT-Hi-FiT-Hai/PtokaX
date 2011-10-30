@@ -22,7 +22,7 @@
 #define UDPThreadH
 //---------------------------------------------------------------------------
 
-class UDPRecvThread {
+class UDPThread {
 private:
 #ifdef _WIN32
     SOCKET sock;
@@ -40,17 +40,20 @@ private:
 
 	char rcvbuf[4096];
 public:
-	UDPRecvThread();
-	~UDPRecvThread();
+	UDPThread();
+	~UDPThread();
 
-    bool Listen();
+    bool Listen(const int &iAddressFamily);
     void Resume();
     void Run();
 	void Close();
 	void WaitFor();
+
+    static UDPThread * Create(const int &iAddressFamily);
+    static void Destroy(UDPThread * pUDPThread);
 };
 //---------------------------------------------------------------------------
-extern UDPRecvThread *UDPThread;
+extern UDPThread *g_pUDPThread6, *g_pUDPThread4;
 //---------------------------------------------------------------------------
 
 #endif

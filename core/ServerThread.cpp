@@ -299,16 +299,6 @@ bool ServerThread::Listen(bool bSilent/* = false*/) {
     }
 #endif
 
-    if(iAdressFamily == AF_INET6) {
-#ifdef _WIN32
-        DWORD dwIPv6 = 0;
-        setsockopt(server, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&dwIPv6, sizeof(dwIPv6));
-#else
-        int iIPv6 = 0;
-        setsockopt(server, IPPROTO_IPV6, IPV6_V6ONLY, &iIPv6, sizeof(iIPv6));
-#endif
-    }
-
     // set the socket properties
     sockaddr_storage sas;
     memset(&sas, 0, sizeof(sockaddr_storage));
@@ -318,23 +308,31 @@ bool ServerThread::Listen(bool bSilent/* = false*/) {
         ((struct sockaddr_in6 *)&sas)->sin6_family = AF_INET6;
         ((struct sockaddr_in6 *)&sas)->sin6_port = htons(ui16Port);
         sas_len = sizeof(struct sockaddr_in6);
-    } else {
-        ((struct sockaddr_in *)&sas)->sin_family = AF_INET;
-        ((struct sockaddr_in *)&sas)->sin_port = htons(ui16Port);
-        sas_len = sizeof(struct sockaddr_in);
-    }
 
-    if(iAdressFamily == AF_INET6) {
         if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP6[0] != '\0') {
 #ifdef _WIN32
-            win_inet_pton(AF_INET6, sHubIP6, &((struct sockaddr_in6 *)&sas)->sin6_addr);
+            win_inet_pton(sHubIP6, &((struct sockaddr_in6 *)&sas)->sin6_addr);
 #else
             inet_pton(AF_INET6, sHubIP6, &((struct sockaddr_in6 *)&sas)->sin6_addr);
 #endif
         } else {
             ((struct sockaddr_in6 *)&sas)->sin6_addr = in6addr_any;
+
+            if(iAdressFamily == AF_INET6 && bIPv6DualStack == true) {
+#ifdef _WIN32
+                DWORD dwIPv6 = 0;
+                setsockopt(server, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&dwIPv6, sizeof(dwIPv6));
+#else
+                int iIPv6 = 0;
+                setsockopt(server, IPPROTO_IPV6, IPV6_V6ONLY, &iIPv6, sizeof(iIPv6));
+#endif
+            }
         }
     } else {
+        ((struct sockaddr_in *)&sas)->sin_family = AF_INET;
+        ((struct sockaddr_in *)&sas)->sin_port = htons(ui16Port);
+        sas_len = sizeof(struct sockaddr_in);
+
         if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP[0] != '\0') {
             ((struct sockaddr_in *)&sas)->sin_addr.s_addr = inet_addr(sHubIP);
         } else {

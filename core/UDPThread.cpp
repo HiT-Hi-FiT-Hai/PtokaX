@@ -37,10 +37,10 @@
 	#endif
 #endif
 //---------------------------------------------------------------------------
-UDPRecvThread *UDPThread = NULL;
+UDPThread *g_pUDPThread6 = NULL, *g_pUDPThread4 = NULL;
 //---------------------------------------------------------------------------
 
-UDPRecvThread::UDPRecvThread() {
+UDPThread::UDPThread() {
 #ifdef _WIN32
     sock = INVALID_SOCKET;
 #else
@@ -58,30 +58,8 @@ UDPRecvThread::UDPRecvThread() {
 	bTerminated = false;
 }
 
-bool UDPRecvThread::Listen() {
-    sockaddr_storage sas;
-    memset(&sas, 0, sizeof(sockaddr_storage));
-    socklen_t sas_len;
-
-    if(bUseIPv6 == true) {
-        ((struct sockaddr_in6 *)&sas)->sin6_family = AF_INET6;
-        ((struct sockaddr_in6 *)&sas)->sin6_port = htons((unsigned short)atoi(SettingManager->sTexts[SETTXT_UDP_PORT]));
-        sas_len = sizeof(struct sockaddr_in6);
-    } else {
-        ((struct sockaddr_in *)&sas)->sin_family = AF_INET;
-        ((struct sockaddr_in *)&sas)->sin_port = htons((unsigned short)atoi(SettingManager->sTexts[SETTXT_UDP_PORT]));
-        sas_len = sizeof(struct sockaddr_in);
-    }
-
-    if(bUseIPv6 == true) {
-        ((struct sockaddr_in6 *)&sas)->sin6_addr = in6addr_any;
-    } else if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP[0] != '\0') {
-		((struct sockaddr_in *)&sas)->sin_addr.s_addr = inet_addr(sHubIP);
-    } else {
-		((struct sockaddr_in *)&sas)->sin_addr.s_addr = INADDR_ANY;
-    }
-
-    sock = socket((bUseIPv6 == true ? AF_INET6 : AF_INET), SOCK_DGRAM, IPPROTO_UDP);
+bool UDPThread::Listen(const int &iAddressFamily) {
+    sock = socket(iAddressFamily, SOCK_DGRAM, IPPROTO_UDP);
 
 #ifdef _WIN32
 	if(sock == INVALID_SOCKET) {
@@ -97,14 +75,44 @@ bool UDPRecvThread::Listen() {
     setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
 #endif
 
-    if(bUseIPv6 == true) {
+    sockaddr_storage sas;
+    memset(&sas, 0, sizeof(sockaddr_storage));
+    socklen_t sas_len;
+
+    if(iAddressFamily == AF_INET6) {
+        ((struct sockaddr_in6 *)&sas)->sin6_family = AF_INET6;
+        ((struct sockaddr_in6 *)&sas)->sin6_port = htons((unsigned short)atoi(SettingManager->sTexts[SETTXT_UDP_PORT]));
+        sas_len = sizeof(struct sockaddr_in6);
+
+        if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP6[0] != '\0') {
 #ifdef _WIN32
-        DWORD dwIPv6 = 0;
-        setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&dwIPv6, sizeof(dwIPv6));
+            win_inet_pton(sHubIP6, &((struct sockaddr_in6 *)&sas)->sin6_addr);
 #else
-        int iIPv6 = 0;
-        setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &iIPv6, sizeof(iIPv6));
+            inet_pton(AF_INET6, sHubIP6, &((struct sockaddr_in6 *)&sas)->sin6_addr);
 #endif
+        } else {
+            ((struct sockaddr_in6 *)&sas)->sin6_addr = in6addr_any;
+
+            if(iAddressFamily == AF_INET6 && bIPv6DualStack == true) {
+#ifdef _WIN32
+                DWORD dwIPv6 = 0;
+                setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&dwIPv6, sizeof(dwIPv6));
+#else
+                int iIPv6 = 0;
+                setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &iIPv6, sizeof(iIPv6));
+#endif
+            }
+        }
+    } else {
+        ((struct sockaddr_in *)&sas)->sin_family = AF_INET;
+        ((struct sockaddr_in *)&sas)->sin_port = htons((unsigned short)atoi(SettingManager->sTexts[SETTXT_UDP_PORT]));
+        sas_len = sizeof(struct sockaddr_in);
+
+        if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP[0] != '\0') {
+            ((struct sockaddr_in *)&sas)->sin_addr.s_addr = inet_addr(sHubIP);
+        } else {
+            ((struct sockaddr_in *)&sas)->sin_addr.s_addr = INADDR_ANY;
+        }
     }
 
 #ifdef _WIN32
@@ -121,7 +129,7 @@ bool UDPRecvThread::Listen() {
 }
 //---------------------------------------------------------------------------
 
-UDPRecvThread::~UDPRecvThread() {
+UDPThread::~UDPThread() {
 #ifdef _WIN32
     if(sock != INVALID_SOCKET) {
 		closesocket(sock);
@@ -145,12 +153,12 @@ unsigned __stdcall ExecuteUDP(void* UDPThrd) {
 #else
 static void* ExecuteUDP(void* UDPThrd) {
 #endif
-	((UDPRecvThread *)UDPThrd)->Run();
+	((UDPThread *)UDPThrd)->Run();
 	return 0;
 }
 //---------------------------------------------------------------------------
 
-void UDPRecvThread::Resume() {
+void UDPThread::Resume() {
 #ifdef _WIN32
 	threadHandle = (HANDLE)_beginthreadex(NULL, 0, ExecuteUDP, this, 0, &threadId);
 	if(threadHandle == 0) {
@@ -163,7 +171,7 @@ void UDPRecvThread::Resume() {
 }
 //---------------------------------------------------------------------------
 
-void UDPRecvThread::Run() {
+void UDPThread::Run() {
     sockaddr_storage sas;
 	socklen_t sas_len = sizeof(sockaddr_storage);
 
@@ -182,7 +190,7 @@ void UDPRecvThread::Run() {
 }
 //---------------------------------------------------------------------------
 
-void UDPRecvThread::Close() {
+void UDPThread::Close() {
 	bTerminated = true;
 #ifdef _WIN32
 	closesocket(sock);
@@ -193,7 +201,7 @@ void UDPRecvThread::Close() {
 }
 //---------------------------------------------------------------------------
 
-void UDPRecvThread::WaitFor() {
+void UDPThread::WaitFor() {
 #ifdef _WIN32
     WaitForSingleObject(threadHandle, INFINITE);
 #else
@@ -203,4 +211,34 @@ void UDPRecvThread::WaitFor() {
 	}
 #endif
 }
-//---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+UDPThread * UDPThread::Create(const int &iAddressFamily) {
+    UDPThread * pUDPThread = new UDPThread();
+    if(pUDPThread == NULL) {
+        string sDbgstr = "[BUF] Cannot allocate pUDPThread!";
+#ifdef _WIN32
+    	sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#endif
+        AppendSpecialLog(sDbgstr);
+        exit(EXIT_FAILURE);
+    }
+
+    if(pUDPThread->Listen(iAddressFamily) == true) {
+        pUDPThread->Resume();
+        return pUDPThread;
+    } else {
+        delete pUDPThread;
+        return NULL;
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void UDPThread::Destroy(UDPThread * pUDPThread) {
+    if(pUDPThread != NULL) {
+        pUDPThread->Close();
+        pUDPThread->WaitFor();
+        delete pUDPThread;
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

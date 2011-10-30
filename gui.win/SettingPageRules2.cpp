@@ -318,9 +318,15 @@ void SettingPageRules2::GetUpdates(bool & /*bUpdateHubNameWelcome*/, bool & /*bU
     bool & /*bUpdatedNickLimitMessage*/, bool & /*bUpdatedBotsSameNick*/, bool & /*bUpdatedBotNick*/, bool & /*bUpdatedBot*/, bool & /*bUpdatedOpChatNick*/,
     bool & /*bUpdatedOpChat*/, bool & /*bUpdatedLanguage*/, bool & /*bUpdatedTextFiles*/, bool & /*bUpdatedRedirectAddress*/, bool & /*bUpdatedTempBanRedirAddress*/,
     bool & /*bUpdatedPermBanRedirAddress*/, bool & /*bUpdatedSysTray*/, bool & /*bUpdatedScripting*/, bool & /*bUpdatedMinShare*/, bool & /*bUpdatedMaxShare*/) {
-    bUpdatedSlotsLimitMessage = bUpdateSlotsLimitMessage;
-    bUpdatedHubSlotRatioMessage = bUpdateHubSlotRatioMessage;
-    bUpdatedMaxHubsLimitMessage = bUpdateMaxHubsLimitMessage;
+    if(bUpdatedSlotsLimitMessage == false) {
+        bUpdatedSlotsLimitMessage = bUpdateSlotsLimitMessage;
+    }
+    if(bUpdatedHubSlotRatioMessage == false) {
+        bUpdatedHubSlotRatioMessage = bUpdateHubSlotRatioMessage;
+    }
+    if(bUpdatedMaxHubsLimitMessage == false) {
+        bUpdatedMaxHubsLimitMessage = bUpdateMaxHubsLimitMessage;
+    }
 }
 
 //------------------------------------------------------------------------------

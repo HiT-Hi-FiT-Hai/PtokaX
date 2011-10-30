@@ -203,7 +203,9 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
 
     NewDbg->ui32Hash = u->ui32NickHash;
 
-    if(bUseIPv6 == true) {
+    bool bIPv6 = (IN6_IS_ADDR_V4MAPPED((in6_addr *)u->ui128IpHash) == 0);
+
+    if(bIPv6 == true) {
         ((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_family = AF_INET6;
         ((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_port = htons((unsigned short)port);
         memcpy(((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_addr.s6_addr, u->ui128IpHash, 16);
@@ -215,7 +217,7 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
         NewDbg->sas_len = sizeof(struct sockaddr_in);
     }
 
-    NewDbg->s = socket((bUseIPv6 == true ? AF_INET6 : AF_INET), SOCK_DGRAM, IPPROTO_UDP);
+    NewDbg->s = socket((bIPv6 == true ? AF_INET6 : AF_INET), SOCK_DGRAM, IPPROTO_UDP);
 #ifdef _WIN32
     if(NewDbg->s == INVALID_SOCKET) {
         int err = WSAGetLastError();
@@ -231,16 +233,6 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
         UserSendTextDelayed(u, Txt);
         delete NewDbg;
         return false;
-    }
-
-    if(bUseIPv6 == true) {
-#ifdef _WIN32
-        DWORD dwIPv6 = 0;
-        setsockopt(NewDbg->s, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&dwIPv6, sizeof(dwIPv6));
-#else
-        int iIPv6 = 0;
-        setsockopt(NewDbg->s, IPPROTO_IPV6, IPV6_V6ONLY, &iIPv6, sizeof(iIPv6));
-#endif
     }
 
     // set non-blocking
@@ -356,25 +348,30 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
         delete NewDbg;
         return false;
     }
-        
+
 	memcpy(NewDbg->Nick, sScriptName, iScriptLen);
     NewDbg->Nick[iScriptLen] = '\0';
-        
+
     NewDbg->ui32Hash = 0;
 
-    if(bUseIPv6 == true) {
+    uint8_t ui128IP[16];
+    HashIP(sIP, ui128IP);
+
+    bool bIPv6 = (IN6_IS_ADDR_V4MAPPED((in6_addr *)ui128IP) == 0);
+
+    if(bIPv6 == true) {
         ((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_family = AF_INET6;
         ((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_port = htons(usPort);
-        HashIP(sIP, ((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_addr.s6_addr);
+        memcpy(((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_addr.s6_addr, ui128IP, 16);
         NewDbg->sas_len = sizeof(struct sockaddr_in6);
     } else {
         ((struct sockaddr_in *)&NewDbg->sas_to)->sin_family = AF_INET;
         ((struct sockaddr_in *)&NewDbg->sas_to)->sin_port = htons(usPort);
-        ((struct sockaddr_in *)&NewDbg->sas_to)->sin_addr.s_addr = inet_addr(sIP);
+        memcpy(&((struct sockaddr_in *)&NewDbg->sas_to)->sin_addr.s_addr, ui128IP+12, 4);
         NewDbg->sas_len = sizeof(struct sockaddr_in);
     }
 
-    NewDbg->s = socket((bUseIPv6 == true ? AF_INET6 : AF_INET), SOCK_DGRAM, IPPROTO_UDP);
+    NewDbg->s = socket((bIPv6 == true ? AF_INET6 : AF_INET), SOCK_DGRAM, IPPROTO_UDP);
 
 #ifdef _WIN32
     if(NewDbg->s == INVALID_SOCKET) {
@@ -391,16 +388,6 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
         AppendSpecialLog(sDbgstr);
         delete NewDbg;
         return false;
-    }
-
-    if(bUseIPv6 == true) {
-#ifdef _WIN32
-        DWORD dwIPv6 = 0;
-        setsockopt(NewDbg->s, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&dwIPv6, sizeof(dwIPv6));
-#else
-        int iIPv6 = 0;
-        setsockopt(NewDbg->s, IPPROTO_IPV6, IPV6_V6ONLY, &iIPv6, sizeof(iIPv6));
-#endif
     }
 
     // set non-blocking
@@ -620,7 +607,7 @@ bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) {
             if(bSndMess == true) {
 				string Txt = "<"+string(SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], (size_t)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC])+
 					"> *** "+string(LanguageManager->sTexts[LAN_YOU_SUBSCRIBED_UDP_DBG], (size_t)LanguageManager->ui16TextsLens[LAN_YOU_SUBSCRIBED_UDP_DBG])+
-					" "+string(ntohs(bUseIPv6 == true ? ((struct sockaddr_in6 *)&cur->sas_to)->sin6_port : ((struct sockaddr_in *)&cur->sas_to)->sin_port))+". "+
+					" "+string(ntohs(cur->sas_to.ss_family == AF_INET6 ? ((struct sockaddr_in6 *)&cur->sas_to)->sin6_port : ((struct sockaddr_in *)&cur->sas_to)->sin_port))+". "+
                     string(LanguageManager->sTexts[LAN_TO_UNSUB_UDP_DBG], (size_t)LanguageManager->ui16TextsLens[LAN_TO_UNSUB_UDP_DBG])+".|";
 				UserSendTextDelayed(u, Txt);
             }

@@ -13,6 +13,8 @@ Added: IPv4 search support for users connected to hub by IPv6 when IPv4 connecti
 Added: Setting for manual IPv4 and IPv6 addresses.
 Changed: Country database for IPv4 from ip-to-country to IpToCountry.
 Fixed: TmrMan.RemoveTimer Lua api call in windoze version (thx Cêñoßy†ê for report).
+Fixed: MOTD was not updated after change in gui (thx mappy for report).
+Fixed: Few settings was not updated after change in gui.
 
 
 ----------------------------------------0.4.2.0 11 September 2011-----------------------------
