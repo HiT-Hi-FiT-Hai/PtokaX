@@ -21,11 +21,12 @@
 #ifndef LuaBanManLibH
 #define LuaBanManLibH
 //------------------------------------------------------------------------------
-struct BanItem;
-struct RangeBanItem;
-//------------------------------------------------------------------------------
 
-void RegBanMan(lua_State * L);
+#if LUA_VERSION_NUM == 501
+    void RegBanMan(lua_State * L);
+#else
+    int RegBanMan(lua_State *L);
+#endif
 //------------------------------------------------------------------------------
 
 #endif

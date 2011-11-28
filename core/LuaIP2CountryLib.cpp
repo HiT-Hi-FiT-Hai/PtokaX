@@ -127,14 +127,24 @@ static int GetCountryName(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
+#if LUA_VERSION_NUM == 501
 static const luaL_reg ip2country_funcs[] =  {
-	{ "GetCountryCode", GetCountryCode }, 
+#else
+static const luaL_Reg ip2country[] = {
+#endif
+	{ "GetCountryCode", GetCountryCode },
 	{ "GetCountryName", GetCountryName }, 
 	{ NULL, NULL }
 };
 //---------------------------------------------------------------------------
 
+#if LUA_VERSION_NUM == 501
 void RegIP2Country(lua_State * L) {
     luaL_register(L, "IP2Country", ip2country_funcs);
+#else
+int RegIP2Country(lua_State * L) {
+    luaL_newlib(L, ip2country);
+    return 1;
+#endif
 }
 //---------------------------------------------------------------------------

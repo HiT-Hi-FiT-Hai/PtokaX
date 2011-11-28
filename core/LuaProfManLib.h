@@ -22,7 +22,11 @@
 #define LuaProfManLibH
 //------------------------------------------------------------------------------
 
-void RegProfMan(lua_State * L);
+#if LUA_VERSION_NUM == 501
+    void RegProfMan(lua_State * L);
+#else
+    int RegProfMan(lua_State *L);
+#endif
 //------------------------------------------------------------------------------
 
 #endif

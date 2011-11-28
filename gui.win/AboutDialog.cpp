@@ -204,9 +204,6 @@ void AboutDialog::DoModal(HWND hWndParent) {
     "\\b\\cf1 Opium Volage\\cf0\\b0  for LUA forum hosting\\par\n"
 	"\\b\\cf1 Sechmet\\cf0\\b0  for blue PtokaX icon\\par\n"
 	"\\par\n"
-	"\\b This application uses the IP-to-Country Database provided by\\par\n"
-    "WebHosting.Info (http://www.webhosting.info),\\par\n"
-    "available from http://ip-to-country.webhosting.info.\\b0"
     "}");
 
     ::EnableWindow(hWndParent, FALSE);

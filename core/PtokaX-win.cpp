@@ -40,40 +40,6 @@
 #endif
 //---------------------------------------------------------------------------
 
-#ifdef _DEBUG
-//    #pragma link "lib/sqlited.lib"
-//    #pragma message("Linking sqlited.lib")
-	#pragma link "tinyxmld.lib"
-	#pragma message("Linking tinyxmld.lib")
-	#pragma link "zlibd.lib"
-	#pragma message("Linking zlibd.lib")
-#else
-//    #pragma link "lib/sqlite.lib"
-//    #pragma message("Linking sqlite.lib")
-	#ifndef _MSC_VER
-        #pragma link "tinyxml.lib"
-	#else
-        #ifndef _M_X64
-            #pragma comment(lib, "tinyxml")
-        #else
-            #pragma comment(lib, "tinyxml-x64")
-        #endif
-    #endif
-    #pragma message("Linking tinyxml.lib")
-
-    #ifndef _MSC_VER
-        #pragma link "zlib.lib"
-    #else
-        #ifndef _M_X64
-            #pragma comment(lib, "zlib")
-        #else
-            #pragma comment(lib, "zlib-x64")
-        #endif
-    #endif
-    #pragma message("Linking zlib.lib")
-#endif
-//---------------------------------------------------------------------------
-	
 static int InstallService(const char * sServiceName, const char * sPath) {
 	SC_HANDLE schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 	     

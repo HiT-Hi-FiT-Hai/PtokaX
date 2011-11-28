@@ -39,16 +39,6 @@
     #include "../gui.win/MainWindowPageScripts.h"
 #endif
 //------------------------------------------------------------------------------
-#ifdef _WIN32
-    #ifndef _M_X64
-        #pragma comment(lib, "PXLua")
-    #else
-        #pragma comment(lib, "PXLua-x64")
-	#endif
-
-	#pragma message("Linking PXLua library")
-#endif
-//---------------------------------------------------------------------------
 ScriptMan *ScriptManager = NULL;
 //------------------------------------------------------------------------------
 

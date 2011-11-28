@@ -22,7 +22,11 @@
 #define LuaSetManLibH
 //------------------------------------------------------------------------------
 
-void RegSetMan(lua_State * L);
+#if LUA_VERSION_NUM == 501
+    void RegSetMan(lua_State * L);
+#else
+    int RegSetMan(lua_State *L);
+#endif
 //------------------------------------------------------------------------------
 
 #endif

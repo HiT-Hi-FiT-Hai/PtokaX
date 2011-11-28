@@ -22,7 +22,11 @@
 #define LuaCoreLibH
 //------------------------------------------------------------------------------
 
-void RegCore(lua_State * L);
+#if LUA_VERSION_NUM == 501
+    void RegCore(lua_State * L);
+#else
+    int RegCore(lua_State * L);
+#endif
 //------------------------------------------------------------------------------
 
 #endif

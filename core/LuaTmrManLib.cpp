@@ -250,14 +250,24 @@ static int RemoveTimer(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
+#if LUA_VERSION_NUM == 501
 static const luaL_reg tmrman_funcs[] =  {
-	{ "AddTimer", AddTimer }, 
+#else
+static const luaL_Reg tmrman[] = {
+#endif
+	{ "AddTimer", AddTimer },
 	{ "RemoveTimer", RemoveTimer }, 
 	{ NULL, NULL }
 };
 //---------------------------------------------------------------------------
 
+#if LUA_VERSION_NUM == 501
 void RegTmrMan(lua_State * L) {
     luaL_register(L, "TmrMan", tmrman_funcs);
+#else
+int RegTmrMan(lua_State * L) {
+    luaL_newlib(L, tmrman);
+    return 1;
+#endif
 }
 //---------------------------------------------------------------------------
