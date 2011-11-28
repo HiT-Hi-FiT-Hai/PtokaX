@@ -11,11 +11,12 @@ Added: Check for IPv4 connection for user connected to hub by IPv6.
 Added: IPv4 client connection support for users connected to hub by IPv6 when IPv4 connection check success.
 Added: IPv4 search support for users connected to hub by IPv6 when IPv4 connection check success.
 Added: Setting for manual IPv4 and IPv6 addresses.
+Added: Both IP addresses to !getinfo command for users with IPv6 and IPv4 connection available.
 Changed: Country database for IPv4 from ip-to-country to IpToCountry.
 Fixed: TmrMan.RemoveTimer Lua api call in windoze version (thx Cêñoßy†ê for report).
 Fixed: MOTD was not updated after change in gui (thx mappy for report).
 Fixed: Few settings was not updated after change in gui.
-
+Removed: All info related to old ip-to-country database.
 
 ----------------------------------------0.4.2.0 11 September 2011-----------------------------
 Added: Missing PtokaX icon to 64bit service binary.

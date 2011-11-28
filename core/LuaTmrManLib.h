@@ -22,7 +22,11 @@
 #define LuaTmrManLibH
 //------------------------------------------------------------------------------
 
-void RegTmrMan(lua_State * L);
+#if LUA_VERSION_NUM == 501
+    void RegTmrMan(lua_State * L);
+#else
+    int RegTmrMan(lua_State *L);
+#endif
 //------------------------------------------------------------------------------
 
 #endif

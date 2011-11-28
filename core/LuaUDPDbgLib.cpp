@@ -154,7 +154,11 @@ static int Send(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
-static const luaL_reg udpdbg_funcs[] =  {
+#if LUA_VERSION_NUM == 501
+static const luaL_reg udpdbg_funcs[] = {
+#else
+static const luaL_Reg udpdbg[] = {
+#endif
 	{ "Reg", Reg }, 
 	{ "Unreg", Unreg }, 
 	{ "Send", Send }, 
@@ -162,7 +166,13 @@ static const luaL_reg udpdbg_funcs[] =  {
 };
 //---------------------------------------------------------------------------
 
+#if LUA_VERSION_NUM == 501
 void RegUDPDbg(lua_State * L) {
     luaL_register(L, "UDPDbg", udpdbg_funcs);
+#else
+int RegUDPDbg(lua_State * L) {
+    luaL_newlib(L, udpdbg);
+    return 1;
+#endif
 }
 //---------------------------------------------------------------------------

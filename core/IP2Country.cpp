@@ -17,12 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * "This application uses the IP-to-Country Database
- *  provided by WebHosting.Info (http://www.webhosting.info),
- *  available from http://ip-to-country.webhosting.info."
-*/
-
 //---------------------------------------------------------------------------
 #include "stdinc.h"
 //---------------------------------------------------------------------------

@@ -1643,8 +1643,12 @@ static int RangeTempBan(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
+#if LUA_VERSION_NUM == 501
 static const luaL_reg banman_funcs[] =  {
-    { "Save", Save }, 
+#else
+static const luaL_Reg banman[] = {
+#endif
+    { "Save", Save },
 	{ "GetBans", GetBans }, 
 	{ "GetTempBans", GetTempBans }, 
 	{ "GetPermBans", GetPermBans }, 
@@ -1684,7 +1688,13 @@ static const luaL_reg banman_funcs[] =  {
 };
 //---------------------------------------------------------------------------
 
+#if LUA_VERSION_NUM == 501
 void RegBanMan(lua_State * L) {
     luaL_register(L, "BanMan", banman_funcs);
+#else
+int RegBanMan(lua_State * L) {
+    luaL_newlib(L, banman);
+    return 1;
+#endif
 }
 //---------------------------------------------------------------------------

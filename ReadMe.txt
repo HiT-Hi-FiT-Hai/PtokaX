@@ -21,14 +21,9 @@ PtokaX LUA Scripts forum: http://board.ptokax.ch
 
 PtokaX Wiki: http://wiki.ptokax.ch
 
-Please report all bugs to PPK@PtokaX.org or to me (PPK) on 'PtokaX Admins Hub' dchub://ptokax-lua.damnserver.com:2006
+Please report all bugs on forum or to PPK@PtokaX.org or to me (PPK) on 'PtokaX Admins Hub' dchub://ptokax-lua.damnserver.com:2006
 
-Note: IP-to-Country database file is available on http://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip .. unpack it to configdir/cfg directory.
-Note: This PtokaX use Lua 5.1.3 for scripting !
-Note: This version have new scripting interface incompatible with all scripts for 0.3.6.0c and older !
+Note: This version have Lua scripting interface incompatible with all scripts for 0.3.6.0c and older !
+Note: IP to Country database files are available on http://software77.net/geo-ip/ for IPv4 you need 'IPV4 CSV (gz)' and for IPV6 'IPV6 Range (gz)', unpack them unpack them to PtokaX/cfg directory.
 
 Latest PtokaX changelog: http://wiki.ptokax.ch/doku.php?id=changelogs:ptokax:changes_after_0.330_15.31
-
-This application uses the IP-to-Country Database
-provided by WebHosting.Info (http://www.webhosting.info),
-available from http://ip-to-country.webhosting.info.

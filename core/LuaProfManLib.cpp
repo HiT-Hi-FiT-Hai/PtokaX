@@ -662,8 +662,12 @@ static int Save(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
+#if LUA_VERSION_NUM == 501
 static const luaL_reg profman_funcs[] =  {
-	{ "AddProfile", AddProfile }, 
+#else
+static const luaL_Reg profman[] = {
+#endif
+	{ "AddProfile", AddProfile },
 	{ "RemoveProfile", RemoveProfile }, 
 	{ "MoveDown", MoveDown }, 
 	{ "MoveUp", MoveUp }, 
@@ -678,7 +682,13 @@ static const luaL_reg profman_funcs[] =  {
 };
 //---------------------------------------------------------------------------
 
+#if LUA_VERSION_NUM == 501
 void RegProfMan(lua_State * L) {
     luaL_register(L, "ProfMan", profman_funcs);
+#else
+int RegProfMan(lua_State * L) {
+    luaL_newlib(L, profman);
+    return 1;
+#endif
 }
 //---------------------------------------------------------------------------

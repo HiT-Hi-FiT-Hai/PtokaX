@@ -2356,8 +2356,12 @@ static int SetUserInfo(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
+#if LUA_VERSION_NUM == 501
 static const luaL_reg core_funcs[] =  {
-	{ "Restart", Restart }, 
+#else
+static const luaL_Reg core[] = {
+#endif
+	{ "Restart", Restart },
 	{ "Shutdown", Shutdown }, 
 	{ "ResumeAccepts", ResumeAccepts }, 
 	{ "SuspendAccepts", SuspendAccepts }, 
@@ -2401,8 +2405,13 @@ static const luaL_reg core_funcs[] =  {
 };
 //---------------------------------------------------------------------------
 
+#if LUA_VERSION_NUM == 501
 void RegCore(lua_State * L) {
     luaL_register(L, "Core", core_funcs);
+#else
+int RegCore(lua_State * L) {
+    luaL_newlib(L, core);
+#endif
 
     lua_pushliteral(L, "Version");
 	lua_pushliteral(L, PtokaXVersionString);
@@ -2414,5 +2423,9 @@ void RegCore(lua_State * L) {
     lua_pushnumber(L, (double)strtoull(BUILD_NUMBER, NULL, 10));
 #endif
 	lua_settable(L, -3);
+
+#if LUA_VERSION_NUM != 501
+    return 1;
+#endif
 }
 //---------------------------------------------------------------------------

@@ -22,7 +22,11 @@
 #define LuaUDPDbgLibH
 //------------------------------------------------------------------------------
 
-void RegUDPDbg(lua_State * L);
+#if LUA_VERSION_NUM == 501
+    void RegUDPDbg(lua_State * L);
+#else
+    int RegUDPDbg(lua_State *L);
+#endif
 //------------------------------------------------------------------------------
 
 #endif

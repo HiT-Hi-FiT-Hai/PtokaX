@@ -320,6 +320,7 @@ bool ScriptStart(Script * cur) {
 
 	lua_atpanic(cur->LUA, ScriptPanic);
 
+#if LUA_VERSION_NUM == 501
 	RegCore(cur->LUA);
 	RegSetMan(cur->LUA);
 	RegRegMan(cur->LUA);
@@ -329,6 +330,34 @@ bool ScriptStart(Script * cur) {
 	RegUDPDbg(cur->LUA);
 	RegScriptMan(cur->LUA);
 	RegIP2Country(cur->LUA);
+#else
+    luaL_requiref(cur->LUA, "Core", RegCore, 1);
+    lua_pop(cur->LUA, 1);
+
+    luaL_requiref(cur->LUA, "SetMan", RegSetMan, 1);
+    lua_pop(cur->LUA, 1);
+
+    luaL_requiref(cur->LUA, "RegMan", RegRegMan, 1);
+    lua_pop(cur->LUA, 1);
+
+    luaL_requiref(cur->LUA, "BanMan", RegBanMan, 1);
+    lua_pop(cur->LUA, 1);
+
+    luaL_requiref(cur->LUA, "ProfMan", RegProfMan, 1);
+    lua_pop(cur->LUA, 1);
+
+    luaL_requiref(cur->LUA, "TmrMan", RegTmrMan, 1);
+    lua_pop(cur->LUA, 1);
+
+    luaL_requiref(cur->LUA, "UDPDbg", RegUDPDbg, 1);
+    lua_pop(cur->LUA, 1);
+
+    luaL_requiref(cur->LUA, "ScriptMan", RegScriptMan, 1);
+    lua_pop(cur->LUA, 1);
+
+    luaL_requiref(cur->LUA, "IP2Country", RegIP2Country, 1);
+    lua_pop(cur->LUA, 1);
+#endif
 
 	if(luaL_dofile(cur->LUA, (SCRIPT_PATH+cur->sName).c_str()) == 0) {
 #ifdef _BUILD_GUI

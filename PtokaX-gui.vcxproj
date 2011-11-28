@@ -192,7 +192,7 @@
     </ProjectReference>
     <Link>
       <AdditionalOptions>/FIXED:NO /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>ws2_32.lib;comctl32.lib;Iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;comctl32.lib;Iphlpapi.lib;Dbghelp.lib;tinyxml.lib;zlib.lib;PXLua.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)PtokaX.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -254,7 +254,7 @@
     </ProjectReference>
     <Link>
       <AdditionalOptions>/FIXED:NO /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>ws2_32.lib;comctl32.lib;Iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;comctl32.lib;Iphlpapi.lib;Dbghelp.lib;tinyxml.lib;zlib.lib;PXLua.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)PtokaX.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -344,7 +344,7 @@
     <Link>
       <AdditionalOptions>/FIXED:NO /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
       <ShowProgress>NotSet</ShowProgress>
-      <AdditionalDependencies>ws2_32.lib;comctl32.lib;Iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;comctl32.lib;Iphlpapi.lib;Dbghelp.lib;tinyxml-x64.lib;zlib-x64.lib;PXLua-x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)PtokaX-x64.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalManifestDependencies>type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*';%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
@@ -407,7 +407,7 @@
     <Link>
       <AdditionalOptions>/FIXED:NO /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
       <ShowProgress>NotSet</ShowProgress>
-      <AdditionalDependencies>ws2_32.lib;comctl32.lib;Iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;comctl32.lib;Iphlpapi.lib;Dbghelp.lib;tinyxml-x64.lib;zlib-x64.lib;PXLua-x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)PtokaX-x64.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalManifestDependencies>type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*';%(AdditionalManifestDependencies)</AdditionalManifestDependencies>

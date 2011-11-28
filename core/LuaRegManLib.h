@@ -21,10 +21,12 @@
 #ifndef LuaRegManLibH
 #define LuaRegManLibH
 //------------------------------------------------------------------------------
-struct RegUser;
-//------------------------------------------------------------------------------
 
-void RegRegMan(lua_State * L);
+#if LUA_VERSION_NUM == 501
+    void RegRegMan(lua_State * L);
+#else
+    int RegRegMan(lua_State *L);
+#endif
 //------------------------------------------------------------------------------
 
 #endif

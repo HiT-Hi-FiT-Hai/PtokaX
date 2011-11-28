@@ -29,8 +29,6 @@
 #include <Dbghelp.h>
 #include <delayimp.h>
 //---------------------------------------------------------------------------
-#pragma comment(lib, "Dbghelp.lib")
-//---------------------------------------------------------------------------
 LPTOP_LEVEL_EXCEPTION_FILTER pOldTLEF = NULL;
 string sLogPath = "", sDebugSymbolsFile = "";
 static char sDebugBuf[512];

@@ -460,12 +460,21 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
                     return true;
                 }
 
-                iret = sprintf(msg+imsgLen, NEW_LINE_CHARS "%s: %s" NEW_LINE_CHARS "%s: %0.02f GB", LanguageManager->sTexts[LAN_IP], user->sIP,
-                    LanguageManager->sTexts[LAN_SHARE_SIZE], (double)user->ui64SharedSize/1073741824);
-                imsgLen += iret;
-                if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand27") == false) {
-                    return true;
-                }
+				if(user->sIPv4[0] != '\0') {
+					iret = sprintf(msg+imsgLen, NEW_LINE_CHARS "%s: %s / %s" NEW_LINE_CHARS "%s: %0.02f GB", LanguageManager->sTexts[LAN_IP], user->sIP, user->sIPv4,
+						LanguageManager->sTexts[LAN_SHARE_SIZE], (double)user->ui64SharedSize/1073741824);
+					imsgLen += iret;
+					if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand27-1") == false) {
+						return true;
+					}
+				} else {
+					iret = sprintf(msg+imsgLen, NEW_LINE_CHARS "%s: %s" NEW_LINE_CHARS "%s: %0.02f GB", LanguageManager->sTexts[LAN_IP], user->sIP,
+						LanguageManager->sTexts[LAN_SHARE_SIZE], (double)user->ui64SharedSize/1073741824);
+					imsgLen += iret;
+					if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand27-2") == false) {
+						return true;
+					}
+				}
 
                 if(user->sDescription != NULL) {
                     int iret = sprintf(msg+imsgLen, NEW_LINE_CHARS "%s: ", LanguageManager->sTexts[LAN_DESCRIPTION]);

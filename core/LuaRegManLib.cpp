@@ -383,8 +383,12 @@ static int ClrRegBadPass(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
+#if LUA_VERSION_NUM == 501
 static const luaL_reg regman_funcs[] =  {
-    { "Save", Save }, 
+#else
+static const luaL_Reg regman[] = {
+#endif
+    { "Save", Save },
 	{ "GetRegsByProfile", GetRegsByProfile }, 
 	{ "GetNonOps", GetNonOps }, 
 	{ "GetOps", GetOps }, 
@@ -398,7 +402,13 @@ static const luaL_reg regman_funcs[] =  {
 };
 //---------------------------------------------------------------------------
 
+#if LUA_VERSION_NUM == 501
 void RegRegMan(lua_State * L) {
     luaL_register(L, "RegMan", regman_funcs);
+#else
+int RegRegMan(lua_State * L) {
+    luaL_newlib(L, regman);
+    return 1;
+#endif
 }
 //---------------------------------------------------------------------------
