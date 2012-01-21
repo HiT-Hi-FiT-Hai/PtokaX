@@ -16,6 +16,7 @@ Changed: Country database for IPv4 from ip-to-country to IpToCountry.
 Fixed: TmrMan.RemoveTimer Lua api call in windoze version (thx Cêñoßy†ê for report).
 Fixed: MOTD was not updated after change in gui (thx mappy for report).
 Fixed: Few settings was not updated after change in gui.
+Fixed: Buggy chat input line after using some settings pages (thx The-Master for report).
 Removed: All info related to old ip-to-country database.
 
 ----------------------------------------0.4.2.0 11 September 2011-----------------------------

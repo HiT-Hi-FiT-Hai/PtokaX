@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2012  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -96,7 +96,7 @@
 #include "pxstring.h"
 //---------------------------------------------------------------------------
 #define PtokaXVersionString "0.4.2.0"
-#define BUILD_NUMBER "316"
+#define BUILD_NUMBER "317"
 #define sErrOutOfMem "[ERR] Out of memory..."
 
 #ifdef _WIN32
