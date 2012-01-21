@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2011  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2012  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -47,6 +47,8 @@
 #include "Resources.h"
 //---------------------------------------------------------------------------
 MainWindowPageUsersChat * pMainWindowPageUsersChat = NULL;
+//---------------------------------------------------------------------------
+static WNDPROC wpOldMultiEditProc = NULL;
 //---------------------------------------------------------------------------
 
 static LRESULT CALLBACK MultiRichEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -282,7 +284,7 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
 }
 //------------------------------------------------------------------------------
 
-static LRESULT CALLBACK EditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+static LRESULT CALLBACK MultiEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     if(uMsg == WM_KEYDOWN) {
         if(wParam == VK_RETURN && (::GetKeyState(VK_CONTROL) & 0x8000) == 0) {
             MainWindowPageUsersChat * pParent = (MainWindowPageUsersChat *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
@@ -304,7 +306,7 @@ static LRESULT CALLBACK EditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
         return 0;
     }
 
-    return ::CallWindowProc(wpOldEditProc, hWnd, uMsg, wParam, lParam);
+    return ::CallWindowProc(wpOldMultiEditProc, hWnd, uMsg, wParam, lParam);
 }
 
 //------------------------------------------------------------------------------
@@ -399,7 +401,7 @@ bool MainWindowPageUsersChat::CreateMainWindowPage(HWND hOwner) {
     wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_UPDATE_USERS], GWLP_WNDPROC, (LONG_PTR)LastButtonProc);
 
     ::SetWindowLongPtr(hWndPageItems[EDT_CHAT], GWLP_USERDATA, (LONG_PTR)this);
-    wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_CHAT], GWLP_WNDPROC, (LONG_PTR)EditProc);
+    wpOldMultiEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_CHAT], GWLP_WNDPROC, (LONG_PTR)MultiEditProc);
 
     ::SetWindowLongPtr(hWndPageItems[LV_USERS], GWLP_USERDATA, (LONG_PTR)this);
     wpOldListViewProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[LV_USERS], GWLP_WNDPROC, (LONG_PTR)ListProc);
