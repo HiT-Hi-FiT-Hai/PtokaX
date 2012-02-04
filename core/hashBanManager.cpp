@@ -242,7 +242,8 @@ void hashBanMan::Add2Table(BanItem *Ban) {
 //---------------------------------------------------------------------------
 
 void hashBanMan::Add2NickTable(BanItem *Ban) {
-    uint16_t ui16dx = *((uint16_t *)&Ban->ui32NickHash);
+    uint16_t ui16dx = 0;
+    memcpy(&ui16dx, &Ban->ui32NickHash, sizeof(uint16_t));
 
     if(nicktable[ui16dx] != NULL) {
         nicktable[ui16dx]->hashnicktableprev = Ban;
@@ -374,7 +375,8 @@ void hashBanMan::RemFromTable(BanItem *Ban) {
 
 void hashBanMan::RemFromNickTable(BanItem *Ban) {
     if(Ban->hashnicktableprev == NULL) {
-        uint16_t ui16dx = *((uint16_t *)&Ban->ui32NickHash);
+        uint16_t ui16dx = 0;
+        memcpy(&ui16dx, &Ban->ui32NickHash, sizeof(uint16_t));
 
         if(Ban->hashnicktablenext == NULL) {
             nicktable[ui16dx] = NULL;
@@ -632,7 +634,8 @@ void hashBanMan::RemoveRange(RangeBanItem *RangeBan) {
 //---------------------------------------------------------------------------
 
 BanItem* hashBanMan::FindNick(User* u) {
-    uint16_t ui16dx = *((uint16_t *)&u->ui32NickHash);
+    uint16_t ui16dx = 0;
+    memcpy(&ui16dx, &u->ui32NickHash, sizeof(uint16_t));
 
     time_t acc_time;
     time(&acc_time);

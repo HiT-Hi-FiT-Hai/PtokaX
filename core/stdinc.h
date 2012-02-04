@@ -96,7 +96,7 @@
 #include "pxstring.h"
 //---------------------------------------------------------------------------
 #define PtokaXVersionString "0.4.2.0"
-#define BUILD_NUMBER "317"
+#define BUILD_NUMBER "320"
 #define sErrOutOfMem "[ERR] Out of memory..."
 
 #ifdef _WIN32

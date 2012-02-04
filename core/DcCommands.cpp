@@ -4051,15 +4051,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &iN
         switch(Nick[i]) {
             case ' ':
             case '$':
-            case '|':
-            case '<':
-            case '>':
-            case ':':
-            case '?':
-            case '*':
-            case '\"':
-            case '/':
-            case '\\': {
+            case '|': {
            	    int imsgLen = sprintf(msg, "<%s> %s '%c' ! %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                     LanguageManager->sTexts[LAN_YOUR_NICK_CONTAINS_ILLEGAL_CHARACTER], Nick[i], 
                     LanguageManager->sTexts[LAN_PLS_CORRECT_IT_AND_GET_BACK_AGAIN]);
