@@ -62,8 +62,9 @@ hashMan::~hashMan() {
 //---------------------------------------------------------------------------
 
 void hashMan::Add(User * u) {
-    uint16_t ui16dx = *((uint16_t *)&u->ui32NickHash);
-    
+    uint16_t ui16dx = 0;
+    memcpy(&ui16dx, &u->ui32NickHash, sizeof(uint16_t));
+
     if(nicktable[ui16dx] != NULL) {
         nicktable[ui16dx]->hashtableprev = u;
         u->hashtablenext = nicktable[ui16dx];
@@ -134,7 +135,8 @@ void hashMan::Add(User * u) {
 
 void hashMan::Remove(User * u) {
     if(u->hashtableprev == NULL) {
-        uint16_t ui16dx = *((uint16_t *)&u->ui32NickHash);
+        uint16_t ui16dx = 0;
+        memcpy(&ui16dx, &u->ui32NickHash, sizeof(uint16_t));
 
         if(u->hashtablenext == NULL) {
             nicktable[ui16dx] = NULL;
@@ -217,7 +219,9 @@ void hashMan::Remove(User * u) {
 
 User * hashMan::FindUser(char * sNick, const size_t &iNickLen) {
     uint32_t ui32Hash = HashNick(sNick, iNickLen);
-    uint16_t ui16dx = *((uint16_t *)&ui32Hash);
+
+    uint16_t ui16dx = 0;
+    memcpy(&ui16dx, &ui32Hash, sizeof(uint16_t));
 
     User *next = nicktable[ui16dx];
 
@@ -244,7 +248,8 @@ User * hashMan::FindUser(char * sNick, const size_t &iNickLen) {
 //---------------------------------------------------------------------------
 
 User * hashMan::FindUser(User * u) {
-    uint16_t ui16dx = *((uint16_t *)&u->ui32NickHash);
+    uint16_t ui16dx = 0;
+    memcpy(&ui16dx, &u->ui32NickHash, sizeof(uint16_t));
 
     User *next = nicktable[ui16dx];  
 

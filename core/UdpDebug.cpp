@@ -203,7 +203,10 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
 
     NewDbg->ui32Hash = u->ui32NickHash;
 
-    bool bIPv6 = (IN6_IS_ADDR_V4MAPPED((in6_addr *)u->ui128IpHash) == 0);
+    struct in6_addr i6addr;
+    memcpy(&i6addr, &u->ui128IpHash, 16);
+
+    bool bIPv6 = (IN6_IS_ADDR_V4MAPPED(&i6addr) == 0);
 
     if(bIPv6 == true) {
         ((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_family = AF_INET6;
@@ -357,7 +360,10 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
     uint8_t ui128IP[16];
     HashIP(sIP, ui128IP);
 
-    bool bIPv6 = (IN6_IS_ADDR_V4MAPPED((in6_addr *)ui128IP) == 0);
+    struct in6_addr i6addr;
+    memcpy(&i6addr, &ui128IP, 16);
+
+    bool bIPv6 = (IN6_IS_ADDR_V4MAPPED(&i6addr) == 0);
 
     if(bIPv6 == true) {
         ((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_family = AF_INET6;

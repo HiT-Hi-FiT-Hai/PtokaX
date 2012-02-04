@@ -243,7 +243,7 @@ static int AddReg(lua_State * L) {
 	uint16_t iProfile = (uint16_t)lua_tonumber(L, 3);
 
     if(iProfile > ProfileMan->iProfileCount-1 || iNickLen == 0 || iNickLen > 64 || iPassLen == 0 || iPassLen > 64 || 
-        strpbrk(sNick, " $|<>:?*\"/\\") != NULL || strchr(sPass, '|') != NULL) {
+        strpbrk(sNick, " $|") != NULL || strchr(sPass, '|') != NULL) {
         return 0;
     }
 
@@ -324,7 +324,7 @@ static int ChangeReg(lua_State * L) {
 	uint16_t iProfile = (uint16_t)lua_tonumber(L, 3);
 
 	if(iProfile > ProfileMan->iProfileCount-1 || iNickLen == 0 || iNickLen > 64 || iPassLen == 0 || iPassLen > 64 ||
-        strpbrk(sNick, " $|<>:?*\"/\\") != NULL || strpbrk(sPass, "|") != NULL) {
+        strpbrk(sNick, " $|") != NULL || strpbrk(sPass, "|") != NULL) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
