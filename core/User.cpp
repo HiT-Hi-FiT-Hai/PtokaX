@@ -150,7 +150,7 @@ static void UserSetBadTag(User * u, char * Descr, uint8_t DescrLen) {
     u->sTagVersion = NULL;
     u->ui8TagVersionLen = 0;
 
-    u->cMode = '\0';
+    u->sModes[0] = '\0';
     u->Hubs = u->Slots = u->OLimit = u->LLimit = u->DLimit = u->iNormalHubs = u->iRegHubs = u->iOpHubs = 0;
     u->ui32BoolBits |= User::BIT_OLDHUBSTAG;
     u->ui32BoolBits |= User::BIT_HAVE_BADTAG;
@@ -251,7 +251,7 @@ static void UserParseMyInfo(User * u) {
     }
 
     // Reset all tag infos...
-    u->cMode = '\0';
+    u->sModes[0] = '\0';
     u->Hubs = 0;
     u->iNormalHubs = 0;
     u->iRegHubs = 0;
@@ -349,16 +349,29 @@ static void UserParseMyInfo(User * u) {
                             reqVals++;
                             break;
                         case 'M':
-                            if(sTagPart[2] == '\0' || sTagPart[3] != '\0') {
-                                UserSetBadTag(u, u->sMyInfoOriginal+(sMyINFOParts[0]-msg), (uint8_t)iMyINFOPartsLen[0]);
-                                return;
+                            if((u->ui32BoolBits & User::BIT_SUPPORT_IP64) == User::BIT_SUPPORT_IP64) {
+                                if(sTagPart[2] == '\0' || sTagPart[3] == '\0' || sTagPart[4] != '\0') {
+                                    UserSetBadTag(u, u->sMyInfoOriginal+(sMyINFOParts[0]-msg), (uint8_t)iMyINFOPartsLen[0]);
+                                    return;
+                                }
+                                u->sModes[0] = sTagPart[2];
+                                u->sModes[1] = sTagPart[3];
+                                u->sModes[2] = '\0';
+                            } else {
+                                if(sTagPart[2] == '\0' || sTagPart[3] != '\0') {
+                                    UserSetBadTag(u, u->sMyInfoOriginal+(sMyINFOParts[0]-msg), (uint8_t)iMyINFOPartsLen[0]);
+                                    return;
+                                }
+                                u->sModes[0] = sTagPart[2];
+                                u->sModes[1] = '\0';
                             }
+
                             if(toupper(sTagPart[2]) == 'A') {
                                 u->ui32BoolBits |= User::BIT_ACTIVE;
                             } else {
                                 u->ui32BoolBits &= ~User::BIT_ACTIVE;
                             }
-                            u->cMode = sTagPart[2];
+
                             reqVals++;
                             break;
                         case 'H': {
@@ -501,7 +514,7 @@ static void UserParseMyInfo(User * u) {
     u->sTagVersion = NULL;
     u->ui8TagVersionLen = 0;
 
-    u->cMode = '\0';
+    u->sModes[0] = '\0';
     u->Hubs = 0;
     u->iNormalHubs = 0;
     u->iRegHubs = 0;
@@ -644,7 +657,7 @@ User::User() {
 	MagicByte = '\0';
 	sEmail = NULL;
 	sTagVersion = NULL;
-	cMode = '\0';
+	sModes[0] = '\0';
 
     sChangedDescriptionShort = NULL;
     sChangedDescriptionLong = NULL;
@@ -3006,7 +3019,7 @@ bool UserGenerateMyInfoShort(User *u) { // true == changed
     }
 
     // Add mode to start of description if is enabled
-    if(SettingManager->bBools[SETBOOL_MODE_TO_DESCRIPTION] == true && u->cMode != 0) {
+    if(SettingManager->bBools[SETBOOL_MODE_TO_DESCRIPTION] == true && u->sModes[0] != 0) {
         char * sDescription = NULL;
 
         if(u->ui8ChangedDescriptionShortLen != 0) {
@@ -3016,10 +3029,10 @@ bool UserGenerateMyInfoShort(User *u) { // true == changed
         }
 
         if(sDescription == NULL) {
-            msg[iLen] = u->cMode;
+            msg[iLen] = u->sModes[0];
             iLen++;
-        } else if(sDescription[0] != u->cMode && sDescription[1] != ' ') {
-            msg[iLen] = u->cMode;
+        } else if(sDescription[0] != u->sModes[0] && sDescription[1] != ' ') {
+            msg[iLen] = u->sModes[0];
             msg[iLen+1] = ' ';
             iLen += 2;
         }
@@ -3064,8 +3077,8 @@ bool UserGenerateMyInfoShort(User *u) { // true == changed
     }
 
     // Add mode to myinfo if is enabled
-    if(SettingManager->bBools[SETBOOL_MODE_TO_MYINFO] == true && u->cMode != 0) {
-        int iRet = sprintf(msg+iLen, "$%c$", u->cMode);
+    if(SettingManager->bBools[SETBOOL_MODE_TO_MYINFO] == true && u->sModes[0] != 0) {
+        int iRet = sprintf(msg+iLen, "$%c$", u->sModes[0]);
         iLen += iRet;
         if(CheckSprintf1(iRet, iLen, 1024, "UserGenerateMyInfoShort1") == false) {
             return false;
