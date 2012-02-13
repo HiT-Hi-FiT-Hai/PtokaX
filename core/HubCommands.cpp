@@ -1866,14 +1866,21 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &iCmdL
 #else
 			if(dlen == 4 && strncasecmp(sCommand+1, "yip", 3) == 0) {
 #endif
-                int imsgLen = CheckFromPm(curUser, fromPM);
+                int imsgLen = CheckFromPm(curUser, fromPM), iret = 0;
 
-                int iret = sprintf(msg+imsgLen, "<%s> *** %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                    LanguageManager->sTexts[LAN_YOUR_IP_IS], curUser->sIP);
+                if(curUser->sIPv4[0] != '\0') {
+                    iret = sprintf(msg+imsgLen, "<%s> *** %s: %s / %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
+                        LanguageManager->sTexts[LAN_YOUR_IP_IS], curUser->sIP, curUser->sIPv4);
+                } else {
+                    iret = sprintf(msg+imsgLen, "<%s> *** %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
+                        LanguageManager->sTexts[LAN_YOUR_IP_IS], curUser->sIP);
+                }
+
                 imsgLen += iret;
                 if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand113") == true) {
                     UserSendCharDelayed(curUser, msg, imsgLen);
                 }
+
                 return true;
             }
 

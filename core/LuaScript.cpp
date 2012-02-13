@@ -566,8 +566,8 @@ void ScriptPushUser(lua_State * L, User * u, const bool &bFullTable/* = false*/)
 
 void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_pushliteral(L, "sMode");
-	if(u->cMode != '\0') {
-		lua_pushlstring(L, (char *)&u->cMode, 1);
+	if(u->sModes[0] != '\0') {
+		lua_pushstring(L, u->sModes);
 	} else {
 		lua_pushnil(L);
 	}

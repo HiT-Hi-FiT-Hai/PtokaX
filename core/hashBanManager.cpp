@@ -825,7 +825,8 @@ BanItem* hashBanMan::FindNick(char * sNick, const size_t &iNickLen) {
 //---------------------------------------------------------------------------
 
 BanItem* hashBanMan::FindNick(const uint32_t &ui32Hash, const time_t &acc_time, char * sNick) {
-    uint16_t ui16dx = *((uint16_t *)&ui32Hash);
+    uint16_t ui16dx = 0;
+    memcpy(&ui16dx, &ui32Hash, sizeof(uint16_t));
 
 	BanItem *next = nicktable[ui16dx];
 
@@ -953,7 +954,8 @@ BanItem* hashBanMan::FindTempNick(char * sNick, const size_t &iNickLen) {
 //---------------------------------------------------------------------------
 
 BanItem* hashBanMan::FindTempNick(const uint32_t &ui32Hash,  const time_t &acc_time, char * sNick) {
-    uint16_t ui16dx = *((uint16_t *)&ui32Hash);
+    uint16_t ui16dx = 0;
+    memcpy(&ui16dx, &ui32Hash, sizeof(uint16_t));
 
 	BanItem *next = nicktable[ui16dx];
 
@@ -1026,7 +1028,8 @@ BanItem* hashBanMan::FindPermNick(char * sNick, const size_t &iNickLen) {
 //---------------------------------------------------------------------------
 
 BanItem* hashBanMan::FindPermNick(const uint32_t &ui32Hash, char * sNick) {
-    uint16_t ui16dx = *((uint16_t *)&ui32Hash);
+    uint16_t ui16dx = 0;
+    memcpy(&ui16dx, &ui32Hash, sizeof(uint16_t));
 
     BanItem *next = nicktable[ui16dx];
 

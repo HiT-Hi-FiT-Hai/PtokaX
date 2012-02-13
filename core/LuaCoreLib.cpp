@@ -902,8 +902,8 @@ static int GetUserData(lua_State * L) {
     switch(ui8DataId) {
         case 0:
         	lua_pushliteral(L, "sMode");
-        	if(u->cMode != '\0') {
-				lua_pushlstring(L, (char *)&u->cMode, 1);
+        	if(u->sModes[0] != '\0') {
+				lua_pushstring(L, u->sModes);
 			} else {
 				lua_pushnil(L);
 			}
@@ -1238,8 +1238,8 @@ static int GetUserValue(lua_State * L) {
 
     switch(ui8DataId) {
         case 0:
-        	if(u->cMode != '\0') {
-				lua_pushlstring(L, (char *)&u->cMode, 1);
+        	if(u->sModes[0] != '\0') {
+				lua_pushstring(L, u->sModes);
 			} else {
 				lua_pushnil(L);
 			}

@@ -131,10 +131,7 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
                     string(curUser->sClient, (size_t)curUser->ui8ClientLen) +
                     "\n" + string(LanguageManager->sTexts[LAN_VERSION], (size_t)LanguageManager->ui16TextsLens[LAN_VERSION]) + ": " + string(curUser->sTagVersion, (size_t)curUser->ui8TagVersionLen);
 
-                char sMode[2];
-                sMode[0] = curUser->cMode;
-                sMode[1] = '\0';
-                sInfoTip += "\n\n" + string(LanguageManager->sTexts[LAN_MODE], (size_t)LanguageManager->ui16TextsLens[LAN_MODE]) + ": " + string(sMode) +
+                sInfoTip += "\n\n" + string(LanguageManager->sTexts[LAN_MODE], (size_t)LanguageManager->ui16TextsLens[LAN_MODE]) + ": " + string(curUser->sModes) +
                     "\n" + string(LanguageManager->sTexts[LAN_SLOTS], (size_t)LanguageManager->ui16TextsLens[LAN_SLOTS]) + ": " + string(curUser->Slots) +
                     "\n" + string(LanguageManager->sTexts[LAN_HUBS], (size_t)LanguageManager->ui16TextsLens[LAN_HUBS]) + ": " + string(curUser->Hubs);
 
