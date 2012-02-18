@@ -2487,7 +2487,6 @@ void UserClose(User * u, bool bNoQuit/* = false*/) {
 #endif
 
         //sqldb->FinalizeVisit(u);
-		ui32Logged--;
 
 		if(((u->ui32BoolBits & User::BIT_HAVE_SHARECOUNTED) == User::BIT_HAVE_SHARECOUNTED) == true) {
             ui64TotalShare -= u->ui64SharedSize;
@@ -2496,7 +2495,11 @@ void UserClose(User * u, bool bNoQuit/* = false*/) {
 
 		ScriptManager->UserDisconnected(u);
 	}
-	
+
+    if(u->ui8State > User::STATE_ADDME_2LOOP) {
+        ui32Logged--;
+    }
+
 	u->ui8State = User::STATE_CLOSING;
 	
     if(u->cmdASearch != NULL) {

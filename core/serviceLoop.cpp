@@ -653,6 +653,7 @@ void theLoop::ReceiveLoop() {
 
 				ScriptManager->UserConnected(curUser);
 				if(curUser->ui8State >= User::STATE_CLOSING) {// connection closed by script?
+                    ScriptManager->UserDisconnected(curUser);
 					continue;
 				}
 
@@ -686,18 +687,11 @@ void theLoop::ReceiveLoop() {
                     
                 UserAdd2Userlist(curUser);
                 
-                ui32Logged++;
                 dLoggedUsers++;
                 curUser->ui8State = User::STATE_ADDME_2LOOP;
                 ui64TotalShare += curUser->ui64SharedSize;
                 curUser->ui32BoolBits |= User::BIT_HAVE_SHARECOUNTED;
                 
-                if(ui32Peak < ui32Logged) {
-                    ui32Peak = ui32Logged;
-                    if(SettingManager->iShorts[SETSHORT_MAX_USERS_PEAK] < (int16_t)ui32Peak)
-                        SettingManager->SetShort(SETSHORT_MAX_USERS_PEAK, (int16_t)ui32Peak);
-                }
-
 #ifdef _BUILD_GUI
                 if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_AUTO_UPDATE_USERLIST], BM_GETCHECK, 0, 0) == BST_CHECKED) {
                     pMainWindowPageUsersChat->AddUser(curUser);
@@ -990,6 +984,14 @@ void theLoop::SendLoop() {
 
         switch(curUser->ui8State) {
             case User::STATE_ADDME_2LOOP: {
+                ui32Logged++;
+
+                if(ui32Peak < ui32Logged) {
+                    ui32Peak = ui32Logged;
+                    if(SettingManager->iShorts[SETSHORT_MAX_USERS_PEAK] < (int16_t)ui32Peak)
+                        SettingManager->SetShort(SETSHORT_MAX_USERS_PEAK, (int16_t)ui32Peak);
+                }
+
             	curUser->ui8State = User::STATE_ADDED;
 
             	// finaly send the nicklist/myinfos/oplist
