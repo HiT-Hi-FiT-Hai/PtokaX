@@ -857,7 +857,7 @@ void SetMan::SetShort(size_t iShortId, const int16_t &iValue) {
             }
             break;
         case SETSHORT_MAX_SIMULTANEOUS_LOGINS:
-            if(iValue == 0 || iValue > 500) {
+            if(iValue == 0 || iValue > 1000) {
                 return;
             }
             break;
