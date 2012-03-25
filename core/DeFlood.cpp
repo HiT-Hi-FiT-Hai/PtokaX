@@ -35,12 +35,6 @@
 //---------------------------------------------------------------------------
 #include "DeFlood.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
-#endif
-//---------------------------------------------------------------------------
 static char msg[1024];
 //---------------------------------------------------------------------------
 
@@ -162,8 +156,7 @@ void DeFloodDoAction(User * u, const uint8_t &ui8DefloodType, const int16_t &ui1
     }
     switch(ui16Action) {
         case 1: {
-            int iret = sprintf(msg+imsgLen, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                DeFloodGetMessage(ui8DefloodType, 0));
+            int iret = sprintf(msg+imsgLen, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], DeFloodGetMessage(ui8DefloodType, 0));
 			imsgLen += iret;
             if(CheckSprintf1(iret, imsgLen, 1024, "DeFloodDoAction2") == true) {
 				UserSendCharDelayed(u, msg, imsgLen);
@@ -183,8 +176,7 @@ void DeFloodDoAction(User * u, const uint8_t &ui8DefloodType, const int16_t &ui1
 
             return;
         case 3: {
-            int iret = sprintf(msg+imsgLen, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                DeFloodGetMessage(ui8DefloodType, 0));
+            int iret = sprintf(msg+imsgLen, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], DeFloodGetMessage(ui8DefloodType, 0));
 			imsgLen += iret;
             if(CheckSprintf1(iret, imsgLen, 1024, "DeFloodDoAction3") == true) {
 				UserSendChar(u, msg, imsgLen);
@@ -197,8 +189,8 @@ void DeFloodDoAction(User * u, const uint8_t &ui8DefloodType, const int16_t &ui1
         }
         case 4: {
 			hashBanManager->TempBan(u, DeFloodGetMessage(ui8DefloodType, 1), NULL, 0, 0, false);
-            int iret = sprintf(msg+imsgLen, "<%s> %s: %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                LanguageManager->sTexts[LAN_YOU_BEING_KICKED_BCS], DeFloodGetMessage(ui8DefloodType, 1));
+            int iret = sprintf(msg+imsgLen, "<%s> %s: %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],  LanguageManager->sTexts[LAN_YOU_BEING_KICKED_BCS],
+                DeFloodGetMessage(ui8DefloodType, 1));
 			imsgLen += iret;
             if(CheckSprintf1(iret, imsgLen, 1024, "DeFloodDoAction4") == true) {
 				UserSendChar(u, msg, imsgLen);
@@ -212,10 +204,8 @@ void DeFloodDoAction(User * u, const uint8_t &ui8DefloodType, const int16_t &ui1
         case 5: {
 			hashBanManager->TempBan(u, DeFloodGetMessage(ui8DefloodType, 1), NULL,
                 SettingManager->iShorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME], 0, false);
-            int iret = sprintf(msg+imsgLen, "<%s> %s: %s %s: %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                LanguageManager->sTexts[LAN_YOU_HAD_BEEN_TEMP_BANNED_TO],
-                formatTime(SettingManager->iShorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME]), LanguageManager->sTexts[LAN_BECAUSE_LWR],
-                DeFloodGetMessage(ui8DefloodType, 1));
+            int iret = sprintf(msg+imsgLen, "<%s> %s: %s %s: %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_HAD_BEEN_TEMP_BANNED_TO],
+                formatTime(SettingManager->iShorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME]), LanguageManager->sTexts[LAN_BECAUSE_LWR], DeFloodGetMessage(ui8DefloodType, 1));
 			imsgLen += iret;
             if(CheckSprintf1(iret, imsgLen, 1024, "DeFloodDoAction5") == true) {
 				UserSendChar(u, msg, imsgLen);
@@ -228,8 +218,7 @@ void DeFloodDoAction(User * u, const uint8_t &ui8DefloodType, const int16_t &ui1
         }
         case 6: {
 			hashBanManager->Ban(u, DeFloodGetMessage(ui8DefloodType, 1), NULL, false);
-            int iret = sprintf(msg+imsgLen, "<%s> %s: %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                LanguageManager->sTexts[LAN_YOU_ARE_BEING_BANNED_BECAUSE],
+            int iret = sprintf(msg+imsgLen, "<%s> %s: %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_ARE_BEING_BANNED_BECAUSE],
                 DeFloodGetMessage(ui8DefloodType, 1));
 			imsgLen += iret;
             if(CheckSprintf1(iret, imsgLen, 1024, "DeFloodDoAction6") == true) {
@@ -247,8 +236,7 @@ void DeFloodDoAction(User * u, const uint8_t &ui8DefloodType, const int16_t &ui1
 
 bool DeFloodCheckForWarn(User * u, const uint8_t &ui8DefloodType, char * sOtherNick) {
 	if(u->iDefloodWarnings < (uint32_t)SettingManager->iShorts[SETSHORT_DEFLOOD_WARNING_COUNT]) {
-        int imsgLen = sprintf(msg, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-            DeFloodGetMessage(ui8DefloodType, 0));
+        int imsgLen = sprintf(msg, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], DeFloodGetMessage(ui8DefloodType, 0));
         if(CheckSprintf(imsgLen, 1024, "DeFloodCheckForWarn1") == true) {
 			UserSendCharDelayed(u, msg, imsgLen);
         }
@@ -263,8 +251,8 @@ bool DeFloodCheckForWarn(User * u, const uint8_t &ui8DefloodType, char * sOtherN
         }
         switch(SettingManager->iShorts[SETSHORT_DEFLOOD_WARNING_ACTION]) {
 			case 0: {
-                int iret = sprintf(msg+imsgLen, "<%s> %s: %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                    LanguageManager->sTexts[LAN_YOU_ARE_BEING_DISCONNECTED_BECAUSE], DeFloodGetMessage(ui8DefloodType, 1));
+                int iret = sprintf(msg+imsgLen, "<%s> %s: %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_ARE_BEING_DISCONNECTED_BECAUSE],
+                    DeFloodGetMessage(ui8DefloodType, 1));
                 imsgLen += iret;
 				if(CheckSprintf1(iret, imsgLen, 1024, "DeFloodCheckForWarn3") == true) {
 					UserSendChar(u, msg, imsgLen);
@@ -276,8 +264,8 @@ bool DeFloodCheckForWarn(User * u, const uint8_t &ui8DefloodType, char * sOtherN
 			}
 			case 1: {
 				hashBanManager->TempBan(u, DeFloodGetMessage(ui8DefloodType, 1), NULL, 0, 0, false);
-                int iret = sprintf(msg+imsgLen, "<%s> %s: %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                    LanguageManager->sTexts[LAN_YOU_BEING_KICKED_BCS], DeFloodGetMessage(ui8DefloodType, 1));
+                int iret = sprintf(msg+imsgLen, "<%s> %s: %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_BEING_KICKED_BCS],
+                    DeFloodGetMessage(ui8DefloodType, 1));
 				if(CheckSprintf1(iret, imsgLen, 1024, "DeFloodCheckForWarn4") == true) {
 					UserSendChar(u, msg, imsgLen);
                 }
@@ -289,10 +277,8 @@ bool DeFloodCheckForWarn(User * u, const uint8_t &ui8DefloodType, char * sOtherN
 			case 2: {
 				hashBanManager->TempBan(u, DeFloodGetMessage(ui8DefloodType, 1), NULL,
                     SettingManager->iShorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME], 0, false);
-                int iret = sprintf(msg+imsgLen, "<%s> %s: %s %s: %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                    LanguageManager->sTexts[LAN_YOU_HAD_BEEN_TEMP_BANNED_TO], 
-                    formatTime(SettingManager->iShorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME]), 
-                    LanguageManager->sTexts[LAN_BECAUSE_LWR], DeFloodGetMessage(ui8DefloodType, 1));
+                int iret = sprintf(msg+imsgLen, "<%s> %s: %s %s: %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_HAD_BEEN_TEMP_BANNED_TO], 
+                    formatTime(SettingManager->iShorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME]), LanguageManager->sTexts[LAN_BECAUSE_LWR], DeFloodGetMessage(ui8DefloodType, 1));
 				if(CheckSprintf1(iret, imsgLen, 1024, "DeFloodCheckForWarn5") == true) {
 					UserSendChar(u, msg, imsgLen);
                 }
@@ -303,8 +289,8 @@ bool DeFloodCheckForWarn(User * u, const uint8_t &ui8DefloodType, char * sOtherN
 			}
             case 3: {
 				hashBanManager->Ban(u, DeFloodGetMessage(ui8DefloodType, 1), NULL, false);
-                int iret = sprintf(msg+imsgLen, "<%s> %s: %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                    LanguageManager->sTexts[LAN_YOU_ARE_BEING_BANNED_BECAUSE], DeFloodGetMessage(ui8DefloodType, 1));
+                int iret = sprintf(msg+imsgLen, "<%s> %s: %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_ARE_BEING_BANNED_BECAUSE],
+                    DeFloodGetMessage(ui8DefloodType, 1));
                 if(CheckSprintf1(iret, imsgLen, 1024, "DeFloodCheckForWarn6") == true) {
 					UserSendChar(u, msg, imsgLen);
                 }
@@ -463,29 +449,21 @@ const char * DeFloodGetMessage(const uint8_t ui8DefloodType, const uint8_t ui8Ms
 void DeFloodReport(User * u, const uint8_t ui8DefloodType, char *sAction) {
     if(SettingManager->bBools[SETBOOL_DEFLOOD_REPORT] == true) {
         if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-            int imsgLen = sprintf(msg, "%s $<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], DeFloodGetMessage(ui8DefloodType, 2), 
-				u->sNick, LanguageManager->sTexts[LAN_WITH_IP], u->sIP, sAction);
+            int imsgLen = sprintf(msg, "%s $<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
+                DeFloodGetMessage(ui8DefloodType, 2), u->sNick, LanguageManager->sTexts[LAN_WITH_IP], u->sIP, sAction);
             if(CheckSprintf(imsgLen, 1024, "DeFloodReport1") == true) {
-				QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
-                globalQ->SingleItemsStore(newItem);
+				globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
             }
         } else {
-            int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-				DeFloodGetMessage(ui8DefloodType, 2), u->sNick, LanguageManager->sTexts[LAN_WITH_IP],
-				u->sIP, sAction);
+            int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], DeFloodGetMessage(ui8DefloodType, 2), u->sNick,
+                LanguageManager->sTexts[LAN_WITH_IP], u->sIP, sAction);
             if(CheckSprintf(imsgLen, 1024, "DeFloodReport2") == true) {
                 globalQ->OPStore(msg, imsgLen);
             }
         }
     }
 
-#ifdef _WIN32
 	int imsgLen = sprintf(msg, "[SYS] Flood type %hu from %s (%s) - user closed.", (uint16_t)ui8DefloodType, u->sNick, u->sIP);
-#else
-	int imsgLen = sprintf(msg, "[SYS] Flood type %u from %s (%s) - user closed.", (uint16_t)ui8DefloodType, u->sNick, u->sIP);
-#endif
-
     if(CheckSprintf(imsgLen, 1024, "DeFloodReport3") == true) {
         UdpDebug->Broadcast(msg, imsgLen);
     }
@@ -509,13 +487,8 @@ bool DeFloodCheckInterval(User * u, const uint8_t &ui8DefloodType,
                 }
             }
 
-#ifdef _WIN32
-            int iret = sprintf(msg+imsgLen, "<%s> %s %I64d %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-#else
-			int iret = sprintf(msg+imsgLen, "<%s> %s %" PRIu64 " %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-#endif
-                LanguageManager->sTexts[LAN_PLEASE_WAIT], (ui64LastOkTick+ui32DefloodTime)-ui64ActualTick, 
-                DeFloodGetMessage(ui8DefloodType, 0));
+			int iret = sprintf(msg+imsgLen, "<%s> %s %" PRIu64 " %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_PLEASE_WAIT],
+                (ui64LastOkTick+ui32DefloodTime)-ui64ActualTick, DeFloodGetMessage(ui8DefloodType, 0));
 			imsgLen += iret;
             if(CheckSprintf1(iret, imsgLen, 1024, "DeFloodCheckInterval2") == true) {
 				UserSendCharDelayed(u, msg, imsgLen);

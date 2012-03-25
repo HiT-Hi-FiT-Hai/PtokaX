@@ -103,15 +103,15 @@ public:		// User declarations
     ProfileManager();
     ~ProfileManager();
 
-    bool IsAllowed(User * u, const uint32_t &iOption);
-    bool IsProfileAllowed(const int32_t &iProfile, const uint32_t &iOption);
+    bool IsAllowed(User * u, const uint32_t &iOption) const;
+    bool IsProfileAllowed(const int32_t &iProfile, const uint32_t &iOption) const;
     int32_t AddProfile(char * name);
     int32_t GetProfileIndex(const char * name);
     int32_t RemoveProfileByName(char * name);
     void MoveProfileDown(const uint16_t &iProfile);
     void MoveProfileUp(const uint16_t &iProfile);
-    void ChangeProfileName(const uint16_t &iProfile, char * sName, const size_t &iLen);
-    void ChangeProfilePermission(const uint16_t &iProfile, const size_t &iId, const bool &bValue);
+    void ChangeProfileName(const uint16_t &iProfile, char * sName, const size_t &szLen);
+    void ChangeProfilePermission(const uint16_t &iProfile, const size_t &szId, const bool &bValue);
     void SaveProfiles();
     bool RemoveProfile(const uint16_t &iProfile);
 };

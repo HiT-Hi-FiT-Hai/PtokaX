@@ -37,9 +37,7 @@
 #include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //---------------------------------------------------------------------------
 #include "LineDialog.h"
 #include "MainWindow.h"
@@ -179,10 +177,10 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
                     if(HIWORD(wParam) == EN_CHANGE) {
                         int iLen = ::GetWindowTextLength((HWND)lParam);
 
-                        char * buf = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
+                        char * buf = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
 
                         if(buf == NULL) {
-                            AppendSpecialLog("Cannot create buf in MainWindowPageUsersChat::MainWindowPageProc!");
+                            AppendDebugLog("%s - [MEM] Cannot allocate" PRIu64 " bytes for buf in MainWindowPageUsersChat::MainWindowPageProc\n", (uint64_t)(iLen+1));
                             return 0;
                         }
 
@@ -209,9 +207,7 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
                         }
 
                         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
-                            string sDbgstr = "[BUF] Cannot deallocate buf in MainWindowPageUsersChat::MainWindowPageProc! "+string((uint32_t)GetLastError())+" "+
-                                string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-                            AppendSpecialLog(sDbgstr);
+                            AppendDebugLog("%s - [MEM] Cannot deallocate buf in MainWindowPageUsersChat::MainWindowPageProc\n", 0);
                         }
 
                         return 0;
@@ -237,7 +233,10 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
                     ::SendMessage(hWndPageItems[LV_USERS], LVM_GETITEM, 0, (LPARAM)&lvItem);
 
                     pRegisteredUserDialog = new RegisteredUserDialog();
-                    pRegisteredUserDialog->DoModal(pMainWindow->m_hWnd, NULL, sNick);
+
+                    if(pRegisteredUserDialog != NULL) {
+                        pRegisteredUserDialog->DoModal(pMainWindow->m_hWnd, NULL, sNick);
+                    }
 
                     return 0;
                 }
@@ -344,7 +343,7 @@ bool MainWindowPageUsersChat::CreateMainWindowPage(HWND hOwner) {
     hWndPageItems[BTN_SHOW_COMMANDS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_CMDS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
         ((rcMain.right - ScaleGui(150)) / 2) + 1, 0, ((rcMain.right - ScaleGui(150)) / 2) - 3, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[REDT_CHAT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL | ES_MULTILINE | ES_READONLY,
+    hWndPageItems[REDT_CHAT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, /*MSFTEDIT_CLASS*/RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL | ES_MULTILINE | ES_READONLY,
         2, iCheckHeight, rcMain.right - ScaleGui(150), rcMain.bottom - iEditHeight - iCheckHeight - 4, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[REDT_CHAT], EM_EXLIMITTEXT, 0, (LPARAM)262144);
     ::SendMessage(hWndPageItems[REDT_CHAT], EM_AUTOURLDETECT, TRUE, 0);
@@ -431,10 +430,10 @@ bool MainWindowPageUsersChat::OnEditEnter() {
         return false;
     }
 
-    char * buf = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iAllocLen+4+SettingManager->ui16TextsLens[SETTXT_ADMIN_NICK]);
+    char * buf = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iAllocLen+4+SettingManager->ui16TextsLens[SETTXT_ADMIN_NICK]);
 
     if(buf == NULL) {
-        AppendSpecialLog("Cannot create buf in MainWindowPageUsersChat::OnEditEnter!");
+        AppendDebugLog("%s - [MEM] Cannot allocate" PRIu64 " bytes for buf in MainWindowPageUsersChat::OnEditEnter\n", (uint64_t)(iAllocLen+4+SettingManager->ui16TextsLens[SETTXT_ADMIN_NICK]));
         return false;
     }
 
@@ -452,9 +451,7 @@ bool MainWindowPageUsersChat::OnEditEnter() {
     RichEditAppendText(hWndPageItems[REDT_CHAT], buf);
 
     if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
-    	string sDbgstr = "[BUF] Cannot deallocate buf in MainWindowPageUsersChat::OnEditEnter! "+string((uint32_t)GetLastError())+" "+
-    		string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-        AppendSpecialLog(sDbgstr);
+        AppendDebugLog("%s - [MEM] Cannot deallocate buf in MainWindowPageUsersChat::OnEditEnter\n", 0);
     }
 
     ::SetWindowText(hWndPageItems[EDT_CHAT], "");
@@ -637,8 +634,7 @@ void MainWindowPageUsersChat::DisconnectUser() {
             imsgLen = sprintf(msg, "%s $<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                 curUser->sNick, LanguageManager->sTexts[LAN_WITH_IP], curUser->sIP, LanguageManager->sTexts[LAN_WAS_CLOSED_BY], SettingManager->sTexts[SETTXT_ADMIN_NICK]);
             if(CheckSprintf(imsgLen, 1024, "MainWindowPageUsersChat::DisconnectUser2") == true) {
-				QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
-                globalQ->SingleItemsStore(newItem);
+				globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
             }
         } else {
             imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_WITH_IP], curUser->sIP,
@@ -698,8 +694,7 @@ void OnKickOk(char * sLine, const int &iLen) {
         imsgLen += iret;
         if(CheckSprintf1(iret, imsgLen, 1024, "OnKickOk3") == true) {
             if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-    			QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
-                globalQ->SingleItemsStore(newItem);
+    			globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
             } else {
                 globalQ->OPStore(msg, imsgLen);
             }
@@ -729,8 +724,11 @@ void MainWindowPageUsersChat::KickUser() {
         return;
     }
 
-	LineDialog * KickDlg = new LineDialog(&OnKickOk);
-	KickDlg->DoModal(::GetParent(m_hWnd), LanguageManager->sTexts[LAN_PLEASE_ENTER_REASON], "");
+	LineDialog * pKickDlg = new LineDialog(&OnKickOk);
+
+	if(pKickDlg != NULL) {
+	   pKickDlg->DoModal(::GetParent(m_hWnd), LanguageManager->sTexts[LAN_PLEASE_ENTER_REASON], "");
+    }
 }
 //------------------------------------------------------------------------------
 
@@ -775,8 +773,7 @@ void OnBanOk(char * sLine, const int &iLen) {
         imsgLen += iret;
         if(CheckSprintf1(iret, imsgLen, 1024, "OnBanOk3") == true) {
             if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-    			QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
-                globalQ->SingleItemsStore(newItem);
+    			globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
             } else {
                 globalQ->OPStore(msg, imsgLen);
             }
@@ -806,8 +803,11 @@ void MainWindowPageUsersChat::BanUser() {
         return;
     }
 
-	LineDialog * BanDlg = new LineDialog(&OnBanOk);
-	BanDlg->DoModal(::GetParent(m_hWnd), LanguageManager->sTexts[LAN_PLEASE_ENTER_REASON], "");
+	LineDialog * pBanDlg = new LineDialog(&OnBanOk);
+
+	if(pBanDlg != NULL) {
+	   pBanDlg->DoModal(::GetParent(m_hWnd), LanguageManager->sTexts[LAN_PLEASE_ENTER_REASON], "");
+    }
 }
 //------------------------------------------------------------------------------
 
@@ -838,8 +838,7 @@ void OnRedirectOk(char * sLine, const int &iLen) {
         imsgLen += iret;
         if(CheckSprintf1(iret, imsgLen, 2048, "OnRedirectOk2") == true) {
             if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-    			QueueDataItem *newItem = globalQ->CreateQueueDataItem(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
-                globalQ->SingleItemsStore(newItem);
+    			globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
             } else {
                 globalQ->OPStore(msg, imsgLen);
             }
@@ -868,9 +867,12 @@ void MainWindowPageUsersChat::RedirectUser() {
         return;
     }
 
-	LineDialog * RedirectDlg = new LineDialog(&OnRedirectOk);
-	RedirectDlg->DoModal(::GetParent(m_hWnd), LanguageManager->sTexts[LAN_PLEASE_ENTER_REDIRECT_ADDRESS],
-        SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS] == NULL ? "" : SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS]);
+	LineDialog * pRedirectDlg = new LineDialog(&OnRedirectOk);
+
+	if(pRedirectDlg != NULL) {
+        pRedirectDlg->DoModal(::GetParent(m_hWnd), LanguageManager->sTexts[LAN_PLEASE_ENTER_REDIRECT_ADDRESS],
+            SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS] == NULL ? "" : SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS]);
+    }
 }
 //------------------------------------------------------------------------------
 

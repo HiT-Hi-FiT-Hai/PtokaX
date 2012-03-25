@@ -168,16 +168,16 @@ static int GetReg(lua_State * L) {
         return 1;
     }
 
-    size_t iLen;
-    char * sNick = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sNick = (char *)lua_tolstring(L, 1, &szLen);
 
-    if(iLen == 0) {
+    if(szLen == 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
     }
 
-    RegUser * r = hashRegManager->Find(sNick, iLen);
+    RegUser * r = hashRegManager->Find(sNick, szLen);
 
     lua_settop(L, 0);
 
@@ -237,17 +237,16 @@ static int AddReg(lua_State * L) {
         return 1;
     }
 
-    size_t iNickLen, iPassLen;
-    char *sNick = (char *)lua_tolstring(L, 1, &iNickLen);
-    char *sPass = (char *)lua_tolstring(L, 2, &iPassLen);
-	uint16_t iProfile = (uint16_t)lua_tonumber(L, 3);
+    size_t szNickLen, szPassLen;
+    char *sNick = (char *)lua_tolstring(L, 1, &szNickLen);
+    char *sPass = (char *)lua_tolstring(L, 2, &szPassLen);
+	uint16_t i16Profile = (uint16_t)lua_tonumber(L, 3);
 
-    if(iProfile > ProfileMan->iProfileCount-1 || iNickLen == 0 || iNickLen > 64 || iPassLen == 0 || iPassLen > 64 || 
-        strpbrk(sNick, " $|") != NULL || strchr(sPass, '|') != NULL) {
+    if(i16Profile > ProfileMan->iProfileCount-1 || szNickLen == 0 || szNickLen > 64 || szPassLen == 0 || szPassLen > 64 || strpbrk(sNick, " $|") != NULL || strchr(sPass, '|') != NULL) {
         return 0;
     }
 
-    bool bAdded = hashRegManager->AddNew(sNick, sPass, iProfile);
+    bool bAdded = hashRegManager->AddNew(sNick, sPass, i16Profile);
 
     lua_settop(L, 0);
 
@@ -276,16 +275,16 @@ static int DelReg(lua_State * L) {
         return 1;
     }
 
-    size_t iNickLen;
-    char *sNick = (char *)lua_tolstring(L, 1, &iNickLen);
+    size_t szNickLen;
+    char * sNick = (char *)lua_tolstring(L, 1, &szNickLen);
 
-    if(iNickLen == 0) {
+    if(szNickLen == 0) {
         lua_settop(L, 0);
         lua_pushnil(L);
         return 1;
     }
 
-	RegUser *reg = hashRegManager->Find(sNick, iNickLen);
+	RegUser *reg = hashRegManager->Find(sNick, szNickLen);
 
     lua_settop(L, 0);
 
@@ -318,19 +317,18 @@ static int ChangeReg(lua_State * L) {
         return 1;
     }
 
-    size_t iNickLen, iPassLen;
-    char *sNick = (char *)lua_tolstring(L, 1, &iNickLen);
-    char *sPass = (char *)lua_tolstring(L, 2, &iPassLen);
-	uint16_t iProfile = (uint16_t)lua_tonumber(L, 3);
+    size_t szNickLen, szPassLen;
+    char *sNick = (char *)lua_tolstring(L, 1, &szNickLen);
+    char *sPass = (char *)lua_tolstring(L, 2, &szPassLen);
+	uint16_t i16Profile = (uint16_t)lua_tonumber(L, 3);
 
-	if(iProfile > ProfileMan->iProfileCount-1 || iNickLen == 0 || iNickLen > 64 || iPassLen == 0 || iPassLen > 64 ||
-        strpbrk(sNick, " $|") != NULL || strpbrk(sPass, "|") != NULL) {
+	if(i16Profile > ProfileMan->iProfileCount-1 || szNickLen == 0 || szNickLen > 64 || szPassLen == 0 || szPassLen > 64 || strpbrk(sNick, " $|") != NULL || strpbrk(sPass, "|") != NULL) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
     }
 
-	RegUser *reg = hashRegManager->Find(sNick, iNickLen);
+	RegUser *reg = hashRegManager->Find(sNick, szNickLen);
 
     if(reg == NULL) {
 		lua_settop(L, 0);
@@ -338,7 +336,7 @@ static int ChangeReg(lua_State * L) {
         return 1;
     }
 
-    hashRegManager->ChangeReg(reg, sPass, iProfile);
+    hashRegManager->ChangeReg(reg, sPass, i16Profile);
 
     lua_settop(L, 0);
 
@@ -362,11 +360,11 @@ static int ClrRegBadPass(lua_State * L) {
 		return 1;
     }
     
-    size_t iNickLen;
-    char* sNick = (char*)lua_tolstring(L, 1, &iNickLen);
+    size_t szNickLen;
+    char * sNick = (char*)lua_tolstring(L, 1, &szNickLen);
 
-    if(iNickLen != 0) {
-        RegUser *Reg = hashRegManager->Find(sNick, iNickLen);
+    if(szNickLen != 0) {
+        RegUser *Reg = hashRegManager->Find(sNick, szNickLen);
         if(Reg != NULL) {
             Reg->iBadPassCount = 0;
         } else {

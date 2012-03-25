@@ -35,9 +35,7 @@
 #include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //---------------------------------------------------------------------------
 #include "MainWindow.h"
 #include "Resources.h"
@@ -282,7 +280,7 @@ bool MainWindowPageScripts::CreateMainWindowPage(HWND hOwner) {
     hWndPageItems[GB_SCRIPTS_ERRORS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_SCRIPTS_ERRORS],
         WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | BS_GROUPBOX, 3, 0, rcMain.right - ScaleGui(145) - 9, rcMain.bottom - 3, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[REDT_SCRIPTS_ERRORS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL | ES_AUTOVSCROLL | ES_MULTILINE | ES_READONLY,
+    hWndPageItems[REDT_SCRIPTS_ERRORS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, /*MSFTEDIT_CLASS*/RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL | ES_AUTOVSCROLL | ES_MULTILINE | ES_READONLY,
         11, iGroupBoxMargin, rcMain.right - ScaleGui(145) - 25, rcMain.bottom - (iGroupBoxMargin + 11), m_hWnd, (HMENU)REDT_SCRIPTS_ERRORS, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[REDT_SCRIPTS_ERRORS], EM_EXLIMITTEXT, 0, (LPARAM)1048576);
     ::SendMessage(hWndPageItems[REDT_SCRIPTS_ERRORS], EM_AUTOURLDETECT, TRUE, 0);
@@ -423,10 +421,13 @@ void MainWindowPageScripts::OnContextMenu(HWND hWindow, LPARAM lParam) {
 
 void MainWindowPageScripts::OpenScriptEditor(char * sScript/* = NULL*/) {
     ScriptEditorDialog * pScriptEditorDialog = new ScriptEditorDialog();
-    pScriptEditorDialog->DoModal(pMainWindow->m_hWnd);
 
-    if(sScript != NULL) {
-        pScriptEditorDialog->LoadScript(sScript);
+    if(pScriptEditorDialog != NULL) {
+        pScriptEditorDialog->DoModal(pMainWindow->m_hWnd);
+
+        if(sScript != NULL) {
+            pScriptEditorDialog->LoadScript(sScript);
+        }
     }
 }
 //------------------------------------------------------------------------------

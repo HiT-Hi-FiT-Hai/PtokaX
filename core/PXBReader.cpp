@@ -71,36 +71,23 @@ bool PXBReader::LoadFile(const char * sFilename) {
 
     fseek(pFile, 0, SEEK_SET);
 
-    szRemainingSize = 1048576;
+    szRemainingSize = 131072;
 
-    if((size_t)lFileLen > szRemainingSize) {
-        sFile = (char *)calloc(szRemainingSize, 1);
-
-        if(sFile == NULL) {
-            string sDbgstr = "[BUF] Cannot allocate 1MB bytes of memory in PXBReader::LoadFile!";
-            AppendSpecialLog(sDbgstr);
-            exit(EXIT_FAILURE);
-        }
-
-        if(fread(sFile, 1, szRemainingSize, pFile) != szRemainingSize) {
-            return false;
-        }
-    } else {
+    if((size_t)lFileLen < szRemainingSize) {
         szRemainingSize = lFileLen;
 
         bFullRead = true;
+    }
 
-        sFile = (char *)calloc(szRemainingSize, 1);
+    sFile = (char *)calloc(szRemainingSize, 1);
 
-        if(sFile == NULL) {
-            string sDbgstr = "[BUF] Cannot allocate "+string(szRemainingSize)+" bytes of memory in PXBReader::LoadFile!";
-            AppendSpecialLog(sDbgstr);
-            exit(EXIT_FAILURE);
-        }
+    if(sFile == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in PXBReader::LoadFile\n", (uint64_t)szRemainingSize);
+        exit(EXIT_FAILURE);
+    }
 
-        if(fread(sFile, 1, szRemainingSize, pFile) != szRemainingSize) {
-            return false;
-        }
+    if(fread(sFile, 1, szRemainingSize, pFile) != szRemainingSize) {
+        return false;
     }
 
     sActualPosition = sFile;
@@ -176,14 +163,13 @@ bool PXBReader::SaveFile(const char * sFilename) {
         return false;
     }
 
-    szRemainingSize = 1048576;
+    szRemainingSize = 131072;
 
     sFile = (char *)calloc(szRemainingSize, 1);
 
     if(sFile == NULL) {
-        string sDbgstr = "[BUF] Cannot allocate 1MB bytes of memory in PXBReader::SaveFile!";
-        AppendSpecialLog(sDbgstr);
-        exit(EXIT_FAILURE);
+        AppendDebugLog("%s - [MEM] Cannot allocate 128kB bytes in PXBReader::SaveFile\n", 0);
+        return false;
     }
 
     sActualPosition = sFile;
@@ -196,8 +182,9 @@ bool PXBReader::WriteNextItem(const uint32_t &ui32Length, const uint8_t &ui8SubI
     uint32_t ui32ItemLength = ui32Length + 4 + (4 * ui8SubItems);
 
     if(ui32ItemLength > szRemainingSize) {
-        // TODO write data to file
-        return false; // temporary
+        fwrite(sFile, 1, sActualPosition-sFile, pFile);
+        sActualPosition = sFile;
+        szRemainingSize = 262144;
     }
 
     (*((uint32_t *)sActualPosition)) = htonl(ui32ItemLength);

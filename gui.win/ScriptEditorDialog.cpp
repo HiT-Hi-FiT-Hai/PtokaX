@@ -32,9 +32,7 @@
 //---------------------------------------------------------------------------
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //---------------------------------------------------------------------------
 #include "MainWindowPageScripts.h"
 #include "Resources.h"
@@ -187,7 +185,7 @@ void ScriptEditorDialog::DoModal(HWND hWndParent) {
 
     ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
-    hWndWindowItems[REDT_SCRIPT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_HSCROLL | WS_VSCROLL | ES_AUTOVSCROLL | ES_MULTILINE |
+    hWndWindowItems[REDT_SCRIPT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, /*MSFTEDIT_CLASS*/RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_HSCROLL | WS_VSCROLL | ES_AUTOVSCROLL | ES_MULTILINE |
         ES_WANTRETURN, ScaleGui(40), 0, rcParent.right - ScaleGui(40), rcParent.bottom - iEditHeight - 4, hWndWindowItems[WINDOW_HANDLE], (HMENU)(REDT_SCRIPT+100), g_hInstance, NULL);
     ::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_EXLIMITTEXT, 0, (LPARAM)16777216);
     ::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_AUTOURLDETECT, TRUE, 0);
@@ -242,9 +240,11 @@ void ScriptEditorDialog::LoadScript(char * sScript) {
     char * sFile = (char *)malloc(lLenght+1);
 
     if(sFile == NULL) {
+        fclose(pFile);
+
         ::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(LanguageManager->sTexts[LAN_FAILED_TO_OPEN], (size_t)LanguageManager->ui16TextsLens[LAN_FAILED_TO_OPEN]) + ": "+ sScript).c_str(),
             LanguageManager->sTexts[LAN_ERROR], MB_OK);
-        fclose(pFile);
+
         return;
     }
 
@@ -367,6 +367,8 @@ void ScriptEditorDialog::OnCheckSyntax() {
 
     if(L == NULL) {
 		free(sBuf);
+
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_FAILED_TO_CHECK_SYNTAX], LanguageManager->sTexts[LAN_ERROR], MB_OK);
         return;
     }
 
@@ -376,8 +378,8 @@ void ScriptEditorDialog::OnCheckSyntax() {
 		::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_NO_SYNERR_IN_SCRIPT], sTitle.c_str(), MB_OK);
 		lua_close(L);
 	} else {
-		size_t iLen = 0;
-		char * stmp = (char*)lua_tolstring(L, -1, &iLen);
+		size_t szLen = 0;
+		char * stmp = (char*)lua_tolstring(L, -1, &szLen);
 
         string sTmp(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]);
         sTmp += " ";

@@ -45,12 +45,6 @@
 #include "ResNickManager.h"
 #include "LuaScript.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
-#endif
-//---------------------------------------------------------------------------
 
 static int Restart(lua_State * L) {
 	if(lua_gettop(L) != 0) {
@@ -146,32 +140,33 @@ static int RegBot(lua_State * L) {
         return 1;
     }
 
-    size_t iNickLen, iDescrLen, iEmailLen;
+    size_t szNickLen, szDescrLen, szEmailLen;
 
-    char *nick = (char *)lua_tolstring(L, 1, &iNickLen);
-    char *description = (char *)lua_tolstring(L, 2, &iDescrLen);
-    char *email = (char *)lua_tolstring(L, 3, &iEmailLen);
+    char *nick = (char *)lua_tolstring(L, 1, &szNickLen);
+    char *description = (char *)lua_tolstring(L, 2, &szDescrLen);
+    char *email = (char *)lua_tolstring(L, 3, &szEmailLen);
 
     bool bIsOP = lua_toboolean(L, 4) == 0 ? false : true;
 
-    if(iNickLen == 0 || iNickLen > 64 || strpbrk(nick, " $|<>:?*\"/\\") != NULL ||
-        iDescrLen > 64 || strpbrk(description, "$|") != NULL ||
-        iEmailLen > 64 || strpbrk(email, "$|") != NULL ||
-		hashManager->FindUser(nick, iNickLen) != NULL ||
-        ResNickManager->CheckReserved(nick, HashNick(nick, iNickLen)) != false) {
+    if(szNickLen == 0 || szNickLen > 64 || strpbrk(nick, " $|") != NULL || szDescrLen > 64 || strpbrk(description, "$|") != NULL ||
+        szEmailLen > 64 || strpbrk(email, "$|") != NULL || hashManager->FindUser(nick, szNickLen) != NULL || ResNickManager->CheckReserved(nick, HashNick(nick, szNickLen)) != false) {
 		lua_settop(L, 0);
 
 		lua_pushnil(L);
         return 1;
     }
 
-    ScriptBot *bot = new ScriptBot(nick, iNickLen, description, iDescrLen, email, iEmailLen, bIsOP);
-    if(bot == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate new ScriptBot!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-        AppendSpecialLog(sDbgstr);
+    ScriptBot * pNewBot = new ScriptBot(nick, szNickLen, description, szDescrLen, email, szEmailLen, bIsOP);
+    if(pNewBot == NULL || pNewBot->sNick == NULL || pNewBot->sMyINFO == NULL) {
+        if(pNewBot == NULL) {
+            AppendDebugLog("%s - [MEM] Cannot allocate pNewBot in Core.RegBot\n", 0);
+        } else if(pNewBot->sNick == NULL) {
+            delete pNewBot;
+            AppendDebugLog("%s - [MEM] Cannot allocate pNewBot->sNick in Core.RegBot\n", 0);
+        } else if(pNewBot->sMyINFO == NULL) {
+            delete pNewBot;
+            AppendDebugLog("%s - [MEM] Cannot allocate pNewBot->sMyINFO in Core.RegBot\n", 0);
+        }
 
 		lua_settop(L, 0);
 
@@ -184,7 +179,7 @@ static int RegBot(lua_State * L) {
 
 	Script * obj = ScriptManager->FindScript(L);
 	if(obj == NULL) {
-		delete bot;
+		delete pNewBot;
 
 		lua_pushnil(L);
         return 1;
@@ -196,12 +191,8 @@ static int RegBot(lua_State * L) {
         ScriptBot * cur = next;
         next = cur->next;
 
-#ifdef _WIN32
-  	    if(stricmp(bot->sNick, cur->sNick) == 0) {
-#else
-		if(strcasecmp(bot->sNick, cur->sNick) == 0) {
-#endif
-            delete bot;
+		if(strcasecmp(pNewBot->sNick, cur->sNick) == 0) {
+            delete pNewBot;
 
             lua_pushnil(L);
             return 1;
@@ -209,29 +200,29 @@ static int RegBot(lua_State * L) {
     }
 
     if(obj->BotList == NULL) {
-        obj->BotList = bot;
+        obj->BotList = pNewBot;
     } else {
-        obj->BotList->prev = bot;
-        bot->next = obj->BotList;
-        obj->BotList = bot;
+        obj->BotList->prev = pNewBot;
+        pNewBot->next = obj->BotList;
+        obj->BotList = pNewBot;
     }
 
-	ResNickManager->AddReservedNick(bot->sNick, true);
+	ResNickManager->AddReservedNick(pNewBot->sNick, true);
 
-	colUsers->Add2NickList(bot->sNick, iNickLen, bot->bIsOP);
+	colUsers->AddBot2NickList(pNewBot->sNick, szNickLen, pNewBot->bIsOP);
 
-    colUsers->AddBot2MyInfos(bot->sMyINFO);
+    colUsers->AddBot2MyInfos(pNewBot->sMyINFO);
 
     // PPK ... fixed hello sending only to users without NoHello
-    int iMsgLen = sprintf(ScriptManager->lua_msg, "$Hello %s|", bot->sNick);
+    int iMsgLen = sprintf(ScriptManager->lua_msg, "$Hello %s|", pNewBot->sNick);
     if(CheckSprintf(iMsgLen, 131072, "RegBot") == true) {
         globalQ->HStore(ScriptManager->lua_msg, iMsgLen);
     }
     
-    globalQ->InfoStore(bot->sMyINFO, strlen(bot->sMyINFO));
+    globalQ->InfoStore(pNewBot->sMyINFO, strlen(pNewBot->sMyINFO));
         
-    if(bot->bIsOP == true) {
-        globalQ->OpListStore(bot->sNick);
+    if(pNewBot->bIsOP == true) {
+        globalQ->OpListStore(pNewBot->sNick);
     }
 
     lua_pushboolean(L, 1);
@@ -257,10 +248,10 @@ static int UnregBot(lua_State * L) {
         return 1;
     }
 
-    size_t iLen;
-    char *botnick = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * botnick = (char *)lua_tolstring(L, 1, &szLen);
     
-    if(iLen == 0) {
+    if(szLen == 0) {
 		lua_settop(L, 0);
 
 		lua_pushnil(L);
@@ -281,11 +272,7 @@ static int UnregBot(lua_State * L) {
         ScriptBot * cur = next;
         next = cur->next;
 
-#ifdef _WIN32
-  	    if(stricmp(botnick, cur->sNick) == 0) {
-#else
 		if(strcasecmp(botnick, cur->sNick) == 0) {
-#endif
             ResNickManager->DelReservedNick(cur->sNick, true);
 
             colUsers->DelFromNickList(cur->sNick, cur->bIsOP);
@@ -703,7 +690,7 @@ static int GetOnlineUsers(lua_State * L) {
 static int GetUser(lua_State * L) {
     bool bFullTable = false;
 
-    size_t iLen = 0;
+    size_t szLen = 0;
 
     char * nick;
     
@@ -720,7 +707,7 @@ static int GetUser(lua_State * L) {
             return 1;
         }
 
-        nick = (char *)lua_tolstring(L, 1, &iLen);
+        nick = (char *)lua_tolstring(L, 1, &szLen);
 
         bFullTable = lua_toboolean(L, 2) == 0 ? false : true;
     } else if(n == 1) {
@@ -733,7 +720,7 @@ static int GetUser(lua_State * L) {
             return 1;
         }
 
-        nick = (char *)lua_tolstring(L, 1, &iLen);
+        nick = (char *)lua_tolstring(L, 1, &szLen);
     } else {
         luaL_error(L, "bad argument count to 'GetUser' (1 or 2 expected, got %d)", lua_gettop(L));
         lua_settop(L, 0);
@@ -742,14 +729,14 @@ static int GetUser(lua_State * L) {
         return 1;
     }
 
-    if(iLen == 0) {
+    if(szLen == 0) {
         lua_settop(L, 0);
 
         lua_pushnil(L);
         return 1;
     }
     
-    User *u = hashManager->FindUser(nick, iLen);
+    User *u = hashManager->FindUser(nick, szLen);
 
     lua_settop(L, 0);
 
@@ -766,7 +753,7 @@ static int GetUser(lua_State * L) {
 static int GetUsers(lua_State * L) {
     bool bFullTable = false;
 
-    size_t iLen = 0;
+    size_t szLen = 0;
 
     char * sIP;
     
@@ -783,7 +770,7 @@ static int GetUsers(lua_State * L) {
             return 1;
         }
 
-        sIP = (char *)lua_tolstring(L, 1, &iLen);
+        sIP = (char *)lua_tolstring(L, 1, &szLen);
 
         bFullTable = lua_toboolean(L, 2) == 0 ? false : true;
     } else if(n == 1) {
@@ -796,7 +783,7 @@ static int GetUsers(lua_State * L) {
             return 1;
         }
 
-        sIP = (char *)lua_tolstring(L, 1, &iLen);
+        sIP = (char *)lua_tolstring(L, 1, &szLen);
     } else {
         luaL_error(L, "bad argument count to 'GetUsers' (1 or 2 expected, got %d)", lua_gettop(L));
         lua_settop(L, 0);
@@ -808,7 +795,7 @@ static int GetUsers(lua_State * L) {
     uint8_t ui128Hash[16];
     memset(ui128Hash, 0, 16);
 
-    if(iLen == 0 || HashIP(sIP, ui128Hash) == false) {
+    if(szLen == 0 || HashIP(sIP, ui128Hash) == false) {
         lua_settop(L, 0);
         lua_pushnil(L);
 
@@ -1473,14 +1460,14 @@ static int Disconnect(lua_State * L) {
             return 1;
         }
     } else if(lua_type(L, 1) == LUA_TSTRING) {
-        size_t iLen;
-        char *nick = (char *)lua_tolstring(L, 1, &iLen);
+        size_t szLen;
+        char * nick = (char *)lua_tolstring(L, 1, &szLen);
     
-        if(iLen == 0) {
+        if(szLen == 0) {
             return 0;
         }
     
-        u = hashManager->FindUser(nick, iLen);
+        u = hashManager->FindUser(nick, szLen);
 
         if(u == NULL) {
     		lua_settop(L, 0);
@@ -1533,11 +1520,11 @@ static int Kick(lua_State * L) {
         return 1;
     }
 
-    size_t iKickerLen, iReasonLen;
-    char *sKicker = (char *)lua_tolstring(L, 2, &iKickerLen);
-    char *sReason = (char *)lua_tolstring(L, 3, &iReasonLen);
+    size_t szKickerLen, szReasonLen;
+    char *sKicker = (char *)lua_tolstring(L, 2, &szKickerLen);
+    char *sReason = (char *)lua_tolstring(L, 3, &szReasonLen);
 
-    if(iKickerLen == 0 || iKickerLen > 64 || iReasonLen == 0 || iReasonLen > 128000) {
+    if(szKickerLen == 0 || szKickerLen > 64 || szReasonLen == 0 || szReasonLen > 128000) {
     	lua_settop(L, 0);
 
         lua_pushnil(L);
@@ -1546,26 +1533,22 @@ static int Kick(lua_State * L) {
 
     hashBanManager->TempBan(u, sReason, sKicker, 0, 0, false);
 
-    int imsgLen = sprintf(ScriptManager->lua_msg, "<%s> %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-		LanguageManager->sTexts[LAN_YOU_BEING_KICKED_BCS], sReason);
+    int imsgLen = sprintf(ScriptManager->lua_msg, "<%s> %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_BEING_KICKED_BCS], sReason);
     if(CheckSprintf(imsgLen, 131072, "Kick5") == true) {
     	UserSendCharDelayed(u, ScriptManager->lua_msg, imsgLen);
     }
 
     if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
     	if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-    	    imsgLen = sprintf(ScriptManager->lua_msg, "%s $<%s> *** %s %s IP %s %s %s %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], u->sNick, LanguageManager->sTexts[LAN_WITH_LWR], 
-                u->sIP, LanguageManager->sTexts[LAN_WAS_KICKED_BY], sKicker, 
+    	    imsgLen = sprintf(ScriptManager->lua_msg, "%s $<%s> *** %s %s IP %s %s %s %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
+                SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], u->sNick, LanguageManager->sTexts[LAN_WITH_LWR], u->sIP, LanguageManager->sTexts[LAN_WAS_KICKED_BY], sKicker,
                 LanguageManager->sTexts[LAN_BECAUSE_LWR], sReason);
             if(CheckSprintf(imsgLen, 131072, "Kick6") == true) {
-				QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
-                globalQ->SingleItemsStore(newItem);
+				globalQ->SingleItemStore(ScriptManager->lua_msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
             }
     	} else {
-    	    imsgLen = sprintf(ScriptManager->lua_msg, "<%s> *** %s %s IP %s %s %s %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], u->sNick, 
-                LanguageManager->sTexts[LAN_WITH_LWR], u->sIP, LanguageManager->sTexts[LAN_WAS_KICKED_BY], sKicker, 
-                LanguageManager->sTexts[LAN_BECAUSE_LWR], sReason);
+    	    imsgLen = sprintf(ScriptManager->lua_msg, "<%s> *** %s %s IP %s %s %s %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], u->sNick,
+                LanguageManager->sTexts[LAN_WITH_LWR], u->sIP, LanguageManager->sTexts[LAN_WAS_KICKED_BY], sKicker, LanguageManager->sTexts[LAN_BECAUSE_LWR], sReason);
             if(CheckSprintf(imsgLen, 131072, "Kick7") == true) {
                 globalQ->OPStore(ScriptManager->lua_msg, imsgLen);
             }
@@ -1612,19 +1595,19 @@ static int Redirect(lua_State * L) {
         return 1;
     }
 
-    size_t iAddressLen, iReasonLen;
-    char *sAddress = (char *)lua_tolstring(L, 2, &iAddressLen);
-    char *sReason = (char *)lua_tolstring(L, 3, &iReasonLen);
+    size_t szAddressLen, szReasonLen;
+    char *sAddress = (char *)lua_tolstring(L, 2, &szAddressLen);
+    char *sReason = (char *)lua_tolstring(L, 3, &szReasonLen);
 
-    if(iAddressLen == 0 || iAddressLen > 1024 || iReasonLen == 0 || iReasonLen > 128000) {
+    if(szAddressLen == 0 || szAddressLen > 1024 || szReasonLen == 0 || szReasonLen > 128000) {
 		lua_settop(L, 0);
 
         lua_pushnil(L);
         return 1;
     }
 
-    int imsgLen = sprintf(ScriptManager->lua_msg, "<%s> %s %s. %s: %s|$ForceMove %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-        LanguageManager->sTexts[LAN_YOU_REDIR_TO], sAddress, LanguageManager->sTexts[LAN_MESSAGE], sReason, sAddress);
+    int imsgLen = sprintf(ScriptManager->lua_msg, "<%s> %s %s. %s: %s|$ForceMove %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_REDIR_TO],
+        sAddress, LanguageManager->sTexts[LAN_MESSAGE], sReason, sAddress);
     if(CheckSprintf(imsgLen, 131072, "Redirect2") == true) {
         UserSendChar(u, ScriptManager->lua_msg, imsgLen);
     }
@@ -1689,18 +1672,15 @@ static int DefloodWarn(lua_State * L) {
 
         if(SettingManager->bBools[SETBOOL_DEFLOOD_REPORT] == true) {
             if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-                imsgLen = sprintf(ScriptManager->lua_msg, "%s $<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                    SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_FLOODER], 
-                    u->sNick, LanguageManager->sTexts[LAN_WITH_IP], u->sIP, 
+                imsgLen = sprintf(ScriptManager->lua_msg, "%s $<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
+                    SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_FLOODER], u->sNick, LanguageManager->sTexts[LAN_WITH_IP], u->sIP,
                     LanguageManager->sTexts[LAN_DISCONN_BY_SCRIPT]);
                 if(CheckSprintf(imsgLen, 131072, "DefloodWarn1") == true) {
-                    QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
-                    globalQ->SingleItemsStore(newItem);
+                    globalQ->SingleItemStore(ScriptManager->lua_msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                 }
             } else {
-                imsgLen = sprintf(ScriptManager->lua_msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                    LanguageManager->sTexts[LAN_FLOODER], u->sNick, LanguageManager->sTexts[LAN_WITH_IP], 
-                    u->sIP, LanguageManager->sTexts[LAN_DISCONN_BY_SCRIPT]);
+                imsgLen = sprintf(ScriptManager->lua_msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_FLOODER], u->sNick,
+                    LanguageManager->sTexts[LAN_WITH_IP], u->sIP, LanguageManager->sTexts[LAN_DISCONN_BY_SCRIPT]);
                 if(CheckSprintf(imsgLen, 131072, "DefloodWarn2") == true) {
                     globalQ->OPStore(ScriptManager->lua_msg, imsgLen);
                 }
@@ -1736,16 +1716,16 @@ static int SendToAll(lua_State * L) {
     }
 
     if(lua_gettop(L) == 1) {
-        size_t iLen;
-        char *sData = (char *)lua_tolstring(L, 1, &iLen);
-        if(sData[0] != '\0' && iLen < 128001) {
-			if(sData[iLen-1] != '|') {
-                memcpy(ScriptManager->lua_msg, sData, iLen);
-                ScriptManager->lua_msg[iLen] = '|';
-                ScriptManager->lua_msg[iLen+1] = '\0';
-				globalQ->Store(ScriptManager->lua_msg, iLen+1);
+        size_t szLen;
+        char * sData = (char *)lua_tolstring(L, 1, &szLen);
+        if(sData[0] != '\0' && szLen < 128001) {
+			if(sData[szLen-1] != '|') {
+                memcpy(ScriptManager->lua_msg, sData, szLen);
+                ScriptManager->lua_msg[szLen] = '|';
+                ScriptManager->lua_msg[szLen+1] = '\0';
+				globalQ->Store(ScriptManager->lua_msg, szLen+1);
 			} else {
-				globalQ->Store(sData, iLen);
+				globalQ->Store(sData, szLen);
             }
         }
     }
@@ -1769,24 +1749,24 @@ static int SendToNick(lua_State * L) {
         return 0;
     }
 
-    size_t iNickLen, iDataLen;
-    char *sNick = (char *)lua_tolstring(L, 1, &iNickLen);
-    char *sData = (char *)lua_tolstring(L, 2, &iDataLen);
+    size_t szNickLen, szDataLen;
+    char *sNick = (char *)lua_tolstring(L, 1, &szNickLen);
+    char *sData = (char *)lua_tolstring(L, 2, &szDataLen);
 
-    if(iNickLen == 0 || iDataLen == 0 || iDataLen > 128000) {
+    if(szNickLen == 0 || szDataLen == 0 || szDataLen > 128000) {
         lua_settop(L, 0);
         return 0;
     }
 
-    User *u = hashManager->FindUser(sNick, iNickLen);
+    User *u = hashManager->FindUser(sNick, szNickLen);
     if(u != NULL) {
-        if(sData[iDataLen-1] != '|') {
-            memcpy(ScriptManager->lua_msg, sData, iDataLen);
-            ScriptManager->lua_msg[iDataLen] = '|';
-            ScriptManager->lua_msg[iDataLen+1] = '\0';
-            UserSendCharDelayed(u, ScriptManager->lua_msg, iDataLen+1);
+        if(sData[szDataLen-1] != '|') {
+            memcpy(ScriptManager->lua_msg, sData, szDataLen);
+            ScriptManager->lua_msg[szDataLen] = '|';
+            ScriptManager->lua_msg[szDataLen+1] = '\0';
+            UserSendCharDelayed(u, ScriptManager->lua_msg, szDataLen+1);
         } else {
-            UserSendCharDelayed(u, sData, iDataLen);
+            UserSendCharDelayed(u, sData, szDataLen);
         }
     }
 
@@ -1808,10 +1788,10 @@ static int SendToOpChat(lua_State * L) {
         return 0;
     }
 
-    size_t iDataLen;
-    char *sData = (char *)lua_tolstring(L, 1, &iDataLen);
+    size_t szDataLen;
+    char * sData = (char *)lua_tolstring(L, 1, &szDataLen);
 
-    if(iDataLen == 0 || iDataLen > 128000) {
+    if(szDataLen == 0 || szDataLen > 128000) {
         lua_settop(L, 0);
         return 0;
     }
@@ -1819,8 +1799,7 @@ static int SendToOpChat(lua_State * L) {
     if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true) {
         int iLen = sprintf(ScriptManager->lua_msg, "%s $<%s> %s|", SettingManager->sTexts[SETTXT_OP_CHAT_NICK], SettingManager->sTexts[SETTXT_OP_CHAT_NICK], sData);
         if(CheckSprintf(iLen, 131072, "SendToOpChat") == true) {
-			QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, iLen, NULL, 0, globalqueue::OPCHAT);
-            globalQ->SingleItemsStore(newItem);
+			globalQ->SingleItemStore(ScriptManager->lua_msg, iLen, NULL, 0, globalqueue::OPCHAT);
         }
     }
 
@@ -1842,21 +1821,21 @@ static int SendToOps(lua_State * L) {
         return 0;
     }
 
-    size_t iLen;
-    char *sData = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sData = (char *)lua_tolstring(L, 1, &szLen);
     
-    if(iLen == 0 || iLen > 128000) {
+    if(szLen == 0 || szLen > 128000) {
         lua_settop(L, 0);
         return 0;
     }
 
-    if(sData[iLen-1] != '|') {
-        memcpy(ScriptManager->lua_msg, sData, iLen);
-        ScriptManager->lua_msg[iLen] = '|';
-        ScriptManager->lua_msg[iLen+1] = '\0';
-        globalQ->OPStore(ScriptManager->lua_msg, iLen+1);
+    if(sData[szLen-1] != '|') {
+        memcpy(ScriptManager->lua_msg, sData, szLen);
+        ScriptManager->lua_msg[szLen] = '|';
+        ScriptManager->lua_msg[szLen+1] = '\0';
+        globalQ->OPStore(ScriptManager->lua_msg, szLen+1);
     } else {
-        globalQ->OPStore(sData, iLen);
+        globalQ->OPStore(sData, szLen);
     }
 
     lua_settop(L, 0);
@@ -1878,25 +1857,23 @@ static int SendToProfile(lua_State * L) {
         return 0;
     }
 
-    int32_t iProfile = (int32_t)lua_tonumber(L, 1);
+    int32_t i32Profile = (int32_t)lua_tonumber(L, 1);
 
-    size_t iDataLen;
-    char *sData = (char *)lua_tolstring(L, 2, &iDataLen);
+    size_t szDataLen;
+    char * sData = (char *)lua_tolstring(L, 2, &szDataLen);
 
-    if(iDataLen == 0 || iDataLen > 128000) {
+    if(szDataLen == 0 || szDataLen > 128000) {
         lua_settop(L, 0);
         return 0;
     }
 
-    if(sData[iDataLen-1] != '|') {
-        memcpy(ScriptManager->lua_msg, sData, iDataLen);
-		ScriptManager->lua_msg[iDataLen] = '|';
-        ScriptManager->lua_msg[iDataLen+1] = '\0';
-		QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, iDataLen+1, NULL, iProfile, globalqueue::TOPROFILE);
-        globalQ->SingleItemsStore(newItem);
+    if(sData[szDataLen-1] != '|') {
+        memcpy(ScriptManager->lua_msg, sData, szDataLen);
+		ScriptManager->lua_msg[szDataLen] = '|';
+        ScriptManager->lua_msg[szDataLen+1] = '\0';
+		globalQ->SingleItemStore(ScriptManager->lua_msg, szDataLen+1, NULL, i32Profile, globalqueue::TOPROFILE);
     } else {
-		QueueDataItem *newItem = globalQ->CreateQueueDataItem(sData, iDataLen, NULL, iProfile, globalqueue::TOPROFILE);
-		globalQ->SingleItemsStore(newItem);
+		globalQ->SingleItemStore(sData, szDataLen, NULL, i32Profile, globalqueue::TOPROFILE);
     }
 
     lua_settop(L, 0);
@@ -1925,21 +1902,21 @@ static int SendToUser(lua_State * L) {
         return 0;
     }
 
-    size_t iLen;
-    char *sData = (char *)lua_tolstring(L, 2, &iLen);
+    size_t szLen;
+    char * sData = (char *)lua_tolstring(L, 2, &szLen);
 
-    if(iLen == 0 || iLen > 128000) {
+    if(szLen == 0 || szLen > 128000) {
         lua_settop(L, 0);
         return 0;
     }
 
-    if(sData[iLen-1] != '|') {
-        memcpy(ScriptManager->lua_msg, sData, iLen);
-        ScriptManager->lua_msg[iLen] = '|';
-        ScriptManager->lua_msg[iLen+1] = '\0';
-    	UserSendCharDelayed(u, ScriptManager->lua_msg, iLen+1);
+    if(sData[szLen-1] != '|') {
+        memcpy(ScriptManager->lua_msg, sData, szLen);
+        ScriptManager->lua_msg[szLen] = '|';
+        ScriptManager->lua_msg[szLen+1] = '\0';
+    	UserSendCharDelayed(u, ScriptManager->lua_msg, szLen+1);
     } else {
-        UserSendCharDelayed(u, sData, iLen);
+        UserSendCharDelayed(u, sData, szLen);
     }
 
     lua_settop(L, 0);
@@ -1961,19 +1938,18 @@ static int SendPmToAll(lua_State * L) {
         return 0;
     }
 
-    size_t iFromLen, iDataLen;
-    char *sFrom = (char *)lua_tolstring(L, 1, &iFromLen);
-    char *sData = (char *)lua_tolstring(L, 2, &iDataLen);
+    size_t szFromLen, szDataLen;
+    char * sFrom = (char *)lua_tolstring(L, 1, &szFromLen);
+    char * sData = (char *)lua_tolstring(L, 2, &szDataLen);
 
-    if(iFromLen == 0 || iFromLen > 64 || iDataLen == 0 || iDataLen > 128000) {
+    if(szFromLen == 0 || szFromLen > 64 || szDataLen == 0 || szDataLen > 128000) {
         lua_settop(L, 0); 
         return 0;
     }
 
     int imsgLen = sprintf(ScriptManager->lua_msg, "%s $<%s> %s|", sFrom, sFrom, sData);
     if(CheckSprintf(imsgLen, 131072, "SendPmToAll") == true) {
-		QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, imsgLen, NULL, 0, globalqueue::PM2ALL);
-        globalQ->SingleItemsStore(newItem);
+		globalQ->SingleItemStore(ScriptManager->lua_msg, imsgLen, NULL, 0, globalqueue::PM2ALL);
     }
 
     lua_settop(L, 0);
@@ -1996,17 +1972,17 @@ static int SendPmToNick(lua_State * L) {
         return 0;
     }
 
-    size_t iToLen, iFromLen, iDataLen;
-    char *sTo = (char *)lua_tolstring(L, 1, &iToLen);
-    char *sFrom = (char *)lua_tolstring(L, 2, &iFromLen);
-    char *sData = (char *)lua_tolstring(L, 3, &iDataLen);
+    size_t szToLen, szFromLen, szDataLen;
+    char * sTo = (char *)lua_tolstring(L, 1, &szToLen);
+    char * sFrom = (char *)lua_tolstring(L, 2, &szFromLen);
+    char * sData = (char *)lua_tolstring(L, 3, &szDataLen);
 
-    if(iToLen == 0 || iFromLen == 0 || iFromLen > 64 || iDataLen == 0 || iDataLen > 128000) {
+    if(szToLen == 0 || szFromLen == 0 || szFromLen > 64 || szDataLen == 0 || szDataLen > 128000) {
         lua_settop(L, 0);
         return 0;
     }
 
-    User *u = hashManager->FindUser(sTo, iToLen);
+    User *u = hashManager->FindUser(sTo, szToLen);
     if(u != NULL) {
         int iMsgLen = sprintf(ScriptManager->lua_msg, "$To: %s From: %s $<%s> %s|", sTo, sFrom, sFrom, sData);
         if(CheckSprintf(iMsgLen, 131072, "SendPmToNick") == true) {
@@ -2033,19 +2009,18 @@ static int SendPmToOps(lua_State * L) {
         return 0;
     }
 
-    size_t iFromLen, iDataLen;
-    char *sFrom = (char *)lua_tolstring(L, 1, &iFromLen);
-    char *sData = (char *)lua_tolstring(L, 2, &iDataLen);
+    size_t szFromLen, szDataLen;
+    char * sFrom = (char *)lua_tolstring(L, 1, &szFromLen);
+    char * sData = (char *)lua_tolstring(L, 2, &szDataLen);
 
-    if(iFromLen == 0 || iFromLen > 64 || iDataLen == 0 || iDataLen > 128000) {
+    if(szFromLen == 0 || szFromLen > 64 || szDataLen == 0 || szDataLen > 128000) {
         lua_settop(L, 0);
         return 0;
     }
 
     int imsgLen = sprintf(ScriptManager->lua_msg, "%s $<%s> %s|", sFrom, sFrom, sData);
     if(CheckSprintf(imsgLen, 131072, "SendPmToOps") == true) {
-		QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
-        globalQ->SingleItemsStore(newItem);
+		globalQ->SingleItemStore(ScriptManager->lua_msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
     }
 
     lua_settop(L, 0);
@@ -2070,19 +2045,18 @@ static int SendPmToProfile(lua_State * L) {
 
     int32_t iProfile = (int32_t)lua_tonumber(L, 1);
 
-    size_t iFromLen, iDataLen;
-    char *sFrom = (char *)lua_tolstring(L, 2, &iFromLen);
-    char *sData = (char *)lua_tolstring(L, 3, &iDataLen);
+    size_t szFromLen, szDataLen;
+    char * sFrom = (char *)lua_tolstring(L, 2, &szFromLen);
+    char * sData = (char *)lua_tolstring(L, 3, &szDataLen);
 
-    if(iFromLen == 0 || iFromLen > 64 || iDataLen == 0 || iDataLen > 128000) {
+    if(szFromLen == 0 || szFromLen > 64 || szDataLen == 0 || szDataLen > 128000) {
         lua_settop(L, 0);
         return 0;
     }
 
     int imsgLen = sprintf(ScriptManager->lua_msg, "%s $<%s> %s|", sFrom, sFrom, sData);
     if(CheckSprintf(imsgLen, 131072, "SendPmToProfile") == true) {
-		QueueDataItem *newItem = globalQ->CreateQueueDataItem(ScriptManager->lua_msg, imsgLen, NULL, iProfile, globalqueue::PM2PROFILE);
-        globalQ->SingleItemsStore(newItem);
+		globalQ->SingleItemStore(ScriptManager->lua_msg, imsgLen, NULL, iProfile, globalqueue::PM2PROFILE);
     }
 
     lua_settop(L, 0);
@@ -2112,11 +2086,11 @@ static int SendPmToUser(lua_State * L) {
         return 0;
     }
 
-    size_t iFromLen, iDataLen;
-    char *sFrom = (char *)lua_tolstring(L, 2, &iFromLen);
-    char *sData = (char *)lua_tolstring(L, 3, &iDataLen);
+    size_t szFromLen, szDataLen;
+    char * sFrom = (char *)lua_tolstring(L, 2, &szFromLen);
+    char * sData = (char *)lua_tolstring(L, 3, &szDataLen);
     
-    if(iFromLen == 0 || iFromLen > 64 || iDataLen == 0 || iDataLen > 128000) {
+    if(szFromLen == 0 || szFromLen > 64 || szDataLen == 0 || szDataLen > 128000) {
 		lua_settop(L, 0);
         return 0;
     }
@@ -2171,17 +2145,17 @@ static int SetUserInfo(lua_State * L) {
             return 0;
         }
 
-        size_t iDataLen;
-        char * sData = (char *)lua_tolstring(L, 3, &iDataLen);
+        size_t szDataLen;
+        char * sData = (char *)lua_tolstring(L, 3, &szDataLen);
 
-        if(iDataLen > 64 || strpbrk(sData, "$|") != NULL) {
+        if(szDataLen > 64 || strpbrk(sData, "$|") != NULL) {
             lua_settop(L, 0);
             return 0;
         }
 
         switch(iDataToChange) {
             case 0:
-                pUser->sChangedDescriptionShort = UserSetUserInfo(pUser->sChangedDescriptionShort, pUser->ui8ChangedDescriptionShortLen, sData, iDataLen, sMyInfoPartsNames[iDataToChange]);
+                pUser->sChangedDescriptionShort = UserSetUserInfo(pUser->sChangedDescriptionShort, pUser->ui8ChangedDescriptionShortLen, sData, szDataLen, sMyInfoPartsNames[iDataToChange]);
                 if(bPermanent == true) {
                     pUser->ui32InfoBits |= User::INFOBIT_DESCRIPTION_SHORT_PERM;
                 } else {
@@ -2189,7 +2163,7 @@ static int SetUserInfo(lua_State * L) {
                 }
                 break;
             case 1:
-                pUser->sChangedDescriptionLong = UserSetUserInfo(pUser->sChangedDescriptionLong, pUser->ui8ChangedDescriptionLongLen, sData, iDataLen, sMyInfoPartsNames[iDataToChange]);
+                pUser->sChangedDescriptionLong = UserSetUserInfo(pUser->sChangedDescriptionLong, pUser->ui8ChangedDescriptionLongLen, sData, szDataLen, sMyInfoPartsNames[iDataToChange]);
                 if(bPermanent == true) {
                     pUser->ui32InfoBits |= User::INFOBIT_DESCRIPTION_LONG_PERM;
                 } else {
@@ -2197,7 +2171,7 @@ static int SetUserInfo(lua_State * L) {
                 }
                 break;
             case 2:
-                pUser->sChangedTagShort = UserSetUserInfo(pUser->sChangedTagShort, pUser->ui8ChangedTagShortLen, sData, iDataLen, sMyInfoPartsNames[iDataToChange]);
+                pUser->sChangedTagShort = UserSetUserInfo(pUser->sChangedTagShort, pUser->ui8ChangedTagShortLen, sData, szDataLen, sMyInfoPartsNames[iDataToChange]);
                 if(bPermanent == true) {
                     pUser->ui32InfoBits |= User::INFOBIT_TAG_SHORT_PERM;
                 } else {
@@ -2205,7 +2179,7 @@ static int SetUserInfo(lua_State * L) {
                 }
                 break;
             case 3:
-                pUser->sChangedTagLong = UserSetUserInfo(pUser->sChangedTagLong, pUser->ui8ChangedTagLongLen, sData, iDataLen, sMyInfoPartsNames[iDataToChange]);
+                pUser->sChangedTagLong = UserSetUserInfo(pUser->sChangedTagLong, pUser->ui8ChangedTagLongLen, sData, szDataLen, sMyInfoPartsNames[iDataToChange]);
                 if(bPermanent == true) {
                     pUser->ui32InfoBits |= User::INFOBIT_TAG_LONG_PERM;
                 } else {
@@ -2213,7 +2187,7 @@ static int SetUserInfo(lua_State * L) {
                 }
                 break;
             case 4:
-                pUser->sChangedConnectionShort = UserSetUserInfo(pUser->sChangedConnectionShort, pUser->ui8ChangedConnectionShortLen, sData, iDataLen, sMyInfoPartsNames[iDataToChange]);
+                pUser->sChangedConnectionShort = UserSetUserInfo(pUser->sChangedConnectionShort, pUser->ui8ChangedConnectionShortLen, sData, szDataLen, sMyInfoPartsNames[iDataToChange]);
                 if(bPermanent == true) {
                     pUser->ui32InfoBits |= User::INFOBIT_CONNECTION_SHORT_PERM;
                 } else {
@@ -2221,7 +2195,7 @@ static int SetUserInfo(lua_State * L) {
                 }
                 break;
             case 5:
-                pUser->sChangedConnectionLong = UserSetUserInfo(pUser->sChangedConnectionLong, pUser->ui8ChangedConnectionLongLen, sData, iDataLen, sMyInfoPartsNames[iDataToChange]);
+                pUser->sChangedConnectionLong = UserSetUserInfo(pUser->sChangedConnectionLong, pUser->ui8ChangedConnectionLongLen, sData, szDataLen, sMyInfoPartsNames[iDataToChange]);
                 if(bPermanent == true) {
                     pUser->ui32InfoBits |= User::INFOBIT_CONNECTION_LONG_PERM;
                 } else {
@@ -2229,7 +2203,7 @@ static int SetUserInfo(lua_State * L) {
                 }
                 break;
             case 6:
-                pUser->sChangedEmailShort = UserSetUserInfo(pUser->sChangedEmailShort, pUser->ui8ChangedEmailShortLen, sData, iDataLen, sMyInfoPartsNames[iDataToChange]);
+                pUser->sChangedEmailShort = UserSetUserInfo(pUser->sChangedEmailShort, pUser->ui8ChangedEmailShortLen, sData, szDataLen, sMyInfoPartsNames[iDataToChange]);
                 if(bPermanent == true) {
                     pUser->ui32InfoBits |= User::INFOBIT_EMAIL_SHORT_PERM;
                 } else {
@@ -2237,7 +2211,7 @@ static int SetUserInfo(lua_State * L) {
                 }
                 break;
             case 7:
-                pUser->sChangedEmailLong = UserSetUserInfo(pUser->sChangedEmailLong, pUser->ui8ChangedEmailLongLen, sData, iDataLen, sMyInfoPartsNames[iDataToChange]);
+                pUser->sChangedEmailLong = UserSetUserInfo(pUser->sChangedEmailLong, pUser->ui8ChangedEmailLongLen, sData, szDataLen, sMyInfoPartsNames[iDataToChange]);
                 if(bPermanent == true) {
                     pUser->ui32InfoBits |= User::INFOBIT_EMAIL_LONG_PERM;
                 } else {

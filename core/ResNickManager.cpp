@@ -26,33 +26,25 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
-//---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
 #endif
 //---------------------------------------------------------------------------
 ResNickMan *ResNickManager = NULL;
 //---------------------------------------------------------------------------
 
 ResNickMan::ReservedNick::ReservedNick(const char * nick, uint32_t ui32NickHash) {
-    size_t iNickLen = strlen(nick);
+    size_t szNickLen = strlen(nick);
 #ifdef _WIN32
-    sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
+    sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
 #else
-	sNick = (char *) malloc(iNickLen+1);
+	sNick = (char *)malloc(szNickLen+1);
 #endif
     if(sNick == NULL) {
-        string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
-        	" bytes of memory in ReservedNick::ReservedNick!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-        AppendSpecialLog(sDbgstr);
+        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in ReservedNick::ReservedNick\n", (uint64_t)(szNickLen+1));
+
         return;
     }   
-    memcpy(sNick, nick, iNickLen);
-    sNick[iNickLen] = '\0';
+    memcpy(sNick, nick, szNickLen);
+    sNick[szNickLen] = '\0';
 
 	ui32Hash = ui32NickHash;
 
@@ -65,10 +57,8 @@ ResNickMan::ReservedNick::ReservedNick(const char * nick, uint32_t ui32NickHash)
 
 ResNickMan::ReservedNick::~ReservedNick() {
 #ifdef _WIN32
-	if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
-		string sDbgstr = "[BUF] Cannot deallocate sNick in ~ReservedNick! "+string((uint32_t)GetLastError())+" "+
-            string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-        AppendSpecialLog(sDbgstr);
+	if(sNick != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
+        AppendDebugLog("%s - [MEM] Cannot deallocate sNick in ResNickMan::ReservedNick::~ReservedNick\n", 0);
     }
 #else
 	free(sNick);
@@ -90,10 +80,10 @@ ResNickMan::ResNickMan() {
 		doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
 		TiXmlElement reservednicks("ReservedNicks");
 		const char* Nicks[] = { "Hub-Security", "Admin", "Client", "PtokaX", "OpChat" };
-		for(uint8_t i = 0;i < 5; i++) {
-			AddReservedNick(Nicks[i]);
+		for(uint8_t ui8i = 0; ui8i < 5; ui8i++) {
+			AddReservedNick(Nicks[ui8i]);
 			TiXmlElement reservednick("ReservedNick");
-			reservednick.InsertEndChild(TiXmlText(Nicks[i]));
+			reservednick.InsertEndChild(TiXmlText(Nicks[ui8i]));
 
 			reservednicks.InsertEndChild(reservednick);
 		}
@@ -146,11 +136,7 @@ bool ResNickMan::CheckReserved(const char * sNick, const uint32_t &hash) {
         ReservedNick *cur = next;
         next = cur->next;
 
-#ifdef _WIN32
-		if(cur->ui32Hash == hash && stricmp(cur->sNick, sNick) == 0) {
-#else
 		if(cur->ui32Hash == hash && strcasecmp(cur->sNick, sNick) == 0) {
-#endif
             return true;
         }
     }
@@ -163,25 +149,26 @@ void ResNickMan::AddReservedNick(const char * sNick, const bool &bFromScript/* =
     uint32_t ulHash = HashNick(sNick, strlen(sNick));
 
     if(CheckReserved(sNick, ulHash) == false) {
-        ReservedNick *newNick = new ReservedNick(sNick, ulHash);
-        if(newNick == NULL) {
-        	string sDbgstr = "[BUF] Cannot allocate ResNickMan::AddReservedNick!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-        	exit(EXIT_FAILURE);
+        ReservedNick * pNewNick = new ReservedNick(sNick, ulHash);
+        if(pNewNick == NULL) {
+			AppendDebugLog("%s - [MEM] Cannot allocate pNewNick in ResNickMan::AddReservedNick\n", 0);
+        	return;
+        } else if(pNewNick->sNick == NULL) {
+            delete pNewNick;
+
+			AppendDebugLog("%s - [MEM] Cannot allocate pNewNick->sNick in ResNickMan::AddReservedNick\n", 0);
+        	return;
         }
 
         if(ReservedNicks == NULL) {
-            ReservedNicks = newNick;
+            ReservedNicks = pNewNick;
         } else {
-            ReservedNicks->prev = newNick;
-            newNick->next = ReservedNicks;
-            ReservedNicks = newNick;
+            ReservedNicks->prev = pNewNick;
+            pNewNick->next = ReservedNicks;
+            ReservedNicks = pNewNick;
         }
 
-        newNick->bFromScript = bFromScript;
+        pNewNick->bFromScript = bFromScript;
     }
 }
 //---------------------------------------------------------------------------

@@ -29,9 +29,7 @@
 #include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //---------------------------------------------------------------------------
 #include "LineDialog.h"
 //---------------------------------------------------------------------------
@@ -107,8 +105,11 @@ LRESULT ProfilesDialog::ProfilesDialogProc(UINT uMsg, WPARAM wParam, LPARAM lPar
         case WM_COMMAND:
             switch(LOWORD(wParam)) {
                 case (BTN_ADD_PROFILE+100): {
-                    LineDialog * NewProfileDlg = new LineDialog(&OnNewProfileOk);
-                    NewProfileDlg->DoModal(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_NEW_PROFILE_NAME], "");
+                    LineDialog * pNewProfileDlg = new LineDialog(&OnNewProfileOk);
+
+                    if(pNewProfileDlg != NULL) {
+                        pNewProfileDlg->DoModal(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_NEW_PROFILE_NAME], "");
+                    }
 
                     return 0;
                 }
@@ -369,12 +370,12 @@ void ProfilesDialog::DoModal(HWND hWndParent) {
         ProfileManager::NOSEARCHINTERVAL, ProfileManager::NOUSRSAMEIP, ProfileManager::NORECONNTIME
     };
 
-    for(uint16_t i = 0; i < (sizeof(iPermissionsIds) / sizeof(iPermissionsIds[0])); i++) {
+    for(uint16_t ui16i = 0; ui16i < (sizeof(iPermissionsIds) / sizeof(iPermissionsIds[0])); ui16i++) {
         LVITEM lvItem = { 0 };
         lvItem.mask = LVIF_PARAM | LVIF_TEXT;
-        lvItem.iItem = i;
-        lvItem.lParam = (LPARAM)iPermissionsIds[i];
-        lvItem.pszText = LanguageManager->sTexts[iPermissionsStrings[i]];
+        lvItem.iItem = ui16i;
+        lvItem.lParam = (LPARAM)iPermissionsIds[ui16i];
+        lvItem.pszText = LanguageManager->sTexts[iPermissionsStrings[ui16i]];
 
         ::SendMessage(hWndWindowItems[LV_PERMISSIONS], LVM_INSERTITEM, 0, (LPARAM)&lvItem);
     }
@@ -392,12 +393,12 @@ void ProfilesDialog::DoModal(HWND hWndParent) {
 void ProfilesDialog::AddAllProfiles() {
     ::SendMessage(hWndWindowItems[LV_PROFILES], WM_SETREDRAW, (WPARAM)FALSE, 0);
 
-    for(uint16_t i = 0; i < ProfileMan->iProfileCount; i++) {
+    for(uint16_t ui16i = 0; ui16i < ProfileMan->iProfileCount; ui16i++) {
         LVITEM lvItem = { 0 };
         lvItem.mask = LVIF_PARAM | LVIF_TEXT;
-        lvItem.iItem = i;
-        lvItem.lParam = (LPARAM)ProfileMan->ProfilesTable[i];
-        lvItem.pszText = ProfileMan->ProfilesTable[i]->sName;
+        lvItem.iItem = ui16i;
+        lvItem.lParam = (LPARAM)ProfileMan->ProfilesTable[ui16i];
+        lvItem.pszText = ProfileMan->ProfilesTable[ui16i]->sName;
 
         ::SendMessage(hWndWindowItems[LV_PROFILES], LVM_INSERTITEM, 0, (LPARAM)&lvItem);
     }
@@ -447,10 +448,10 @@ void ProfilesDialog::OnProfileChanged(const LPNMLISTVIEW &pListView) {
 
     uint16_t iItemCount = (uint16_t)::SendMessage(hWndWindowItems[LV_PERMISSIONS], LVM_GETITEMCOUNT, 0, 0);
 
-    for(uint16_t i = 0; i < iItemCount; i++) {
+    for(uint16_t ui16i = 0; ui16i < iItemCount; ui16i++) {
         LVITEM lvItem = { 0 };
         lvItem.mask = LVIF_PARAM;
-        lvItem.iItem = i;
+        lvItem.iItem = ui16i;
 
         if((BOOL)::SendMessage(hWndWindowItems[LV_PERMISSIONS], LVM_GETITEM, 0, (LPARAM)&lvItem) == FALSE) {
             continue;
@@ -460,7 +461,7 @@ void ProfilesDialog::OnProfileChanged(const LPNMLISTVIEW &pListView) {
         lvItem.state = INDEXTOSTATEIMAGEMASK(ProfileMan->ProfilesTable[pListView->iItem]->bPermissions[(int)lvItem.lParam] == true ? 2 : 1);
         lvItem.stateMask = LVIS_STATEIMAGEMASK;
 
-        ::SendMessage(hWndWindowItems[LV_PERMISSIONS], LVM_SETITEMSTATE, i, (LPARAM)&lvItem);
+        ::SendMessage(hWndWindowItems[LV_PERMISSIONS], LVM_SETITEMSTATE, ui16i, (LPARAM)&lvItem);
     }
 
     bIgnoreItemChanged = false;
@@ -478,16 +479,16 @@ void ProfilesDialog::ChangePermissionChecks(const bool &bCheck) {
 
     uint16_t iItemCount = (uint16_t)::SendMessage(hWndWindowItems[LV_PERMISSIONS], LVM_GETITEMCOUNT, 0, 0);
 
-    for(uint16_t i = 0; i < iItemCount; i++) {
-        ProfileMan->ProfilesTable[iSel]->bPermissions[i] = bCheck;
+    for(uint16_t ui16i = 0; ui16i < iItemCount; ui16i++) {
+        ProfileMan->ProfilesTable[iSel]->bPermissions[ui16i] = bCheck;
 
         LVITEM lvItem = { 0 };
         lvItem.mask = LVIF_STATE;
-        lvItem.iItem = i;
+        lvItem.iItem = ui16i;
         lvItem.state = INDEXTOSTATEIMAGEMASK(bCheck == true ? 2 : 1);
         lvItem.stateMask = LVIS_STATEIMAGEMASK;
 
-        ::SendMessage(hWndWindowItems[LV_PERMISSIONS], LVM_SETITEMSTATE, i, (LPARAM)&lvItem);
+        ::SendMessage(hWndWindowItems[LV_PERMISSIONS], LVM_SETITEMSTATE, ui16i, (LPARAM)&lvItem);
     }
 
     bIgnoreItemChanged = false;
@@ -513,8 +514,11 @@ void OnRenameProfileOk(char * sLine, const int &iLen) {
 //---------------------------------------------------------------------------
 
 void ProfilesDialog::RenameProfile(const int &iProfile) {
-    LineDialog * RenameProfileDlg = new LineDialog(&OnRenameProfileOk);
-    RenameProfileDlg->DoModal(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_NEW_PROFILE_NAME], ProfileMan->ProfilesTable[iProfile]->sName);
+    LineDialog * pRenameProfileDlg = new LineDialog(&OnRenameProfileOk);
+
+    if(pRenameProfileDlg != NULL) {
+        pRenameProfileDlg->DoModal(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_NEW_PROFILE_NAME], ProfileMan->ProfilesTable[iProfile]->sName);
+    }
 }
 //------------------------------------------------------------------------------
 

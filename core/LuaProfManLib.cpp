@@ -300,10 +300,10 @@ static int AddProfile(lua_State * L) {
         return 1;
     }
 
-    size_t iLen;
-    char *sProfileName = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sProfileName = (char *)lua_tolstring(L, 1, &szLen);
 
-    if(iLen == 0 || iLen > 64) {
+    if(szLen == 0 || szLen > 64) {
         lua_settop(L, 0);
         lua_pushnil(L);
         return 1;
@@ -337,10 +337,10 @@ static int RemoveProfile(lua_State * L) {
         return 1;
     }
 
-    size_t iLen;
-    char *sProfileName = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sProfileName = (char *)lua_tolstring(L, 1, &szLen);
 
-    if(iLen == 0) {
+    if(szLen == 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -434,10 +434,10 @@ static int GetProfile(lua_State * L) {
     }
 
     if(lua_type(L, 1) == LUA_TSTRING) {
-        size_t iLen;
-        char *profName = (char *)lua_tolstring(L, 1, &iLen);
+        size_t szLen;
+        char *profName = (char *)lua_tolstring(L, 1, &szLen);
 
-        if(iLen == 0) {
+        if(szLen == 0) {
             lua_pushnil(L);
             return 1;
         }
@@ -486,9 +486,9 @@ static int GetProfiles(lua_State * L) {
     lua_newtable(L);
     int t = lua_gettop(L);
 
-    for(uint16_t i = 0; i < ProfileMan->iProfileCount; i++) {
-        lua_pushnumber(L, (i+1));
-        PushProfile(L, i);
+    for(uint16_t ui16i = 0; ui16i < ProfileMan->iProfileCount; ui16i++) {
+        lua_pushnumber(L, (ui16i+1));
+        PushProfile(L, ui16i);
         lua_rawset(L, t);
     }
 
@@ -513,7 +513,7 @@ static int GetProfilePermission(lua_State * L) {
     }
 
     uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
-    size_t iId = (size_t)lua_tonumber(L, 2);
+    size_t szId = (size_t)lua_tonumber(L, 2);
     
     lua_settop(L, 0);
     
@@ -522,13 +522,13 @@ static int GetProfilePermission(lua_State * L) {
         return 1;
     }
 
-	if(iId > ProfileManager::NORECONNTIME) {
+	if(szId > ProfileManager::NORECONNTIME) {
 		luaL_error(L, "bad argument #2 to 'GetProfilePermission' (it's not valid id)");
 		lua_pushnil(L);
 		return 1;
 	}
 
-    ProfileMan->ProfilesTable[iProfile]->bPermissions[iId] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
+    ProfileMan->ProfilesTable[iProfile]->bPermissions[szId] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
 
     return 1;
 }
@@ -589,16 +589,16 @@ static int SetProfileName(lua_State * L) {
         return 1;
     }
 
-    size_t iLen;
-	char *sName = (char *)lua_tolstring(L, 2, &iLen);
+    size_t szLen;
+	char * sName = (char *)lua_tolstring(L, 2, &szLen);
 
-    if(iLen == 0 || iLen > 64) {
+    if(szLen == 0 || szLen > 64) {
         lua_settop(L, 0);
         lua_pushnil(L);
         return 1;
     }
 
-	ProfileMan->ChangeProfileName(iProfile, sName, iLen);
+	ProfileMan->ChangeProfileName(iProfile, sName, szLen);
 
     lua_settop(L, 0);
     lua_pushboolean(L, 1);
@@ -625,7 +625,7 @@ static int SetProfilePermission(lua_State * L) {
 
     uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
 
-    size_t iId = (size_t)lua_tonumber(L, 2);
+    size_t szId = (size_t)lua_tonumber(L, 2);
 
     bool bValue = lua_toboolean(L, 3) == 0 ? false : true;
     
@@ -636,13 +636,13 @@ static int SetProfilePermission(lua_State * L) {
 		return 1;
 	}
 
-	if(iId > ProfileManager::NORECONNTIME) {
+	if(szId > ProfileManager::NORECONNTIME) {
 		luaL_error(L, "bad argument #2 to 'SetProfilePermission' (it's not valid id)");
 		lua_pushnil(L);
 		return 1;
 	}
 
-    ProfileMan->ChangeProfilePermission(iProfile, iId, bValue);
+    ProfileMan->ChangeProfilePermission(iProfile, szId, bValue);
 
     lua_pushboolean(L, 1);
     return 1;

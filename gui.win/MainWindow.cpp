@@ -34,9 +34,7 @@
 #include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //---------------------------------------------------------------------------
 #include "AboutDialog.h"
 #include "BansDialog.h"
@@ -76,6 +74,11 @@ uint64_t PXGetTickCount64() {
 MainWindow::MainWindow() {
     g_GuiSettingManager = new GuiSettingManager();
 
+    if(g_GuiSettingManager == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate g_GuiSettingManager in MainWindow::MainWindow\n", 0);
+        exit(EXIT_FAILURE);
+    }
+
 	INITCOMMONCONTROLSEX iccx = { sizeof(INITCOMMONCONTROLSEX), ICC_BAR_CLASSES | ICC_COOL_CLASSES | ICC_DATE_CLASSES | ICC_LINK_CLASS | ICC_LISTVIEW_CLASSES |
         ICC_STANDARD_CLASSES | ICC_TAB_CLASSES | ICC_TREEVIEW_CLASSES | ICC_UPDOWN_CLASS };
 	InitCommonControlsEx(&iccx);
@@ -89,6 +92,13 @@ MainWindow::MainWindow() {
     MainWindowPages[0] = new MainWindowPageStats();
     MainWindowPages[1] = new MainWindowPageUsersChat();
     MainWindowPages[2] = new MainWindowPageScripts();
+
+    for(uint8_t ui8i = 0; ui8i < 4; ui8i++) {
+        if(MainWindowPages[ui8i] == NULL) {
+            AppendDebugLog("%s - [MEM] Cannot allocate MainWindowPage[" PRIu64 "] in MainWindow::MainWindow\n", (uint64_t)ui8i);
+            exit(EXIT_FAILURE);
+        }
+    }
 
     uiTaskBarCreated = ::RegisterWindowMessage("TaskbarCreated");
 
@@ -253,8 +263,7 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 // Create update check thread
                 pUpdateCheckThread = new UpdateCheckThread();
                 if(pUpdateCheckThread == NULL) {
-                    string sDbgstr = "[BUF] Cannot allocate UpdateCheckThread! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-                    AppendSpecialLog(sDbgstr);
+                    AppendDebugLog("%s - [MEM] Cannot allocate UpdateCheckThread in MainWindow::MainWindowProc::WM_CREATE\n", 0);
                     exit(EXIT_FAILURE);
                 }
 
@@ -309,21 +318,21 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     if(bServerRunning == false) {
 						msg[0] = '\0';
                     } else {
-                        iret = sprintf(msg, " (%s: %I32d)", LanguageManager->sTexts[LAN_USERS], ui32Logged);
-                        if(CheckSprintf(iret, 1024, "MainWindow::MainWindowProc") == false) {
+                        iret = sprintf(msg, " (%s: %u)", LanguageManager->sTexts[LAN_USERS], ui32Logged);
+                        if(CheckSprintf(iret, 256, "MainWindow::MainWindowProc") == false) {
                             return 0;
                         }
 					}
 
-					size_t iSize = sizeof(nid.szTip);
+					size_t szSize = sizeof(nid.szTip);
 
-					if(iSize < (size_t)(SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iret+10)) {
-						nid.szTip[iSize] = '\0';
-						memcpy(nid.szTip+(iSize-(iret+1)), msg, iret);
-						nid.szTip[iSize-(iret+2)] = '.';
-						nid.szTip[iSize-(iret+3)] = '.';
-						nid.szTip[iSize-(iret+4)] = '.';
-						memcpy(nid.szTip+9, SettingManager->sTexts[SETTXT_HUB_NAME], iSize-(iret+13));
+					if(szSize < (size_t)(SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iret+10)) {
+						nid.szTip[szSize] = '\0';
+						memcpy(nid.szTip+(szSize-(iret+1)), msg, iret);
+						nid.szTip[szSize-(iret+2)] = '.';
+						nid.szTip[szSize-(iret+3)] = '.';
+						nid.szTip[szSize-(iret+4)] = '.';
+						memcpy(nid.szTip+9, SettingManager->sTexts[SETTXT_HUB_NAME], szSize-(iret+13));
 						memcpy(nid.szTip, "PtokaX - ", 9);
 					} else {
 						memcpy(nid.szTip, "PtokaX - ", 9);
@@ -415,37 +424,55 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     return 0;
                 case IDC_SETTINGS: {
                     pSettingDialog = new SettingDialog();
-                    pSettingDialog->DoModal(m_hWnd);
+
+                    if(pSettingDialog != NULL) {
+                        pSettingDialog->DoModal(m_hWnd);
+                    }
 
                     return 0;
                 }
                 case IDC_REG_USERS: {
                     pRegisteredUsersDialog = new RegisteredUsersDialog();
-                    pRegisteredUsersDialog->DoModal(m_hWnd);
+
+                    if(pRegisteredUsersDialog != NULL) {
+                        pRegisteredUsersDialog->DoModal(m_hWnd);
+                    }
 
                     return 0;
                 }
                 case IDC_PROFILES: {
                     pProfilesDialog = new ProfilesDialog();
-                    pProfilesDialog->DoModal(m_hWnd);
+
+                    if(pProfilesDialog != NULL) {
+                        pProfilesDialog->DoModal(m_hWnd);
+                    }
 
                     return 0;
                 }
                 case IDC_BANS: {
                     pBansDialog = new BansDialog();
-                    pBansDialog->DoModal(m_hWnd);
+
+                    if(pBansDialog != NULL) {
+                        pBansDialog->DoModal(m_hWnd);
+                    }
 
                     return 0;
 				}
                 case IDC_RANGE_BANS: {
                     pRangeBansDialog = new RangeBansDialog();
-                    pRangeBansDialog->DoModal(m_hWnd);
+
+                    if(pRangeBansDialog != NULL) {
+                        pRangeBansDialog->DoModal(m_hWnd);
+                    }
 
                     return 0;
                 }
                 case IDC_ABOUT: {
-                    AboutDialog * AboutDlg = new AboutDialog();
-                    AboutDlg->DoModal(m_hWnd);
+                    AboutDialog * pAboutDlg = new AboutDialog();
+
+                    if(pAboutDlg != NULL) {
+                        pAboutDlg->DoModal(m_hWnd);
+                    }
 
                     return 0;
                 }
@@ -460,27 +487,29 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     return 0;
                 case IDC_UPDATE_CHECK: {
                     pUpdateDialog = new UpdateDialog();
-                    pUpdateDialog->DoModal(m_hWnd);
 
-                    // First destroy old update check thread if any
-                    if(pUpdateCheckThread != NULL) {
-                        pUpdateCheckThread->Close();
-                        pUpdateCheckThread->WaitFor();
+                    if(pUpdateDialog != NULL) {
+                        pUpdateDialog->DoModal(m_hWnd);
 
-                        delete pUpdateCheckThread;
-                        pUpdateCheckThread = NULL;
+                        // First destroy old update check thread if any
+                        if(pUpdateCheckThread != NULL) {
+                            pUpdateCheckThread->Close();
+                            pUpdateCheckThread->WaitFor();
+
+                            delete pUpdateCheckThread;
+                            pUpdateCheckThread = NULL;
+                        }
+
+                        // Create update check thread
+                        pUpdateCheckThread = new UpdateCheckThread();
+                        if(pUpdateCheckThread == NULL) {
+                            AppendDebugLog("%s - [MEM] Cannot allocate UpdateCheckThread in MainWindow::MainWindowProc::IDC_UPDATE_CHECK\n", 0);
+                            exit(EXIT_FAILURE);
+                        }
+
+                        // Start the update check thread
+                        pUpdateCheckThread->Resume();
                     }
-
-                    // Create update check thread
-                    pUpdateCheckThread = new UpdateCheckThread();
-                    if(pUpdateCheckThread == NULL) {
-                        string sDbgstr = "[BUF] Cannot allocate UpdateCheckThread! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-                        AppendSpecialLog(sDbgstr);
-                        exit(EXIT_FAILURE);
-                    }
-
-                    // Start the update check thread
-                    pUpdateCheckThread->Resume();
 
                     return 0;
                 }
@@ -530,8 +559,10 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             if(pUpdateDialog == NULL) {
                 pUpdateDialog = new UpdateDialog();
 
-                if(pUpdateDialog->ParseData(sMsg, m_hWnd) == false) {
-                    delete pUpdateDialog;
+                if(pUpdateDialog != NULL) {
+                    if(pUpdateDialog->ParseData(sMsg, m_hWnd) == false) {
+                        delete pUpdateDialog;
+                    }
                 }
             } else {
                 pUpdateDialog->ParseData(sMsg, m_hWnd);

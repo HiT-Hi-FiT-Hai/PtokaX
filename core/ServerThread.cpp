@@ -34,12 +34,6 @@
 //---------------------------------------------------------------------------
 #include "ServerThread.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
-#endif
-//---------------------------------------------------------------------------
 
 ServerThread::ServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber) {
 #ifdef _WIN32
@@ -119,7 +113,7 @@ void ServerThread::Resume() {
     int iRet = pthread_create(&threadId, NULL, ExecuteServerThread, this);
     if(iRet != 0) {
 #endif
-		AppendSpecialLog("[ERR] Failed to create new ServerThread!");
+		AppendDebugLog("%s - [ERR] Failed to create new ServerThread\n", 0);
     }
 }
 //---------------------------------------------------------------------------
@@ -358,7 +352,6 @@ bool ServerThread::Listen(bool bSilent/* = false*/) {
 #ifdef _BUILD_GUI
 			::MessageBox(NULL, (string(LanguageManager->sTexts[LAN_SRV_BIND_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_BIND_ERR]) +
 				": " + string(WSErrorStr(err)) + " (" + string(err) + ") " + LanguageManager->sTexts[LAN_FOR_PORT_LWR] + ": " + string(ui16Port)).c_str(), sTitle.c_str(), MB_OK | MB_ICONERROR);
-		}
 #else
             AppendLog(string(LanguageManager->sTexts[LAN_SRV_BIND_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_BIND_ERR])+
 #ifdef _WIN32
@@ -367,12 +360,12 @@ bool ServerThread::Listen(bool bSilent/* = false*/) {
 				": " + string(ErrnoStr(errno))+" (" + string(errno)+") "+
 #endif
 				string(LanguageManager->sTexts[LAN_FOR_PORT_LWR], (size_t)LanguageManager->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+string(ui16Port));
-		}
+#endif
+        }
 #ifdef _WIN32
 		closesocket(server);
 #else
         close(server);
-#endif
 #endif
         return false;
     }
@@ -395,17 +388,16 @@ bool ServerThread::Listen(bool bSilent/* = false*/) {
 #ifdef _BUILD_GUI
             ::MessageBox(NULL, (string(LanguageManager->sTexts[LAN_SRV_LISTEN_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_LISTEN_ERR]) +
 				": " + string(WSErrorStr(err)) + " (" + string(err) + ") " + LanguageManager->sTexts[LAN_FOR_PORT_LWR] + ": " + string(ui16Port)).c_str(), sTitle.c_str(), MB_OK | MB_ICONERROR);
-        }
 #else
             AppendLog(string(LanguageManager->sTexts[LAN_SRV_LISTEN_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_SRV_LISTEN_ERR])+
 				": " + string(errno)+" "+
 				string(LanguageManager->sTexts[LAN_FOR_PORT_LWR], (size_t)LanguageManager->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+string(ui16Port));
+#endif
         }
 #ifdef _WIN32
 		closesocket(server);
 #else
 		close(server);
-#endif
 #endif
         return false;
     }
@@ -457,29 +449,25 @@ bool ServerThread::isFlooder(const int &s, const sockaddr_storage &addr) {
         }
     }
 
-    AntiConFlood *newItem = new AntiConFlood();
-    if(newItem == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate newItem in theLoop::isFlooder!";
-#ifdef _WIN32
-    	sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+    AntiConFlood * pNewItem = new AntiConFlood();
+    if(pNewItem == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem  in theLoop::isFlooder\n", 0);
     	return true;
     }
 
-    memcpy(newItem->ui128IpHash, ui128IpHash, 16);
+    memcpy(pNewItem->ui128IpHash, ui128IpHash, 16);
 
-    newItem->Time = ui64ActualTick;
+    pNewItem->Time = ui64ActualTick;
 
-    newItem->prev = NULL;
-    newItem->next = AntiFloodList;
+    pNewItem->prev = NULL;
+    pNewItem->next = AntiFloodList;
 
-    newItem->hits = 1;
+    pNewItem->hits = 1;
 
     if(AntiFloodList != NULL) {
-        AntiFloodList->prev = newItem;
+        AntiFloodList->prev = pNewItem;
     }
-    AntiFloodList = newItem;
+    AntiFloodList = pNewItem;
 
     srvLoop->AcceptSocket(s, addr);
 

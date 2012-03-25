@@ -42,7 +42,7 @@ private:
 	void OnLButtonUp();
 
     void SetSplitterPosition(int iPos, const bool &bUpdate = true);
-	bool IsCursorOverSplitter(const int &iX, const int &iY);
+	bool IsCursorOverSplitter(const int &iX, const int &iY) const;
 
     bool bUpdatePercentagePos;
 };

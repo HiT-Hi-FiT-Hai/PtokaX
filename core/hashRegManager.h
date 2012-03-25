@@ -57,7 +57,7 @@ public:
     void Rem(RegUser * Reg);
     void RemFromTable(RegUser * Reg);
 
-    RegUser* Find(char * sNick, const size_t &iNickLen);
+    RegUser* Find(char * sNick, const size_t &szNickLen);
     RegUser* Find(User * u);
     RegUser* Find(uint32_t hash, char * sNick);
 

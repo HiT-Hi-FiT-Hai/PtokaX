@@ -26,42 +26,34 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
-//---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
 #endif
 //---------------------------------------------------------------------------
 static const char * sEmpty = "";
 //---------------------------------------------------------------------------
 
-void string::stralloc(const char * sTxt, const size_t & iLen) {
-	iDataLen = iLen;
+void string::stralloc(const char * sTxt, const size_t &szLen) {
+	szDataLen = szLen;
 
-	if(iDataLen == 0) {
+	if(szDataLen == 0) {
 		sData = (char *)sEmpty;
 		return;
 	}
 
-	sData = (char *)malloc(iDataLen+1);
+	sData = (char *)malloc(szDataLen+1);
 	if(sData == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+1))+
-			" bytes of memory for sData in string::stralloc(const char *, const size_t &)!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
-        exit(EXIT_FAILURE);
+		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sData in string::stralloc\n", (uint64_t)(szDataLen+1));
+
+        return;
 	}
 
-	memcpy(sData, sTxt, iDataLen);
-	sData[iDataLen] = '\0';
+	memcpy(sData, sTxt, szDataLen);
+	sData[szDataLen] = '\0';
 }
 //---------------------------------------------------------------------------
 
 string::string() {
 	sData = (char *)sEmpty;
-    iDataLen = 0;
+    szDataLen = 0;
 }
 //---------------------------------------------------------------------------
 
@@ -70,8 +62,8 @@ string::string(const char * sTxt) {
 }
 //---------------------------------------------------------------------------
 
-string::string(const char * sTxt, const size_t & iLen) {
-	stralloc(sTxt, iLen);
+string::string(const char * sTxt, const size_t &szLen) {
+	stralloc(sTxt, szLen);
 }
 //---------------------------------------------------------------------------
 
@@ -129,79 +121,67 @@ string::string(const int64_t & i64Number) {
 //---------------------------------------------------------------------------
 
 string::string(const string & sStr1, const string & sStr2) {
-    iDataLen = sStr1.size()+sStr2.size();
+    szDataLen = sStr1.size()+sStr2.size();
 
-    if(iDataLen == 0) {
+    if(szDataLen == 0) {
         sData = (char *)sEmpty;
         return;
     }
 
-    sData = (char *)malloc(iDataLen+1);
+    sData = (char *)malloc(szDataLen+1);
     if(sData == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+1))+
-            " bytes of memory for sData in string::string(const string &, const string &)!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-        AppendSpecialLog(sDbgstr);
-        exit(EXIT_FAILURE);
+        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sData in string::string(string, string)\n", (uint64_t)(szDataLen+1));
+
+        return;
     }
 
     memcpy(sData, sStr1.c_str(), sStr1.size());
     memcpy(sData+sStr1.size(), sStr2.c_str(), sStr2.size());
-    sData[iDataLen] = '\0';
+    sData[szDataLen] = '\0';
 }
 //---------------------------------------------------------------------------
 
 string::string(const char * sTxt, const string & sStr) {
-    size_t iLen = strlen(sTxt);
-	iDataLen = iLen+sStr.size();
+    size_t szLen = strlen(sTxt);
+	szDataLen = szLen+sStr.size();
 
-    if(iDataLen == 0) {
+    if(szDataLen == 0) {
         sData = (char *)sEmpty;
         return;
     }
 
-    sData = (char *)malloc(iDataLen+1);
+    sData = (char *)malloc(szDataLen+1);
     if(sData == NULL) {
-        string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+1))+
-            " bytes of memory for sData in string::string(const char *, const string &)!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-        AppendSpecialLog(sDbgstr);
-        exit(EXIT_FAILURE);
+        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sData in string::string(char, string)\n", (uint64_t)(szDataLen+1));
+
+        return;
     }
 
-    memcpy(sData, sTxt, iLen);
-    memcpy(sData+iLen, sStr.c_str(), sStr.size());
-    sData[iDataLen] = '\0';
+    memcpy(sData, sTxt, szLen);
+    memcpy(sData+szLen, sStr.c_str(), sStr.size());
+    sData[szDataLen] = '\0';
 }
 //---------------------------------------------------------------------------
 
 string::string(const string & sStr, const char * sTxt) {
-    size_t iLen = strlen(sTxt);
-	iDataLen = sStr.size()+iLen;
+    size_t szLen = strlen(sTxt);
+	szDataLen = sStr.size()+szLen;
 
-    if(iDataLen == 0) {
+    if(szDataLen == 0) {
         sData = (char *)sEmpty;
         return;
     }
 
-    sData = (char *)malloc(iDataLen+1);
+    sData = (char *)malloc(szDataLen+1);
     if(sData == NULL) {
-        string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+1))+
-            " bytes of memory for sData in string::string(const string &, const char *)!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-        AppendSpecialLog(sDbgstr);
-        exit(EXIT_FAILURE);
+        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sData in string::string(string, char)\n", (uint64_t)(szDataLen+1));
+
+        return;
     }
 
     memcpy(sData, sStr.c_str(), sStr.size());
-    memcpy(sData+sStr.size(), sTxt, iLen);
-    sData[iDataLen] = '\0';
+    memcpy(sData+sStr.size(), sTxt, szLen);
+    sData[szDataLen] = '\0';
 }
 //---------------------------------------------------------------------------
 
@@ -213,7 +193,7 @@ string::~string() {
 //---------------------------------------------------------------------------
 
 size_t string::size() const {
-    return iDataLen;
+    return szDataLen;
 }
 //---------------------------------------------------------------------------
 
@@ -228,7 +208,7 @@ void string::clear() {
     }
 
 	sData = (char *)sEmpty;
-    iDataLen = 0;
+    szDataLen = 0;
 }
 //---------------------------------------------------------------------------
 
@@ -251,33 +231,27 @@ string operator+(const char * sTxt, const string & sStr) {
 //---------------------------------------------------------------------------
 
 string & string::operator+=(const char * sTxt) {
-    size_t iLen = strlen(sTxt);
+    size_t szLen = strlen(sTxt);
 
     char * oldbuf = sData;
 
     if(sData == sEmpty) {
-        sData = (char *)malloc(iDataLen+iLen+1);
+        sData = (char *)malloc(szDataLen+szLen+1);
     } else {
-        sData = (char *)realloc(oldbuf, iDataLen+iLen+1);
+        sData = (char *)realloc(oldbuf, szDataLen+szLen+1);
     }
 
     if(sData == NULL) {
-        string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+iLen+1))+
-            " bytes of memory for sData in string::operator+=(const char *)!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-        if(oldbuf != sEmpty) {
-            free(oldbuf);
-        }
+        sData = oldbuf;
 
-        AppendSpecialLog(sDbgstr);
-        exit(EXIT_FAILURE);
+        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sData in string::operator+=(char)\n", (uint64_t)(szDataLen+szLen+1));
+
+        return *this;
     }
 
-    memcpy(sData+iDataLen, sTxt, iLen);
-	iDataLen += iLen;
-	sData[iDataLen] = '\0';
+    memcpy(sData+szDataLen, sTxt, szLen);
+	szDataLen += szLen;
+	sData[szDataLen] = '\0';
 
     return *this;
 }
@@ -291,27 +265,22 @@ string & string::operator+=(const string & sStr) {
     char * oldbuf = sData;
 
     if(sData == sEmpty) {
-        sData = (char *)malloc(iDataLen+sStr.size()+1);
+        sData = (char *)malloc(szDataLen+sStr.size()+1);
     } else {
-        sData = (char *)realloc(oldbuf, iDataLen+sStr.size()+1);
+        sData = (char *)realloc(oldbuf, szDataLen+sStr.size()+1);
     }
+
     if(sData == NULL) {
-        string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iDataLen+sStr.size()+1))+
-            " bytes of memory for sData in string::operator+=(const char *)!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-        if(oldbuf != sEmpty) {
-            free(oldbuf);
-        }
+        sData = oldbuf;
 
-        AppendSpecialLog(sDbgstr);
-        exit(EXIT_FAILURE);
+        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sData in string::operator+=(string)\n", (uint64_t)(szDataLen+sStr.size()+1));
+
+        return *this;
     }
 
-    memcpy(sData+iDataLen, sStr.c_str(), sStr.size());
-	iDataLen += sStr.size();
-	sData[iDataLen] = '\0';
+    memcpy(sData+szDataLen, sStr.c_str(), sStr.size());
+	szDataLen += sStr.size();
+	sData[szDataLen] = '\0';
 
     return *this;
 }
@@ -340,8 +309,8 @@ string & string::operator=(const string & sStr) {
 //---------------------------------------------------------------------------
 
 bool string::operator==(const char * sTxt) {
-    if(iDataLen != strlen(sTxt) || 
-        memcmp(sData, sTxt, iDataLen) != 0) {
+    if(szDataLen != strlen(sTxt) || 
+        memcmp(sData, sTxt, szDataLen) != 0) {
         return false;
     }
 
@@ -350,8 +319,8 @@ bool string::operator==(const char * sTxt) {
 //---------------------------------------------------------------------------
 
 bool string::operator==(const string & sStr) {
-    if(iDataLen != sStr.size() || 
-        memcmp(sData, sStr.c_str(), iDataLen) != 0) {
+    if(szDataLen != sStr.size() || 
+        memcmp(sData, sStr.c_str(), szDataLen) != 0) {
         return false;
     }
 

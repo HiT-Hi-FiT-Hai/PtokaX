@@ -28,10 +28,6 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
-//---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
 #endif
 //---------------------------------------------------------------------------
 TextFileMan *TextFileManager = NULL;
@@ -41,9 +37,7 @@ TextFileMan::TextFile::~TextFile() {
 #ifdef _WIN32
     if(sCommand != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sCommand) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate sCommand in ~TextFile! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-			AppendSpecialLog(sDbgstr);
+			AppendDebugLog("%s - [MEM] Cannot deallocate sCommand in TextFileMan::TextFile::~TextFile\n", 0);
         }
     }
 #else
@@ -53,9 +47,7 @@ TextFileMan::TextFile::~TextFile() {
 #ifdef _WIN32
     if(sText != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sText) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate sText in ~TextFile! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-			AppendSpecialLog(sDbgstr);
+			AppendDebugLog("%s - [MEM] Cannot deallocate sText in TextFileMan::TextFile::~TextFile\n", 0);
         }
     }
 #else
@@ -88,62 +80,52 @@ bool TextFileMan::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = fals
         TextFile * cur = next;
         next = cur->next;
 
-#ifdef _WIN32
-        if(stricmp(cur->sCommand, cmd) == 0) {
-#else
 		if(strcasecmp(cur->sCommand, cmd) == 0) {
-#endif
             bool bInPM = (SettingManager->bBools[SETBOOL_SEND_TEXT_FILES_AS_PM] == true || fromPM);
-            size_t iHubSecLen = (size_t)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC];
-            size_t iChatLen = 0;
+            size_t szHubSecLen = (size_t)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC];
+            size_t szChatLen = 0;
 
             // PPK ... to chat or to PM ???
             if(bInPM == true) {
-                iChatLen = 18+u->ui8NickLen+(2*iHubSecLen)+strlen(cur->sText);
+                szChatLen = 18+u->ui8NickLen+(2*szHubSecLen)+strlen(cur->sText);
             } else {
-                iChatLen = 4+iHubSecLen+strlen(cur->sText);
+                szChatLen = 4+szHubSecLen+strlen(cur->sText);
             }
 
 #ifdef _WIN32
-            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iChatLen);
+            char * sMSG = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szChatLen);
 #else
-			char *MSG = (char *) malloc(iChatLen);
+			char * sMSG = (char *)malloc(szChatLen);
 #endif
-            if(MSG == NULL) {
-        		string sDbgstr = "[BUF] "+string(u->sNick,u->ui8NickLen)+" ("+string(u->sIP, u->ui8IpLen)+") Cannot allocate "+string((uint64_t)iChatLen)+
-        			" bytes of memory in TextFileMan::ProcessTextFilesCmd!";
-#ifdef _WIN32
-        		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-        		AppendSpecialLog(sDbgstr);
+            if(sMSG == NULL) {
+        		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMsg in TextFileMan::ProcessTextFilesCmd\n", (uint64_t)szChatLen);
+
                 return true;
             }
 
             if(bInPM == true) {
-                int iret = sprintf(MSG, "$To: %s From: %s $<%s> %s", u->sNick, SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                    SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], cur->sText);
-                if(CheckSprintf(iret, iChatLen, "TextFileMan::ProcessTextFilesCmd1") == false) {
-                    free(MSG);
+                int iret = sprintf(sMSG, "$To: %s From: %s $<%s> %s", u->sNick, SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
+                    cur->sText);
+                if(CheckSprintf(iret, szChatLen, "TextFileMan::ProcessTextFilesCmd1") == false) {
+                    free(sMSG);
                     return true;
                 }
             } else {
-                int iret = sprintf(MSG,"<%s> %s", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], cur->sText);
-                if(CheckSprintf(iret, iChatLen, "TextFileMan::ProcessTextFilesCmd2") == false) {
-                    free(MSG);
+                int iret = sprintf(sMSG,"<%s> %s", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], cur->sText);
+                if(CheckSprintf(iret, szChatLen, "TextFileMan::ProcessTextFilesCmd2") == false) {
+                    free(sMSG);
                     return true;
                 }
             }
 
-            UserSendCharDelayed(u, MSG, iChatLen-1);
+            UserSendCharDelayed(u, sMSG, szChatLen-1);
 
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
-        		string sDbgstr = "[BUF] Cannot deallocate MSG in TextFileMan::ProcessTextFilesCmd! "+string((uint32_t)GetLastError())+" "+
-        			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-        		AppendSpecialLog(sDbgstr);
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMSG) == 0) {
+        		AppendDebugLog("%s - [MEM] Cannot deallocate sMSG in TextFileMan::ProcessTextFilesCmd\n", 0);
             }
 #else
-			free(MSG);
+			free(sMSG);
 #endif
 
         	return true;
@@ -183,47 +165,55 @@ void TextFileMan::RefreshTextFiles() {
         	FILE *f = fopen((PATH+"\\texts\\"+textfile.name).c_str(), "rb");
 			if(f != NULL) {
 				if(textfile.size != 0) {
-					TextFile * newtxtfile = new TextFile();
+					TextFile * pNewTxtFile = new TextFile();
+					if(pNewTxtFile == NULL) {
+						AppendDebugLog("%s - [MEM] Cannot allocate pNewTxtFile in TextFileMan::RefreshTextFiles\n", 0);
 
-					newtxtfile->sText = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, textfile.size+2);
+						fclose(f);
+						_findclose(hFile);
 
-					if(newtxtfile->sText == NULL) {
-						string sDbgstr = "[BUF] Cannot allocate "+string((uint32_t)textfile.size+2)+
-	                        " bytes of memory for sText in TextFileMan::RefreshTextFiles! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+                        return;
+                    }
 
-						AppendSpecialLog(sDbgstr);
+					pNewTxtFile->sText = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, textfile.size+2);
+
+					if(pNewTxtFile->sText == NULL) {
+						AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sText in TextFileMan::RefreshTextFiles\n", (uint64_t)(textfile.size+2));
+
+						fclose(f);
+						_findclose(hFile);
 
 						return;
  					}
 
-					size_t size = fread(newtxtfile->sText, 1, textfile.size, f);
+					size_t size = fread(pNewTxtFile->sText, 1, textfile.size, f);
 
-					newtxtfile->sText[size] = '|';
-					newtxtfile->sText[size+1] = '\0';
+					pNewTxtFile->sText[size] = '|';
+					pNewTxtFile->sText[size+1] = '\0';
 
-					newtxtfile->sCommand = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, strlen(textfile.name)-3);
-					if(newtxtfile->sCommand == NULL) {
-						string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(strlen(textfile.name)-3))+
-                        " bytes of memory for sCommand in TextFileMan::RefreshTextFiles! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
+					pNewTxtFile->sCommand = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, strlen(textfile.name)-3);
+					if(pNewTxtFile->sCommand == NULL) {
+						AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sCommand in TextFileMan::RefreshTextFiles\n", (uint64_t)(strlen(textfile.name)-3));
 
-						AppendSpecialLog(sDbgstr);
+						fclose(f);
+						_findclose(hFile);
 
 						return;
 					}
 
-					memcpy(newtxtfile->sCommand, textfile.name, strlen(textfile.name)-4);
-					newtxtfile->sCommand[strlen(textfile.name)-4] = '\0';
+					memcpy(pNewTxtFile->sCommand, textfile.name, strlen(textfile.name)-4);
+					pNewTxtFile->sCommand[strlen(textfile.name)-4] = '\0';
 
-					newtxtfile->prev = NULL;
+					pNewTxtFile->prev = NULL;
 
 					if(TextFiles == NULL) {
-						newtxtfile->next = NULL;
+						pNewTxtFile->next = NULL;
 					} else {
-						TextFiles->prev = newtxtfile;
-						newtxtfile->next = TextFiles;
+						TextFiles->prev = pNewTxtFile;
+						pNewTxtFile->next = TextFiles;
 					}
 
-					TextFiles = newtxtfile;
+					TextFiles = pNewTxtFile;
 				}
 
 				fclose(f);
@@ -256,41 +246,52 @@ void TextFileMan::RefreshTextFiles() {
         FILE *f = fopen(txtfile.c_str(), "rb");
 		if(f != NULL) {
 			if(s_buf.st_size != 0) {
-                TextFile * newtxtfile = new TextFile();
-				newtxtfile->sText = (char *) malloc(s_buf.st_size+2);
-				if(newtxtfile->sText == NULL) {
-					string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)s_buf.st_size+2)+
-                        " bytes of memory for sText in TextFileMan::RefreshTextFiles!";
-					AppendSpecialLog(sDbgstr);
-					closedir(p_txtdir);
-                    return;
-                }
-    	        size_t size = fread(newtxtfile->sText, 1, s_buf.st_size, f);
-				newtxtfile->sText[size] = '|';
-                newtxtfile->sText[size+1] = '\0';
+                TextFile * pNewTxtFile = new TextFile();
+				if(pNewTxtFile == NULL) {
+					AppendDebugLog("%s - [MEM] Cannot allocate pNewTxtFile in TextFileMan::RefreshTextFiles1\n", 0);
 
-				newtxtfile->sCommand = (char *) malloc(strlen(p_dirent->d_name)-3);
-				if(newtxtfile->sCommand == NULL) {
-					string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(strlen(p_dirent->d_name)-3))+
-                        " bytes of memory for sCommand in TextFileMan::RefreshTextFiles!";
-					AppendSpecialLog(sDbgstr);
+					fclose(f);
 					closedir(p_txtdir);
+
                     return;
                 }
 
-                memcpy(newtxtfile->sCommand, p_dirent->d_name, strlen(p_dirent->d_name)-4);
-                newtxtfile->sCommand[strlen(p_dirent->d_name)-4] = '\0';
+				pNewTxtFile->sText = (char *)malloc(s_buf.st_size+2);
+				if(pNewTxtFile->sText == NULL) {
+					AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sText in TextFileMan::RefreshTextFiles\n", (uint64_t)(s_buf.st_size+2));
 
-                newtxtfile->prev = NULL;
+					fclose(f);
+					closedir(p_txtdir);
+
+                    return;
+                }
+    	        size_t size = fread(pNewTxtFile->sText, 1, s_buf.st_size, f);
+				pNewTxtFile->sText[size] = '|';
+                pNewTxtFile->sText[size+1] = '\0';
+
+				pNewTxtFile->sCommand = (char *)malloc(strlen(p_dirent->d_name)-3);
+				if(pNewTxtFile->sCommand == NULL) {
+					AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sCommand in TextFileMan::RefreshTextFiles\n", (uint64_t)(strlen(p_dirent->d_name)-3));
+
+					fclose(f);
+					closedir(p_txtdir);
+
+                    return;
+                }
+
+                memcpy(pNewTxtFile->sCommand, p_dirent->d_name, strlen(p_dirent->d_name)-4);
+                pNewTxtFile->sCommand[strlen(p_dirent->d_name)-4] = '\0';
+
+                pNewTxtFile->prev = NULL;
 
                 if(TextFiles == NULL) {
-                    newtxtfile->next = NULL;
+                    pNewTxtFile->next = NULL;
                 } else {
-                    TextFiles->prev = newtxtfile;
-                    newtxtfile->next = TextFiles;
+                    TextFiles->prev = pNewTxtFile;
+                    pNewTxtFile->next = TextFiles;
                 }
 
-                TextFiles = newtxtfile;
+                TextFiles = pNewTxtFile;
     	    }
 
             fclose(f);

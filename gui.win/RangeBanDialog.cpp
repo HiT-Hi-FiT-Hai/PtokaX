@@ -28,9 +28,7 @@
 //---------------------------------------------------------------------------
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //---------------------------------------------------------------------------
 #include "RangeBansDialog.h"
 //---------------------------------------------------------------------------
@@ -361,8 +359,7 @@ bool RangeBanDialog::OnAccept() {
 	if(pRangeBanToChange == NULL) {
 		RangeBanItem * pRangeBan = new RangeBanItem();
 		if(pRangeBan == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate RangeBan in RangeBanDialog::OnAccept! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-			AppendSpecialLog(sDbgstr);
+			AppendDebugLog("%s - [MEM] Cannot allocate pRangeBan in RangeBanDialog::OnAccept\n", 0);
 			return false;
 		}
 
@@ -408,11 +405,10 @@ bool RangeBanDialog::OnAccept() {
         int iReasonLen = ::GetWindowTextLength(hWndWindowItems[EDT_REASON]);
 
 		if(iReasonLen != 0) {
-            pRangeBan->sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
+            pRangeBan->sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
             if(pRangeBan->sReason == NULL) {
-    			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen+1)+
-    				" bytes of memory for sReason in RangeBanDialog::OnAccept! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-                AppendSpecialLog(sDbgstr);
+                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in RangeBanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
+
                 delete pRangeBan;
 
                 return false;
@@ -424,11 +420,10 @@ bool RangeBanDialog::OnAccept() {
         int iByLen = ::GetWindowTextLength(hWndWindowItems[EDT_BY]);
 
         if(iByLen != 0) {
-            pRangeBan->sBy = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
+            pRangeBan->sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
             if(pRangeBan->sBy == NULL) {
-                string sDbgstr = "[BUF] Cannot allocate "+string(iByLen+1)+
-					" bytes of memory for sBy in RangeBanDialog::OnAccept! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-                AppendSpecialLog(sDbgstr);
+                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in RangeBanDialog::OnAccept\n", (uint64_t)(iByLen+1));
+
                 delete pRangeBan;
 
     			return false;
@@ -468,11 +463,9 @@ bool RangeBanDialog::OnAccept() {
 
         char * sReason = NULL;
 		if(iReasonLen != 0) {
-            sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
+            sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
             if(sReason == NULL) {
-    			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen+1)+
-    				" bytes of memory for sReason in RangeBanDialog::OnAccept! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-                AppendSpecialLog(sDbgstr);
+                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in RangeBanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
 
                 return false;
             }
@@ -484,9 +477,7 @@ bool RangeBanDialog::OnAccept() {
 			if(pRangeBanToChange->sReason == NULL || strcmp(pRangeBanToChange->sReason, sReason) != NULL) {
 				if(pRangeBanToChange->sReason != NULL) {
 					if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pRangeBanToChange->sReason) == 0) {
-						string sDbgstr = "[BUF] Cannot deallocate sReason in RangeBanDialog::OnAccept! "+string((uint32_t)GetLastError())+" "+
-							string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-						AppendSpecialLog(sDbgstr);
+						AppendDebugLog("%s - [MEM] Cannot deallocate sReason in RangeBanDialog::OnAccept\n", 0);
 					}
 					pRangeBanToChange->sReason = NULL;
 				}
@@ -495,9 +486,7 @@ bool RangeBanDialog::OnAccept() {
 			}
 		} else if(pRangeBanToChange->sReason != NULL) {
 			if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pRangeBanToChange->sReason) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate sReason in BanDialog::OnAccept! "+string((uint32_t)GetLastError())+" "+
-					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-				AppendSpecialLog(sDbgstr);
+				AppendDebugLog("%s - [MEM] Cannot deallocate sReason in BanDialog::OnAccept\n", 0);
 			}
 
 			pRangeBanToChange->sReason = NULL;
@@ -505,9 +494,7 @@ bool RangeBanDialog::OnAccept() {
 
         if(sReason != NULL && (pRangeBanToChange->sReason != sReason)) {
 			if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sReason) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate sReason in RangeBanDialog::OnAccept! "+string((uint32_t)GetLastError())+" "+
-					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-				AppendSpecialLog(sDbgstr);
+				AppendDebugLog("%s - [MEM] Cannot deallocate sReason in RangeBanDialog::OnAccept\n", 0);
 			}
         }
 
@@ -515,11 +502,9 @@ bool RangeBanDialog::OnAccept() {
 
         char * sBy = NULL;
         if(iByLen != 0) {
-            sBy = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
+            sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
             if(sBy == NULL) {
-                string sDbgstr = "[BUF] Cannot allocate "+string(iByLen+1)+
-					" bytes of memory for sBy in RangeBanDialog::OnAccept! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-                AppendSpecialLog(sDbgstr);
+                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in RangeBanDialog::OnAccept\n", (uint64_t)(iByLen+1));
 
     			return false;
             }
@@ -531,9 +516,7 @@ bool RangeBanDialog::OnAccept() {
 			if(pRangeBanToChange->sBy == NULL || strcmp(pRangeBanToChange->sBy, sBy) != NULL) {
 				if(pRangeBanToChange->sBy != NULL) {
 					if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pRangeBanToChange->sBy) == 0) {
-						string sDbgstr = "[BUF] Cannot deallocate sBy in RangeBanDialog::OnAccept! "+string((uint32_t)GetLastError())+" "+
-							string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-						AppendSpecialLog(sDbgstr);
+						AppendDebugLog("%s - [MEM] Cannot deallocate sBy in RangeBanDialog::OnAccept\n", 0);
 					}
 					pRangeBanToChange->sBy = NULL;
 				}
@@ -542,18 +525,14 @@ bool RangeBanDialog::OnAccept() {
 			}
 		} else if(pRangeBanToChange->sBy != NULL) {
 			if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pRangeBanToChange->sBy) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate sBy in RangeBanDialog::OnAccept! "+string((uint32_t)GetLastError())+" "+
-					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-				AppendSpecialLog(sDbgstr);
+				AppendDebugLog("%s - [MEM] Cannot deallocate sBy in RangeBanDialog::OnAccept\n", 0);
 			}
 			pRangeBanToChange->sBy = NULL;
         }
 
         if(sBy != NULL && (pRangeBanToChange->sBy != sBy)) {
 			if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sBy) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate sBy in RangeBanDialog::OnAccept! "+string((uint32_t)GetLastError())+" "+
-					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-				AppendSpecialLog(sDbgstr);
+				AppendDebugLog("%s - [MEM] Cannot deallocate sBy in RangeBanDialog::OnAccept\n", 0);
 			}
         }
 

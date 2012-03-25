@@ -220,17 +220,17 @@ struct User {
 struct QzBuf; // for send queue
 //---------------------------------------------------------------------------
 
-void UserMakeLock(User * u);
+bool UserMakeLock(User * u);
 
 bool UserDoRecv(User * u);
 
-void UserSendChar(User * u, const char * cText, const size_t &iTextLen);
+void UserSendChar(User * u, const char * cText, const size_t &szTextLen);
 void UserSendCharDelayed(User * u, const char * cText);
-void UserSendCharDelayed(User * u, const char * cText, const size_t &iTextLen);
+void UserSendCharDelayed(User * u, const char * cText, const size_t &szTextLen);
 void UserSendText(User * u, const string & sText);
 void UserSendTextDelayed(User * u, const string & sText);
 void UserSendQueue(User * u, QzBuf * Queue, bool bChckActSr = true);
-bool UserPutInSendBuf(User * u, const char * Text, const size_t &iTxtLen);
+bool UserPutInSendBuf(User * u, const char * Text, const size_t &szTxtLen);
 bool UserTry2Send(User * u);
 
 void UserSetIP(User * u, char * sNewIP);
@@ -238,10 +238,10 @@ void UserSetNick(User * u, char * sNewNick, const uint8_t &ui8NewNickLen);
 void UserSetMyInfoOriginal(User * u, char * sNewMyInfo, const uint16_t &ui16NewMyInfoLen);
 void UserSetVersion(User * u, char * sNewVer);
 void UserSetPasswd(User * u, char * sNewPass);
-void UserSetLastChat(User * u, char * sNewData, const size_t &iLen);
-void UserSetLastPM(User * u, char * sNewData, const size_t &iLen);
-void UserSetLastSearch(User * u, char * sNewData, const size_t &iLen);
-void UserSetKickMsg(User * u, char * sKickMsg, size_t iLen = 0);
+void UserSetLastChat(User * u, char * sNewData, const size_t &szLen);
+void UserSetLastPM(User * u, char * sNewData, const size_t &szLen);
+void UserSetLastSearch(User * u, char * sNewData, const size_t &szLen);
+void UserSetKickMsg(User * u, char * sKickMsg, size_t szLen = 0);
 
 void UserClose(User * u, bool bNoQuit = false);
 
@@ -257,7 +257,7 @@ void UserHasSuspiciousTag(User * curUser);
 
 bool UserProcessRules(User * u);
 
-void UserAddPrcsdCmd(User * u, const unsigned char &cType, char * sCommand, const size_t &iCommandLen, User * to, const bool &bIsPm = false);
+void UserAddPrcsdCmd(User * u, const unsigned char &cType, char * sCommand, const size_t &szCommandLen, User * to, const bool &bIsPm = false);
 
 void UserAddMeOrIPv4Check(User * pUser);
 

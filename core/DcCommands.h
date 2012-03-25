@@ -55,7 +55,7 @@ private:
     void Unknown(User * curUser, char * sData, const uint32_t &iLen);
     void MyNick(User * pUser, char * sData, const uint32_t &ui32Len);
     
-    bool ValidateUserNick(User * curUser, char * Nick, const size_t &iNickLen, const bool &ValidateNick);
+    bool ValidateUserNick(User * curUser, char * Nick, const size_t &szNickLen, const bool &ValidateNick);
 
 	PassBf * Find(const uint8_t * ui128IpHash);
 	void Remove(PassBf * PassBfItem);
@@ -70,7 +70,7 @@ public:
     void PreProcessData(User * curUser, char * sData, const bool &bCheck, const uint32_t &iLen);
     void ProcessCmds(User * curUser);
 
-    void SRFromUDP(User * curUser, char * sData, const size_t &iLen);
+    void SRFromUDP(User * curUser, char * sData, const size_t &szLen);
     
 	uint32_t iStatChat, iStatCmdUnknown, iStatCmdTo, iStatCmdMyInfo, iStatCmdSearch, iStatCmdSR, iStatCmdRevCTM;
 	uint32_t iStatCmdOpForceMove, iStatCmdMyPass, iStatCmdValidate, iStatCmdKey, iStatCmdGetInfo, iStatCmdGetNickList;

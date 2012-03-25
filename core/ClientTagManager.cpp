@@ -26,23 +26,15 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
-//---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
 #endif
 //---------------------------------------------------------------------------
 ClientTagMan *ClientTagManager = NULL;
 //---------------------------------------------------------------------------
 
 ClientTagMan::ClientTagMan() {
-    cliTags = (ClientTag *) calloc(256, sizeof(ClientTag));
+    cliTags = (ClientTag *)calloc(256, sizeof(ClientTag));
     if(cliTags == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate cliTags!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [MEM] Cannot allocate cliTags in ClientTagMan::ClientTagMan\n", 0);
     	exit(EXIT_FAILURE);
     }
 
@@ -101,12 +93,12 @@ void ClientTagMan::Load() {
 		TiXmlElement clienttags("ClientTags");
 		const char* ClientPatts[] = { "++", "DCGUI", "DC", "oDC", "DC:PRO", "QuickDC", "LDC++", "R2++", "Goofy++", "PWDC++", "BDC++", "zK++" };
 		const char* ClientNames[] = { "DC++", "Valknut", "NMDC2", "oDC", "DC:PRO", "QuickDC", "LDC++", "R2++", "Goofy++", "PWDC++", "BDC++", "zK++" };
-		for(uint8_t i = 0; i < 12; i++) {
+		for(uint8_t ui8i = 0; ui8i < 12; ui8i++) {
 			TiXmlElement clientpatt("ClientTag");
-			clientpatt.InsertEndChild(TiXmlText(ClientPatts[i]));
+			clientpatt.InsertEndChild(TiXmlText(ClientPatts[ui8i]));
 
 			TiXmlElement clientname("ClientName");
-			clientname.InsertEndChild(TiXmlText(ClientNames[i]));
+			clientname.InsertEndChild(TiXmlText(ClientNames[ui8i]));
 
 			TiXmlElement clienttag("Client");
 			clienttag.InsertEndChild(clientpatt);
@@ -114,9 +106,9 @@ void ClientTagMan::Load() {
 
 			clienttags.InsertEndChild(clienttag);
 
-			strcpy(cliTags[i].TagPatt, ClientPatts[i]);
-			cliTags[i].PattLen = strlen(cliTags[i].TagPatt);
-			strcpy(cliTags[i].CliName, ClientNames[i]);
+			strcpy(cliTags[ui8i].TagPatt, ClientPatts[ui8i]);
+			cliTags[ui8i].PattLen = strlen(cliTags[ui8i].TagPatt);
+			strcpy(cliTags[ui8i].CliName, ClientNames[ui8i]);
 		}
 		doc.InsertEndChild(clienttags);
 		doc.SaveFile();

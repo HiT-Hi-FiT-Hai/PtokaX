@@ -33,9 +33,7 @@
 //---------------------------------------------------------------------------
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //---------------------------------------------------------------------------
 #include "LineDialog.h"
 #include "MainWindow.h"
@@ -241,11 +239,9 @@ char * MainWindowPageStats::GetPageName() {
 //------------------------------------------------------------------------------
 
 void OnRedirectAllOk(char * sLine, const int &iLen) {
-    char *sMSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+16);
+    char *sMSG = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+16);
     if(sMSG == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(iLen+16)+
-			" bytes of memory for sMSG in OnRedirectAllOk! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMSG in OnRedirectAllOk\n", (uint64_t)(iLen+16));
         return;
     }
 
@@ -264,9 +260,7 @@ void OnRedirectAllOk(char * sLine, const int &iLen) {
     }
 
     if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMSG) == 0) {
-		string sDbgstr = "[BUF] Cannot deallocate sMSG in OnRedirectAllOk! "+string((uint32_t)GetLastError())+" "+
-			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [MEM] Cannot deallocate sMSG in OnRedirectAllOk\n", 0);
 	}
 }
 //---------------------------------------------------------------------------
@@ -274,18 +268,19 @@ void OnRedirectAllOk(char * sLine, const int &iLen) {
 void MainWindowPageStats::OnRedirectAll() {
     UdpDebug->Broadcast("[SYS] Redirect All.");
 
-	LineDialog * RedirectAllDlg = new LineDialog(&OnRedirectAllOk);
-	RedirectAllDlg->DoModal(::GetParent(m_hWnd), LanguageManager->sTexts[LAN_REDIRECT_ALL_USERS_TO],
-        SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS] == NULL ? "" : SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS]);
+	LineDialog * pRedirectAllDlg = new LineDialog(&OnRedirectAllOk);
+
+	if(pRedirectAllDlg != NULL) {
+        pRedirectAllDlg->DoModal(::GetParent(m_hWnd), LanguageManager->sTexts[LAN_REDIRECT_ALL_USERS_TO],
+            SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS] == NULL ? "" : SettingManager->sTexts[SETTXT_REDIRECT_ADDRESS]);
+    }
 }
 //---------------------------------------------------------------------------
 
 void OnMassMessageOk(char * sLine, const int &iLen) {
-    char *sMSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+256);
+    char *sMSG = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+256);
     if(sMSG == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(iLen+256)+
-			" bytes of memory for sMSG in OnMassMessageOk! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMSG in OnMassMessageOk\n", (uint64_t)(iLen+256));
         return;
     }
 
@@ -297,22 +292,21 @@ void OnMassMessageOk(char * sLine, const int &iLen) {
         return;
     }
 
-    QueueDataItem * newItem = globalQ->CreateQueueDataItem(sMSG, imsgLen, NULL, 0, globalqueue::PM2ALL);
+    globalQ->SingleItemStore(sMSG, imsgLen, NULL, 0, globalqueue::PM2ALL);
 
     if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMSG) == 0) {
-		string sDbgstr = "[BUF] Cannot deallocate sMSG in OnMassMessageOk! "+string((uint32_t)GetLastError())+" "+
-			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [MEM] Cannot deallocate sMSG in OnMassMessageOk\n", 0);
 	}
-
-    globalQ->SingleItemsStore(newItem);
 }
 
 //---------------------------------------------------------------------------
 
 void MainWindowPageStats::OnMassMessage() {
-	LineDialog * MassMsgDlg = new LineDialog(&OnMassMessageOk);
-	MassMsgDlg->DoModal(::GetParent(m_hWnd), LanguageManager->sTexts[LAN_MASS_MSG], "");
+	LineDialog * pMassMsgDlg = new LineDialog(&OnMassMessageOk);
+
+	if(pMassMsgDlg != NULL) {
+        pMassMsgDlg->DoModal(::GetParent(m_hWnd), LanguageManager->sTexts[LAN_MASS_MSG], "");
+    }
 }
 //---------------------------------------------------------------------------
 

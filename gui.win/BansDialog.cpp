@@ -28,9 +28,7 @@
 //---------------------------------------------------------------------------
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //---------------------------------------------------------------------------
 #include "GuiSettingManager.h"
 #include "BanDialog.h"
@@ -90,7 +88,10 @@ LRESULT BansDialog::BansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             switch(LOWORD(wParam)) {
                 case (BTN_ADD_BAN+100): {
                     pBanDialog = new BanDialog();
-                    pBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE]);
+
+                    if(pBanDialog != NULL) {
+                        pBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE]);
+                    }
 
                     return 0;
                 }
@@ -163,7 +164,10 @@ LRESULT BansDialog::BansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     BanItem * pBan = (BanItem *)ListViewGetItem(hWndWindowItems[LV_BANS], ((LPNMITEMACTIVATE)lParam)->iItem);
 
                     pBanDialog = new BanDialog();
-                    pBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pBan);
+
+                    if(pBanDialog != NULL) {
+                        pBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pBan);
+                    }
 
                     return 0;
                 } else if(((LPNMHDR)lParam)->code == NM_RETURN) {
@@ -648,6 +652,9 @@ void BansDialog::ChangeBan() {
     BanItem * pBan = (BanItem *)ListViewGetItem(hWndWindowItems[LV_BANS], iSel);
 
     pBanDialog = new BanDialog();
-    pBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pBan);
+
+    if(pBanDialog != NULL) {
+        pBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pBan);
+    }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

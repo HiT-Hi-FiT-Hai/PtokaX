@@ -70,11 +70,12 @@ public:
     void DisconnectAll();
     void AddUser(User * u);
     void RemUser(User * u);
-    void Add2NickList(char * Nick, const size_t &iNickLen, const bool &isOp);
-    void Add2OpList(char * Nick, const size_t &iNickLen);
+    void Add2NickList(User * u);
+    void AddBot2NickList(char * Nick, const size_t &szNickLen, const bool &isOp);
+    void Add2OpList(User * u);
     void DelFromNickList(char * Nick, const bool &isOp);
     void DelFromOpList(char * Nick);
-    void SendChat2All(User * cur, char * data, const size_t &iChatLen);
+    void SendChat2All(User * cur, char * data, const size_t &szChatLen);
 	void Add2MyInfos(User * u);
 	void DelFromMyInfos(User * u);
     void Add2MyInfosTag(User * u);

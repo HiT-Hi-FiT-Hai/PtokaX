@@ -26,9 +26,7 @@
 //---------------------------------------------------------------------------
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //---------------------------------------------------------------------------
 #include "Resources.h"
 //---------------------------------------------------------------------------
@@ -72,9 +70,12 @@ LRESULT LineDialog::LineDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     int iLen = ::GetWindowTextLength(hWndWindowItems[EDT_LINE]);
                     if(iLen != 0) {
                         char * sBuf = new char[iLen + 1];
-                        ::GetWindowText(hWndWindowItems[EDT_LINE], sBuf, iLen + 1);
-                        (*pOnOk)(sBuf, iLen);
-                        delete [] sBuf;
+
+                        if(sBuf != NULL) {
+                            ::GetWindowText(hWndWindowItems[EDT_LINE], sBuf, iLen + 1);
+                            (*pOnOk)(sBuf, iLen);
+                            delete [] sBuf;
+                        }
                     }
                 }
                 case IDCANCEL:

@@ -27,19 +27,15 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
-//---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
 #endif
 //---------------------------------------------------------------------------
 hashMan *hashManager = NULL;
 //---------------------------------------------------------------------------
 
 hashMan::hashMan() {
-    for(uint32_t i = 0; i < 65536; i++) {
-        nicktable[i] = NULL;
-        iptable[i] = NULL;
+    for(uint32_t ui32i = 0; ui32i < 65536; ui32i++) {
+        nicktable[ui32i] = NULL;
+        iptable[ui32i] = NULL;
     }
 
     //Memo("hashManager created");
@@ -48,8 +44,8 @@ hashMan::hashMan() {
 
 hashMan::~hashMan() {
     //Memo("hashManager destroyed");
-    for(uint32_t i = 0; i < 65536; i++) {
-		IpTableItem * next = iptable[i];
+    for(uint32_t ui32i = 0; ui32i < 65536; ui32i++) {
+		IpTableItem * next = iptable[ui32i];
         
         while(next != NULL) {
             IpTableItem * cur = next;
@@ -78,12 +74,11 @@ void hashMan::Add(User * u) {
         iptable[ui16dx] = new IpTableItem();
 
         if(iptable[ui16dx] == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate IpTableItem in hashMan::Add!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            exit(EXIT_FAILURE);
+            u->ui32BoolBits |= User::BIT_ERROR;
+            UserClose(u);
+
+            AppendDebugLog("%s - [MEM] Cannot allocate IpTableItem in hashMan::Add\n", 0);
+            return;
         }
 
         iptable[ui16dx]->next = NULL;
@@ -114,12 +109,11 @@ void hashMan::Add(User * u) {
     IpTableItem * cur = new IpTableItem();
 
     if(cur == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate IpTableItem2 in hashMan::Add!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
-        exit(EXIT_FAILURE);
+        u->ui32BoolBits |= User::BIT_ERROR;
+        UserClose(u);
+
+		AppendDebugLog("%s - [MEM] Cannot allocate IpTableItem2 in hashMan::Add\n", 0);
+		return;
     }
 
     cur->FirstUser = u;
@@ -217,8 +211,8 @@ void hashMan::Remove(User * u) {
 }
 //---------------------------------------------------------------------------
 
-User * hashMan::FindUser(char * sNick, const size_t &iNickLen) {
-    uint32_t ui32Hash = HashNick(sNick, iNickLen);
+User * hashMan::FindUser(char * sNick, const size_t &szNickLen) {
+    uint32_t ui32Hash = HashNick(sNick, szNickLen);
 
     uint16_t ui16dx = 0;
     memcpy(&ui16dx, &ui32Hash, sizeof(uint16_t));
@@ -232,11 +226,7 @@ User * hashMan::FindUser(char * sNick, const size_t &iNickLen) {
             next = cur->hashtablenext;
 
             // we are looking for duplicate string
-#ifdef _WIN32
-			if(cur->ui32NickHash == ui32Hash && cur->ui8NickLen == iNickLen && stricmp(cur->sNick, sNick) == 0) {
-#else
-			if(cur->ui32NickHash == ui32Hash && cur->ui8NickLen == iNickLen && strcasecmp(cur->sNick, sNick) == 0) {
-#endif
+			if(cur->ui32NickHash == ui32Hash && cur->ui8NickLen == szNickLen && strcasecmp(cur->sNick, sNick) == 0) {
                 return cur;
             }
         }            
@@ -260,11 +250,7 @@ User * hashMan::FindUser(User * u) {
             next = cur->hashtablenext;
 
             // we are looking for duplicate string
-#ifdef _WIN32
-            if(cur->ui32NickHash == u->ui32NickHash && cur->ui8NickLen == u->ui8NickLen && stricmp(cur->sNick, u->sNick) == 0) {
-#else
 			if(cur->ui32NickHash == u->ui32NickHash && cur->ui8NickLen == u->ui8NickLen && strcasecmp(cur->sNick, u->sNick) == 0) {
-#endif
                 return cur;
             }
         }            

@@ -37,7 +37,7 @@ public:
 	const char * Find(const uint8_t * ui128IpHash, const bool &bCountryName);
 	uint8_t Find(const uint8_t * ui128IpHash);
 
-    const char * GetCountry(const uint8_t &ui8dx, const bool &bCountryName);
+    const char * GetCountry(const uint8_t &ui8dx, const bool &bCountryName) const;
 };
 //---------------------------------------------------------------------------
 extern IP2CC *IP2Country;

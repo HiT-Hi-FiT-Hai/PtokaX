@@ -35,11 +35,11 @@ public:
     GuiSettingManager(void);
     ~GuiSettingManager(void);
 
-    bool GetDefaultBool(size_t iBoolId);
-    int32_t GetDefaultInteger(size_t iIntegerId);
+    bool GetDefaultBool(const size_t &szBoolId) const;
+    int32_t GetDefaultInteger(const size_t &szIntegerId) const;
 
-    void SetBool(size_t iBoolId, const bool &bValue); //g_GuiSettingManager->SetBool()
-    void SetInteger(size_t iIntegerId, const int32_t &iValue); //g_GuiSettingManager->SetInteger()
+    void SetBool(const size_t &szBoolId, const bool &bValue); //g_GuiSettingManager->SetBool()
+    void SetInteger(const size_t &szIntegerId, const int32_t &i32Value); //g_GuiSettingManager->SetInteger()
 
     void Save();
 };

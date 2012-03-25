@@ -26,8 +26,7 @@ struct Script;
 //---------------------------------------------------------------------------
 
 struct ScriptBot {
-    ScriptBot(char * Nick, const size_t &iNickLen, char * Description, const size_t &iDscrLen, 
-        char * Email, const size_t &iEmlLen, const bool &isOP);
+    ScriptBot(char * sNick, const size_t &szNickLen, char * sDescription, const size_t &szDscrLen, char * sEmail, const size_t &szEmailLen, const bool &bOP);
     ~ScriptBot();
 
     char *sNick;
@@ -41,9 +40,9 @@ struct ScriptBot {
 
 struct ScriptTimer {
 #ifdef _WIN32
-    ScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &iLen);
+    ScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &szLen);
 #else
-	ScriptTimer(char * sFunctName, const size_t &iLen);
+	ScriptTimer(char * sFunctName, const size_t &szLen);
 #endif
     ~ScriptTimer();
 
@@ -97,11 +96,6 @@ bool ScriptStart(Script * cur);
 void ScriptStop(Script * cur);
 
 int ScriptGetGC(Script * cur);
-#ifdef _WIN32
-    #ifndef _MSC_VER
-	   void ScriptGetGC(Script * cur, const uint32_t &i);
-    #endif
-#endif
 
 void ScriptOnStartup(Script * cur);
 void ScriptOnExit(Script * cur);

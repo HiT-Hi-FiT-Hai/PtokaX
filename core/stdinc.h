@@ -36,21 +36,19 @@
 #include <math.h>
 #ifdef _WIN32
 	#include <dos.h>
-	#ifndef _MSC_VER
-		#include <dir.h>
-	#else
-		#pragma warning(disable: 4996) // Deprecated stricmp
+
+	#pragma warning(disable: 4996) // Deprecated stricmp
 	
-		typedef signed __int8 int8_t;
-		typedef signed __int16 int16_t;
-		typedef signed __int32 int32_t;
-		typedef signed __int64 int64_t;
+	typedef signed __int8 int8_t;
+	typedef signed __int16 int16_t;
+	typedef signed __int32 int32_t;
+	typedef signed __int64 int64_t;
 	
-		typedef unsigned __int8 uint8_t;
-		typedef unsigned __int16 uint16_t;
-		typedef unsigned __int32 uint32_t;
-		typedef unsigned __int64 uint64_t;
-	#endif
+	typedef unsigned __int8 uint8_t;
+	typedef unsigned __int16 uint16_t;
+	typedef unsigned __int32 uint32_t;
+	typedef unsigned __int64 uint64_t;
+
 	#include <winsock2.h>
 	#include <ws2tcpip.h>
 	#ifdef _BUILD_GUI
@@ -96,13 +94,12 @@
 #include "pxstring.h"
 //---------------------------------------------------------------------------
 #define PtokaXVersionString "0.4.2.0"
-#define BUILD_NUMBER "326"
-#define sErrOutOfMem "[ERR] Out of memory..."
+#define BUILD_NUMBER "373"
 
 #ifdef _WIN32
-    #define NEW_LINE_CHARS "\r\n"
-#else
-    #define NEW_LINE_CHARS "\n"
+    #define PRIu64 "I64u"
+    #define strcasecmp stricmp
+    #define strncasecmp strnicmp
 #endif
 
 #ifdef _BUILD_GUI
