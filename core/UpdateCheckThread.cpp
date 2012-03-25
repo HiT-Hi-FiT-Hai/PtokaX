@@ -85,7 +85,7 @@ unsigned __stdcall ExecuteUpdateCheck(void * /*pArguments*/) {
 void UpdateCheckThread::Resume() {
 	hThread = (HANDLE)_beginthreadex(NULL, 0, ExecuteUpdateCheck, NULL, 0, NULL);
 	if(hThread == 0) {
-		AppendSpecialLog("[ERR] Failed to create new UpdateCheckThread!");
+		AppendDebugLog("%s - [ERR] Failed to create new UpdateCheckThread\n", 0);
     }
 }
 //---------------------------------------------------------------------------
@@ -241,9 +241,7 @@ void UpdateCheckThread::Run() {
 
     sRecvBuf = (char *)malloc(512);
     if(sRecvBuf == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate 512 bytes of memory for sRecvBuf in UpdateCheckThread::Run! "+
-			string(HeapValidate(GetProcessHeap(), 0, 0))+GetMemStat();
-		Message(sDbgstr.c_str(), sDbgstr.size());
+		AppendDebugLog("%s - [MEM] Cannot allocate 512 bytes for sRecvBuf in UpdateCheckThread::Run\n", 0);
 
 		::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
@@ -285,9 +283,7 @@ void UpdateCheckThread::WaitFor() {
 void UpdateCheckThread::Message(char * sMessage, const size_t &szLen) {
 	char *sMess = (char *)malloc(szLen + 1);
 	if(sMess == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string(szLen + 1)+
-			" bytes of memory for sMess in UpdateCheckThread::Message! "+string(HeapValidate(GetProcessHeap(), 0, 0))+GetMemStat();
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMess in UpdateCheckThread::Message\n", (uint64_t)(szLen+1));
 
 		return;
 	}
@@ -327,9 +323,9 @@ bool UpdateCheckThread::SendHeader() {
 //---------------------------------------------------------------------------
 
 bool UpdateCheckThread::Receive() {
-    uint32_t ui32bytes = 0;
+    u_long ui32bytes = 0;
 
-	if(ioctlsocket(sSocket, FIONREAD, (unsigned long *)&ui32bytes) == SOCKET_ERROR) {
+	if(ioctlsocket(sSocket, FIONREAD, &ui32bytes) == SOCKET_ERROR) {
         int iError = WSAGetLastError();
 	    int iMsgLen = sprintf(sMsg, "Update check ioctlsocket(FIONREAD) error %s (%d).", WSErrorStr(iError), iError);
         if(CheckSprintf(iMsgLen, 2048, "UpdateCheckThread::Receive") == true) {
@@ -348,18 +344,16 @@ bool UpdateCheckThread::Receive() {
     }
 
     if(ui32RecvBufSize < ui32RecvBufLen + ui32bytes) {
-        size_t iAllignLen = ((ui32RecvBufLen + ui32bytes + 1) & 0xFFFFFE00) + 0x200;
+        size_t szAllignLen = ((ui32RecvBufLen + ui32bytes + 1) & 0xFFFFFE00) + 0x200;
 
-        sRecvBuf = (char *)realloc(sRecvBuf, iAllignLen);
+        sRecvBuf = (char *)realloc(sRecvBuf, szAllignLen);
         if(sRecvBuf == NULL) {
-			string sDbgstr = "[BUF] Cannot reallocate "+string(ui32bytes)+"/"+string(ui32RecvBufLen)+"/"+string(iAllignLen)+
-                " bytes of memory for sRecvBuf in UpdateCheckThread::Receive! "+string(HeapValidate(GetProcessHeap(), 0, 0))+GetMemStat();
-			Message(sDbgstr.c_str(), sDbgstr.size());
+            AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes for sRecvBuf in UpdateCheckThread::Receive\n", (uint64_t)szAllignLen);
 
             return false;
         }
 
-        ui32RecvBufSize = (int)iAllignLen - 1;
+        ui32RecvBufSize = (int)szAllignLen - 1;
     }
 
     int iBytes = recv(sSocket, sRecvBuf + ui32RecvBufLen, ui32RecvBufSize - ui32RecvBufLen, 0);
@@ -397,14 +391,14 @@ bool UpdateCheckThread::Receive() {
 	if(bData == false) {
 		char *sBuffer = sRecvBuf;
 
-		for(uint32_t i = 0; i < ui32RecvBufLen; i++) {
-			if(sRecvBuf[i] == '\n') {
-				sRecvBuf[i] = '\0';
-				uint32_t iCommandLen = (uint32_t)((sRecvBuf+i) - sBuffer) + 1;
+		for(uint32_t ui32i = 0; ui32i < ui32RecvBufLen; ui32i++) {
+			if(sRecvBuf[ui32i] == '\n') {
+				sRecvBuf[ui32i] = '\0';
+				uint32_t ui32iCommandLen = (uint32_t)((sRecvBuf+ui32i) - sBuffer) + 1;
 
-				if(iCommandLen > 7 && strncmp(sBuffer, "HTTP", 4) == NULL && strstr(sBuffer, "200") != NULL) {
+				if(ui32iCommandLen > 7 && strncmp(sBuffer, "HTTP", 4) == NULL && strstr(sBuffer, "200") != NULL) {
 					bOk = true;
-				} else if(iCommandLen == 2 && sBuffer[0] == '\r') {
+				} else if(ui32iCommandLen == 2 && sBuffer[0] == '\r') {
 					if(bOk == true && ui32FileLen != 0) {
 						bData = true;
 					} else {
@@ -413,11 +407,11 @@ bool UpdateCheckThread::Receive() {
 
 						return false;
                     }
-				} else if(iCommandLen > 16 && strncmp(sBuffer, "Content-Length: ", 16) == NULL) {
+				} else if(ui32iCommandLen > 16 && strncmp(sBuffer, "Content-Length: ", 16) == NULL) {
 					ui32FileLen = atoi(sBuffer+16);
 				}
 
-				sBuffer += iCommandLen;
+				sBuffer += ui32iCommandLen;
 
 				if(bData == true) {
 					break;
@@ -445,11 +439,9 @@ bool UpdateCheckThread::Receive() {
 
 	if(bData == true) {
 		if(ui32RecvBufLen == (uint32_t)ui32FileLen) {
-			char *sMess = (char *) malloc(ui32RecvBufLen + 1);
+			char *sMess = (char *)malloc(ui32RecvBufLen + 1);
 			if(sMess == NULL) {
-				string sDbgstr = "[BUF] Cannot allocate "+string(ui32RecvBufLen+1)+
-					" bytes of memory for sMess in UpdateCheckThread::Receive! "+string(HeapValidate(GetProcessHeap(), 0, 0))+GetMemStat();
-				AppendSpecialLog(sDbgstr);
+				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMess in UpdateCheckThread::Receive\n", (uint64_t)(ui32RecvBufLen+1));
 
 				return false;
 			}

@@ -49,10 +49,7 @@ void AppendLog(const char * sData) {
 
 	strftime(sDebugBuf, 128, "%d.%m.%Y %H:%M:%S", acc_tm);
 
-	fprintf(fw, sDebugBuf);
-	fprintf(fw, " - ");
-	fprintf(fw, sData);
-	fprintf(fw, "\n");
+	fprintf(fw, "%s - %s\n", sDebugBuf, sData);
 
 	fclose(fw);
 }
@@ -104,8 +101,8 @@ void GetSourceFileInfo(DWORD64 dw64Address, FILE * fw) {
 void GetFunctionInfo(DWORD64 dw64Address, FILE * fw) {
 	DWORD64 dw64Displacement = 0;
 
-    ULONG64 ul64Buffer[(sizeof(SYMBOL_INFO) + MAX_SYM_NAME*sizeof(TCHAR) + sizeof(ULONG64) - 1) / sizeof(ULONG64)];
-    PSYMBOL_INFO pSym = (PSYMBOL_INFO)ul64Buffer;
+    char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
+    PSYMBOL_INFO pSym = (PSYMBOL_INFO)buffer;
 
     pSym->SizeOfStruct = sizeof(SYMBOL_INFO);
     pSym->MaxNameLen = MAX_SYM_NAME;
@@ -115,8 +112,7 @@ void GetFunctionInfo(DWORD64 dw64Address, FILE * fw) {
         if(UnDecorateSymbolName(pSym->Name, sDebugBuf, 512, UNDNAME_COMPLETE | UNDNAME_NO_THISTYPE | UNDNAME_NO_SPECIAL_SYMS | UNDNAME_NO_MEMBER_TYPE |
             UNDNAME_NO_MS_KEYWORDS | UNDNAME_NO_ACCESS_SPECIFIERS) > 0) {
             // We have readable name, write it
-            fprintf(fw, sDebugBuf);
-            fprintf(fw, "\n");
+            fprintf(fw, "%s\n", sDebugBuf);
             return;
         }
 	}
@@ -282,11 +278,11 @@ LONG WINAPI PtokaX_UnhandledExceptionFilter(LPEXCEPTION_POINTERS ExceptionInfo) 
 void ExceptionHandlingInitialize(const string &sPath, char * sAppPath) {
     sLogPath = sPath+ "\\logs\\";
 
-    size_t iBufLen = strlen(sAppPath);
-    if(iBufLen > 3  && tolower(sAppPath[iBufLen-3]) == 'e' && tolower(sAppPath[iBufLen-2]) == 'x' && tolower(sAppPath[iBufLen-1]) == 'e') {
-        sAppPath[iBufLen-3] = 'p';
-        sAppPath[iBufLen-2] = 'd';
-        sAppPath[iBufLen-1] = 'b';
+    size_t szBufLen = strlen(sAppPath);
+    if(szBufLen > 3  && tolower(sAppPath[szBufLen-3]) == 'e' && tolower(sAppPath[szBufLen-2]) == 'x' && tolower(sAppPath[szBufLen-1]) == 'e') {
+        sAppPath[szBufLen-3] = 'p';
+        sAppPath[szBufLen-2] = 'd';
+        sAppPath[szBufLen-1] = 'b';
     }
 
     sDebugSymbolsFile = sAppPath;

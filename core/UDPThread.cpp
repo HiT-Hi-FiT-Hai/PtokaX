@@ -31,12 +31,6 @@
 //---------------------------------------------------------------------------
 #include "UDPThread.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
-#endif
-//---------------------------------------------------------------------------
 UDPThread *g_pUDPThread6 = NULL, *g_pUDPThread4 = NULL;
 //---------------------------------------------------------------------------
 
@@ -166,7 +160,7 @@ void UDPThread::Resume() {
 	int iRet = pthread_create(&threadId, NULL, ExecuteUDP, this);
 	if(iRet != 0) {
 #endif
-		AppendSpecialLog("[ERR] Failed to create new UDPThread!");
+		AppendDebugLog("%s - [ERR] Failed to create new UDPThread\n", 0);
     }
 }
 //---------------------------------------------------------------------------
@@ -216,12 +210,8 @@ void UDPThread::WaitFor() {
 UDPThread * UDPThread::Create(const int &iAddressFamily) {
     UDPThread * pUDPThread = new UDPThread();
     if(pUDPThread == NULL) {
-        string sDbgstr = "[BUF] Cannot allocate pUDPThread!";
-#ifdef _WIN32
-    	sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-        AppendSpecialLog(sDbgstr);
-        exit(EXIT_FAILURE);
+        AppendDebugLog("%s - [MEM] Cannot allocate pUDPThread in UDPThread::Create\n", 0);
+        return NULL;
     }
 
     if(pUDPThread->Listen(iAddressFamily) == true) {

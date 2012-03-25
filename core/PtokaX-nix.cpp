@@ -87,11 +87,11 @@ int main(int argc, char* argv[]) {
 	            return EXIT_FAILURE;
 			}
 	
-	        size_t iLen = strlen(argv[i]);
-			if(argv[i][iLen - 1] == '/') {
-	            PATH = string(argv[i], iLen - 1);
+	        size_t szLen = strlen(argv[i]);
+			if(argv[i][szLen - 1] == '/') {
+	            PATH = string(argv[i], szLen - 1);
 			} else {
-	            PATH = string(argv[i], iLen);
+	            PATH = string(argv[i], szLen);
 	        }
 	
 	        if(DirExist(PATH.c_str()) == false) {
@@ -196,26 +196,22 @@ int main(int argc, char* argv[]) {
 	sigact.sa_flags = 0;
 	
 	if(sigaction(SIGINT, &sigact, NULL) == -1) {
-	    string sDbgstr = "[BUF] Cannot create sigaction SIGINT! "+string(strerror(errno));
-	    AppendSpecialLog(sDbgstr);
+	    AppendDebugLog("%s - [ERR] Cannot create sigaction SIGINT in main\n", 0);
 	    exit(EXIT_FAILURE);
 	}
 	
 	if(sigaction(SIGTERM, &sigact, NULL) == -1) {
-	    string sDbgstr = "[BUF] Cannot create sigaction SIGTERM! "+string(strerror(errno));
-	    AppendSpecialLog(sDbgstr);
+	    AppendDebugLog("%s - [ERR] Cannot create sigaction SIGTERM in main\n", 0);
 	    exit(EXIT_FAILURE);
 	}
 	
 	if(sigaction(SIGQUIT, &sigact, NULL) == -1) {
-	    string sDbgstr = "[BUF] Cannot create sigaction SIGQUIT! "+string(strerror(errno));
-	    AppendSpecialLog(sDbgstr);
+	    AppendDebugLog("%s - [ERR] Cannot create sigaction SIGQUIT in main\n", 0);
 	    exit(EXIT_FAILURE);
 	}
 	
 	if(bDaemon == false && sigaction(SIGHUP, &sigact, NULL) == -1) {
-	    string sDbgstr = "[BUF] Cannot create sigaction SIGHUP! "+string(strerror(errno));
-	    AppendSpecialLog(sDbgstr);
+	    AppendDebugLog("%s - [ERR] Cannot create sigaction SIGHUP in main\n", 0);
 	    exit(EXIT_FAILURE);
 	}
 

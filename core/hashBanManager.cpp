@@ -66,9 +66,7 @@ BanItem::~BanItem(void) {
 #ifdef _WIN32
     if(sNick != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate sNick in BanItem::~BanItem! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-            AppendSpecialLog(sDbgstr);
+            AppendDebugLog("%s - [MEM] Cannot deallocate sNick in BanItem::~BanItem\n", 0);
         }
     }
 #else
@@ -78,9 +76,7 @@ BanItem::~BanItem(void) {
 #ifdef _WIN32
     if(sReason != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sReason) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate sReason in BanItem::~BanItem! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-			AppendSpecialLog(sDbgstr);
+			AppendDebugLog("%s - [MEM] Cannot deallocate sReason in BanItem::~BanItem\n", 0);
         }
     }
 #else
@@ -90,9 +86,7 @@ BanItem::~BanItem(void) {
 #ifdef _WIN32
     if(sBy != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sBy) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate sBy in BanItem::~BanItem! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-			AppendSpecialLog(sDbgstr);
+			AppendDebugLog("%s - [MEM] Cannot deallocate sBy in BanItem::~BanItem\n", 0);
         }
     }
 #else
@@ -124,9 +118,7 @@ RangeBanItem::~RangeBanItem(void) {
 #ifdef _WIN32
     if(sReason != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sReason) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate sReason in RangeBanItem::~RangeBanItem! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-			AppendSpecialLog(sDbgstr);
+			AppendDebugLog("%s - [MEM] Cannot deallocate sReason in RangeBanItem::~RangeBanItem\n", 0);
         }
     }
 #else
@@ -136,9 +128,7 @@ RangeBanItem::~RangeBanItem(void) {
 #ifdef _WIN32
     if(sBy != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sBy) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate sBy in RangeBanItem::~RangeBanItem! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-			AppendSpecialLog(sDbgstr);
+			AppendDebugLog("%s - [MEM] Cannot deallocate sBy in RangeBanItem::~RangeBanItem\n", 0);
         }
     }
 #else
@@ -154,9 +144,9 @@ hashBanMan::hashBanMan(void) {
     
     iSaveCalled = 0;
 
-    for(uint32_t i = 0; i < 65536; i++) {
-        nicktable[i] = NULL;
-        iptable[i] = NULL;
+    for(uint32_t ui32i = 0; ui32i < 65536; ui32i++) {
+        nicktable[ui32i] = NULL;
+        iptable[ui32i] = NULL;
     }
 }
 //---------------------------------------------------------------------------
@@ -186,8 +176,8 @@ hashBanMan::~hashBanMan(void) {
 		delete curRangeBan;
 	}
 
-    for(uint32_t i = 0; i < 65536; i++) {
-        IpTableItem * next = iptable[i];
+    for(uint32_t ui32i = 0; ui32i < 65536; ui32i++) {
+        IpTableItem * next = iptable[ui32i];
         
         while(next != NULL) {
             IpTableItem * cur = next;
@@ -199,8 +189,10 @@ hashBanMan::~hashBanMan(void) {
 }
 //---------------------------------------------------------------------------
 
-void hashBanMan::Add(BanItem * Ban) {
-	Add2Table(Ban);
+bool hashBanMan::Add(BanItem * Ban) {
+	if(Add2Table(Ban) == false) {
+        return false;
+    }
 
     if(((Ban->ui8Bits & PERM) == PERM) == true) {
 		if(PermBanListE == NULL) {
@@ -227,17 +219,23 @@ void hashBanMan::Add(BanItem * Ban) {
         pBansDialog->AddBan(Ban);
     }
 #endif
+
+	return true;
 }
 //---------------------------------------------------------------------------
 
-void hashBanMan::Add2Table(BanItem *Ban) {
+bool hashBanMan::Add2Table(BanItem *Ban) {
 	if(((Ban->ui8Bits & IP) == IP) == true) {
-		Add2IpTable(Ban);
+		if(Add2IpTable(Ban) == false) {
+            return false;
+        }
     }
 
     if(((Ban->ui8Bits & NICK) == NICK) == true) {
 		Add2NickTable(Ban);
     }
+
+    return true;
 }
 //---------------------------------------------------------------------------
 
@@ -254,19 +252,15 @@ void hashBanMan::Add2NickTable(BanItem *Ban) {
 }
 //---------------------------------------------------------------------------
 
-void hashBanMan::Add2IpTable(BanItem *Ban) {
+bool hashBanMan::Add2IpTable(BanItem *Ban) {
     uint16_t ui16dx = *((uint16_t *)(Ban->ui128IpHash+13));
     
     if(iptable[ui16dx] == NULL) {
 		iptable[ui16dx] = new IpTableItem();
 
         if(iptable[ui16dx] == NULL) {
-        	string sDbgstr = "[BUF] Cannot allocate IpTableItem in hashBanMan::AddBan2IpTable!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            exit(EXIT_FAILURE);
+			AppendDebugLog("%s - [MEM] Cannot allocate IpTableItem in hashBanMan::Add2IpTable\n", 0);
+            return false;
         }
 
         iptable[ui16dx]->next = NULL;
@@ -274,7 +268,7 @@ void hashBanMan::Add2IpTable(BanItem *Ban) {
 
         iptable[ui16dx]->FirstBan = Ban;
 
-        return;
+        return true;
     }
 
     IpTableItem * next = iptable[ui16dx];
@@ -288,19 +282,15 @@ void hashBanMan::Add2IpTable(BanItem *Ban) {
 			Ban->hashiptablenext = cur->FirstBan;
             cur->FirstBan = Ban;
 
-            return;
+            return true;
         }
     }
 
     IpTableItem * cur = new IpTableItem();
 
     if(cur == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate IpTableBans2 in hashBanMan::AddBan2IpTable!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
-        exit(EXIT_FAILURE);
+		AppendDebugLog("%s - [MEM] Cannot allocate IpTableBans2 in hashBanMan::Add2IpTable\n", 0);
+        return false;
     }
 
     cur->FirstBan = Ban;
@@ -310,6 +300,8 @@ void hashBanMan::Add2IpTable(BanItem *Ban) {
 
     iptable[ui16dx]->prev = cur;
     iptable[ui16dx] = cur;
+
+    return true;
 }
 //---------------------------------------------------------------------------
 
@@ -646,11 +638,7 @@ BanItem* hashBanMan::FindNick(User* u) {
         BanItem *cur = next;
         next = cur->hashnicktablenext;
 
-#ifdef _WIN32
-        if(cur->ui32NickHash == u->ui32NickHash && stricmp(cur->sNick, u->sNick) == 0) {
-#else
 		if(cur->ui32NickHash == u->ui32NickHash && strcasecmp(cur->sNick, u->sNick) == 0) {
-#endif
             // PPK ... check if temban expired
 			if(((cur->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
                 if(acc_time >= cur->tempbanexpire) {
@@ -814,8 +802,8 @@ RangeBanItem* hashBanMan::FindFullRange(const uint8_t * ui128IpHash, const time_
 }
 //---------------------------------------------------------------------------
 
-BanItem* hashBanMan::FindNick(char * sNick, const size_t &iNickLen) {
-    uint32_t hash = HashNick(sNick, iNickLen);
+BanItem* hashBanMan::FindNick(char * sNick, const size_t &szNickLen) {
+    uint32_t hash = HashNick(sNick, szNickLen);
 
     time_t acc_time;
     time(&acc_time);
@@ -834,11 +822,7 @@ BanItem* hashBanMan::FindNick(const uint32_t &ui32Hash, const time_t &acc_time, 
         BanItem *cur = next;
         next = cur->hashnicktablenext;
 
-#ifdef _WIN32
-        if(cur->ui32NickHash == ui32Hash && stricmp(cur->sNick, sNick) == 0) {
-#else
 		if(cur->ui32NickHash == ui32Hash && strcasecmp(cur->sNick, sNick) == 0) {
-#endif
             // PPK ... check if temban expired
 			if(((cur->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
                 if(acc_time >= cur->tempbanexpire) {
@@ -943,8 +927,8 @@ RangeBanItem* hashBanMan::FindRange(const uint8_t * ui128FromHash, const uint8_t
 }
 //---------------------------------------------------------------------------
 
-BanItem* hashBanMan::FindTempNick(char * sNick, const size_t &iNickLen) {
-    uint32_t hash = HashNick(sNick, iNickLen);
+BanItem* hashBanMan::FindTempNick(char * sNick, const size_t &szNickLen) {
+    uint32_t hash = HashNick(sNick, szNickLen);
 
     time_t acc_time;
     time(&acc_time);
@@ -963,11 +947,7 @@ BanItem* hashBanMan::FindTempNick(const uint32_t &ui32Hash,  const time_t &acc_t
         BanItem *cur = next;
         next = cur->hashnicktablenext;
 
-#ifdef _WIN32
-        if(cur->ui32NickHash == ui32Hash && stricmp(cur->sNick, sNick) == 0) {
-#else
 		if(cur->ui32NickHash == ui32Hash && strcasecmp(cur->sNick, sNick) == 0) {
-#endif
             // PPK ... check if temban expired
 			if(((cur->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
                 if(acc_time >= cur->tempbanexpire) {
@@ -1020,8 +1000,8 @@ BanItem* hashBanMan::FindTempIP(const uint8_t * ui128IpHash, const time_t &acc_t
 }
 //---------------------------------------------------------------------------
 
-BanItem* hashBanMan::FindPermNick(char * sNick, const size_t &iNickLen) {
-    uint32_t hash = HashNick(sNick, iNickLen);
+BanItem* hashBanMan::FindPermNick(char * sNick, const size_t &szNickLen) {
+    uint32_t hash = HashNick(sNick, szNickLen);
     
 	return FindPermNick(hash, sNick);
 }
@@ -1037,11 +1017,7 @@ BanItem* hashBanMan::FindPermNick(const uint32_t &ui32Hash, char * sNick) {
         BanItem *cur = next;
         next = cur->hashnicktablenext;
 
-#ifdef _WIN32
-        if(cur->ui32NickHash == ui32Hash && stricmp(cur->sNick, sNick) == 0) {
-#else
 		if(cur->ui32NickHash == ui32Hash && strcasecmp(cur->sNick, sNick) == 0) {
-#endif
             if(((cur->ui8Bits & hashBanMan::PERM) == hashBanMan::PERM) == true) {
                 return cur;
             }
@@ -1153,13 +1129,9 @@ void hashBanMan::Load(void) {
 
                     bool fullipban = (atoi(ban->Value()) == 0 ? false : true);
 
-                    BanItem *Ban = new BanItem();
+                    BanItem * Ban = new BanItem();
                     if(Ban == NULL) {
-                    	string sDbgstr = "[BUF] Cannot allocate Ban in hashBanMan::LoadXmlBanList!";
-#ifdef _WIN32
-						sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-						AppendSpecialLog(sDbgstr);
+						AppendDebugLog("%s - [MEM] Cannot allocate Ban in hashBanMan::Load\n", 0);
                     	exit(EXIT_FAILURE);
                     }
 
@@ -1188,24 +1160,20 @@ void hashBanMan::Load(void) {
                     // PPK ... nickban
                     if(nickban == true) {
                         if(nick != NULL) {
-                            size_t iNickLen = strlen(nick);
+                            size_t szNickLen = strlen(nick);
 #ifdef _WIN32
-                            Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
+                            Ban->sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
 #else
-							Ban->sNick = (char *) malloc(iNickLen+1);
+							Ban->sNick = (char *)malloc(szNickLen+1);
 #endif
                             if(Ban->sNick == NULL) {
-								string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
-									" bytes of memory for sNick in hashBanMan::LoadXmlBanList!";
-#ifdef _WIN32
-								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-								AppendSpecialLog(sDbgstr);
+								AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in hashBanMan::Load\n", (uint64_t)(szNickLen+1));
+
                                 exit(EXIT_FAILURE);
-                                return;
                             }
-                            memcpy(Ban->sNick, nick, iNickLen);
-                            Ban->sNick[iNickLen] = '\0';
+
+                            memcpy(Ban->sNick, nick, szNickLen);
+                            Ban->sNick[szNickLen] = '\0';
                             Ban->ui32NickHash = HashNick(Ban->sNick, strlen(Ban->sNick));
                             Ban->ui8Bits |= NICK;
                         } else {
@@ -1216,86 +1184,42 @@ void hashBanMan::Load(void) {
                     }
 
                     if(reason != NULL) {
-                        size_t iReasonLen = strlen(reason);
-                        if(iReasonLen > 255) {
-#ifdef _WIN32
-                            Ban->sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, 256);
-#else
-							Ban->sReason = (char *) malloc(256);
-#endif
-                            if(Ban->sReason == NULL) {
-                            	string sDbgstr = "[BUF] Cannot allocate 256 bytes of memory for sReason in hashBanMan::LoadXmlBanList!";
-#ifdef _WIN32
-								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-								AppendSpecialLog(sDbgstr);
-                                exit(EXIT_FAILURE);
-                                return;
-                            }
-                            memcpy(Ban->sReason, reason, 252);
-                            Ban->sReason[255] = '\0';
-                            Ban->sReason[254] = '.';
-                            Ban->sReason[253] = '.';
-                            Ban->sReason[252] = '.';
-                        } else {
-#ifdef _WIN32
-                            Ban->sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
-#else
-							Ban->sReason = (char *) malloc(iReasonLen+1);
-#endif
-                            if(Ban->sReason == NULL) {
-								string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen+1))+
-									" bytes of memory for sReason1 in hashBanMan::LoadXmlBanList!";
-#ifdef _WIN32
-								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-								AppendSpecialLog(sDbgstr);
-                                exit(EXIT_FAILURE);
-                                return;
-                            }
-                            memcpy(Ban->sReason, reason, iReasonLen);
-                            Ban->sReason[iReasonLen] = '\0';
+                        size_t szReasonLen = strlen(reason);
+                        if(szReasonLen > 255) {
+                            szReasonLen = 255;
                         }
+#ifdef _WIN32
+                        Ban->sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szReasonLen+1);
+#else
+						Ban->sReason = (char *)malloc(szReasonLen+1);
+#endif
+                        if(Ban->sReason == NULL) {
+							AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::Load\n", (uint64_t)(szReasonLen+1));
+
+                            exit(EXIT_FAILURE);
+                        }
+
+                        memcpy(Ban->sReason, reason, szReasonLen);
+                        Ban->sReason[szReasonLen] = '\0';
                     }
 
                     if(by != NULL) {
-                        size_t iByLen = strlen(by);
-                        if(iByLen > 63) {
-#ifdef _WIN32
-                            Ban->sBy = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, 64);
-#else
-							Ban->sBy = (char *) malloc(64);
-#endif
-                            if(Ban->sBy == NULL) {
-                            	string sDbgstr = "[BUF] Cannot allocate 64 bytes of memory for sBy in hashBanMan::LoadXmlBanList!";
-#ifdef _WIN32
-								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-								AppendSpecialLog(sDbgstr);
-                                exit(EXIT_FAILURE);
-                                return;
-                            }
-                            memcpy(Ban->sBy, by, 63);
-                            Ban->sBy[63] = '\0';
-                        } else {
-#ifdef _WIN32
-                            Ban->sBy = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
-#else
-							Ban->sBy = (char *) malloc(iByLen+1);
-#endif
-                            if(Ban->sBy == NULL) {
-								string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
-									" bytes of memory for sBy1 in hashBanMan::LoadXmlBanList!";
-#ifdef _WIN32
-								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-                                AppendSpecialLog(sDbgstr);
-                                exit(EXIT_FAILURE);
-                                return;
-                            }
-                            memcpy(Ban->sBy, by, iByLen);
-                            Ban->sBy[iByLen] = '\0';
+                        size_t szByLen = strlen(by);
+                        if(szByLen > 63) {
+                            szByLen = 63;
                         }
+#ifdef _WIN32
+                        Ban->sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szByLen+1);
+#else
+						Ban->sBy = (char *)malloc(szByLen+1);
+#endif
+                        if(Ban->sBy == NULL) {
+                            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy1 in hashBanMan::Load\n", (uint64_t)(szByLen+1));
+                            exit(EXIT_FAILURE);
+                        }
+
+                        memcpy(Ban->sBy, by, szByLen);
+                        Ban->sBy[szByLen] = '\0';
                     }
 
                     // PPK ... temp ban
@@ -1322,7 +1246,9 @@ void hashBanMan::Load(void) {
                         Ban->ui8Bits |= FULL;
                     }
 
-                    Add(Ban);
+                    if(Add(Ban) == false) {
+                        exit(EXIT_FAILURE);
+                    }
                 }
             }
 
@@ -1371,13 +1297,9 @@ void hashBanMan::Load(void) {
 
                     bool fullipban = (atoi(rangeban->Value()) == 0 ? false : true);
 
-                    RangeBanItem *RangeBan = new RangeBanItem();
+                    RangeBanItem * RangeBan = new RangeBanItem();
                     if(RangeBan == NULL) {
-                    	string sDbgstr = "[BUF] Cannot allocate RangeBan in hashBanMan::LoadXmlBanList!";
-#ifdef _WIN32
-						sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-						AppendSpecialLog(sDbgstr);
+						AppendDebugLog("%s - [MEM] Cannot allocate RangeBan in hashBanMan::Load\n", 0);
                     	exit(EXIT_FAILURE);
                     }
 
@@ -1406,86 +1328,41 @@ void hashBanMan::Load(void) {
                     }
 
                     if(reason != NULL) {
-                        size_t iReasonLen = strlen(reason);
-                        if(iReasonLen > 255) {
-#ifdef _WIN32
-                            RangeBan->sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, 256);
-#else
-							RangeBan->sReason = (char *) malloc(256);
-#endif
-                            if(RangeBan->sReason == NULL) {
-                            	string sDbgstr = "[BUF] Cannot allocate 256 bytes of memory for sReason2 in hashBanMan::LoadXmlBanList!";
-#ifdef _WIN32
-								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-								AppendSpecialLog(sDbgstr);
-                                exit(EXIT_FAILURE);
-                                return;
-                            }
-                            memcpy(RangeBan->sReason, reason, 252);
-                            RangeBan->sReason[255] = '\0';
-                            RangeBan->sReason[254] = '.';
-                            RangeBan->sReason[253] = '.';
-                            RangeBan->sReason[252] = '.';
-                        } else {
-#ifdef _WIN32
-                            RangeBan->sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
-#else
-							RangeBan->sReason = (char *) malloc(iReasonLen+1);
-#endif
-                            if(RangeBan->sReason == NULL) {
-								string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen+1))+
-									" bytes of memory for sReason3 in hashBanMan::LoadXmlBanList!";
-#ifdef _WIN32
-								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-								AppendSpecialLog(sDbgstr);
-                                exit(EXIT_FAILURE);
-                                return;
-                            }
-                            memcpy(RangeBan->sReason, reason, iReasonLen);
-                            RangeBan->sReason[iReasonLen] = '\0';
+                        size_t szReasonLen = strlen(reason);
+                        if(szReasonLen > 255) {
+                            szReasonLen = 255;
                         }
+#ifdef _WIN32
+                        RangeBan->sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szReasonLen+1);
+#else
+						RangeBan->sReason = (char *)malloc(szReasonLen+1);
+#endif
+                        if(RangeBan->sReason == NULL) {
+							AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason3 in hashBanMan::Load\n", (uint64_t)(szReasonLen+1));
+                            exit(EXIT_FAILURE);
+                        }
+
+                        memcpy(RangeBan->sReason, reason, szReasonLen);
+                        RangeBan->sReason[szReasonLen] = '\0';
                     }
 
                     if(by != NULL) {
-                        size_t iByLen = strlen(by);
-                        if(iByLen > 63) {
-#ifdef _WIN32
-                            RangeBan->sBy = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, 64);
-#else
-							RangeBan->sBy = (char *) malloc(64);
-#endif
-                            if(RangeBan->sBy == NULL) {
-                            	string sDbgstr = "[BUF] Cannot allocate 64 bytes of memory for sBy2 in hashBanMan::LoadXmlBanList!";
-#ifdef _WIN32
-								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-								AppendSpecialLog(sDbgstr);
-                                exit(EXIT_FAILURE);
-                                return;
-                            }
-                            memcpy(RangeBan->sBy, by, 63);
-                            RangeBan->sBy[63] = '\0';
-                        } else {
-#ifdef _WIN32
-                            RangeBan->sBy = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
-#else
-							RangeBan->sBy = (char *) malloc(iByLen+1);
-#endif
-                            if(RangeBan->sBy == NULL) {
-								string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
-									" bytes of memory for sBy3 in hashBanMan::LoadXmlBanList!";
-#ifdef _WIN32
-								sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-								AppendSpecialLog(sDbgstr);
-                                exit(EXIT_FAILURE);
-                                return;
-                            }
-                            memcpy(RangeBan->sBy, by, iByLen);
-                            RangeBan->sBy[iByLen] = '\0';
+                        size_t szByLen = strlen(by);
+                        if(szByLen > 63) {
+                            szByLen = 63;
                         }
+#ifdef _WIN32
+                        RangeBan->sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szByLen+1);
+#else
+						RangeBan->sBy = (char *)malloc(szByLen+1);
+#endif
+                        if(RangeBan->sBy == NULL) {
+							AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy3 in hashBanMan::Load\n", (uint64_t)(szByLen+1));
+                            exit(EXIT_FAILURE);
+                        }
+
+                        memcpy(RangeBan->sBy, by, szByLen);
+                        RangeBan->sBy[szByLen] = '\0';
                     }
 
                     // PPK ... temp ban
@@ -1732,263 +1609,6 @@ void hashBanMan::Save(bool bForce/* = false*/) {
 }
 //---------------------------------------------------------------------------
 
-void hashBanMan::CreateTemp(char * first, char * second, const uint32_t &iTime, const time_t &acc_time) {
-    uint32_t a, b, c, d;
-    if(GetIpParts(first, strlen(first), a, b, c, d) == false)
-        return;
-    
-    BanItem *Ban = new BanItem();
-    if(Ban == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate Ban in hashBanMan::CreateTempBan!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
-        exit(EXIT_FAILURE);
-    }
-
-	if(HashIP(first, Ban->ui128IpHash) == false) {
-        delete Ban;
-
-        return;
-	}
-
-    // PPK ... set ban type to TEMP
-    Ban->ui8Bits |= TEMP;
-
-    // PPK ... temp ban ip
-    strcpy(Ban->sIp, first);
-    Ban->ui8Bits |= IP;
-
-    // PPK ... temp ban nick
-    size_t iNickLen = strlen(second);
-#ifdef _WIN32
-    Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
-#else
-	Ban->sNick = (char *) malloc(iNickLen+1);
-#endif
-    if(Ban->sNick == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
-			" bytes of memory in hashBanMan::CreateTempBan!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-        AppendSpecialLog(sDbgstr);
-        delete Ban;
-
-        return;
-    }   
-    memcpy(Ban->sNick, second, iNickLen);
-    Ban->sNick[iNickLen] = '\0';
-    Ban->ui32NickHash = HashNick(Ban->sNick, strlen(Ban->sNick));
-    Ban->ui8Bits |= NICK;
-
-    // PPK ... temp ban expiration
-    Ban->tempbanexpire = (iTime*60) + acc_time;
-
-    // PPK ... old tempban not allow same ip/nick bans, no check needed ;)
-    Add(Ban);
-}
-//---------------------------------------------------------------------------
-
-void hashBanMan::CreatePerm(char * first, char * second){
-    BanItem *Ban = new BanItem();
-    if(Ban == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate Ban in hashBanMan::CreatePermBan!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
-        exit(EXIT_FAILURE);
-    }
-
-    // PPK ... set ban type to perm
-    Ban->ui8Bits |= PERM;
-
-    if(HashIP(first, Ban->ui128IpHash) == true) {
-        // PPK ... perm ban ip
-        strcpy(Ban->sIp, first);
-        Ban->ui8Bits |= IP;
-        
-        if(second != NULL) {
-#ifdef _WIN32
-            if(stricmp(second, "3x bad password") == 0) {
-#else
-			if(strcasecmp(second, "3x bad password") == 0) {
-#endif
-                size_t iReasonLen = strlen(second);
-#ifdef _WIN32
-                Ban->sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
-#else
-				Ban->sReason = (char *) malloc(iReasonLen+1);
-#endif
-                if(Ban->sReason == NULL) {
-					string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen+1))+
-						" bytes of memory for sReason in hashBanMan::CreatePermBan!";
-#ifdef _WIN32
-					sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-					AppendSpecialLog(sDbgstr);
-                    delete Ban;
-
-                    return;
-                }   
-                memcpy(Ban->sReason, second, iReasonLen);
-                Ban->sReason[iReasonLen] = '\0';
-                Ban->ui8Bits |= FULL;
-            } else {
-                // PPK ... perm ban nick
-                size_t iNickLen = strlen(second);
-#ifdef _WIN32
-                Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
-#else
-				Ban->sNick = (char *) malloc(iNickLen+1);
-#endif
-                if(Ban->sNick == NULL) {
-					string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
-						" bytes of memory for sNick in hashBanMan::CreatePermBan!";
-#ifdef _WIN32
-					sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-					AppendSpecialLog(sDbgstr);
-                    delete Ban;
-
-                    return;
-                }   
-                memcpy(Ban->sNick, second, iNickLen);
-                Ban->sNick[iNickLen] = '\0';
-                Ban->ui32NickHash = HashNick(Ban->sNick, strlen(Ban->sNick));
-                Ban->ui8Bits |= NICK;
-            }
-        }
-    } else {
-        // PPK ... perm ban nick
-        size_t iNickLen = strlen(first);
-#ifdef _WIN32
-        Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
-#else
-		Ban->sNick = (char *) malloc(iNickLen+1);
-#endif
-        if(Ban->sNick == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
-				" bytes of memory for sNick1 in hashBanMan::CreatePermBan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete Ban;
-
-            return;
-        }   
-        memcpy(Ban->sNick, first, iNickLen);
-        Ban->sNick[iNickLen] = '\0';
-        Ban->ui32NickHash = HashNick(Ban->sNick, strlen(Ban->sNick));
-        Ban->ui8Bits |= NICK;
-        
-        if(second != NULL && HashIP(second, Ban->ui128IpHash) == true) {
-            // PPK ... perm ban ip
-            strcpy(Ban->sIp, second);
-            Ban->ui8Bits |= IP;
-        }
-    }
-    
-    time_t acc_time;
-    time(&acc_time);
-    
-    // PPK ... check existing bans for duplicity
-    if(((Ban->ui8Bits & NICK) == NICK) == true) {
-        BanItem *nxtBan;
-        
-        // PPK ... not allow same nickbans !
-		if((nxtBan = FindNick(Ban->ui32NickHash, acc_time, Ban->sNick)) != NULL) {
-            if(((nxtBan->ui8Bits & PERM) == PERM) == true) {
-                if(((nxtBan->ui8Bits & IP) == IP) == true) {
-                    if(((Ban->ui8Bits & IP) == IP) == true) {
-                        if(memcmp(nxtBan->ui128IpHash, Ban->ui128IpHash, 16) == 0) {
-                            // PPK ... same perm ban already exist, delete new
-                            delete Ban;
-
-                            return;
-                        } else {
-                            // PPK ... already existing perm ban have same nick but diferent ip, set new ban to ip ban only
-                            Ban->ui8Bits &= ~NICK;
-                        }
-                    } else {
-                        // PPK ... new ban is only nick ban, delete it
-                        delete Ban;
-
-                        return;
-                    }
-                } else {
-                    if(((Ban->ui8Bits & IP) == IP) == false) {
-                        // PPK ... old ban is only nickban, new ban is only nickban too... delete new
-                        delete Ban;
-
-                        return;
-                    } else {
-                        // PPK ... old ban is only nick ban, remove it
-                        Rem(nxtBan);
-                        delete nxtBan;
-					}
-                }
-            } else {
-                if(((nxtBan->ui8Bits & IP) == IP) == true) {
-                    if(((Ban->ui8Bits & IP) == IP) == true) {
-                        if(memcmp(nxtBan->ui128IpHash, Ban->ui128IpHash, 16) == 0) {
-                            // PPK ... same ban already exist, delete old tempban
-                            Rem(nxtBan);
-                            delete nxtBan;
-						} else {
-                            // PPK ... already existing temp ban have same nick but diferent ip, set old ban to ip ban only
-							RemFromNickTable(nxtBan);
-                            nxtBan->ui8Bits &= ~NICK;
-                        }
-                    } else {
-						// PPK ... new ban is only nick ban, set old ban to ip ban only
-						RemFromNickTable(nxtBan);
-                        nxtBan->ui8Bits &= ~NICK;
-                    }
-                } else {
-                    // PPK ... old ban is only nick ban, remove it
-                    Rem(nxtBan);
-                    delete nxtBan;
-				}
-            }
-        }
-
-        // PPK ... not allow bans with same ip and nick !
-        if(((Ban->ui8Bits & IP) == IP) == true) {
-			nxtBan = FindIP(Ban->ui128IpHash, acc_time);
-            
-            while(nxtBan != NULL) {
-                BanItem *curBan = nxtBan;
-                nxtBan = curBan->hashiptablenext;
-
-                if(((curBan->ui8Bits & PERM) == PERM) == true) {
-                    if(((curBan->ui8Bits & NICK) == NICK) == false && Ban->ui32NickHash == curBan->ui32NickHash) {
-                        // PPK ... ban with same ip and nick, set nickban to old ban and delete new ban
-                        curBan->ui8Bits |= NICK;
-						Add2NickTable(curBan);
-                        
-                        delete Ban;
-
-						return;
-                    }
-                } else {
-                    if(((curBan->ui8Bits & NICK) == NICK) == false && Ban->ui32NickHash == curBan->ui32NickHash) {
-                        // PPK ... old ban with same ip and nick is only tempban, delete it
-                        Rem(curBan);
-                        delete curBan;
-					}
-                }
-            }
-        }
-    }
-    
-    Add(Ban);
-}
-//---------------------------------------------------------------------------
-
 void hashBanMan::ClearTemp(void) {
     BanItem *nextBan = TempBanListS;
 
@@ -2069,66 +1689,61 @@ void hashBanMan::ClearPermRange(void) {
 //---------------------------------------------------------------------------
 
 void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFull) {
-    time_t acc_time;
-    time(&acc_time);
-    
-    BanItem *Ban = new BanItem();
-    if(Ban == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate Ban in hashBanMan::Ban!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+    BanItem * pBan = new BanItem();
+    if(pBan == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate pBan in hashBanMan::Ban\n", 0);
 		return;
     }
-    Ban->ui8Bits |= PERM;
 
-    strcpy(Ban->sIp, u->sIP);
-    memcpy(Ban->ui128IpHash, u->ui128IpHash, 16);
-    Ban->ui8Bits |= IP;
+    pBan->ui8Bits |= PERM;
+
+    strcpy(pBan->sIp, u->sIP);
+    memcpy(pBan->ui128IpHash, u->ui128IpHash, 16);
+    pBan->ui8Bits |= IP;
     
-    if(bFull == true)
-        Ban->ui8Bits |= FULL;
-    
+    if(bFull == true) {
+        pBan->ui8Bits |= FULL;
+    }
+
+    time_t acc_time;
+    time(&acc_time);
+
     // PPK ... check for <unknown> nick -> bad ban from script
     if(u->sNick[0] != '<') {
 #ifdef _WIN32
-        Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
+        pBan->sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
 #else
-		Ban->sNick = (char *) malloc(u->ui8NickLen+1);
+		pBan->sNick = (char *)malloc(u->ui8NickLen+1);
 #endif
-		if(Ban->sNick == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(u->ui8NickLen+1)+
-				" bytes of memory for sNick in hashBanMan::Ban!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-			delete Ban;
+		if(pBan->sNick == NULL) {
+            delete pBan;
+
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in hashBanMan::Ban\n", (uint64_t)(u->ui8NickLen+1));
 
 			return;
 		}
-		memcpy(Ban->sNick, u->sNick, u->ui8NickLen);
-		Ban->sNick[u->ui8NickLen] = '\0';
-		Ban->ui32NickHash = u->ui32NickHash;
-		Ban->ui8Bits |= NICK;
+
+		memcpy(pBan->sNick, u->sNick, u->ui8NickLen);
+		pBan->sNick[u->ui8NickLen] = '\0';
+		pBan->ui32NickHash = u->ui32NickHash;
+		pBan->ui8Bits |= NICK;
         
         // PPK ... not allow same nickbans ! i don't want this check here, but lame scripter find way to ban same nick/ip multiple times :(
-		BanItem *nxtBan = FindNick(Ban->ui32NickHash, acc_time, Ban->sNick);
+		BanItem * nxtBan = FindNick(pBan->ui32NickHash, acc_time, pBan->sNick);
 
         if(nxtBan != NULL) {
             if(((nxtBan->ui8Bits & PERM) == PERM) == true) {
                 if(((nxtBan->ui8Bits & IP) == IP) == true) {
-                    if(memcmp(Ban->ui128IpHash, nxtBan->ui128IpHash, 16) == 0) {
-                        if(((Ban->ui8Bits & FULL) == FULL) == false) {
+                    if(memcmp(pBan->ui128IpHash, nxtBan->ui128IpHash, 16) == 0) {
+                        if(((pBan->ui8Bits & FULL) == FULL) == false) {
                             // PPK ... same ban and new is not full, delete new
-                            delete Ban;
+                            delete pBan;
 
                             return;
                         } else {
                             if(((nxtBan->ui8Bits & FULL) == FULL) == true) {
                                 // PPK ... same ban and both full, delete new
-                                delete Ban;
+                                delete pBan;
 
                                 return;
                             } else {
@@ -2138,7 +1753,7 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
 							}
                         }
                     } else {
-                        Ban->ui8Bits &= ~NICK;
+                        pBan->ui8Bits &= ~NICK;
                     }
                 } else {
                     // PPK ... old ban is only nickban, remove it
@@ -2147,13 +1762,13 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
 				}
             } else {
                 if(((nxtBan->ui8Bits & IP) == IP) == true) {
-                    if(memcmp(Ban->ui128IpHash, nxtBan->ui128IpHash, 16) == 0) {
+                    if(memcmp(pBan->ui128IpHash, nxtBan->ui128IpHash, 16) == 0) {
                         if(((nxtBan->ui8Bits & FULL) == FULL) == false) {
                             // PPK ... same ban and old is only temp, delete old
                             Rem(nxtBan);
                             delete nxtBan;
 						} else {
-                            if(((Ban->ui8Bits & FULL) == FULL) == true) {
+                            if(((pBan->ui8Bits & FULL) == FULL) == true) {
                                 // PPK ... same full ban and old is only temp, delete old
                                 Rem(nxtBan);
                                 delete nxtBan;
@@ -2178,7 +1793,7 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
     }
     
     // PPK ... clear bans with same ip without nickban and fullban if new ban is fullban
-	BanItem *nxtBan = FindIP(Ban->ui128IpHash, acc_time);
+	BanItem *nxtBan = FindIP(pBan->ui128IpHash, acc_time);
 
     while(nxtBan != NULL) {
         BanItem *curBan = nxtBan;
@@ -2188,7 +1803,7 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
             continue;
         }
         
-        if(((curBan->ui8Bits & FULL) == FULL) == true && ((Ban->ui8Bits & FULL) == FULL) == false) {
+        if(((curBan->ui8Bits & FULL) == FULL) == true && ((pBan->ui8Bits & FULL) == FULL) == false) {
             continue;
         }
 
@@ -2197,101 +1812,94 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
 	}
         
     if(sReason != NULL) {
-        size_t iReasonLen = strlen(sReason);
+        size_t szReasonLen = strlen(sReason);
 #ifdef _WIN32
-        Ban->sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen > 255 ? 256 : iReasonLen+1);
+        pBan->sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szReasonLen > 255 ? 256 : szReasonLen+1);
 #else
-		Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
+		pBan->sReason = (char *)malloc(szReasonLen > 255 ? 256 : szReasonLen+1);
 #endif
-        if(Ban->sReason == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen > 255 ? 256 : iReasonLen+1))+
-				" bytes of memory for sReason in hashBanMan::Ban!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-            AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sReason == NULL) {
+            delete pBan;
+
+            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::Ban\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
 
             return;
         }
 
-        if(iReasonLen > 255) {
-            memcpy(Ban->sReason, sReason, 252);
-			Ban->sReason[254] = '.';
-			Ban->sReason[253] = '.';
-            Ban->sReason[252] = '.';
-            iReasonLen = 255;
+        if(szReasonLen > 255) {
+            memcpy(pBan->sReason, sReason, 252);
+			pBan->sReason[254] = '.';
+			pBan->sReason[253] = '.';
+            pBan->sReason[252] = '.';
+            szReasonLen = 255;
         } else {
-            memcpy(Ban->sReason, sReason, iReasonLen);
+            memcpy(pBan->sReason, sReason, szReasonLen);
         }
-        Ban->sReason[iReasonLen] = '\0';
+        pBan->sReason[szReasonLen] = '\0';
     }
 
     if(sBy != NULL) {
-        size_t iByLen = strlen(sBy);
-        if(iByLen > 63) {
-            iByLen = 63;
+        size_t szByLen = strlen(sBy);
+        if(szByLen > 63) {
+            szByLen = 63;
         }
 #ifdef _WIN32
-        Ban->sBy = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
+        pBan->sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szByLen+1);
 #else
-		Ban->sBy = (char *) malloc(iByLen+1);
+		pBan->sBy = (char *)malloc(szByLen+1);
 #endif
-        if(Ban->sBy == NULL) {
-            string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
-            	" bytes of memory for sBy in hashBanMan::Ban!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-            AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sBy == NULL) {
+            delete pBan;
+
+            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in hashBanMan::Ban\n", (uint64_t)(szByLen+1));
 
 			return;
         }   
-        memcpy(Ban->sBy, sBy, iByLen);
-        Ban->sBy[iByLen] = '\0';
+        memcpy(pBan->sBy, sBy, szByLen);
+        pBan->sBy[szByLen] = '\0';
     }
 
-	Add(Ban);
+	if(Add(pBan) == false) {
+        delete pBan;
+        return;
+    }
+
 	Save();
 }
 //---------------------------------------------------------------------------
 
 char hashBanMan::BanIp(User * u, char * sIp, char * sReason, char * sBy, const bool &bFull) {
-    BanItem *Ban = new BanItem();
-    if(Ban == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate Ban in hashBanMan::BanIp!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-    	AppendSpecialLog(sDbgstr);
+    BanItem * pBan = new BanItem();
+    if(pBan == NULL) {
+    	AppendDebugLog("%s - [MEM] Cannot allocate pBan in hashBanMan::BanIp\n", 0);
     	return 1;
     }
 
-    Ban->ui8Bits |= PERM;
+    pBan->ui8Bits |= PERM;
 
     if(u != NULL) {
-        strcpy(Ban->sIp, u->sIP);
-        memcpy(Ban->ui128IpHash, u->ui128IpHash, 16);
+        strcpy(pBan->sIp, u->sIP);
+        memcpy(pBan->ui128IpHash, u->ui128IpHash, 16);
     } else {
-        if(sIp != NULL && HashIP(sIp, Ban->ui128IpHash) == true) {
-            strcpy(Ban->sIp, sIp);
+        if(sIp != NULL && HashIP(sIp, pBan->ui128IpHash) == true) {
+            strcpy(pBan->sIp, sIp);
         } else {
-			delete Ban;
+			delete pBan;
 
             return 1;
         }
     }
 
-    Ban->ui8Bits |= IP;
+    pBan->ui8Bits |= IP;
     
-    if(bFull == true)
-        Ban->ui8Bits |= FULL;
+    if(bFull == true) {
+        pBan->ui8Bits |= FULL;
+    }
     
     time_t acc_time;
     time(&acc_time);
 
-	BanItem *nxtBan = FindIP(Ban->ui128IpHash, acc_time);
+	BanItem * nxtBan = FindIP(pBan->ui128IpHash, acc_time);
         
     // PPK ... don't add ban if is already here perm (full) ban for same ip
     while(nxtBan != NULL) {
@@ -2299,17 +1907,19 @@ char hashBanMan::BanIp(User * u, char * sIp, char * sReason, char * sBy, const b
         nxtBan = curBan->hashiptablenext;
         
         if(((curBan->ui8Bits & TEMP) == TEMP) == true) {
-            if(((curBan->ui8Bits & FULL) == FULL) == false || ((Ban->ui8Bits & FULL) == FULL) == true) {
+            if(((curBan->ui8Bits & FULL) == FULL) == false || ((pBan->ui8Bits & FULL) == FULL) == true) {
                 if(((curBan->ui8Bits & NICK) == NICK) == false) {
                     Rem(curBan);
                     delete curBan;
 				}
+
                 continue;
             }
+
             continue;
         }
 
-        if(((curBan->ui8Bits & FULL) == FULL) == false && ((Ban->ui8Bits & FULL) == FULL) == true) {
+        if(((curBan->ui8Bits & FULL) == FULL) == false && ((pBan->ui8Bits & FULL) == FULL) == true) {
             if(((curBan->ui8Bits & NICK) == NICK) == false) {
                 Rem(curBan);
                 delete curBan;
@@ -2317,163 +1927,151 @@ char hashBanMan::BanIp(User * u, char * sIp, char * sReason, char * sBy, const b
             continue;
         }
 
-        delete Ban;
+        delete pBan;
 
         return 2;
     }
 
     if(sReason != NULL) {
-        size_t iReasonLen = strlen(sReason);
+        size_t szReasonLen = strlen(sReason);
 #ifdef _WIN32
-        Ban->sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen > 255 ? 256 : iReasonLen+1);
+        pBan->sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szReasonLen > 255 ? 256 : szReasonLen+1);
 #else
-		Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
+		pBan->sReason = (char *)malloc(szReasonLen > 255 ? 256 : szReasonLen+1);
 #endif
-        if(Ban->sReason == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen > 255 ? 256 : iReasonLen+1))+
-				" bytes of memory for sReason in hashBanMan::BanIp!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sReason == NULL) {
+            delete pBan;
 
-            return 0;
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::BanIp\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
+
+            return 1;
         }
 
-        if(iReasonLen > 255) {
-            memcpy(Ban->sReason, sReason, 252);
-			Ban->sReason[254] = '.';
-			Ban->sReason[253] = '.';
-            Ban->sReason[252] = '.';
-            iReasonLen = 255;
+        if(szReasonLen > 255) {
+            memcpy(pBan->sReason, sReason, 252);
+			pBan->sReason[254] = '.';
+			pBan->sReason[253] = '.';
+            pBan->sReason[252] = '.';
+            szReasonLen = 255;
         } else {
-            memcpy(Ban->sReason, sReason, iReasonLen);
+            memcpy(pBan->sReason, sReason, szReasonLen);
         }
-        Ban->sReason[iReasonLen] = '\0';
+        pBan->sReason[szReasonLen] = '\0';
     }
 
     if(sBy != NULL) {
-        size_t iByLen = strlen(sBy);
-        if(iByLen > 63) {
-            iByLen = 63;
+        size_t szByLen = strlen(sBy);
+        if(szByLen > 63) {
+            szByLen = 63;
         }
 #ifdef _WIN32
-        Ban->sBy = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
+        pBan->sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szByLen+1);
 #else
-		Ban->sBy = (char *) malloc(iByLen+1);
+		pBan->sBy = (char *)malloc(szByLen+1);
 #endif
-        if(Ban->sBy == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
-				" bytes of memory for sBy in hashBanMan::BanIp!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sBy == NULL) {
+            delete pBan;
 
-            return 0;
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in hashBanMan::BanIp\n", (uint64_t)(szByLen+1));
+
+            return 1;
         }   
-        memcpy(Ban->sBy, sBy, iByLen);
-        Ban->sBy[iByLen] = '\0';
+        memcpy(pBan->sBy, sBy, szByLen);
+        pBan->sBy[szByLen] = '\0';
     }
 
-    Add(Ban);
+    if(Add(pBan) == false) {
+        delete pBan;
+        return 1;
+    }
+
 	Save();
+
     return 0;
 }
 //---------------------------------------------------------------------------
 
 bool hashBanMan::NickBan(User * u, char * sNick, char * sReason, char * sBy) {
-    BanItem *Ban = new BanItem();
-    if(Ban == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate Ban in hashBanMan::NickBan!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+    BanItem * pBan = new BanItem();
+    if(pBan == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate pBan in hashBanMan::NickBan\n", 0);
     	return false;
     }
-    Ban->ui8Bits |= PERM;
+
+    pBan->ui8Bits |= PERM;
 
     if(u == NULL) {
-        // PPK ... this never happen, but to be sure ;)
+        // PPK ... this should never happen, but to be sure ;)
         if(sNick == NULL) {
-            delete Ban;
+            delete pBan;
 
             return false;
         }
 
         // PPK ... bad script ban check
         if(sNick[0] == '<') {
-            delete Ban;
+            delete pBan;
 
             return false;
         }
         
-        size_t iNickLen = strlen(sNick);
+        size_t szNickLen = strlen(sNick);
 #ifdef _WIN32
-        Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
+        pBan->sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
 #else
-		Ban->sNick = (char *) malloc(iNickLen+1);
+		pBan->sNick = (char *)malloc(szNickLen+1);
 #endif
-        if(Ban->sNick == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
-				" bytes of memory for sNick in hashBanMan::NickBan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sNick == NULL) {
+            delete pBan;
+
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in hashBanMan::NickBan\n", (uint64_t)(szNickLen+1));
 
             return false;
-        }   
-        memcpy(Ban->sNick, sNick, iNickLen);
-        Ban->sNick[iNickLen] = '\0';
-        Ban->ui32NickHash = HashNick(sNick, strlen(sNick));
+        }
+
+        memcpy(pBan->sNick, sNick, szNickLen);
+        pBan->sNick[szNickLen] = '\0';
+        pBan->ui32NickHash = HashNick(sNick, szNickLen);
     } else {
         // PPK ... bad script ban check
         if(u->sNick[0] == '<') {
-            delete Ban;
+            delete pBan;
 
             return false;
         }
 
 #ifdef _WIN32
-        Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
+        pBan->sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
 #else
-		Ban->sNick = (char *) malloc(u->ui8NickLen+1);
+		pBan->sNick = (char *)malloc(u->ui8NickLen+1);
 #endif
-        if(Ban->sNick == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string(u->ui8NickLen+1)+
-				" bytes of memory for sNick1 in hashBanMan::NickBan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sNick == NULL) {
+            delete pBan;
+
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick1 in hashBanMan::NickBan\n", (uint64_t)(u->ui8NickLen+1));
 
             return false;
         }   
-        memcpy(Ban->sNick, u->sNick, u->ui8NickLen);
-        Ban->sNick[u->ui8NickLen] = '\0';
-        Ban->ui32NickHash = u->ui32NickHash;
 
-        strcpy(Ban->sIp, u->sIP);
-        memcpy(Ban->ui128IpHash, u->ui128IpHash, 16);
+        memcpy(pBan->sNick, u->sNick, u->ui8NickLen);
+        pBan->sNick[u->ui8NickLen] = '\0';
+        pBan->ui32NickHash = u->ui32NickHash;
+
+        strcpy(pBan->sIp, u->sIP);
+        memcpy(pBan->ui128IpHash, u->ui128IpHash, 16);
     }
 
-    Ban->ui8Bits |= NICK;
+    pBan->ui8Bits |= NICK;
 
     time_t acc_time;
     time(&acc_time);
 
-	BanItem *nxtBan = FindNick(Ban->ui32NickHash, acc_time, Ban->sNick);
+	BanItem *nxtBan = FindNick(pBan->ui32NickHash, acc_time, pBan->sNick);
     
     // PPK ... not allow same nickbans !
     if(nxtBan != NULL) {
         if(((nxtBan->ui8Bits & PERM) == PERM) == true) {
-            delete Ban;
+            delete pBan;
 
             return false;
         } else {
@@ -2488,163 +2086,155 @@ bool hashBanMan::NickBan(User * u, char * sNick, char * sReason, char * sBy) {
 			}
         }
     }
-    
+
     if(sReason != NULL) {
-        size_t iReasonLen = strlen(sReason);
+        size_t szReasonLen = strlen(sReason);
 #ifdef _WIN32
-        Ban->sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen > 255 ? 256 : iReasonLen+1);
+        pBan->sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szReasonLen > 255 ? 256 : szReasonLen+1);
 #else
-		Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
+		pBan->sReason = (char *)malloc(szReasonLen > 255 ? 256 : szReasonLen+1);
 #endif
-        if(Ban->sReason == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen > 255 ? 256 : iReasonLen+1))+
-				" bytes of memory for sReason in hashBanMan::NickBan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sReason == NULL) {
+            delete pBan;
+
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::NickBan\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
 
             return false;
         }   
 
-        if(iReasonLen > 255) {
-            memcpy(Ban->sReason, sReason, 252);
-			Ban->sReason[254] = '.';
-			Ban->sReason[253] = '.';
-            Ban->sReason[252] = '.';
-            iReasonLen = 255;
+        if(szReasonLen > 255) {
+            memcpy(pBan->sReason, sReason, 252);
+			pBan->sReason[254] = '.';
+			pBan->sReason[253] = '.';
+            pBan->sReason[252] = '.';
+            szReasonLen = 255;
         } else {
-            memcpy(Ban->sReason, sReason, iReasonLen);
+            memcpy(pBan->sReason, sReason, szReasonLen);
         }
-        Ban->sReason[iReasonLen] = '\0';
+        pBan->sReason[szReasonLen] = '\0';
     }
 
     if(sBy != NULL) {
-        size_t iByLen = strlen(sBy);
-        if(iByLen > 63) {
-            iByLen = 63;
+        size_t szByLen = strlen(sBy);
+        if(szByLen > 63) {
+            szByLen = 63;
         }
 #ifdef _WIN32
-        Ban->sBy = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
+        pBan->sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szByLen+1);
 #else
-		Ban->sBy = (char *) malloc(iByLen+1);
+		pBan->sBy = (char *)malloc(szByLen+1);
 #endif
-        if(Ban->sBy == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
-				" bytes of memory for sBy in hashBanMan::NickBan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sBy == NULL) {
+            delete pBan;
+
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in hashBanMan::NickBan\n", (uint64_t)(szByLen+1));
 
             return false;
         }   
-        memcpy(Ban->sBy, sBy, iByLen);
-        Ban->sBy[iByLen] = '\0';
+        memcpy(pBan->sBy, sBy, szByLen);
+        pBan->sBy[szByLen] = '\0';
     }
 
-    Add(Ban);
+    if(Add(pBan) == false) {
+        delete pBan;
+        return false;
+    }
+
 	Save();
+
     return true;
 }
 //---------------------------------------------------------------------------
 
 void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint32_t &minutes, const time_t &expiretime, const bool &bFull) {
-    time_t acc_time;
-    time(&acc_time);
-    
-    BanItem *Ban = new BanItem();
-    if(Ban == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate Ban in hashBanMan::TempBan!";
-#ifdef _WIN32
-    	sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-    	AppendSpecialLog(sDbgstr);
+    BanItem * pBan = new BanItem();
+    if(pBan == NULL) {
+    	AppendDebugLog("%s - [MEM] Cannot allocate pBan in hashBanMan::TempBan\n", 0);
     	return;
     }
-    Ban->ui8Bits |= TEMP;
 
-    strcpy(Ban->sIp, u->sIP);
-    memcpy(Ban->ui128IpHash, u->ui128IpHash, 16);
-    Ban->ui8Bits |= IP;
+    pBan->ui8Bits |= TEMP;
+
+    strcpy(pBan->sIp, u->sIP);
+    memcpy(pBan->ui128IpHash, u->ui128IpHash, 16);
+    pBan->ui8Bits |= IP;
     
-    if(bFull == true)
-        Ban->ui8Bits |= FULL;
+    if(bFull == true) {
+        pBan->ui8Bits |= FULL;
+    }
+
+    time_t acc_time;
+    time(&acc_time);
 
     if(expiretime > 0) {
-        Ban->tempbanexpire = expiretime;
+        pBan->tempbanexpire = expiretime;
     } else {
         if(minutes > 0) {
-            Ban->tempbanexpire = acc_time+(minutes*60);
+            pBan->tempbanexpire = acc_time+(minutes*60);
         } else {
-    	    Ban->tempbanexpire = acc_time+(SettingManager->iShorts[SETSHORT_DEFAULT_TEMP_BAN_TIME]*60);
+    	    pBan->tempbanexpire = acc_time+(SettingManager->iShorts[SETSHORT_DEFAULT_TEMP_BAN_TIME]*60);
         }
     }
-    
+
     // PPK ... check for <unknown> nick -> bad ban from script
     if(u->sNick[0] != '<') {
-        size_t iNickLen = strlen(u->sNick);
+        size_t szNickLen = strlen(u->sNick);
 #ifdef _WIN32
-        Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
+        pBan->sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
 #else
-		Ban->sNick = (char *) malloc(iNickLen+1);
+		pBan->sNick = (char *)malloc(szNickLen+1);
 #endif
-        if(Ban->sNick == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
-				" bytes of memory for sNick in hashBanMan::TempBan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-            AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sNick == NULL) {
+            delete pBan;
+
+            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in hashBanMan::TempBan\n", (uint64_t)(szNickLen+1));
 
             return;
-        }   
-        memcpy(Ban->sNick, u->sNick, iNickLen);
-        Ban->sNick[iNickLen] = '\0';
-        Ban->ui32NickHash = u->ui32NickHash;
-        Ban->ui8Bits |= NICK;
+        }
+
+        memcpy(pBan->sNick, u->sNick, szNickLen);
+        pBan->sNick[szNickLen] = '\0';
+        pBan->ui32NickHash = u->ui32NickHash;
+        pBan->ui8Bits |= NICK;
 
         // PPK ... not allow same nickbans ! i don't want this check here, but lame scripter find way to ban same nick multiple times :(
-		BanItem *nxtBan = FindNick(Ban->ui32NickHash, acc_time, Ban->sNick);
+		BanItem *nxtBan = FindNick(pBan->ui32NickHash, acc_time, pBan->sNick);
 
         if(nxtBan != NULL) {
             if(((nxtBan->ui8Bits & PERM) == PERM) == true) {
                 if(((nxtBan->ui8Bits & IP) == IP) == true) {
-                    if(memcmp(Ban->ui128IpHash, nxtBan->ui128IpHash, 16) == 0) {
-                        if(((Ban->ui8Bits & FULL) == FULL) == false) {
+                    if(memcmp(pBan->ui128IpHash, nxtBan->ui128IpHash, 16) == 0) {
+                        if(((pBan->ui8Bits & FULL) == FULL) == false) {
                             // PPK ... same ban and old is perm, delete new
-                            delete Ban;
+                            delete pBan;
 
                             return;
                         } else {
                             if(((nxtBan->ui8Bits & FULL) == FULL) == true) {
                                 // PPK ... same ban and old is full perm, delete new
-                                delete Ban;
+                                delete pBan;
 
                                 return;
                             } else {
                                 // PPK ... same ban and only new is full, set new to ipban only
-                                Ban->ui8Bits &= ~NICK;
+                                pBan->ui8Bits &= ~NICK;
                             }
                         }
                     }
                 } else {
                     // PPK ... perm ban to same nick already exist, set new to ipban only
-                    Ban->ui8Bits &= ~NICK;
+                    pBan->ui8Bits &= ~NICK;
                 }
             } else {
-                if(nxtBan->tempbanexpire < Ban->tempbanexpire) {
+                if(nxtBan->tempbanexpire < pBan->tempbanexpire) {
                     if(((nxtBan->ui8Bits & IP) == IP) == true) {
-                        if(memcmp(Ban->ui128IpHash, nxtBan->ui128IpHash, 16) == 0) {
+                        if(memcmp(pBan->ui128IpHash, nxtBan->ui128IpHash, 16) == 0) {
                             if(((nxtBan->ui8Bits & FULL) == FULL) == false) {
                                 // PPK ... same bans, but old with lower expiration -> delete old
                                 Rem(nxtBan);
                                 delete nxtBan;
 							} else {
-                                if(((Ban->ui8Bits & FULL) == FULL) == false) {
+                                if(((pBan->ui8Bits & FULL) == FULL) == false) {
                                     // PPK ... old ban with lower expiration is full ban, set old to ipban only
 									RemFromNickTable(nxtBan);
                                     nxtBan->ui8Bits &= ~NICK;
@@ -2666,30 +2256,30 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
 					}
                 } else {
                     if(((nxtBan->ui8Bits & IP) == IP) == true) {
-                        if(memcmp(Ban->ui128IpHash, nxtBan->ui128IpHash, 16) == 0) {
-                            if(((Ban->ui8Bits & FULL) == FULL) == false) {
+                        if(memcmp(pBan->ui128IpHash, nxtBan->ui128IpHash, 16) == 0) {
+                            if(((pBan->ui8Bits & FULL) == FULL) == false) {
                                 // PPK ... same bans, but new with lower expiration -> delete new
-                                delete Ban;
+                                delete pBan;
 
 								return;
                             } else {
                                 if(((nxtBan->ui8Bits & FULL) == FULL) == false) {
                                     // PPK ... new ban with lower expiration is full ban, set new to ipban only
-                                    Ban->ui8Bits &= ~NICK;
+                                    pBan->ui8Bits &= ~NICK;
                                 } else {
                                     // PPK ... same bans, new have lower expiration -> delete new
-                                    delete Ban;
+                                    delete pBan;
 
                                     return;
                                 }
                             }
                         } else {
                             // PPK ... set new ban to ipban only
-                            Ban->ui8Bits &= ~NICK;
+                            pBan->ui8Bits &= ~NICK;
                         }
                     } else {
                         // PPK ... old ban is only nickban with higher bantime, set new to ipban only
-                        Ban->ui8Bits &= ~NICK;
+                        pBan->ui8Bits &= ~NICK;
                     }
                 }
             }
@@ -2697,7 +2287,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
     }
 
     // PPK ... clear bans with lower timeban and same ip without nickban and fullban if new ban is fullban
-	BanItem *nxtBan = FindIP(Ban->ui128IpHash, acc_time);
+	BanItem *nxtBan = FindIP(pBan->ui128IpHash, acc_time);
 
     while(nxtBan != NULL) {
         BanItem *curBan = nxtBan;
@@ -2711,313 +2301,295 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
             continue;
         }
 
-        if(((curBan->ui8Bits & FULL) == FULL) == true && ((Ban->ui8Bits & FULL) == FULL) == false) {
+        if(((curBan->ui8Bits & FULL) == FULL) == true && ((pBan->ui8Bits & FULL) == FULL) == false) {
             continue;
         }
 
-        if(curBan->tempbanexpire > Ban->tempbanexpire) {
+        if(curBan->tempbanexpire > pBan->tempbanexpire) {
             continue;
         }
         
         Rem(curBan);
         delete curBan;
 	}
-    
+
     if(sReason != NULL) {
-        size_t iReasonLen = strlen(sReason);
+        size_t szReasonLen = strlen(sReason);
 #ifdef _WIN32
-        Ban->sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen > 255 ? 256 : iReasonLen+1);
+        pBan->sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szReasonLen > 255 ? 256 : szReasonLen+1);
 #else
-		Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
+		pBan->sReason = (char *)malloc(szReasonLen > 255 ? 256 : szReasonLen+1);
 #endif
-        if(Ban->sReason == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen > 255 ? 256 : iReasonLen+1))+
-				" bytes of memory for sReason in hashBanMan::TempBan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sReason == NULL) {
+            delete pBan;
+
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::TempBan\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
 
             return;
         }   
 
-        if(iReasonLen > 255) {
-            memcpy(Ban->sReason, sReason, 252);
-			Ban->sReason[254] = '.';
-			Ban->sReason[253] = '.';
-            Ban->sReason[252] = '.';
-            iReasonLen = 255;
+        if(szReasonLen > 255) {
+            memcpy(pBan->sReason, sReason, 252);
+			pBan->sReason[254] = '.';
+			pBan->sReason[253] = '.';
+            pBan->sReason[252] = '.';
+            szReasonLen = 255;
         } else {
-            memcpy(Ban->sReason, sReason, iReasonLen);
+            memcpy(pBan->sReason, sReason, szReasonLen);
         }
-        Ban->sReason[iReasonLen] = '\0';
+        pBan->sReason[szReasonLen] = '\0';
     }
 
     if(sBy != NULL) {
-        size_t iByLen = strlen(sBy);
-        if(iByLen > 63) {
-            iByLen = 63;
+        size_t szByLen = strlen(sBy);
+        if(szByLen > 63) {
+            szByLen = 63;
         }
 #ifdef _WIN32
-        Ban->sBy = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
+        pBan->sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szByLen+1);
 #else
-		Ban->sBy = (char *) malloc(iByLen+1);
+		pBan->sBy = (char *)malloc(szByLen+1);
 #endif
-        if(Ban->sBy == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
-				" bytes of memory for sBy in hashBanMan::TempBan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sBy == NULL) {
+            delete pBan;
+
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in hashBanMan::TempBan\n", (uint64_t)(szByLen+1));
 
             return;
         }   
-        memcpy(Ban->sBy, sBy, iByLen);
-        Ban->sBy[iByLen] = '\0';
+        memcpy(pBan->sBy, sBy, szByLen);
+        pBan->sBy[szByLen] = '\0';
     }
 
-    Add(Ban);
+    if(Add(pBan) == false) {
+        delete pBan;
+        return;
+    }
+
 	Save();
 }
 //---------------------------------------------------------------------------
 
 char hashBanMan::TempBanIp(User * u, char * sIp, char * sReason, char * sBy, const uint32_t &minutes, const time_t &expiretime, const bool &bFull) {
-    BanItem *Ban = new BanItem();
-    if(Ban == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate Ban in hashBanMan::TempBanIp!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+    BanItem * pBan = new BanItem();
+    if(pBan == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate pBan in hashBanMan::TempBanIp\n", 0);
     	return 1;
     }
-    Ban->ui8Bits |= TEMP;
+
+    pBan->ui8Bits |= TEMP;
 
     if(u != NULL) {
-        strcpy(Ban->sIp, u->sIP);
-        memcpy(Ban->ui128IpHash, u->ui128IpHash, 16);
+        strcpy(pBan->sIp, u->sIP);
+        memcpy(pBan->ui128IpHash, u->ui128IpHash, 16);
     } else {
-        if(sIp != NULL && HashIP(sIp, Ban->ui128IpHash) == true) {
-            strcpy(Ban->sIp, sIp);
+        if(sIp != NULL && HashIP(sIp, pBan->ui128IpHash) == true) {
+            strcpy(pBan->sIp, sIp);
         } else {
-            delete Ban;
+            delete pBan;
 
             return 1;
         }
     }
 
-    Ban->ui8Bits |= IP;
+    pBan->ui8Bits |= IP;
     
-    if(bFull == true)
-        Ban->ui8Bits |= FULL;
+    if(bFull == true) {
+        pBan->ui8Bits |= FULL;
+    }
 
     time_t acc_time;
     time(&acc_time);
 
     if(expiretime > 0) {
-        Ban->tempbanexpire = expiretime;
+        pBan->tempbanexpire = expiretime;
     } else {
         if(minutes == 0) {
-    	    Ban->tempbanexpire = acc_time+(SettingManager->iShorts[SETSHORT_DEFAULT_TEMP_BAN_TIME]*60);
+    	    pBan->tempbanexpire = acc_time+(SettingManager->iShorts[SETSHORT_DEFAULT_TEMP_BAN_TIME]*60);
         } else {
-            Ban->tempbanexpire = acc_time+(minutes*60);
+            pBan->tempbanexpire = acc_time+(minutes*60);
         }
     }
     
-	BanItem *nxtBan = FindIP(Ban->ui128IpHash, acc_time);
+	BanItem *nxtBan = FindIP(pBan->ui128IpHash, acc_time);
 
     // PPK ... don't add ban if is already here perm (full) ban or longer temp ban for same ip
     while(nxtBan != NULL) {
         BanItem *curBan = nxtBan;
         nxtBan = curBan->hashiptablenext;
 
-        if(((curBan->ui8Bits & TEMP) == TEMP) == true && curBan->tempbanexpire < Ban->tempbanexpire) {
-            if(((curBan->ui8Bits & FULL) == FULL) == false || ((Ban->ui8Bits & FULL) == FULL) == true) {
+        if(((curBan->ui8Bits & TEMP) == TEMP) == true && curBan->tempbanexpire < pBan->tempbanexpire) {
+            if(((curBan->ui8Bits & FULL) == FULL) == false || ((pBan->ui8Bits & FULL) == FULL) == true) {
                 if(((curBan->ui8Bits & NICK) == NICK) == false) {
                     Rem(curBan);
                     delete curBan;
 				}
+
                 continue;
             }
+
             continue;
         }
 
-        if(((curBan->ui8Bits & FULL) == FULL) == false && ((Ban->ui8Bits & FULL) == FULL) == true) continue;
+        if(((curBan->ui8Bits & FULL) == FULL) == false && ((pBan->ui8Bits & FULL) == FULL) == true) continue;
 
-        delete Ban;
+        delete pBan;
 
         return 2;
     }
-    
+
     if(sReason != NULL) {
-        size_t iReasonLen = strlen(sReason);
+        size_t szReasonLen = strlen(sReason);
 #ifdef _WIN32
-        Ban->sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen > 255 ? 256 : iReasonLen+1);
+        pBan->sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szReasonLen > 255 ? 256 : szReasonLen+1);
 #else
-		Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
+		pBan->sReason = (char *)malloc(szReasonLen > 255 ? 256 : szReasonLen+1);
 #endif
-        if(Ban->sReason == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen > 255 ? 256 : iReasonLen+1))+
-				" bytes of memory for sReason in hashBanMan::TempBanIp!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sReason == NULL) {
+            delete pBan;
 
-            return 0;
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::TempBanIp\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
+
+            return 1;
         }
 
-        if(iReasonLen > 255) {
-            memcpy(Ban->sReason, sReason, 252);
-			Ban->sReason[254] = '.';
-			Ban->sReason[253] = '.';
-            Ban->sReason[252] = '.';
-            iReasonLen = 255;
+        if(szReasonLen > 255) {
+            memcpy(pBan->sReason, sReason, 252);
+			pBan->sReason[254] = '.';
+			pBan->sReason[253] = '.';
+            pBan->sReason[252] = '.';
+            szReasonLen = 255;
         } else {
-            memcpy(Ban->sReason, sReason, iReasonLen);
+            memcpy(pBan->sReason, sReason, szReasonLen);
         }
-        Ban->sReason[iReasonLen] = '\0';
+        pBan->sReason[szReasonLen] = '\0';
     }
 
     if(sBy != NULL) {
-        size_t iByLen = strlen(sBy);
-        if(iByLen > 63) {
-            iByLen = 63;
+        size_t szByLen = strlen(sBy);
+        if(szByLen > 63) {
+            szByLen = 63;
         }
 #ifdef _WIN32
-        Ban->sBy = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
+        pBan->sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szByLen+1);
 #else
-		Ban->sBy = (char *) malloc(iByLen+1);
+		pBan->sBy = (char *)malloc(szByLen+1);
 #endif
-        if(Ban->sBy == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
-				" bytes of memory for sBy in hashBanMan::TempBanIp!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sBy == NULL) {
+            delete pBan;
 
-            return 0;
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in hashBanMan::TempBanIp\n", (uint64_t)(szByLen+1));
+
+            return 1;
         }   
-        memcpy(Ban->sBy, sBy, iByLen);
-        Ban->sBy[iByLen] = '\0';
+        memcpy(pBan->sBy, sBy, szByLen);
+        pBan->sBy[szByLen] = '\0';
     }
 
-    Add(Ban);
+    if(Add(pBan) == false) {
+        delete pBan;
+        return 1;
+    }
+
 	Save();
+
     return 0;
 }
 //---------------------------------------------------------------------------
 
 bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy, const uint32_t &minutes, const time_t &expiretime) {
-    BanItem *Ban = new BanItem();
-    if(Ban == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate Ban in hashBanMan::NickTempBan!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+    BanItem * pBan = new BanItem();
+    if(pBan == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate pBan in hashBanMan::NickTempBan\n", 0);
     	return false;
     }
-    Ban->ui8Bits |= TEMP;
+
+    pBan->ui8Bits |= TEMP;
 
     if(u == NULL) {
-        // PPK ... this never happen, but to be sure ;)
+        // PPK ... this should never happen, but to be sure ;)
         if(sNick == NULL) {
-            delete Ban;
+            delete pBan;
 
             return false;
         }
 
         // PPK ... bad script ban check
         if(sNick[0] == '<') {
-            delete Ban;
+            delete pBan;
 
             return false;
         }
         
-        size_t iNickLen = strlen(sNick);
+        size_t szNickLen = strlen(sNick);
 #ifdef _WIN32
-        Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
+        pBan->sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
 #else
-		Ban->sNick = (char *) malloc(iNickLen+1);
+		pBan->sNick = (char *)malloc(szNickLen+1);
 #endif
-        if(Ban->sNick == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
-				" bytes of memory for sNick in hashBanMan::NickTempBan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sNick == NULL) {
+            delete pBan;
+
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in hashBanMan::NickTempBan\n", (uint64_t)(szNickLen+1));
 
             return false;
         }   
-        memcpy(Ban->sNick, sNick, iNickLen);
-        Ban->sNick[iNickLen] = '\0';
-        Ban->ui32NickHash = HashNick(sNick, strlen(sNick));
+        memcpy(pBan->sNick, sNick, szNickLen);
+        pBan->sNick[szNickLen] = '\0';
+        pBan->ui32NickHash = HashNick(sNick, szNickLen);
     } else {
         // PPK ... bad script ban check
         if(u->sNick[0] == '<') {
-            delete Ban;
+            delete pBan;
 
             return false;
         }
 
 #ifdef _WIN32
-        Ban->sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
+        pBan->sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
 #else
-		Ban->sNick = (char *) malloc(u->ui8NickLen+1);
+		pBan->sNick = (char *)malloc(u->ui8NickLen+1);
 #endif
-        if(Ban->sNick == NULL) {
-            string sDbgstr = "[BUF] Cannot allocate "+string(u->ui8NickLen+1)+
-            	" bytes of memory for sNick1 in hashBanMan::NickTempBan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-            AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sNick == NULL) {
+            delete pBan;
+
+            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick1 in hashBanMan::NickTempBan\n", (uint64_t)(u->ui8NickLen+1));
 
             return false;
         }   
-        memcpy(Ban->sNick, u->sNick, u->ui8NickLen);
-        Ban->sNick[u->ui8NickLen] = '\0';
-        Ban->ui32NickHash = u->ui32NickHash;
+        memcpy(pBan->sNick, u->sNick, u->ui8NickLen);
+        pBan->sNick[u->ui8NickLen] = '\0';
+        pBan->ui32NickHash = u->ui32NickHash;
 
-        strcpy(Ban->sIp, u->sIP);
-        memcpy(Ban->ui128IpHash, u->ui128IpHash, 16);
+        strcpy(pBan->sIp, u->sIP);
+        memcpy(pBan->ui128IpHash, u->ui128IpHash, 16);
     }
 
-    Ban->ui8Bits |= NICK;
+    pBan->ui8Bits |= NICK;
 
     time_t acc_time;
     time(&acc_time);
 
     if(expiretime > 0) {
-        Ban->tempbanexpire = expiretime;
+        pBan->tempbanexpire = expiretime;
     } else {
         if(minutes > 0) {
-            Ban->tempbanexpire = acc_time+(minutes*60);
+            pBan->tempbanexpire = acc_time+(minutes*60);
         } else {
-    	    Ban->tempbanexpire = acc_time+(SettingManager->iShorts[SETSHORT_DEFAULT_TEMP_BAN_TIME]*60);
+    	    pBan->tempbanexpire = acc_time+(SettingManager->iShorts[SETSHORT_DEFAULT_TEMP_BAN_TIME]*60);
         }
     }
     
-	BanItem *nxtBan = FindNick(Ban->ui32NickHash, acc_time, Ban->sNick);
+	BanItem *nxtBan = FindNick(pBan->ui32NickHash, acc_time, pBan->sNick);
 
     // PPK ... not allow same nickbans !
     if(nxtBan != NULL) {
         if(((nxtBan->ui8Bits & PERM) == PERM) == true) {
-            delete Ban;
+            delete pBan;
 
             return false;
         } else {
-            if(nxtBan->tempbanexpire < Ban->tempbanexpire) {
+            if(nxtBan->tempbanexpire < pBan->tempbanexpire) {
                 if(((nxtBan->ui8Bits & IP) == IP) == true) {
                     // PPK ... set old ban to ip ban only
                     RemFromNickTable(nxtBan);
@@ -3028,7 +2600,7 @@ bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy,
                     delete nxtBan;
 				}
             } else {
-                delete Ban;
+                delete pBan;
 
                 return false;
             }
@@ -3036,63 +2608,60 @@ bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy,
     }
 
     if(sReason != NULL) {
-        size_t iReasonLen = strlen(sReason);
+        size_t szReasonLen = strlen(sReason);
 #ifdef _WIN32
-        Ban->sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen > 255 ? 256 : iReasonLen+1);
+        pBan->sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szReasonLen > 255 ? 256 : szReasonLen+1);
 #else
-		Ban->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
+		pBan->sReason = (char *)malloc(szReasonLen > 255 ? 256 : szReasonLen+1);
 #endif
-        if(Ban->sReason == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen > 255 ? 256 : iReasonLen+1))+
-				" bytes of memory for sReason in hashBanMan::NickTempBan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-            AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sReason == NULL) {
+            delete pBan;
+
+            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::NickTempBan\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
 
             return false;
         }   
 
-        if(iReasonLen > 255) {
-            memcpy(Ban->sReason, sReason, 252);
-			Ban->sReason[254] = '.';
-			Ban->sReason[253] = '.';
-            Ban->sReason[252] = '.';
-            iReasonLen = 255;
+        if(szReasonLen > 255) {
+            memcpy(pBan->sReason, sReason, 252);
+			pBan->sReason[254] = '.';
+			pBan->sReason[253] = '.';
+            pBan->sReason[252] = '.';
+            szReasonLen = 255;
         } else {
-            memcpy(Ban->sReason, sReason, iReasonLen);
+            memcpy(pBan->sReason, sReason, szReasonLen);
         }
-        Ban->sReason[iReasonLen] = '\0';
+        pBan->sReason[szReasonLen] = '\0';
     }
 
     if(sBy != NULL) {
-        size_t iByLen = strlen(sBy);
-        if(iByLen > 63) {
-            iByLen = 63;
+        size_t szByLen = strlen(sBy);
+        if(szByLen > 63) {
+            szByLen = 63;
         }
 #ifdef _WIN32
-        Ban->sBy = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
+        pBan->sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szByLen+1);
 #else
-		Ban->sBy = (char *) malloc(iByLen+1);
+		pBan->sBy = (char *)malloc(szByLen+1);
 #endif
-        if(Ban->sBy == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
-				" bytes of memory for sBy in hashBanMan::NickTempBan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete Ban;
+        if(pBan->sBy == NULL) {
+            delete pBan;
+
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in hashBanMan::NickTempBan\n", (uint64_t)(szByLen+1));
 
             return false;
         }   
-        memcpy(Ban->sBy, sBy, iByLen);
-        Ban->sBy[iByLen] = '\0';
+        memcpy(pBan->sBy, sBy, szByLen);
+        pBan->sBy[szByLen] = '\0';
     }
 
-    Add(Ban);
+    if(Add(pBan) == false) {
+        delete pBan;
+        return false;
+    }
+
 	Save();
+
     return true;
 }
 //---------------------------------------------------------------------------
@@ -3261,34 +2830,32 @@ void hashBanMan::RemoveTempAllIP(const uint8_t * ui128IpHash) {
 //---------------------------------------------------------------------------
 
 bool hashBanMan::RangeBan(char * sIpFrom, const uint8_t * ui128FromIpHash, char * sIpTo, const uint8_t * ui128ToIpHash, char * sReason, char * sBy, const bool &bFull) {
-    RangeBanItem *RangeBan = new RangeBanItem();
-    if(RangeBan == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate RangeBan in hashBanMan::RangeBan!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+    RangeBanItem * pRangeBan = new RangeBanItem();
+    if(pRangeBan == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate pRangeBan in hashBanMan::RangeBan\n", 0);
     	return false;
     }
-    RangeBan->ui8Bits |= PERM;
 
-    strcpy(RangeBan->sIpFrom, sIpFrom);
-    memcpy(RangeBan->ui128FromIpHash, ui128FromIpHash, 16);
+    pRangeBan->ui8Bits |= PERM;
 
-    strcpy(RangeBan->sIpTo, sIpTo);
-    memcpy(RangeBan->ui128ToIpHash, ui128ToIpHash, 16);
+    strcpy(pRangeBan->sIpFrom, sIpFrom);
+    memcpy(pRangeBan->ui128FromIpHash, ui128FromIpHash, 16);
 
-    if(bFull == true)
-        RangeBan->ui8Bits |= FULL;
+    strcpy(pRangeBan->sIpTo, sIpTo);
+    memcpy(pRangeBan->ui128ToIpHash, ui128ToIpHash, 16);
 
-    RangeBanItem *nxtBan = RangeBanListS;
+    if(bFull == true) {
+        pRangeBan->ui8Bits |= FULL;
+    }
+
+    RangeBanItem * nxtBan = RangeBanListS;
 
     // PPK ... don't add range ban if is already here same perm (full) range ban
     while(nxtBan != NULL) {
         RangeBanItem *curBan = nxtBan;
         nxtBan = curBan->next;
 
-        if(memcmp(curBan->ui128FromIpHash, RangeBan->ui128FromIpHash, 16) != 0 || memcmp(curBan->ui128ToIpHash, RangeBan->ui128ToIpHash, 16) != 0) {
+        if(memcmp(curBan->ui128FromIpHash, pRangeBan->ui128FromIpHash, 16) != 0 || memcmp(curBan->ui128ToIpHash, pRangeBan->ui128ToIpHash, 16) != 0) {
             continue;
         }
 
@@ -3296,75 +2863,67 @@ bool hashBanMan::RangeBan(char * sIpFrom, const uint8_t * ui128FromIpHash, char 
             continue;
         }
         
-        if(((curBan->ui8Bits & FULL) == FULL) == false && ((RangeBan->ui8Bits & FULL) == FULL) == true) {
+        if(((curBan->ui8Bits & FULL) == FULL) == false && ((pRangeBan->ui8Bits & FULL) == FULL) == true) {
             RemRange(curBan);
             delete curBan;
 
             continue;
         }
         
-        delete RangeBan;
+        delete pRangeBan;
 
         return false;
     }
 
     if(sReason != NULL) {
-        size_t iReasonLen = strlen(sReason);
+        size_t szReasonLen = strlen(sReason);
 #ifdef _WIN32
-        RangeBan->sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen > 255 ? 256 : iReasonLen+1);
+        pRangeBan->sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szReasonLen > 255 ? 256 : szReasonLen+1);
 #else
-		RangeBan->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
+		pRangeBan->sReason = (char *)malloc(szReasonLen > 255 ? 256 : szReasonLen+1);
 #endif
-        if(RangeBan->sReason == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen > 255 ? 256 : iReasonLen+1))+
-				" bytes of memory for sReason in hashBanMan::RangeBan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete RangeBan;
+        if(pRangeBan->sReason == NULL) {
+            delete pRangeBan;
+
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::RangeBan\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
 
             return false;
         }   
 
-        if(iReasonLen > 255) {
-            memcpy(RangeBan->sReason, sReason, 252);
-            RangeBan->sReason[254] = '.';
-            RangeBan->sReason[253] = '.';
-            RangeBan->sReason[252] = '.';
-            iReasonLen = 255;
+        if(szReasonLen > 255) {
+            memcpy(pRangeBan->sReason, sReason, 252);
+            pRangeBan->sReason[254] = '.';
+            pRangeBan->sReason[253] = '.';
+            pRangeBan->sReason[252] = '.';
+            szReasonLen = 255;
         } else {
-            memcpy(RangeBan->sReason, sReason, iReasonLen);
+            memcpy(pRangeBan->sReason, sReason, szReasonLen);
         }
-        RangeBan->sReason[iReasonLen] = '\0';
+        pRangeBan->sReason[szReasonLen] = '\0';
     }
 
     if(sBy != NULL) {
-        size_t iByLen = strlen(sBy);
-        if(iByLen > 63) {
-            iByLen = 63;
+        size_t szByLen = strlen(sBy);
+        if(szByLen > 63) {
+            szByLen = 63;
         }
 #ifdef _WIN32
-        RangeBan->sBy = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
+        pRangeBan->sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szByLen+1);
 #else
-		RangeBan->sBy = (char *) malloc(iByLen+1);
+		pRangeBan->sBy = (char *)malloc(szByLen+1);
 #endif
-        if(RangeBan->sBy == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
-				" bytes of memory for sBy in hashBanMan::RangeBan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete RangeBan;
+        if(pRangeBan->sBy == NULL) {
+            delete pRangeBan;
+
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in hashBanMan::RangeBan\n", (uint64_t)(szByLen+1));
 
             return false;
         }   
-        memcpy(RangeBan->sBy, sBy, iByLen);
-        RangeBan->sBy[iByLen] = '\0';
+        memcpy(pRangeBan->sBy, sBy, szByLen);
+        pRangeBan->sBy[szByLen] = '\0';
     }
 
-    AddRange(RangeBan);
+    AddRange(pRangeBan);
 	Save();
 
     return true;
@@ -3373,37 +2932,34 @@ bool hashBanMan::RangeBan(char * sIpFrom, const uint8_t * ui128FromIpHash, char 
 
 bool hashBanMan::RangeTempBan(char * sIpFrom, const uint8_t * ui128FromIpHash, char * sIpTo, const uint8_t * ui128ToIpHash, char * sReason, char * sBy, const uint32_t &minutes,
     const time_t &expiretime, const bool &bFull) {
-    RangeBanItem *RangeBan = new RangeBanItem();
-    if(RangeBan == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate RangeBan in hashBanMan::RangeTempBan!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+    RangeBanItem * pRangeBan = new RangeBanItem();
+    if(pRangeBan == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate pRangeBan in hashBanMan::RangeTempBan\n", 0);
     	return false;
     }
-    RangeBan->ui8Bits |= TEMP;
 
-    strcpy(RangeBan->sIpFrom, sIpFrom);
-    memcpy(RangeBan->ui128FromIpHash, ui128FromIpHash, 16);
+    pRangeBan->ui8Bits |= TEMP;
 
-    strcpy(RangeBan->sIpTo, sIpTo);
-    memcpy(RangeBan->ui128ToIpHash, ui128ToIpHash, 16);
+    strcpy(pRangeBan->sIpFrom, sIpFrom);
+    memcpy(pRangeBan->ui128FromIpHash, ui128FromIpHash, 16);
+
+    strcpy(pRangeBan->sIpTo, sIpTo);
+    memcpy(pRangeBan->ui128ToIpHash, ui128ToIpHash, 16);
 
     if(bFull == true) {
-        RangeBan->ui8Bits |= FULL;
+        pRangeBan->ui8Bits |= FULL;
     }
 
     time_t acc_time;
     time(&acc_time);
 
     if(expiretime > 0) {
-        RangeBan->tempbanexpire = expiretime;
+        pRangeBan->tempbanexpire = expiretime;
     } else {
         if(minutes > 0) {
-            RangeBan->tempbanexpire = acc_time+(minutes*60);
+            pRangeBan->tempbanexpire = acc_time+(minutes*60);
         } else {
-    	    RangeBan->tempbanexpire = acc_time+(SettingManager->iShorts[SETSHORT_DEFAULT_TEMP_BAN_TIME]*60);
+    	    pRangeBan->tempbanexpire = acc_time+(SettingManager->iShorts[SETSHORT_DEFAULT_TEMP_BAN_TIME]*60);
         }
     }
     
@@ -3414,12 +2970,12 @@ bool hashBanMan::RangeTempBan(char * sIpFrom, const uint8_t * ui128FromIpHash, c
         RangeBanItem *curBan = nxtBan;
         nxtBan = curBan->next;
 
-        if(memcmp(curBan->ui128FromIpHash, RangeBan->ui128FromIpHash, 16) != 0 || memcmp(curBan->ui128ToIpHash, RangeBan->ui128ToIpHash, 16) != 0) {
+        if(memcmp(curBan->ui128FromIpHash, pRangeBan->ui128FromIpHash, 16) != 0 || memcmp(curBan->ui128ToIpHash, pRangeBan->ui128ToIpHash, 16) != 0) {
             continue;
         }
 
-        if(((curBan->ui8Bits & TEMP) == TEMP) == true && curBan->tempbanexpire < RangeBan->tempbanexpire) {
-            if(((curBan->ui8Bits & FULL) == FULL) == false || ((RangeBan->ui8Bits & FULL) == FULL) == true) {
+        if(((curBan->ui8Bits & TEMP) == TEMP) == true && curBan->tempbanexpire < pRangeBan->tempbanexpire) {
+            if(((curBan->ui8Bits & FULL) == FULL) == false || ((pRangeBan->ui8Bits & FULL) == FULL) == true) {
                 RemRange(curBan);
                 delete curBan;
 
@@ -3429,73 +2985,66 @@ bool hashBanMan::RangeTempBan(char * sIpFrom, const uint8_t * ui128FromIpHash, c
             continue;
         }
         
-        if(((curBan->ui8Bits & FULL) == FULL) == false && ((RangeBan->ui8Bits & FULL) == FULL) == true) {
+        if(((curBan->ui8Bits & FULL) == FULL) == false && ((pRangeBan->ui8Bits & FULL) == FULL) == true) {
             continue;
         }
 
-        delete RangeBan;
+        delete pRangeBan;
 
         return false;
     }
-    
+
     if(sReason != NULL) {
-        size_t iReasonLen = strlen(sReason);
+        size_t szReasonLen = strlen(sReason);
 #ifdef _WIN32
-        RangeBan->sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen > 255 ? 256 : iReasonLen+1);
+        pRangeBan->sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szReasonLen > 255 ? 256 : szReasonLen+1);
 #else
-		RangeBan->sReason = (char *) malloc(iReasonLen > 255 ? 256 : iReasonLen+1);
+		pRangeBan->sReason = (char *)malloc(szReasonLen > 255 ? 256 : szReasonLen+1);
 #endif
-        if(RangeBan->sReason == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iReasonLen > 255 ? 256 : iReasonLen+1))+
-				" bytes of memory for sReason in hashBanMan::RangeTempBan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete RangeBan;
+        if(pRangeBan->sReason == NULL) {
+            delete pRangeBan;
+
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::RangeTempBan\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
 
             return false;
         }   
 
-        if(iReasonLen > 255) {
-            memcpy(RangeBan->sReason, sReason, 252);
-            RangeBan->sReason[254] = '.';
-            RangeBan->sReason[253] = '.';
-            RangeBan->sReason[252] = '.';
-            iReasonLen = 255;
+        if(szReasonLen > 255) {
+            memcpy(pRangeBan->sReason, sReason, 252);
+            pRangeBan->sReason[254] = '.';
+            pRangeBan->sReason[253] = '.';
+            pRangeBan->sReason[252] = '.';
+            szReasonLen = 255;
         } else {
-            memcpy(RangeBan->sReason, sReason, iReasonLen);
+            memcpy(pRangeBan->sReason, sReason, szReasonLen);
         }
-        RangeBan->sReason[iReasonLen] = '\0';
+        pRangeBan->sReason[szReasonLen] = '\0';
     }
 
     if(sBy != NULL) {
-        size_t iByLen = strlen(sBy);
-        if(iByLen > 63) {
-            iByLen = 63;
+        size_t szByLen = strlen(sBy);
+        if(szByLen > 63) {
+            szByLen = 63;
         }
 #ifdef _WIN32
-        RangeBan->sBy = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
+        pRangeBan->sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szByLen+1);
 #else
-		RangeBan->sBy = (char *) malloc(iByLen+1);
+		pRangeBan->sBy = (char *)malloc(szByLen+1);
 #endif
-        if(RangeBan->sBy == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iByLen+1))+
-				" bytes of memory for sBy in hashBanMan::RangeTempBan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete RangeBan;
+        if(pRangeBan->sBy == NULL) {
+            delete pRangeBan;
+
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in hashBanMan::RangeTempBan\n", (uint64_t)(szByLen+1));
 
             return false;
         }   
-        memcpy(RangeBan->sBy, sBy, iByLen);
-        RangeBan->sBy[iByLen] = '\0';
+        memcpy(pRangeBan->sBy, sBy, szByLen);
+        pRangeBan->sBy[szByLen] = '\0';
     }
 
-    AddRange(RangeBan);
+    AddRange(pRangeBan);
 	Save();
+
     return true;
 }
 //---------------------------------------------------------------------------

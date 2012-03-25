@@ -59,121 +59,97 @@
 //---------------------------------------------------------------------------
 
 static int ScriptPanic(lua_State * L) {
-    size_t iLen = 0;
-    char * stmp = (char*)lua_tolstring(L, -1, &iLen);
+    size_t szLen = 0;
+    char * stmp = (char*)lua_tolstring(L, -1, &szLen);
 
-    string sMsg = "[LUA] At panic -> " + string(stmp, iLen);
+    string sMsg = "[LUA] At panic -> " + string(stmp, szLen);
 
-    AppendSpecialLog(sMsg);
-    UdpDebug->Broadcast(sMsg);
+    AppendLog(sMsg);
 
     return 0;
 }
 //------------------------------------------------------------------------------
 
-ScriptBot::ScriptBot(char * Nick, const size_t &iNickLen, char * Description, const size_t &iDscrLen, 
-    char * Email, const size_t &iEmlLen, const bool &isOP) {
+ScriptBot::ScriptBot(char * sBotNick, const size_t &szNickLen, char * sDescription, const size_t &szDscrLen, char * sEmail, const size_t &szEmlLen, const bool &bOP) {
+    ScriptManager->ui8BotsCount++;
+
     prev = NULL;
     next = NULL;
 
 #ifdef _WIN32
-    sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
+    sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
 #else
-	sNick = (char *) malloc(iNickLen+1);
+	sNick = (char *)malloc(szNickLen+1);
 #endif
     if(sNick == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
-			" bytes of memory for sNick in ScriptBot::ScriptBot!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in ScriptBot::ScriptBot\n", (uint64_t)(szNickLen+1));
+
 		return;
     }
-    memcpy(sNick, Nick, iNickLen);
-    sNick[iNickLen] = '\0';
+    memcpy(sNick, sBotNick, szNickLen);
+    sNick[szNickLen] = '\0';
 
-    bIsOP = isOP;
+    bIsOP = bOP;
 
-    size_t iWantLen = 24+iNickLen+iDscrLen+iEmlLen;
+    size_t szWantLen = 24+szNickLen+szDscrLen+szEmlLen;
 
 #ifdef _WIN32
-    sMyINFO = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iWantLen);
+    sMyINFO = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szWantLen);
 #else
-	sMyINFO = (char *) malloc(iWantLen);
+	sMyINFO = (char *)malloc(szWantLen);
 #endif
     if(sMyINFO == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)iWantLen)+
-			" bytes of memory for sMyINFO in ScriptBot::ScriptBot!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMyINFO in ScriptBot::ScriptBot\n", (uint64_t)szWantLen);
+
 		return;
     }
 
-	int iLen = sprintf(sMyINFO, "$MyINFO $ALL %s %s$ $$%s$$|", sNick, Description != NULL ? Description : "", Email != NULL ? Email : "");
+	int iLen = sprintf(sMyINFO, "$MyINFO $ALL %s %s$ $$%s$$|", sNick, sDescription != NULL ? sDescription : "", sEmail != NULL ? sEmail : "");
 
-	CheckSprintf(iLen, iWantLen, "ScriptBot::ScriptBot");
-
-	ScriptManager->ui8BotsCount++;
+	CheckSprintf(iLen, szWantLen, "ScriptBot::ScriptBot");
 }
 //------------------------------------------------------------------------------
 
 ScriptBot::~ScriptBot() {
-    prev = NULL;
-    next = NULL;
-
 #ifdef _WIN32
-    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
-		string sDbgstr = "[BUF] Cannot deallocate sNick in ~ScriptBot! "+string((uint32_t)GetLastError())+" "+
-			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-		AppendSpecialLog(sDbgstr);
+    if(sNick != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
+		AppendDebugLog("%s - [MEM] Cannot deallocate sNick in ScriptBot::~ScriptBot\n", 0);
     }
 #else
 	free(sNick);
 #endif
 
-    sNick = NULL;
-
 #ifdef _WIN32
-    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMyINFO) == 0) {
-		string sDbgstr = "[BUF] Cannot deallocate sMyINFO in ~ScriptBot! "+string((uint32_t)GetLastError())+" "+
-			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-		AppendSpecialLog(sDbgstr);
+    if(sMyINFO != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMyINFO) == 0) {
+		AppendDebugLog("%s - [MEM] Cannot deallocate sMyINFO in ScriptBot::~ScriptBot\n", 0);
     }
 #else
 	free(sMyINFO);
 #endif
-
-    sMyINFO = NULL;
 
 	ScriptManager->ui8BotsCount--;
 }
 //------------------------------------------------------------------------------
 
 #ifdef _WIN32
-	ScriptTimer::ScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &iLen) {
+	ScriptTimer::ScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &szLen) {
 #else
-	ScriptTimer::ScriptTimer(char * sFunctName, const size_t &iLen) {
+	ScriptTimer::ScriptTimer(char * sFunctName, const size_t &szLen) {
 #endif
 	if(sFunctName != NULL) {
 #ifdef _WIN32
-        sFunctionName = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
+        sFunctionName = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
 #else
-		sFunctionName = (char *) malloc(iLen+1);
+		sFunctionName = (char *)malloc(szLen+1);
 #endif
         if(sFunctionName == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iLen+1))+
-				" bytes of memory for sFunctionName in ScriptTimer::ScriptTimer!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sFunctionName in ScriptTimer::ScriptTimer\n", (uint64_t)(szLen+1));
+
 			return;
         }
-        memcpy(sFunctionName, sFunctName, iLen);
-        sFunctionName[iLen] = '\0';
+
+        memcpy(sFunctionName, sFunctName, szLen);
+        sFunctionName[szLen] = '\0';
     } else {
         sFunctionName = NULL;
     }
@@ -193,9 +169,7 @@ ScriptTimer::~ScriptTimer() {
 #ifdef _WIN32
 	if(sFunctionName != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sFunctionName) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate sFunctionName in ~ScriptTimer! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-			AppendSpecialLog(sDbgstr);
+			AppendDebugLog("%s - [MEM] Cannot deallocate sFunctionName in ScriptTimer::~ScriptTimer\n", 0);
         }
     }
 #else
@@ -204,36 +178,30 @@ ScriptTimer::~ScriptTimer() {
 }
 //------------------------------------------------------------------------------
 
-Script::Script(char *Name, const bool &enabled) {
+Script::Script(char * Name, const bool &enabled) {
     bEnabled = enabled;
 
 #ifdef _WIN32
 	string ExtractedFilename = ExtractFileName(Name);
-    sName = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ExtractedFilename.size()+1);
-#else
-    size_t iLen = strlen(Name);
+	size_t szNameLen = ExtractedFilename.size();
 
-    sName = (char *) malloc(iLen+1);
+    sName = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNameLen+1);
+#else
+    size_t szNameLen = strlen(Name);
+
+    sName = (char *)malloc(szNameLen+1);
 #endif
     if(sName == NULL) {
-#ifdef _WIN32
-		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(ExtractedFilename.size()+1))+
-			" bytes of memory in Script::Script! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#else
-		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iLen+1))+
-			" bytes of memory in Script::Script!";
-#endif
-        AppendSpecialLog(sDbgstr);
-		UdpDebug->Broadcast(sDbgstr);
+        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in Script::Script\n", (uint64_t)szNameLen+1);
+
         return;
     }   
 #ifdef _WIN32
     memcpy(sName, ExtractedFilename.c_str(), ExtractedFilename.size());
-    sName[ExtractedFilename.size()] = '\0';
 #else
-    memcpy(sName, Name, iLen);
-    sName[iLen] = '\0';
+    memcpy(sName, Name, szNameLen);
 #endif
+    sName[szNameLen] = '\0';
 
     ui16Functions = 65535;
     ui32DataArrivals = 4294967295U;
@@ -281,13 +249,8 @@ Script::~Script() {
     }
 
 #ifdef _WIN32
-	if(sName != NULL) {
-		if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sName) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate sName in ~Script! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hRecvHeap, HEAP_NO_SERIALIZE, 0));
-
-            AppendSpecialLog(sDbgstr);
-        }
+	if(sName != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sName) == 0) {
+        AppendDebugLog("%s - [MEM] Cannot deallocate sName in Script::~Script\n", 0);
     }
 #else
 	free(sName);
@@ -297,11 +260,7 @@ Script::~Script() {
 
 bool ScriptStart(Script * cur) {
 	cur->ui16Functions = 65535;
-#ifdef _WIN32
-	cur->ui32DataArrivals = 4294967295;
-#else
 	cur->ui32DataArrivals = 4294967295U;
-#endif
 
 	cur->prev = NULL;
 	cur->next = NULL;
@@ -367,10 +326,10 @@ bool ScriptStart(Script * cur) {
 
         return true;
 	} else {
-        size_t iLen = 0;
-        char * stmp = (char*)lua_tolstring(cur->LUA, -1, &iLen);
+        size_t szLen = 0;
+        char * stmp = (char*)lua_tolstring(cur->LUA, -1, &szLen);
 
-        string sMsg(stmp, iLen);
+        string sMsg(stmp, szLen);
 
 #ifdef _BUILD_GUI
         RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
@@ -436,7 +395,7 @@ void ScriptStop(Script * cur) {
             colUsers->DelBotFromMyInfos(bot->sMyINFO);
 
 			int iMsgLen = sprintf(ScriptManager->lua_msg, "$Quit %s|", bot->sNick);
-           	if(CheckSprintf(iMsgLen, 128, "ScriptStop") == true) {
+           	if(CheckSprintf(iMsgLen, 131072, "ScriptStop") == true) {
                 globalQ->InfoStore(ScriptManager->lua_msg, iMsgLen);
             }
 		}
@@ -495,7 +454,7 @@ void ScriptOnExit(Script * cur) {
 }
 //------------------------------------------------------------------------------
 
-static bool ScriptOnError(Script * cur, char * ErrorMsg, const size_t &iLen) {
+static bool ScriptOnError(Script * cur, char * sErrorMsg, const size_t &szMsgLen) {
 	lua_getglobal(cur->LUA, "OnError");
     int i = lua_gettop(cur->LUA);
     if(lua_isnil(cur->LUA, i)) {
@@ -506,13 +465,13 @@ static bool ScriptOnError(Script * cur, char * ErrorMsg, const size_t &iLen) {
 
 	ScriptManager->ActualUser = NULL;
     
-    lua_pushlstring(cur->LUA, ErrorMsg, iLen);
+    lua_pushlstring(cur->LUA, sErrorMsg, szMsgLen);
 
 	if(lua_pcall(cur->LUA, 1, 0, 0) != 0) { // 1 passed parameters, zero returned
-		size_t iLen = 0;
-		char * stmp = (char*)lua_tolstring(cur->LUA, -1, &iLen);
+		size_t szLen = 0;
+		char * stmp = (char*)lua_tolstring(cur->LUA, -1, &szLen);
 
-		string sMsg(stmp, iLen);
+		string sMsg(stmp, szLen);
 
 #ifdef _BUILD_GUI
         RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
@@ -836,10 +795,10 @@ User * ScriptGetUser(lua_State * L, const int &iTop, const char * sFunction) {
             return NULL;
         }
     
-        size_t iNickLen;
-        char * sNick = (char *)lua_tolstring(L, iTop+2, &iNickLen);
+        size_t szNickLen;
+        char * sNick = (char *)lua_tolstring(L, iTop+2, &szNickLen);
 
-		if(u != hashManager->FindUser(sNick, iNickLen)) {
+		if(u != hashManager->FindUser(sNick, szNickLen)) {
             return NULL;
         }
     }
@@ -849,10 +808,10 @@ User * ScriptGetUser(lua_State * L, const int &iTop, const char * sFunction) {
 //------------------------------------------------------------------------------
 
 void ScriptError(Script * cur) {
-	size_t iLen = 0;
-	char * stmp = (char*)lua_tolstring(cur->LUA, -1, &iLen);
+	size_t szLen = 0;
+	char * stmp = (char*)lua_tolstring(cur->LUA, -1, &szLen);
 
-	string sMsg(stmp, iLen);
+	string sMsg(stmp, szLen);
 
 #ifdef _BUILD_GUI
     RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
@@ -865,7 +824,7 @@ void ScriptError(Script * cur) {
         AppendLog(sMsg, true);
     }
 
-	if((((cur->ui16Functions & Script::ONERROR) == Script::ONERROR) == true && ScriptOnError(cur, stmp, iLen) == false) ||
+	if((((cur->ui16Functions & Script::ONERROR) == Script::ONERROR) == true && ScriptOnError(cur, stmp, szLen) == false) ||
         SettingManager->bBools[SETBOOL_STOP_SCRIPT_ON_ERROR] == true) {
         // PPK ... stop buggy script ;)
 		eventqueue->AddNormal(eventq::EVENT_STOPSCRIPT, cur->sName);

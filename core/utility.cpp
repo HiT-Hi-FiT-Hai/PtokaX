@@ -152,11 +152,11 @@ char * Lock2Key(char * sLock) {
     uint8_t v;
     
 	// first make the crypting stuff
-	for(uint8_t i = 0; i < 46; i++) {
-        if(i == 0) {
+	for(uint8_t ui8i = 0; ui8i < 46; ui8i++) {
+        if(ui8i == 0) {
             v = (uint8_t)(sLock[0] ^ sLock[45] ^ sLock[44] ^ 5);
         } else {
-            v = sLock[i] ^ sLock[i-1];
+            v = sLock[ui8i] ^ sLock[ui8i-1];
         }
         
         // swap nibbles (0xF0 = 11110000, 0x0F = 00001111)
@@ -354,11 +354,7 @@ char * formatTime(uint64_t rest) {
 	rest -= n*525600;
 
 	if(n != 0) {
-#ifdef _WIN32
-		int iLen = sprintf(buf, "%I64d %s", n, n > 1 ? LanguageManager->sTexts[LAN_YEARS_LWR] : LanguageManager->sTexts[LAN_YEAR_LWR]);
-#else
 		int iLen = sprintf(buf, "%" PRIu64 " %s", n, n > 1 ? LanguageManager->sTexts[LAN_YEARS_LWR] : LanguageManager->sTexts[LAN_YEAR_LWR]);
-#endif
 		if(CheckSprintf(iLen, 128, "formatTime1") == false) {
             time[0] = '\0';
             return time;
@@ -371,11 +367,7 @@ char * formatTime(uint64_t rest) {
 	rest -= n*43200;
 
 	if(n != 0) {       
-#ifdef _WIN32
-		int iLen = sprintf(buf, "%s%I64d %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_MONTHS_LWR] : LanguageManager->sTexts[LAN_MONTH_LWR]);
-#else
 		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_MONTHS_LWR] : LanguageManager->sTexts[LAN_MONTH_LWR]);
-#endif
 		if(CheckSprintf(iLen, 128, "formatTime3") == false) {
             time[0] = '\0';
             return time;
@@ -389,11 +381,7 @@ char * formatTime(uint64_t rest) {
 	rest -= n*1440;
 
 	if(n != 0) {       
-#ifdef _WIN32
-		int iLen = sprintf(buf, "%s%I64d %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_DAYS_LWR] : LanguageManager->sTexts[LAN_DAY_LWR]); 
-#else
-		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_DAYS_LWR] : LanguageManager->sTexts[LAN_DAY_LWR]); 
-#endif
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_DAYS_LWR] : LanguageManager->sTexts[LAN_DAY_LWR]);
 		if(CheckSprintf(iLen, 128, "formatTime5") == false) {
             time[0] = '\0';
             return time;
@@ -407,11 +395,7 @@ char * formatTime(uint64_t rest) {
 	rest -= n*60;
 
 	if(n != 0) {	
-#ifdef _WIN32
-		int iLen = sprintf(buf, "%s%I64d %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_HOURS_LWR] : LanguageManager->sTexts[LAN_HOUR_LWR]);
-#else
 		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_HOURS_LWR] : LanguageManager->sTexts[LAN_HOUR_LWR]);
-#endif
 		if(CheckSprintf(iLen, 128, "formatTime7") == false) {
             time[0] = '\0';
             return time;
@@ -422,11 +406,7 @@ char * formatTime(uint64_t rest) {
 	}
 
 	if(rest != 0) {
-#ifdef _WIN32
-		int iLen = sprintf(buf, "%s%I64d %s", i > 0 ? " " : "", rest, LanguageManager->sTexts[LAN_MIN_LWR]);
-#else
 		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", rest, LanguageManager->sTexts[LAN_MIN_LWR]);
-#endif
 		if(CheckSprintf(iLen, 128, "formatTime9") == false) {
             time[0] = '\0';
             return time;
@@ -448,11 +428,7 @@ char * formatSecTime(uint64_t rest) {
 	rest -= n*31536000;
 
 	if(n != 0) {
-#ifdef _WIN32
-		int iLen = sprintf(buf, "%I64d %s", n, n > 1 ? LanguageManager->sTexts[LAN_YEARS_LWR] : LanguageManager->sTexts[LAN_YEAR_LWR]);
-#else
 		int iLen = sprintf(buf, "%" PRIu64 " %s", n, n > 1 ? LanguageManager->sTexts[LAN_YEARS_LWR] : LanguageManager->sTexts[LAN_YEAR_LWR]);
-#endif
 		if(CheckSprintf(iLen, 128, "formatSecTime1") == false) {
             time[0] = '\0';
             return time;
@@ -466,11 +442,7 @@ char * formatSecTime(uint64_t rest) {
 	rest -= n*2592000;
 
 	if(n != 0) {
-#ifdef _WIN32
-		int iLen = sprintf(buf, "%s%I64d %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_MONTHS_LWR] : LanguageManager->sTexts[LAN_MONTH_LWR]);
-#else
 		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_MONTHS_LWR] : LanguageManager->sTexts[LAN_MONTH_LWR]);
-#endif
 		if(CheckSprintf(iLen, 128, "formatSecTime3") == false) {
             time[0] = '\0';
             return time;
@@ -484,11 +456,7 @@ char * formatSecTime(uint64_t rest) {
 	rest -= n*86400;
 
 	if(n != 0) {
-#ifdef _WIN32
-		int iLen = sprintf(buf, "%s%I64d %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_DAYS_LWR] : LanguageManager->sTexts[LAN_DAY_LWR]);
-#else
 		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_DAYS_LWR] : LanguageManager->sTexts[LAN_DAY_LWR]);
-#endif
 		if(CheckSprintf(iLen, 128, "formatSecTime5") == false) {
             time[0] = '\0';
             return time;
@@ -502,11 +470,7 @@ char * formatSecTime(uint64_t rest) {
 	rest -= n*3600;
 
 	if(n != 0) {
-#ifdef _WIN32
-		int iLen = sprintf(buf, "%s%I64d %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_HOURS_LWR] : LanguageManager->sTexts[LAN_HOUR_LWR]);
-#else
 		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_HOURS_LWR] : LanguageManager->sTexts[LAN_HOUR_LWR]);
-#endif
 		if(CheckSprintf(iLen, 128, "formatSecTime7") == false) {
             time[0] = '\0';
             return time;
@@ -520,11 +484,7 @@ char * formatSecTime(uint64_t rest) {
 	rest -= n*60;
 
 	if(n != 0) {
-#ifdef _WIN32
-		int iLen = sprintf(buf, "%s%I64d %s", i > 0 ? " " : "", n, LanguageManager->sTexts[LAN_MIN_LWR]);
-#else
 		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, LanguageManager->sTexts[LAN_MIN_LWR]);
-#endif
 		if(CheckSprintf(iLen, 128, "formatSecTime9") == false) {
             time[0] = '\0';
             return time;
@@ -535,11 +495,7 @@ char * formatSecTime(uint64_t rest) {
 	}
 
 	if(rest != 0) {
-#ifdef _WIN32
-    	int iLen = sprintf(buf, "%s%I64d %s", i > 0 ? " " : "", rest, LanguageManager->sTexts[LAN_SEC_LWR]);
-#else
 		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", rest, LanguageManager->sTexts[LAN_SEC_LWR]);
-#endif
 		if(CheckSprintf(iLen, 128, "formatSecTime10") == false) {
             time[0] = '\0';
             return time;
@@ -611,9 +567,9 @@ bool GetIpParts(char * sIP, const size_t ui32Len, uint32_t &a, uint32_t &b, uint
     uint8_t iDots = 0, iChars = 0, iActualChar;
     uint16_t iFirst = 0, iSecond = 0, iThird = 0;
 
-    for(uint32_t i = 0; i < ui32Len; i++) {
+    for(uint32_t ui32i = 0; ui32i < ui32Len; ui32i++) {
         iChars++;
-        switch(sIP[i]) {
+        switch(sIP[ui32i]) {
             case '0':
                 iActualChar = 0;
                 break;
@@ -742,12 +698,12 @@ bool GetIpParts(char * sIP, const size_t ui32Len, uint32_t &a, uint32_t &b, uint
 }
 //---------------------------------------------------------------------------
 
-uint32_t HashNick(const char * sNick, const size_t &iNickLen) {
+uint32_t HashNick(const char * sNick, const size_t &szNickLen) {
 	char c;
     uint32_t h = 5381;
 
-	for(size_t i = 0; i < iNickLen; i++) {
-        c = (char)tolower(sNick[i]);
+	for(size_t szi = 0; szi < szNickLen; szi++) {
+        c = (char)tolower(sNick[szi]);
         h += (h << 5);
         h ^= c;
     }
@@ -805,7 +761,7 @@ char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_tim
     }
 
     if(SettingManager->bBools[SETBOOL_BAN_MSG_SHOW_IP] == true && Ban->sIp[0] != '\0') {
-        int iLen = sprintf(banmsg1, NEW_LINE_CHARS "%s: %s", LanguageManager->sTexts[LAN_IP], Ban->sIp);
+        int iLen = sprintf(banmsg1, "\n%s: %s", LanguageManager->sTexts[LAN_IP], Ban->sIp);
         if(CheckSprintf(iLen, 512, "GenerateBanMessage3") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -816,7 +772,7 @@ char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_tim
     }
 
     if(SettingManager->bBools[SETBOOL_BAN_MSG_SHOW_NICK] == true && Ban->sNick != NULL) {
-        int iLen = sprintf(banmsg1, NEW_LINE_CHARS "%s: %s", LanguageManager->sTexts[LAN_NICK], Ban->sNick);
+        int iLen = sprintf(banmsg1, "\n%s: %s", LanguageManager->sTexts[LAN_NICK], Ban->sNick);
         if(CheckSprintf(iLen, 512, "GenerateBanMessage4") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -827,7 +783,7 @@ char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_tim
     }
 
     if(SettingManager->bBools[SETBOOL_BAN_MSG_SHOW_REASON] == true && Ban->sReason != NULL) {
-        int iLen = sprintf(banmsg1, NEW_LINE_CHARS "%s: %s", LanguageManager->sTexts[LAN_REASON], Ban->sReason);
+        int iLen = sprintf(banmsg1, "\n%s: %s", LanguageManager->sTexts[LAN_REASON], Ban->sReason);
         if(CheckSprintf(iLen, 512, "GenerateBanMessage5") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -838,7 +794,7 @@ char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_tim
     }
 
     if(SettingManager->bBools[SETBOOL_BAN_MSG_SHOW_BY] == true && Ban->sBy != NULL) {
-        int iLen = sprintf(banmsg1, NEW_LINE_CHARS "%s: %s", LanguageManager->sTexts[LAN_BANNED_BY], Ban->sBy);
+        int iLen = sprintf(banmsg1, "\n%s: %s", LanguageManager->sTexts[LAN_BANNED_BY], Ban->sBy);
         if(CheckSprintf(iLen, 512, "GenerateBanMessage6") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -849,7 +805,7 @@ char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_tim
     }
 
     if(SettingManager->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG] != NULL) {
-        int iLen = sprintf(banmsg1, NEW_LINE_CHARS "%s|", SettingManager->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG]);
+        int iLen = sprintf(banmsg1, "\n%s|", SettingManager->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG]);
         if(CheckSprintf(iLen, 512, "GenerateBanMessage7") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -869,7 +825,7 @@ char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_tim
             strcat(banmsg, SettingManager->sPreTexts[SetMan::SETPRETXT_PERM_BAN_REDIR_ADDRESS]);
         }
     } else {
-        if(SettingManager->bBools[SETBOOL_TEMP_BAN_REDIR] == true) {
+        if(SettingManager->bBools[SETBOOL_TEMP_BAN_REDIR] == true && SettingManager->sPreTexts[SetMan::SETPRETXT_TEMP_BAN_REDIR_ADDRESS] != NULL) {
             iMsgLen += (int)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_TEMP_BAN_REDIR_ADDRESS];
             strcat(banmsg, SettingManager->sPreTexts[SetMan::SETPRETXT_TEMP_BAN_REDIR_ADDRESS]);
         }
@@ -900,7 +856,7 @@ char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const 
     }
 
     if(SettingManager->bBools[SETBOOL_BAN_MSG_SHOW_RANGE] == true) {
-        int iLen = sprintf(banmsg1, NEW_LINE_CHARS "%s: %s-%s", LanguageManager->sTexts[LAN_RANGE], RangeBan->sIpFrom, RangeBan->sIpTo);
+        int iLen = sprintf(banmsg1, "\n%s: %s-%s", LanguageManager->sTexts[LAN_RANGE], RangeBan->sIpFrom, RangeBan->sIpTo);
         if(CheckSprintf(iLen, 512, "GenerateRangeBanMessage3") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -911,7 +867,7 @@ char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const 
     }
 
     if(SettingManager->bBools[SETBOOL_BAN_MSG_SHOW_REASON] == true && RangeBan->sReason != NULL) {
-        int iLen = sprintf(banmsg1, NEW_LINE_CHARS "%s: %s", LanguageManager->sTexts[LAN_REASON], RangeBan->sReason);
+        int iLen = sprintf(banmsg1, "\n%s: %s", LanguageManager->sTexts[LAN_REASON], RangeBan->sReason);
         if(CheckSprintf(iLen, 512, "GenerateRangeBanMessage4") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -922,7 +878,7 @@ char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const 
     }
 
     if(SettingManager->bBools[SETBOOL_BAN_MSG_SHOW_BY] == true && RangeBan->sBy != NULL) {
-        int iLen = sprintf(banmsg1, NEW_LINE_CHARS "%s: %s", LanguageManager->sTexts[LAN_BANNED_BY], RangeBan->sBy);
+        int iLen = sprintf(banmsg1, "\n%s: %s", LanguageManager->sTexts[LAN_BANNED_BY], RangeBan->sBy);
         if(CheckSprintf(iLen, 512, "GenerateRangeBanMessage5") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -933,7 +889,7 @@ char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const 
     }
 
     if(SettingManager->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG] != NULL) {
-        int iLen = sprintf(banmsg1, NEW_LINE_CHARS "%s|", SettingManager->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG]);
+        int iLen = sprintf(banmsg1, "\n%s|", SettingManager->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG]);
         if(CheckSprintf(iLen, 512, "GenerateRangeBanMessage6") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -953,7 +909,7 @@ char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const 
             strcat(banmsg, SettingManager->sPreTexts[SetMan::SETPRETXT_PERM_BAN_REDIR_ADDRESS]);
         }
     } else {
-        if(SettingManager->bBools[SETBOOL_TEMP_BAN_REDIR] == true) {
+        if(SettingManager->bBools[SETBOOL_TEMP_BAN_REDIR] == true && SettingManager->sPreTexts[SetMan::SETPRETXT_TEMP_BAN_REDIR_ADDRESS] != NULL) {
             iMsgLen += (int)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_TEMP_BAN_REDIR_ADDRESS];
             strcat(banmsg, SettingManager->sPreTexts[SetMan::SETPRETXT_TEMP_BAN_REDIR_ADDRESS]);
         }
@@ -1002,8 +958,8 @@ bool GenerateTempBanTime(const char &cMultiplyer, const uint32_t &iTime, time_t 
 //---------------------------------------------------------------------------
 
 bool HaveOnlyNumbers(char *sData, const uint16_t &ui16Len) {
-    for(uint16_t i = 0; i < ui16Len; i++) {
-        if(isdigit(sData[i]) == 0)
+    for(uint16_t ui16i = 0; ui16i < ui16Len; ui16i++) {
+        if(isdigit(sData[ui16i]) == 0)
             return false;
     }
     return true;
@@ -1011,13 +967,8 @@ bool HaveOnlyNumbers(char *sData, const uint16_t &ui16Len) {
 //---------------------------------------------------------------------------
 
 int GetWlcmMsg(char * sWlcmMsg) {
-#ifdef _WIN32
-    int iLen =  sprintf(sWlcmMsg, "%s%I64d %s, %I64d %s, %I64d %s / %s: %I32d)|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_NAME_WLCM],
-#else
 	int iLen =  sprintf(sWlcmMsg, "%s%" PRIu64 " %s, %" PRIu64 " %s, %" PRIu64 " %s / %s: %u)|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_NAME_WLCM],
-#endif
-        iDays, LanguageManager->sTexts[LAN_DAYS_LWR], iHours, LanguageManager->sTexts[LAN_HOURS_LWR], 
-        iMins, LanguageManager->sTexts[LAN_MINUTES_LWR], 
+        iDays, LanguageManager->sTexts[LAN_DAYS_LWR], iHours, LanguageManager->sTexts[LAN_HOURS_LWR], iMins, LanguageManager->sTexts[LAN_MINUTES_LWR],
         LanguageManager->sTexts[LAN_USERS], ui32Logged);
     if(CheckSprintf(iLen, 1024, "GetWlcmMsg2") == false) {
         sWlcmMsg[0] = '\0';
@@ -1050,32 +1001,32 @@ int GetWlcmMsg(char * sWlcmMsg) {
 #endif
 //---------------------------------------------------------------------------
 
-bool CheckSprintf(int iRetVal, const size_t &iMax, const char * sMsg) {
+bool CheckSprintf(int iRetVal, const size_t &szMax, const char * sMsg) {
     if(iRetVal > 0) {
-		if(iMax != 0 && iRetVal >= (int)iMax) {
-			string sDbgstr = "sprintf high value "+string(iRetVal)+"/"+string((uint64_t)iMax)+" in "+string(sMsg);
-            AppendSpecialLog(sDbgstr);
+		if(szMax != 0 && iRetVal >= (int)szMax) {
+			string sDbgstr = "%s - [ERR] sprintf high value "+string(iRetVal)+"/"+string((uint64_t)szMax)+" in "+string(sMsg)+"\n";
+            AppendDebugLog(sDbgstr.c_str(), 0);
             return false;
         }
     } else {
-		string sDbgstr = "sprintf low value "+string(iRetVal)+" in "+string(sMsg);
-		AppendSpecialLog(sDbgstr);
+		string sDbgstr = "%s - [ERR] sprintf low value "+string(iRetVal)+" in "+string(sMsg)+"\n";
+		AppendDebugLog(sDbgstr.c_str(), 0);
         return false;
     }
     return true;
 }
 //---------------------------------------------------------------------------
 
-bool CheckSprintf1(int iRetVal, int iLenVal, const size_t &iMax, const char * sMsg) {
+bool CheckSprintf1(int iRetVal, int iLenVal, const size_t &szMax, const char * sMsg) {
     if(iRetVal > 0) {
-        if(iMax != 0 && iLenVal >= (int)iMax) {
-			string sDbgstr = "sprintf high value "+string(iLenVal)+"/"+string((uint64_t)iMax)+" in "+string(sMsg);
-			AppendSpecialLog(sDbgstr);
+        if(szMax != 0 && iLenVal >= (int)szMax) {
+			string sDbgstr = "%s - [ERR] sprintf high value "+string(iLenVal)+"/"+string((uint64_t)szMax)+" in "+string(sMsg)+"\n";
+			AppendDebugLog(sDbgstr.c_str(), 0);
             return false;
         }
     } else {
-		string sDbgstr = "sprintf low value "+string(iRetVal)+" in "+string(sMsg);
-		AppendSpecialLog(sDbgstr);
+		string sDbgstr = "%s - [ERR] sprintf low value "+string(iRetVal)+" in "+string(sMsg)+"\n";
+		AppendDebugLog(sDbgstr.c_str(), 0);
         return false;
     }
     return true;
@@ -1083,47 +1034,6 @@ bool CheckSprintf1(int iRetVal, int iLenVal, const size_t &iMax, const char * sM
 //---------------------------------------------------------------------------
 
 void AppendLog(const string & sData, const bool &bScript/* == false*/) {
-    if(UdpDebug != NULL && bScript == false) {
-        static char msg[1024];
-        if(sData.size() < 1000) {
-            int imsgLen = sprintf(msg, "[LOG] %s", sData.c_str());
-            if(CheckSprintf(imsgLen, 1024, "AppendLog1") == true) {
-                UdpDebug->Broadcast(msg, imsgLen);
-            }
-        } else {
-#ifdef _WIN32
-            char *MSG = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, sData.size()+64);
-#else
-			char *MSG = (char *) malloc(sData.size()+64);
-#endif
-            if(MSG == NULL) {
-    			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(sData.size()+64))+
-    				" bytes of memory in AppendLog!";
-#ifdef _WIN32
-    			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-    			AppendSpecialLog(sDbgstr);
-                UdpDebug->Broadcast(sDbgstr);
-                return;
-            }
-            int imsgLen = sprintf(MSG, "[LOG] %s", sData.c_str());
-            if(CheckSprintf(imsgLen, sData.size()+64, "AppendLog2") == true) {
-                UdpDebug->Broadcast(MSG, imsgLen);
-            }
-
-#ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
-    			string sDbgstr = "[BUF] Cannot deallocate MSG in AppendLog! "+string((uint32_t)GetLastError())+" "+
-    				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-    			AppendSpecialLog(sDbgstr);
-                UdpDebug->Broadcast(sDbgstr);
-            }
-#else
-			free(MSG);
-#endif
-        }
-    }
-
 	FILE * fw;
 
 	if(bScript == false) {
@@ -1140,27 +1050,57 @@ void AppendLog(const string & sData, const bool &bScript/* == false*/) {
 #endif
     }
 
-	if(fw == NULL) {
-		return;
+	if(fw != NULL) {
+	   time_t acc_time;
+	   time(&acc_time);
+
+	   struct tm * acc_tm;
+	   acc_tm = localtime(&acc_time);
+
+	   char sBuf[64];
+	   strftime(sBuf, 64, "%c", acc_tm);
+
+	   fprintf(fw, "%s - %s\n", sBuf, sData.c_str());
+
+	   fclose(fw);
 	}
 
-	time_t acc_time;
-	time(&acc_time);
+    if(UdpDebug != NULL && bScript == false) {
+        static char msg[1024];
+        if(sData.size() < 1000) {
+            int imsgLen = sprintf(msg, "[LOG] %s", sData.c_str());
+            if(CheckSprintf(imsgLen, 1024, "AppendLog1") == true) {
+                UdpDebug->Broadcast(msg, imsgLen);
+            }
+        } else {
+#ifdef _WIN32
+            char * sMSG = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, sData.size()+64);
+#else
+			char * sMSG = (char *)malloc(sData.size()+64);
+#endif
+            if(sMSG == NULL) {
+    			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMSG in AppendLog\n", (uint64_t)(sData.size()+64));
+                return;
+            }
 
-	struct tm * acc_tm;
-	acc_tm = localtime(&acc_time);
+            int imsgLen = sprintf(sMSG, "[LOG] %s", sData.c_str());
+            if(CheckSprintf(imsgLen, sData.size()+64, "AppendLog2") == true) {
+                UdpDebug->Broadcast(sMSG, imsgLen);
+            }
 
-	char sBuf[64];
-	strftime(sBuf, 64, "%c", acc_tm);
-
-	string sTmp = string(sBuf) + " - " + sData + "\n";
-	fprintf(fw, sTmp.c_str());
-
-	fclose(fw);
+#ifdef _WIN32
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMSG) == 0) {
+    			AppendDebugLog("%s - [MEM] Cannot deallocate MSG in AppendLog\n", 0);
+            }
+#else
+			free(sMSG);
+#endif
+        }
+    }
 }
 //---------------------------------------------------------------------------
 
-void AppendSpecialLog(const string & sData) {
+void AppendDebugLog(const char * sData, const uint64_t ui64Value) {
 #ifdef _WIN32
 	FILE * fw = fopen((PATH + "\\logs\\debug.log").c_str(), "a");
 #else
@@ -1180,9 +1120,7 @@ void AppendSpecialLog(const string & sData) {
 	char sBuf[64];
 	strftime(sBuf, 64, "%c", acc_tm);
 
-	string sTmp = string(sBuf) + " - " + sData + NEW_LINE_CHARS;
-
-	fprintf(fw, sTmp.c_str());
+    fprintf(fw, sData, sBuf, ui64Value); // "%s - " PRIu64 "\n"
 
 	fclose(fw);
 }
@@ -1192,7 +1130,11 @@ void AppendSpecialLog(const string & sData) {
 	void GetHeapStats(void *hHeap, DWORD &dwCommitted, DWORD &dwUnCommitted) {
 	    PROCESS_HEAP_ENTRY *lpEntry;
 	
-	    lpEntry = (PROCESS_HEAP_ENTRY *) calloc(1, sizeof(PROCESS_HEAP_ENTRY));
+	    lpEntry = (PROCESS_HEAP_ENTRY *)calloc(1, sizeof(PROCESS_HEAP_ENTRY));
+	    if(lpEntry == NULL) {
+            return;
+        }
+
 	    lpEntry->lpData = NULL;
 	
 	    while(HeapWalk((HANDLE)hHeap, (PROCESS_HEAP_ENTRY *)lpEntry) != 0) {
@@ -1330,6 +1272,7 @@ bool DirExist(char * sPath) {
             if(pData != NULL) {
                 ::HeapFree(hLuaHeap, 0, pData);
             }
+
             return NULL;
         } else {
             if(pData != NULL) {
@@ -1433,7 +1376,12 @@ void win_inet_ntop(PVOID pAddr, PTSTR pStringBuf, size_t szStringBufSize) {
 bool GetMacAddress(const char * sIP, char * sMac) {
 #ifdef _WIN32
     uint32_t uiIP = ::inet_addr(sIP);
+
     MIB_IPNETTABLE * pINT = (MIB_IPNETTABLE *)new char[131072];
+    if(pINT == NULL) {
+        return false;
+    }
+
     ULONG ulSize = 131072;
     DWORD dwRes = ::GetIpNetTable(pINT, &ulSize, TRUE);
     if(dwRes == NO_ERROR) {

@@ -29,87 +29,66 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
-//---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
 #endif
 //---------------------------------------------------------------------------
 LangMan *LanguageManager = NULL;
 //---------------------------------------------------------------------------
 
 LangMan::LangMan(void) {
-    for(size_t i = 0; i < LANG_IDS_END; i++) {
-        size_t TextLen = strlen(LangStr[i]);
+    for(size_t szi = 0; szi < LANG_IDS_END; szi++) {
+        size_t szTextLen = strlen(LangStr[szi]);
 #ifdef _WIN32
-        sTexts[i] = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, TextLen+1);
+        sTexts[szi] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szTextLen+1);
 #else
-		sTexts[i] = (char *) malloc(TextLen+1);
+		sTexts[szi] = (char *)malloc(szTextLen+1);
 #endif
-        if(sTexts[i] == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(TextLen+1))+
-				" bytes of memory in LangMan::LangMan!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-            AppendSpecialLog(sDbgstr);
+        if(sTexts[szi] == NULL) {
+            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in LangMan::LangMan\n", (uint64_t)(szTextLen+1));
+
             exit(EXIT_FAILURE);
         }
-        memcpy(sTexts[i], LangStr[i], TextLen);
-        ui16TextsLens[i] = (uint16_t)TextLen;
-        sTexts[i][ui16TextsLens[i]] = '\0';
+        memcpy(sTexts[szi], LangStr[szi], szTextLen);
+        ui16TextsLens[szi] = (uint16_t)szTextLen;
+        sTexts[szi][ui16TextsLens[szi]] = '\0';
     }
 }
 //---------------------------------------------------------------------------
 
 LangMan::~LangMan(void) {
-    for(size_t i = 0; i < LANG_IDS_END; i++) {
+    for(size_t szi = 0; szi < LANG_IDS_END; szi++) {
 #ifdef _WIN32
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sTexts[i]) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate sTexts[i] in LangMan::~LangMan! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-			AppendSpecialLog(sDbgstr);
+        if(sTexts[szi] != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sTexts[szi]) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate sTexts[szi] in LangMan::~LangMan\n", 0);
         }
 #else
-		free(sTexts[i]);
+		free(sTexts[szi]);
 #endif
-        sTexts[i] = NULL;
-        ui16TextsLens[i] = 0;
     }
 }
 //---------------------------------------------------------------------------
 
 void LangMan::LoadLanguage() {
     if(SettingManager->sTexts[SETTXT_LANGUAGE] == NULL) {
-        for(size_t i = 0; i < LANG_IDS_END; i++) {
+        for(size_t szi = 0; szi < LANG_IDS_END; szi++) {
+            char * sOldText = sTexts[szi];
+
+            size_t szTextLen = strlen(LangStr[szi]);
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sTexts[i]) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate sTexts[i] in LangMan::LoadLanguage! "+string((uint32_t)GetLastError())+" "+
-					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-				AppendSpecialLog(sDbgstr);
-            }
+            sTexts[szi] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldText, szTextLen+1);
 #else
-			free(sTexts[i]);
+			sTexts[szi] = (char *)realloc(sOldText, szTextLen+1);
 #endif
-            
-            size_t TextLen = strlen(LangStr[i]);
-#ifdef _WIN32
-            sTexts[i] = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, TextLen+1);
-#else
-			sTexts[i] = (char *) malloc(TextLen+1);
-#endif
-            if(sTexts[i] == NULL) {
-				string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(TextLen+1))+
-					" bytes of memory in LangMan::LoadLanguage!";
-#ifdef _WIN32
-				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-				AppendSpecialLog(sDbgstr);
-                return;
+            if(sTexts[szi] == NULL) {
+                sTexts[szi] = sOldText;
+
+				AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in LangMan::LoadLanguage\n", (uint64_t)(szTextLen+1));
+
+                continue;
             }
-            memcpy(sTexts[i], LangStr[i], TextLen);
-            ui16TextsLens[i] = (uint16_t)TextLen;
-            sTexts[i][ui16TextsLens[i]] = '\0';
+
+            memcpy(sTexts[szi], LangStr[szi], szTextLen);
+            ui16TextsLens[szi] = (uint16_t)szTextLen;
+            sTexts[szi][ui16TextsLens[szi]] = '\0';
         }
     } else {
 #ifdef _WIN32
@@ -132,35 +111,27 @@ void LangMan::LoadLanguage() {
 
                     const char * sName = text->ToElement()->Attribute("Name");
                     const char * sText = text->ToElement()->GetText();
-                    size_t iLen = (sText != NULL ? strlen(sText) : 0);
-                    if(iLen != 0 && iLen < 129) {
-                        for(size_t i = 0; i < LANG_IDS_END; i++) {
-                            if(strcmp(LangXmlStr[i], sName) == 0) {
+                    size_t szLen = (sText != NULL ? strlen(sText) : 0);
+                    if(szLen != 0 && szLen < 129) {
+                        for(size_t szi = 0; szi < LANG_IDS_END; szi++) {
+                            if(strcmp(LangXmlStr[szi], sName) == 0) {
+                                char * sOldText = sTexts[szi];
 #ifdef _WIN32
-                                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sTexts[i]) == 0) {
-									string sDbgstr = "[BUF] Cannot deallocate sTexts[i]1 in LangMan::LoadLanguage! "+string((uint32_t)GetLastError())+" "+
-										string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-									AppendSpecialLog(sDbgstr);
-                                }
-                                
-                                sTexts[i] = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
+                                sTexts[szi] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldText, szLen+1);
 #else
-                                free(sTexts[i]);
-                                
-                                sTexts[i] = (char *) malloc(iLen+1);
+                                sTexts[szi] = (char *)realloc(sOldText, szLen+1);
 #endif
-                                if(sTexts[i] == NULL) {
-                                    string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iLen+1))+
-                                    	" bytes of memory in LangMan::LoadLanguage1!";
-#ifdef _WIN32
-									sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-									AppendSpecialLog(sDbgstr);
-                                    return;
+                                if(sTexts[szi] == NULL) {
+                                    sTexts[szi] = sOldText;
+
+									AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in LangMan::LoadLanguage1\n", (uint64_t)(szLen+1));
+
+                                    break;
                                 }
-                                memcpy(sTexts[i], sText, iLen);
-                                ui16TextsLens[i] = (uint16_t)iLen;
-                                sTexts[i][ui16TextsLens[i]] = '\0';
+
+                                memcpy(sTexts[szi], sText, szLen);
+                                ui16TextsLens[szi] = (uint16_t)szLen;
+                                sTexts[szi][ui16TextsLens[szi]] = '\0';
                                 break;
                             }
                         }

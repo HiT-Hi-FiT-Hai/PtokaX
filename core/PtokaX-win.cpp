@@ -30,9 +30,7 @@
 //---------------------------------------------------------------------------
 #pragma hdrstop
 //---------------------------------------------------------------------------
-#ifdef _MSC_VER
-	#include "ExceptionHandling.h"
-#endif
+#include "ExceptionHandling.h"
 #include "LuaScript.h"
 //---------------------------------------------------------------------------
 #ifdef TIXML_USE_STL
@@ -201,9 +199,7 @@ static void WINAPI StartService(DWORD /*argc*/, char* argv[]) {
 	    }
 	}
 
-#ifdef _MSC_VER
     ExceptionHandlingUnitialize();
-#endif
 
 	ss.dwCurrentState = SERVICE_STOPPED;
 	SetServiceStatus(ssh, &ss);
@@ -264,18 +260,18 @@ int __cdecl main(int argc, char* argv[]) {
 	            return EXIT_FAILURE;
 	        }
 	
-	        size_t iLen = strlen(argv[i]);
-	        if(iLen >= 1 && argv[i][0] != '\\' && argv[i][0] != '/') {
-	            if(iLen < 4 || (argv[i][1] != ':' || (argv[i][2] != '\\' && argv[i][2] != '/'))) {
+	        size_t szLen = strlen(argv[i]);
+	        if(szLen >= 1 && argv[i][0] != '\\' && argv[i][0] != '/') {
+	            if(szLen < 4 || (argv[i][1] != ':' || (argv[i][2] != '\\' && argv[i][2] != '/'))) {
 	                printf("Config directory must be absolute path!");
 	                return EXIT_FAILURE;
 	            }
 	    	}
 	
-	    	if(argv[i][iLen - 1] == '/' || argv[i][iLen - 1] == '\\') {
-	            PATH = string(argv[i], iLen - 1);
+	    	if(argv[i][szLen - 1] == '/' || argv[i][szLen - 1] == '\\') {
+	            PATH = string(argv[i], szLen - 1);
 	    	} else {
-	            PATH = string(argv[i], iLen);
+	            PATH = string(argv[i], szLen);
 	        }
 	    
 	        if(DirExist(PATH.c_str()) == false) {
@@ -320,18 +316,16 @@ int __cdecl main(int argc, char* argv[]) {
 		}
 	}
 
-#ifdef _MSC_VER
     ExceptionHandlingInitialize(PATH, sBuf);
-#endif
 
 	if(bService == false) {
 	    ServerInitialize();
 	
 	    if(ServerStart() == false) {
 	        printf("Server start failed!");
-#ifdef _MSC_VER
+
             ExceptionHandlingUnitialize();
-#endif
+
 	        return EXIT_FAILURE;
 	    } else {
 	        printf((sTitle+" running...\n").c_str());
@@ -362,9 +356,7 @@ int __cdecl main(int argc, char* argv[]) {
 	        }
 	    }
 
-#ifdef _MSC_VER
         ExceptionHandlingUnitialize();
-#endif
 	} else {
 	    SERVICE_TABLE_ENTRY DispatchTable[] = {
 	        { sServiceName, StartService },
@@ -373,9 +365,9 @@ int __cdecl main(int argc, char* argv[]) {
 	       
 	    if(StartServiceCtrlDispatcher(DispatchTable) == false) {
 			AppendLog("StartServiceCtrlDispatcher failed ("+string((uint32_t)GetLastError())+")!");
-#ifdef _MSC_VER
+
             ExceptionHandlingUnitialize();
-#endif
+
 	        return EXIT_FAILURE;
 	    }
 	}

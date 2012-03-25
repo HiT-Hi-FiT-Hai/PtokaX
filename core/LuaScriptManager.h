@@ -86,12 +86,6 @@ public:
     Script * FindScript(lua_State * L);
     uint8_t FindScriptIdx(char * sName);
 
-#ifdef _WIN32
-    #ifndef _MSC_VER
-        void GetGCInfo();
-    #endif
-#endif
-
 	bool AddScript(char * sName, const bool &bEnabled, const bool &bNew);
 
 	bool StartScript(Script * curScript, const bool &bEnable);
@@ -103,7 +97,7 @@ public:
 
     void OnStartup();
     void OnExit(bool bForce = false);
-    bool Arrival(User * u, char * sData, const size_t &iLen, const unsigned char &iType);
+    bool Arrival(User * u, char * sData, const size_t &szLen, const unsigned char &uiType);
     void UserConnected(User * u);
 	void UserDisconnected(User * u);
 

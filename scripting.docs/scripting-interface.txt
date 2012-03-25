@@ -3,7 +3,7 @@ Functions
 OnStartup()					- Is called on script startup.
 OnExit()					- Is called on script exit.
 
-OnTimer(nTimerId)				- Default function called by timer on given interval.
+OnTimer(uTimerId)				- Default function called by timer on given interval.
 
 UserConnected(tUser)				- Is called when user finish login sequence.
 UserDisconnected(tUser)				- Is called when user disconnect or was disconnected.
@@ -228,9 +228,9 @@ Save()								- Save profiles.
 
 TmrMan.
 -------------------
-AddTimer(nTimerInterval)		- Add new timer for script. nTimerInterval is in ms. Return nil when failed or nTimerId when success.
-AddTimer(nTimerInterval, sFunctionName)	- Add new timer for script. nTimerInterval is in ms. sFunctionName is name of function called by this timer. Return nil when failed or nTimerId when success.
-RemoveTimer(nTimerId)			- Remove timer with given ID from script.
+AddTimer(nTimerInterval)		- Add new timer for script. nTimerInterval is in ms. Return nil when failed or uTimerId when success.
+AddTimer(nTimerInterval, sFunctionName)	- Add new timer for script. nTimerInterval is in ms. sFunctionName is name of function called by this timer. Return nil when failed or uTimerId when success.
+RemoveTimer(uTimerId)			- Remove timer with given ID from script.
 
 
 UDPDbg.

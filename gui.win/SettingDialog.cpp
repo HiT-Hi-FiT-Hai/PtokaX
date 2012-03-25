@@ -25,12 +25,11 @@
 #include "../core/LanguageManager.h"
 #include "../core/ServerManager.h"
 #include "../core/SettingManager.h"
+#include "../core/utility.h"
 //---------------------------------------------------------------------------
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //---------------------------------------------------------------------------
 #include "MainWindow.h"
 #include "Resources.h"
@@ -70,6 +69,13 @@ SettingDialog::SettingDialog() {
     SettingPages[9] = new SettingPageDeflood();
     SettingPages[10] = new SettingPageDeflood2();
     SettingPages[11] = new SettingPageDeflood3();
+
+    for(uint8_t ui8i = 0; ui8i < 12; ui8i++) {
+        if(SettingPages[ui8i] == NULL) {
+            AppendDebugLog("%s - [MEM] Cannot allocate SettingPage" PRIu64 " in SettingDialog::SettingDialog\n", (uint64_t)ui8i);
+            exit(EXIT_FAILURE);
+        }
+    }
 }
 //---------------------------------------------------------------------------
 

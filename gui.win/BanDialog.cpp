@@ -28,9 +28,7 @@
 //---------------------------------------------------------------------------
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //---------------------------------------------------------------------------
 #include "BansDialog.h"
 //---------------------------------------------------------------------------
@@ -418,8 +416,7 @@ bool BanDialog::OnAccept() {
 	if(pBanToChange == NULL) {
 		BanItem * pBan = new BanItem();
 		if(pBan == NULL) {
-			string sDbgstr = "[BUF] BanDialog::OnAccept! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-			AppendSpecialLog(sDbgstr);
+            AppendDebugLog("%s - [MEM] Cannot allocate Ban in BanDialog::OnAccept\n", 0);
 			return false;
 		}
 
@@ -446,9 +443,7 @@ bool BanDialog::OnAccept() {
 		if(iNickLen != 0) {
 			pBan->sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
 			if(pBan->sNick == NULL) {
-				string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
-					" bytes of memory for sNick in BanDialog::OnAccept! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-				AppendSpecialLog(sDbgstr);
+				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in BanDialog::OnAccept\n", (uint64_t)(iNickLen+1));
 				delete pBan;
 
 				return false;
@@ -488,11 +483,10 @@ bool BanDialog::OnAccept() {
         int iReasonLen = ::GetWindowTextLength(hWndWindowItems[EDT_REASON]);
 
 		if(iReasonLen != 0) {
-            pBan->sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
+            pBan->sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
             if(pBan->sReason == NULL) {
-    			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen+1)+
-    				" bytes of memory for sReason in BanDialog::OnAccept! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-                AppendSpecialLog(sDbgstr);
+                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in BanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
+
                 delete pBan;
 
                 return false;
@@ -504,11 +498,10 @@ bool BanDialog::OnAccept() {
         int iByLen = ::GetWindowTextLength(hWndWindowItems[EDT_BY]);
 
         if(iByLen != 0) {
-            pBan->sBy = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
+            pBan->sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
             if(pBan->sBy == NULL) {
-                string sDbgstr = "[BUF] Cannot allocate "+string(iByLen+1)+
-					" bytes of memory for sBy in BanDialog::OnAccept! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-                AppendSpecialLog(sDbgstr);
+                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in BanDialog::OnAccept\n", (uint64_t)(iByLen+1));
+
                 delete pBan;
 
     			return false;
@@ -517,7 +510,10 @@ bool BanDialog::OnAccept() {
             ::GetWindowText(hWndWindowItems[EDT_BY], pBan->sBy, iByLen+1);
 		}
 
-		hashBanManager->Add(pBan);
+		if(hashBanManager->Add(pBan) == false) {
+            delete pBan;
+            return false;
+        }
 
 		return true;
 	} else {
@@ -549,7 +545,14 @@ bool BanDialog::OnAccept() {
 					pBanToChange->ui8Bits &= ~hashBanMan::FULL;
                 }
 
-				hashBanManager->Add2IpTable(pBanToChange);
+				if(hashBanManager->Add2IpTable(pBanToChange) == false) {
+                    hashBanManager->Rem(pBanToChange);
+
+                    delete pBanToChange;
+                    pBanToChange = NULL;
+
+                    return false;
+                }
 			} else {
 				pBanToChange->ui8Bits &= ~hashBanMan::IP;
 				pBanToChange->ui8Bits &= ~hashBanMan::FULL;
@@ -559,7 +562,14 @@ bool BanDialog::OnAccept() {
 		if(iIpLen != 0) {
 			if(bIpBan == true) {
 				if(((pBanToChange->ui8Bits & hashBanMan::IP) == hashBanMan::IP) == false) {
-					hashBanManager->Add2IpTable(pBanToChange);
+					if(hashBanManager->Add2IpTable(pBanToChange) == false) {
+                        hashBanManager->Rem(pBanToChange);
+
+                        delete pBanToChange;
+                        pBanToChange = NULL;
+
+                        return false;
+                    }
 				}
 
 				pBanToChange->ui8Bits |= hashBanMan::IP;
@@ -659,9 +669,7 @@ bool BanDialog::OnAccept() {
 		if(iNickLen != 0) {
             sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
             if(sNick == NULL) {
-                string sDbgstr = "[BUF] Cannot allocate "+string(iNickLen+1)+
-                    " bytes of memory for sNick in BanDialog::OnAccept! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-                AppendSpecialLog(sDbgstr);
+                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in BanDialog::OnAccept\n", (uint64_t)(iNickLen+1));
 
                 return false;
             }
@@ -675,9 +683,7 @@ bool BanDialog::OnAccept() {
             }
 
 			if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pBanToChange->sNick) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate sNick in BanDialog::OnAccept! "+string((uint32_t)GetLastError())+" "+
-					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-				AppendSpecialLog(sDbgstr);
+				AppendDebugLog("%s - [MEM] Cannot deallocate sNick in BanDialog::OnAccept\n", 0);
 			}
 			pBanToChange->sNick = NULL;
 
@@ -692,9 +698,7 @@ bool BanDialog::OnAccept() {
 
 			if(pBanToChange->sNick != NULL) {
 				if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pBanToChange->sNick) == 0) {
-					string sDbgstr = "[BUF] Cannot deallocate sNick in BanDialog::OnAccept! "+string((uint32_t)GetLastError())+" "+
-						string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-					AppendSpecialLog(sDbgstr);
+					AppendDebugLog("%s - [MEM] Cannot deallocate sNick in BanDialog::OnAccept\n", 0);
 				}
 				pBanToChange->sNick = NULL;
 			}
@@ -714,9 +718,7 @@ bool BanDialog::OnAccept() {
 
         if(sNick != NULL && (pBanToChange->sNick != sNick)) {
 			if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate sNick in BanDialog::OnAccept! "+string((uint32_t)GetLastError())+" "+
-					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-				AppendSpecialLog(sDbgstr);
+				AppendDebugLog("%s - [MEM] Cannot deallocate sNick in BanDialog::OnAccept\n", 0);
 			}
         }
 
@@ -741,11 +743,9 @@ bool BanDialog::OnAccept() {
 
         char * sReason = NULL;
 		if(iReasonLen != 0) {
-            sReason = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
+            sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
             if(sReason == NULL) {
-    			string sDbgstr = "[BUF] Cannot allocate "+string(iReasonLen+1)+
-    				" bytes of memory for sReason in BanDialog::OnAccept! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-                AppendSpecialLog(sDbgstr);
+                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in BanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
 
                 return false;
             }
@@ -757,9 +757,7 @@ bool BanDialog::OnAccept() {
 			if(pBanToChange->sReason == NULL || strcmp(pBanToChange->sReason, sReason) != NULL) {
 				if(pBanToChange->sReason != NULL) {
 					if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pBanToChange->sReason) == 0) {
-						string sDbgstr = "[BUF] Cannot deallocate sReason in BanDialog::OnAccept! "+string((uint32_t)GetLastError())+" "+
-							string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-						AppendSpecialLog(sDbgstr);
+						AppendDebugLog("%s - [MEM] Cannot deallocate sReason in BanDialog::OnAccept\n", 0);
 					}
 					pBanToChange->sReason = NULL;
 				}
@@ -768,9 +766,7 @@ bool BanDialog::OnAccept() {
 			}
 		} else if(pBanToChange->sReason != NULL) {
 			if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pBanToChange->sReason) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate sReason in BanDialog::OnAccept! "+string((uint32_t)GetLastError())+" "+
-					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-				AppendSpecialLog(sDbgstr);
+				AppendDebugLog("%s - [MEM] Cannot deallocate sReason in BanDialog::OnAccept\n", 0);
 			}
 
 			pBanToChange->sReason = NULL;
@@ -778,9 +774,7 @@ bool BanDialog::OnAccept() {
 
         if(sReason != NULL && (pBanToChange->sReason != sReason)) {
 			if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sReason) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate sReason in BanDialog::OnAccept! "+string((uint32_t)GetLastError())+" "+
-					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-				AppendSpecialLog(sDbgstr);
+				AppendDebugLog("%s - [MEM] Cannot deallocate sReason in BanDialog::OnAccept\n", 0);
 			}
         }
 
@@ -788,11 +782,9 @@ bool BanDialog::OnAccept() {
 
         char * sBy = NULL;
         if(iByLen != 0) {
-            sBy = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
+            sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
             if(sBy == NULL) {
-                string sDbgstr = "[BUF] Cannot allocate "+string(iByLen+1)+
-					" bytes of memory for sBy in BanDialog::OnAccept! "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-                AppendSpecialLog(sDbgstr);
+                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in BanDialog::OnAccept\n", (uint64_t)(iByLen+1));
 
     			return false;
             }
@@ -804,9 +796,7 @@ bool BanDialog::OnAccept() {
 			if(pBanToChange->sBy == NULL || strcmp(pBanToChange->sBy, sBy) != NULL) {
 				if(pBanToChange->sBy != NULL) {
 					if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pBanToChange->sBy) == 0) {
-						string sDbgstr = "[BUF] Cannot deallocate sBy in BanDialog::OnAccept! "+string((uint32_t)GetLastError())+" "+
-							string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-						AppendSpecialLog(sDbgstr);
+						AppendDebugLog("%s - [MEM] Cannot deallocate sBy in BanDialog::OnAccept\n", 0);
 					}
 					pBanToChange->sBy = NULL;
 				}
@@ -815,18 +805,14 @@ bool BanDialog::OnAccept() {
 			}
 		} else if(pBanToChange->sBy != NULL) {
 			if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pBanToChange->sBy) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate sBy in BanDialog::OnAccept! "+string((uint32_t)GetLastError())+" "+
-					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-				AppendSpecialLog(sDbgstr);
+				AppendDebugLog("%s - [MEM] Cannot deallocate sBy in BanDialog::OnAccept\n", 0);
 			}
 			pBanToChange->sBy = NULL;
         }
 
         if(sBy != NULL && (pBanToChange->sBy != sBy)) {
 			if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sBy) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate sBy in BanDialog::OnAccept! "+string((uint32_t)GetLastError())+" "+
-					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-				AppendSpecialLog(sDbgstr);
+				AppendDebugLog("%s - [MEM] Cannot deallocate sBy in BanDialog::OnAccept\n", 0);
 			}
         }
 

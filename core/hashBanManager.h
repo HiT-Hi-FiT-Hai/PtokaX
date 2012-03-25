@@ -91,10 +91,10 @@ public:
     ~hashBanMan(void);
 
 
-    void Add(BanItem * Ban);
-    void Add2Table(BanItem *Ban);
+    bool Add(BanItem * Ban);
+    bool Add2Table(BanItem *Ban);
 	void Add2NickTable(BanItem *Ban);
-	void Add2IpTable(BanItem *Ban);
+	bool Add2IpTable(BanItem *Ban);
     void Rem(BanItem * Ban, const bool &bFromGui = false);
     void RemFromTable(BanItem *Ban);
     void RemFromNickTable(BanItem *Ban);
@@ -117,25 +117,22 @@ public:
     BanItem* FindFull(const uint8_t * ui128IpHash, const time_t &acc_time);
     RangeBanItem* FindFullRange(const uint8_t * ui128IpHash, const time_t &acc_time);
 
-    BanItem* FindNick(char * sNick, const size_t &iNickLen);
+    BanItem* FindNick(char * sNick, const size_t &szNickLen);
     BanItem* FindNick(const uint32_t &hash, const time_t &acc_time, char * sNick);
     BanItem* FindIP(const uint8_t * ui128IpHash, const time_t &acc_time);
     RangeBanItem* FindRange(const uint8_t * ui128IpHash, const time_t &acc_time);
     RangeBanItem* FindRange(const uint8_t * ui128FromHash, const uint8_t * ui128ToHash, const time_t &acc_time);
 
-    BanItem* FindTempNick(char * sNick, const size_t &iNickLen);
+    BanItem* FindTempNick(char * sNick, const size_t &szNickLen);
     BanItem* FindTempNick(const uint32_t &hash, const time_t &acc_time, char * sNick);
     BanItem* FindTempIP(const uint8_t * ui128IpHash, const time_t &acc_time);
     
-    BanItem* FindPermNick(char * sNick, const size_t &iNickLen);
+    BanItem* FindPermNick(char * sNick, const size_t &szNickLen);
     BanItem* FindPermNick(const uint32_t &hash, char * sNick);
     BanItem* FindPermIP(const uint8_t * ui128IpHash);
 
     void Load(void);
     void Save(bool bForce = false);
-    
-    void CreateTemp(char * first, char * second, const uint32_t &iTime, const time_t &acc_time);
-    void CreatePerm(char * first, char * second);
 
     void ClearTemp(void);
     void ClearPerm(void);

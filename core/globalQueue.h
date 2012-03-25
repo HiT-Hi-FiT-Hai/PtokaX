@@ -34,12 +34,12 @@ struct QzBuf {
 
 // PPK ... single items like opchat messages
 struct QueueDataItem {
-    size_t iDataLen;
-    uint32_t iType;
-    int32_t iProfile;
-    char *sData;
-    QueueDataItem *prev, *next;
-    User *FromUser;
+    size_t szDataLen;
+    uint32_t ui32Type;
+    int32_t i32Profile;
+    char * sData;
+    QueueDataItem * prev, * next;
+    User * FromUser;
 };
 //-----------------------------------------------------------------------------
 
@@ -123,24 +123,23 @@ public:
     ~globalqueue();
 
     void Store(char * sData);
-    void Store(char * sData, const size_t &iDataLen);
+    void Store(char * sData, const size_t &szDataLen);
     void HStore(char * sData);
-    void HStore(char * sData, const size_t &iDataLen);
-    void AStore(char * sData, const size_t &iDataLen);
-    void PStore(char * sData, const size_t &iDataLen);
-    void InfoStore(char * sData, const size_t &iDataLen);
-    void StrpInfoStore(char * sData, const size_t &iDataLen);
-    void FullInfoStore(char * sData, const size_t &iDataLen);
-    void OPStore(char * sData, const size_t &iDataLen);
+    void HStore(char * sData, const size_t &szDataLen);
+    void AStore(char * sData, const size_t &szDataLen);
+    void PStore(char * sData, const size_t &szDataLen);
+    void InfoStore(char * sData, const size_t &szDataLen);
+    void StrpInfoStore(char * sData, const size_t &szDataLen);
+    void FullInfoStore(char * sData, const size_t &szDataLen);
+    void OPStore(char * sData, const size_t &szDataLen);
     void OpListStore(char * sNick);
     void UserIPStore(User * curUser);
-    void SingleItemsStore(QueueDataItem * NewItem);
     void FinalizeQueues();
     void ClearQueues();
     void ProcessQueues(User * u);
     void ProcessSingleItems(User * u);
     void SendGlobalQ();
-    QueueDataItem * CreateQueueDataItem(char * data, const size_t &idatalen, User * fromuser, const int32_t &iProfile, const uint32_t &type);
+    void SingleItemStore(char * sData, const size_t &szDataLen, User * pFromUser, const int32_t &i32Profile, const uint32_t &ui32Type);
 };
 
 //-----------------------------------------------------------------------------

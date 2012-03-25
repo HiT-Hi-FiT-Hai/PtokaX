@@ -26,10 +26,6 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
-//---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
 #endif
 //---------------------------------------------------------------------------
 IP2CC * IP2Country = NULL;
@@ -108,37 +104,37 @@ IP2CC::IP2CC() {
     }
 
 #ifdef _WIN32
-    ui32RangeFrom = (uint32_t *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui32Size * sizeof(uint32_t));
+    ui32RangeFrom = (uint32_t *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ui32Size * sizeof(uint32_t));
 #else
-	ui32RangeFrom = (uint32_t *) calloc(ui32Size, sizeof(uint32_t));
+	ui32RangeFrom = (uint32_t *)calloc(ui32Size, sizeof(uint32_t));
 #endif
 
     if(ui32RangeFrom == NULL) {
-		AppendSpecialLog("Cannot create IP2CC::ui32RangeFrom!");
+		AppendDebugLog("%s - [MEM] Cannot create IP2CC::ui32RangeFrom\n", 0);
 		fclose(ip2country);
 		return;
     }
 
 #ifdef _WIN32
-    ui32RangeTo = (uint32_t *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui32Size * sizeof(uint32_t));
+    ui32RangeTo = (uint32_t *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ui32Size * sizeof(uint32_t));
 #else
-	ui32RangeTo = (uint32_t *) calloc(ui32Size, sizeof(uint32_t));
+	ui32RangeTo = (uint32_t *)calloc(ui32Size, sizeof(uint32_t));
 #endif
 
     if(ui32RangeTo == NULL) {
-		AppendSpecialLog("Cannot create IP2CC::ui32RangeTo!");
+		AppendDebugLog("%s - [MEM] Cannot create IP2CC::ui32RangeTo\n", 0);
 		fclose(ip2country);
 		return;
     }
 
 #ifdef _WIN32
-    ui8RangeCI = (uint8_t *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui32Size * sizeof(uint8_t));
+    ui8RangeCI = (uint8_t *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ui32Size * sizeof(uint8_t));
 #else
-	ui8RangeCI = (uint8_t *) calloc(ui32Size, sizeof(uint8_t));
+	ui8RangeCI = (uint8_t *)calloc(ui32Size, sizeof(uint8_t));
 #endif
 
     if(ui8RangeCI == NULL) {
-		AppendSpecialLog("Cannot create IP2CC::ui8RangeCI!");
+		AppendDebugLog("%s - [MEM] Cannot create IP2CC::ui8RangeCI\n", 0);
 		fclose(ip2country);
 		return;
 	}
@@ -154,60 +150,51 @@ IP2CC::IP2CC() {
             ui32Size += 512;
             void * oldbuf = ui32RangeFrom;
 #ifdef _WIN32
-			ui32RangeFrom = (uint32_t *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, ui32Size * sizeof(uint32_t));
+			ui32RangeFrom = (uint32_t *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, ui32Size * sizeof(uint32_t));
 #else
-			ui32RangeFrom = (uint32_t *) realloc(oldbuf, ui32Size * sizeof(uint32_t));
+			ui32RangeFrom = (uint32_t *)realloc(oldbuf, ui32Size * sizeof(uint32_t));
 #endif
             if(ui32RangeFrom == NULL) {
-    			string sDbgstr = "[BUF] Cannot reallocate "+string(ui32Size)+
-    				" bytes of memory in IP2CC::IP2CC for ui32RangeFrom!";
+    			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in IP2CC::IP2CC for ui32RangeFrom\n", (uint64_t)ui32Size);
 #ifdef _WIN32
-    			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
                 HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
 #else
                 free(oldbuf);
 #endif
-    			AppendSpecialLog(sDbgstr);
     			fclose(ip2country);
                 return;
     		}
 
             oldbuf = ui32RangeTo;
 #ifdef _WIN32
-			ui32RangeTo = (uint32_t *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, ui32Size * sizeof(uint32_t));
+			ui32RangeTo = (uint32_t *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, ui32Size * sizeof(uint32_t));
 #else
-			ui32RangeTo = (uint32_t *) realloc(oldbuf, ui32Size * sizeof(uint32_t));
+			ui32RangeTo = (uint32_t *)realloc(oldbuf, ui32Size * sizeof(uint32_t));
 #endif
             if(ui32RangeTo == NULL) {
-    			string sDbgstr = "[BUF] Cannot reallocate "+string(ui32Size)+
-    				" bytes of memory in IP2CC::IP2CC for ui32RangeTo!";
+    			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in IP2CC::IP2CC for ui32RangeTo\n", (uint64_t)ui32Size);
 #ifdef _WIN32
-    			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
                 HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
 #else
                 free(oldbuf);
 #endif
-    			AppendSpecialLog(sDbgstr);
     			fclose(ip2country);
                 return;
     		}
 
             oldbuf = ui8RangeCI;
 #ifdef _WIN32
-            ui8RangeCI = (uint8_t *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, ui32Size * sizeof(uint8_t));
+            ui8RangeCI = (uint8_t *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, ui32Size * sizeof(uint8_t));
 #else
-			ui8RangeCI = (uint8_t *) realloc(oldbuf, ui32Size * sizeof(uint8_t));
+			ui8RangeCI = (uint8_t *)realloc(oldbuf, ui32Size * sizeof(uint8_t));
 #endif
             if(ui8RangeCI == NULL) {
-    			string sDbgstr = "[BUF] Cannot reallocate "+string(ui32Size)+
-    				" bytes of memory in IP2CC::IP2CC for ui8RangeCI!";
+    			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in IP2CC::IP2CC for ui8RangeCI\n", (uint64_t)ui32Size);
 #ifdef _WIN32
-    			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
                 HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
 #else
                 free(oldbuf);
 #endif
-    			AppendSpecialLog(sDbgstr);
     			fclose(ip2country);
                 return;
     		}
@@ -216,11 +203,11 @@ IP2CC::IP2CC() {
         char * sStart = sLine+1;
         uint8_t ui8d = 0;
         
-        size_t iLineLen = strlen(sLine);
+        size_t szLineLen = strlen(sLine);
 
-		for(size_t ui16i = 1; ui16i < iLineLen; ui16i++) {
-            if(sLine[ui16i] == '\"') {
-                sLine[ui16i] = '\0';
+		for(size_t szi = 1; szi < szLineLen; szi++) {
+            if(sLine[szi] == '\"') {
+                sLine[szi] = '\0';
                 if(ui8d == 0) {
                     ui32RangeFrom[ui32Count] = strtoul(sStart, NULL, 10);
                 } else if(ui8d == 1) {
@@ -238,8 +225,8 @@ IP2CC::IP2CC() {
                 }
 
                 ui8d++;
-                ui16i += (uint16_t)2;
-                sStart = sLine+ui16i+1;
+                szi += (uint16_t)2;
+                sStart = sLine+szi+1;
                 
             }
         }
@@ -262,37 +249,37 @@ IP2CC::IP2CC() {
     }
 
 #ifdef _WIN32
-    ui128IPv6RangeFrom = (uint8_t *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui32IPv6Size * (sizeof(uint8_t)*16));
+    ui128IPv6RangeFrom = (uint8_t *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ui32IPv6Size * (sizeof(uint8_t)*16));
 #else
-	ui128IPv6RangeFrom = (uint8_t *) calloc(ui32IPv6Size, sizeof(uint8_t) * 16);
+	ui128IPv6RangeFrom = (uint8_t *)calloc(ui32IPv6Size, sizeof(uint8_t) * 16);
 #endif
 
     if(ui128IPv6RangeFrom == NULL) {
-		AppendSpecialLog("Cannot create IP2CC::ui128IPv6RangeFrom!");
+		AppendDebugLog("%s - [MEM] Cannot create IP2CC::ui128IPv6RangeFrom\n", 0);
 		fclose(ip2country);
 		return;
     }
 
 #ifdef _WIN32
-    ui128IPv6RangeTo = (uint8_t *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui32IPv6Size * (sizeof(uint8_t)*16));
+    ui128IPv6RangeTo = (uint8_t *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ui32IPv6Size * (sizeof(uint8_t)*16));
 #else
-	ui128IPv6RangeTo = (uint8_t *) calloc(ui32IPv6Size, sizeof(uint8_t) * 16);
+	ui128IPv6RangeTo = (uint8_t *)calloc(ui32IPv6Size, sizeof(uint8_t) * 16);
 #endif
 
     if(ui128IPv6RangeTo == NULL) {
-		AppendSpecialLog("Cannot create IP2CC::ui128IPv6RangeTo!");
+		AppendDebugLog("%s - [MEM] Cannot create IP2CC::ui128IPv6RangeTo\n", 0);
 		fclose(ip2country);
 		return;
     }
 
 #ifdef _WIN32
-    ui8IPv6RangeCI = (uint8_t *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui32IPv6Size * sizeof(uint8_t));
+    ui8IPv6RangeCI = (uint8_t *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ui32IPv6Size * sizeof(uint8_t));
 #else
-	ui8IPv6RangeCI = (uint8_t *) calloc(ui32IPv6Size, sizeof(uint8_t));
+	ui8IPv6RangeCI = (uint8_t *)calloc(ui32IPv6Size, sizeof(uint8_t));
 #endif
 
     if(ui8IPv6RangeCI == NULL) {
-		AppendSpecialLog("Cannot create IP2CC::ui8IPv6RangeCI!");
+		AppendDebugLog("%s - [MEM] Cannot create IP2CC::ui8IPv6RangeCI\n", 0);
 		fclose(ip2country);
 		return;
 	}
@@ -306,60 +293,51 @@ IP2CC::IP2CC() {
             ui32IPv6Size += 512;
             void * oldbuf = ui128IPv6RangeFrom;
 #ifdef _WIN32
-			ui128IPv6RangeFrom = (uint8_t *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, ui32IPv6Size * (sizeof(uint8_t)*16));
+			ui128IPv6RangeFrom = (uint8_t *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, ui32IPv6Size * (sizeof(uint8_t)*16));
 #else
-			ui128IPv6RangeFrom = (uint8_t *) realloc(oldbuf, ui32IPv6Size * (sizeof(uint8_t)*16));
+			ui128IPv6RangeFrom = (uint8_t *)realloc(oldbuf, ui32IPv6Size * (sizeof(uint8_t)*16));
 #endif
             if(ui128IPv6RangeFrom == NULL) {
-    			string sDbgstr = "[BUF] Cannot reallocate "+string(ui32IPv6Size)+
-    				" bytes of memory in IP2CC::IP2CC for ui128IPv6RangeFrom!";
+    			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in IP2CC::IP2CC for ui128IPv6RangeFrom\n", (uint64_t)ui32IPv6Size);
 #ifdef _WIN32
-    			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
                 HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
 #else
                 free(oldbuf);
 #endif
-    			AppendSpecialLog(sDbgstr);
     			fclose(ip2country);
                 return;
     		}
 
             oldbuf = ui128IPv6RangeTo;
 #ifdef _WIN32
-			ui128IPv6RangeTo = (uint8_t *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, ui32IPv6Size * (sizeof(uint8_t)*16));
+			ui128IPv6RangeTo = (uint8_t *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, ui32IPv6Size * (sizeof(uint8_t)*16));
 #else
-			ui128IPv6RangeTo = (uint8_t *) realloc(oldbuf, ui32IPv6Size * (sizeof(uint8_t)*16));
+			ui128IPv6RangeTo = (uint8_t *)realloc(oldbuf, ui32IPv6Size * (sizeof(uint8_t)*16));
 #endif
             if(ui128IPv6RangeTo == NULL) {
-    			string sDbgstr = "[BUF] Cannot reallocate "+string(ui32IPv6Size)+
-    				" bytes of memory in IP2CC::IP2CC for ui128IPv6RangeTo!";
+    			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in IP2CC::IP2CC for ui128IPv6RangeTo\n", (uint64_t)ui32IPv6Size);
 #ifdef _WIN32
-    			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
                 HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
 #else
                 free(oldbuf);
 #endif
-    			AppendSpecialLog(sDbgstr);
     			fclose(ip2country);
                 return;
     		}
 
             oldbuf = ui8IPv6RangeCI;
 #ifdef _WIN32
-            ui8IPv6RangeCI = (uint8_t *) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, ui32IPv6Size * sizeof(uint8_t));
+            ui8IPv6RangeCI = (uint8_t *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, ui32IPv6Size * sizeof(uint8_t));
 #else
-			ui8IPv6RangeCI = (uint8_t *) realloc(oldbuf, ui32IPv6Size * sizeof(uint8_t));
+			ui8IPv6RangeCI = (uint8_t *)realloc(oldbuf, ui32IPv6Size * sizeof(uint8_t));
 #endif
             if(ui8IPv6RangeCI == NULL) {
-    			string sDbgstr = "[BUF] Cannot reallocate "+string(ui32IPv6Size)+
-    				" bytes of memory in IP2CC::IP2CC for ui8IPv6RangeCI!";
+    			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in IP2CC::IP2CC for ui8IPv6RangeCI\n", (uint64_t)ui32IPv6Size);
 #ifdef _WIN32
-    			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
                 HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
 #else
                 free(oldbuf);
 #endif
-    			AppendSpecialLog(sDbgstr);
     			fclose(ip2country);
                 return;
     		}
@@ -368,18 +346,18 @@ IP2CC::IP2CC() {
         char * sStart = sLine;
         uint8_t ui8d = 0;
 
-        size_t iLineLen = strlen(sLine);
+        size_t szLineLen = strlen(sLine);
 
-		for(size_t ui16i = 0; ui16i < iLineLen; ui16i++) {
-            if(ui8d == 0 && sLine[ui16i] == '-') {
-                sLine[ui16i] = '\0';
+		for(size_t szi = 0; szi < szLineLen; szi++) {
+            if(ui8d == 0 && sLine[szi] == '-') {
+                sLine[szi] = '\0';
 #ifdef _WIN32
                 win_inet_pton(sStart, ui128IPv6RangeFrom + (ui32IPv6Count*16));
 #else
                 inet_pton(AF_INET6, sStart, ui128IPv6RangeFrom + (ui32IPv6Count*16));
 #endif
-            } else if(sLine[ui16i] == ',') {
-                sLine[ui16i] = '\0';
+            } else if(sLine[szi] == ',') {
+                sLine[szi] = '\0';
                 if(ui8d == 1) {
 #ifdef _WIN32
                     win_inet_pton(sStart, ui128IPv6RangeTo + (ui32IPv6Count*16));
@@ -403,7 +381,7 @@ IP2CC::IP2CC() {
             }
 
             ui8d++;
-            sStart = sLine+ui16i+1;
+            sStart = sLine+szi+1;
         }
     }
 
@@ -415,9 +393,7 @@ IP2CC::~IP2CC() {
 #ifdef _WIN32
     if(ui32RangeFrom != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ui32RangeFrom) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate IP2CC::ui32RangeFrom! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-            AppendSpecialLog(sDbgstr);
+            AppendDebugLog("%s - [MEM] Cannot deallocate IP2CC::ui32RangeFrom in IP2CC::~IP2CC\n", 0);
         }
     }
 #else
@@ -427,9 +403,7 @@ IP2CC::~IP2CC() {
 #ifdef _WIN32
     if(ui32RangeTo != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ui32RangeTo) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate IP2CC::ui32RangeTo! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-            AppendSpecialLog(sDbgstr);
+            AppendDebugLog("%s - [MEM] Cannot deallocate IP2CC::ui32RangeTo in IP2CC::~IP2CC\n", 0);
         }
     }
 #else
@@ -439,9 +413,7 @@ IP2CC::~IP2CC() {
 #ifdef _WIN32
     if(ui8RangeCI != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ui8RangeCI) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate IP2CC::ui8RangeCI! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-            AppendSpecialLog(sDbgstr);
+            AppendDebugLog("%s - [MEM] Cannot deallocate IP2CC::ui8RangeCI in IP2CC::~IP2CC\n", 0);
         }
     }
 #else
@@ -451,9 +423,7 @@ IP2CC::~IP2CC() {
 #ifdef _WIN32
     if(ui128IPv6RangeFrom != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ui128IPv6RangeFrom) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate IP2CC::ui128IPv6RangeFrom! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-            AppendSpecialLog(sDbgstr);
+            AppendDebugLog("%s - [MEM] Cannot deallocate IP2CC::ui128IPv6RangeFrom in IP2CC::~IP2CC\n", 0);
         }
     }
 #else
@@ -463,9 +433,7 @@ IP2CC::~IP2CC() {
 #ifdef _WIN32
     if(ui128IPv6RangeTo != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ui128IPv6RangeTo) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate IP2CC::ui128IPv6RangeTo! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-            AppendSpecialLog(sDbgstr);
+            AppendDebugLog("%s - [MEM] Cannot deallocate IP2CC::ui128IPv6RangeTo in IP2CC::~IP2CC\n", 0);
         }
     }
 #else
@@ -475,9 +443,7 @@ IP2CC::~IP2CC() {
 #ifdef _WIN32
     if(ui8IPv6RangeCI != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ui8IPv6RangeCI) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate IP2CC::ui8IPv6RangeCI! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-            AppendSpecialLog(sDbgstr);
+            AppendDebugLog("%s - [MEM] Cannot deallocate IP2CC::ui8IPv6RangeCI in IP2CC::~IP2CC\n", 0);
         }
     }
 #else
@@ -554,7 +520,7 @@ uint8_t IP2CC::Find(const uint8_t * ui128IpHash) {
 }
 //---------------------------------------------------------------------------
 
-const char * IP2CC::GetCountry(const uint8_t &ui8dx, const bool &bCountryName) {
+const char * IP2CC::GetCountry(const uint8_t &ui8dx, const bool &bCountryName) const {
     if(bCountryName == false) {
         return CountryCodes[ui8dx];
     } else {

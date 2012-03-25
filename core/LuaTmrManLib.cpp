@@ -36,12 +36,6 @@
 	#include "scrtmrinc.h"
 #endif
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
-#endif
-//---------------------------------------------------------------------------
 
 static int AddTimer(lua_State * L) {
 	Script * cur = ScriptManager->FindScript(L);
@@ -53,7 +47,7 @@ static int AddTimer(lua_State * L) {
 
     int n = lua_gettop(L);
 
-	size_t iLen = 0;
+	size_t szLen = 0;
     char * sFunctionName = NULL;
 
 	if(n == 2) {
@@ -65,9 +59,9 @@ static int AddTimer(lua_State * L) {
             return 1;
         }
 
-        sFunctionName = (char *)lua_tolstring(L, 2, &iLen);
+        sFunctionName = (char *)lua_tolstring(L, 2, &szLen);
 
-        if(iLen == 0) {
+        if(szLen == 0) {
     		lua_settop(L, 0);
     		lua_pushnil(L);
             return 1;
@@ -111,17 +105,16 @@ static int AddTimer(lua_State * L) {
         return 1;
     }
 
-	ScriptTimer * newtimer = new ScriptTimer(timer, sFunctionName, iLen);
+	ScriptTimer * pNewtimer = new ScriptTimer(timer, sFunctionName, szLen);
 #else
-	ScriptTimer * newtimer = new ScriptTimer(sFunctionName, iLen);
+	ScriptTimer * pNewtimer = new ScriptTimer(sFunctionName, szLen);
 #endif
 
-    if(newtimer == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate new ScriptTimer!";
+    if(pNewtimer == NULL) {
 #ifdef _WIN32
-        sDbgstr += " " + string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+        KillTimer(NULL, timer);
 #endif
-        AppendSpecialLog(sDbgstr);
+        AppendDebugLog("%s - [MEM] Cannot allocate pNewtimer in TmrMan.AddTimer\n", 0);
 		lua_pushnil(L);
         return 1;
     }
@@ -132,7 +125,7 @@ static int AddTimer(lua_State * L) {
     struct sigevent sigev;
     sigev.sigev_notify = SIGEV_SIGNAL;
     sigev.sigev_signo = SIGSCRTMR;
-    sigev.sigev_value.sival_ptr = newtimer;
+    sigev.sigev_value.sival_ptr = pNewtimer;
 
     int iRet = timer_create(CLOCK_REALTIME, &sigev, &scrtimer);
 
@@ -142,7 +135,7 @@ static int AddTimer(lua_State * L) {
         return 1;
     }
 
-    newtimer->TimerId = scrtimer;
+    pNewtimer->TimerId = scrtimer;
 
     uint32_t ui32Milis = (uint32_t)lua_tonumber(L, 1);// ms
 
@@ -167,21 +160,21 @@ static int AddTimer(lua_State * L) {
     lua_settop(L, 0);
 
 #ifdef _WIN32
-    lua_pushlightuserdata(L, (void *)newtimer->uiTimerId);
+    lua_pushlightuserdata(L, (void *)pNewtimer->uiTimerId);
 #else
-    lua_pushlightuserdata(L, (void *)newtimer->TimerId);
+    lua_pushlightuserdata(L, (void *)pNewtimer->TimerId);
 #endif
 
-    newtimer->prev = NULL;
+    pNewtimer->prev = NULL;
 
     if(cur->TimerList == NULL) {
-        newtimer->next = NULL;
+        pNewtimer->next = NULL;
     } else {
-        newtimer->next = cur->TimerList;
-        cur->TimerList->prev = newtimer;
+        pNewtimer->next = cur->TimerList;
+        cur->TimerList->prev = pNewtimer;
     }
 
-    cur->TimerList = newtimer;
+    cur->TimerList = pNewtimer;
 
     return 1;
 }

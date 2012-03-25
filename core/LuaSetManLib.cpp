@@ -31,10 +31,6 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
-//---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
 #endif
 //---------------------------------------------------------------------------
 
@@ -84,10 +80,10 @@ static int SetMOTD(lua_State * L) {
         return 0;
     }
 
-    size_t iLen = 0;
-    char * sTxt = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen = 0;
+    char * sTxt = (char *)lua_tolstring(L, 1, &szLen);
 
-	SettingManager->SetMOTD(sTxt, iLen);
+	SettingManager->SetMOTD(sTxt, szLen);
 
 	SettingManager->UpdateMOTD();
 
@@ -111,17 +107,17 @@ static int GetBool(lua_State * L) {
         return 1;
     }
 
-    size_t iId = (size_t)lua_tonumber(L, 1);
+    size_t szId = (size_t)lua_tonumber(L, 1);
 
     lua_settop(L, 0);
 
-    if(iId >= SETBOOL_IDS_END) {
+    if(szId >= SETBOOL_IDS_END) {
         luaL_error(L, "bad argument #1 to 'GetBool' (it's not valid id)");
         lua_pushnil(L);
         return 1;
     }  
 
-    SettingManager->bBools[iId] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
+    SettingManager->bBools[szId] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
 
     return 1;
 }
@@ -141,22 +137,22 @@ static int SetBool(lua_State * L) {
         return 0;
     }
 
-    size_t iId = (size_t)lua_tonumber(L, 1);
+    size_t szId = (size_t)lua_tonumber(L, 1);
     bool bValue = (lua_toboolean(L, 2) == 0 ? false : true);
 
     lua_settop(L, 0);
 
-    if(iId >= SETBOOL_IDS_END) {
+    if(szId >= SETBOOL_IDS_END) {
         luaL_error(L, "bad argument #1 to 'SetBool' (it's not valid id)");
         return 0;
     }  
 
-    if(iId == 22 && bValue == false) {
+    if(szId == 22 && bValue == false) {
         eventqueue->AddNormal(eventq::EVENT_STOP_SCRIPTING, NULL);
         return 0;
     }
 
-    SettingManager->SetBool(iId, bValue);
+    SettingManager->SetBool(szId, bValue);
 
     return 0;
 }
@@ -177,17 +173,17 @@ static int GetNumber(lua_State * L) {
         return 1;
     }
 
-    size_t iId = (size_t)lua_tonumber(L, 1);
+    size_t szId = (size_t)lua_tonumber(L, 1);
 
     lua_settop(L, 0);
 
-	if(iId >= (SETSHORT_IDS_END-1)) {
+	if(szId >= (SETSHORT_IDS_END-1)) {
         luaL_error(L, "bad argument #1 to 'GetNumber' (it's not valid id)");
         lua_pushnil(L);
         return 1;
     }  
 
-    lua_pushnumber(L, SettingManager->iShorts[iId]);
+    lua_pushnumber(L, SettingManager->iShorts[szId]);
 
     return 1;
 }
@@ -207,17 +203,17 @@ static int SetNumber(lua_State * L) {
         return 0;
     }
 
-    size_t iId = (size_t)lua_tonumber(L, 1);
+    size_t szId = (size_t)lua_tonumber(L, 1);
     int16_t iValue = (int16_t)lua_tonumber(L, 2);
 
     lua_settop(L, 0);
 
-	if(iId >= (SETSHORT_IDS_END-1)) {
+	if(szId >= (SETSHORT_IDS_END-1)) {
         luaL_error(L, "bad argument #1 to 'SetNumber' (it's not valid id)");
         return 0;
     }  
 
-    SettingManager->SetShort(iId, iValue);
+    SettingManager->SetShort(szId, iValue);
 
     return 0;
 }
@@ -238,18 +234,18 @@ static int GetString(lua_State * L) {
         return 1;
     }
 
-    size_t iId = (size_t)lua_tonumber(L, 1);
+    size_t szId = (size_t)lua_tonumber(L, 1);
 
     lua_settop(L, 0);
 
-    if(iId >= SETTXT_IDS_END) {
+    if(szId >= SETTXT_IDS_END) {
         luaL_error(L, "bad argument #1 to 'GetString' (it's not valid id)");
         lua_pushnil(L);
         return 1;
     }  
 
-    if(SettingManager->sTexts[iId] != NULL) {
-        lua_pushlstring(L, SettingManager->sTexts[iId], (size_t)SettingManager->ui16TextsLens[iId]);
+    if(SettingManager->sTexts[szId] != NULL) {
+        lua_pushlstring(L, SettingManager->sTexts[szId], (size_t)SettingManager->ui16TextsLens[szId]);
     } else {
         lua_pushnil(L);
     }
@@ -272,18 +268,18 @@ static int SetString(lua_State * L) {
         return 0;
     }
 
-    size_t iId = (size_t)lua_tonumber(L, 1);
+    size_t szId = (size_t)lua_tonumber(L, 1);
 
-    if(iId >= SETTXT_IDS_END) {
+    if(szId >= SETTXT_IDS_END) {
         luaL_error(L, "bad argument #1 to 'SetString' (it's not valid id)");
         lua_settop(L, 0);
         return 0;
     }  
 
-    size_t iLen;
-    char * sValue = (char *)lua_tolstring(L, 2, &iLen);
+    size_t szLen;
+    char * sValue = (char *)lua_tolstring(L, 2, &szLen);
 
-    SettingManager->SetText(iId, sValue, iLen);
+    SettingManager->SetText(szId, sValue, szLen);
 
     lua_settop(L, 0);
     return 0;
@@ -509,15 +505,15 @@ static int SetOpChat(lua_State * L) {
     }
 
     char *NewBotName, *NewBotDescription, *NewBotEmail;
-    size_t iNameLen, iDescrLen, iEmailLen;
+    size_t szNameLen, szDescrLen, szEmailLen;
 
-    NewBotName = (char *)lua_tolstring(L, 2, &iNameLen);
-    NewBotDescription = (char *)lua_tolstring(L, 3, &iDescrLen);
-    NewBotEmail = (char *)lua_tolstring(L, 4, &iEmailLen);
+    NewBotName = (char *)lua_tolstring(L, 2, &szNameLen);
+    NewBotDescription = (char *)lua_tolstring(L, 3, &szDescrLen);
+    NewBotEmail = (char *)lua_tolstring(L, 4, &szEmailLen);
 
-    if(iNameLen == 0 || iNameLen > 64 || iDescrLen > 64 || iEmailLen > 64 ||
-        strpbrk(NewBotName, " $|<>:?*\"/\\") != NULL || strpbrk(NewBotDescription, "$|") != NULL ||
-		strpbrk(NewBotEmail, "$|") != NULL || hashManager->FindUser(NewBotName, iNameLen) != NULL) {
+    if(szNameLen == 0 || szNameLen > 64 || szDescrLen > 64 || szEmailLen > 64 ||
+        strpbrk(NewBotName, " $|") != NULL || strpbrk(NewBotDescription, "$|") != NULL ||
+		strpbrk(NewBotEmail, "$|") != NULL || hashManager->FindUser(NewBotName, szNameLen) != NULL) {
         lua_settop(L, 0);
         return 0;
     }
@@ -628,15 +624,15 @@ static int SetHubBot(lua_State * L) {
     }
 
     char *NewBotName, *NewBotDescription, *NewBotEmail;
-    size_t iNameLen, iDescrLen, iEmailLen;
+    size_t szNameLen, szDescrLen, szEmailLen;
 
-    NewBotName = (char *)lua_tolstring(L, 2, &iNameLen);
-    NewBotDescription = (char *)lua_tolstring(L, 3, &iDescrLen);
-    NewBotEmail = (char *)lua_tolstring(L, 4, &iEmailLen);
+    NewBotName = (char *)lua_tolstring(L, 2, &szNameLen);
+    NewBotDescription = (char *)lua_tolstring(L, 3, &szDescrLen);
+    NewBotEmail = (char *)lua_tolstring(L, 4, &szEmailLen);
 
-    if(iNameLen == 0 || iNameLen > 64 || iDescrLen > 64 || iEmailLen > 64 ||
-        strpbrk(NewBotName, " $|<>:?*\"/\\") != NULL || strpbrk(NewBotDescription, "$|") != NULL ||
-        strpbrk(NewBotEmail, "$|") != NULL || hashManager->FindUser(NewBotName, iNameLen) != NULL) {
+    if(szNameLen == 0 || szNameLen > 64 || szDescrLen > 64 || szEmailLen > 64 ||
+        strpbrk(NewBotName, " $|") != NULL || strpbrk(NewBotDescription, "$|") != NULL ||
+        strpbrk(NewBotEmail, "$|") != NULL || hashManager->FindUser(NewBotName, szNameLen) != NULL) {
         lua_settop(L, 0);
         return 0;
     }

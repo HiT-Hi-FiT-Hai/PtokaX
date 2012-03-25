@@ -30,9 +30,7 @@
 #include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //---------------------------------------------------------------------------
 #include "RegisteredUserDialog.h"
 //---------------------------------------------------------------------------
@@ -88,7 +86,10 @@ LRESULT RegisteredUsersDialog::RegisteredUsersDialogProc(UINT uMsg, WPARAM wPara
             switch(LOWORD(wParam)) {
                 case (BTN_ADD_REG+100): {
                     pRegisteredUserDialog = new RegisteredUserDialog();
-                    pRegisteredUserDialog->DoModal(hWndWindowItems[WINDOW_HANDLE]);
+
+                    if(pRegisteredUserDialog != NULL) {
+                        pRegisteredUserDialog->DoModal(hWndWindowItems[WINDOW_HANDLE]);
+                    }
 
                     return 0;
                 }
@@ -141,7 +142,10 @@ LRESULT RegisteredUsersDialog::RegisteredUsersDialogProc(UINT uMsg, WPARAM wPara
                     RegUser * pReg = (RegUser *)ListViewGetItem(hWndWindowItems[LV_REGS],  ((LPNMITEMACTIVATE)lParam)->iItem);
 
                     pRegisteredUserDialog = new RegisteredUserDialog();
-                    pRegisteredUserDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pReg);
+
+                    if(pRegisteredUserDialog != NULL) {
+                        pRegisteredUserDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pReg);
+                    }
 
                     return 0;
                 }
@@ -542,6 +546,9 @@ void RegisteredUsersDialog::ChangeReg() {
     RegUser * pReg = (RegUser *)ListViewGetItem(hWndWindowItems[LV_REGS], iSel);
 
     pRegisteredUserDialog = new RegisteredUserDialog();
-    pRegisteredUserDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pReg);
+
+    if(pRegisteredUserDialog != NULL) {
+        pRegisteredUserDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pReg);
+    }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

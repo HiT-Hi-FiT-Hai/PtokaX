@@ -51,47 +51,39 @@ RegUser::RegUser(char * Nick, char * Pass, const uint16_t &iRegProfile) {
     prev = NULL;
     next = NULL;
     
-    size_t iNickLen = strlen(Nick);
+    size_t szNickLen = strlen(Nick);
 #ifdef _WIN32
-    sNick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
+    sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
 #else
-	sNick = (char *) malloc(iNickLen+1);
+	sNick = (char *)malloc(szNickLen+1);
 #endif
     if(sNick == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iNickLen+1))+
-			" bytes of memory for sNick in RegUser::RegUser!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-        AppendSpecialLog(sDbgstr);
+        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in RegUser::RegUser\n", (uint64_t)(szNickLen+1));
+
         return;
     }   
-    memcpy(sNick, Nick, iNickLen);
-    sNick[iNickLen] = '\0';
+    memcpy(sNick, Nick, szNickLen);
+    sNick[szNickLen] = '\0';
     
-    size_t iPassLen = strlen(Pass);
+    size_t szPassLen = strlen(Pass);
 #ifdef _WIN32
-    sPass = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iPassLen+1);
+    sPass = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szPassLen+1);
 #else
-	sPass = (char *) malloc(iPassLen+1);
+	sPass = (char *)malloc(szPassLen+1);
 #endif
     if(sPass == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iPassLen+1))+
-			" bytes of memory for sPass in RegUser::RegUser!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sPass in RegUser::RegUser\n", (uint64_t)(szPassLen+1));
+
         return;
     }   
-    memcpy(sPass, Pass, iPassLen);
-    sPass[iPassLen] = '\0';
+    memcpy(sPass, Pass, szPassLen);
+    sPass[szPassLen] = '\0';
 
     tLastBadPass = 0;
     iBadPassCount = 0;
     
     iProfile = iRegProfile;
-	ui32Hash = HashNick(sNick, iNickLen);
+	ui32Hash = HashNick(sNick, szNickLen);
     hashtableprev = NULL;
     hashtablenext = NULL;
 }
@@ -99,10 +91,8 @@ RegUser::RegUser(char * Nick, char * Pass, const uint16_t &iRegProfile) {
 
 RegUser::~RegUser(void) {
 #ifdef _WIN32
-    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
-		string sDbgstr = "[BUF] Cannot deallocate sNick in RegUser::~RegUser! "+string((uint32_t)GetLastError())+" "+
-			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-		AppendSpecialLog(sDbgstr);
+    if(sNick != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
+		AppendDebugLog("%s - [MEM] Cannot deallocate sNick in RegUser::~RegUser\n", 0);
     }
 #else
 	free(sNick);
@@ -110,10 +100,8 @@ RegUser::~RegUser(void) {
     sNick = NULL;
 
 #ifdef _WIN32
-    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPass) == 0) {
-		string sDbgstr = "[BUF] Cannot deallocate sPass in RegUser::~RegUser! "+string((uint32_t)GetLastError())+" "+
-			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-		AppendSpecialLog(sDbgstr);
+    if(sPass != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPass) == 0) {
+		AppendDebugLog("%s - [MEM] Cannot deallocate sPass in RegUser::~RegUser\n", 0);
     }
 #else
 	free(sPass);
@@ -125,8 +113,8 @@ RegUser::~RegUser(void) {
 hashRegMan::hashRegMan(void) {
     RegListS = RegListE = NULL;
 
-    for(unsigned int i = 0; i < 65536; i++) {
-        table[i] = NULL;
+    for(uint32_t ui32i = 0; ui32i < 65536; ui32i++) {
+        table[ui32i] = NULL;
     }
 }
 //---------------------------------------------------------------------------
@@ -147,21 +135,26 @@ bool hashRegMan::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) 
         return false;
     }
 
-    RegUser *newUser = new RegUser(sNick, sPasswd, iProfile);
-    if(newUser == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate newUser in hashRegMan::AddNew!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
-        exit(EXIT_FAILURE);
+    RegUser * pNewUser = new RegUser(sNick, sPasswd, iProfile);
+    if(pNewUser == NULL || pNewUser->sNick == NULL || pNewUser->sPass == NULL) {
+        if(pNewUser == NULL) {
+            AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in hashRegMan::AddNew\n", 0);
+        } else if(pNewUser->sNick == NULL) {
+            delete pNewUser;
+            AppendDebugLog("%s - [MEM] Cannot allocate pNewUser->sNick in hashRegMan::AddNew\n", 0);
+        } else if(pNewUser->sPass) {
+            delete pNewUser;
+            AppendDebugLog("%s - [MEM] Cannot allocate pNewUser->sPass in hashRegMan::AddNew\n", 0);
+        }
+
+        return false;
     }
 
-	Add(newUser);
+	Add(pNewUser);
 
 #ifdef _BUILD_GUI
     if(pRegisteredUsersDialog != NULL) {
-        pRegisteredUsersDialog->AddReg(newUser);
+        pRegisteredUsersDialog->AddReg(pNewUser);
     }
 #endif
 
@@ -169,7 +162,7 @@ bool hashRegMan::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) 
         return true;
     }
 
-	User *AddedUser = hashManager->FindUser(newUser->sNick, strlen(newUser->sNick));
+	User * AddedUser = hashManager->FindUser(pNewUser->sNick, strlen(pNewUser->sNick));
 
     if(AddedUser != NULL) {
         bool bAllowedOpChat = ProfileMan->IsAllowed(AddedUser, ProfileManager::ALLOWEDOPCHAT);
@@ -183,7 +176,7 @@ bool hashRegMan::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) 
             }
 
             if(((AddedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
-				colUsers->Add2OpList(AddedUser->sNick, AddedUser->ui8NickLen);
+				colUsers->Add2OpList(AddedUser);
                 globalQ->OpListStore(AddedUser->sNick);
 
                 if(bAllowedOpChat != ProfileMan->IsAllowed(AddedUser, ProfileManager::ALLOWEDOPCHAT)) {
@@ -243,32 +236,23 @@ void hashRegMan::Add2Table(RegUser * Reg) {
 
 void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui16NewProfile) {
     if(strcmp(pReg->sPass, sNewPasswd) != 0) {
-        size_t iPassLen = strlen(sNewPasswd);
+        size_t szPassLen = strlen(sNewPasswd);
+
+        char * sOldPass = pReg->sPass;
 #ifdef _WIN32
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pReg->sPass) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate pReg->sPass in hashRegMan::ChangeReg! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-			AppendSpecialLog(sDbgstr);
-        }
-
-        pReg->sPass = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iPassLen+1);
+        pReg->sPass = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldPass, szPassLen+1);
 #else
-		free(pReg->sPass);
-
-		pReg->sPass = (char *) malloc(iPassLen+1);
+		pReg->sPass = (char *)realloc(sOldPass, szPassLen+1);
 #endif
         if(pReg->sPass == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iPassLen+1))+
-				" bytes of memory for sPass in hashRegMan::ChangeReg!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
+            pReg->sPass = sOldPass;
+
+			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes for sPass in hashRegMan::ChangeReg\n", (uint64_t)(szPassLen+1));
 
             return;
         }
-        memcpy(pReg->sPass, sNewPasswd, iPassLen);
-        pReg->sPass[iPassLen] = '\0';
+        memcpy(pReg->sPass, sNewPasswd, szPassLen);
+        pReg->sPass[szPassLen] = '\0';
     }
 
     pReg->iProfile = ui16NewProfile;
@@ -294,7 +278,7 @@ void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui
             ProfileMan->IsAllowed(ChangedUser, ProfileManager::HASKEYICON)) {
             if(ProfileMan->IsAllowed(ChangedUser, ProfileManager::HASKEYICON) == true) {
                 ChangedUser->ui32BoolBits |= User::BIT_OPERATOR;
-                colUsers->Add2OpList(ChangedUser->sNick, ChangedUser->ui8NickLen);
+                colUsers->Add2OpList(ChangedUser);
                 globalQ->OpListStore(ChangedUser->sNick);
             } else {
                 ChangedUser->ui32BoolBits &= ~User::BIT_OPERATOR;
@@ -430,8 +414,8 @@ void hashRegMan::RemFromTable(RegUser * Reg) {
 }
 //---------------------------------------------------------------------------
 
-RegUser* hashRegMan::Find(char * sNick, const size_t &iNickLen) {
-    uint32_t ui32Hash = HashNick(sNick, iNickLen);
+RegUser* hashRegMan::Find(char * sNick, const size_t &szNickLen) {
+    uint32_t ui32Hash = HashNick(sNick, szNickLen);
 
     uint16_t ui16dx = 0;
     memcpy(&ui16dx, &ui32Hash, sizeof(uint16_t));
@@ -442,11 +426,7 @@ RegUser* hashRegMan::Find(char * sNick, const size_t &iNickLen) {
         RegUser *cur = next;
         next = cur->hashtablenext;
 
-#ifdef _WIN32
-		if(cur->ui32Hash == ui32Hash && stricmp(cur->sNick, sNick) == 0) {
-#else
 		if(cur->ui32Hash == ui32Hash && strcasecmp(cur->sNick, sNick) == 0) {
-#endif
             return cur;
         }
     }
@@ -465,11 +445,7 @@ RegUser* hashRegMan::Find(User * u) {
         RegUser *cur = next;
         next = cur->hashtablenext;
 
-#ifdef _WIN32
-		if(cur->ui32Hash == u->ui32NickHash && stricmp(cur->sNick, u->sNick) == 0) {
-#else
 		if(cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->sNick, u->sNick) == 0) {
-#endif
             return cur;
         }
     }
@@ -488,11 +464,7 @@ RegUser* hashRegMan::Find(uint32_t ui32Hash, char * sNick) {
         RegUser *cur = next;
         next = cur->hashtablenext;
 
-#ifdef _WIN32
-        if(cur->ui32Hash == ui32Hash && stricmp(cur->sNick, sNick) == 0) {
-#else
 		if(cur->ui32Hash == ui32Hash && strcasecmp(cur->sNick, sNick) == 0) {
-#endif
             return cur;
         }
     }
@@ -543,7 +515,7 @@ void hashRegMan::Load(void) {
                     char msg[1024];
                     int imsgLen = sprintf(msg, "%s %s %s! %s %s.", LanguageManager->sTexts[LAN_USER], nick, LanguageManager->sTexts[LAN_HAVE_NOT_EXIST_PROFILE],
                         LanguageManager->sTexts[LAN_CHANGED_PROFILE_TO], ProfileMan->ProfilesTable[iProfilesCount]->sName);
-					CheckSprintf(imsgLen, 1024, "hashRegMan::LoadXmlRegList1");
+					CheckSprintf(imsgLen, 1024, "hashRegMan::Load");
 
 #ifdef _BUILD_GUI
 					::MessageBox(NULL, msg, sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
@@ -556,21 +528,26 @@ void hashRegMan::Load(void) {
                 }
 
                 if(Find((char*)nick, strlen(nick)) == NULL) {
-                    RegUser *newUser = new RegUser(nick, pass, iProfile);
-                    if(newUser == NULL) {
-                    	string sDbgstr = "[BUF] Cannot allocate newUser in hashRegMan::LoadXmlRegList!";
-#ifdef _WIN32
-						sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-						AppendSpecialLog(sDbgstr);
+                    RegUser * pNewUser = new RegUser(nick, pass, iProfile);
+                    if(pNewUser == NULL || pNewUser->sNick == NULL || pNewUser->sPass == NULL) {
+                        if(pNewUser == NULL) {
+                            AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in hashRegMan::Load\n", 0);
+                        } else if(pNewUser->sNick == NULL) {
+                            delete pNewUser;
+                            AppendDebugLog("%s - [MEM] Cannot allocate pNewUser->sNick in hashRegMan::Load\n", 0);
+                        } else if(pNewUser->sPass) {
+                            delete pNewUser;
+                            AppendDebugLog("%s - [MEM] Cannot allocate pNewUser->sPass in hashRegMan::Load\n", 0);
+                        }
+
                     	exit(EXIT_FAILURE);
                     }
-					Add(newUser);
+					Add(pNewUser);
                 } else {
                     char msg[1024];
                     int imsgLen = sprintf(msg, "%s %s %s! %s.", LanguageManager->sTexts[LAN_USER], nick, LanguageManager->sTexts[LAN_IS_ALREADY_IN_REGS], 
                         LanguageManager->sTexts[LAN_USER_DELETED]);
-					CheckSprintf(imsgLen, 1024, "hashRegMan::LoadXmlRegList2");
+					CheckSprintf(imsgLen, 1024, "hashRegMan::Load1");
 
 #ifdef _BUILD_GUI
 					::MessageBox(NULL, msg, sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
@@ -635,17 +612,23 @@ void hashRegMan::Load(void) {
                 iProfile = iProfilesCount;
             }
 
-            RegUser *newUser = new RegUser(string((char *)pxbRegs.pItemDatas[0], pxbRegs.ui16ItemLengths[0]).c_str(),
+            RegUser * pNewUser = new RegUser(string((char *)pxbRegs.pItemDatas[0], pxbRegs.ui16ItemLengths[0]).c_str(),
                 string((char *)pxbRegs.pItemDatas[1], pxbRegs.ui16ItemLengths[1]).c_str(), iProfile);
-            if(newUser == NULL) {
-                string sDbgstr = "[BUF] Cannot allocate newUser in hashRegMan::LoadXmlRegList!";
-#ifdef _WIN32
-				sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-				AppendSpecialLog(sDbgstr);
+            if(pNewUser == NULL || pNewUser->sNick == NULL || pNewUser->sPass == NULL) {
+                if(pNewUser == NULL) {
+                    AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in hashRegMan::Load\n", 0);
+                } else if(pNewUser->sNick == NULL) {
+                    delete pNewUser;
+                    AppendDebugLog("%s - [MEM] Cannot allocate pNewUser->sNick in hashRegMan::Load\n", 0);
+                } else if(pNewUser->sPass) {
+                    delete pNewUser;
+                    AppendDebugLog("%s - [MEM] Cannot allocate pNewUser->sPass in hashRegMan::Load\n", 0);
+                }
+
                 exit(EXIT_FAILURE);
             }
-			Add(newUser);
+
+			Add(pNewUser);
 		}
 
         bSuccess = pxbRegs.ReadNextItem(ui16Identificators, 3);

@@ -29,9 +29,7 @@
 //---------------------------------------------------------------------------
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //---------------------------------------------------------------------------
 
 SettingPageGeneral::SettingPageGeneral() {
@@ -201,10 +199,10 @@ void SettingPageGeneral::Save() {
     } else {
         uint32_t ui32Len = (uint32_t)::SendMessage(hWndPageItems[CB_LANGUAGE], CB_GETLBTEXTLEN, ui32CurSel, 0);
 
-        char * buf = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui32Len+1);
+        char * buf = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui32Len+1);
 
         if(buf == NULL) {
-            AppendSpecialLog("Cannot create buf in SettingPageGeneral::Save!");
+            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for buf in SettingPageGeneral::Save\n", (uint64_t)(ui32Len+1));
             return;
         }
 
@@ -219,9 +217,7 @@ void SettingPageGeneral::Save() {
         SettingManager->SetText(SETTXT_LANGUAGE, buf, ui32Len);
 
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
-            string sDbgstr = "[BUF] Cannot deallocate buf in SettingPageGeneral::Save! "+string((uint32_t)GetLastError())+" "+
-                string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-            AppendSpecialLog(sDbgstr);
+            AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageGeneral::Save\n", 0);
         }
     }
 
@@ -424,33 +420,29 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
     // Select actual language in combobox
     if(SettingManager->sTexts[SETTXT_LANGUAGE] != NULL) {
         uint32_t ui32Count = (uint32_t)::SendMessage(hWndPageItems[CB_LANGUAGE], CB_GETCOUNT, 0, 0);
-        for(uint32_t i = 1; i < ui32Count; i++) {
-            uint32_t ui32Len = (uint32_t)::SendMessage(hWndPageItems[CB_LANGUAGE], CB_GETLBTEXTLEN, i,0);
+        for(uint32_t ui32i = 1; ui32i < ui32Count; ui32i++) {
+            uint32_t ui32Len = (uint32_t)::SendMessage(hWndPageItems[CB_LANGUAGE], CB_GETLBTEXTLEN, ui32i, 0);
             if(ui32Len == (int32_t)SettingManager->ui16TextsLens[SETTXT_LANGUAGE]) {
-                char * buf = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui32Len+1);
+                char * buf = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui32Len+1);
 
                 if(buf == NULL) {
-                    AppendSpecialLog("Cannot create buf in SettingPageGeneral::CreateSettingPage!");
+                    AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for buf in SettingPageGeneral::CreateSettingPage\n", (uint64_t)(ui32Len+1));
                     return false;
                 }
 
-                ::SendMessage(hWndPageItems[CB_LANGUAGE], CB_GETLBTEXT, i, (LPARAM)buf);
+                ::SendMessage(hWndPageItems[CB_LANGUAGE], CB_GETLBTEXT, ui32i, (LPARAM)buf);
                 if(stricmp(buf, SettingManager->sTexts[SETTXT_LANGUAGE]) == NULL) {
-                    ::SendMessage(hWndPageItems[CB_LANGUAGE], CB_SETCURSEL, i, 0);
+                    ::SendMessage(hWndPageItems[CB_LANGUAGE], CB_SETCURSEL, ui32i, 0);
 
                     if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
-                        string sDbgstr = "[BUF] Cannot deallocate buf in SettingPageGeneral::CreateSettingPage! "+string((uint32_t)GetLastError())+" "+
-                            string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-                        AppendSpecialLog(sDbgstr);
+                        AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageGeneral::CreateSettingPage\n", 0);
                     }
 
                     break;
                 }
 
                 if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
-                    string sDbgstr = "[BUF] Cannot deallocate buf in SettingPageGeneral::CreateSettingPage1! "+string((uint32_t)GetLastError())+" "+
-                        string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-                    AppendSpecialLog(sDbgstr);
+                    AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageGeneral::CreateSettingPage\n", 0);
                 }
             }
         }

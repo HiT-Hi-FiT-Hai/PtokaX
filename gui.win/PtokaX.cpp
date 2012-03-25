@@ -30,9 +30,7 @@
 //---------------------------------------------------------------------------
 #pragma hdrstop
 //---------------------------------------------------------------------------
-#ifdef _MSC_VER
-	#include "../core/ExceptionHandling.h"
-#endif
+#include "../core/ExceptionHandling.h"
 #include "../core/LuaScript.h"
 #include "MainWindow.h"
 //---------------------------------------------------------------------------
@@ -82,22 +80,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 		PATH = sBuf;
 	}
 
-	size_t iCmdLen = strlen(lpCmdLine);
-	if(iCmdLen != 0) {
+	size_t szCmdLen = strlen(lpCmdLine);
+	if(szCmdLen != 0) {
 	    char *sParam = lpCmdLine;
 
-	    for(size_t i = 0; i < iCmdLen; i++) {
-	        if(i == iCmdLen-1) {
-	            if(lpCmdLine[i] != ' ') {
-	                i++;
+	    for(size_t szi = 0; szi < szCmdLen; szi++) {
+	        if(szi == szCmdLen-1) {
+	            if(lpCmdLine[szi] != ' ') {
+	                szi++;
 	            }
-	        } else if(lpCmdLine[i] != ' ') {
+	        } else if(lpCmdLine[szi] != ' ') {
 	            continue;
 	        }
 
-			size_t iParamLen = (lpCmdLine+i)-sParam;
+			size_t szParamLen = (lpCmdLine+szi)-sParam;
 
-	        switch(iParamLen) {
+	        switch(szParamLen) {
 	            case 7:
 	                if(strnicmp(sParam, "/notray", 7) == NULL) {
 	                    bCmdNoTray = true;
@@ -126,23 +124,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 	                break;
 	            default:
                     if(strnicmp(sParam, "-c ", 3) == NULL) {
-                        size_t iLen = strlen(sParam+3);
-                        if(iLen == 0) {
+                        size_t szLen = strlen(sParam+3);
+                        if(szLen == 0) {
                             ::MessageBox(NULL, "Missing config directory!", "Error!", MB_OK);
                             return 0;
                         }
 
-                        if(iLen >= 1 && sParam[0] != '\\' && sParam[0] != '/') {
-                            if(iLen < 4 || (sParam[1] != ':' || (sParam[2] != '\\' && sParam[2] != '/'))) {
+                        if(szLen >= 1 && sParam[0] != '\\' && sParam[0] != '/') {
+                            if(szLen < 4 || (sParam[1] != ':' || (sParam[2] != '\\' && sParam[2] != '/'))) {
                                 ::MessageBox(NULL, "Config directory must be absolute path!", "Error!", MB_OK);
                                 return 0;
                             }
                         }
 
-                        if(sParam[iLen - 1] == '/' || sParam[iLen - 1] == '\\') {
-                            PATH = string(sParam, iLen - 1);
+                        if(sParam[szLen - 1] == '/' || sParam[szLen - 1] == '\\') {
+                            PATH = string(sParam, szLen - 1);
                         } else {
-                            PATH = string(sParam, iLen);
+                            PATH = string(sParam, szLen);
                         }
 
                         if(DirExist(PATH.c_str()) == false) {
@@ -155,15 +153,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 	                break;
 	        }
 
-	        sParam = lpCmdLine+i+1;
+	        sParam = lpCmdLine+szi+1;
 		}
 	}
 
-    HINSTANCE hRichEdit = ::LoadLibrary("Riched20.dll");
+    HINSTANCE hRichEdit = ::LoadLibrary(/*"msftedit.dll"*/"riched20.dll");
 
-#ifdef _MSC_VER
     ExceptionHandlingInitialize(PATH, sBuf);
-#endif
 
 	ServerInitialize();
 
@@ -222,9 +218,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 
     delete pMainWindow;
 
-#ifdef _MSC_VER
     ExceptionHandlingUnitialize();
-#endif
 
     ::FreeLibrary(hRichEdit);
 

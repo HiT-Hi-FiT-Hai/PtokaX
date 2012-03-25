@@ -24,9 +24,7 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "GuiUtil.h"
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 BasicSplitter::BasicSplitter() : iSplitterPos(0), iPercentagePos(0), bUpdatePercentagePos(true) {
@@ -139,7 +137,7 @@ void BasicSplitter::SetSplitterPosition(int iPos, const bool &bUpdate/* = true*/
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-bool BasicSplitter::IsCursorOverSplitter(const int &iX, const int &iY) {
+bool BasicSplitter::IsCursorOverSplitter(const int &iX, const int &iY) const {
 	if(iX == -1 || iY == -1 || iX < rcSplitter.left || iX > rcSplitter.right || iY < rcSplitter.top || iY > rcSplitter.bottom) {
 		return false;
     }

@@ -41,7 +41,7 @@ public:
     void Add(User * u);
     void Remove(User * u);
 
-    User * FindUser(char * sNick, const size_t &iNickLen);
+    User * FindUser(char * sNick, const size_t &szNickLen);
     User * FindUser(User * u);
     User * FindUser(const uint8_t * ui128IpHash);
 

@@ -29,9 +29,7 @@
 #include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //---------------------------------------------------------------------------
 #include "RangeBanDialog.h"
 //---------------------------------------------------------------------------
@@ -91,7 +89,10 @@ LRESULT RangeBansDialog::RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lP
                 case (BTN_ADD_RANGE_BAN+100): {
 
                     pRangeBanDialog = new RangeBanDialog();
-                    pRangeBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE]);
+
+                    if(pRangeBanDialog != NULL) {
+                        pRangeBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE]);
+                    }
 
                     return 0;
                 }
@@ -165,7 +166,10 @@ LRESULT RangeBansDialog::RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lP
                     RangeBanItem * pRangeBan = (RangeBanItem *)ListViewGetItem(hWndWindowItems[LV_RANGE_BANS], ((LPNMITEMACTIVATE)lParam)->iItem);
 
                     pRangeBanDialog = new RangeBanDialog();
-                    pRangeBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pRangeBan);
+
+                    if(pRangeBanDialog != NULL) {
+                        pRangeBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pRangeBan);
+                    }
 
                     return 0;
                 }
@@ -612,6 +616,9 @@ void RangeBansDialog::ChangeRangeBan() {
     RangeBanItem * pRangeBan = (RangeBanItem *)ListViewGetItem(hWndWindowItems[LV_RANGE_BANS], iSel);
 
     pRangeBanDialog = new RangeBanDialog();
-    pRangeBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pRangeBan);
+
+    if(pRangeBanDialog != NULL) {
+        pRangeBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pRangeBan);
+    }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

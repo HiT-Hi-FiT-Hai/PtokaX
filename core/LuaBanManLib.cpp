@@ -37,12 +37,6 @@
 //---------------------------------------------------------------------------
 #include "LuaScript.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
-#endif
-//---------------------------------------------------------------------------
 
 static void PushBan(lua_State * L, BanItem * b) {
 	lua_checkstack(L, 3); // we need 3 (1 table, 2 id, 3 value) empty slots in stack, check it to be sure
@@ -280,10 +274,10 @@ static int GetBan(lua_State * L) {
     time_t acc_time;
     time(&acc_time);
 
-    size_t iLen;
-    char *sValue = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sValue = (char *)lua_tolstring(L, 1, &szLen);
 
-	BanItem *Ban = hashBanManager->FindNick(sValue, iLen);
+	BanItem *Ban = hashBanManager->FindNick(sValue, szLen);
 
 	uint8_t ui128Hash[16];
 	memset(ui128Hash, 0, 16);
@@ -354,10 +348,10 @@ static int GetPermBan(lua_State * L) {
         return 1;
     }
 
-    size_t iLen;
-    char *sValue = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sValue = (char *)lua_tolstring(L, 1, &szLen);
 
-	BanItem *Ban = hashBanManager->FindPermNick(sValue, iLen);
+	BanItem *Ban = hashBanManager->FindPermNick(sValue, szLen);
 
 	uint8_t ui128Hash[16];
 	memset(ui128Hash, 0, 16);
@@ -428,10 +422,10 @@ static int GetTempBan(lua_State * L) {
     time_t acc_time;
     time(&acc_time);
 
-    size_t iLen;
-    char *sValue = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sValue = (char *)lua_tolstring(L, 1, &szLen);
 
-	BanItem *Ban = hashBanManager->FindTempNick(sValue, iLen);
+	BanItem * Ban = hashBanManager->FindTempNick(sValue, szLen);
 
 	uint8_t ui128Hash[16];
 	memset(ui128Hash, 0, 16);
@@ -611,15 +605,15 @@ static int GetRangeBan(lua_State * L) {
         return 1;
     }
 
-    size_t iFromLen, iToLen;
-    char *sFrom = (char *)lua_tolstring(L, 1, &iFromLen);
-    char *sTo = (char *)lua_tolstring(L, 2, &iToLen);
+    size_t szFromLen, szToLen;
+    char * sFrom = (char *)lua_tolstring(L, 1, &szFromLen);
+    char * sTo = (char *)lua_tolstring(L, 2, &szToLen);
 
 	uint8_t ui128FromHash[16], ui128ToHash[16];
 	memset(ui128FromHash, 0, 16);
 	memset(ui128ToHash, 0, 16);
 
-    if(iFromLen == 0 || iToLen == 0 || HashIP(sFrom, ui128FromHash) == false || HashIP(sTo, ui128ToHash) == false || memcmp(ui128ToHash, ui128FromHash, 16) <= 0) {
+    if(szFromLen == 0 || szToLen == 0 || HashIP(sFrom, ui128FromHash) == false || HashIP(sTo, ui128ToHash) == false || memcmp(ui128ToHash, ui128FromHash, 16) <= 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -672,15 +666,15 @@ static int GetRangePermBan(lua_State * L) {
         return 1;
     }
 
-    size_t iFromLen, iToLen;
-    char *sFrom = (char *)lua_tolstring(L, 1, &iFromLen);
-    char *sTo = (char *)lua_tolstring(L, 2, &iToLen);
+    size_t szFromLen, szToLen;
+    char * sFrom = (char *)lua_tolstring(L, 1, &szFromLen);
+    char * sTo = (char *)lua_tolstring(L, 2, &szToLen);
 
 	uint8_t ui128FromHash[16], ui128ToHash[16];
 	memset(ui128FromHash, 0, 16);
 	memset(ui128ToHash, 0, 16);
 
-	if(iFromLen == 0 || iToLen == 0 || HashIP(sFrom, ui128FromHash) == false || HashIP(sTo, ui128ToHash) == false || memcmp(ui128ToHash, ui128FromHash, 16) <= 0) {
+	if(szFromLen == 0 || szToLen == 0 || HashIP(sFrom, ui128FromHash) == false || HashIP(sTo, ui128ToHash) == false || memcmp(ui128ToHash, ui128FromHash, 16) <= 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -723,15 +717,15 @@ static int GetRangeTempBan(lua_State * L) {
         return 1;
     }
 
-    size_t iFromLen, iToLen;
-    char *sFrom = (char *)lua_tolstring(L, 1, &iFromLen);
-    char *sTo = (char *)lua_tolstring(L, 2, &iToLen);
+    size_t szFromLen, szToLen;
+    char * sFrom = (char *)lua_tolstring(L, 1, &szFromLen);
+    char * sTo = (char *)lua_tolstring(L, 2, &szToLen);
 
 	uint8_t ui128FromHash[16], ui128ToHash[16];
 	memset(ui128FromHash, 0, 16);
 	memset(ui128ToHash, 0, 16);
 
-	if(iFromLen == 0 || iToLen == 0 || HashIP(sFrom, ui128FromHash) == false || HashIP(sTo, ui128ToHash) == false || memcmp(ui128ToHash, ui128FromHash, 16) <= 0) {
+	if(szFromLen == 0 || szToLen == 0 || HashIP(sFrom, ui128FromHash) == false || HashIP(sTo, ui128ToHash) == false || memcmp(ui128ToHash, ui128FromHash, 16) <= 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -784,10 +778,10 @@ static int Unban(lua_State * L) {
         return 1;
     }
 
-    size_t iLen;
-    char *sWhat = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sWhat = (char *)lua_tolstring(L, 1, &szLen);
 
-    if(iLen == 0) {
+    if(szLen == 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -820,10 +814,10 @@ static int UnbanPerm(lua_State * L) {
         return 1;
     }
 
-    size_t iLen;
-    char *sWhat = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sWhat = (char *)lua_tolstring(L, 1, &szLen);
 
-    if(iLen == 0) {
+    if(szLen == 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -856,10 +850,10 @@ static int UnbanTemp(lua_State * L) {
         return 1;
     }
 
-    size_t iLen;
-    char *sWhat = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sWhat = (char *)lua_tolstring(L, 1, &szLen);
 
-    if(iLen == 0) {
+    if(szLen == 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -890,13 +884,13 @@ static int UnbanAll(lua_State * L) {
         return 0;
     }
 
-    size_t iLen;
-    char *sIP = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sIP = (char *)lua_tolstring(L, 1, &szLen);
 
 	uint8_t ui128Hash[16];
 	memset(ui128Hash, 0, 16);
 
-    if(iLen == 0 || HashIP(sIP, ui128Hash) == false) {
+    if(szLen == 0 || HashIP(sIP, ui128Hash) == false) {
 		lua_settop(L, 0);
         return 0;
     }
@@ -922,13 +916,13 @@ static int UnbanPermAll(lua_State * L) {
         return 0;
     }
 
-    size_t iLen;
-    char *sIP = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sIP = (char *)lua_tolstring(L, 1, &szLen);
 
 	uint8_t ui128Hash[16];
 	memset(ui128Hash, 0, 16);
 
-    if(iLen == 0 || HashIP(sIP, ui128Hash) == false) {
+    if(szLen == 0 || HashIP(sIP, ui128Hash) == false) {
 		lua_settop(L, 0);
         return 0;
     }
@@ -954,13 +948,13 @@ static int UnbanTempAll(lua_State * L) {
         return 0;
     }
 
-    size_t iLen;
-    char *sIP = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sIP = (char *)lua_tolstring(L, 1, &szLen);
 
 	uint8_t ui128Hash[16];
 	memset(ui128Hash, 0, 16);
 
-    if(iLen == 0 || HashIP(sIP, ui128Hash) == false) {
+    if(szLen == 0 || HashIP(sIP, ui128Hash) == false) {
 		lua_settop(L, 0);
         return 0;
     }
@@ -989,15 +983,15 @@ static int RangeUnban(lua_State * L) {
         return 1;
     }
 
-    size_t iFromIpLen, iToIpLen;
-    char *sFromIp = (char *)lua_tolstring(L, 1, &iFromIpLen);
-    char *sToIp = (char *)lua_tolstring(L, 2, &iToIpLen);
+    size_t szFromIpLen, szToIpLen;
+    char * sFromIp = (char *)lua_tolstring(L, 1, &szFromIpLen);
+    char * sToIp = (char *)lua_tolstring(L, 2, &szToIpLen);
 
 	uint8_t ui128FromHash[16], ui128ToHash[16];
 	memset(ui128FromHash, 0, 16);
 	memset(ui128ToHash, 0, 16);
 
-	if(iFromIpLen != 0 && iToIpLen != 0 && HashIP(sFromIp, ui128FromHash) == true && HashIP(sToIp, ui128ToHash) == true && 
+	if(szFromIpLen != 0 && szToIpLen != 0 && HashIP(sFromIp, ui128FromHash) == true && HashIP(sToIp, ui128ToHash) == true &&
 		memcmp(ui128ToHash, ui128FromHash, 16) > 0 && hashBanManager->RangeUnban(ui128FromHash, ui128ToHash) == true) {
         lua_settop(L, 0);
         lua_pushboolean(L, 1);
@@ -1026,15 +1020,15 @@ static int RangeUnbanPerm(lua_State * L) {
         return 1;
     }
 
-    size_t iFromIpLen, iToIpLen;
-    char *sFromIp = (char *)lua_tolstring(L, 1, &iFromIpLen);
-    char *sToIp = (char *)lua_tolstring(L, 2, &iToIpLen);
+    size_t szFromIpLen, szToIpLen;
+    char * sFromIp = (char *)lua_tolstring(L, 1, &szFromIpLen);
+    char * sToIp = (char *)lua_tolstring(L, 2, &szToIpLen);
 
 	uint8_t ui128FromHash[16], ui128ToHash[16];
 	memset(ui128FromHash, 0, 16);
 	memset(ui128ToHash, 0, 16);
 
-	if(iFromIpLen != 0 && iToIpLen != 0 && HashIP(sFromIp, ui128FromHash) == true && HashIP(sToIp, ui128ToHash) == true && 
+	if(szFromIpLen != 0 && szToIpLen != 0 && HashIP(sFromIp, ui128FromHash) == true && HashIP(sToIp, ui128ToHash) == true &&
 		memcmp(ui128ToHash, ui128FromHash, 16) > 0 && hashBanManager->RangeUnban(ui128FromHash, ui128ToHash, hashBanMan::PERM) == true) {
         lua_settop(L, 0);
         lua_pushboolean(L, 1);
@@ -1063,15 +1057,15 @@ static int RangeUnbanTemp(lua_State * L) {
         return 1;
     }
 
-    size_t iFromIpLen, iToIpLen;
-    char *sFromIp = (char *)lua_tolstring(L, 1, &iFromIpLen);
-    char *sToIp = (char *)lua_tolstring(L, 2, &iToIpLen);
+    size_t szFromIpLen, szToIpLen;
+    char * sFromIp = (char *)lua_tolstring(L, 1, &szFromIpLen);
+    char * sToIp = (char *)lua_tolstring(L, 2, &szToIpLen);
 
 	uint8_t ui128FromHash[16], ui128ToHash[16];
 	memset(ui128FromHash, 0, 16);
 	memset(ui128ToHash, 0, 16);
 
-	if(iFromIpLen != 0 && iToIpLen != 0 && HashIP(sFromIp, ui128FromHash) == true && HashIP(sToIp, ui128ToHash) == true && 
+	if(szFromIpLen != 0 && szToIpLen != 0 && HashIP(sFromIp, ui128FromHash) == true && HashIP(sToIp, ui128ToHash) == true &&
 		memcmp(ui128ToHash, ui128FromHash, 16) > 0 && hashBanManager->RangeUnban(ui128FromHash, ui128ToHash, hashBanMan::TEMP) == true) {
         lua_settop(L, 0);
         lua_pushboolean(L, 1);
@@ -1195,15 +1189,15 @@ static int Ban(lua_State * L) {
         return 1;
     }
 
-    size_t iReasonLen;
-    char *sReason = (char *)lua_tolstring(L, 2, &iReasonLen);
-    if(iReasonLen == 0) {
+    size_t szReasonLen;
+    char * sReason = (char *)lua_tolstring(L, 2, &szReasonLen);
+    if(szReasonLen == 0) {
         sReason = NULL;
     }
 
-	size_t iByLen;
-    char *sBy = (char *)lua_tolstring(L, 3, &iByLen);
-    if(iByLen == 0) {
+	size_t szByLen;
+    char *sBy = (char *)lua_tolstring(L, 3, &szByLen);
+    if(szByLen == 0) {
         sBy = NULL;
     }
 
@@ -1242,23 +1236,23 @@ static int BanIP(lua_State * L) {
         return 1;
     }
 
-    size_t iIpLen;
-    char *sIP = (char *)lua_tolstring(L, 1, &iIpLen);
-    if(iIpLen == 0) {
+    size_t szIpLen;
+    char * sIP = (char *)lua_tolstring(L, 1, &szIpLen);
+    if(szIpLen == 0) {
         lua_settop(L, 0);
         lua_pushnil(L);
         return 1;
     }
 
-    size_t iReasonLen;
-    char *sReason = (char *)lua_tolstring(L, 2, &iReasonLen);
-    if(iReasonLen == 0) {
+    size_t szReasonLen;
+    char * sReason = (char *)lua_tolstring(L, 2, &szReasonLen);
+    if(szReasonLen == 0) {
         sReason = NULL;
     }
 
-    size_t iByLen;
-    char *sBy = (char *)lua_tolstring(L, 3, &iByLen);
-    if(iByLen == 0) {
+    size_t szByLen;
+    char * sBy = (char *)lua_tolstring(L, 3, &szByLen);
+    if(szByLen == 0) {
         sBy = NULL;
     }
 
@@ -1293,27 +1287,27 @@ static int BanNick(lua_State * L) {
         return 1;
     }
 
-    size_t iNickLen;
-    char *sNick = (char *)lua_tolstring(L, 1, &iNickLen);
-    if(iNickLen == 0) {
+    size_t szNickLen;
+    char * sNick = (char *)lua_tolstring(L, 1, &szNickLen);
+    if(szNickLen == 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
     }
 
-    size_t iReasonLen;
-    char *sReason = (char *)lua_tolstring(L, 2, &iReasonLen);
-    if(iReasonLen == 0) {
+    size_t szReasonLen;
+    char * sReason = (char *)lua_tolstring(L, 2, &szReasonLen);
+    if(szReasonLen == 0) {
         sReason = NULL;
     }
 
-    size_t iByLen;
-    char *sBy = (char *)lua_tolstring(L, 3, &iByLen);
-    if(iByLen == 0) {
+    size_t szByLen;
+    char * sBy = (char *)lua_tolstring(L, 3, &szByLen);
+    if(szByLen == 0) {
         sBy = NULL;
     }
 
-    User *curUser = hashManager->FindUser(sNick, iNickLen);
+    User *curUser = hashManager->FindUser(sNick, szNickLen);
     if(curUser != NULL) {
         if(hashBanManager->NickBan(curUser, NULL, sReason, sBy) == true) {
             int imsgLen = sprintf(ScriptManager->lua_msg, "[SYS] User %s (%s) nickbanned by script.", curUser->sNick, curUser->sIP);
@@ -1372,15 +1366,15 @@ static int TempBan(lua_State * L) {
 
 	uint32_t iMinutes = (uint32_t)lua_tonumber(L, 2);
 
-	size_t iReasonLen;
-    char *sReason = (char *)lua_tolstring(L, 3, &iReasonLen);
-    if(iReasonLen == 0) {
+	size_t szReasonLen;
+    char * sReason = (char *)lua_tolstring(L, 3, &szReasonLen);
+    if(szReasonLen == 0) {
         sReason = NULL;
     }
 
-	size_t iByLen;
-    char *sBy = (char *)lua_tolstring(L, 4, &iByLen);
-    if(iByLen == 0) {
+	size_t szByLen;
+    char * sBy = (char *)lua_tolstring(L, 4, &szByLen);
+    if(szByLen == 0) {
         sBy = NULL;
     }
 
@@ -1421,31 +1415,31 @@ static int TempBanIP(lua_State * L) {
         return 1;
     }
 
-    size_t iIpLen;
-    char *sIP = (char *)lua_tolstring(L, 1, &iIpLen);
-    if(iIpLen == 0) {
+    size_t szIpLen;
+    char * sIP = (char *)lua_tolstring(L, 1, &szIpLen);
+    if(szIpLen == 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
     }
 
-	uint32_t iMinutes = (uint32_t)lua_tonumber(L, 2);
+	uint32_t i32Minutes = (uint32_t)lua_tonumber(L, 2);
 
-    size_t iReasonLen;
-    char *sReason = (char *)lua_tolstring(L, 3, &iReasonLen);
-    if(iReasonLen == 0) {
+    size_t szReasonLen;
+    char * sReason = (char *)lua_tolstring(L, 3, &szReasonLen);
+    if(szReasonLen == 0) {
         sReason = NULL;
     }
 
-    size_t iByLen;
-    char *sBy = (char *)lua_tolstring(L, 4, &iByLen);
-    if(iByLen == 0) {
+    size_t szByLen;
+    char * sBy = (char *)lua_tolstring(L, 4, &szByLen);
+    if(szByLen == 0) {
         sBy = NULL;
     }
 
     bool bFull = lua_toboolean(L, 5) == 0 ? false : true;
 
-    if(hashBanManager->TempBanIp(NULL, sIP, sReason, sBy, iMinutes, 0, bFull) == 0) {
+    if(hashBanManager->TempBanIp(NULL, sIP, sReason, sBy, i32Minutes, 0, bFull) == 0) {
         lua_settop(L, 0);
         lua_pushboolean(L, 1);
     } else {
@@ -1475,31 +1469,31 @@ static int TempBanNick(lua_State * L) {
         return 1;
     }
 
-    size_t iNickLen;
-    char *sNick = (char *)lua_tolstring(L, 1, &iNickLen);
-    if(iNickLen == 0) {
+    size_t szNickLen;
+    char * sNick = (char *)lua_tolstring(L, 1, &szNickLen);
+    if(szNickLen == 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
     }
 
-	uint32_t iMinutes = (uint32_t)lua_tonumber(L, 2);
+	uint32_t i32Minutes = (uint32_t)lua_tonumber(L, 2);
 
-    size_t iReasonLen;
-    char *sReason = (char *)lua_tolstring(L, 3, &iReasonLen);
-    if(iReasonLen == 0) {
+    size_t szReasonLen;
+    char * sReason = (char *)lua_tolstring(L, 3, &szReasonLen);
+    if(szReasonLen == 0) {
         sReason = NULL;
     }
 
-    size_t iByLen;
-    char *sBy = (char *)lua_tolstring(L, 4, &iByLen);
-    if(iByLen == 0) {
+    size_t szByLen;
+    char * sBy = (char *)lua_tolstring(L, 4, &szByLen);
+    if(szByLen == 0) {
         sBy = NULL;
     }
 
-    User *curUser = hashManager->FindUser(sNick, iNickLen);
+    User *curUser = hashManager->FindUser(sNick, szNickLen);
     if(curUser != NULL) {
-        if(hashBanManager->NickTempBan(curUser, NULL, sReason, sBy, iMinutes, 0) == true) {
+        if(hashBanManager->NickTempBan(curUser, NULL, sReason, sBy, i32Minutes, 0) == true) {
             int imsgLen = sprintf(ScriptManager->lua_msg, "[SYS] User %s (%s) nickbanned by script.", curUser->sNick, curUser->sIP);
             if(CheckSprintf(imsgLen, 131072, "NickTempBan2") == true) {
                 UdpDebug->Broadcast(ScriptManager->lua_msg, imsgLen);
@@ -1511,7 +1505,7 @@ static int TempBanNick(lua_State * L) {
             lua_pushnil(L);
         }
     } else {
-        if(hashBanManager->NickTempBan(NULL, sNick, sReason, sBy, iMinutes, 0) == true) {
+        if(hashBanManager->NickTempBan(NULL, sNick, sReason, sBy, i32Minutes, 0) == true) {
             int imsgLen = sprintf(ScriptManager->lua_msg, "[SYS] Nick %s nickbanned by script.", sNick);
             if(CheckSprintf(imsgLen, 131072, "NickTempBan3") == true) {
                 UdpDebug->Broadcast(ScriptManager->lua_msg, imsgLen);
@@ -1546,21 +1540,21 @@ static int RangeBan(lua_State * L) {
         return 1;
     }
 
-    size_t iFromIpLen;
-    char *sFromIP = (char *)lua_tolstring(L, 1, &iFromIpLen);
+    size_t szFromIpLen;
+    char * sFromIP = (char *)lua_tolstring(L, 1, &szFromIpLen);
 
-    size_t iToIpLen;
-    char *sToIP = (char *)lua_tolstring(L, 2, &iToIpLen);
+    size_t szToIpLen;
+    char * sToIP = (char *)lua_tolstring(L, 2, &szToIpLen);
 
-    size_t iReasonLen;
-    char *sReason = (char *)lua_tolstring(L, 3, &iReasonLen);
-    if(iReasonLen == 0) {
+    size_t szReasonLen;
+    char * sReason = (char *)lua_tolstring(L, 3, &szReasonLen);
+    if(szReasonLen == 0) {
         sReason = NULL;
     }
 
-    size_t iByLen;
-    char *sBy = (char *)lua_tolstring(L, 4, &iByLen);
-    if(iByLen == 0) {
+    size_t szByLen;
+    char * sBy = (char *)lua_tolstring(L, 4, &szByLen);
+    if(szByLen == 0) {
         sBy = NULL;
     }
 
@@ -1570,7 +1564,7 @@ static int RangeBan(lua_State * L) {
 	memset(ui128FromHash, 0, 16);
 	memset(ui128ToHash, 0, 16);
 
-	if(iFromIpLen != 0 && iToIpLen != 0 && HashIP(sFromIP, ui128FromHash) == true && HashIP(sToIP, ui128ToHash) == true &&
+	if(szFromIpLen != 0 && szToIpLen != 0 && HashIP(sFromIP, ui128FromHash) == true && HashIP(sToIP, ui128ToHash) == true &&
         memcmp(ui128ToHash, ui128FromHash, 16) > 0 && hashBanManager->RangeBan(sFromIP, ui128FromHash, sToIP, ui128ToHash, sReason, sBy, bFull) == true) {
 		lua_settop(L, 0);
 		lua_pushboolean(L, 1);
@@ -1604,23 +1598,23 @@ static int RangeTempBan(lua_State * L) {
         return 1;
     }
 
-    size_t iFromIpLen;
-    char *sFromIP = (char *)lua_tolstring(L, 1, &iFromIpLen);
+    size_t szFromIpLen;
+    char * sFromIP = (char *)lua_tolstring(L, 1, &szFromIpLen);
 
-    size_t iToIpLen;
-    char *sToIP = (char *)lua_tolstring(L, 2, &iToIpLen);
+    size_t szToIpLen;
+    char * sToIP = (char *)lua_tolstring(L, 2, &szToIpLen);
 
-    uint32_t iMinutes = (uint32_t)lua_tonumber(L, 3);
+    uint32_t i32Minutes = (uint32_t)lua_tonumber(L, 3);
 
-    size_t iReasonLen;
-    char *sReason = (char *)lua_tolstring(L, 4, &iReasonLen);
-    if(iReasonLen == 0) {
+    size_t szReasonLen;
+    char * sReason = (char *)lua_tolstring(L, 4, &szReasonLen);
+    if(szReasonLen == 0) {
         sReason = NULL;
     }
 
-    size_t iByLen;
-    char *sBy = (char *)lua_tolstring(L, 5, &iByLen);
-    if(iByLen == 0) {
+    size_t szByLen;
+    char * sBy = (char *)lua_tolstring(L, 5, &szByLen);
+    if(szByLen == 0) {
         sBy = NULL;
     }
 
@@ -1630,8 +1624,8 @@ static int RangeTempBan(lua_State * L) {
 	memset(ui128FromHash, 0, 16);
 	memset(ui128ToHash, 0, 16);
 
-	if(iFromIpLen != 0 && iToIpLen != 0 && HashIP(sFromIP, ui128FromHash) == true && HashIP(sToIP, ui128ToHash) == true &&
-		memcmp(ui128ToHash, ui128FromHash, 16) > 0 && hashBanManager->RangeTempBan(sFromIP, ui128FromHash, sToIP, ui128ToHash, sReason, sBy, iMinutes, 0, bFull) == true) {
+	if(szFromIpLen != 0 && szToIpLen != 0 && HashIP(sFromIP, ui128FromHash) == true && HashIP(sToIP, ui128ToHash) == true &&
+		memcmp(ui128ToHash, ui128FromHash, 16) > 0 && hashBanManager->RangeTempBan(sFromIP, ui128FromHash, sToIP, ui128ToHash, sReason, sBy, i32Minutes, 0, bFull) == true) {
 		lua_settop(L, 0);
 		lua_pushboolean(L, 1);
         return 1;

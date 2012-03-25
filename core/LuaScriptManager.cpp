@@ -107,15 +107,13 @@ ScriptMan::~ScriptMan() {
     RunningScriptS = NULL;
     RunningScriptE = NULL;
 
-    for(uint8_t i = 0; i < ui8ScriptCount; i++) {
-		delete ScriptTable[i];
+    for(uint8_t ui8i = 0; ui8i < ui8ScriptCount; ui8i++) {
+		delete ScriptTable[ui8i];
     }
 
 #ifdef _WIN32
 	if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ScriptTable) == 0) {
-		string sDbgstr = "[BUF] Cannot deallocate ScriptTable in ScriptMan::~ScriptMan! "+string((uint32_t)GetLastError())+" "+
-			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [MEM] Cannot deallocate ScriptTable in ScriptMan::~ScriptMan\n", 0);
 	}
 #else
 	free(ScriptTable);
@@ -145,12 +143,12 @@ void ScriptMan::Start() {
     CheckForNewScripts();
 
     // PPK ... second start all enabled scripts
-    for(uint8_t i = 0; i < ui8ScriptCount; i++) {
-		if(ScriptTable[i]->bEnabled == true) {
-        	if(ScriptStart(ScriptTable[i]) == true) {
-				AddRunningScript(ScriptTable[i]);
+    for(uint8_t ui8i = 0; ui8i < ui8ScriptCount; ui8i++) {
+		if(ScriptTable[ui8i]->bEnabled == true) {
+        	if(ScriptStart(ScriptTable[ui8i]) == true) {
+				AddRunningScript(ScriptTable[ui8i]);
 			} else {
-                ScriptTable[i]->bEnabled = false;
+                ScriptTable[ui8i]->bEnabled = false;
             }
 		}
 	}
@@ -170,53 +168,37 @@ bool ScriptMan::AddScript(char * sName, const bool &bEnabled, const bool &/*bNew
         return false;
     }
 
-    ui8ScriptCount++;
-
+    Script ** oldbuf = ScriptTable;
+#ifdef _WIN32
     if(ScriptTable == NULL) {
-#ifdef _WIN32
-        ScriptTable = (Script **) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui8ScriptCount*sizeof(Script *));
-#else
-		ScriptTable = (Script **) calloc(ui8ScriptCount, sizeof(Script *));
-#endif
-        if(ScriptTable == NULL) {
-        	string sDbgstr = "[BUF] Cannot allocate ScriptTable in ScriptMan::AddScript!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            exit(EXIT_FAILURE);
-        }
+        ScriptTable = (Script **)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, (ui8ScriptCount+1)*sizeof(Script *));
     } else {
-        Script ** oldbuf = ScriptTable;
-#ifdef _WIN32
-		ScriptTable = (Script **) HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, oldbuf, ui8ScriptCount*sizeof(Script *));
-#else
-		ScriptTable = (Script **) realloc(oldbuf, ui8ScriptCount*sizeof(Script *));
-#endif
-		if(ScriptTable == NULL) {
-			string sDbgstr = "[BUF] Cannot reallocate ScriptTable in ScriptMan::AddScript!";
-#ifdef _WIN32
-            sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-            HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
-#else
-            free(oldbuf);
-#endif
-			AppendSpecialLog(sDbgstr);
-            exit(EXIT_FAILURE);
-        }
+		ScriptTable = (Script **)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf, (ui8ScriptCount+1)*sizeof(Script *));
     }
-
-    ScriptTable[ui8ScriptCount-1] = new Script(sName, bEnabled);
-
-    if(ScriptTable[ui8ScriptCount-1] == NULL) {
-        ui8ScriptCount--;
-    	string sDbgstr = "[BUF] Cannot allocate new Script!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
+#else
+	ScriptTable = (Script **)realloc(oldbuf, (ui8ScriptCount+1)*sizeof(Script *));
 #endif
-		AppendSpecialLog(sDbgstr);
+	if(ScriptTable == NULL) {
+        ScriptTable = oldbuf;
+
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate ScriptTable in ScriptMan::AddScript\n", 0);
         return false;
     }
+
+    ScriptTable[ui8ScriptCount] = new Script(sName, bEnabled);
+
+    if(ScriptTable[ui8ScriptCount] == NULL || ScriptTable[ui8ScriptCount]->sName == NULL) {
+        if(ScriptTable[ui8ScriptCount] == NULL) {
+            AppendDebugLog("%s - [MEM] Cannot allocate new Script in ScriptMan::AddScript\n", 0);
+        } else if(ScriptTable[ui8ScriptCount]->sName == NULL) {
+            delete ScriptTable[ui8ScriptCount];
+            AppendDebugLog("%s - [MEM] Cannot allocate Script->sName in ScriptMan::AddScript\n", 0);
+        }
+
+        return false;
+    }
+
+    ui8ScriptCount++;
 
 #ifdef _BUILD_GUI
     if(bNew == true) {
@@ -299,16 +281,16 @@ void ScriptMan::SaveScripts() {
     doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
     TiXmlElement scripts("Scripts");
 
-	for(uint8_t i = 0; i < ui8ScriptCount; i++) {
-		if(FileExist((SCRIPT_PATH+string(ScriptTable[i]->sName)).c_str()) == false) {
+	for(uint8_t ui8i = 0; ui8i < ui8ScriptCount; ui8i++) {
+		if(FileExist((SCRIPT_PATH+string(ScriptTable[ui8i]->sName)).c_str()) == false) {
 			continue;
         }
 
         TiXmlElement name("Name");
-        name.InsertEndChild(TiXmlText(ScriptTable[i]->sName));
+        name.InsertEndChild(TiXmlText(ScriptTable[ui8i]->sName));
         
         TiXmlElement enabled("Enabled");
-        if(ScriptTable[i]->bEnabled == true) {
+        if(ScriptTable[ui8i]->bEnabled == true) {
             enabled.InsertEndChild(TiXmlText("1"));
         } else {
             enabled.InsertEndChild(TiXmlText("0"));
@@ -326,18 +308,18 @@ void ScriptMan::SaveScripts() {
 //------------------------------------------------------------------------------
 
 void ScriptMan::CheckForDeletedScripts() {
-    uint8_t i = 0;
+    uint8_t ui8i = 0;
 
-	while(i < ui8ScriptCount) {
-		if(FileExist((SCRIPT_PATH+string(ScriptTable[i]->sName)).c_str()) == true || ScriptTable[i]->LUA != NULL) {
-			i++;
+	while(ui8i < ui8ScriptCount) {
+		if(FileExist((SCRIPT_PATH+string(ScriptTable[ui8i]->sName)).c_str()) == true || ScriptTable[ui8i]->LUA != NULL) {
+			ui8i++;
 			continue;
         }
 
-		delete ScriptTable[i];
+		delete ScriptTable[ui8i];
 
-		for(uint8_t j = i; j+1 < ui8ScriptCount; j++) {
-            ScriptTable[j] = ScriptTable[j+1];
+		for(uint8_t ui8j = ui8i; ui8j+1 < ui8ScriptCount; ui8j++) {
+            ScriptTable[ui8j] = ScriptTable[ui8j+1];
         }
 
         ScriptTable[ui8ScriptCount-1] = NULL;
@@ -412,13 +394,9 @@ void ScriptMan::Restart() {
 //------------------------------------------------------------------------------
 
 Script * ScriptMan::FindScript(char * sName) {
-    for(uint8_t i = 0; i < ui8ScriptCount; i++) {
-#ifdef _WIN32
-        if(stricmp(ScriptTable[i]->sName, sName) == 0) {
-#else
-		if(strcasecmp(ScriptTable[i]->sName, sName) == 0) {
-#endif
-            return ScriptTable[i];
+    for(uint8_t ui8i = 0; ui8i < ui8ScriptCount; ui8i++) {
+		if(strcasecmp(ScriptTable[ui8i]->sName, sName) == 0) {
+            return ScriptTable[ui8i];
         }
     }
 
@@ -443,13 +421,9 @@ Script * ScriptMan::FindScript(lua_State * L) {
 //------------------------------------------------------------------------------
 
 uint8_t ScriptMan::FindScriptIdx(char * sName) {
-    for(uint8_t i = 0; i < ui8ScriptCount; i++) {
-#ifdef _WIN32
-        if(stricmp(ScriptTable[i]->sName, sName) == 0) {
-#else
-		if(strcasecmp(ScriptTable[i]->sName, sName) == 0) {
-#endif
-            return i;
+    for(uint8_t ui8i = 0; ui8i < ui8ScriptCount; ui8i++) {
+		if(strcasecmp(ScriptTable[ui8i]->sName, sName) == 0) {
+            return ui8i;
         }
     }
 
@@ -457,32 +431,11 @@ uint8_t ScriptMan::FindScriptIdx(char * sName) {
 }
 //------------------------------------------------------------------------------
 
-#ifdef _WIN32
-    #ifndef _MSC_VER
-	void ScriptMan::GetGCInfo() {
-		if(SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == false) {
-	        return;
-	    }
-		
-	    uint32_t i = 0;
-	    Script *next = RunningScriptS;
-	    
-		while(next != NULL) {
-			Script *cur = next;
-			next = cur->next;
-	
-	        ScriptGetGC(cur, i++);
-	    }
-	}
-	#endif
-#endif
-//------------------------------------------------------------------------------
-
 bool ScriptMan::StartScript(Script * curScript, const bool &bEnable) {
     uint8_t ui8dx = 255;
-    for(uint8_t i = 0; i < ui8ScriptCount; i++) {
-        if(curScript == ScriptTable[i]) {
-            ui8dx = i;
+    for(uint8_t ui8i = 0; ui8i < ui8ScriptCount; ui8i++) {
+        if(curScript == ScriptTable[ui8i]) {
+            ui8dx = ui8i;
             break;
         }
     }
@@ -512,10 +465,10 @@ bool ScriptMan::StartScript(Script * curScript, const bool &bEnable) {
 	} else {
 		// previous script
 		if(ui8dx != 0) {
-			for(int16_t i = (int16_t)(ui8dx-1); i > -1; i--) {
-				if(ScriptTable[i]->bEnabled == true) {
-					ScriptTable[i]->next = curScript;
-					curScript->prev = ScriptTable[i];
+			for(int16_t i16i = (int16_t)(ui8dx-1); i16i > -1; i16i--) {
+				if(ScriptTable[i16i]->bEnabled == true) {
+					ScriptTable[i16i]->next = curScript;
+					curScript->prev = ScriptTable[i16i];
 					break;
 				}
 			}
@@ -531,10 +484,10 @@ bool ScriptMan::StartScript(Script * curScript, const bool &bEnable) {
 
 		// next script
 		if(ui8dx != ui8ScriptCount-1) {
-			for(int16_t i = (int16_t)(ui8dx+1); i < (int16_t)ui8ScriptCount; i++) {
-				if(ScriptTable[i]->bEnabled == true) {
-					ScriptTable[i]->prev = curScript;
-					curScript->next = ScriptTable[i];
+			for(uint8_t ui8i = ui8dx+1; ui8i < ui8ScriptCount; ui8i++) {
+				if(ScriptTable[ui8i]->bEnabled == true) {
+					ScriptTable[ui8i]->prev = curScript;
+					curScript->next = ScriptTable[ui8i];
 					break;
 				}
 			}
@@ -726,8 +679,8 @@ void ScriptMan::DeleteScript(const uint8_t &ui8ScriptPosInTbl) {
 
     delete cur;
 
-	for(uint8_t i = ui8ScriptPosInTbl; i+1 < ui8ScriptCount; i++) {
-        ScriptTable[i] = ScriptTable[i+1];
+	for(uint8_t ui8i = ui8ScriptPosInTbl; ui8i+1 < ui8ScriptCount; ui8i++) {
+        ScriptTable[ui8i] = ScriptTable[ui8i+1];
     }
 
     ScriptTable[ui8ScriptCount-1] = NULL;
@@ -779,7 +732,7 @@ void ScriptMan::OnExit(bool bForce/* = false*/) {
 }
 //------------------------------------------------------------------------------
 
-bool ScriptMan::Arrival(User * u, char * sData, const size_t &iLen, const unsigned char &iType) {
+bool ScriptMan::Arrival(User * u, char * sData, const size_t &szLen, const unsigned char &uiType) {
 	if(SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == false) {
 		return false;
 	}
@@ -818,7 +771,7 @@ bool ScriptMan::Arrival(User * u, char * sData, const size_t &iLen, const unsign
 
         // if any of the scripts returns a nonzero value,
 		// then stop for all other scripts
-        if(((cur->ui32DataArrivals & iLuaArrivalBits[iType]) == iLuaArrivalBits[iType]) == true && (bMoved == false || cur->bProcessed == false)) {
+        if(((cur->ui32DataArrivals & iLuaArrivalBits[uiType]) == iLuaArrivalBits[uiType]) == true && (bMoved == false || cur->bProcessed == false)) {
             cur->bProcessed = true;
 
             // PPK ... table of arrivals
@@ -828,10 +781,10 @@ bool ScriptMan::Arrival(User * u, char * sData, const size_t &iLen, const unsign
             "UDPSRArrival", "KickArrival", "OpForceMoveArrival", "SupportsArrival", "BotINFOArrival", 
             "CloseArrival", "UnknownArrival" };
 
-            lua_getglobal(cur->LUA, arrival[iType]);
+            lua_getglobal(cur->LUA, arrival[uiType]);
             int i = lua_gettop(cur->LUA);
             if(lua_isnil(cur->LUA, i)) {
-                cur->ui32DataArrivals &= ~iLuaArrivalBits[iType];
+                cur->ui32DataArrivals &= ~iLuaArrivalBits[uiType];
 
                 lua_settop(cur->LUA, 0);
                 continue;
@@ -842,7 +795,7 @@ bool ScriptMan::Arrival(User * u, char * sData, const size_t &iLen, const unsign
             lua_checkstack(cur->LUA, 2); // we need 2 empty slots in stack, check it to be sure
 
 			ScriptPushUser(cur->LUA, u); // usertable
-            lua_pushlstring(cur->LUA, sData, iLen); // sData
+            lua_pushlstring(cur->LUA, sData, szLen); // sData
 
             // two passed parameters, zero returned
             if(lua_pcall(cur->LUA, 2, LUA_MULTRET, 0) != 0) {

@@ -39,12 +39,12 @@ private:
 
     void SendNoPermission(User * user, const bool &fromPM);
     int CheckFromPm(User * curUser, const bool &fromPM);
-    void UncountDeflood(User * curUser, const bool &fromPM);
+    void UncountDeflood(User * curUser, const bool &fromPM) const;
 public:
 	HubCommands();
     ~HubCommands();
 
-    bool DoCommand(User * curUser, char * sCommand, const size_t &iCmdLen, bool fromPM = false);
+    bool DoCommand(User * curUser, char * sCommand, const size_t &szCmdLen, bool fromPM = false);
 };
 
 //---------------------------------------------------------------------------

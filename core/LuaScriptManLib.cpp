@@ -85,23 +85,23 @@ static int GetScripts(lua_State * L) {
 
 	int t = lua_gettop(L), n = 0;
 
-	for(uint8_t i = 0; i < ScriptManager->ui8ScriptCount; i++) {
+	for(uint8_t ui8i = 0; ui8i < ScriptManager->ui8ScriptCount; ui8i++) {
 		lua_pushnumber(L, ++n);
 
 		lua_newtable(L);
 		int s = lua_gettop(L);
 
 		lua_pushliteral(L, "sName");
-		lua_pushstring(L, ScriptManager->ScriptTable[i]->sName);
+		lua_pushstring(L, ScriptManager->ScriptTable[ui8i]->sName);
 		lua_rawset(L, s);
 
 		lua_pushliteral(L, "bEnabled");
-		ScriptManager->ScriptTable[i]->bEnabled == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
+		ScriptManager->ScriptTable[ui8i]->bEnabled == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
 		lua_rawset(L, s);
 
 		lua_pushliteral(L, "iMemUsage");
-		ScriptManager->ScriptTable[i]->LUA == NULL ? lua_pushnil(L) : 
-            lua_pushnumber(L, lua_gc(ScriptManager->ScriptTable[i]->LUA, LUA_GCCOUNT, 0));
+		ScriptManager->ScriptTable[ui8i]->LUA == NULL ? lua_pushnil(L) :
+            lua_pushnumber(L, lua_gc(ScriptManager->ScriptTable[ui8i]->LUA, LUA_GCCOUNT, 0));
 		lua_rawset(L, s);
 
 		lua_rawset(L, t);
@@ -126,10 +126,10 @@ static int Move(lua_State * L, const bool &bUp) {
         return 1;
     }
 
-    size_t iLen;
-    char *sName = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char *sName = (char *)lua_tolstring(L, 1, &szLen);
     
-    if(iLen == 0) {
+    if(szLen == 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -182,10 +182,10 @@ static int StartScript(lua_State * L) {
         return 1;
     }
 
-    size_t iLen;
-    char *sName = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sName = (char *)lua_tolstring(L, 1, &szLen);
     
-    if(iLen == 0) {
+    if(szLen == 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -242,10 +242,10 @@ static int RestartScript(lua_State * L) {
         return 1;
     }
 
-    size_t iLen;
-    char *sName = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char *sName = (char *)lua_tolstring(L, 1, &szLen);
     
-    if(iLen == 0) {
+    if(szLen == 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -294,10 +294,10 @@ static int StopScript(lua_State * L) {
         return 1;
     }
 
-    size_t iLen;
-    char *sName = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sName = (char *)lua_tolstring(L, 1, &szLen);
 
-    if(iLen == 0) {
+    if(szLen == 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;

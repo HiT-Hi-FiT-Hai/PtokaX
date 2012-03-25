@@ -71,9 +71,7 @@ eventq::~eventq() {
 #ifdef _WIN32
         if(cur->sMsg != NULL) {
             if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sMsg) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate cur->sMsg in eventq::~eventq! "+string((uint32_t)GetLastError())+" "+
-					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-				AppendSpecialLog(sDbgstr);
+				AppendDebugLog("%s - [MEM] Cannot deallocate cur->sMsg in eventq::~eventq\n", 0);
             }
         }
 #else
@@ -116,101 +114,87 @@ void eventq::AddNormal(uint8_t ui8Id, char * sMsg) {
 		}
 	}
 
-    event * newevent = new event();
+    event * pNewEvent = new event();
 
-	if(newevent == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate new event in eventq::AddNormal!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+	if(pNewEvent == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewEvent in eventq::AddNormal\n", 0);
         return;
     }
 
     if(sMsg != NULL) {
-        size_t iLen = strlen(sMsg);
+        size_t szLen = strlen(sMsg);
 #ifdef _WIN32
-		newevent->sMsg = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
+		pNewEvent->sMsg = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
 #else
-		newevent->sMsg = (char *) malloc(iLen+1);
+		pNewEvent->sMsg = (char *)malloc(szLen+1);
 #endif
-		if(newevent->sMsg == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iLen+1))+
-				" bytes of memory for newevent->sMsg in eventq::AddNormal!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete newevent;
+		if(pNewEvent->sMsg == NULL) {
+            delete pNewEvent;
+
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for pNewEvent->sMsg in eventq::AddNormal\n", (uint64_t)(szLen+1));
+
             return;
         }
 
-        memcpy(newevent->sMsg, sMsg, iLen);
-        newevent->sMsg[iLen] = '\0';
+        memcpy(pNewEvent->sMsg, sMsg, szLen);
+        pNewEvent->sMsg[szLen] = '\0';
     } else {
-		newevent->sMsg = NULL;
+		pNewEvent->sMsg = NULL;
     }
 
-    newevent->ui8Id = ui8Id;
+    pNewEvent->ui8Id = ui8Id;
 
     if(NormalS == NULL) {
-        NormalS = newevent;
-        newevent->prev = NULL;
+        NormalS = pNewEvent;
+        pNewEvent->prev = NULL;
     } else {
-        newevent->prev = NormalE;
-        NormalE->next = newevent; 
+        pNewEvent->prev = NormalE;
+        NormalE->next = pNewEvent;
     }
 
-    NormalE = newevent;
-    newevent->next = NULL;
+    NormalE = pNewEvent;
+    pNewEvent->next = NULL;
 }
 //---------------------------------------------------------------------------
 
 void eventq::AddThread(uint8_t ui8Id, char * sMsg, const sockaddr_storage * sas/* = NULL*/) {
-	event * newevent = new event();
+	event * pNewEvent = new event();
 
-	if(newevent == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate new event in eventq::AddNormal!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+	if(pNewEvent == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewEvent in eventq::AddThread\n", 0);
         return;
     }
 
     if(sMsg != NULL) {
-        size_t iLen = strlen(sMsg);
-		newevent->sMsg = (char *) malloc(iLen+1);
-		if(newevent->sMsg == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)(iLen+1))+
-				" bytes of memory for newevent->sMsg in eventq::AddThread!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
-            delete newevent;
+        size_t szLen = strlen(sMsg);
+		pNewEvent->sMsg = (char *)malloc(szLen+1);
+		if(pNewEvent->sMsg == NULL) {
+            delete pNewEvent;
+
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for pNewEvent->sMsg in eventq::AddThread\n", (uint64_t)(szLen+1));
+
             return;
         }
 
-        memcpy(newevent->sMsg, sMsg, iLen);
-        newevent->sMsg[iLen] = '\0';
+        memcpy(pNewEvent->sMsg, sMsg, szLen);
+        pNewEvent->sMsg[szLen] = '\0';
     } else {
-		newevent->sMsg = NULL;
+		pNewEvent->sMsg = NULL;
     }
 
-    newevent->ui8Id = ui8Id;
+    pNewEvent->ui8Id = ui8Id;
 
     if(sas != NULL) {
         if(sas->ss_family == AF_INET6) {
-            memcpy(newevent->ui128IpHash, &((struct sockaddr_in6 *)sas)->sin6_addr.s6_addr, 16);
+            memcpy(pNewEvent->ui128IpHash, &((struct sockaddr_in6 *)sas)->sin6_addr.s6_addr, 16);
         } else {
-            memset(newevent->ui128IpHash, 0, 16);
-            newevent->ui128IpHash[10] = 255;
-            newevent->ui128IpHash[11] = 255;
-            memcpy(newevent->ui128IpHash+12, &((struct sockaddr_in *)sas)->sin_addr.s_addr, 4);
+            memset(pNewEvent->ui128IpHash, 0, 16);
+            pNewEvent->ui128IpHash[10] = 255;
+            pNewEvent->ui128IpHash[11] = 255;
+            memcpy(pNewEvent->ui128IpHash+12, &((struct sockaddr_in *)sas)->sin_addr.s_addr, 4);
         }
     } else {
-        memset(newevent->ui128IpHash, 0, 16);
+        memset(pNewEvent->ui128IpHash, 0, 16);
     }
 
 #ifdef _WIN32
@@ -220,15 +204,15 @@ void eventq::AddThread(uint8_t ui8Id, char * sMsg, const sockaddr_storage * sas/
 #endif
 
     if(ThreadS == NULL) {
-        ThreadS = newevent;
-        newevent->prev = NULL;
+        ThreadS = pNewEvent;
+        pNewEvent->prev = NULL;
     } else {
-        newevent->prev = ThreadE;
-        ThreadE->next = newevent;
+        pNewEvent->prev = ThreadE;
+        ThreadE->next = pNewEvent;
     }
 
-    ThreadE = newevent;
-    newevent->next = NULL;
+    ThreadE = pNewEvent;
+    pNewEvent->next = NULL;
 
 #ifdef _WIN32
     LeaveCriticalSection(&csEventQueue);
@@ -297,9 +281,7 @@ void eventq::ProcessEvents() {
 #ifdef _WIN32
         if(cur->sMsg != NULL) {
             if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sMsg) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate cur->sMsg in eventq::ProcessEvents! "+string((uint32_t)GetLastError())+" "+
-					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-				AppendSpecialLog(sDbgstr);
+				AppendDebugLog("%s - [MEM] Cannot deallocate cur->sMsg in eventq::ProcessEvents\n", 0);
             }
         }
 #else
@@ -338,27 +320,23 @@ void eventq::ProcessEvents() {
                 UdpDebug->Broadcast(cur->sMsg);
                 break;
             case EVENT_UDP_SR: {
-                size_t iMsgLen = strlen(cur->sMsg);
-                ui64BytesRead += (uint64_t)iMsgLen;
+                size_t szMsgLen = strlen(cur->sMsg);
+                ui64BytesRead += (uint64_t)szMsgLen;
 
                 char *temp = strchr(cur->sMsg+4, ' ');
                 if(temp == NULL) {
                     break;;
                 }
 
-                size_t iLen = (temp-cur->sMsg)-4;
-                if(iLen > 64 || iLen == 0) {
+                size_t szLen = (temp-cur->sMsg)-4;
+                if(szLen > 64 || szLen == 0) {
                     break;
                 }
 
-#ifdef _WIN32
-                // terminate nick, needed for stricmp in hashmanager
-#else
 				// terminate nick, needed for strcasecmp in hashmanager
-#endif
                 temp[0] = '\0';
 
-                User *u = hashManager->FindUser(cur->sMsg+4, iLen);
+                User *u = hashManager->FindUser(cur->sMsg+4, szLen);
                 if(u == NULL) {
                     break;
                 }
@@ -380,7 +358,7 @@ void eventq::ProcessEvents() {
     }
 #endif
 
-                DcCommands->SRFromUDP(u, cur->sMsg, iMsgLen);
+                DcCommands->SRFromUDP(u, cur->sMsg, szMsgLen);
                 break;
             }
             default:

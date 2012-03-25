@@ -34,12 +34,6 @@
 //---------------------------------------------------------------------------
 #include "LuaScript.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
-#endif
-//---------------------------------------------------------------------------
 
 static int Reg(lua_State * L) {
 	if(lua_gettop(L) != 3) {
@@ -66,10 +60,10 @@ static int Reg(lua_State * L) {
         return 1;
     }
 
-    size_t iLen;
-    char * sIP = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sIP = (char *)lua_tolstring(L, 1, &szLen);
 
-    if(iLen < 7 || iLen > 15 || isIP(sIP, iLen) == false) {
+    if(szLen < 7 || szLen > 15 || isIP(sIP, szLen) == false) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -130,10 +124,10 @@ static int Send(lua_State * L) {
         return 1;
     }
 
-    size_t iLen;
-    char * sMsg = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sMsg = (char *)lua_tolstring(L, 1, &szLen);
 
-    if(iLen == 0) {
+    if(szLen == 0) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -141,13 +135,13 @@ static int Send(lua_State * L) {
 
 	Script * cur = ScriptManager->FindScript(L);
 	if(cur == NULL || cur->bRegUDP == false) {
-        UdpDebug->Broadcast(sMsg, iLen);
+        UdpDebug->Broadcast(sMsg, szLen);
         lua_settop(L, 0);
         lua_pushboolean(L, 1);
         return 1;
     }
 
-    UdpDebug->Send(cur->sName, sMsg, iLen);
+    UdpDebug->Send(cur->sName, sMsg, szLen);
 
     lua_pushboolean(L, 1);
     return 1;

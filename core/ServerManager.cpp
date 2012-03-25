@@ -165,9 +165,8 @@ static void SecTimerHandler(int /*sig*/) {
 	        // Create hublist reg thread
 	        RegisterThread = new RegThread();
 	        if(RegisterThread == NULL) {
-				string sDbgstr = "[BUF] Cannot allocate RegisterThread! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-	        	AppendSpecialLog(sDbgstr);
-	        	exit(EXIT_FAILURE);
+	        	AppendDebugLog("%s - [MEM] Cannot allocate RegisterThread in ServerOnRegTimer\n", 0);
+	        	return;
 	        }
 	        
 	        // Setup hublist reg thread
@@ -183,13 +182,9 @@ static void SecTimerHandler(int /*sig*/) {
 void ServerInitialize() {
     setlocale(LC_ALL, "");
 #ifdef _WIN32
-	#ifndef _MSC_VER
-	    randomize();
-	#else
-	    time_t acctime;
-	    time(&acctime);
-	    srand((uint32_t)acctime);
-	#endif
+	time_t acctime;
+	time(&acctime);
+	srand((uint32_t)acctime);
 
 	WSADATA wsaData;
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -214,9 +209,9 @@ void ServerInitialize() {
 	PATH_LUA = PATH + "/";
 
 	char * sLuaPath = PATH_LUA.c_str();
-	for(size_t i = 0; i < PATH.size(); i++) {
-		if(sLuaPath[i] == '\\') {
-			sLuaPath[i] = '/';
+	for(size_t szi = 0; szi < PATH.size(); szi++) {
+		if(sLuaPath[szi] == '\\') {
+			sLuaPath[szi] = '/';
 		}
 	}
 
@@ -274,11 +269,7 @@ void ServerInitialize() {
 
 	ResNickManager = new ResNickMan();
 	if(ResNickManager == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate ResNickManager!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-	    AppendSpecialLog(sDbgstr);
+	    AppendDebugLog("%s - [MEM] Cannot allocate ResNickManager in ServerInitialize\n", 0);
 	    exit(EXIT_FAILURE);
 	}
 
@@ -305,21 +296,13 @@ void ServerInitialize() {
 
     ZlibUtility = new clsZlibUtility();
     if(ZlibUtility == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate ZlibUtility!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [MEM] Cannot allocate ZlibUtility in ServerInitialize\n", 0);
     	exit(EXIT_FAILURE);
     }
 
     ClientTagManager = new ClientTagMan();
     if(ClientTagManager == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate ClientTagManager!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [MEM] Cannot allocate ClientTagManager in ServerInitialize\n", 0);
     	exit(EXIT_FAILURE);
     }
 
@@ -327,31 +310,23 @@ void ServerInitialize() {
 
     iLastBytesRead = iLastBytesSent = 0;
 
-	for(uint8_t i = 0 ; i < 60; i++) {
-		CpuUsage[i] = 0;
-		UploadSpeed[i] = 0;
-		DownloadSpeed[i] = 0;
+	for(uint8_t ui8i = 0 ; ui8i < 60; ui8i++) {
+		CpuUsage[ui8i] = 0;
+		UploadSpeed[ui8i] = 0;
+		DownloadSpeed[ui8i] = 0;
 	}
 
 	cpuUsage = 0.0;
 
 	SettingManager = new SetMan();
     if(SettingManager == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate SettingManager!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-    	AppendSpecialLog(sDbgstr);
+    	AppendDebugLog("%s - [MEM] Cannot allocate SettingManager in ServerInitialize\n", 0);
     	exit(EXIT_FAILURE);
     }
 
     LanguageManager = new LangMan();
     if(LanguageManager == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate LanguageManager!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-        AppendSpecialLog(sDbgstr);
+        AppendDebugLog("%s - [MEM] Cannot allocate LanguageManager in ServerInitialize\n", 0);
         exit(EXIT_FAILURE);
     }
 
@@ -359,21 +334,13 @@ void ServerInitialize() {
 
     ProfileMan = new ProfileManager();
     if(ProfileMan == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate ProfileMan!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-    	AppendSpecialLog(sDbgstr);
+    	AppendDebugLog("%s - [MEM] Cannot allocate ProfileMan in ServerInitialize\n", 0);
     	exit(EXIT_FAILURE);
     }
 
     hashRegManager = new hashRegMan();
     if(hashRegManager == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate hashRegManager!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-    	AppendSpecialLog(sDbgstr);
+    	AppendDebugLog("%s - [MEM] Cannot allocate hashRegManager in ServerInitialize\n", 0);
     	exit(EXIT_FAILURE);
     }
 
@@ -382,11 +349,7 @@ void ServerInitialize() {
 
     hashBanManager = new hashBanMan();
     if(hashBanManager == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate hashBanManager!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-        AppendSpecialLog(sDbgstr);
+        AppendDebugLog("%s - [MEM] Cannot allocate hashBanManager in ServerInitialize\n", 0);
         exit(EXIT_FAILURE);
     }
 
@@ -395,38 +358,27 @@ void ServerInitialize() {
 
     TextFileManager = new TextFileMan();
     if(TextFileManager == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate TextFileManager!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-        AppendSpecialLog(sDbgstr);
+        AppendDebugLog("%s - [MEM] Cannot allocate TextFileManager in ServerInitialize\n", 0);
         exit(EXIT_FAILURE);
     }
 
     UdpDebug = new clsUdpDebug();
     if(UdpDebug == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate UdpDebug!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-        AppendSpecialLog(sDbgstr);
+        AppendDebugLog("%s - [MEM] Cannot allocate UdpDebug in ServerInitialize\n", 0);
         exit(EXIT_FAILURE);
     }
 
     ScriptManager = new ScriptMan();
     if(ScriptManager == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate ScriptManager!";
-#ifdef _WIN32
-        sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-        AppendSpecialLog(sDbgstr);
+        AppendDebugLog("%s - [MEM] Cannot allocate ScriptManager in ServerInitialize\n", 0);
         exit(EXIT_FAILURE);
     }
 
 #ifdef _BUILD_GUI
     pMainWindow = new MainWindow();
 
-    if(pMainWindow->CreateEx() == NULL) {
+    if(pMainWindow == NULL || pMainWindow->CreateEx() == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate pMainWindow in ServerInitialize\n", 0);
         exit(EXIT_FAILURE);
     }
 #endif
@@ -437,8 +389,7 @@ void ServerInitialize() {
     sectimer = SetTimer(NULL, 0, 1000, NULL);
 
 	if(sectimer == 0) {
-		string sDbgstr = "[BUF] Cannot start Timer in ServerThread::ServerThread! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [ERR] Cannot startsectimer in ServerInitialize\n", 0);
         exit(EXIT_FAILURE);
     }
 
@@ -450,8 +401,7 @@ void ServerInitialize() {
     sigactsec.sa_flags = 0;
 
     if(sigaction(SIGSECTMR, &sigactsec, NULL) == -1) {
-		string sDbgstr = "[BUF] Cannot create sigaction SIGSECTMR in ServerInitialize()!";
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [ERR] Cannot create sigaction SIGSECTMR in ServerInitialize\n", 0);
         exit(EXIT_FAILURE);
     }
 
@@ -462,8 +412,7 @@ void ServerInitialize() {
     int iRet = timer_create(CLOCK_REALTIME, &sigevsec, &sectimer);
     
 	if(iRet == -1) {
-		string sDbgstr = "[BUF] Cannot create sectimer in ServerInitialize()! "+string(strerror(errno));
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [ERR] Cannot create sectimer in ServerInitialize\n", 0);
         exit(EXIT_FAILURE);
     }
 
@@ -474,8 +423,7 @@ void ServerInitialize() {
     iRet = timer_create(CLOCK_REALTIME, &sigevreg, &regtimer);
     
 	if(iRet == -1) {
-		string sDbgstr = "[BUF] Cannot create regtimer in ServerInitialize()! "+string(strerror(errno));
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [ERR] Cannot create regtimer in ServerInitialize\n", 0);
         exit(EXIT_FAILURE);
     }
 #endif
@@ -494,8 +442,7 @@ bool ServerStart() {
 
     int iRet = timer_settime(sectimer, 0, &sectmrspec, NULL);
     if(iRet == -1) {
-		string sDbgstr = "[BUF] Cannot start sectimer in ServerStart()!";
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [ERR] Cannot start sectimer in ServerStart\n", 0);
     	exit(EXIT_FAILURE);
     }
 #endif
@@ -620,19 +567,19 @@ bool ServerStart() {
         }
     }
 
-    for(uint8_t i = 0; i < 25; i++) {
-        if(SettingManager->iPortNumbers[i] == 0) {
+    for(uint8_t ui8i = 0; ui8i < 25; ui8i++) {
+        if(SettingManager->iPortNumbers[ui8i] == 0) {
             break;
         }
 
         if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true || (bUseIPv6 == true && bIPv6DualStack == false)) {
             if(bUseIPv6 == true) {
-                ServerCreateServerThread(AF_INET6, SettingManager->iPortNumbers[i]);
+                ServerCreateServerThread(AF_INET6, SettingManager->iPortNumbers[ui8i]);
             }
 
-            ServerCreateServerThread(AF_INET, SettingManager->iPortNumbers[i]);
+            ServerCreateServerThread(AF_INET, SettingManager->iPortNumbers[ui8i]);
         } else {
-            ServerCreateServerThread(bUseIPv6 == true ? AF_INET6 : AF_INET, SettingManager->iPortNumbers[i]);
+            ServerCreateServerThread(bUseIPv6 == true ? AF_INET6 : AF_INET, SettingManager->iPortNumbers[ui8i]);
         }
     }
 
@@ -651,82 +598,50 @@ bool ServerStart() {
 //  if(tlsenabled == true) {
 /*        TLSManager = new TLSMan();
         if(TLSManager == NULL) {
-        	string sDbgstr = "[BUF] Cannot allocate TLSManager!";
-#ifdef _WIN32
-    		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-    		AppendSpecialLog(sDbgstr);
+    		AppendDebugLog("%s - [MEM] Cannot allocate TLSManager in ServerStart\n", 0);
         	exit(EXIT_FAILURE);
         }*/
 //  }
 
     IP2Country = new IP2CC();
     if(IP2Country == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate IP2Country!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [MEM] Cannot allocate IP2Country in ServerStart\n", 0);
     	exit(EXIT_FAILURE);
     }
 
     eventqueue = new eventq();
     if(eventqueue == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate eventqueue!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [MEM] Cannot allocate eventqueue in ServerStart\n", 0);
     	exit(EXIT_FAILURE);
     }
 
     hashManager = new hashMan();
     if(hashManager == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate hashManager!";
-#ifdef _WIN32
-    	sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-    	AppendSpecialLog(sDbgstr);
+    	AppendDebugLog("%s - [MEM] Cannot allocate hashManager in ServerStart\n", 0);
         exit(EXIT_FAILURE);
     }
 
     colUsers = new classUsers();
 	if(colUsers == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate colUsers!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [MEM] Cannot allocate colUsers in ServerStart\n", 0);
     	exit(EXIT_FAILURE);
     }
 
     globalQ = new globalqueue();
     if(globalQ == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate globalQ!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-    	AppendSpecialLog(sDbgstr);
+    	AppendDebugLog("%s - [MEM] Cannot allocate globalQ in ServerStart\n", 0);
     	exit(EXIT_FAILURE);
     }
 
     HubCmds = new HubCommands();
     if(HubCmds == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate HubCmds!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-    	AppendSpecialLog(sDbgstr);
+    	AppendDebugLog("%s - [MEM] Cannot allocate HubCmds in ServerStart\n", 0);
     	exit(EXIT_FAILURE);
     }
 
     DcCommands = new cDcCommands();
     if(DcCommands == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate DcCommands!";
-#ifdef _WIN32
-    	sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-    	AppendSpecialLog(sDbgstr);
+    	AppendDebugLog("%s - [MEM] Cannot allocate DcCommands in ServerStart\n", 0);
     	exit(EXIT_FAILURE);
     }
 
@@ -758,11 +673,7 @@ bool ServerStart() {
 
     srvLoop = new theLoop();
     if(srvLoop == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate srvLoop!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-    	AppendSpecialLog(sDbgstr);
+    	AppendDebugLog("%s - [MEM] Cannot allocate srvLoop in ServerStart\n", 0);
     	exit(EXIT_FAILURE);
     }
 
@@ -793,7 +704,6 @@ bool ServerStart() {
 		regtimer = SetTimer(NULL, 0, 901000, NULL);
 
         if(regtimer == 0) {
-			string sDbgstr = "[BUF] Cannot start RegTimer in ServerMan::StartServer! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
 #else
         struct itimerspec regtmrspec;
         regtmrspec.it_interval.tv_sec = 901;
@@ -803,10 +713,9 @@ bool ServerStart() {
     
         iRet = timer_settime(regtimer, 0, &regtmrspec, NULL);
         if(iRet == -1) {
-    		string sDbgstr = "[BUF] Cannot start regtimer in ServerStart()!";
 #endif
 
-			AppendSpecialLog(sDbgstr);
+			AppendDebugLog("%s - [ERR] Cannot start regtimer in ServerStart\n", 0);
         	exit(EXIT_FAILURE);
         }
     }
@@ -828,19 +737,13 @@ void ServerStop() {
 
     int iRet = timer_settime(sectimer, 0, &sectmrspec, NULL);
     if(iRet == -1) {
-		string sDbgstr = "[BUF] Cannot stop sectimer in ServerStop()!";
-		AppendSpecialLog(sDbgstr);
+		AppendDebugLog("%s - [ERR] Cannot stop sectimer in ServerStop\n", 0);
     	exit(EXIT_FAILURE);
     }
 #endif
 
     char msg[1024];
-#ifdef _WIN32
-    int iret = sprintf(msg, "Serving stopped (UL: %I64d [%I64d], DL: %I64d)", ui64BytesSent, ui64BytesSentSaved, ui64BytesRead);
-#else
-    int iret = sprintf(msg, "Serving stopped (UL: %" PRIu64 " [%" PRIu64 "], DL: %" PRIu64 ")", ui64BytesSent, 
-        ui64BytesSentSaved, ui64BytesRead);
-#endif
+    int iret = sprintf(msg, "Serving stopped (UL: %" PRIu64 " [%" PRIu64 "], DL: %" PRIu64 ")", ui64BytesSent, ui64BytesSentSaved, ui64BytesRead);
     if(CheckSprintf(iret, 1024, "ServerMan::StopServer") == true) {
         AppendLog(msg);
     }
@@ -848,7 +751,7 @@ void ServerStop() {
 	//Stop the HubRegistration timer
 	if(SettingManager->bBools[SETBOOL_AUTO_REG] == true) {
 #ifdef _WIN32
-	   KillTimer(NULL, regtimer);
+        if(KillTimer(NULL, regtimer) == 0) {
 #else
         struct itimerspec regtmrspec;
         regtmrspec.it_interval.tv_sec = 0;
@@ -858,11 +761,10 @@ void ServerStop() {
     
         iRet = timer_settime(regtimer, 0, &regtmrspec, NULL);
         if(iRet == -1) {
-    		string sDbgstr = "[BUF] Cannot stop regtimer in ServerStop()!";
-    		AppendSpecialLog(sDbgstr);
+#endif
+    		AppendDebugLog("%s - [ERR] Cannot stop regtimer in ServerStop\n", 0);
         	exit(EXIT_FAILURE);
         }
-#endif
     }
 
     ServerThread *next = ServersS;
@@ -974,7 +876,7 @@ void ServerFinalStop(const bool &bFromServiceLoop) {
         }
 #else
 		if(ServerStart() == false) {
-            AppendLog("Server start failed!");
+            AppendLog("[ERR] Server start failed in ServerFinalStop");
             exit(EXIT_FAILURE);
         }
 #endif
@@ -1054,12 +956,12 @@ void ServerUpdateServers() {
 
         bool bFound = false;
 
-        for(uint8_t i = 0; i < 25; i++) {
-            if(SettingManager->iPortNumbers[i] == 0) {
+        for(uint8_t ui8i = 0; ui8i < 25; ui8i++) {
+            if(SettingManager->iPortNumbers[ui8i] == 0) {
                 break;
             }
 
-            if(cur->ui16Port == SettingManager->iPortNumbers[i]) {
+            if(cur->ui16Port == SettingManager->iPortNumbers[ui8i]) {
                 bFound = true;
                 break;
             }
@@ -1089,8 +991,8 @@ void ServerUpdateServers() {
     }
 
     // Add servers for ports that not running
-    for(uint8_t i = 0; i < 25; i++) {
-        if(SettingManager->iPortNumbers[i] == 0) {
+    for(uint8_t ui8i = 0; ui8i < 25; ui8i++) {
+        if(SettingManager->iPortNumbers[ui8i] == 0) {
             break;
         }
 
@@ -1101,7 +1003,7 @@ void ServerUpdateServers() {
             ServerThread *cur = next;
             next = cur->next;
 
-            if(cur->ui16Port == SettingManager->iPortNumbers[i]) {
+            if(cur->ui16Port == SettingManager->iPortNumbers[ui8i]) {
                 bFound = true;
                 break;
             }
@@ -1110,11 +1012,11 @@ void ServerUpdateServers() {
         if(bFound == false) {
             if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true || (bUseIPv6 == true && bIPv6DualStack == false)) {
                 if(bUseIPv6 == true) {
-                    ServerCreateServerThread(AF_INET6, SettingManager->iPortNumbers[i]);
+                    ServerCreateServerThread(AF_INET6, SettingManager->iPortNumbers[ui8i]);
                 }
-                ServerCreateServerThread(AF_INET, SettingManager->iPortNumbers[i]);
+                ServerCreateServerThread(AF_INET, SettingManager->iPortNumbers[ui8i]);
             } else {
-                ServerCreateServerThread(bUseIPv6 == true ? AF_INET6 : AF_INET, SettingManager->iPortNumbers[i]);
+                ServerCreateServerThread(bUseIPv6 == true ? AF_INET6 : AF_INET, SettingManager->iPortNumbers[ui8i]);
             }
         }
     }
@@ -1167,7 +1069,6 @@ void ServerUpdateAutoRegState() {
         regtimer = SetTimer(NULL, 0, 901000, NULL);
 
         if(regtimer == 0) {
-            string sDbgstr = "[BUF] Cannot start RegTimer in ServerMan::UpdateAutoRegState! "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
 #else
         struct itimerspec regtmrspec;
         regtmrspec.it_interval.tv_sec = 901;
@@ -1177,14 +1078,13 @@ void ServerUpdateAutoRegState() {
     
         int iRet = timer_settime(regtimer, 0, &regtmrspec, NULL);
         if(iRet == -1) {
-    		string sDbgstr = "[BUF] Cannot start regtimer in ServerUpdateAutoRegState(!";
 #endif
-			AppendSpecialLog(sDbgstr);
+			AppendDebugLog("%s - [ERR] Cannot start regtimer in ServerUpdateAutoRegState\n", 0);
             exit(EXIT_FAILURE);
         }
     } else {
 #ifdef _WIN32
-        KillTimer(NULL, regtimer);
+        if(KillTimer(NULL, regtimer) == 0) {
 #else
         struct itimerspec regtmrspec;
         regtmrspec.it_interval.tv_sec = 0;
@@ -1194,37 +1094,32 @@ void ServerUpdateAutoRegState() {
     
         int iRet = timer_settime(regtimer, 0, &regtmrspec, NULL);
         if(iRet == -1) {
-    		string sDbgstr = "[BUF] Cannot stop regtimer in ServerUpdateAutoRegState(!";
-    		AppendSpecialLog(sDbgstr);
+#endif
+    		AppendDebugLog("%s - [ERR] Cannot stop regtimer in ServerUpdateAutoRegState\n", 0);
         	exit(EXIT_FAILURE);
         }
-#endif
     }
 }
 //---------------------------------------------------------------------------
 
 void ServerCreateServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber) {
-	ServerThread *Server = new ServerThread(iAddrFamily, ui16PortNumber);
-    if(Server == NULL) {
-        string sDbgstr = "[BUF] Cannot allocate Server in ServerCreateServerThread!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+	ServerThread * pServer = new ServerThread(iAddrFamily, ui16PortNumber);
+    if(pServer == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate pServer in ServerCreateServerThread\n", 0);
         exit(EXIT_FAILURE);
     }
 
-	if(Server->Listen() == true) {
+	if(pServer->Listen() == true) {
 		if(ServersE == NULL) {
-            ServersS = Server;
-            ServersE = Server;
+            ServersS = pServer;
+            ServersE = pServer;
         } else {
-            Server->prev = ServersE;
-            ServersE->next = Server;
-            ServersE = Server;
+            pServer->prev = ServersE;
+            ServersE->next = pServer;
+            ServersE = pServer;
         }
     } else {
-        delete Server;
+        delete pServer;
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

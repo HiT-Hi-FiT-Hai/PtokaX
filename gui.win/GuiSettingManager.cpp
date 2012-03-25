@@ -26,9 +26,7 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "../core/utility.h"
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "../core/PXBReader.h"
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -37,13 +35,13 @@ GuiSettingManager * g_GuiSettingManager = NULL;
 
 GuiSettingManager::GuiSettingManager(void) {
     // Read default bools
-    for(size_t i = 0; i < GUISETBOOL_IDS_END; i++) {
-        SetBool(i, GuiSetBoolDef[i]);
+    for(size_t szi = 0; szi < GUISETBOOL_IDS_END; szi++) {
+        SetBool(szi, GuiSetBoolDef[szi]);
 	}
 
     // Read default integers
-    for(size_t i = 0; i < GUISETINT_IDS_END; i++) {
-        SetInteger(i, GuiSetIntegerDef[i]);
+    for(size_t szi = 0; szi < GUISETINT_IDS_END; szi++) {
+        SetInteger(szi, GuiSetIntegerDef[szi]);
 	}
 
     // Load settings
@@ -91,15 +89,15 @@ void GuiSettingManager::Load() {
     bool bSuccess = pxbSetting.ReadNextItem(ui16Identificators, 2);
 
     while(bSuccess == true) {
-        for(size_t i = 0; i < GUISETBOOL_IDS_END; i++) {
-            if(pxbSetting.ui16ItemLengths[0] == strlen(GuiSetBoolStr[i]) && strncmp((char *)pxbSetting.pItemDatas[0], GuiSetBoolStr[i], pxbSetting.ui16ItemLengths[0]) == 0) {
-                SetBool(i, ((char *)pxbSetting.pItemDatas[1])[0] == '0' ? false : true);
+        for(size_t szi = 0; szi < GUISETBOOL_IDS_END; szi++) {
+            if(pxbSetting.ui16ItemLengths[0] == strlen(GuiSetBoolStr[szi]) && strncmp((char *)pxbSetting.pItemDatas[0], GuiSetBoolStr[szi], pxbSetting.ui16ItemLengths[0]) == 0) {
+                SetBool(szi, ((char *)pxbSetting.pItemDatas[1])[0] == '0' ? false : true);
             }
         }
 
-        for(size_t i = 0; i < GUISETINT_IDS_END; i++) {
-            if(pxbSetting.ui16ItemLengths[0] == strlen(GuiSetIntegerStr[i]) && strncmp((char *)pxbSetting.pItemDatas[0], GuiSetIntegerStr[i], pxbSetting.ui16ItemLengths[0]) == 0) {
-                SetInteger(i, ntohl(*((uint32_t *)(pxbSetting.pItemDatas[1]))));
+        for(size_t szi = 0; szi < GUISETINT_IDS_END; szi++) {
+            if(pxbSetting.ui16ItemLengths[0] == strlen(GuiSetIntegerStr[szi]) && strncmp((char *)pxbSetting.pItemDatas[0], GuiSetIntegerStr[szi], pxbSetting.ui16ItemLengths[0]) == 0) {
+                SetInteger(szi, ntohl(*((uint32_t *)(pxbSetting.pItemDatas[1]))));
             }
         }
 
@@ -138,18 +136,18 @@ void GuiSettingManager::Save() {
     pxbSetting.sItemIdentifiers[1][0] = 'S';
     pxbSetting.sItemIdentifiers[1][1] = 'V';
 
-    for(size_t i = 0; i < GUISETBOOL_IDS_END; i++) {
+    for(size_t szi = 0; szi < GUISETBOOL_IDS_END; szi++) {
         // Don't save setting with default value
-        if(bBools[i] == GuiSetBoolDef[i]) {
+        if(bBools[szi] == GuiSetBoolDef[szi]) {
             continue;
         }
 
-        pxbSetting.ui16ItemLengths[0] = (uint16_t)strlen(GuiSetBoolStr[i]);
-        pxbSetting.pItemDatas[0] = (void *)GuiSetBoolStr[i];
+        pxbSetting.ui16ItemLengths[0] = (uint16_t)strlen(GuiSetBoolStr[szi]);
+        pxbSetting.pItemDatas[0] = (void *)GuiSetBoolStr[szi];
         pxbSetting.ui8ItemValues[0] = PXBReader::PXB_STRING;
 
         pxbSetting.ui16ItemLengths[1] = 1;
-        pxbSetting.pItemDatas[1] = (bBools[i] == true ? (void *)1 : 0);
+        pxbSetting.pItemDatas[1] = (bBools[szi] == true ? (void *)1 : 0);
         pxbSetting.ui8ItemValues[1] = PXBReader::PXB_BYTE;
 
         if(pxbSetting.WriteNextItem(pxbSetting.ui16ItemLengths[0] + pxbSetting.ui16ItemLengths[1], 2) == false) {
@@ -157,18 +155,18 @@ void GuiSettingManager::Save() {
         }
     }
 
-    for(size_t i = 0; i < GUISETINT_IDS_END; i++) {
+    for(size_t szi = 0; szi < GUISETINT_IDS_END; szi++) {
         // Don't save setting with default value
-        if(iIntegers[i] == GuiSetIntegerDef[i]) {
+        if(iIntegers[szi] == GuiSetIntegerDef[szi]) {
             continue;
         }
 
-        pxbSetting.ui16ItemLengths[0] = (uint16_t)strlen(GuiSetIntegerStr[i]);
-        pxbSetting.pItemDatas[0] = (void *)GuiSetIntegerStr[i];
+        pxbSetting.ui16ItemLengths[0] = (uint16_t)strlen(GuiSetIntegerStr[szi]);
+        pxbSetting.pItemDatas[0] = (void *)GuiSetIntegerStr[szi];
         pxbSetting.ui8ItemValues[0] = PXBReader::PXB_STRING;
 
         pxbSetting.ui16ItemLengths[1] = 4;
-        pxbSetting.pItemDatas[1] = (void *)iIntegers[i];
+        pxbSetting.pItemDatas[1] = (void *)iIntegers[szi];
         pxbSetting.ui8ItemValues[1] = PXBReader::PXB_FOUR_BYTES;
 
         if(pxbSetting.WriteNextItem(pxbSetting.ui16ItemLengths[0] + pxbSetting.ui16ItemLengths[1], 2) == false) {
@@ -180,30 +178,30 @@ void GuiSettingManager::Save() {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-bool GuiSettingManager::GetDefaultBool(size_t iBoolId) {
-    return GuiSetBoolDef[iBoolId];
+bool GuiSettingManager::GetDefaultBool(const size_t &szBoolId) const {
+    return GuiSetBoolDef[szBoolId];
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-int32_t GuiSettingManager::GetDefaultInteger(size_t iIntegerId) {
-    return GuiSetIntegerDef[iIntegerId];;
+int32_t GuiSettingManager::GetDefaultInteger(const size_t &szIntegerId) const {
+    return GuiSetIntegerDef[szIntegerId];;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GuiSettingManager::SetBool(size_t iBoolId, const bool &bValue) {
-    if(bBools[iBoolId] == bValue) {
+void GuiSettingManager::SetBool(const size_t &szBoolId, const bool &bValue) {
+    if(bBools[szBoolId] == bValue) {
         return;
     }
 
-    bBools[iBoolId] = bValue;
+    bBools[szBoolId] = bValue;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GuiSettingManager::SetInteger(size_t iIntegerId, const int32_t &iValue) {
-    if(iValue < 0 || iIntegers[iIntegerId] == iValue) {
+void GuiSettingManager::SetInteger(const size_t &szIntegerId, const int32_t &i32Value) {
+    if(i32Value < 0 || iIntegers[szIntegerId] == i32Value) {
         return;
     }
 
-    iIntegers[iIntegerId] = iValue;
+    iIntegers[szIntegerId] = i32Value;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

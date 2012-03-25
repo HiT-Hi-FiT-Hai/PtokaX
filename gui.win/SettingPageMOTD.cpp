@@ -28,9 +28,7 @@
 //---------------------------------------------------------------------------
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
+#pragma hdrstop
 //---------------------------------------------------------------------------
 static WNDPROC wpOldMultiEditProc = NULL;
 //---------------------------------------------------------------------------
@@ -60,10 +58,10 @@ LRESULT SettingPageMOTD::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam
             if(HIWORD(wParam) == EN_CHANGE) {
                 int iLen = ::GetWindowTextLength((HWND)lParam);
 
-                char * buf = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
+                char * buf = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
 
                 if(buf == NULL) {
-                    AppendSpecialLog("Cannot create buf in SettingPageMOTD::PageMOTDProc!");
+                    AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for buf in SettingPageMOTD::PageMOTDProc\n", (uint64_t)(iLen+1));
                     return 0;
                 }
 
@@ -90,9 +88,7 @@ LRESULT SettingPageMOTD::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                 }
 
                 if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
-                    string sDbgstr = "[BUF] Cannot deallocate buf in SettingPageMOTD::PageMOTDProc! "+string((uint32_t)GetLastError())+" "+
-                        string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-                    AppendSpecialLog(sDbgstr);
+                    AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageMOTD::PageMOTDProc\n", 0);
                 }
 
                 return 0;
@@ -120,10 +116,10 @@ void SettingPageMOTD::Save() {
 
     int iAllocLen = ::GetWindowTextLength(hWndPageItems[EDT_MOTD]);
 
-    char * buf = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iAllocLen+1);
+    char * buf = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iAllocLen+1);
 
     if(buf == NULL) {
-        AppendSpecialLog("Cannot create buf in SettingPageMOTD::Save!");
+        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for buf in SettingPageMOTD::Save\n", (uint64_t)(iAllocLen+1));
         return;
     }
 
@@ -137,9 +133,7 @@ void SettingPageMOTD::Save() {
     SettingManager->SetMOTD(buf, iLen);
 
     if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
-    	string sDbgstr = "[BUF] Cannot deallocate buf in SettingPageMOTD::Save! "+string((uint32_t)GetLastError())+" "+
-    		string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-        AppendSpecialLog(sDbgstr);
+        AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageMOTD::Save\n", 0);
     }
 
     SettingManager->SetBool(SETBOOL_MOTD_AS_PM, bMOTDAsPM);

@@ -30,10 +30,6 @@
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
-//---------------------------------------------------------------------------
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
 #endif
 //---------------------------------------------------------------------------
 clsUdpDebug *UdpDebug = NULL;
@@ -63,9 +59,7 @@ clsUdpDebug::UdpDbgItem::~UdpDbgItem() {
 #ifdef _WIN32
     if(Nick != NULL) {
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)Nick) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate Nick in ~UdpDbgItem! "+string((uint32_t)GetLastError())+" "+
-                string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-            AppendSpecialLog(sDbgstr);
+            AppendDebugLog("%s - [MEM] Cannot deallocate Nick in clsUdpDebug::UdpDbgItem::~UdpDbgItem\n", 0);
         }
     }
 #else
@@ -114,54 +108,47 @@ void clsUdpDebug::Broadcast(const char * msg) {
 }
 //---------------------------------------------------------------------------
 
-void clsUdpDebug::Broadcast(const char * msg, const size_t &iLen) {
+void clsUdpDebug::Broadcast(const char * msg, const size_t &szMsgLen) {
     if(llist == NULL)
         return;
 
-    size_t pktLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iLen;
+    size_t szLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+szMsgLen;
 
 #ifdef _WIN32
-    char *full = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, pktLen);
+    char * sMsg = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen);
 #else
-	char *full = (char *) malloc(pktLen);
+	char * sMsg = (char *)malloc(szLen);
 #endif
-    if(full == NULL) {
-		string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)pktLen)+
-			" bytes of memory in clsUdpDebug::Broadcast!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#else
-#endif
-        AppendSpecialLog(sDbgstr);
+    if(sMsg == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMsg in clsUdpDebug::Broadcast\n", (uint64_t)szLen);
+
 		return;
     }
 
     // create packet
-    ((uint16_t *)full)[0] = (uint16_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME];
-    ((uint16_t *)full)[1] = (uint16_t)iLen;
-    memcpy(full+4, SettingManager->sTexts[SETTXT_HUB_NAME], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
-    memcpy(full+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME], msg, iLen);
+    ((uint16_t *)sMsg)[0] = (uint16_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME];
+    ((uint16_t *)sMsg)[1] = (uint16_t)szMsgLen;
+    memcpy(sMsg+4, SettingManager->sTexts[SETTXT_HUB_NAME], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
+    memcpy(sMsg+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME], msg, szMsgLen);
      
     UdpDbgItem *next = llist;
 	while(next != NULL) {
         UdpDbgItem *cur = next;
         next = cur->next;
 #ifdef _WIN32
-    	sendto(cur->s, full, (int)pktLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
+    	sendto(cur->s, sMsg, (int)szLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
 #else
-		sendto(cur->s, full, pktLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
+		sendto(cur->s, sMsg, szLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
 #endif
-        ui64BytesSent += pktLen;
+        ui64BytesSent += szLen;
     }
 
 #ifdef _WIN32
-    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)full) == 0) {
-		string sDbgstr = "[BUF] Cannot deallocate full in clsUdpDebug::Broadcast! "+string((uint32_t)GetLastError())+" "+
-			string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-		AppendSpecialLog(sDbgstr);
+    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMsg) == 0) {
+		AppendDebugLog("%s - [MEM] Cannot deallocate sMsg in clsUdpDebug::Broadcast\n", 0);
 	}
 #else
-	free(full);
+	free(sMsg);
 #endif
 }
 //---------------------------------------------------------------------------
@@ -172,36 +159,29 @@ void clsUdpDebug::Broadcast(const string & msg) {
 //---------------------------------------------------------------------------
 
 bool clsUdpDebug::New(User * u, const int32_t &port) {
-	UdpDbgItem *NewDbg = new UdpDbgItem();
-    if(NewDbg == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate NewDbg in clsUdpDebug::New!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+	UdpDbgItem * pNewDbg = new UdpDbgItem();
+    if(pNewDbg == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewDbg in clsUdpDebug::New\n", 0);
     	return false;
     }
 
     // initialize dbg item
 #ifdef _WIN32
-    NewDbg->Nick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
+    pNewDbg->Nick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
 #else
-	NewDbg->Nick = (char *) malloc(u->ui8NickLen+1);
+	pNewDbg->Nick = (char *)malloc(u->ui8NickLen+1);
 #endif
-    if(NewDbg->Nick == NULL) {
-		string sDbgstr = "[BUF] "+string(u->sNick, u->ui8NickLen)+" ("+string(u->sIP, u->ui8IpLen)+") Cannot allocate "+string(u->ui8NickLen+1)+
-			" bytes of memory for Nick in clsUdpDebug::New!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+    if(pNewDbg->Nick == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for Nick in clsUdpDebug::New\n", (uint64_t)(u->ui8NickLen+1));
+
+		delete pNewDbg;
         return false;
     }
 
-    memcpy(NewDbg->Nick, u->sNick, u->ui8NickLen);
-    NewDbg->Nick[u->ui8NickLen] = '\0';
+    memcpy(pNewDbg->Nick, u->sNick, u->ui8NickLen);
+    pNewDbg->Nick[u->ui8NickLen] = '\0';
 
-    NewDbg->ui32Hash = u->ui32NickHash;
+    pNewDbg->ui32Hash = u->ui32NickHash;
 
     struct in6_addr i6addr;
     memcpy(&i6addr, &u->ui128IpHash, 16);
@@ -209,23 +189,23 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
     bool bIPv6 = (IN6_IS_ADDR_V4MAPPED(&i6addr) == 0);
 
     if(bIPv6 == true) {
-        ((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_family = AF_INET6;
-        ((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_port = htons((unsigned short)port);
-        memcpy(((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_addr.s6_addr, u->ui128IpHash, 16);
-        NewDbg->sas_len = sizeof(struct sockaddr_in6);
+        ((struct sockaddr_in6 *)&pNewDbg->sas_to)->sin6_family = AF_INET6;
+        ((struct sockaddr_in6 *)&pNewDbg->sas_to)->sin6_port = htons((unsigned short)port);
+        memcpy(((struct sockaddr_in6 *)&pNewDbg->sas_to)->sin6_addr.s6_addr, u->ui128IpHash, 16);
+        pNewDbg->sas_len = sizeof(struct sockaddr_in6);
     } else {
-        ((struct sockaddr_in *)&NewDbg->sas_to)->sin_family = AF_INET;
-        ((struct sockaddr_in *)&NewDbg->sas_to)->sin_port = htons((unsigned short)port);
-        ((struct sockaddr_in *)&NewDbg->sas_to)->sin_addr.s_addr = inet_addr(u->sIP);
-        NewDbg->sas_len = sizeof(struct sockaddr_in);
+        ((struct sockaddr_in *)&pNewDbg->sas_to)->sin_family = AF_INET;
+        ((struct sockaddr_in *)&pNewDbg->sas_to)->sin_port = htons((unsigned short)port);
+        ((struct sockaddr_in *)&pNewDbg->sas_to)->sin_addr.s_addr = inet_addr(u->sIP);
+        pNewDbg->sas_len = sizeof(struct sockaddr_in);
     }
 
-    NewDbg->s = socket((bIPv6 == true ? AF_INET6 : AF_INET), SOCK_DGRAM, IPPROTO_UDP);
+    pNewDbg->s = socket((bIPv6 == true ? AF_INET6 : AF_INET), SOCK_DGRAM, IPPROTO_UDP);
 #ifdef _WIN32
-    if(NewDbg->s == INVALID_SOCKET) {
+    if(pNewDbg->s == INVALID_SOCKET) {
         int err = WSAGetLastError();
 #else
-    if(NewDbg->s == -1) {
+    if(pNewDbg->s == -1) {
 #endif
 		string Txt = "*** [ERR] "+string(LanguageManager->sTexts[LAN_UDP_SCK_CREATE_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_UDP_SCK_CREATE_ERR])+
 #ifdef _WIN32
@@ -234,18 +214,18 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
 			": "+string(errno);
 #endif
         UserSendTextDelayed(u, Txt);
-        delete NewDbg;
+        delete pNewDbg;
         return false;
     }
 
     // set non-blocking
 #ifdef _WIN32
     uint32_t block = 1;
-	if(SOCKET_ERROR == ioctlsocket(NewDbg->s, FIONBIO, (unsigned long *)&block)) {
+	if(SOCKET_ERROR == ioctlsocket(pNewDbg->s, FIONBIO, (unsigned long *)&block)) {
         int err = WSAGetLastError();
 #else
-    int oldFlag = fcntl(NewDbg->s, F_GETFL, 0);
-    if(fcntl(NewDbg->s, F_SETFL, oldFlag | O_NONBLOCK) == -1) {
+    int oldFlag = fcntl(pNewDbg->s, F_GETFL, 0);
+    if(fcntl(pNewDbg->s, F_SETFL, oldFlag | O_NONBLOCK) == -1) {
 #endif
 		string Txt = "*** [ERR] "+string(LanguageManager->sTexts[LAN_UDP_NON_BLOCK_FAIL], (size_t)LanguageManager->ui16TextsLens[LAN_UDP_NON_BLOCK_FAIL])+
 #ifdef _WIN32
@@ -254,108 +234,91 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
 			": "+string(errno);
 #endif
 		UserSendTextDelayed(u, Txt);
-        delete NewDbg;
+        delete pNewDbg;
         return false;
     }
 
-    NewDbg->prev = NULL;
-    NewDbg->next = NULL;
+    pNewDbg->prev = NULL;
+    pNewDbg->next = NULL;
 
     if(llist == NULL){
-        llist = NewDbg;
+        llist = pNewDbg;
     } else {
-        llist->prev = NewDbg;
-        NewDbg->next = llist;
-        llist = NewDbg;
+        llist->prev = pNewDbg;
+        pNewDbg->next = llist;
+        llist = pNewDbg;
     }
 
     char msg[128];
-#ifdef _WIN32
-    int iLen = sprintf(msg, "[HUB] Subscribed, users online: %I32d", ui32Logged);
-#else
+
 	int iLen = sprintf(msg, "[HUB] Subscribed, users online: %u", ui32Logged);
-#endif
     if(CheckSprintf(iLen, 128, "clsUdpDebug::New") == true) {
-	    size_t pktLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iLen;
+	    size_t szLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iLen;
 	
 #ifdef _WIN32
-	    char *full = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, pktLen);
+	    char * sMsg = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen);
 #else
-		char *full = (char *) malloc(pktLen);
+		char * sMsg = (char *)malloc(szLen);
 #endif
-	    if(full == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)pktLen)+
-				" bytes of memory in clsUdpDebug::New1!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
+	    if(sMsg == NULL) {
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in clsUdpDebug::New1\n", (uint64_t)szLen);
+
 			return false;
 	    }
 	
 	    // create packet
-	    ((uint16_t *)full)[0] = (uint16_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME];
-	    ((uint16_t *)full)[1] = (uint16_t)iLen;
-	    memcpy(full+4, SettingManager->sTexts[SETTXT_HUB_NAME], SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
-	    memcpy(full+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME], msg, iLen);
+	    ((uint16_t *)sMsg)[0] = (uint16_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME];
+	    ((uint16_t *)sMsg)[1] = (uint16_t)iLen;
+	    memcpy(sMsg+4, SettingManager->sTexts[SETTXT_HUB_NAME], SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
+	    memcpy(sMsg+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME], msg, iLen);
 	
 #ifdef _WIN32
-		sendto(NewDbg->s, full, (int)pktLen, 0, (struct sockaddr *)&NewDbg->sas_to, NewDbg->sas_len);
+		sendto(pNewDbg->s, sMsg, (int)szLen, 0, (struct sockaddr *)&pNewDbg->sas_to, pNewDbg->sas_len);
 #else
-		sendto(NewDbg->s, full, pktLen, 0, (struct sockaddr *)&NewDbg->sas_to, NewDbg->sas_len);
+		sendto(pNewDbg->s, sMsg, szLen, 0, (struct sockaddr *)&pNewDbg->sas_to, pNewDbg->sas_len);
 #endif
-        ui64BytesSent += iLen;
+        ui64BytesSent += szLen;
 
 #ifdef _WIN32		
-	    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)full) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate full in clsUdpDebug::New! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-			AppendSpecialLog(sDbgstr);
+	    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMsg) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate full in clsUdpDebug::New\n", 0);
         }
 #else
-		free(full);
+		free(sMsg);
 #endif
     }
 
-    NewDbg->bIsScript = false;
+    pNewDbg->bIsScript = false;
 
     return true;
 }
 //---------------------------------------------------------------------------
 
 bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, char * sScriptName) {
-	UdpDbgItem *NewDbg = new UdpDbgItem();
-    if(NewDbg == NULL) {
-    	string sDbgstr = "[BUF] Cannot allocate NewDbg in clsUdpDebug::New!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(GetProcessHeap, 0, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
+	UdpDbgItem * pNewDbg = new UdpDbgItem();
+    if(pNewDbg == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewDbg in clsUdpDebug::New\n", 0);
     	return false;
     }
 
     // initialize dbg item
-    size_t iScriptLen = strlen(sScriptName);
+    size_t szNameLen = strlen(sScriptName);
 #ifdef _WIN32
-    NewDbg->Nick = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iScriptLen+1);
+    pNewDbg->Nick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNameLen+1);
 #else
-	NewDbg->Nick = (char *) malloc(iScriptLen+1);
+	pNewDbg->Nick = (char *)malloc(szNameLen+1);
 #endif
-    if(NewDbg->Nick == NULL) {
-		string sDbgstr = "[BUF] "+string(sScriptName)+" Cannot allocate "+string((uint64_t)(iScriptLen+1))+
-			" bytes of memory for Nick in clsUdpDebug::New!";
-#ifdef _WIN32
-		sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-		AppendSpecialLog(sDbgstr);
-        delete NewDbg;
+    if(pNewDbg->Nick == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for Nick in clsUdpDebug::New\n", (uint64_t)(szNameLen+1));
+
+        delete pNewDbg;
         return false;
     }
 
-	memcpy(NewDbg->Nick, sScriptName, iScriptLen);
-    NewDbg->Nick[iScriptLen] = '\0';
+	memcpy(pNewDbg->Nick, sScriptName, szNameLen);
+    pNewDbg->Nick[szNameLen] = '\0';
 
-    NewDbg->ui32Hash = 0;
+    pNewDbg->ui32Hash = 0;
 
     uint8_t ui128IP[16];
     HashIP(sIP, ui128IP);
@@ -366,142 +329,117 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
     bool bIPv6 = (IN6_IS_ADDR_V4MAPPED(&i6addr) == 0);
 
     if(bIPv6 == true) {
-        ((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_family = AF_INET6;
-        ((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_port = htons(usPort);
-        memcpy(((struct sockaddr_in6 *)&NewDbg->sas_to)->sin6_addr.s6_addr, ui128IP, 16);
-        NewDbg->sas_len = sizeof(struct sockaddr_in6);
+        ((struct sockaddr_in6 *)&pNewDbg->sas_to)->sin6_family = AF_INET6;
+        ((struct sockaddr_in6 *)&pNewDbg->sas_to)->sin6_port = htons(usPort);
+        memcpy(((struct sockaddr_in6 *)&pNewDbg->sas_to)->sin6_addr.s6_addr, ui128IP, 16);
+        pNewDbg->sas_len = sizeof(struct sockaddr_in6);
     } else {
-        ((struct sockaddr_in *)&NewDbg->sas_to)->sin_family = AF_INET;
-        ((struct sockaddr_in *)&NewDbg->sas_to)->sin_port = htons(usPort);
-        memcpy(&((struct sockaddr_in *)&NewDbg->sas_to)->sin_addr.s_addr, ui128IP+12, 4);
-        NewDbg->sas_len = sizeof(struct sockaddr_in);
+        ((struct sockaddr_in *)&pNewDbg->sas_to)->sin_family = AF_INET;
+        ((struct sockaddr_in *)&pNewDbg->sas_to)->sin_port = htons(usPort);
+        memcpy(&((struct sockaddr_in *)&pNewDbg->sas_to)->sin_addr.s_addr, ui128IP+12, 4);
+        pNewDbg->sas_len = sizeof(struct sockaddr_in);
     }
 
-    NewDbg->s = socket((bIPv6 == true ? AF_INET6 : AF_INET), SOCK_DGRAM, IPPROTO_UDP);
+    pNewDbg->s = socket((bIPv6 == true ? AF_INET6 : AF_INET), SOCK_DGRAM, IPPROTO_UDP);
 
 #ifdef _WIN32
-    if(NewDbg->s == INVALID_SOCKET) {
-        int err = WSAGetLastError();
+    if(pNewDbg->s == INVALID_SOCKET) {
 #else
-    if(NewDbg->s == -1) {
+    if(pNewDbg->s == -1) {
 #endif
-		string sDbgstr = "*** [ERR] "+string(LanguageManager->sTexts[LAN_UDP_SCK_CREATE_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_UDP_SCK_CREATE_ERR])+
-#ifdef _WIN32
-			": "+string(WSErrorStr(err))+" ("+string(err)+")";
-#else
-			": "+string(errno);
-#endif
-        AppendSpecialLog(sDbgstr);
-        delete NewDbg;
+        delete pNewDbg;
         return false;
     }
 
     // set non-blocking
 #ifdef _WIN32
     uint32_t block = 1;
-	if(SOCKET_ERROR == ioctlsocket(NewDbg->s, FIONBIO, (unsigned long *)&block)) {
-        int err = WSAGetLastError();
+	if(SOCKET_ERROR == ioctlsocket(pNewDbg->s, FIONBIO, (unsigned long *)&block)) {
 #else
-    int oldFlag = fcntl(NewDbg->s, F_GETFL, 0);
-    if(fcntl(NewDbg->s, F_SETFL, oldFlag | O_NONBLOCK) == -1) {
+    int oldFlag = fcntl(pNewDbg->s, F_GETFL, 0);
+    if(fcntl(pNewDbg->s, F_SETFL, oldFlag | O_NONBLOCK) == -1) {
 #endif
-		string sDbgstr = "*** [ERR] "+string(LanguageManager->sTexts[LAN_UDP_NON_BLOCK_FAIL], (size_t)LanguageManager->ui16TextsLens[LAN_UDP_NON_BLOCK_FAIL])+
-#ifdef _WIN32
-			": "+string(WSErrorStr(err))+" ("+string(err)+")";
-#else
-			": "+string(errno);
-#endif
-		AppendSpecialLog(sDbgstr);
-        delete NewDbg;
+        delete pNewDbg;
         return false;
     }
         
-    NewDbg->prev = NULL;
-    NewDbg->next = NULL;
+    pNewDbg->prev = NULL;
+    pNewDbg->next = NULL;
 
     if(bAllData == true) {
         if(llist == NULL){
-            llist = NewDbg;
+            llist = pNewDbg;
         } else {
-            llist->prev = NewDbg;
-            NewDbg->next = llist;
-            llist = NewDbg;
+            llist->prev = pNewDbg;
+            pNewDbg->next = llist;
+            llist = pNewDbg;
         }
     } else {
         if(ScriptList == NULL){
-            ScriptList = NewDbg;
+            ScriptList = pNewDbg;
         } else {
-            ScriptList->prev = NewDbg;
-            NewDbg->next = ScriptList;
-            ScriptList = NewDbg;
+            ScriptList->prev = pNewDbg;
+            pNewDbg->next = ScriptList;
+            ScriptList = pNewDbg;
         }
     }
 
     char msg[128];
-#ifdef _WIN32
-    int iLen = sprintf(msg, "[HUB] Subscribed, users online: %I32d", ui32Logged);
-#else
+
 	int iLen = sprintf(msg, "[HUB] Subscribed, users online: %u", ui32Logged);
-#endif
     if(CheckSprintf(iLen, 128, "clsUdpDebug::New") == true) {
-	    size_t pktLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iLen;
+	    size_t szLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iLen;
 	    if(bAllData == false) {
-            pktLen += iScriptLen+2;
+            szLen += szNameLen+2;
         }
 
 #ifdef _WIN32
-	    char *full = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, pktLen);
+	    char * sMsg = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen);
 #else
-		char *full = (char *) malloc(pktLen);
+		char * sMsg = (char *)malloc(szLen);
 #endif
-	    if(full == NULL) {
-			string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)pktLen)+
-				" bytes of memory in clsUdpDebug::New1!";
-#ifdef _WIN32
-			sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-			AppendSpecialLog(sDbgstr);
+	    if(sMsg == NULL) {
+			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in clsUdpDebug::New1\n", (uint64_t)szLen);
+
 			return false;
 	    }
 	
 	    // create packet
 	    if(bAllData == true) {
-	       ((uint16_t *)full)[0] = (uint16_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME];
+	       ((uint16_t *)sMsg)[0] = (uint16_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME];
         } else {
-            ((uint16_t *)full)[0] = (uint16_t)(SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iScriptLen+2);
+            ((uint16_t *)sMsg)[0] = (uint16_t)(SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+szNameLen+2);
         }
 
-	    ((uint16_t *)full)[1] = (uint16_t)iLen;
+	    ((uint16_t *)sMsg)[1] = (uint16_t)iLen;
 
-	    memcpy(full+4, SettingManager->sTexts[SETTXT_HUB_NAME], SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
+	    memcpy(sMsg+4, SettingManager->sTexts[SETTXT_HUB_NAME], SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
 	    if(bAllData == false) {
-			full[4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]] = '[';
-            memcpy(full+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+1, sScriptName, iScriptLen);
-			full[4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+1+iScriptLen] = ']';
-            memcpy(full+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iScriptLen+2, msg, iLen);
+			sMsg[4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]] = '[';
+            memcpy(sMsg+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+1, sScriptName, szNameLen);
+			sMsg[4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+1+szNameLen] = ']';
+            memcpy(sMsg+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+szNameLen+2, msg, iLen);
         } else {
-	       memcpy(full+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME], msg, iLen);
+	       memcpy(sMsg+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME], msg, iLen);
         }
 
 #ifdef _WIN32
-		sendto(NewDbg->s, full, (int)pktLen, 0, (struct sockaddr *)&NewDbg->sas_to, NewDbg->sas_len);
+		sendto(pNewDbg->s, sMsg, (int)szLen, 0, (struct sockaddr *)&pNewDbg->sas_to, pNewDbg->sas_len);
 #else
-		sendto(NewDbg->s, full, pktLen, 0, (struct sockaddr *)&NewDbg->sas_to, NewDbg->sas_len);
+		sendto(pNewDbg->s, sMsg, szLen, 0, (struct sockaddr *)&pNewDbg->sas_to, pNewDbg->sas_len);
 #endif
-        ui64BytesSent += iLen;
+        ui64BytesSent += szLen;
 
 #ifdef _WIN32
-	    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)full) == 0) {
-			string sDbgstr = "[BUF] Cannot deallocate full in clsUdpDebug::New! "+string((uint32_t)GetLastError())+" "+
-				string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-			AppendSpecialLog(sDbgstr);
+	    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMsg) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate full in clsUdpDebug::New\n", 0);
         }
 #else
-		free(full);
+		free(sMsg);
 #endif
     }
 
-    NewDbg->bIsScript = true;
+    pNewDbg->bIsScript = true;
 
     return true;
 }
@@ -512,11 +450,8 @@ bool clsUdpDebug::Remove(User * u) {
 	while(next != NULL) {
         UdpDbgItem *cur = next;
         next = cur->next;
-#ifdef _WIN32
-    	if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && stricmp(cur->Nick, u->sNick) == 0) {
-#else
+
 		if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->Nick, u->sNick) == 0) {
-#endif
             if(cur->prev == NULL) {
                 if(cur->next == NULL) {
                     llist = NULL;
@@ -545,11 +480,7 @@ void clsUdpDebug::Remove(char * sScriptName) {
         UdpDbgItem *cur = next;
         next = cur->next;
 
-#ifdef _WIN32
-    	if(stricmp(cur->Nick, sScriptName) == 0) {
-#else
 		if(strcasecmp(cur->Nick, sScriptName) == 0) {
-#endif
             if(cur->prev == NULL) {
                 if(cur->next == NULL) {
                     llist = NULL;
@@ -574,11 +505,7 @@ void clsUdpDebug::Remove(char * sScriptName) {
         UdpDbgItem *cur = next;
         next = cur->next;
 
-#ifdef _WIN32
-    	if(cur->bIsScript == true && stricmp(cur->Nick, sScriptName) == 0) {
-#else
 		if(cur->bIsScript == true && strcasecmp(cur->Nick, sScriptName) == 0) {
-#endif
             if(cur->prev == NULL) {
                 if(cur->next == NULL) {
                     llist = NULL;
@@ -605,11 +532,8 @@ bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) {
 	while(next != NULL) {
         UdpDbgItem *cur = next;
         next = cur->next;
-#ifdef _WIN32
-        if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && stricmp(cur->Nick, u->sNick) == 0) {
-#else
+
 		if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->Nick, u->sNick) == 0) {
-#endif
             if(bSndMess == true) {
 				string Txt = "<"+string(SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], (size_t)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC])+
 					"> *** "+string(LanguageManager->sTexts[LAN_YOU_SUBSCRIBED_UDP_DBG], (size_t)LanguageManager->ui16TextsLens[LAN_YOU_SUBSCRIBED_UDP_DBG])+
@@ -625,61 +549,52 @@ bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) {
 }
 //---------------------------------------------------------------------------
 
-void clsUdpDebug::Send(char * sScriptName, char * sMsg, const size_t &iLen) {
+void clsUdpDebug::Send(char * sScriptName, char * sMessage, const size_t &szMsgLen) {
     UdpDbgItem *next = ScriptList;
 	while(next != NULL) {
         UdpDbgItem *cur = next;
         next = cur->next;
-#ifdef _WIN32
-        if(stricmp(cur->Nick, sScriptName) == 0) {
-#else
+
 		if(strcasecmp(cur->Nick, sScriptName) == 0) {
-#endif
-            size_t iScriptLen = strlen(sScriptName);
-            size_t pktLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iScriptLen+2+iLen;
+            size_t szNameLen = strlen(sScriptName);
+            size_t szLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+szNameLen+2+szMsgLen;
 
 #ifdef _WIN32
-            char *full = (char *) HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, pktLen);
+            char * sMsg = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen);
 #else
-			char *full = (char *) malloc(pktLen);
+			char * sMsg = (char *)malloc(szLen);
 #endif
-            if(full == NULL) {
-				string sDbgstr = "[BUF] Cannot allocate "+string((uint64_t)pktLen)+
-					" bytes of memory in clsUdpDebug::Send!";
-#ifdef _WIN32
-				sDbgstr += " "+string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0))+GetMemStat();
-#endif
-				AppendSpecialLog(sDbgstr);
+            if(sMsg == NULL) {
+				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in clsUdpDebug::Send\n", (uint64_t)szLen);
+
         		return;
             }
         
             // create packet
-			((uint16_t *)full)[0] = (uint16_t)(SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iScriptLen+2);
-            ((uint16_t *)full)[1] = (uint16_t)iLen;
+			((uint16_t *)sMsg)[0] = (uint16_t)(SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+szNameLen+2);
+            ((uint16_t *)sMsg)[1] = (uint16_t)szMsgLen;
 
-            memcpy(full+4, SettingManager->sTexts[SETTXT_HUB_NAME], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
+            memcpy(sMsg+4, SettingManager->sTexts[SETTXT_HUB_NAME], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
           
-			full[4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]] = '[';
-            memcpy(full+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+1, sScriptName, iScriptLen);
-			full[4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+1+iScriptLen] = ']';
+			sMsg[4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]] = '[';
+            memcpy(sMsg+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+1, sScriptName, szNameLen);
+			sMsg[4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+1+szNameLen] = ']';
 
-            memcpy(full+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iScriptLen+2, sMsg, iLen);
+            memcpy(sMsg+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+szNameLen+2, sMessage, szMsgLen);
 
 #ifdef _WIN32
-            sendto(cur->s, full, (int)pktLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
+            sendto(cur->s, sMsg, (int)szLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
 #else
-			sendto(cur->s, full, pktLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
+			sendto(cur->s, sMsg, szLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
 #endif
-            ui64BytesSent += pktLen;
+            ui64BytesSent += szLen;
 
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)full) == 0) {
-				string sDbgstr = "[BUF] Cannot deallocate full in clsUdpDebug::Send! "+string((uint32_t)GetLastError())+" "+
-					string(HeapValidate(hPtokaXHeap, HEAP_NO_SERIALIZE, 0));
-				AppendSpecialLog(sDbgstr);
+            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMsg) == 0) {
+				AppendDebugLog("%s - [MEM] Cannot deallocate full in clsUdpDebug::Send\n", 0);
         	}
 #else
-			free(full);
+			free(sMsg);
 #endif
 
         	return;

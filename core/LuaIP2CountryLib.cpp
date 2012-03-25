@@ -35,12 +35,6 @@
 #include "IP2Country.h"
 #include "LuaScript.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#ifndef _MSC_VER
-		#pragma package(smart_init)
-	#endif
-#endif
-//---------------------------------------------------------------------------
 
 static int GetCountryCode(lua_State * L) {
 	if(lua_gettop(L) != 1) {
@@ -57,13 +51,13 @@ static int GetCountryCode(lua_State * L) {
         return 1;
     }
 
-    size_t iLen;
-    char *sIP = (char *)lua_tolstring(L, 1, &iLen);
+    size_t szLen;
+    char * sIP = (char *)lua_tolstring(L, 1, &szLen);
 
     uint8_t ui128Hash[16];
     memset(ui128Hash, 0, 16);
 
-    if(iLen == 0 || HashIP(sIP, ui128Hash) == false) {
+    if(szLen == 0 || HashIP(sIP, ui128Hash) == false) {
         lua_settop(L, 0);
         lua_pushnil(L);
         return 1;
@@ -90,13 +84,13 @@ static int GetCountryName(lua_State * L) {
     const char * sCountry;
 
     if(lua_type(L, 1) == LUA_TSTRING) {
-        size_t iLen;
-        char *sIP = (char *)lua_tolstring(L, 1, &iLen);
+        size_t szLen;
+        char * sIP = (char *)lua_tolstring(L, 1, &szLen);
 
         uint8_t ui128Hash[16];
         memset(ui128Hash, 0, 16);
 
-        if(iLen == 0 || HashIP(sIP, ui128Hash) == false) {
+        if(szLen == 0 || HashIP(sIP, ui128Hash) == false) {
             lua_settop(L, 0);
             lua_pushnil(L);
             return 1;

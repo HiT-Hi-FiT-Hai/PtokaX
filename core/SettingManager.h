@@ -90,18 +90,18 @@ public:
     SetMan(void);
     ~SetMan(void);
 
-    bool GetBool(size_t iBoolId);
+    bool GetBool(const size_t &szBoolId);
     uint16_t GetFirstPort();
-    int16_t GetShort(size_t iShortId);
-    void GetText(size_t iTxtId, char * sMsg);
+    int16_t GetShort(const size_t &szShortId);
+    void GetText(const size_t &szTxtId, char * sMsg);
 
-    void SetBool(size_t iBoolId, const bool &bValue); //SettingManager->SetBool()
-    void SetMOTD(char * sTxt, const size_t &iLen);
-    void SetShort(size_t iShortId, const int16_t &iValue);
-    void SetText(size_t iTxtId, char * sTxt);
-    void SetText(size_t iTxtId, const char * sTxt);
-    void SetText(size_t iTxtId, const char * sTxt, const size_t &iLen);
-    void SetText(size_t iTxtId, const string & sTxt);
+    void SetBool(const size_t &szBoolId, const bool &bValue); //SettingManager->SetBool()
+    void SetMOTD(char * sTxt, const size_t &szLen);
+    void SetShort(const size_t &szShortId, const int16_t &iValue);
+    void SetText(const size_t &szTxtId, char * sTxt);
+    void SetText(const size_t &szTxtId, const char * sTxt);
+    void SetText(const size_t &szTxtId, const char * sTxt, const size_t &szLen);
+    void SetText(const size_t &szTxtId, const string & sTxt);
 
     void UpdateBot(const bool &bNickChanged = true);
     void DisableBot(const bool &bNickChanged = true);

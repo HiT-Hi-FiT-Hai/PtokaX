@@ -55,7 +55,7 @@ char * stristr2(const char *str1, const char *str2);
 bool isIP(char * IP, const size_t ui32Len);
 bool GetIpParts(char * sIP, const size_t ui32Len, uint32_t &a, uint32_t &b, uint32_t &c, uint32_t &d);
 
-uint32_t HashNick(const char * sNick, const size_t &sNickLen);
+uint32_t HashNick(const char * sNick, const size_t &szNickLen);
 
 bool HashIP(const char * sIP, uint8_t * ui128IpHash);
 
@@ -75,11 +75,11 @@ inline size_t Allign1024(size_t n) { return ((n+1) & 0xFFFFFC00) + 0x400; }
 	string GetMemStat();
 #endif
 
-bool CheckSprintf(int iRetVal, const size_t &iMax, const char * sMsg); // CheckSprintf(imsgLen, 64, "UdpDebug::New");
-bool CheckSprintf1(int iRetVal, int iLenVal, const size_t &iMax, const char * sMsg); // CheckSprintf1(iret, imsgLen, 64, "UdpDebug::New");
+bool CheckSprintf(int iRetVal, const size_t &szMax, const char * sMsg); // CheckSprintf(imsgLen, 64, "UdpDebug::New");
+bool CheckSprintf1(int iRetVal, int iLenVal, const size_t &szMax, const char * sMsg); // CheckSprintf1(iret, imsgLen, 64, "UdpDebug::New");
 
 void AppendLog(const string & sData, const bool &bScript = false);
-void AppendSpecialLog(const string & sData);
+void AppendDebugLog(const char * sData, const uint64_t ui64Value);
 
 #ifdef _WIN32
 	void GetHeapStats(void *hHeap, DWORD &dwCommitted, DWORD &dwUnCommitted);
