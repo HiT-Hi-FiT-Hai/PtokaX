@@ -12,12 +12,25 @@ Added: IPv4 client connection support for users connected to hub by IPv6 when IP
 Added: IPv4 search support for users connected to hub by IPv6 when IPv4 connection check success.
 Added: Setting for manual IPv4 and IPv6 addresses.
 Added: Both IP addresses to !getinfo command for users with IPv6 and IPv4 connection available.
+Added: Both IP addresses to !myip command for users with IPv6 and IPv4 connection available.
 Changed: Country database for IPv4 from ip-to-country to IpToCountry.
+Changed: Not allowed chars in nick to only space, pipe and dollar. Only those protocol disallow. Issues with other chars is client work.
+Changed: Max simultaneous logins value from 500 to 1000.
+Changed: UserDisconnected is now called when user is disconnected by script in User/Reg/OpConnected.
+Changed: Max send buffer size on small hubs from 128 kB to 256 kB.
+Changed: Disabled keep slow client online for clients with zpipe support.
+Changed: Memory allocation failures checking. When memory allocation fail then user who caused that is disconnected and hub not crash.
+Changed: Line ending to \n on windoze.
 Fixed: TmrMan.RemoveTimer Lua api call in windoze version (thx Cêñoßy†ê for report).
 Fixed: MOTD was not updated after change in gui (thx mappy for report).
 Fixed: Few settings was not updated after change in gui.
 Fixed: Buggy chat input line after using some settings pages (thx The-Master for report).
+Fixed: All strict aliasing issues with GCC 02 and higher optimization level compile.
+Fixed: Core.GetUsersCount can in rare cases have different user count than number of users returned by Core.GetOnlineUsers.
+Fixed: Crash on script error loging in some cases.
+Fixed: Memory leak in users and bans ip hashtables.
 Removed: All info related to old ip-to-country database.
+Updated: makefile to work with buggy gold linker.
 
 ----------------------------------------0.4.2.0 11 September 2011-----------------------------
 Added: Missing PtokaX icon to 64bit service binary.

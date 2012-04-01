@@ -1421,6 +1421,22 @@ void UserSendTextDelayed(User * u, const string &sText) {
 
 void UserSendQueue(User * u, QzBuf * Queue, bool bChckActSr/* = true*/) {
     if(Queue->len == 0) {
+        if(ui8SrCntr == 0) {
+            if(u->cmdASearch != NULL) {
+#ifdef _WIN32
+                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)u->cmdASearch->sCommand) == 0) {
+					AppendDebugLog("%s - [MEM] Cannot deallocate u->cmdASearch->sCommand in UserSendQueue\n", 0);
+                }
+#else
+				free(u->cmdASearch->sCommand);
+#endif
+                u->cmdASearch->sCommand = NULL;
+
+                delete u->cmdASearch;
+                u->cmdASearch = NULL;
+            }
+        }
+
         return;
     }
 
@@ -1440,7 +1456,7 @@ void UserSendQueue(User * u, QzBuf * Queue, bool bChckActSr/* = true*/) {
 
 #ifdef _WIN32
                     if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)u->cmdASearch->sCommand) == 0) {
-						AppendDebugLog("%s - [MEM] Cannot deallocate u->cmdASearch->sCommand in UserSendQueue\n", 0);
+						AppendDebugLog("%s - [MEM] Cannot deallocate u->cmdASearch->sCommand1 in UserSendQueue\n", 0);
 					}
 #else
 					free(u->cmdASearch->sCommand);
@@ -1463,7 +1479,7 @@ void UserSendQueue(User * u, QzBuf * Queue, bool bChckActSr/* = true*/) {
                     if(u->cmdASearch != NULL) {
 #ifdef _WIN32
                         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)u->cmdASearch->sCommand) == 0) {
-							AppendDebugLog("%s - [MEM] Cannot deallocate u->cmdASearch->sCommand1 in UserSendQueue\n", 0);
+							AppendDebugLog("%s - [MEM] Cannot deallocate u->cmdASearch->sCommand2 in UserSendQueue\n", 0);
                         }
 #else
 						free(u->cmdASearch->sCommand);
@@ -1486,7 +1502,7 @@ void UserSendQueue(User * u, QzBuf * Queue, bool bChckActSr/* = true*/) {
                         UserRemFromSendBuf(u, u->cmdASearch->sCommand, u->cmdASearch->iLen, iSbLen);
 #ifdef _WIN32
                         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)u->cmdASearch->sCommand) == 0) {
-							AppendDebugLog("%s - [MEM] Cannot deallocate u->cmdASearch->sCommand2 in UserSendQueue\n", 0);
+							AppendDebugLog("%s - [MEM] Cannot deallocate u->cmdASearch->sCommand3 in UserSendQueue\n", 0);
                         }
 #else
 						free(u->cmdASearch->sCommand);
@@ -1503,7 +1519,7 @@ void UserSendQueue(User * u, QzBuf * Queue, bool bChckActSr/* = true*/) {
             if(u->cmdASearch != NULL) {
 #ifdef _WIN32
                 if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)u->cmdASearch->sCommand) == 0) {
-					AppendDebugLog("%s - [MEM] Cannot deallocate u->cmdASearch->sCommand3 in UserSendQueue\n", 0);
+					AppendDebugLog("%s - [MEM] Cannot deallocate u->cmdASearch->sCommand4 in UserSendQueue\n", 0);
                 }
 #else
 				free(u->cmdASearch->sCommand);
@@ -1515,7 +1531,7 @@ void UserSendQueue(User * u, QzBuf * Queue, bool bChckActSr/* = true*/) {
             }
         }
     }
-    
+
     if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false) {
         UserPutInSendBuf(u, Queue->buffer, Queue->len);
     } else {

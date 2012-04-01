@@ -402,8 +402,6 @@ void hashBanMan::RemFromIpTable(BanItem *Ban) {
 				if(Ban->hashiptablenext == NULL) {
 					if(cur->prev == NULL) {
 						if(cur->next == NULL) {
-                            delete cur;
-
                             iptable[ui16dx] = NULL;
 						} else {
 							cur->next->prev = NULL;
@@ -415,6 +413,8 @@ void hashBanMan::RemFromIpTable(BanItem *Ban) {
 						cur->prev->next = cur->next;
                         cur->next->prev = cur->prev;
                     }
+
+                    delete cur;
 				} else {
 					Ban->hashiptablenext->hashiptableprev = NULL;
                     cur->FirstBan = Ban->hashiptablenext;

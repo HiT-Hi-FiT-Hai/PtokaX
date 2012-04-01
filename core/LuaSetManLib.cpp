@@ -683,11 +683,7 @@ static int SetHubBot(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
-#if LUA_VERSION_NUM == 501
-static const luaL_reg setman_funcs[] = {
-#else
 static const luaL_Reg setman[] = {
-#endif
     { "Save", Save },
 	{ "GetMOTD", GetMOTD }, 
 	{ "SetMOTD", SetMOTD }, 
@@ -712,7 +708,7 @@ static const luaL_Reg setman[] = {
 
 #if LUA_VERSION_NUM == 501
 void RegSetMan(lua_State * L) {
-    luaL_register(L, "SetMan", setman_funcs);
+    luaL_register(L, "SetMan", setman);
 #else
 int RegSetMan(lua_State * L) {
     luaL_newlib(L, setman);

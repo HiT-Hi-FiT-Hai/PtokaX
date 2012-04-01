@@ -2330,11 +2330,7 @@ static int SetUserInfo(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
-#if LUA_VERSION_NUM == 501
-static const luaL_reg core_funcs[] =  {
-#else
 static const luaL_Reg core[] = {
-#endif
 	{ "Restart", Restart },
 	{ "Shutdown", Shutdown }, 
 	{ "ResumeAccepts", ResumeAccepts }, 
@@ -2381,7 +2377,7 @@ static const luaL_Reg core[] = {
 
 #if LUA_VERSION_NUM == 501
 void RegCore(lua_State * L) {
-    luaL_register(L, "Core", core_funcs);
+    luaL_register(L, "Core", core);
 #else
 int RegCore(lua_State * L) {
     luaL_newlib(L, core);

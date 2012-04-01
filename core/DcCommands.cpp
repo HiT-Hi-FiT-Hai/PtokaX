@@ -2423,8 +2423,10 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
                     UserClose(OtherUser, true);
                 }
             }
-            hashManager->Add(curUser);
-            curUser->ui32BoolBits |= User::BIT_HASHED;;
+            if(hashManager->Add(curUser) == false) {
+                return;
+            }
+            curUser->ui32BoolBits |= User::BIT_HASHED;
         }
         if(((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == false) {
             // welcome the new user
@@ -4080,8 +4082,12 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &sz
             return false;
         } else {
        	    // hub is public, proceed to Hello
-            hashManager->Add(curUser);
+            if(hashManager->Add(curUser) == false) {
+                return false;
+            }
+
             curUser->ui32BoolBits |= User::BIT_HASHED;
+
             if(ValidateNick == true) {
                 curUser->ui8State = User::STATE_VERSION_OR_MYPASS; // waiting for $Version
                 UserAddPrcsdCmd(curUser, PrcsdUsrCmd::LOGINHELLO, NULL, 0, NULL);
@@ -4090,7 +4096,10 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &sz
         }
     } else {
         // user is registered, wait for password
-        hashManager->Add(curUser);
+        if(hashManager->Add(curUser) == false) {
+            return false;
+        }
+
         curUser->ui32BoolBits |= User::BIT_HASHED;
         curUser->ui8State = User::STATE_VERSION_OR_MYPASS;
         UserAddPrcsdCmd(curUser, PrcsdUsrCmd::GETPASS, NULL, 0, NULL);

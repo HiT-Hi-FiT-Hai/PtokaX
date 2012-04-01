@@ -57,7 +57,7 @@ hashMan::~hashMan() {
 }
 //---------------------------------------------------------------------------
 
-void hashMan::Add(User * u) {
+bool hashMan::Add(User * u) {
     uint16_t ui16dx = 0;
     memcpy(&ui16dx, &u->ui32NickHash, sizeof(uint16_t));
 
@@ -78,7 +78,7 @@ void hashMan::Add(User * u) {
             UserClose(u);
 
             AppendDebugLog("%s - [MEM] Cannot allocate IpTableItem in hashMan::Add\n", 0);
-            return;
+            return false;
         }
 
         iptable[ui16dx]->next = NULL;
@@ -87,7 +87,7 @@ void hashMan::Add(User * u) {
         iptable[ui16dx]->FirstUser = u;
 		iptable[ui16dx]->ui16Count = 1;
 
-        return;
+        return true;
     }
 
     IpTableItem * next = iptable[ui16dx];
@@ -102,7 +102,7 @@ void hashMan::Add(User * u) {
             cur->FirstUser = u;
 			cur->ui16Count++;
 
-            return;
+            return true;
         }
     }
 
@@ -113,7 +113,7 @@ void hashMan::Add(User * u) {
         UserClose(u);
 
 		AppendDebugLog("%s - [MEM] Cannot allocate IpTableItem2 in hashMan::Add\n", 0);
-		return;
+		return false;
     }
 
     cur->FirstUser = u;
@@ -124,6 +124,8 @@ void hashMan::Add(User * u) {
 
     iptable[ui16dx]->prev = cur;
     iptable[ui16dx] = cur;
+
+    return true;
 }
 //---------------------------------------------------------------------------
 
@@ -163,7 +165,6 @@ void hashMan::Remove(User * u) {
                 if(u->hashiptablenext == NULL) {
                     if(cur->prev == NULL) {
                         if(cur->next == NULL) {
-                            delete cur;
                             iptable[ui16dx] = NULL;
                         } else {
                             cur->next->prev = NULL;
@@ -175,6 +176,8 @@ void hashMan::Remove(User * u) {
                         cur->prev->next = cur->next;
                         cur->next->prev = cur->prev;
                     }
+
+                    delete cur;
                 } else {
                     u->hashiptablenext->hashiptableprev = NULL;
                     cur->FirstUser = u->hashiptablenext;
