@@ -38,7 +38,7 @@ public:
     hashMan();
     ~hashMan();
 
-    void Add(User * u);
+    bool Add(User * u);
     void Remove(User * u);
 
     User * FindUser(char * sNick, const size_t &szNickLen);

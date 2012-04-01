@@ -357,11 +357,7 @@ static int Refresh(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
-#if LUA_VERSION_NUM == 501
-static const luaL_reg scriptman_funcs[] =  {
-#else
 static const luaL_Reg scriptman[] = {
-#endif
 	{ "GetScript", GetScript },
 	{ "GetScripts", GetScripts }, 
 	{ "MoveUp", MoveUp }, 
@@ -377,7 +373,7 @@ static const luaL_Reg scriptman[] = {
 
 #if LUA_VERSION_NUM == 501
 void RegScriptMan(lua_State * L) {
-    luaL_register(L, "ScriptMan", scriptman_funcs);
+    luaL_register(L, "ScriptMan", scriptman);
 #else
 int RegScriptMan(lua_State * L) {
     luaL_newlib(L, scriptman);

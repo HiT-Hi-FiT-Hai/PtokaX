@@ -4633,6 +4633,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
 #endif
 				Statinfo+="Users (Max/Actual Peak (Max Peak)/Logged): "+string(SettingManager->iShorts[SETSHORT_MAX_USERS])+" / "+string(ui32Peak)+" ("+
 					string(SettingManager->iShorts[SETSHORT_MAX_USERS_PEAK])+") / "+string(ui32Logged)+ "\n";
+                Statinfo+="Joins / Parts: "+string(ui32Joins)+" / "+string(ui32Parts)+"\n";
 				Statinfo+="Users shared size: "+string(ui64TotalShare)+" Bytes / "+string(formatBytes(ui64TotalShare))+"\n";
 				Statinfo+="Chat messages: "+string(DcCommands->iStatChat)+" x\n";
 				Statinfo+="Unknown commands: "+string(DcCommands->iStatCmdUnknown)+" x\n";
