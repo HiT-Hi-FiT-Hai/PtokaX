@@ -126,7 +126,7 @@ void RegThread::Setup(char * sListAddresses, const uint16_t &ui16AddrsLen) {
     // parse all addresses and create individul RegSockets
     char *sAddresses = (char *)malloc(ui16AddrsLen+1);
     if(sAddresses == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sAddresses in RegThread::Setup\n", (uint64_t)(ui16AddrsLen+1));
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sAddresses in RegThread::Setup\n", (uint64_t)(ui16AddrsLen+1));
 
         return;
     }
@@ -167,7 +167,7 @@ void RegThread::AddSock(char * sAddress, const size_t &ui32Len) {
     if(pNewSock->sAddress == NULL) {
 		delete pNewSock;
 
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sAddress in RegThread::AddSock\n", (uint64_t)(ui32Len+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sAddress in RegThread::AddSock\n", (uint64_t)(ui32Len+1));
 
         return;
     }
@@ -528,7 +528,7 @@ bool RegThread::Receive(RegSocket * Sock) {
         if(Sock->sRecvBuf == NULL) {
             free(oldbuf);
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes for sRecvBuf in RegThread::Receive\n", (uint64_t)szAllignLen);
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sRecvBuf in RegThread::Receive\n", (uint64_t)szAllignLen);
 
             return false;
         }
@@ -740,7 +740,7 @@ void RegThread::Add2SendBuf(RegSocket * Sock, char * sData) {
     
     Sock->sSendBuf = (char *)malloc(szLen+1);
     if(Sock->sSendBuf == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sSendBuf in RegThread::Add2SendBuf\n", (uint64_t)(szLen+1));
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sSendBuf in RegThread::Add2SendBuf\n", (uint64_t)(szLen+1));
 
         return;
     }

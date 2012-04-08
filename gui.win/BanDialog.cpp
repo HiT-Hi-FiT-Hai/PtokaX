@@ -443,7 +443,7 @@ bool BanDialog::OnAccept() {
 		if(iNickLen != 0) {
 			pBan->sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
 			if(pBan->sNick == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in BanDialog::OnAccept\n", (uint64_t)(iNickLen+1));
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in BanDialog::OnAccept\n", (uint64_t)(iNickLen+1));
 				delete pBan;
 
 				return false;
@@ -485,7 +485,7 @@ bool BanDialog::OnAccept() {
 		if(iReasonLen != 0) {
             pBan->sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
             if(pBan->sReason == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in BanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
+                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in BanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
 
                 delete pBan;
 
@@ -500,7 +500,7 @@ bool BanDialog::OnAccept() {
         if(iByLen != 0) {
             pBan->sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
             if(pBan->sBy == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in BanDialog::OnAccept\n", (uint64_t)(iByLen+1));
+                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in BanDialog::OnAccept\n", (uint64_t)(iByLen+1));
 
                 delete pBan;
 
@@ -669,7 +669,7 @@ bool BanDialog::OnAccept() {
 		if(iNickLen != 0) {
             sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iNickLen+1);
             if(sNick == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in BanDialog::OnAccept\n", (uint64_t)(iNickLen+1));
+                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in BanDialog::OnAccept\n", (uint64_t)(iNickLen+1));
 
                 return false;
             }
@@ -745,7 +745,7 @@ bool BanDialog::OnAccept() {
 		if(iReasonLen != 0) {
             sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
             if(sReason == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in BanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
+                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in BanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
 
                 return false;
             }
@@ -784,7 +784,7 @@ bool BanDialog::OnAccept() {
         if(iByLen != 0) {
             sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
             if(sBy == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in BanDialog::OnAccept\n", (uint64_t)(iByLen+1));
+                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in BanDialog::OnAccept\n", (uint64_t)(iByLen+1));
 
     			return false;
             }

@@ -203,7 +203,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
 									char * sMsg = (char *)malloc(iLen+curUser->ui8NickLen+15+64);
 #endif
                                     if(sMsg == NULL) {
-                                        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::StateValidateMyinfo\n", (uint64_t)(iLen+curUser->ui8NickLen+15+64));
+                                        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::StateValidateMyinfo\n", (uint64_t)(iLen+curUser->ui8NickLen+15+64));
 
                                         UserClose(curUser);
                                 		return;
@@ -315,7 +315,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
 										char * sMsg = (char *)malloc(iLen+curUser->ui8NickLen+15+64);
 #endif
 										if(sMsg == NULL) {
-											AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::StateVerPassMyinfo\n", (uint64_t)(iLen+curUser->ui8NickLen+15+64));
+											AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::StateVerPassMyinfo\n", (uint64_t)(iLen+curUser->ui8NickLen+15+64));
 
                                             UserClose(curUser);
                                             return;
@@ -389,7 +389,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
 							char * sMsg = (char *)malloc(iLen+curUser->ui8NickLen+15+64);
 #endif
                             if(sMsg == NULL) {
-								AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::StateNickListMyinfo\n", (uint64_t)(iLen+curUser->ui8NickLen+15+64));
+								AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::StateNickListMyinfo\n", (uint64_t)(iLen+curUser->ui8NickLen+15+64));
 
                                 UserClose(curUser);
                                 return;
@@ -459,7 +459,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
 									char * sMsg = (char *)malloc(iLen+curUser->ui8NickLen+15+64);
 #endif
                                     if(sMsg == NULL) {
-										AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::State1LoopMyinfo\n", (uint64_t)(iLen+curUser->ui8NickLen+15+64));
+										AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::State1LoopMyinfo\n", (uint64_t)(iLen+curUser->ui8NickLen+15+64));
 
 										UserClose(curUser);
                                         return;
@@ -564,7 +564,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
 									char * sMsg = (char *)malloc(iLen+curUser->ui8NickLen+15+64);
 #endif
                                     if(sMsg == NULL) {
-										AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::StateAddedMyinfo\n", (uint64_t)(iLen+curUser->ui8NickLen+15+64));
+										AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::StateAddedMyinfo\n", (uint64_t)(iLen+curUser->ui8NickLen+15+64));
 
 										UserClose(curUser);
                                         return;
@@ -1091,7 +1091,7 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
 			char * sMsg = (char *)malloc(szNeededLen);
 #endif
             if(sMsg == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::ConnectToMe\n", (uint64_t)szNeededLen);
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::ConnectToMe\n", (uint64_t)szNeededLen);
 
 				UserClose(curUser);
 				return;
@@ -1143,7 +1143,7 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
 				char * sMsg = (char *)malloc(szNeededLen);
 #endif
                 if(sMsg == NULL) {
-                    AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::CTM\n", (uint64_t)szNeededLen);
+                    AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::CTM\n", (uint64_t)szNeededLen);
 
                     UserClose(curUser);
                     return;
@@ -1210,7 +1210,7 @@ void cDcCommands::GetINFO(User * curUser, char * sData, const uint32_t &iLen) {
 			char * sMsg = (char *)malloc(szNeededLen);
 #endif
             if(sMsg == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::GetINFO\n", (uint64_t)szNeededLen);
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::GetINFO\n", (uint64_t)szNeededLen);
 
 				UserClose(curUser);
                 return;
@@ -1447,7 +1447,7 @@ void cDcCommands::Key(User * curUser, char * sData, const uint32_t &iLen) {
 			char * sMsg = (char *)malloc(szNeededLen);
 #endif
             if(sMsg == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::Key\n", (uint64_t)szNeededLen);
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::Key\n", (uint64_t)szNeededLen);
 
 				UserClose(curUser);
                 return;
@@ -1816,7 +1816,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
 				char * sMsg = (char *)malloc(szNeededLen);
 #endif
                 if(sMsg == NULL) {
-                    AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::Search\n", (uint64_t)szNeededLen);
+                    AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::Search\n", (uint64_t)szNeededLen);
 
                     UserClose(curUser);
                     return;
@@ -1882,7 +1882,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
                 curUser->ui32BoolBits |= User::BIT_ERROR;
                 UserClose(curUser);
 
-				AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes for DcCommands::Search\n", (uint64_t)(curUser->cmdPSearch->iLen+iLen+1));
+				AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for DcCommands::Search\n", (uint64_t)(curUser->cmdPSearch->iLen+iLen+1));
 
                 return;
             }
@@ -1913,7 +1913,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
                 curUser->ui32BoolBits |= User::BIT_ERROR;
                 UserClose(curUser);
 
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::Search2\n", (uint64_t)(iLen+1));
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::Search2\n", (uint64_t)(iLen+1));
 
                 return;
             }
@@ -1943,7 +1943,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
 					char * sMsg = (char *)malloc(szNeededLen);
 #endif
                     if(sMsg == NULL) {
-						AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::Search3\n", (uint64_t)szNeededLen);
+						AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::Search3\n", (uint64_t)szNeededLen);
 
 						UserClose(curUser);
                         return;
@@ -2017,7 +2017,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
                 curUser->ui32BoolBits |= User::BIT_ERROR;
                 UserClose(curUser);
 
-				AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes for DcCommands::Search1\n", (uint64_t)(curUser->cmdASearch->iLen+iLen+1));
+				AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for DcCommands::Search1\n", (uint64_t)(curUser->cmdASearch->iLen+iLen+1));
 
                 return;
             }
@@ -2047,7 +2047,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
                 curUser->ui32BoolBits |= User::BIT_ERROR;
                 UserClose(curUser);
 
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::Search5\n", (uint64_t)(iLen+1));
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::Search5\n", (uint64_t)(iLen+1));
 
                 return;
             }
@@ -2111,7 +2111,7 @@ bool cDcCommands::MyINFODeflood(User * curUser, char * sData, const uint32_t &iL
 			char * sMsg = (char *)malloc(szNeededLen);
 #endif
             if(sMsg == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::MyINFODeflood\n", (uint64_t)szNeededLen);
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::MyINFODeflood\n", (uint64_t)szNeededLen);
 
 				UserClose(curUser);
 				return false;
@@ -2206,7 +2206,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
 			char * sMsg = (char *)malloc(szNeededLen);
 #endif
             if(sMsg == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::MyPass\n", (uint64_t)szNeededLen);
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::MyPass\n", (uint64_t)szNeededLen);
 
 				UserClose(curUser);
                 return;
@@ -2310,7 +2310,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
                         char * sMsg = (char *)malloc(szNeededLen);
 #endif
                         if(sMsg == NULL) {
-				            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::MyPass1\n", (uint64_t)szNeededLen);
+				            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::MyPass1\n", (uint64_t)szNeededLen);
 
 				            UserClose(curUser);
                             return;
@@ -2354,7 +2354,7 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
             char * sMsg = (char *)malloc(szNeededLen);
 #endif
             if(sMsg == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::MyPass2\n", (uint64_t)szNeededLen);
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::MyPass2\n", (uint64_t)szNeededLen);
 
 				UserClose(curUser);
                 return;
@@ -2531,7 +2531,7 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
 				char * sMsg = (char *)malloc(szNeededLen);
 #endif
                 if(sMsg == NULL) {
-					AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::OpForceMove\n", (uint64_t)szNeededLen);
+					AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::OpForceMove\n", (uint64_t)szNeededLen);
 
 					UserClose(OtherUser);
                     return;
@@ -2577,7 +2577,7 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
 						char * sMsg = (char *)malloc(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->ui8NickLen+64);
 #endif
                         if(sMsg == NULL) {
-                            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::OpForceMove1\n", (uint64_t)(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->ui8NickLen+64));
+                            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::OpForceMove1\n", (uint64_t)(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->ui8NickLen+64));
                             return;
                         }
                         int imsgLen = sprintf(sMsg, "%s $<%s> *** %s %s %s %s %s. %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
@@ -2609,7 +2609,7 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
 						char * sMsg = (char *)malloc(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->ui8NickLen+64);
 #endif
                         if(sMsg == NULL) {
-							AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::OpForceMove2\n", (uint64_t)(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->ui8NickLen+64));
+							AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::OpForceMove2\n", (uint64_t)(iCmdPartsLen[1]+iCmdPartsLen[2]+64+curUser->ui8NickLen+64));
                             return;
                         }
                         imsgLen = sprintf(sMsg, "<%s> *** %s %s %s %s %s. %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->sNick,
@@ -2643,7 +2643,7 @@ void cDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen
 					char * sMsg = (char *)malloc(iCmdPartsLen[1]+iCmdPartsLen[2]+128);
 #endif
                     if(sMsg == NULL) {
-						AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::OpForceMove3\n", (uint64_t)(iCmdPartsLen[1]+iCmdPartsLen[2]+128));
+						AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::OpForceMove3\n", (uint64_t)(iCmdPartsLen[1]+iCmdPartsLen[2]+128));
                         return;
                     }
                     imsgLen = sprintf(sMsg, "<%s> *** %s %s %s. %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], OtherUser->sNick, LanguageManager->sTexts[LAN_IS_REDIRECTED_TO],
@@ -2693,7 +2693,7 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &i
 			char * sMsg = (char *)malloc(szNeededLen);
 #endif
             if(sMsg == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::RevConnectToMe\n", (uint64_t)szNeededLen);
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::RevConnectToMe\n", (uint64_t)szNeededLen);
 
 				UserClose(curUser);
                 return;
@@ -2752,7 +2752,7 @@ void cDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &i
 			char * sMsg = (char *)malloc(szNeededLen);
 #endif
             if(sMsg == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::RevConnectToMe\n", (uint64_t)szNeededLen);
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::RevConnectToMe\n", (uint64_t)szNeededLen);
 
 				UserClose(curUser);
 				return;
@@ -2842,7 +2842,7 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
 			char * sMsg = (char *)malloc(szNeededLen);
 #endif
             if(sMsg == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::SR\n", (uint64_t)szNeededLen);
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::SR\n", (uint64_t)szNeededLen);
 
 				UserClose(curUser);
 				return;
@@ -2881,7 +2881,7 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
 			char * sMsg = (char *)malloc(szNeededLen);
 #endif
             if(sMsg == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::SR\n", (uint64_t)szNeededLen);
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::SR\n", (uint64_t)szNeededLen);
 
 				UserClose(curUser);
                 return;
@@ -3006,7 +3006,7 @@ void cDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
                 char * sMsg = (char *)malloc(szNeededLen);
 #endif
                 if(sMsg == NULL) {
-				    AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for cDcCommands::Supports\n", (uint64_t)szNeededLen);
+				    AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for cDcCommands::Supports\n", (uint64_t)szNeededLen);
 
 				    UserClose(curUser);
                     return;
@@ -3165,7 +3165,7 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
 			char * sMsg = (char *)malloc(szNeededLen);
 #endif
             if(sMsg == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::To\n", (uint64_t)szNeededLen);
+                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::To\n", (uint64_t)szNeededLen);
 
                 UserClose(curUser);
                 return;
@@ -3215,7 +3215,7 @@ void cDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const b
 				char * sMsg = (char *)malloc(szNeededLen);
 #endif
                 if(sMsg == NULL) {
-					AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::To1\n", (uint64_t)szNeededLen);
+					AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::To1\n", (uint64_t)szNeededLen);
 
 					UserClose(curUser);
                     return;
@@ -3490,7 +3490,7 @@ bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen
 			char * sMsg = (char *)malloc(szNeededLen);
 #endif
             if(sMsg == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::ChatDeflood\n", (uint64_t)szNeededLen);
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::ChatDeflood\n", (uint64_t)szNeededLen);
 
 				UserClose(curUser);
                 return false;
@@ -3664,7 +3664,7 @@ void cDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, const
 							char * sMsg = (char *)malloc(szNeededLen);
 #endif
                             if(sMsg == NULL) {
-								AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::Chat\n", (uint64_t)szNeededLen);
+								AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::Chat\n", (uint64_t)szNeededLen);
                                 return;
                             }
                             int imsgLen = sprintf(sMsg, "%s $%s", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], sData);
@@ -3797,7 +3797,7 @@ void cDcCommands::Unknown(User * curUser, char * sData, const uint32_t &iLen) {
 			char * sMsg = (char *)malloc(szNeededLen);
 #endif
             if(sMsg == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for DcCommands::Unknown\n", (uint64_t)szNeededLen);
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::Unknown\n", (uint64_t)szNeededLen);
 
 				UserClose(curUser);
                 return;

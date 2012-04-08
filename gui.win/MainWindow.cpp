@@ -93,9 +93,9 @@ MainWindow::MainWindow() {
     MainWindowPages[1] = new MainWindowPageUsersChat();
     MainWindowPages[2] = new MainWindowPageScripts();
 
-    for(uint8_t ui8i = 0; ui8i < 4; ui8i++) {
+    for(uint8_t ui8i = 0; ui8i < 3; ui8i++) {
         if(MainWindowPages[ui8i] == NULL) {
-            AppendDebugLog("%s - [MEM] Cannot allocate MainWindowPage[" PRIu64 "] in MainWindow::MainWindow\n", (uint64_t)ui8i);
+            AppendDebugLog("%s - [MEM] Cannot allocate MainWindowPage[%" PRIu64 "] in MainWindow::MainWindow\n", (uint64_t)ui8i);
             exit(EXIT_FAILURE);
         }
     }

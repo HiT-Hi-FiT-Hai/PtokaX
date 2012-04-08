@@ -523,7 +523,7 @@ UserBan::UserBan(char * sMess, const uint32_t &iMessLen, const uint32_t &ui32Has
 	sMessage = (char *)malloc(iMessLen+1);
 #endif
     if(sMessage == NULL) {
-        AppendDebugLog("%s - [MEM] UserBan::UserBann cannot allocate " PRIu64 " bytes for sMessage\n", (uint64_t)(iMessLen+1));
+        AppendDebugLog("%s - [MEM] UserBan::UserBann cannot allocate %" PRIu64 " bytes for sMessage\n", (uint64_t)(iMessLen+1));
         return;
     }
 
@@ -1064,7 +1064,7 @@ bool UserMakeLock(User * u) {
     if(u->sendbuf == NULL) {
         u->sbdatalen = 0;
 
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in UserMakeLock\n", (uint64_t)szAllignLen);
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in UserMakeLock\n", (uint64_t)szAllignLen);
 
         return false;
     }
@@ -1228,7 +1228,7 @@ bool UserDoRecv(User * u) {
             u->ui32BoolBits |= User::BIT_ERROR;
             UserClose(u);
 
-			AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes for recvbuf in UserDoRecv\n", (uint64_t)szAllignLen);
+			AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes for recvbuf in UserDoRecv\n", (uint64_t)szAllignLen);
 
 			return false;
 		}
@@ -1634,7 +1634,7 @@ bool UserPutInSendBuf(User * u, const char * Text, const size_t &szTxtLen) {
                         u->ui32BoolBits |= User::BIT_ERROR;
                         UserClose(u);
 
-                        AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in UserPutInSendBuf-keepslow\n", (uint64_t)szAllignLen);
+                        AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in UserPutInSendBuf-keepslow\n", (uint64_t)szAllignLen);
 
                         return false;
                     }
@@ -1674,7 +1674,7 @@ bool UserPutInSendBuf(User * u, const char * Text, const size_t &szTxtLen) {
             u->ui32BoolBits |= User::BIT_ERROR;
             UserClose(u);
 
-			AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes for new sendbuf in UserPutInSendBuf\n", (uint64_t)szAllignLen);
+			AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes for new sendbuf in UserPutInSendBuf\n", (uint64_t)szAllignLen);
 
         	return false;
         }
@@ -1799,7 +1799,7 @@ void UserSetNick(User * u, char * sNewNick, const uint8_t &ui8NewNickLen) {
         u->ui32BoolBits |= User::BIT_ERROR;
         UserClose(u);
 
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for Nick in UserSetNick\n", (uint64_t)(ui8NewNickLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for Nick in UserSetNick\n", (uint64_t)(ui8NewNickLen+1));
 
         return;
     }   
@@ -1858,7 +1858,7 @@ void UserSetMyInfoOriginal(User * u, char * sNewMyInfo, const uint16_t &ui16NewM
         u->ui32BoolBits |= User::BIT_ERROR;
         UserClose(u);
 
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMyInfoOriginal in UserSetMyInfoOriginal\n", (uint64_t)(ui16NewMyInfoLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMyInfoOriginal in UserSetMyInfoOriginal\n", (uint64_t)(ui16NewMyInfoLen+1));
 
         return;
     }
@@ -1944,7 +1944,7 @@ static void UserSetMyInfoLong(User * u, char * sNewMyInfoLong, const uint16_t &u
         u->ui32BoolBits |= User::BIT_ERROR;
         UserClose(u);
 
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMyInfoLong in UserSetMyInfoLong\n", (uint64_t)(ui16NewMyInfoLongLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMyInfoLong in UserSetMyInfoLong\n", (uint64_t)(ui16NewMyInfoLongLen+1));
 
         return;
     }   
@@ -1979,7 +1979,7 @@ static void UserSetMyInfoShort(User * u, char * sNewMyInfoShort, const uint16_t 
         u->ui32BoolBits |= User::BIT_ERROR;
         UserClose(u);
 
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for MyInfoShort in UserSetMyInfoShort\n", (uint64_t)(ui16NewMyInfoShortLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for MyInfoShort in UserSetMyInfoShort\n", (uint64_t)(ui16NewMyInfoShortLen+1));
 
         return;
     }   
@@ -2010,7 +2010,7 @@ void UserSetVersion(User * u, char * sNewVer) {
         u->ui32BoolBits |= User::BIT_ERROR;
         UserClose(u);
 
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for Version in UserSetVersion\n", (uint64_t)(szLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for Version in UserSetVersion\n", (uint64_t)(szLen+1));
 
         return;
     }   
@@ -2041,7 +2041,7 @@ void UserSetPasswd(User * u, char * sNewPass) {
         u->ui32BoolBits |= User::BIT_ERROR;
         UserClose(u);
 
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for Password in UserSetPasswd\n", (uint64_t)(szLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for Password in UserSetPasswd\n", (uint64_t)(szLen+1));
 
         return;
     }   
@@ -2070,7 +2070,7 @@ void UserSetLastChat(User * u, char * sNewData, const size_t &szLen) {
         u->ui32BoolBits |= User::BIT_ERROR;
         UserClose(u);
 
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sLastChat in UserSetLastChat\n", (uint64_t)(szLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sLastChat in UserSetLastChat\n", (uint64_t)(szLen+1));
 
         return;
     }   
@@ -2104,7 +2104,7 @@ void UserSetLastPM(User * u, char * sNewData, const size_t &szLen) {
         u->ui32BoolBits |= User::BIT_ERROR;
         UserClose(u);
 
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sLastPM in UserSetLastPM\n", (uint64_t)(szLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sLastPM in UserSetLastPM\n", (uint64_t)(szLen+1));
 
         return;
     }
@@ -2139,7 +2139,7 @@ void UserSetLastSearch(User * u, char * sNewData, const size_t &szLen) {
         u->ui32BoolBits |= User::BIT_ERROR;
         UserClose(u);
 
-        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sLastSearch in UserSetLastSearch\n", (uint64_t)(szLen+1));
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sLastSearch in UserSetLastSearch\n", (uint64_t)(szLen+1));
 
         return;
     }   
@@ -2188,7 +2188,7 @@ void UserSetKickMsg(User * u, char * sKickMsg, size_t szLen/* = 0*/) {
             u->ui32BoolBits |= User::BIT_ERROR;
             UserClose(u);
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sKickMsg in UserSetKickMsg\n", (uint64_t)(szLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sKickMsg in UserSetKickMsg\n", (uint64_t)(szLen+1));
 
             return;
         }
@@ -2442,7 +2442,7 @@ void UserAddUserList(User * u) {
                         u->ui32BoolBits |= User::BIT_ERROR;
                         UserClose(u);
 
-						AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes for nickList in UserAddUserList\n", (uint64_t)(colUsers->nickListSize+NICKLISTSIZE+1));
+						AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for nickList in UserAddUserList\n", (uint64_t)(colUsers->nickListSize+NICKLISTSIZE+1));
 
                         return;
                     }
@@ -2597,7 +2597,7 @@ void UserAddUserList(User * u) {
                     u->ui32BoolBits |= User::BIT_ERROR;
                     UserClose(u);
 
-                    AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes for opList in UserAddUserList\n", (uint64_t)(colUsers->opListSize+OPLISTSIZE+1));
+                    AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for opList in UserAddUserList\n", (uint64_t)(colUsers->opListSize+OPLISTSIZE+1));
 
                     return;
                 }
@@ -3056,7 +3056,7 @@ void UserAddPrcsdCmd(User * u, const unsigned char &cType, char * sCommand, cons
                     u->ui32BoolBits |= User::BIT_ERROR;
                     UserClose(u);
 
-					AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in UserAddPrcsdCmd\n", (uint64_t)(cur->iLen+szCommandLen+1));
+					AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in UserAddPrcsdCmd\n", (uint64_t)(cur->iLen+szCommandLen+1));
 
                     return;
                 }
@@ -3087,7 +3087,7 @@ void UserAddPrcsdCmd(User * u, const unsigned char &cType, char * sCommand, cons
             u->ui32BoolBits |= User::BIT_ERROR;
             UserClose(u);
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sCommand in UserAddPrcsdCmd\n", (uint64_t)(szCommandLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sCommand in UserAddPrcsdCmd\n", (uint64_t)(szCommandLen+1));
 
             return;
         }
@@ -3109,7 +3109,7 @@ void UserAddPrcsdCmd(User * u, const unsigned char &cType, char * sCommand, cons
             u->ui32BoolBits |= User::BIT_ERROR;
             UserClose(u);
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for ToNick in UserAddPrcsdCmd\n", (uint64_t)(to->ui8NickLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for ToNick in UserAddPrcsdCmd\n", (uint64_t)(to->ui8NickLen+1));
 
             return;
         }   
@@ -3149,7 +3149,7 @@ void UserAddPrcsdCmd(User * u, const unsigned char &cType, char * sCommand, cons
         u->ui32BoolBits |= User::BIT_ERROR;
         UserClose(u);
 
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sCommand in UserAddPrcsdCmd1\n", (uint64_t)(szCommandLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sCommand in UserAddPrcsdCmd1\n", (uint64_t)(szCommandLen+1));
 
         return;
     }
@@ -3203,7 +3203,7 @@ char * UserSetUserInfo(char * sOldData, uint8_t &ui8OldDataLen, char * sNewData,
         sOldData = (char *)malloc(sz8NewDataLen+1);
 #endif
         if(sOldData == NULL) {
-            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in UserSetUserInfo\n", (uint64_t)(sz8NewDataLen+1));
+            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in UserSetUserInfo\n", (uint64_t)(sz8NewDataLen+1));
             return sOldData;
         }
 

@@ -131,7 +131,7 @@ SetMan::~SetMan(void) {
 
 #ifdef _WIN32
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sTexts[szi]) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sTexts[" PRIu64 "] in SetMan::~SetMan\n", (uint64_t)szi);
+			AppendDebugLog("%s - [MEM] Cannot deallocate sTexts[%" PRIu64 "] in SetMan::~SetMan\n", (uint64_t)szi);
         }
 #else
 		free(sTexts[szi]);
@@ -145,7 +145,7 @@ SetMan::~SetMan(void) {
 
 #ifdef _WIN32
         if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[szi]) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sPreTexts[" PRIu64 "] in SetMan::~SetMan\n", (uint64_t)szi);
+			AppendDebugLog("%s - [MEM] Cannot deallocate sPreTexts[%" PRIu64 "] in SetMan::~SetMan\n", (uint64_t)szi);
         }
 #else
 		free(sPreTexts[szi]);
@@ -208,7 +208,7 @@ void SetMan::LoadMOTD() {
 			sMOTD = (char *)malloc(ui16MOTDLen+1);
 #endif
             if(sMOTD == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMOTD in SetMan::LoadMOTD\n", (uint64_t)(ui16MOTDLen+1));
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMOTD in SetMan::LoadMOTD\n", (uint64_t)(ui16MOTDLen+1));
                 exit(EXIT_FAILURE);
             }
 
@@ -649,7 +649,7 @@ void SetMan::SetMOTD(char * sTxt, const size_t &szLen) {
             sMOTD = sOldMOTD;
             ui16MOTDLen = ui16OldMOTDLen;
 
-            AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::SetMOTD for sMOTD\n", (uint64_t)(ui16MOTDLen+1));
+            AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::SetMOTD for sMOTD\n", (uint64_t)(ui16MOTDLen+1));
 
             return;
         }
@@ -1048,7 +1048,7 @@ void SetMan::SetText(const size_t &szTxtId, const char * sTxt, const size_t &szL
         if(sTexts[szTxtId] != NULL) {
 #ifdef _WIN32
             if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sTexts[szTxtId]) == 0) {
-                AppendDebugLog("%s - [MEM] Cannot deallocate sTexts[" PRIu64 "] in SetMan::SetText\n", (uint64_t)(szTxtId));
+                AppendDebugLog("%s - [MEM] Cannot deallocate sTexts[%" PRIu64 "] in SetMan::SetText\n", (uint64_t)(szTxtId));
             }
 #else
             free(sTexts[szTxtId]);
@@ -1070,7 +1070,7 @@ void SetMan::SetText(const size_t &szTxtId, const char * sTxt, const size_t &szL
         if(sTexts[szTxtId] == NULL) {
             sTexts[szTxtId] = sOldText;
 
-			AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::SetText\n", (uint64_t)(szLen+1));
+			AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::SetText\n", (uint64_t)(szLen+1));
 
             if(szTxtId == SETTXT_HUB_NAME || szTxtId == SETTXT_HUB_ADDRESS || szTxtId == SETTXT_HUB_DESCRIPTION) {
 #ifdef _WIN32
@@ -1261,7 +1261,7 @@ void SetMan::UpdateHubSec() {
         if(sPreTexts[SetMan::SETPRETXT_HUB_SEC] == NULL) {
             sPreTexts[SetMan::SETPRETXT_HUB_SEC] = sOldHubSec;
 
-			AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdateHubSec\n", (uint64_t)(ui16TextsLens[SETTXT_BOT_NICK]+1));
+			AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateHubSec\n", (uint64_t)(ui16TextsLens[SETTXT_BOT_NICK]+1));
 
             return;
         }
@@ -1325,7 +1325,7 @@ void SetMan::UpdateMOTD() {
     if(sPreTexts[SETPRETXT_MOTD] == NULL) {
         sPreTexts[SETPRETXT_MOTD] = sOldMotd;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdateMOTD\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateMOTD\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -1376,7 +1376,7 @@ void SetMan::UpdateHubNameWelcome() {
     if(sPreTexts[SETPRETXT_HUB_NAME_WLCM] == NULL) {
         sPreTexts[SETPRETXT_HUB_NAME_WLCM] = sOldWelcome;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdateHubNameWelcome\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateHubNameWelcome\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -1431,7 +1431,7 @@ void SetMan::UpdateHubName() {
     if(sPreTexts[SETPRETXT_HUB_NAME] == NULL) {
         sPreTexts[SETPRETXT_HUB_NAME] = sOldHubName;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdateHubName\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateHubName\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -1493,7 +1493,7 @@ void SetMan::UpdateRedirectAddress() {
     if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] == NULL) {
         sPreTexts[SETPRETXT_REDIRECT_ADDRESS] = sOldRedirAddr;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdateRedirectAddress\n", (uint64_t)szNeededLen);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateRedirectAddress\n", (uint64_t)szNeededLen);
 
         return;
     }
@@ -1535,7 +1535,7 @@ void SetMan::UpdateRegOnlyMessage() {
     if(sPreTexts[SETPRETXT_REG_ONLY_MSG] == NULL) {
         sPreTexts[SETPRETXT_REG_ONLY_MSG] = sOldRegOnlyMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdateRegOnlyMessage\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateRegOnlyMessage\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -1592,7 +1592,7 @@ void SetMan::UpdateShareLimitMessage() {
     if(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] == NULL) {
         sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] = sOldShareLimitMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdateShareLimitMessage\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateShareLimitMessage\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -1689,7 +1689,7 @@ void SetMan::UpdateSlotsLimitMessage() {
     if(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] == NULL) {
         sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] = sOldSlotsLimitMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdateSlotsLimitMessage\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateSlotsLimitMessage\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -1780,7 +1780,7 @@ void SetMan::UpdateHubSlotRatioMessage() {
     if(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] == NULL) {
         sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] = sOldHubSlotLimitMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdateHubSlotRatioMessage\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateHubSlotRatioMessage\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -1868,7 +1868,7 @@ void SetMan::UpdateMaxHubsLimitMessage() {
     if(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] == NULL) {
         sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] = sOldHubLimitMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdateMaxHubsLimitMessage\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateMaxHubsLimitMessage\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -1971,7 +1971,7 @@ void SetMan::UpdateNoTagMessage() {
     if(sPreTexts[SETPRETXT_NO_TAG_MSG] == NULL) {
         sPreTexts[SETPRETXT_NO_TAG_MSG] = sOldNoTagMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdateNoTagMessage\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateNoTagMessage\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -2040,7 +2040,7 @@ void SetMan::UpdateTempBanRedirAddress() {
     if(sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS] == NULL) {
         sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS] = sOldTempBanRedirMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdateTempBanRedirAddress\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateTempBanRedirAddress\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -2103,7 +2103,7 @@ void SetMan::UpdatePermBanRedirAddress() {
     if(sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS] == NULL) {
         sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS] = sOldPermBanRedirMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdatePermBanRedirAddress\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdatePermBanRedirAddress\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -2154,7 +2154,7 @@ void SetMan::UpdateNickLimitMessage() {
     if(sPreTexts[SETPRETXT_NICK_LIMIT_MSG] == NULL) {
         sPreTexts[SETPRETXT_NICK_LIMIT_MSG] = sOldNickLimitMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdateNickLimitMessage\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateNickLimitMessage\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -2354,7 +2354,7 @@ void SetMan::UpdateBot(const bool &bNickChanged/* = true*/) {
     if(sPreTexts[SETPRETXT_HUB_BOT_MYINFO] == NULL) {
         sPreTexts[SETPRETXT_HUB_BOT_MYINFO] = sOldHubBotMyinfoMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdateBot\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateBot\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -2483,7 +2483,7 @@ void SetMan::UpdateOpChat(const bool &bNickChanged/* = true*/) {
     if(sPreTexts[SETPRETXT_OP_CHAT_HELLO] == NULL) {
         sPreTexts[SETPRETXT_OP_CHAT_HELLO] = sOldOpChatHelloMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdateOpChat\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateOpChat\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -2512,7 +2512,7 @@ void SetMan::UpdateOpChat(const bool &bNickChanged/* = true*/) {
     if(sPreTexts[SETPRETXT_OP_CHAT_MYINFO] == NULL) {
         sPreTexts[SETPRETXT_OP_CHAT_MYINFO] = sOldOpChatMyInfoMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in SetMan::UpdateOpChat1\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateOpChat1\n", (uint64_t)szNeededMem);
 
 		if(sPreTexts[SETPRETXT_OP_CHAT_MYINFO] == NULL) {
             exit(EXIT_FAILURE);

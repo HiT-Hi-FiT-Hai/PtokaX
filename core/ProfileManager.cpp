@@ -431,7 +431,7 @@ ProfileItem * ProfileManager::CreateProfile(const char * name) {
 	pNewProfile->sName = (char *)malloc(szLen+1);
 #endif
     if(pNewProfile->sName == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in ProfileManager::CreateProfile for pNewProfile->sName\n", (uint64_t)szLen);
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in ProfileManager::CreateProfile for pNewProfile->sName\n", (uint64_t)szLen);
 
         exit(EXIT_FAILURE);
     } 
@@ -567,7 +567,7 @@ void ProfileManager::ChangeProfileName(const uint16_t &iProfile, char * sName, c
     if(ProfilesTable[iProfile]->sName == NULL) {
         ProfilesTable[iProfile]->sName = sOldName;
 
-		AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in ProfileManager::ChangeProfileName for ProfilesTable[iProfile]->sName\n", (uint64_t)szLen);
+		AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in ProfileManager::ChangeProfileName for ProfilesTable[iProfile]->sName\n", (uint64_t)szLen);
 
         return;
     } 

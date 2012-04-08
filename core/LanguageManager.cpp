@@ -43,7 +43,7 @@ LangMan::LangMan(void) {
 		sTexts[szi] = (char *)malloc(szTextLen+1);
 #endif
         if(sTexts[szi] == NULL) {
-            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in LangMan::LangMan\n", (uint64_t)(szTextLen+1));
+            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in LangMan::LangMan\n", (uint64_t)(szTextLen+1));
 
             exit(EXIT_FAILURE);
         }
@@ -81,7 +81,7 @@ void LangMan::LoadLanguage() {
             if(sTexts[szi] == NULL) {
                 sTexts[szi] = sOldText;
 
-				AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in LangMan::LoadLanguage\n", (uint64_t)(szTextLen+1));
+				AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in LangMan::LoadLanguage\n", (uint64_t)(szTextLen+1));
 
                 continue;
             }
@@ -124,7 +124,7 @@ void LangMan::LoadLanguage() {
                                 if(sTexts[szi] == NULL) {
                                     sTexts[szi] = sOldText;
 
-									AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in LangMan::LoadLanguage1\n", (uint64_t)(szLen+1));
+									AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in LangMan::LoadLanguage1\n", (uint64_t)(szLen+1));
 
                                     break;
                                 }

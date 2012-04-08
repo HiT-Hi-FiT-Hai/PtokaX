@@ -82,7 +82,7 @@ ScriptBot::ScriptBot(char * sBotNick, const size_t &szNickLen, char * sDescripti
 	sNick = (char *)malloc(szNickLen+1);
 #endif
     if(sNick == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in ScriptBot::ScriptBot\n", (uint64_t)(szNickLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in ScriptBot::ScriptBot\n", (uint64_t)(szNickLen+1));
 
 		return;
     }
@@ -99,7 +99,7 @@ ScriptBot::ScriptBot(char * sBotNick, const size_t &szNickLen, char * sDescripti
 	sMyINFO = (char *)malloc(szWantLen);
 #endif
     if(sMyINFO == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMyINFO in ScriptBot::ScriptBot\n", (uint64_t)szWantLen);
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMyINFO in ScriptBot::ScriptBot\n", (uint64_t)szWantLen);
 
 		return;
     }
@@ -143,7 +143,7 @@ ScriptBot::~ScriptBot() {
 		sFunctionName = (char *)malloc(szLen+1);
 #endif
         if(sFunctionName == NULL) {
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sFunctionName in ScriptTimer::ScriptTimer\n", (uint64_t)(szLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sFunctionName in ScriptTimer::ScriptTimer\n", (uint64_t)(szLen+1));
 
 			return;
         }
@@ -192,7 +192,7 @@ Script::Script(char * Name, const bool &enabled) {
     sName = (char *)malloc(szNameLen+1);
 #endif
     if(sName == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in Script::Script\n", (uint64_t)szNameLen+1);
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in Script::Script\n", (uint64_t)szNameLen+1);
 
         return;
     }   

@@ -180,7 +180,7 @@ LRESULT MainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam, LP
                         char * buf = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
 
                         if(buf == NULL) {
-                            AppendDebugLog("%s - [MEM] Cannot allocate" PRIu64 " bytes for buf in MainWindowPageUsersChat::MainWindowPageProc\n", (uint64_t)(iLen+1));
+                            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for buf in MainWindowPageUsersChat::MainWindowPageProc\n", (uint64_t)(iLen+1));
                             return 0;
                         }
 
@@ -433,7 +433,7 @@ bool MainWindowPageUsersChat::OnEditEnter() {
     char * buf = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iAllocLen+4+SettingManager->ui16TextsLens[SETTXT_ADMIN_NICK]);
 
     if(buf == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate" PRIu64 " bytes for buf in MainWindowPageUsersChat::OnEditEnter\n", (uint64_t)(iAllocLen+4+SettingManager->ui16TextsLens[SETTXT_ADMIN_NICK]));
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for buf in MainWindowPageUsersChat::OnEditEnter\n", (uint64_t)(iAllocLen+4+SettingManager->ui16TextsLens[SETTXT_ADMIN_NICK]));
         return false;
     }
 

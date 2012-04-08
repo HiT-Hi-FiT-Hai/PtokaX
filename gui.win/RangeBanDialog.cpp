@@ -407,7 +407,7 @@ bool RangeBanDialog::OnAccept() {
 		if(iReasonLen != 0) {
             pRangeBan->sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
             if(pRangeBan->sReason == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in RangeBanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
+                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in RangeBanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
 
                 delete pRangeBan;
 
@@ -422,7 +422,7 @@ bool RangeBanDialog::OnAccept() {
         if(iByLen != 0) {
             pRangeBan->sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
             if(pRangeBan->sBy == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in RangeBanDialog::OnAccept\n", (uint64_t)(iByLen+1));
+                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in RangeBanDialog::OnAccept\n", (uint64_t)(iByLen+1));
 
                 delete pRangeBan;
 
@@ -465,7 +465,7 @@ bool RangeBanDialog::OnAccept() {
 		if(iReasonLen != 0) {
             sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
             if(sReason == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in RangeBanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
+                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in RangeBanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
 
                 return false;
             }
@@ -504,7 +504,7 @@ bool RangeBanDialog::OnAccept() {
         if(iByLen != 0) {
             sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
             if(sBy == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in RangeBanDialog::OnAccept\n", (uint64_t)(iByLen+1));
+                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in RangeBanDialog::OnAccept\n", (uint64_t)(iByLen+1));
 
     			return false;
             }

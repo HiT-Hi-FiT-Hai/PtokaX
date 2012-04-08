@@ -39,7 +39,7 @@ ResNickMan::ReservedNick::ReservedNick(const char * nick, uint32_t ui32NickHash)
 	sNick = (char *)malloc(szNickLen+1);
 #endif
     if(sNick == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in ReservedNick::ReservedNick\n", (uint64_t)(szNickLen+1));
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in ReservedNick::ReservedNick\n", (uint64_t)(szNickLen+1));
 
         return;
     }   

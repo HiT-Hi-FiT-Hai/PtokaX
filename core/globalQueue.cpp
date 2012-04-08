@@ -261,7 +261,7 @@ globalqueue::globalqueue() {
 		zqueue->buffer = (char *)calloc(256, 1);
 #endif
     	if(zqueue->buffer == NULL) {
-			AppendDebugLog("%s - [MEM] Cannot create global output zqueueq[" PRIu64 "] buffer\n", (uint64_t)ui8i);
+			AppendDebugLog("%s - [MEM] Cannot create global output zqueueq[%" PRIu64 "] buffer\n", (uint64_t)ui8i);
             exit(EXIT_FAILURE);
     	}
     	zqueue->len = 0;
@@ -272,7 +272,7 @@ globalqueue::globalqueue() {
 		zqueue->zbuffer = (char *)calloc(32, 1);
 #endif
     	if(zqueue->zbuffer == NULL) {
-			AppendDebugLog("%s - [MEM] Cannot create global output zqueueq[" PRIu64 "] zbuffer\n", (uint64_t)ui8i);
+			AppendDebugLog("%s - [MEM] Cannot create global output zqueueq[%" PRIu64 "] zbuffer\n", (uint64_t)ui8i);
             exit(EXIT_FAILURE);
     	}
         zqueue->zlen = 0;
@@ -287,7 +287,7 @@ globalqueue::globalqueue() {
 		zqueue->buffer = (char *)calloc(256, 1);
 #endif
     	if(zqueue->buffer == NULL) {
-			AppendDebugLog("%s - [MEM] Cannot create global output zqueueb[" PRIu64 "] buffer\n", (uint64_t)ui8i);
+			AppendDebugLog("%s - [MEM] Cannot create global output zqueueb[%" PRIu64 "] buffer\n", (uint64_t)ui8i);
             exit(EXIT_FAILURE);
     	}
     	zqueue->len = 0;
@@ -298,7 +298,7 @@ globalqueue::globalqueue() {
 		zqueue->zbuffer = (char *)calloc(32, 1);
 #endif
     	if(zqueue->zbuffer == NULL) {
-			AppendDebugLog("%s - [MEM] Cannot create global output zqueueb[" PRIu64 "] zbuffer\n", (uint64_t)ui8i);
+			AppendDebugLog("%s - [MEM] Cannot create global output zqueueb[%" PRIu64 "] zbuffer\n", (uint64_t)ui8i);
             exit(EXIT_FAILURE);
     	}
         zqueue->zlen = 0;
@@ -450,7 +450,7 @@ void globalqueue::Store(char * sData, const size_t &szDataLen) {
             if(zqueue->buffer == NULL) {
                 zqueue->buffer = pOldBuf;
 
-				AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in globalqueue::Store\n", (uint64_t)szAllignLen);
+				AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::Store\n", (uint64_t)szAllignLen);
 
                 return;
             }
@@ -494,7 +494,7 @@ void globalqueue::HStore(char * sData, const size_t &szDataLen) {
             if(zqueue->buffer == NULL) {
                 zqueue->buffer = pOldBuf;
 
-				AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in globalqueue::HStore\n", (uint64_t)szAllignLen);
+				AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::HStore\n", (uint64_t)szAllignLen);
 
                 return;
             }
@@ -532,7 +532,7 @@ void globalqueue::AStore(char * sData, const size_t &szDataLen) {
            	if(zqueue->buffer == NULL) {
                 zqueue->buffer = pOldBuf;
 
-				AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in globalqueue::AStore\n", (uint64_t)szAllignLen);
+				AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::AStore\n", (uint64_t)szAllignLen);
 
                 return;
             }
@@ -570,7 +570,7 @@ void globalqueue::PStore(char * sData, const size_t &szDataLen) {
            	if(zqueue->buffer == NULL) {
                 zqueue->buffer = pOldBuf;
 
-				AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in globalqueue::PStore\n", (uint64_t)szAllignLen);
+				AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::PStore\n", (uint64_t)szAllignLen);
 
                 return;
             }
@@ -608,7 +608,7 @@ void globalqueue::InfoStore(char * sData, const size_t &szDataLen) {
             if(zqueue->buffer == NULL) {
                 zqueue->buffer = pOldBuf;
 
-				AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in globalqueue::InfoStore\n", (uint64_t)szAllignLen);
+				AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::InfoStore\n", (uint64_t)szAllignLen);
 
                 return;
             }
@@ -646,7 +646,7 @@ void globalqueue::StrpInfoStore(char * sData, const size_t &szDataLen) {
             if(zqueue->buffer == NULL) {
                 zqueue->buffer = pOldBuf;
 
-				AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in globalqueue::StrpInfoStore\n", (uint64_t)szAllignLen);
+				AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::StrpInfoStore\n", (uint64_t)szAllignLen);
 
                 return;
             }
@@ -684,7 +684,7 @@ void globalqueue::FullInfoStore(char * sData, const size_t &szDataLen) {
             if(zqueue->buffer == NULL) {
                 zqueue->buffer = pOldBuf;
 
-				AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in globalqueue::FullInfoStore\n", (uint64_t)szAllignLen);
+				AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::FullInfoStore\n", (uint64_t)szAllignLen);
 
                 return;
             }
@@ -722,7 +722,7 @@ void globalqueue::OPStore(char * sData, const size_t &szDataLen) {
             if(zqueue->buffer == NULL) {
                 zqueue->buffer = pOldBuf;
 
-				AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in globalqueue::OPStore\n", (uint64_t)szAllignLen);
+				AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::OPStore\n", (uint64_t)szAllignLen);
 
                 return;
             }
@@ -753,7 +753,7 @@ void globalqueue::OpListStore(char * sNick) {
                 if(OpListQueue.buffer == NULL) {
                     OpListQueue.buffer = pOldBuf;
 
-                    AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in globalqueue::OpListStore\n", (uint64_t)szAllignLen);
+                    AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::OpListStore\n", (uint64_t)szAllignLen);
 
                     return;
                 }
@@ -792,7 +792,7 @@ void globalqueue::UserIPStore(User * curUser) {
                 if(UserIPQueue.buffer == NULL) {
                     UserIPQueue.buffer = pOldBuf;
 
-					AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in globalqueue::UserIPStore\n", (uint64_t)szAllignLen);
+					AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::UserIPStore\n", (uint64_t)szAllignLen);
 
                     return;
                 }
@@ -850,7 +850,7 @@ void globalqueue::FinalizeQueues() {
                 if(zqueue->buffer == NULL) {
                     zqueue->buffer = pOldBuf;
 
-					AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in globalqueue::FinalizeQueues\n", (uint64_t)szAllignLen);
+					AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::FinalizeQueues\n", (uint64_t)szAllignLen);
 
                     return;
                 }
@@ -1260,7 +1260,7 @@ void globalqueue::ProcessSingleItems(User * u) {
                         if(MSG == NULL) {
                             MSG = pOldBuf;
 
-							AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in globalqueue::ProcessSingleItems\n", (uint64_t)szAllignLen);
+							AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems\n", (uint64_t)szAllignLen);
 
                             break;
                         }
@@ -1291,7 +1291,7 @@ void globalqueue::ProcessSingleItems(User * u) {
                             if(MSG == NULL) {
                                 MSG = pOldBuf;
 
-								AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in globalqueue::ProcessSingleItems1\n", (uint64_t)szAllignLen);
+								AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems1\n", (uint64_t)szAllignLen);
 
 								break;
                             }
@@ -1323,7 +1323,7 @@ void globalqueue::ProcessSingleItems(User * u) {
                             if(MSG == NULL) {
                                 MSG = pOldBuf;
 
-								AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in globalqueue::ProcessSingleItems2\n", (uint64_t)szAllignLen);
+								AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems2\n", (uint64_t)szAllignLen);
 
                                 break;
                             }
@@ -1355,7 +1355,7 @@ void globalqueue::ProcessSingleItems(User * u) {
                             if(MSG == NULL) {
                                 MSG = pOldBuf;
 
-								AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in globalqueue::ProcessSingleItems3\n", (uint64_t)szAllignLen);
+								AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems3\n", (uint64_t)szAllignLen);
 
                                 break;
                             }
@@ -1384,7 +1384,7 @@ void globalqueue::ProcessSingleItems(User * u) {
                             if(MSG == NULL) {
                                 MSG = pOldBuf;
 
-								AppendDebugLog("%s - [MEM] Cannot (re)allocate " PRIu64 " bytes in globalqueue::ProcessSingleItems4\n", (uint64_t)szAllignLen);
+								AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems4\n", (uint64_t)szAllignLen);
 
                                 break;
                             }
@@ -1453,7 +1453,7 @@ void globalqueue::SingleItemStore(char * sData, const size_t &szDataLen, User * 
         if(pNewItem->sData == NULL) {
             delete pNewItem;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in globalqueue::SingleItemStore\n", (uint64_t)(szDataLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in globalqueue::SingleItemStore\n", (uint64_t)(szDataLen+1));
 
             return;
         }
