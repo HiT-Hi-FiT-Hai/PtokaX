@@ -1167,7 +1167,7 @@ void hashBanMan::Load(void) {
 							Ban->sNick = (char *)malloc(szNickLen+1);
 #endif
                             if(Ban->sNick == NULL) {
-								AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in hashBanMan::Load\n", (uint64_t)(szNickLen+1));
+								AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in hashBanMan::Load\n", (uint64_t)(szNickLen+1));
 
                                 exit(EXIT_FAILURE);
                             }
@@ -1194,7 +1194,7 @@ void hashBanMan::Load(void) {
 						Ban->sReason = (char *)malloc(szReasonLen+1);
 #endif
                         if(Ban->sReason == NULL) {
-							AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::Load\n", (uint64_t)(szReasonLen+1));
+							AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in hashBanMan::Load\n", (uint64_t)(szReasonLen+1));
 
                             exit(EXIT_FAILURE);
                         }
@@ -1214,7 +1214,7 @@ void hashBanMan::Load(void) {
 						Ban->sBy = (char *)malloc(szByLen+1);
 #endif
                         if(Ban->sBy == NULL) {
-                            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy1 in hashBanMan::Load\n", (uint64_t)(szByLen+1));
+                            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy1 in hashBanMan::Load\n", (uint64_t)(szByLen+1));
                             exit(EXIT_FAILURE);
                         }
 
@@ -1338,7 +1338,7 @@ void hashBanMan::Load(void) {
 						RangeBan->sReason = (char *)malloc(szReasonLen+1);
 #endif
                         if(RangeBan->sReason == NULL) {
-							AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason3 in hashBanMan::Load\n", (uint64_t)(szReasonLen+1));
+							AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason3 in hashBanMan::Load\n", (uint64_t)(szReasonLen+1));
                             exit(EXIT_FAILURE);
                         }
 
@@ -1357,7 +1357,7 @@ void hashBanMan::Load(void) {
 						RangeBan->sBy = (char *)malloc(szByLen+1);
 #endif
                         if(RangeBan->sBy == NULL) {
-							AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy3 in hashBanMan::Load\n", (uint64_t)(szByLen+1));
+							AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy3 in hashBanMan::Load\n", (uint64_t)(szByLen+1));
                             exit(EXIT_FAILURE);
                         }
 
@@ -1718,7 +1718,7 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
 		if(pBan->sNick == NULL) {
             delete pBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in hashBanMan::Ban\n", (uint64_t)(u->ui8NickLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in hashBanMan::Ban\n", (uint64_t)(u->ui8NickLen+1));
 
 			return;
 		}
@@ -1821,7 +1821,7 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
         if(pBan->sReason == NULL) {
             delete pBan;
 
-            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::Ban\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
+            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in hashBanMan::Ban\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
 
             return;
         }
@@ -1851,7 +1851,7 @@ void hashBanMan::Ban(User * u, const char * sReason, char * sBy, const bool &bFu
         if(pBan->sBy == NULL) {
             delete pBan;
 
-            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in hashBanMan::Ban\n", (uint64_t)(szByLen+1));
+            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in hashBanMan::Ban\n", (uint64_t)(szByLen+1));
 
 			return;
         }   
@@ -1942,7 +1942,7 @@ char hashBanMan::BanIp(User * u, char * sIp, char * sReason, char * sBy, const b
         if(pBan->sReason == NULL) {
             delete pBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::BanIp\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in hashBanMan::BanIp\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
 
             return 1;
         }
@@ -1972,7 +1972,7 @@ char hashBanMan::BanIp(User * u, char * sIp, char * sReason, char * sBy, const b
         if(pBan->sBy == NULL) {
             delete pBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in hashBanMan::BanIp\n", (uint64_t)(szByLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in hashBanMan::BanIp\n", (uint64_t)(szByLen+1));
 
             return 1;
         }   
@@ -2024,7 +2024,7 @@ bool hashBanMan::NickBan(User * u, char * sNick, char * sReason, char * sBy) {
         if(pBan->sNick == NULL) {
             delete pBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in hashBanMan::NickBan\n", (uint64_t)(szNickLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in hashBanMan::NickBan\n", (uint64_t)(szNickLen+1));
 
             return false;
         }
@@ -2048,7 +2048,7 @@ bool hashBanMan::NickBan(User * u, char * sNick, char * sReason, char * sBy) {
         if(pBan->sNick == NULL) {
             delete pBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick1 in hashBanMan::NickBan\n", (uint64_t)(u->ui8NickLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick1 in hashBanMan::NickBan\n", (uint64_t)(u->ui8NickLen+1));
 
             return false;
         }   
@@ -2097,7 +2097,7 @@ bool hashBanMan::NickBan(User * u, char * sNick, char * sReason, char * sBy) {
         if(pBan->sReason == NULL) {
             delete pBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::NickBan\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in hashBanMan::NickBan\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
 
             return false;
         }   
@@ -2127,7 +2127,7 @@ bool hashBanMan::NickBan(User * u, char * sNick, char * sReason, char * sBy) {
         if(pBan->sBy == NULL) {
             delete pBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in hashBanMan::NickBan\n", (uint64_t)(szByLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in hashBanMan::NickBan\n", (uint64_t)(szByLen+1));
 
             return false;
         }   
@@ -2187,7 +2187,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
         if(pBan->sNick == NULL) {
             delete pBan;
 
-            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in hashBanMan::TempBan\n", (uint64_t)(szNickLen+1));
+            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in hashBanMan::TempBan\n", (uint64_t)(szNickLen+1));
 
             return;
         }
@@ -2323,7 +2323,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
         if(pBan->sReason == NULL) {
             delete pBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::TempBan\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in hashBanMan::TempBan\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
 
             return;
         }   
@@ -2353,7 +2353,7 @@ void hashBanMan::TempBan(User * u, const char * sReason, char * sBy, const uint3
         if(pBan->sBy == NULL) {
             delete pBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in hashBanMan::TempBan\n", (uint64_t)(szByLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in hashBanMan::TempBan\n", (uint64_t)(szByLen+1));
 
             return;
         }   
@@ -2448,7 +2448,7 @@ char hashBanMan::TempBanIp(User * u, char * sIp, char * sReason, char * sBy, con
         if(pBan->sReason == NULL) {
             delete pBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::TempBanIp\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in hashBanMan::TempBanIp\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
 
             return 1;
         }
@@ -2478,7 +2478,7 @@ char hashBanMan::TempBanIp(User * u, char * sIp, char * sReason, char * sBy, con
         if(pBan->sBy == NULL) {
             delete pBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in hashBanMan::TempBanIp\n", (uint64_t)(szByLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in hashBanMan::TempBanIp\n", (uint64_t)(szByLen+1));
 
             return 1;
         }   
@@ -2530,7 +2530,7 @@ bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy,
         if(pBan->sNick == NULL) {
             delete pBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in hashBanMan::NickTempBan\n", (uint64_t)(szNickLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in hashBanMan::NickTempBan\n", (uint64_t)(szNickLen+1));
 
             return false;
         }   
@@ -2553,7 +2553,7 @@ bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy,
         if(pBan->sNick == NULL) {
             delete pBan;
 
-            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick1 in hashBanMan::NickTempBan\n", (uint64_t)(u->ui8NickLen+1));
+            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick1 in hashBanMan::NickTempBan\n", (uint64_t)(u->ui8NickLen+1));
 
             return false;
         }   
@@ -2617,7 +2617,7 @@ bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy,
         if(pBan->sReason == NULL) {
             delete pBan;
 
-            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::NickTempBan\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
+            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in hashBanMan::NickTempBan\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
 
             return false;
         }   
@@ -2647,7 +2647,7 @@ bool hashBanMan::NickTempBan(User * u, char * sNick, char * sReason, char * sBy,
         if(pBan->sBy == NULL) {
             delete pBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in hashBanMan::NickTempBan\n", (uint64_t)(szByLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in hashBanMan::NickTempBan\n", (uint64_t)(szByLen+1));
 
             return false;
         }   
@@ -2885,7 +2885,7 @@ bool hashBanMan::RangeBan(char * sIpFrom, const uint8_t * ui128FromIpHash, char 
         if(pRangeBan->sReason == NULL) {
             delete pRangeBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::RangeBan\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in hashBanMan::RangeBan\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
 
             return false;
         }   
@@ -2915,7 +2915,7 @@ bool hashBanMan::RangeBan(char * sIpFrom, const uint8_t * ui128FromIpHash, char 
         if(pRangeBan->sBy == NULL) {
             delete pRangeBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in hashBanMan::RangeBan\n", (uint64_t)(szByLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in hashBanMan::RangeBan\n", (uint64_t)(szByLen+1));
 
             return false;
         }   
@@ -3004,7 +3004,7 @@ bool hashBanMan::RangeTempBan(char * sIpFrom, const uint8_t * ui128FromIpHash, c
         if(pRangeBan->sReason == NULL) {
             delete pRangeBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sReason in hashBanMan::RangeTempBan\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in hashBanMan::RangeTempBan\n", (uint64_t)(szReasonLen > 255 ? 256 : szReasonLen+1));
 
             return false;
         }   
@@ -3034,7 +3034,7 @@ bool hashBanMan::RangeTempBan(char * sIpFrom, const uint8_t * ui128FromIpHash, c
         if(pRangeBan->sBy == NULL) {
             delete pRangeBan;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sBy in hashBanMan::RangeTempBan\n", (uint64_t)(szByLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in hashBanMan::RangeTempBan\n", (uint64_t)(szByLen+1));
 
             return false;
         }   

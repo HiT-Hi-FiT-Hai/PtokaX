@@ -155,7 +155,7 @@ IP2CC::IP2CC() {
 			ui32RangeFrom = (uint32_t *)realloc(oldbuf, ui32Size * sizeof(uint32_t));
 #endif
             if(ui32RangeFrom == NULL) {
-    			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in IP2CC::IP2CC for ui32RangeFrom\n", (uint64_t)ui32Size);
+    			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in IP2CC::IP2CC for ui32RangeFrom\n", (uint64_t)ui32Size);
 #ifdef _WIN32
                 HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
 #else
@@ -172,7 +172,7 @@ IP2CC::IP2CC() {
 			ui32RangeTo = (uint32_t *)realloc(oldbuf, ui32Size * sizeof(uint32_t));
 #endif
             if(ui32RangeTo == NULL) {
-    			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in IP2CC::IP2CC for ui32RangeTo\n", (uint64_t)ui32Size);
+    			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in IP2CC::IP2CC for ui32RangeTo\n", (uint64_t)ui32Size);
 #ifdef _WIN32
                 HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
 #else
@@ -189,7 +189,7 @@ IP2CC::IP2CC() {
 			ui8RangeCI = (uint8_t *)realloc(oldbuf, ui32Size * sizeof(uint8_t));
 #endif
             if(ui8RangeCI == NULL) {
-    			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in IP2CC::IP2CC for ui8RangeCI\n", (uint64_t)ui32Size);
+    			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in IP2CC::IP2CC for ui8RangeCI\n", (uint64_t)ui32Size);
 #ifdef _WIN32
                 HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
 #else
@@ -298,7 +298,7 @@ IP2CC::IP2CC() {
 			ui128IPv6RangeFrom = (uint8_t *)realloc(oldbuf, ui32IPv6Size * (sizeof(uint8_t)*16));
 #endif
             if(ui128IPv6RangeFrom == NULL) {
-    			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in IP2CC::IP2CC for ui128IPv6RangeFrom\n", (uint64_t)ui32IPv6Size);
+    			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in IP2CC::IP2CC for ui128IPv6RangeFrom\n", (uint64_t)ui32IPv6Size);
 #ifdef _WIN32
                 HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
 #else
@@ -315,7 +315,7 @@ IP2CC::IP2CC() {
 			ui128IPv6RangeTo = (uint8_t *)realloc(oldbuf, ui32IPv6Size * (sizeof(uint8_t)*16));
 #endif
             if(ui128IPv6RangeTo == NULL) {
-    			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in IP2CC::IP2CC for ui128IPv6RangeTo\n", (uint64_t)ui32IPv6Size);
+    			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in IP2CC::IP2CC for ui128IPv6RangeTo\n", (uint64_t)ui32IPv6Size);
 #ifdef _WIN32
                 HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
 #else
@@ -332,7 +332,7 @@ IP2CC::IP2CC() {
 			ui8IPv6RangeCI = (uint8_t *)realloc(oldbuf, ui32IPv6Size * sizeof(uint8_t));
 #endif
             if(ui8IPv6RangeCI == NULL) {
-    			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in IP2CC::IP2CC for ui8IPv6RangeCI\n", (uint64_t)ui32IPv6Size);
+    			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in IP2CC::IP2CC for ui8IPv6RangeCI\n", (uint64_t)ui32IPv6Size);
 #ifdef _WIN32
                 HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)oldbuf);
 #else

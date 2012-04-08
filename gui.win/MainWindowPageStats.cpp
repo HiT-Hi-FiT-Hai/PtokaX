@@ -241,7 +241,7 @@ char * MainWindowPageStats::GetPageName() {
 void OnRedirectAllOk(char * sLine, const int &iLen) {
     char *sMSG = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+16);
     if(sMSG == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMSG in OnRedirectAllOk\n", (uint64_t)(iLen+16));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMSG in OnRedirectAllOk\n", (uint64_t)(iLen+16));
         return;
     }
 
@@ -280,7 +280,7 @@ void MainWindowPageStats::OnRedirectAll() {
 void OnMassMessageOk(char * sLine, const int &iLen) {
     char *sMSG = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+256);
     if(sMSG == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMSG in OnMassMessageOk\n", (uint64_t)(iLen+256));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMSG in OnMassMessageOk\n", (uint64_t)(iLen+256));
         return;
     }
 

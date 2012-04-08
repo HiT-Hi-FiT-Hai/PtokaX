@@ -82,7 +82,7 @@ bool PXBReader::LoadFile(const char * sFilename) {
     sFile = (char *)calloc(szRemainingSize, 1);
 
     if(sFile == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in PXBReader::LoadFile\n", (uint64_t)szRemainingSize);
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in PXBReader::LoadFile\n", (uint64_t)szRemainingSize);
         exit(EXIT_FAILURE);
     }
 

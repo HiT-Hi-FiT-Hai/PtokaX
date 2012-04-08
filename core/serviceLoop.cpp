@@ -702,7 +702,7 @@ void theLoop::ReceiveLoop() {
                         curUser->ui32BoolBits |= User::BIT_ERROR;
                         UserClose(curUser);
 
-						AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sLockUsrConn in theLoop::ReceiveLoop\n", (uint64_t)(szNeededLen+1));
+						AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sLockUsrConn in theLoop::ReceiveLoop\n", (uint64_t)(szNeededLen+1));
 
                 		continue;
                     }
@@ -1036,7 +1036,7 @@ void theLoop::SendLoop() {
                             curUser->ui32BoolBits |= User::BIT_ERROR;
                             UserClose(curUser);
 
-							AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in theLoop::SendLoop\n", (uint64_t)(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MOTD]+65));
+							AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in theLoop::SendLoop\n", (uint64_t)(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MOTD]+65));
 
                             continue;
                         }

@@ -1079,7 +1079,7 @@ void AppendLog(const string & sData, const bool &bScript/* == false*/) {
 			char * sMSG = (char *)malloc(sData.size()+64);
 #endif
             if(sMSG == NULL) {
-    			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMSG in AppendLog\n", (uint64_t)(sData.size()+64));
+    			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMSG in AppendLog\n", (uint64_t)(sData.size()+64));
                 return;
             }
 
@@ -1120,7 +1120,7 @@ void AppendDebugLog(const char * sData, const uint64_t ui64Value) {
 	char sBuf[64];
 	strftime(sBuf, 64, "%c", acc_tm);
 
-    fprintf(fw, sData, sBuf, ui64Value); // "%s - " PRIu64 "\n"
+    fprintf(fw, sData, sBuf, ui64Value); // "%s - %" PRIu64 "\n"
 
 	fclose(fw);
 }

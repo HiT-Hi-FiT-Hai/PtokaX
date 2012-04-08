@@ -61,7 +61,7 @@ LRESULT SettingPageMOTD::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                 char * buf = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
 
                 if(buf == NULL) {
-                    AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for buf in SettingPageMOTD::PageMOTDProc\n", (uint64_t)(iLen+1));
+                    AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for buf in SettingPageMOTD::PageMOTDProc\n", (uint64_t)(iLen+1));
                     return 0;
                 }
 
@@ -119,7 +119,7 @@ void SettingPageMOTD::Save() {
     char * buf = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iAllocLen+1);
 
     if(buf == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for buf in SettingPageMOTD::Save\n", (uint64_t)(iAllocLen+1));
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for buf in SettingPageMOTD::Save\n", (uint64_t)(iAllocLen+1));
         return;
     }
 

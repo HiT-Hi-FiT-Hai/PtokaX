@@ -202,7 +202,7 @@ void SettingPageGeneral::Save() {
         char * buf = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui32Len+1);
 
         if(buf == NULL) {
-            AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for buf in SettingPageGeneral::Save\n", (uint64_t)(ui32Len+1));
+            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for buf in SettingPageGeneral::Save\n", (uint64_t)(ui32Len+1));
             return;
         }
 
@@ -426,7 +426,7 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
                 char * buf = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui32Len+1);
 
                 if(buf == NULL) {
-                    AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for buf in SettingPageGeneral::CreateSettingPage\n", (uint64_t)(ui32Len+1));
+                    AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for buf in SettingPageGeneral::CreateSettingPage\n", (uint64_t)(ui32Len+1));
                     return false;
                 }
 

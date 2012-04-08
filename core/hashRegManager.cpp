@@ -58,7 +58,7 @@ RegUser::RegUser(char * Nick, char * Pass, const uint16_t &iRegProfile) {
 	sNick = (char *)malloc(szNickLen+1);
 #endif
     if(sNick == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sNick in RegUser::RegUser\n", (uint64_t)(szNickLen+1));
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in RegUser::RegUser\n", (uint64_t)(szNickLen+1));
 
         return;
     }   
@@ -72,7 +72,7 @@ RegUser::RegUser(char * Nick, char * Pass, const uint16_t &iRegProfile) {
 	sPass = (char *)malloc(szPassLen+1);
 #endif
     if(sPass == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sPass in RegUser::RegUser\n", (uint64_t)(szPassLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sPass in RegUser::RegUser\n", (uint64_t)(szPassLen+1));
 
         return;
     }   
@@ -247,7 +247,7 @@ void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui
         if(pReg->sPass == NULL) {
             pReg->sPass = sOldPass;
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes for sPass in hashRegMan::ChangeReg\n", (uint64_t)(szPassLen+1));
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sPass in hashRegMan::ChangeReg\n", (uint64_t)(szPassLen+1));
 
             return;
         }

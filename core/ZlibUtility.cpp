@@ -44,7 +44,7 @@ clsZlibUtility::clsZlibUtility() {
 	sZbuffer = (char *)calloc(ZBUFFERLEN, 1);
 #endif
 	if(sZbuffer == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sZbuffer in clsZlibUtility::clsZlibUtility\n", (uint64_t)ZBUFFERLEN);
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sZbuffer in clsZlibUtility::clsZlibUtility\n", (uint64_t)ZBUFFERLEN);
 		exit(EXIT_FAILURE);
 	}
 	memcpy(sZbuffer, "$ZOn|", 5);
@@ -86,7 +86,7 @@ char * clsZlibUtility::CreateZPipe(const char *sInData, const size_t &szInDataSi
             szZbufferSize = szOldZbufferSize;
             ui32OutDataLen = 0;
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes for sZbuffer in clsZlibUtility::CreateZPipe\n", (uint64_t)szZbufferSize);
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sZbuffer in clsZlibUtility::CreateZPipe\n", (uint64_t)szZbufferSize);
 
             return sZbuffer;
         }
@@ -155,7 +155,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const size_t &szInDataSize, ch
             szZbufferSize = szOldZbufferSize;
             szOutDataLen = 0;
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes for sZbuffer in clsZlibUtility::CreateZPipe\n", (uint64_t)szZbufferSize);
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sZbuffer in clsZlibUtility::CreateZPipe\n", (uint64_t)szZbufferSize);
 
             return sOutData;
         }
@@ -211,7 +211,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const size_t &szInDataSize, ch
             szOutDataSize = szOldOutDataSize;
             szOutDataLen = 0;
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes for sOutData in clsZlibUtility::CreateZPipe\n", (uint64_t)(szOutDataSize+1));
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sOutData in clsZlibUtility::CreateZPipe\n", (uint64_t)(szOutDataSize+1));
 
             return sOutData;
         }
@@ -247,7 +247,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &uiInDataSi
             szZbufferSize = szOldZbufferSize;
             uiOutDataLen = 0;
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes for sZbuffer in clsZlibUtility::CreateZPipe\n", (uint64_t)szZbufferSize);
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sZbuffer in clsZlibUtility::CreateZPipe\n", (uint64_t)szZbufferSize);
 
             return sOutData;
         }
@@ -307,7 +307,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &uiInDataSi
             uiOutDataSize = uiOldOutDataSize;
             uiOutDataLen = 0;
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes for sOutData in clsZlibUtility::CreateZPipe\n", (uint64_t)(uiOutDataSize+1));
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sOutData in clsZlibUtility::CreateZPipe\n", (uint64_t)(uiOutDataSize+1));
 
             return sOutData;
         }

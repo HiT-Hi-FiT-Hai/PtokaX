@@ -131,7 +131,7 @@ void eventq::AddNormal(uint8_t ui8Id, char * sMsg) {
 		if(pNewEvent->sMsg == NULL) {
             delete pNewEvent;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for pNewEvent->sMsg in eventq::AddNormal\n", (uint64_t)(szLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pNewEvent->sMsg in eventq::AddNormal\n", (uint64_t)(szLen+1));
 
             return;
         }
@@ -171,7 +171,7 @@ void eventq::AddThread(uint8_t ui8Id, char * sMsg, const sockaddr_storage * sas/
 		if(pNewEvent->sMsg == NULL) {
             delete pNewEvent;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for pNewEvent->sMsg in eventq::AddThread\n", (uint64_t)(szLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pNewEvent->sMsg in eventq::AddThread\n", (uint64_t)(szLen+1));
 
             return;
         }

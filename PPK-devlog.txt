@@ -29,6 +29,8 @@ Fixed: All strict aliasing issues with GCC 02 and higher optimization level comp
 Fixed: Core.GetUsersCount can in rare cases have different user count than number of users returned by Core.GetOnlineUsers.
 Fixed: Crash on script error loging in some cases.
 Fixed: Memory leak in users and bans ip hashtables.
+Fixed: Bug in gui initialisation causing rare termination on startup.
+Fixed: Incorrect translation of "full" in ban commands (thx Alexey for report).
 Removed: All info related to old ip-to-country database.
 Updated: makefile to work with buggy gold linker.
 

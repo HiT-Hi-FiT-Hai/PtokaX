@@ -72,7 +72,7 @@ SettingDialog::SettingDialog() {
 
     for(uint8_t ui8i = 0; ui8i < 12; ui8i++) {
         if(SettingPages[ui8i] == NULL) {
-            AppendDebugLog("%s - [MEM] Cannot allocate SettingPage" PRIu64 " in SettingDialog::SettingDialog\n", (uint64_t)ui8i);
+            AppendDebugLog("%s - [MEM] Cannot allocate SettingPage[%" PRIu64 "] in SettingDialog::SettingDialog\n", (uint64_t)ui8i);
             exit(EXIT_FAILURE);
         }
     }

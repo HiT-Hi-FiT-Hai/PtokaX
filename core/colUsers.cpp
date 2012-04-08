@@ -445,7 +445,7 @@ void classUsers::Add2NickList(User * u) {
             u->ui32BoolBits |= User::BIT_ERROR;
             UserClose(u);
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in classUsers::Add2NickList for NickList\n", (uint64_t)(nickListSize+NICKLISTSIZE+1));
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in classUsers::Add2NickList for NickList\n", (uint64_t)(nickListSize+NICKLISTSIZE+1));
 
             return;
 		}
@@ -478,7 +478,7 @@ void classUsers::Add2NickList(User * u) {
             u->ui32BoolBits |= User::BIT_ERROR;
             UserClose(u);
 
-            AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in classUsers::Add2NickList for opList\n", (uint64_t)(opListSize+OPLISTSIZE+1));
+            AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in classUsers::Add2NickList for opList\n", (uint64_t)(opListSize+OPLISTSIZE+1));
 
             return;
         }
@@ -510,7 +510,7 @@ void classUsers::AddBot2NickList(char * Nick, const size_t &szNickLen, const boo
         if(nickList == NULL) {
             nickList = pOldBuf;
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in classUsers::AddBot2NickList for NickList\n", (uint64_t)(nickListSize+NICKLISTSIZE+1));
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in classUsers::AddBot2NickList for NickList\n", (uint64_t)(nickListSize+NICKLISTSIZE+1));
 
             return;
 		}
@@ -540,7 +540,7 @@ void classUsers::AddBot2NickList(char * Nick, const size_t &szNickLen, const boo
         if(opList == NULL) {
             opList = pOldBuf;
 
-            AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in classUsers::AddBot2NickList for opList\n", (uint64_t)(opListSize+OPLISTSIZE+1));
+            AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in classUsers::AddBot2NickList for opList\n", (uint64_t)(opListSize+OPLISTSIZE+1));
 
             return;
         }
@@ -572,7 +572,7 @@ void classUsers::Add2OpList(User * u) {
             u->ui32BoolBits |= User::BIT_ERROR;
             UserClose(u);
 
-            AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in classUsers::Add2OpList for opList\n", (uint64_t)(opListSize+OPLISTSIZE+1));
+            AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in classUsers::Add2OpList for opList\n", (uint64_t)(opListSize+OPLISTSIZE+1));
 
             return;
         }
@@ -690,7 +690,7 @@ void classUsers::SendChat2All(User * cur, char * data, const size_t &szChatLen) 
 					char * sMsg = (char *)malloc(szNeededLen);
 #endif
                     if(sMsg == NULL) {
-                        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in classUsers::SendChat2All\n", (uint64_t)szNeededLen);
+                        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in classUsers::SendChat2All\n", (uint64_t)szNeededLen);
                         return;
                     }
                 	int iMsgLen = sprintf(sMsg, "%s ", cur->sIP);
@@ -732,7 +732,7 @@ void classUsers::Add2MyInfos(User * u) {
             u->ui32BoolBits |= User::BIT_ERROR;
             UserClose(u);
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in classUsers::Add2MyInfos\n", (uint64_t)(myInfosSize+MYINFOLISTSIZE+1));
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in classUsers::Add2MyInfos\n", (uint64_t)(myInfosSize+MYINFOLISTSIZE+1));
 
             return;
         }
@@ -772,7 +772,7 @@ void classUsers::Add2MyInfosTag(User * u) {
             u->ui32BoolBits |= User::BIT_ERROR;
             UserClose(u);
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in classUsers::Add2MyInfosTag\n", (uint64_t)(myInfosTagSize+MYINFOLISTSIZE+1));
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in classUsers::Add2MyInfosTag\n", (uint64_t)(myInfosTagSize+MYINFOLISTSIZE+1));
 
             return;
         }
@@ -813,7 +813,7 @@ void classUsers::AddBot2MyInfos(char * MyInfo) {
                 if(myInfosTag == NULL) {
                     myInfosTag = pOldBuf;
 
-					AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes for myInfosTag in classUsers::AddBot2MyInfos\n", (uint64_t)(myInfosTagSize+MYINFOLISTSIZE+1));
+					AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for myInfosTag in classUsers::AddBot2MyInfos\n", (uint64_t)(myInfosTagSize+MYINFOLISTSIZE+1));
 
                     return;
                 }
@@ -837,7 +837,7 @@ void classUsers::AddBot2MyInfos(char * MyInfo) {
                 if(myInfos == NULL) {
                     myInfos = pOldBuf;
 
-					AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes for myInfos in classUsers::AddBot2MyInfos\n", (uint64_t)(myInfosSize+MYINFOLISTSIZE+1));
+					AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for myInfos in classUsers::AddBot2MyInfos\n", (uint64_t)(myInfosSize+MYINFOLISTSIZE+1));
 
                     return;
                 }
@@ -891,7 +891,7 @@ void classUsers::Add2UserIP(User * cur) {
             cur->ui32BoolBits |= User::BIT_ERROR;
             UserClose(cur);
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes in classUsers::Add2UserIP\n", (uint64_t)(userIPListSize+IPLISTSIZE+1));
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in classUsers::Add2UserIP\n", (uint64_t)(userIPListSize+IPLISTSIZE+1));
 
             return;
         }
@@ -951,7 +951,7 @@ void classUsers::Add2RecTimes(User * curUser) {
 	if(pNewRecTime->sNick == NULL) {
         delete pNewRecTime;
 
-        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in classUsers::Add2RecTimes\n", (uint64_t)(curUser->ui8NickLen+1));
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in classUsers::Add2RecTimes\n", (uint64_t)(curUser->ui8NickLen+1));
 
         return;
     }

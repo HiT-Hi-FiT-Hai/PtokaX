@@ -41,7 +41,7 @@ void string::stralloc(const char * sTxt, const size_t &szLen) {
 
 	sData = (char *)malloc(szDataLen+1);
 	if(sData == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sData in string::stralloc\n", (uint64_t)(szDataLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sData in string::stralloc\n", (uint64_t)(szDataLen+1));
 
         return;
 	}
@@ -130,7 +130,7 @@ string::string(const string & sStr1, const string & sStr2) {
 
     sData = (char *)malloc(szDataLen+1);
     if(sData == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sData in string::string(string, string)\n", (uint64_t)(szDataLen+1));
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sData in string::string(string, string)\n", (uint64_t)(szDataLen+1));
 
         return;
     }
@@ -152,7 +152,7 @@ string::string(const char * sTxt, const string & sStr) {
 
     sData = (char *)malloc(szDataLen+1);
     if(sData == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sData in string::string(char, string)\n", (uint64_t)(szDataLen+1));
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sData in string::string(char, string)\n", (uint64_t)(szDataLen+1));
 
         return;
     }
@@ -174,7 +174,7 @@ string::string(const string & sStr, const char * sTxt) {
 
     sData = (char *)malloc(szDataLen+1);
     if(sData == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sData in string::string(string, char)\n", (uint64_t)(szDataLen+1));
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sData in string::string(string, char)\n", (uint64_t)(szDataLen+1));
 
         return;
     }
@@ -244,7 +244,7 @@ string & string::operator+=(const char * sTxt) {
     if(sData == NULL) {
         sData = oldbuf;
 
-        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sData in string::operator+=(char)\n", (uint64_t)(szDataLen+szLen+1));
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sData in string::operator+=(char)\n", (uint64_t)(szDataLen+szLen+1));
 
         return *this;
     }
@@ -273,7 +273,7 @@ string & string::operator+=(const string & sStr) {
     if(sData == NULL) {
         sData = oldbuf;
 
-        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sData in string::operator+=(string)\n", (uint64_t)(szDataLen+sStr.size()+1));
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sData in string::operator+=(string)\n", (uint64_t)(szDataLen+sStr.size()+1));
 
         return *this;
     }

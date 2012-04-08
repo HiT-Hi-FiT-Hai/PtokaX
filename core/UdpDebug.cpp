@@ -120,7 +120,7 @@ void clsUdpDebug::Broadcast(const char * msg, const size_t &szMsgLen) {
 	char * sMsg = (char *)malloc(szLen);
 #endif
     if(sMsg == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMsg in clsUdpDebug::Broadcast\n", (uint64_t)szLen);
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMsg in clsUdpDebug::Broadcast\n", (uint64_t)szLen);
 
 		return;
     }
@@ -172,7 +172,7 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
 	pNewDbg->Nick = (char *)malloc(u->ui8NickLen+1);
 #endif
     if(pNewDbg->Nick == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for Nick in clsUdpDebug::New\n", (uint64_t)(u->ui8NickLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for Nick in clsUdpDebug::New\n", (uint64_t)(u->ui8NickLen+1));
 
 		delete pNewDbg;
         return false;
@@ -261,7 +261,7 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
 		char * sMsg = (char *)malloc(szLen);
 #endif
 	    if(sMsg == NULL) {
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in clsUdpDebug::New1\n", (uint64_t)szLen);
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in clsUdpDebug::New1\n", (uint64_t)szLen);
 
 			return false;
 	    }
@@ -309,7 +309,7 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
 	pNewDbg->Nick = (char *)malloc(szNameLen+1);
 #endif
     if(pNewDbg->Nick == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for Nick in clsUdpDebug::New\n", (uint64_t)(szNameLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for Nick in clsUdpDebug::New\n", (uint64_t)(szNameLen+1));
 
         delete pNewDbg;
         return false;
@@ -399,7 +399,7 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
 		char * sMsg = (char *)malloc(szLen);
 #endif
 	    if(sMsg == NULL) {
-			AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in clsUdpDebug::New1\n", (uint64_t)szLen);
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in clsUdpDebug::New1\n", (uint64_t)szLen);
 
 			return false;
 	    }
@@ -565,7 +565,7 @@ void clsUdpDebug::Send(char * sScriptName, char * sMessage, const size_t &szMsgL
 			char * sMsg = (char *)malloc(szLen);
 #endif
             if(sMsg == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes in clsUdpDebug::Send\n", (uint64_t)szLen);
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in clsUdpDebug::Send\n", (uint64_t)szLen);
 
         		return;
             }

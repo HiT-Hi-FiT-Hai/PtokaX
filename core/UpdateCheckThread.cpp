@@ -283,7 +283,7 @@ void UpdateCheckThread::WaitFor() {
 void UpdateCheckThread::Message(char * sMessage, const size_t &szLen) {
 	char *sMess = (char *)malloc(szLen + 1);
 	if(sMess == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMess in UpdateCheckThread::Message\n", (uint64_t)(szLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMess in UpdateCheckThread::Message\n", (uint64_t)(szLen+1));
 
 		return;
 	}
@@ -348,7 +348,7 @@ bool UpdateCheckThread::Receive() {
 
         sRecvBuf = (char *)realloc(sRecvBuf, szAllignLen);
         if(sRecvBuf == NULL) {
-            AppendDebugLog("%s - [MEM] Cannot reallocate " PRIu64 " bytes for sRecvBuf in UpdateCheckThread::Receive\n", (uint64_t)szAllignLen);
+            AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sRecvBuf in UpdateCheckThread::Receive\n", (uint64_t)szAllignLen);
 
             return false;
         }
@@ -441,7 +441,7 @@ bool UpdateCheckThread::Receive() {
 		if(ui32RecvBufLen == (uint32_t)ui32FileLen) {
 			char *sMess = (char *)malloc(ui32RecvBufLen + 1);
 			if(sMess == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMess in UpdateCheckThread::Receive\n", (uint64_t)(ui32RecvBufLen+1));
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMess in UpdateCheckThread::Receive\n", (uint64_t)(ui32RecvBufLen+1));
 
 				return false;
 			}

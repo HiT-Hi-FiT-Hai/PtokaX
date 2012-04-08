@@ -98,7 +98,7 @@ bool TextFileMan::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = fals
 			char * sMSG = (char *)malloc(szChatLen);
 #endif
             if(sMSG == NULL) {
-        		AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sMsg in TextFileMan::ProcessTextFilesCmd\n", (uint64_t)szChatLen);
+        		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMsg in TextFileMan::ProcessTextFilesCmd\n", (uint64_t)szChatLen);
 
                 return true;
             }
@@ -178,7 +178,7 @@ void TextFileMan::RefreshTextFiles() {
 					pNewTxtFile->sText = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, textfile.size+2);
 
 					if(pNewTxtFile->sText == NULL) {
-						AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sText in TextFileMan::RefreshTextFiles\n", (uint64_t)(textfile.size+2));
+						AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sText in TextFileMan::RefreshTextFiles\n", (uint64_t)(textfile.size+2));
 
 						fclose(f);
 						_findclose(hFile);
@@ -193,7 +193,7 @@ void TextFileMan::RefreshTextFiles() {
 
 					pNewTxtFile->sCommand = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, strlen(textfile.name)-3);
 					if(pNewTxtFile->sCommand == NULL) {
-						AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sCommand in TextFileMan::RefreshTextFiles\n", (uint64_t)(strlen(textfile.name)-3));
+						AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sCommand in TextFileMan::RefreshTextFiles\n", (uint64_t)(strlen(textfile.name)-3));
 
 						fclose(f);
 						_findclose(hFile);
@@ -258,7 +258,7 @@ void TextFileMan::RefreshTextFiles() {
 
 				pNewTxtFile->sText = (char *)malloc(s_buf.st_size+2);
 				if(pNewTxtFile->sText == NULL) {
-					AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sText in TextFileMan::RefreshTextFiles\n", (uint64_t)(s_buf.st_size+2));
+					AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sText in TextFileMan::RefreshTextFiles\n", (uint64_t)(s_buf.st_size+2));
 
 					fclose(f);
 					closedir(p_txtdir);
@@ -271,7 +271,7 @@ void TextFileMan::RefreshTextFiles() {
 
 				pNewTxtFile->sCommand = (char *)malloc(strlen(p_dirent->d_name)-3);
 				if(pNewTxtFile->sCommand == NULL) {
-					AppendDebugLog("%s - [MEM] Cannot allocate " PRIu64 " bytes for sCommand in TextFileMan::RefreshTextFiles\n", (uint64_t)(strlen(p_dirent->d_name)-3));
+					AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sCommand in TextFileMan::RefreshTextFiles\n", (uint64_t)(strlen(p_dirent->d_name)-3));
 
 					fclose(f);
 					closedir(p_txtdir);
