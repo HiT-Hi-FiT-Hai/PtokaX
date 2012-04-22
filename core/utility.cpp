@@ -1312,12 +1312,12 @@ void CheckForIPv6() {
 
 #ifdef _WIN32
     DWORD dwIPv6 = 0;
-    if(setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&dwIPv6, sizeof(dwIPv6)) == SOCKET_ERROR) {
+    if(setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&dwIPv6, sizeof(dwIPv6)) != SOCKET_ERROR) {
 #else
     int iIPv6 = 0;
-    if(setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &iIPv6, sizeof(iIPv6)) == -1) {
+    if(setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &iIPv6, sizeof(iIPv6)) != -1) {
 #endif
-        bIPv6DualStack = false;
+        bIPv6DualStack = true;
     }
 
 #ifdef _WIN32
