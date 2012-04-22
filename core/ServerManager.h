@@ -39,7 +39,7 @@ bool ServerStart();
 void ServerUpdateServers();
 void ServerStop();
 void ServerFinalClose();
-void ServerCreateServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber);
+void ServerCreateServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber, const bool &bResume = false);
 //---------------------------------------------------------------------------
 extern double CpuUsage[60], cpuUsage;
 extern uint64_t ui64ActualTick, ui64TotalShare;

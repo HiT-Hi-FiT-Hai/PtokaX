@@ -986,6 +986,7 @@ void ServerUpdateServers() {
 
             cur->Close();
         	cur->WaitFor();
+
         	delete cur;
         }
     }
@@ -1012,11 +1013,11 @@ void ServerUpdateServers() {
         if(bFound == false) {
             if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true || (bUseIPv6 == true && bIPv6DualStack == false)) {
                 if(bUseIPv6 == true) {
-                    ServerCreateServerThread(AF_INET6, SettingManager->iPortNumbers[ui8i]);
+                    ServerCreateServerThread(AF_INET6, SettingManager->iPortNumbers[ui8i], true);
                 }
-                ServerCreateServerThread(AF_INET, SettingManager->iPortNumbers[ui8i]);
+                ServerCreateServerThread(AF_INET, SettingManager->iPortNumbers[ui8i], true);
             } else {
-                ServerCreateServerThread(bUseIPv6 == true ? AF_INET6 : AF_INET, SettingManager->iPortNumbers[ui8i]);
+                ServerCreateServerThread(bUseIPv6 == true ? AF_INET6 : AF_INET, SettingManager->iPortNumbers[ui8i], true);
             }
         }
     }
@@ -1102,7 +1103,7 @@ void ServerUpdateAutoRegState() {
 }
 //---------------------------------------------------------------------------
 
-void ServerCreateServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber) {
+void ServerCreateServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber, const bool &bResume/* = false*/) {
 	ServerThread * pServer = new ServerThread(iAddrFamily, ui16PortNumber);
     if(pServer == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pServer in ServerCreateServerThread\n", 0);
@@ -1120,6 +1121,10 @@ void ServerCreateServerThread(const int &iAddrFamily, const uint16_t &ui16PortNu
         }
     } else {
         delete pServer;
+    }
+
+    if(bResume == true) {
+        pServer->Resume();
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
