@@ -640,8 +640,8 @@ void classUsers::DelFromOpList(char * Nick) {
 //---------------------------------------------------------------------------
 
 // PPK ... check global mainchat flood and add to global queue
-void classUsers::SendChat2All(User * cur, char * data, const size_t &szChatLen) {
-    UdpDebug->Broadcast(data, szChatLen);
+void classUsers::SendChat2All(User * cur, char * sData, const size_t &szChatLen) {
+    UdpDebug->Broadcast(sData, szChatLen);
 
     if(ProfileMan->IsAllowed(cur, ProfileManager::NODEFLOODMAINCHAT) == false && 
         SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] != 0) {
@@ -683,30 +683,18 @@ void classUsers::SendChat2All(User * cur, char * data, const size_t &szChatLen) 
                 if(SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 1) {
                     return;
                 } else if(SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 2) {
-                    size_t szNeededLen = szChatLen+17;
-#ifdef _WIN32
-                    char * sMsg = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededLen);
-#else
-					char * sMsg = (char *)malloc(szNeededLen);
-#endif
-                    if(sMsg == NULL) {
-                        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in classUsers::SendChat2All\n", (uint64_t)szNeededLen);
-                        return;
+                    if(szChatLen > 64000) {
+                        sData[64000] = '\0';
                     }
-                	int iMsgLen = sprintf(sMsg, "%s ", cur->sIP);
-                	if(CheckSprintf(iMsgLen, szNeededLen, "classUsers::SendChat2All3") == true) {
-                        memcpy(sMsg+iMsgLen, data, szChatLen);
+
+                	int iMsgLen = sprintf(g_sBuffer, "%s ", cur->sIP);
+                	if(CheckSprintf(iMsgLen, g_szBufferSize, "classUsers::SendChat2All3") == true) {
+                        memcpy(g_sBuffer+iMsgLen, sData, szChatLen);
                         iMsgLen += (uint32_t)szChatLen;
-                        sMsg[iMsgLen] = '\0';
-                        globalQ->OPStore(sMsg, iMsgLen);
+                        g_sBuffer[iMsgLen] = '\0';
+                        globalQ->OPStore(g_sBuffer, iMsgLen);
                     }
-#ifdef _WIN32
-                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMsg) == 0) {
-						AppendDebugLog("%s - [MEM] Cannot deallocate sMsg in classUsers::SendChat2All\n", 0);
-                    }
-#else
-					free(sMsg);
-#endif
+
                     return;
                 }
             } else {
@@ -715,7 +703,7 @@ void classUsers::SendChat2All(User * cur, char * data, const size_t &szChatLen) 
         }
     }
 
-    globalQ->Store(data, szChatLen);
+    globalQ->Store(sData, szChatLen);
 }
 //---------------------------------------------------------------------------
 

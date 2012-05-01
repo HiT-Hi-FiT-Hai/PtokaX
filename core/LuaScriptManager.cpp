@@ -50,8 +50,6 @@ ScriptMan::ScriptMan() {
     
     ActualUser = NULL;
 
-    lua_msg[0] = '\0';
-
     ui8ScriptCount = 0;
     ui8BotsCount = 0;
 

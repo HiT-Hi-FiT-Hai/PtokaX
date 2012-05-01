@@ -63,8 +63,6 @@ public:
     Script **ScriptTable;
 	User *ActualUser;
 
-	char lua_msg[131072];
-
     uint8_t ui8ScriptCount, ui8BotsCount;
 
     bool bMoved;

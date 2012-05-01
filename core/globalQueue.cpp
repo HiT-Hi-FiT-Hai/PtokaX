@@ -998,18 +998,18 @@ void globalqueue::ProcessQueues(User * u) {
                 UserSendQueue(u, Q, false);
             }
         } else {
-            if(bHaveH == true && ((u->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) == false) {
+            if(bHaveH == true && ((u->ui32SupportBits & User::SUPPORTBIT_NOHELLO) == User::SUPPORTBIT_NOHELLO) == false) {
                 if(bHaveFull == true && ProfileMan->IsAllowed(u, ProfileManager::SENDFULLMYINFOS)) {
                     if(bHaveOp == true && ((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, HlFullIpOpQ, false);
                         } else {
                             UserSendQueue(u, HlFullOpQ, false);
                         }
                     } else {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, HlFullIpQ, false);
                         } else {
                             UserSendQueue(u, HlFullQ, false);
@@ -1018,14 +1018,14 @@ void globalqueue::ProcessQueues(User * u) {
                 } else {
                     if(bHaveOp == true && ((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, HlStrpIpOpQ, false);
                         } else {
                             UserSendQueue(u, HlStrpOpQ, false);
                         }
                     } else {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, HlStrpIpQ, false);
                         } else {
                             UserSendQueue(u, HlStrpQ, false);
@@ -1036,14 +1036,14 @@ void globalqueue::ProcessQueues(User * u) {
                 if(bHaveFull == true && ProfileMan->IsAllowed(u, ProfileManager::SENDFULLMYINFOS)) {
                     if(bHaveOp == true && ((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, FullIpOpQ, false);
                         } else {
                             UserSendQueue(u, FullOpQ, false);
                         }
                     } else {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, FullIpQ, false);
                         } else {
                             UserSendQueue(u, FullQ, false);
@@ -1052,14 +1052,14 @@ void globalqueue::ProcessQueues(User * u) {
                 } else {
                     if(bHaveOp == true && ((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, StrpIpOpQ, false);
                         } else {
                             UserSendQueue(u, StrpOpQ, false);
                         }
                     } else {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, StrpIpQ, false);
                         } else {
                             UserSendQueue(u, StrpQ, false);
@@ -1078,18 +1078,18 @@ void globalqueue::ProcessQueues(User * u) {
                 UserSendQueue(u, ActQ);
             }
         } else {
-            if(bHaveH == true && ((u->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) == false) {
+            if(bHaveH == true && ((u->ui32SupportBits & User::SUPPORTBIT_NOHELLO) == User::SUPPORTBIT_NOHELLO) == false) {
                 if(bHaveFull == true && ProfileMan->IsAllowed(u, ProfileManager::SENDFULLMYINFOS)) {
                     if(bHaveOp == true && ((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, HlFullIpOpActQ);
                         } else {
                             UserSendQueue(u, HlFullOpActQ);
                         }
                     } else {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, HlFullIpActQ);
                         } else {
                             UserSendQueue(u, HlFullActQ);
@@ -1098,14 +1098,14 @@ void globalqueue::ProcessQueues(User * u) {
                 } else {
                     if(bHaveOp == true && ((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, HlStrpIpOpActQ);
                         } else {
                             UserSendQueue(u, HlStrpOpActQ);
                         }
                     } else {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, HlStrpIpActQ);
                         } else {
                             UserSendQueue(u, HlStrpActQ);
@@ -1116,14 +1116,14 @@ void globalqueue::ProcessQueues(User * u) {
                 if(bHaveFull == true && ProfileMan->IsAllowed(u, ProfileManager::SENDFULLMYINFOS)) {
                     if(bHaveOp == true && ((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, FullIpOpActQ);
                         } else {
                             UserSendQueue(u, FullOpActQ);
                         }
                     } else {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, FullIpActQ);
                         } else {
                             UserSendQueue(u, FullActQ);
@@ -1132,14 +1132,14 @@ void globalqueue::ProcessQueues(User * u) {
                 } else {
                     if(bHaveOp == true && ((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, StrpIpOpActQ);
                         } else {
                             UserSendQueue(u, StrpOpActQ);
                         }
                     } else {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, StrpIpActQ);
                         } else {
                             UserSendQueue(u, StrpActQ);
@@ -1158,18 +1158,18 @@ void globalqueue::ProcessQueues(User * u) {
                 UserSendQueue(u, PasQ);
             }
         } else {
-            if(bHaveH == true && ((u->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) == false) {
+            if(bHaveH == true && ((u->ui32SupportBits & User::SUPPORTBIT_NOHELLO) == User::SUPPORTBIT_NOHELLO) == false) {
                 if(bHaveFull == true && ProfileMan->IsAllowed(u, ProfileManager::SENDFULLMYINFOS)) {
                     if(bHaveOp == true && ((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, HlFullIpOpPasQ);
                         } else {
                             UserSendQueue(u, HlFullOpPasQ);
                         }
                     } else {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, HlFullIpPasQ);
                         } else {
                             UserSendQueue(u, HlFullPasQ);
@@ -1178,14 +1178,14 @@ void globalqueue::ProcessQueues(User * u) {
                 } else {
                     if(bHaveOp == true && ((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, HlStrpIpOpPasQ);
                         } else {
                             UserSendQueue(u, HlStrpOpPasQ);
                         }
                     } else {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, HlStrpIpPasQ);
                         } else {
                             UserSendQueue(u, HlStrpPasQ);
@@ -1196,14 +1196,14 @@ void globalqueue::ProcessQueues(User * u) {
                 if(bHaveFull == true && ProfileMan->IsAllowed(u, ProfileManager::SENDFULLMYINFOS)) {
                     if(bHaveOp == true && ((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, FullIpOpPasQ);
                         } else {
                             UserSendQueue(u, FullOpPasQ);
                         }
                     } else {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, FullIpPasQ);
                         } else {
                             UserSendQueue(u, FullPasQ);
@@ -1212,14 +1212,14 @@ void globalqueue::ProcessQueues(User * u) {
                 } else {
                     if(bHaveOp == true && ((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true &&
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, StrpIpOpPasQ);
                         } else {
                             UserSendQueue(u, StrpOpPasQ);
                         }
                     } else {
                         if(bHaveIP == true && ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true && 
-                            ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+                            ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
                             UserSendQueue(u, StrpIpPasQ);
                         } else {
                             UserSendQueue(u, StrpPasQ);
@@ -1233,169 +1233,102 @@ void globalqueue::ProcessQueues(User * u) {
 //---------------------------------------------------------------------------
 
 void globalqueue::ProcessSingleItems(User * u) {
-    char *MSG = NULL;
-    int MSGLen = 0;
-    size_t MSGSize = 0;
+    size_t szLen = 0;
+
     QueueDataItem *qdinxt = SingleItemsQueueS;
 
     while(qdinxt != NULL) {
         QueueDataItem *qdicur = qdinxt;
         qdinxt = qdicur->next;
+
         if(qdicur->FromUser != u) {
             switch(qdicur->ui32Type) {
                 case globalqueue::PM2ALL: { // send PM to ALL
-                    if(MSGSize < MSGLen+qdicur->szDataLen+u->ui8NickLen+13) {
-                        size_t szAllignLen = Allign1024(MSGLen+qdicur->szDataLen+u->ui8NickLen+13);
-                        char * pOldBuf = MSG;
-#ifdef _WIN32
-                        if(MSG == NULL) {
-                            MSG = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szAllignLen);
-                        } else {
-                            MSG = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szAllignLen);
-                        }
-#else
-						MSG = (char *)realloc(pOldBuf, szAllignLen);
-#endif
-
-                        if(MSG == NULL) {
-                            MSG = pOldBuf;
-
-							AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems\n", (uint64_t)szAllignLen);
-
+                    size_t szWanted = szLen+qdicur->szDataLen+u->ui8NickLen+13;
+                    if(g_szBufferSize < szWanted) {
+                        if(CheckAndResizeGlobalBuffer(szWanted) == false) {
+							AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems\n", (uint64_t)Allign128K(szWanted));
                             break;
                         }
-                        MSGSize = (uint32_t)(szAllignLen-1);
                     }
-                    int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->sNick);
-                    MSGLen += iret;
-                    CheckSprintf1(iret, MSGLen, MSGSize, "globalqueue::ProcessSingleItems1");
-                    memcpy(MSG+MSGLen, qdicur->sData, qdicur->szDataLen);
-                    MSGLen += (int)qdicur->szDataLen;
-                    MSG[MSGLen] = '\0';
+                    int iret = sprintf(g_sBuffer+szLen, "$To: %s From: ", u->sNick);
+                    szLen += iret;
+                    CheckSprintf1(iret, szLen, g_szBufferSize, "globalqueue::ProcessSingleItems1");
+
+                    memcpy(g_sBuffer+szLen, qdicur->sData, qdicur->szDataLen);
+                    szLen += qdicur->szDataLen;
+                    g_sBuffer[szLen] = '\0';
+
                     break;
                 }
                 case globalqueue::PM2OPS: { // send PM only to operators
                     if(((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
-                        if(MSGSize < MSGLen+qdicur->szDataLen+u->ui8NickLen+13) {
-                            size_t szAllignLen = Allign1024(MSGLen+qdicur->szDataLen+u->ui8NickLen+13);
-                            char * pOldBuf = MSG;
-#ifdef _WIN32
-                            if(MSG == NULL) {
-                                MSG = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szAllignLen);
-                            } else {
-                                MSG = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szAllignLen);
-                            }
-#else
-							MSG = (char *)realloc(pOldBuf, szAllignLen);
-#endif
-                            if(MSG == NULL) {
-                                MSG = pOldBuf;
-
-								AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems1\n", (uint64_t)szAllignLen);
-
+                        size_t szWanted = szLen+qdicur->szDataLen+u->ui8NickLen+13;
+                        if(g_szBufferSize < szWanted) {
+                            if(CheckAndResizeGlobalBuffer(szWanted) == false) {
+								AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems1\n", (uint64_t)Allign128K(szWanted));
 								break;
                             }
-                            MSGSize = (uint32_t)(szAllignLen-1);
                         }
-                        int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->sNick);
-                        MSGLen += iret;
-                        CheckSprintf1(iret, MSGLen, MSGSize, "globalqueue::ProcessSingleItems2");
-                        memcpy(MSG+MSGLen, qdicur->sData, qdicur->szDataLen);
-                        MSGLen += (int)qdicur->szDataLen;
-                        MSG[MSGLen] = '\0';
+                        int iret = sprintf(g_sBuffer+szLen, "$To: %s From: ", u->sNick);
+                        szLen += iret;
+                        CheckSprintf1(iret, szLen, g_szBufferSize, "globalqueue::ProcessSingleItems2");
+
+                        memcpy(g_sBuffer+szLen, qdicur->sData, qdicur->szDataLen);
+                        szLen += qdicur->szDataLen;
+                        g_sBuffer[szLen] = '\0';
                     }
                     break;
                 }
                 case globalqueue::OPCHAT: { // send OpChat only to allowed users...
                     if(ProfileMan->IsAllowed(u, ProfileManager::ALLOWEDOPCHAT) == true) {
-                        if(MSGSize < MSGLen+qdicur->szDataLen+u->ui8NickLen+13) {
-                            size_t szAllignLen = Allign1024(MSGLen+qdicur->szDataLen+u->ui8NickLen+13);
-                            char * pOldBuf = MSG;
-#ifdef _WIN32
-                            if(MSG == NULL) {
-                                MSG = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szAllignLen);
-                            } else {
-                                MSG = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szAllignLen);
-                            }
-#else
-							MSG = (char *)realloc(pOldBuf, szAllignLen);
-#endif
-                            if(MSG == NULL) {
-                                MSG = pOldBuf;
-
-								AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems2\n", (uint64_t)szAllignLen);
-
+                        size_t szWanted = szLen+qdicur->szDataLen+u->ui8NickLen+13;
+                        if(g_szBufferSize < szWanted) {
+                            if(CheckAndResizeGlobalBuffer(szWanted) == false) {
+								AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems2\n", (uint64_t)Allign128K(szWanted));
                                 break;
                             }
-                            MSGSize = (uint32_t)(szAllignLen-1);
                         }
-                        int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->sNick);
-                        MSGLen += iret;
-                        CheckSprintf1(iret, MSGLen, MSGSize, "globalqueue::ProcessSingleItems3");
-                        memcpy(MSG+MSGLen, qdicur->sData, qdicur->szDataLen);
-                        MSGLen += (int)qdicur->szDataLen;
-                        MSG[MSGLen] = '\0';
+                        int iret = sprintf(g_sBuffer+szLen, "$To: %s From: ", u->sNick);
+                        szLen += iret;
+                        CheckSprintf1(iret, szLen, g_szBufferSize, "globalqueue::ProcessSingleItems3");
+
+                        memcpy(g_sBuffer+szLen, qdicur->sData, qdicur->szDataLen);
+                        szLen += qdicur->szDataLen;
+                        g_sBuffer[szLen] = '\0';
                     }
                     break;
                 }
                 case globalqueue::TOPROFILE: { // send data only to given profile...
                     if(u->iProfile == qdicur->i32Profile) {
-                        if(MSGSize < MSGLen+qdicur->szDataLen) {
-                            size_t szAllignLen = Allign1024(MSGLen+qdicur->szDataLen+1);
-                            char * pOldBuf = MSG;
-#ifdef _WIN32
-                            if(MSG == NULL) {
-                                MSG = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szAllignLen);
-                            } else {
-                                MSG = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szAllignLen);
-                            }
-#else
-							MSG = (char *)realloc(pOldBuf, szAllignLen);
-#endif
-                            if(MSG == NULL) {
-                                MSG = pOldBuf;
-
-								AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems3\n", (uint64_t)szAllignLen);
-
+                        size_t szWanted = szLen+qdicur->szDataLen;
+                        if(g_szBufferSize < szWanted) {
+                            if(CheckAndResizeGlobalBuffer(szWanted) == false) {
+								AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems3\n", (uint64_t)Allign128K(szWanted));
                                 break;
                             }
-                            MSGSize = (uint32_t)(szAllignLen-1);
                         }
-                        memcpy(MSG+MSGLen, qdicur->sData, qdicur->szDataLen);
-                        MSGLen += (int)qdicur->szDataLen;
-                        MSG[MSGLen] = '\0';
+                        memcpy(g_sBuffer+szLen, qdicur->sData, qdicur->szDataLen);
+                        szLen += qdicur->szDataLen;
+                        g_sBuffer[szLen] = '\0';
                     }
                     break;
                 }
                 case globalqueue::PM2PROFILE: { // send pm only to given profile...
                     if(u->iProfile == qdicur->i32Profile) {
-                        if(MSGSize < MSGLen+qdicur->szDataLen+u->ui8NickLen+13) {
-                            size_t szAllignLen = Allign1024(MSGLen+qdicur->szDataLen+u->ui8NickLen+13);
-                            char * pOldBuf = MSG;
-#ifdef _WIN32
-                            if(MSG == NULL) {
-                                MSG = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szAllignLen);
-                            } else {
-                                MSG = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szAllignLen);
-                            }
-#else
-							MSG = (char *)realloc(pOldBuf, szAllignLen);
-#endif
-                            if(MSG == NULL) {
-                                MSG = pOldBuf;
-
-								AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems4\n", (uint64_t)szAllignLen);
-
+                        size_t szWanted = szLen+qdicur->szDataLen+u->ui8NickLen+13;
+                        if(g_szBufferSize < szWanted) {
+                            if(CheckAndResizeGlobalBuffer(szWanted) == false) {
+								AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems4\n", (uint64_t)Allign128K(szWanted));
                                 break;
                             }
-                            MSGSize = (uint32_t)(szAllignLen-1);
                         }
-                        int iret = sprintf(MSG+MSGLen, "$To: %s From: ", u->sNick);
-                        MSGLen += iret;
-                        CheckSprintf1(iret, MSGLen, MSGSize, "globalqueue::ProcessSingleItems4");
-                        memcpy(MSG+MSGLen, qdicur->sData, qdicur->szDataLen);
-                        MSGLen += (int)qdicur->szDataLen;
-                        MSG[MSGLen] = '\0';
+                        int iret = sprintf(g_sBuffer+szLen, "$To: %s From: ", u->sNick);
+                        szLen += iret;
+                        CheckSprintf1(iret, szLen, g_szBufferSize, "globalqueue::ProcessSingleItems4");
+                        memcpy(g_sBuffer+szLen, qdicur->sData, qdicur->szDataLen);
+                        szLen += qdicur->szDataLen;
+                        g_sBuffer[szLen] = '\0';
                     }
                     break;
                 }
@@ -1404,16 +1337,12 @@ void globalqueue::ProcessSingleItems(User * u) {
             }
         }
     }
-    if(MSG != NULL) {
-        UserSendCharDelayed(u, MSG, MSGLen);
-#ifdef _WIN32
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)MSG) == 0) {
-            AppendDebugLog("%s - [MEM] Cannot deallocate MSG in globalqueue::ProcessSingleItems\n", 0);
-        }
-#else
-		free(MSG);
-#endif
+
+    if(szLen != 0) {
+        UserSendCharDelayed(u, g_sBuffer, szLen);
     }
+
+    ReduceGlobalBuffer();
 }
 //---------------------------------------------------------------------------
 

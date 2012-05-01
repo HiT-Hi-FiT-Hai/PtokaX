@@ -111,19 +111,11 @@ struct User {
     	BIT_HAVE_BOTINFO               = 0x2000,
     	BIT_HAVE_KEY                   = 0x4000,
     	BIT_HAVE_SHARECOUNTED          = 0x8000,
-    	BIT_SUPPORT_NOGETINFO          = 0x10000,
-    	BIT_SUPPORT_USERCOMMAND        = 0x20000,
-    	BIT_SUPPORT_NOHELLO            = 0x40000,
-    	BIT_SUPPORT_QUICKLIST          = 0x80000,
-    	BIT_SUPPORT_USERIP2            = 0x100000,
-    	BIT_SUPPORT_ZPIPE              = 0x200000,
-    	BIT_PRCSD_MYINFO               = 0x400000,
-    	BIT_RECV_FLOODER               = 0x800000,
-    	BIT_QUACK_SUPPORTS             = 0x1000000,
-    	BIT_IPV6                       = 0x2000000,
-    	BIT_SUPPORT_IP64               = 0x4000000,
-    	BIT_SUPPORT_IPV4               = 0x8000000,
-    	BIT_IPV4                       = 0x10000000,
+    	BIT_PRCSD_MYINFO               = 0x10000,
+    	BIT_RECV_FLOODER               = 0x20000,
+    	BIT_QUACK_SUPPORTS             = 0x400000,
+    	BIT_IPV6                       = 0x800000,
+    	BIT_IPV4                       = 0x1000000,
     };
 
     enum UserInfoBits {
@@ -144,6 +136,17 @@ struct User {
     	INFOBIT_SHARE_LONG_PERM            = 0x4000
     };
 
+    enum UserSupportBits {
+    	SUPPORTBIT_NOGETINFO               = 0x1,
+    	SUPPORTBIT_USERCOMMAND             = 0x2,
+    	SUPPORTBIT_NOHELLO                 = 0x4,
+    	SUPPORTBIT_QUICKLIST               = 0x8,
+    	SUPPORTBIT_USERIP2                 = 0x10,
+    	SUPPORTBIT_ZPIPE                   = 0x20,
+    	SUPPORTBIT_IP64                    = 0x40,
+    	SUPPORTBIT_IPV4                    = 0x80,
+    };
+
     uint64_t ui64SharedSize, ui64ChangedSharedSizeShort, ui64ChangedSharedSizeLong;
 	uint64_t ui64GetNickListsTick, ui64MyINFOsTick, ui64SearchsTick, ui64ChatMsgsTick;
     uint64_t ui64PMsTick, ui64SameSearchsTick, ui64SamePMsTick, ui64SameChatsTick;
@@ -152,12 +155,12 @@ struct User {
     uint64_t ui64CTMsTick2, ui64RCTMsTick, ui64RCTMsTick2, ui64SRsTick;
     uint64_t ui64SRsTick2, ui64RecvsTick, ui64RecvsTick2, ui64ChatIntMsgsTick;
     uint64_t ui64PMsIntTick, ui64SearchsIntTick;
-    uint64_t ui32BoolBits, ui32InfoBits;
 
     uint32_t ui32Recvs, ui32Recvs2;
 
     uint32_t Hubs, Slots, OLimit, LLimit, DLimit, iNormalHubs, iRegHubs, iOpHubs;
     uint32_t iSendCalled, iRecvCalled, iReceivedPmCount, iSR, iDefloodWarnings;
+    uint32_t ui32BoolBits, ui32InfoBits, ui32SupportBits;
 
 #ifdef _WIN32
 	SOCKET Sck;

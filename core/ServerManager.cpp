@@ -265,6 +265,8 @@ void ServerInitialize() {
         ui32CpuCount = 1;
     }
 #endif
+    CreateGlobalBuffer();
+
     CheckForIPv6();
 
 	ResNickManager = new ResNickMan();
@@ -936,6 +938,8 @@ void ServerFinalClose() {
 
     delete ResNickManager;
     ResNickManager = NULL;
+
+    DeleteGlobalBuffer();
 
 #ifdef _WIN32
 	HeapDestroy(hPtokaXHeap);

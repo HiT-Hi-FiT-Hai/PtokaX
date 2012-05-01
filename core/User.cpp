@@ -276,7 +276,7 @@ static void UserParseMyInfo(User * u) {
 
             static const uint16_t ui16plusplus = *((uint16_t *)"++");
             if(DCTag[3] == ' ' && *((uint16_t *)(DCTag+1)) == ui16plusplus) {
-                u->ui32BoolBits |= User::BIT_SUPPORT_NOHELLO;
+                u->ui32SupportBits |= User::SUPPORTBIT_NOHELLO;
             }
                 
             // PPK ... tag code with customizable tag file support... but only god knows how slow is :(
@@ -340,7 +340,7 @@ static void UserParseMyInfo(User * u) {
                             reqVals++;
                             break;
                         case 'M':
-                            if((u->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6 && (u->ui32BoolBits & User::BIT_SUPPORT_IP64) == User::BIT_SUPPORT_IP64) {
+                            if((u->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6 && (u->ui32SupportBits & User::SUPPORTBIT_IP64) == User::SUPPORTBIT_IP64) {
                                 if(sTagPart[2] == '\0' || sTagPart[3] == '\0' || sTagPart[4] != '\0') {
                                     UserSetBadTag(u, u->sMyInfoOriginal+(sMyINFOParts[0]-msg), (uint8_t)iMyINFOPartsLen[0]);
                                     return;
@@ -716,6 +716,7 @@ User::User() {
 	ui32BoolBits |= User::BIT_OLDHUBSTAG;
 
     ui32InfoBits = 0;
+    ui32SupportBits = 0;
 
 	ui8ConnectionLen = 0;
 	ui8DescriptionLen = 0;
@@ -949,7 +950,7 @@ User::~User() {
 	free(sChangedEmailLong);
 #endif
 
-	if(((ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == true)
+	if(((ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == true)
         DcCommands->iStatZPipe--;
 
 	ui32Parts++;
@@ -1301,7 +1302,7 @@ void UserSendChar(User * u, const char * cText, const size_t &szTextLen) {
 	if(u->ui8State >= User::STATE_CLOSING || szTextLen == 0)
         return;
 
-    if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false || szTextLen < ZMINDATALEN) {
+    if(((u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false || szTextLen < ZMINDATALEN) {
         if(UserPutInSendBuf(u, cText, szTextLen)) {
             UserTry2Send(u);
         }
@@ -1334,7 +1335,7 @@ void UserSendCharDelayed(User * u, const char * cText) {
         return;
     }
 
-    if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false || szTxtLen < ZMINDATALEN) {
+    if(((u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false || szTxtLen < ZMINDATALEN) {
         UserPutInSendBuf(u, cText, szTxtLen);
     } else {
         uint32_t iLen = 0;
@@ -1355,7 +1356,7 @@ void UserSendCharDelayed(User * u, const char * cText, const size_t &szTextLen) 
         return;
     }
         
-    if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false || szTextLen < ZMINDATALEN) {
+    if(((u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false || szTextLen < ZMINDATALEN) {
         UserPutInSendBuf(u, cText, szTextLen);
     } else {
         uint32_t iLen = 0;
@@ -1376,7 +1377,7 @@ void UserSendText(User * u, const string &sText) {
         return;
     }
 
-    if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false || sText.size() < ZMINDATALEN) {
+    if(((u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false || sText.size() < ZMINDATALEN) {
         if(UserPutInSendBuf(u, sText.c_str(), sText.size())) {
             UserTry2Send(u);
         }
@@ -1403,7 +1404,7 @@ void UserSendTextDelayed(User * u, const string &sText) {
         return;
     }
       
-    if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false || sText.size() < ZMINDATALEN) {
+    if(((u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false || sText.size() < ZMINDATALEN) {
         UserPutInSendBuf(u, sText.c_str(), sText.size());
     } else {
         uint32_t iLen = 0;
@@ -1442,7 +1443,7 @@ void UserSendQueue(User * u, QzBuf * Queue, bool bChckActSr/* = true*/) {
 
     if(ui8SrCntr == 0) {
         if(bChckActSr == true) {
-            if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false) {
+            if(((u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false) {
                 uint32_t iSbLen = u->sbdatalen;
                 UserPutInSendBuf(u, Queue->buffer, Queue->len);
                                                                   
@@ -1532,7 +1533,7 @@ void UserSendQueue(User * u, QzBuf * Queue, bool bChckActSr/* = true*/) {
         }
     }
 
-    if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false) {
+    if(((u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false) {
         UserPutInSendBuf(u, Queue->buffer, Queue->len);
     } else {
         if(Queue->zlined == false) {
@@ -1573,7 +1574,7 @@ bool UserPutInSendBuf(User * u, const char * Text, const size_t &szTxtLen) {
                 szMaxBufLen = szMaxBufLen < 262144 ? 262144 :szMaxBufLen;
                 if(szAllignLen > szMaxBufLen) {
                     // does the buffer size reached the maximum
-                    if(SettingManager->bBools[SETBOOL_KEEP_SLOW_USERS] == false || (u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) {
+                    if(SettingManager->bBools[SETBOOL_KEEP_SLOW_USERS] == false || (u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) {
                         // we want to drop the slow user
                         u->ui32BoolBits |= User::BIT_ERROR;
                         UserClose(u);
@@ -2406,15 +2407,15 @@ void UserAddUserList(User * u) {
     u->ui32BoolBits |= User::BIT_BIG_SEND_BUFFER;
 	u->iLastNicklist = ui64ActualTick;
 
-	if(((u->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) == false) {
+	if(((u->ui32SupportBits & User::SUPPORTBIT_NOHELLO) == User::SUPPORTBIT_NOHELLO) == false) {
     	if(ProfileMan->IsAllowed(u, ProfileManager::ALLOWEDOPCHAT) == false || (SettingManager->bBools[SETBOOL_REG_OP_CHAT] == false ||
             (SettingManager->bBools[SETBOOL_REG_BOT] == true && SettingManager->bBotsSameNick == true))) {
-            if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false) {
+            if(((u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false) {
                 UserSendCharDelayed(u, colUsers->nickList, colUsers->nickListLen);
             } else {
                 if(colUsers->iZNickListLen == 0) {
                     colUsers->sZNickList = ZlibUtility->CreateZPipe(colUsers->nickList, colUsers->nickListLen, colUsers->sZNickList,
-                        colUsers->iZNickListLen, colUsers->iZNickListSize, ZLISTSIZE);
+                        colUsers->iZNickListLen, colUsers->iZNickListSize, Allign16K);
                     if(colUsers->iZNickListLen == 0) {
                         UserSendCharDelayed(u, colUsers->nickList, colUsers->nickListLen);
                     } else {
@@ -2464,12 +2465,12 @@ void UserAddUserList(User * u) {
                 break;
             }
 
-            if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false) {
+            if(((u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false) {
                 UserSendCharDelayed(u, colUsers->myInfosTag, colUsers->myInfosTagLen);
             } else {
                 if(colUsers->iZMyInfosTagLen == 0) {
                     colUsers->sZMyInfosTag = ZlibUtility->CreateZPipe(colUsers->myInfosTag, colUsers->myInfosTagLen, colUsers->sZMyInfosTag,
-                        colUsers->iZMyInfosTagLen, colUsers->iZMyInfosTagSize, ZMYINFOLISTSIZE);
+                        colUsers->iZMyInfosTagLen, colUsers->iZMyInfosTagSize, Allign128K);
                     if(colUsers->iZMyInfosTagLen == 0) {
                         UserSendCharDelayed(u, colUsers->myInfosTag, colUsers->myInfosTagLen);
                     } else {
@@ -2489,12 +2490,12 @@ void UserAddUserList(User * u) {
                     break;
                 }
 
-                if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false) {
+                if(((u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false) {
                     UserSendCharDelayed(u, colUsers->myInfos, colUsers->myInfosLen);
                 } else {
                     if(colUsers->iZMyInfosLen == 0) {
                         colUsers->sZMyInfos = ZlibUtility->CreateZPipe(colUsers->myInfos, colUsers->myInfosLen, colUsers->sZMyInfos,
-                            colUsers->iZMyInfosLen, colUsers->iZMyInfosSize, ZMYINFOLISTSIZE);
+                            colUsers->iZMyInfosLen, colUsers->iZMyInfosSize, Allign128K);
                         if(colUsers->iZMyInfosLen == 0) {
                             UserSendCharDelayed(u, colUsers->myInfos, colUsers->myInfosLen);
                         } else {
@@ -2511,12 +2512,12 @@ void UserAddUserList(User * u) {
                     break;
                 }
 
-                if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false) {
+                if(((u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false) {
                     UserSendCharDelayed(u, colUsers->myInfosTag, colUsers->myInfosTagLen);
                 } else {
                     if(colUsers->iZMyInfosTagLen == 0) {
                         colUsers->sZMyInfosTag = ZlibUtility->CreateZPipe(colUsers->myInfosTag, colUsers->myInfosTagLen, colUsers->sZMyInfosTag,
-                            colUsers->iZMyInfosTagLen, colUsers->iZMyInfosTagSize, ZMYINFOLISTSIZE);
+                            colUsers->iZMyInfosTagLen, colUsers->iZMyInfosTagSize, Allign128K);
                         if(colUsers->iZMyInfosTagLen == 0) {
                             UserSendCharDelayed(u, colUsers->myInfosTag, colUsers->myInfosTagLen);
                         } else {
@@ -2536,12 +2537,12 @@ void UserAddUserList(User * u) {
                 break;
             }
 
-            if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false) {
+            if(((u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false) {
                 UserSendCharDelayed(u, colUsers->myInfos, colUsers->myInfosLen);
             } else {
                 if(colUsers->iZMyInfosLen == 0) {
                     colUsers->sZMyInfos = ZlibUtility->CreateZPipe(colUsers->myInfos, colUsers->myInfosLen, colUsers->sZMyInfos,
-                        colUsers->iZMyInfosLen, colUsers->iZMyInfosSize, ZMYINFOLISTSIZE);
+                        colUsers->iZMyInfosLen, colUsers->iZMyInfosSize, Allign128K);
                     if(colUsers->iZMyInfosLen == 0) {
                         UserSendCharDelayed(u, colUsers->myInfos, colUsers->myInfosLen);
                     } else {
@@ -2561,12 +2562,12 @@ void UserAddUserList(User * u) {
 	if(ProfileMan->IsAllowed(u, ProfileManager::ALLOWEDOPCHAT) == false || (SettingManager->bBools[SETBOOL_REG_OP_CHAT] == false ||
         (SettingManager->bBools[SETBOOL_REG_BOT] == true && SettingManager->bBotsSameNick == true))) {
         if(colUsers->opListLen > 9) {
-            if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false) {
+            if(((u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false) {
                 UserSendCharDelayed(u, colUsers->opList, colUsers->opListLen);
             } else {
                 if(colUsers->iZOpListLen == 0) {
                     colUsers->sZOpList = ZlibUtility->CreateZPipe(colUsers->opList, colUsers->opListLen, colUsers->sZOpList,
-                        colUsers->iZOpListLen, colUsers->iZOpListSize, ZLISTSIZE);
+                        colUsers->iZOpListLen, colUsers->iZOpListSize, Allign16K);
                     if(colUsers->iZOpListLen == 0) {
                         UserSendCharDelayed(u, colUsers->opList, colUsers->opListLen);
                     } else {
@@ -2612,14 +2613,14 @@ void UserAddUserList(User * u) {
         }
     }
 
-    if(ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true && ((u->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true) {
+    if(ProfileMan->IsAllowed(u, ProfileManager::SENDALLUSERIP) == true && ((u->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true) {
         if(colUsers->userIPListLen > 9) {
-            if(((u->ui32BoolBits & User::BIT_SUPPORT_ZPIPE) == User::BIT_SUPPORT_ZPIPE) == false) {
+            if(((u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false) {
                 UserSendCharDelayed(u, colUsers->userIPList, colUsers->userIPListLen);
             } else {
                 if(colUsers->iZUserIPListLen == 0) {
                     colUsers->sZUserIPList = ZlibUtility->CreateZPipe(colUsers->userIPList, colUsers->userIPListLen, colUsers->sZUserIPList,
-                        colUsers->iZUserIPListLen, colUsers->iZUserIPListSize, ZLISTSIZE);
+                        colUsers->iZUserIPListLen, colUsers->iZUserIPListSize, Allign16K);
                     if(colUsers->iZUserIPListLen == 0) {
                         UserSendCharDelayed(u, colUsers->userIPList, colUsers->userIPListLen);
                     } else {
@@ -3172,7 +3173,7 @@ void UserAddPrcsdCmd(User * u, const unsigned char &cType, char * sCommand, cons
 //---------------------------------------------------------------------------
 
 void UserAddMeOrIPv4Check(User * pUser) {
-    if(((pUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) && ((pUser->ui32BoolBits & User::BIT_SUPPORT_IPV4) == User::BIT_SUPPORT_IPV4) && sHubIP[0] != '\0') {
+    if(((pUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) && ((pUser->ui32SupportBits & User::SUPPORTBIT_IPV4) == User::SUPPORTBIT_IPV4) && sHubIP[0] != '\0') {
         pUser->ui8State = User::STATE_IPV4_CHECK;
 
         int imsgLen = sprintf(msg, "$ConnectToMe %s %s:%s|", pUser->sNick, sHubIP, string(SettingManager->iPortNumbers[0]).c_str());

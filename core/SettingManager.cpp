@@ -2546,7 +2546,7 @@ void SetMan::UpdateOpChat(const bool &bNickChanged/* = true*/) {
             User *curUser = next;
             next = curUser->next;
             if(curUser->ui8State == User::STATE_ADDED && ProfileMan->IsAllowed(curUser, ProfileManager::ALLOWEDOPCHAT) == true) {
-                if(bNickChanged == true && (((curUser->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) == false)) {
+                if(bNickChanged == true && (((curUser->ui32SupportBits & User::SUPPORTBIT_NOHELLO) == User::SUPPORTBIT_NOHELLO) == false)) {
                     UserSendCharDelayed(curUser, SettingManager->sPreTexts[SETPRETXT_OP_CHAT_HELLO], 
                         SettingManager->ui16PreTextsLens[SETPRETXT_OP_CHAT_HELLO]);
                 }

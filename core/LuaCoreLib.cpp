@@ -214,9 +214,9 @@ static int RegBot(lua_State * L) {
     colUsers->AddBot2MyInfos(pNewBot->sMyINFO);
 
     // PPK ... fixed hello sending only to users without NoHello
-    int iMsgLen = sprintf(ScriptManager->lua_msg, "$Hello %s|", pNewBot->sNick);
-    if(CheckSprintf(iMsgLen, 131072, "RegBot") == true) {
-        globalQ->HStore(ScriptManager->lua_msg, iMsgLen);
+    int iMsgLen = sprintf(g_sBuffer, "$Hello %s|", pNewBot->sNick);
+    if(CheckSprintf(iMsgLen, g_szBufferSize, "RegBot") == true) {
+        globalQ->HStore(g_sBuffer, iMsgLen);
     }
     
     globalQ->InfoStore(pNewBot->sMyINFO, strlen(pNewBot->sMyINFO));
@@ -279,9 +279,9 @@ static int UnregBot(lua_State * L) {
 
             colUsers->DelBotFromMyInfos(cur->sMyINFO);
 
-            int iMsgLen = sprintf(ScriptManager->lua_msg, "$Quit %s|", cur->sNick);
-            if(CheckSprintf(iMsgLen, 131072, "UnregBot") == true) {
-                globalQ->InfoStore(ScriptManager->lua_msg, iMsgLen);
+            int iMsgLen = sprintf(g_sBuffer, "$Quit %s|", cur->sNick);
+            if(CheckSprintf(iMsgLen, g_szBufferSize, "UnregBot") == true) {
+                globalQ->InfoStore(g_sBuffer, iMsgLen);
             }
 
             if(cur->prev == NULL) {
@@ -985,12 +985,12 @@ static int GetUserData(lua_State * L) {
             break;
         case 12:
         	lua_pushliteral(L, "bUserCommand");
-        	(u->ui32BoolBits & User::BIT_SUPPORT_USERCOMMAND) == User::BIT_SUPPORT_USERCOMMAND ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+        	(u->ui32SupportBits & User::SUPPORTBIT_USERCOMMAND) == User::SUPPORTBIT_USERCOMMAND ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
         	lua_rawset(L, 1);
             break;
         case 13:
         	lua_pushliteral(L, "bQuickList");
-        	(u->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+        	(u->ui32SupportBits & User::SUPPORTBIT_QUICKLIST) == User::SUPPORTBIT_QUICKLIST ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
         	lua_rawset(L, 1);
             break;
         case 14:
@@ -1297,10 +1297,10 @@ static int GetUserValue(lua_State * L) {
         	(u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
         	return 1;
         case 12:
-        	(u->ui32BoolBits & User::BIT_SUPPORT_USERCOMMAND) == User::BIT_SUPPORT_USERCOMMAND ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+        	(u->ui32SupportBits & User::SUPPORTBIT_USERCOMMAND) == User::SUPPORTBIT_USERCOMMAND ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
         	return 1;
         case 13:
-        	(u->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+        	(u->ui32SupportBits & User::SUPPORTBIT_QUICKLIST) == User::SUPPORTBIT_QUICKLIST ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
         	return 1;
         case 14:
         	(u->ui32BoolBits & User::BIT_HAVE_BADTAG) == User::BIT_HAVE_BADTAG ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
@@ -1483,8 +1483,8 @@ static int Disconnect(lua_State * L) {
         return 1;
     }
 
-//    int imsgLen = sprintf(ScriptManager->lua_msg, "[SYS] User %s (%s) disconnected by script.", u->Nick, u->IP);
-//    UdpDebug->Broadcast(ScriptManager->lua_msg, imsgLen);
+//    int imsgLen = sprintf(g_sBuffer, "[SYS] User %s (%s) disconnected by script.", u->Nick, u->IP);
+//    UdpDebug->Broadcast(g_sBuffer, imsgLen);
     UserClose(u);
 
     lua_settop(L, 0);
@@ -1533,32 +1533,32 @@ static int Kick(lua_State * L) {
 
     hashBanManager->TempBan(u, sReason, sKicker, 0, 0, false);
 
-    int imsgLen = sprintf(ScriptManager->lua_msg, "<%s> %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_BEING_KICKED_BCS], sReason);
-    if(CheckSprintf(imsgLen, 131072, "Kick5") == true) {
-    	UserSendCharDelayed(u, ScriptManager->lua_msg, imsgLen);
+    int imsgLen = sprintf(g_sBuffer, "<%s> %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_BEING_KICKED_BCS], sReason);
+    if(CheckSprintf(imsgLen, g_szBufferSize, "Kick5") == true) {
+    	UserSendCharDelayed(u, g_sBuffer, imsgLen);
     }
 
     if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
     	if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-    	    imsgLen = sprintf(ScriptManager->lua_msg, "%s $<%s> *** %s %s IP %s %s %s %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
+    	    imsgLen = sprintf(g_sBuffer, "%s $<%s> *** %s %s IP %s %s %s %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                 SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], u->sNick, LanguageManager->sTexts[LAN_WITH_LWR], u->sIP, LanguageManager->sTexts[LAN_WAS_KICKED_BY], sKicker,
                 LanguageManager->sTexts[LAN_BECAUSE_LWR], sReason);
-            if(CheckSprintf(imsgLen, 131072, "Kick6") == true) {
-				globalQ->SingleItemStore(ScriptManager->lua_msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+            if(CheckSprintf(imsgLen, g_szBufferSize, "Kick6") == true) {
+				globalQ->SingleItemStore(g_sBuffer, imsgLen, NULL, 0, globalqueue::PM2OPS);
             }
     	} else {
-    	    imsgLen = sprintf(ScriptManager->lua_msg, "<%s> *** %s %s IP %s %s %s %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], u->sNick,
+    	    imsgLen = sprintf(g_sBuffer, "<%s> *** %s %s IP %s %s %s %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], u->sNick,
                 LanguageManager->sTexts[LAN_WITH_LWR], u->sIP, LanguageManager->sTexts[LAN_WAS_KICKED_BY], sKicker, LanguageManager->sTexts[LAN_BECAUSE_LWR], sReason);
-            if(CheckSprintf(imsgLen, 131072, "Kick7") == true) {
-                globalQ->OPStore(ScriptManager->lua_msg, imsgLen);
+            if(CheckSprintf(imsgLen, g_szBufferSize, "Kick7") == true) {
+                globalQ->OPStore(g_sBuffer, imsgLen);
             }
     	}
     }
 
     // disconnect the user
-    imsgLen = sprintf(ScriptManager->lua_msg, "[SYS] User %s (%s) kicked by script.", u->sNick, u->sIP);
-    if(CheckSprintf(imsgLen, 131072, "Kick8") == true) {
-        UdpDebug->Broadcast(ScriptManager->lua_msg, imsgLen);
+    imsgLen = sprintf(g_sBuffer, "[SYS] User %s (%s) kicked by script.", u->sNick, u->sIP);
+    if(CheckSprintf(imsgLen, g_szBufferSize, "Kick8") == true) {
+        UdpDebug->Broadcast(g_sBuffer, imsgLen);
     }
 
     UserClose(u);
@@ -1606,14 +1606,14 @@ static int Redirect(lua_State * L) {
         return 1;
     }
 
-    int imsgLen = sprintf(ScriptManager->lua_msg, "<%s> %s %s. %s: %s|$ForceMove %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_REDIR_TO],
+    int imsgLen = sprintf(g_sBuffer, "<%s> %s %s. %s: %s|$ForceMove %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_REDIR_TO],
         sAddress, LanguageManager->sTexts[LAN_MESSAGE], sReason, sAddress);
-    if(CheckSprintf(imsgLen, 131072, "Redirect2") == true) {
-        UserSendChar(u, ScriptManager->lua_msg, imsgLen);
+    if(CheckSprintf(imsgLen, g_szBufferSize, "Redirect2") == true) {
+        UserSendChar(u, g_sBuffer, imsgLen);
     }
 
-    //int imsgLen = sprintf(ScriptManager->lua_msg, "[SYS] User %s (%s) redirected by script.", u->Nick, u->IP);
-    //UdpDebug->Broadcast(ScriptManager->lua_msg, imsgLen);
+    //int imsgLen = sprintf(g_sBuffer, "[SYS] User %s (%s) redirected by script.", u->Nick, u->IP);
+    //UdpDebug->Broadcast(g_sBuffer, imsgLen);
 
     UserClose(u);
     
@@ -1672,24 +1672,24 @@ static int DefloodWarn(lua_State * L) {
 
         if(SettingManager->bBools[SETBOOL_DEFLOOD_REPORT] == true) {
             if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-                imsgLen = sprintf(ScriptManager->lua_msg, "%s $<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
+                imsgLen = sprintf(g_sBuffer, "%s $<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                     SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_FLOODER], u->sNick, LanguageManager->sTexts[LAN_WITH_IP], u->sIP,
                     LanguageManager->sTexts[LAN_DISCONN_BY_SCRIPT]);
-                if(CheckSprintf(imsgLen, 131072, "DefloodWarn1") == true) {
-                    globalQ->SingleItemStore(ScriptManager->lua_msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+                if(CheckSprintf(imsgLen, g_szBufferSize, "DefloodWarn1") == true) {
+                    globalQ->SingleItemStore(g_sBuffer, imsgLen, NULL, 0, globalqueue::PM2OPS);
                 }
             } else {
-                imsgLen = sprintf(ScriptManager->lua_msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_FLOODER], u->sNick,
+                imsgLen = sprintf(g_sBuffer, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_FLOODER], u->sNick,
                     LanguageManager->sTexts[LAN_WITH_IP], u->sIP, LanguageManager->sTexts[LAN_DISCONN_BY_SCRIPT]);
-                if(CheckSprintf(imsgLen, 131072, "DefloodWarn2") == true) {
-                    globalQ->OPStore(ScriptManager->lua_msg, imsgLen);
+                if(CheckSprintf(imsgLen, g_szBufferSize, "DefloodWarn2") == true) {
+                    globalQ->OPStore(g_sBuffer, imsgLen);
                 }
             }
         }
 
-        imsgLen = sprintf(ScriptManager->lua_msg, "[SYS] Flood from %s (%s) - user closed by script.", u->sNick, u->sIP);
-        if(CheckSprintf(imsgLen, 131072, "DefloodWarn3") == true) {
-            UdpDebug->Broadcast(ScriptManager->lua_msg, imsgLen);
+        imsgLen = sprintf(g_sBuffer, "[SYS] Flood from %s (%s) - user closed by script.", u->sNick, u->sIP);
+        if(CheckSprintf(imsgLen, g_szBufferSize, "DefloodWarn3") == true) {
+            UdpDebug->Broadcast(g_sBuffer, imsgLen);
         }
 
         UserClose(u);
@@ -1720,10 +1720,10 @@ static int SendToAll(lua_State * L) {
         char * sData = (char *)lua_tolstring(L, 1, &szLen);
         if(sData[0] != '\0' && szLen < 128001) {
 			if(sData[szLen-1] != '|') {
-                memcpy(ScriptManager->lua_msg, sData, szLen);
-                ScriptManager->lua_msg[szLen] = '|';
-                ScriptManager->lua_msg[szLen+1] = '\0';
-				globalQ->Store(ScriptManager->lua_msg, szLen+1);
+                memcpy(g_sBuffer, sData, szLen);
+                g_sBuffer[szLen] = '|';
+                g_sBuffer[szLen+1] = '\0';
+				globalQ->Store(g_sBuffer, szLen+1);
 			} else {
 				globalQ->Store(sData, szLen);
             }
@@ -1761,10 +1761,10 @@ static int SendToNick(lua_State * L) {
     User *u = hashManager->FindUser(sNick, szNickLen);
     if(u != NULL) {
         if(sData[szDataLen-1] != '|') {
-            memcpy(ScriptManager->lua_msg, sData, szDataLen);
-            ScriptManager->lua_msg[szDataLen] = '|';
-            ScriptManager->lua_msg[szDataLen+1] = '\0';
-            UserSendCharDelayed(u, ScriptManager->lua_msg, szDataLen+1);
+            memcpy(g_sBuffer, sData, szDataLen);
+            g_sBuffer[szDataLen] = '|';
+            g_sBuffer[szDataLen+1] = '\0';
+            UserSendCharDelayed(u, g_sBuffer, szDataLen+1);
         } else {
             UserSendCharDelayed(u, sData, szDataLen);
         }
@@ -1797,9 +1797,9 @@ static int SendToOpChat(lua_State * L) {
     }
 
     if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true) {
-        int iLen = sprintf(ScriptManager->lua_msg, "%s $<%s> %s|", SettingManager->sTexts[SETTXT_OP_CHAT_NICK], SettingManager->sTexts[SETTXT_OP_CHAT_NICK], sData);
-        if(CheckSprintf(iLen, 131072, "SendToOpChat") == true) {
-			globalQ->SingleItemStore(ScriptManager->lua_msg, iLen, NULL, 0, globalqueue::OPCHAT);
+        int iLen = sprintf(g_sBuffer, "%s $<%s> %s|", SettingManager->sTexts[SETTXT_OP_CHAT_NICK], SettingManager->sTexts[SETTXT_OP_CHAT_NICK], sData);
+        if(CheckSprintf(iLen, g_szBufferSize, "SendToOpChat") == true) {
+			globalQ->SingleItemStore(g_sBuffer, iLen, NULL, 0, globalqueue::OPCHAT);
         }
     }
 
@@ -1830,10 +1830,10 @@ static int SendToOps(lua_State * L) {
     }
 
     if(sData[szLen-1] != '|') {
-        memcpy(ScriptManager->lua_msg, sData, szLen);
-        ScriptManager->lua_msg[szLen] = '|';
-        ScriptManager->lua_msg[szLen+1] = '\0';
-        globalQ->OPStore(ScriptManager->lua_msg, szLen+1);
+        memcpy(g_sBuffer, sData, szLen);
+        g_sBuffer[szLen] = '|';
+        g_sBuffer[szLen+1] = '\0';
+        globalQ->OPStore(g_sBuffer, szLen+1);
     } else {
         globalQ->OPStore(sData, szLen);
     }
@@ -1868,10 +1868,10 @@ static int SendToProfile(lua_State * L) {
     }
 
     if(sData[szDataLen-1] != '|') {
-        memcpy(ScriptManager->lua_msg, sData, szDataLen);
-		ScriptManager->lua_msg[szDataLen] = '|';
-        ScriptManager->lua_msg[szDataLen+1] = '\0';
-		globalQ->SingleItemStore(ScriptManager->lua_msg, szDataLen+1, NULL, i32Profile, globalqueue::TOPROFILE);
+        memcpy(g_sBuffer, sData, szDataLen);
+		g_sBuffer[szDataLen] = '|';
+        g_sBuffer[szDataLen+1] = '\0';
+		globalQ->SingleItemStore(g_sBuffer, szDataLen+1, NULL, i32Profile, globalqueue::TOPROFILE);
     } else {
 		globalQ->SingleItemStore(sData, szDataLen, NULL, i32Profile, globalqueue::TOPROFILE);
     }
@@ -1911,10 +1911,10 @@ static int SendToUser(lua_State * L) {
     }
 
     if(sData[szLen-1] != '|') {
-        memcpy(ScriptManager->lua_msg, sData, szLen);
-        ScriptManager->lua_msg[szLen] = '|';
-        ScriptManager->lua_msg[szLen+1] = '\0';
-    	UserSendCharDelayed(u, ScriptManager->lua_msg, szLen+1);
+        memcpy(g_sBuffer, sData, szLen);
+        g_sBuffer[szLen] = '|';
+        g_sBuffer[szLen+1] = '\0';
+    	UserSendCharDelayed(u, g_sBuffer, szLen+1);
     } else {
         UserSendCharDelayed(u, sData, szLen);
     }
@@ -1947,9 +1947,9 @@ static int SendPmToAll(lua_State * L) {
         return 0;
     }
 
-    int imsgLen = sprintf(ScriptManager->lua_msg, "%s $<%s> %s|", sFrom, sFrom, sData);
-    if(CheckSprintf(imsgLen, 131072, "SendPmToAll") == true) {
-		globalQ->SingleItemStore(ScriptManager->lua_msg, imsgLen, NULL, 0, globalqueue::PM2ALL);
+    int imsgLen = sprintf(g_sBuffer, "%s $<%s> %s|", sFrom, sFrom, sData);
+    if(CheckSprintf(imsgLen, g_szBufferSize, "SendPmToAll") == true) {
+		globalQ->SingleItemStore(g_sBuffer, imsgLen, NULL, 0, globalqueue::PM2ALL);
     }
 
     lua_settop(L, 0);
@@ -1984,9 +1984,9 @@ static int SendPmToNick(lua_State * L) {
 
     User *u = hashManager->FindUser(sTo, szToLen);
     if(u != NULL) {
-        int iMsgLen = sprintf(ScriptManager->lua_msg, "$To: %s From: %s $<%s> %s|", sTo, sFrom, sFrom, sData);
-        if(CheckSprintf(iMsgLen, 131072, "SendPmToNick") == true) {
-            UserSendCharDelayed(u, ScriptManager->lua_msg, iMsgLen);
+        int iMsgLen = sprintf(g_sBuffer, "$To: %s From: %s $<%s> %s|", sTo, sFrom, sFrom, sData);
+        if(CheckSprintf(iMsgLen, g_szBufferSize, "SendPmToNick") == true) {
+            UserSendCharDelayed(u, g_sBuffer, iMsgLen);
         }
     }
 
@@ -2018,9 +2018,9 @@ static int SendPmToOps(lua_State * L) {
         return 0;
     }
 
-    int imsgLen = sprintf(ScriptManager->lua_msg, "%s $<%s> %s|", sFrom, sFrom, sData);
-    if(CheckSprintf(imsgLen, 131072, "SendPmToOps") == true) {
-		globalQ->SingleItemStore(ScriptManager->lua_msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+    int imsgLen = sprintf(g_sBuffer, "%s $<%s> %s|", sFrom, sFrom, sData);
+    if(CheckSprintf(imsgLen, g_szBufferSize, "SendPmToOps") == true) {
+		globalQ->SingleItemStore(g_sBuffer, imsgLen, NULL, 0, globalqueue::PM2OPS);
     }
 
     lua_settop(L, 0);
@@ -2054,9 +2054,9 @@ static int SendPmToProfile(lua_State * L) {
         return 0;
     }
 
-    int imsgLen = sprintf(ScriptManager->lua_msg, "%s $<%s> %s|", sFrom, sFrom, sData);
-    if(CheckSprintf(imsgLen, 131072, "SendPmToProfile") == true) {
-		globalQ->SingleItemStore(ScriptManager->lua_msg, imsgLen, NULL, iProfile, globalqueue::PM2PROFILE);
+    int imsgLen = sprintf(g_sBuffer, "%s $<%s> %s|", sFrom, sFrom, sData);
+    if(CheckSprintf(imsgLen, g_szBufferSize, "SendPmToProfile") == true) {
+		globalQ->SingleItemStore(g_sBuffer, imsgLen, NULL, iProfile, globalqueue::PM2PROFILE);
     }
 
     lua_settop(L, 0);
@@ -2095,9 +2095,9 @@ static int SendPmToUser(lua_State * L) {
         return 0;
     }
 
-    int imsgLen = sprintf(ScriptManager->lua_msg, "$To: %s From: %s $<%s> %s|", u->sNick, sFrom, sFrom, sData);
-    if(CheckSprintf(imsgLen, 131072, "SendPmToUser") == true) {
-        UserSendCharDelayed(u, ScriptManager->lua_msg, imsgLen);
+    int imsgLen = sprintf(g_sBuffer, "$To: %s From: %s $<%s> %s|", u->sNick, sFrom, sFrom, sData);
+    if(CheckSprintf(imsgLen, g_szBufferSize, "SendPmToUser") == true) {
+        UserSendCharDelayed(u, g_sBuffer, imsgLen);
     }
 
     lua_settop(L, 0);
