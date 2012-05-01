@@ -648,7 +648,7 @@ void theLoop::ReceiveLoop() {
             case User::STATE_ADDME: {
                 // PPK ... Add user, but only if send $GetNickList (or have quicklist supports) <- important, used by flooders !!!
                 if(((curUser->ui32BoolBits & User::BIT_GETNICKLIST) == User::BIT_GETNICKLIST) == false &&
-                    ((curUser->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == false &&
+                    ((curUser->ui32SupportBits & User::SUPPORTBIT_QUICKLIST) == User::SUPPORTBIT_QUICKLIST) == false &&
                     ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true)
                     continue;
 
@@ -1013,7 +1013,7 @@ void theLoop::SendLoop() {
                 UserAddUserList(curUser);
                 
                 // PPK ... UserIP2 supports
-                if(((curUser->ui32BoolBits & User::BIT_SUPPORT_USERIP2) == User::BIT_SUPPORT_USERIP2) == true &&
+                if(((curUser->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true &&
                     ((curUser->ui32BoolBits & User::BIT_QUACK_SUPPORTS) == User::BIT_QUACK_SUPPORTS) == false &&
                     ProfileMan->IsAllowed(curUser, ProfileManager::SENDALLUSERIP) == false) {
             		int imsgLen = sprintf(msg, "$UserIP %s %s|", curUser->sNick, (curUser->sIPv4[0] == '\0' ? curUser->sIP : curUser->sIPv4));
@@ -1027,32 +1027,10 @@ void theLoop::SendLoop() {
                 // PPK ... send motd ???
                 if(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MOTD] != 0) {
                     if(SettingManager->bBools[SETBOOL_MOTD_AS_PM] == true) {
-#ifdef _WIN32
-                        char * sMSG = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MOTD]+65);
-#else
-						char * sMSG = (char *)malloc(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MOTD]+65);
-#endif
-                        if(sMSG == NULL) {
-                            curUser->ui32BoolBits |= User::BIT_ERROR;
-                            UserClose(curUser);
-
-							AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in theLoop::SendLoop\n", (uint64_t)(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MOTD]+65));
-
-                            continue;
+                        int imsgLen = sprintf(g_sBuffer, SettingManager->sPreTexts[SetMan::SETPRETXT_MOTD], curUser->sNick);
+                        if(CheckSprintf(imsgLen, g_szBufferSize, "theLoop::SendLoop2") == true) {
+                            UserSendCharDelayed(curUser, g_sBuffer, imsgLen);
                         }
-
-                        int imsgLen = sprintf(sMSG, SettingManager->sPreTexts[SetMan::SETPRETXT_MOTD], curUser->sNick);
-                        if(CheckSprintf(imsgLen, SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MOTD]+65, "theLoop::SendLoop2") == true) {
-                            UserSendCharDelayed(curUser, sMSG, imsgLen);
-                        }
-
-#ifdef _WIN32
-                        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMSG) == 0) {
-							AppendDebugLog("%s - [MEM] Cannot deallocate sMSG in theLoop::SendLoop\n", 0);
-                        }
-#else
-						free(sMSG);
-#endif
                     } else {
                         UserSendCharDelayed(curUser, SettingManager->sPreTexts[SetMan::SETPRETXT_MOTD],
                             SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_MOTD]);

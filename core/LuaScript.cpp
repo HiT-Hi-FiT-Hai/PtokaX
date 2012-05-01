@@ -394,9 +394,9 @@ void ScriptStop(Script * cur) {
 
             colUsers->DelBotFromMyInfos(bot->sMyINFO);
 
-			int iMsgLen = sprintf(ScriptManager->lua_msg, "$Quit %s|", bot->sNick);
-           	if(CheckSprintf(iMsgLen, 131072, "ScriptStop") == true) {
-                globalQ->InfoStore(ScriptManager->lua_msg, iMsgLen);
+			int iMsgLen = sprintf(g_sBuffer, "$Quit %s|", bot->sNick);
+           	if(CheckSprintf(iMsgLen, g_szBufferSize, "ScriptStop") == true) {
+                globalQ->InfoStore(g_sBuffer, iMsgLen);
             }
 		}
 
@@ -617,11 +617,11 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "bUserCommand");
-	(u->ui32BoolBits & User::BIT_SUPPORT_USERCOMMAND) == User::BIT_SUPPORT_USERCOMMAND ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+	(u->ui32SupportBits & User::SUPPORTBIT_USERCOMMAND) == User::SUPPORTBIT_USERCOMMAND ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "bQuickList");
-	(u->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+	(u->ui32SupportBits & User::SUPPORTBIT_QUICKLIST) == User::SUPPORTBIT_QUICKLIST ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "bSuspiciousTag");

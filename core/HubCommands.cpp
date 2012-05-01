@@ -1810,38 +1810,16 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
 
 				UncountDeflood(curUser, fromPM);
 
-                if(dlen < 768) {
-                    int imsgLen = sprintf(msg, "%s $<%s> %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, sCommand+8);
-                    if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand116") == true) {
-						globalQ->SingleItemStore(msg, imsgLen, curUser, 0, globalqueue::PM2ALL);
-                    }
-                } else {
-                    size_t szWantLen = size_t(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC])+curUser->ui8NickLen+dlen+32;
-#ifdef _WIN32
-                    char * sMsg = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szWantLen);
-#else
-					char * sMsg = (char *)malloc(szWantLen);
-#endif
-                    if(sMsg == NULL) {
-                        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in HubCommands massmsg\n", (uint64_t)szWantLen);
-
-                        return true;
-                    }
-
-                    int imsgLen = sprintf(sMsg, "%s $<%s> %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, sCommand+8);
-                    if(CheckSprintf(imsgLen, szWantLen, "HubCommands::DoCommand117") == true) {
-						globalQ->SingleItemStore(sMsg, imsgLen, curUser, 0, globalqueue::PM2ALL);
-                    }
-#ifdef _WIN32
-                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMsg) == 0) {
-						AppendDebugLog("%s - [MEM] Cannot deallocate MSG in HubCommands::DoCommand/massmsg\n", 0);
-                    }
-#else
-					free(sMsg);
-#endif
+                if(dlen > 64000) {
+                    sCommand[64000] = '\0';
                 }
 
-                int imsgLen = CheckFromPm(curUser, fromPM);
+                int imsgLen = sprintf(g_sBuffer, "%s $<%s> %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, sCommand+8);
+                if(CheckSprintf(imsgLen, g_szBufferSize, "HubCommands::DoCommand117") == true) {
+					globalQ->SingleItemStore(g_sBuffer, imsgLen, curUser, 0, globalqueue::PM2ALL);
+                }
+
+                imsgLen = CheckFromPm(curUser, fromPM);
 
                 int iret = sprintf(msg+imsgLen, "<%s> *** %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                     LanguageManager->sTexts[LAN_MASSMSG_TO_ALL_SENT]);
@@ -2641,7 +2619,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                 colUsers->Add2OpList(user);
 
                 int imsgLen = 0;
-                if(((user->ui32BoolBits & User::BIT_SUPPORT_QUICKLIST) == User::BIT_SUPPORT_QUICKLIST) == false) {
+                if(((user->ui32SupportBits & User::SUPPORTBIT_QUICKLIST) == User::SUPPORTBIT_QUICKLIST) == false) {
                     imsgLen = sprintf(msg, "$LogedIn %s|", user->sNick);
                     if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand184") == false) {
                         return true;
@@ -2658,7 +2636,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                 if(bAllowedOpChat != ProfileMan->IsAllowed(user, ProfileManager::ALLOWEDOPCHAT)) {
                     if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true &&
                         (SettingManager->bBools[SETBOOL_REG_BOT] == false || SettingManager->bBotsSameNick == false)) {
-                        if(((user->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) == false) {
+                        if(((user->ui32SupportBits & User::SUPPORTBIT_NOHELLO) == User::SUPPORTBIT_NOHELLO) == false) {
                             UserSendCharDelayed(user, SettingManager->sPreTexts[SetMan::SETPRETXT_OP_CHAT_HELLO],
                                 SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_OP_CHAT_HELLO]);
                         }
@@ -2725,38 +2703,16 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
 
 				UncountDeflood(curUser, fromPM);
 
-                if(dlen < 768) {
-                    int imsgLen = sprintf(msg, "%s $<%s> %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, sCommand+10);
-                    if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand193") == true) {
-						globalQ->SingleItemStore(msg, imsgLen, curUser, 0, globalqueue::PM2OPS);
-                    }
-                } else {
-                    size_t szWantLen = size_t(SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC])+curUser->ui8NickLen+dlen+32;
-#ifdef _WIN32
-                    char * sMsg = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szWantLen);
-#else
-					char * sMsg = (char *)malloc(szWantLen);
-#endif
-                    if(sMsg == NULL) {
-						AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in HubCommands opmassmsg\n", (uint64_t)szWantLen);
-
-                        return true;
-                    }
-
-                    int imsgLen = sprintf(sMsg, "%s $<%s> %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, sCommand+10);
-                    if(CheckSprintf(imsgLen, szWantLen, "HubCommands::DoCommand194") == true) {
-						globalQ->SingleItemStore(sMsg, imsgLen, curUser, 0, globalqueue::PM2OPS);
-                    }
-#ifdef _WIN32
-                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMsg) == 0) {
-						AppendDebugLog("%s - [MEM] Cannot deallocate MSG in HubCommands::DoCommand/opmassmsg\n", 0);
-                    }
-#else
-					free(sMsg);
-#endif
+                if(dlen > 64000) {
+                    sCommand[64000] = '\0';
                 }
 
-                int imsgLen = CheckFromPm(curUser, fromPM);
+                int imsgLen = sprintf(g_sBuffer, "%s $<%s> %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, sCommand+10);
+                if(CheckSprintf(imsgLen, g_szBufferSize, "HubCommands::DoCommand193") == true) {
+					globalQ->SingleItemStore(g_sBuffer, imsgLen, curUser, 0, globalqueue::PM2OPS);
+                }
+
+                imsgLen = CheckFromPm(curUser, fromPM);
 
                 int iret = sprintf(msg+imsgLen, "<%s> *** %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                     LanguageManager->sTexts[LAN_MASSMSG_TO_OPS_SND]);
@@ -4067,7 +4023,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                             if(bAllowedOpChat != ProfileMan->IsAllowed(AddedUser, ProfileManager::ALLOWEDOPCHAT)) {
                                 if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true &&
                                     (SettingManager->bBools[SETBOOL_REG_BOT] == false || SettingManager->bBotsSameNick == false)) {
-                                    if(((AddedUser->ui32BoolBits & User::BIT_SUPPORT_NOHELLO) == User::BIT_SUPPORT_NOHELLO) == false) {
+                                    if(((AddedUser->ui32SupportBits & User::SUPPORTBIT_NOHELLO) == User::SUPPORTBIT_NOHELLO) == false) {
                                         UserSendCharDelayed(AddedUser, SettingManager->sPreTexts[SetMan::SETPRETXT_OP_CHAT_HELLO],
                                             SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_OP_CHAT_HELLO]);
                                     }

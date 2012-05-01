@@ -41,6 +41,8 @@ static const int MAX_PAT_SIZE = 64;
 static const int MAX_ALPHABET_SIZE = 255;
 //---------------------------------------------------------------------------
 string PATH = "", SCRIPT_PATH = "", sTitle = "";
+size_t g_szBufferSize = 0;
+char * g_sBuffer = NULL;
 bool bCmdAutoStart = false, bCmdNoAutoStart = false, bCmdNoTray = false, bCmdNoKeyCheck = false, bUseIPv6 = true, bIPv6DualStack = false;
 #ifdef _WIN32
 	HANDLE hConsole = NULL, hLuaHeap = NULL, hPtokaXHeap = NULL, hRecvHeap = NULL, hSendHeap = NULL;
@@ -1001,7 +1003,7 @@ int GetWlcmMsg(char * sWlcmMsg) {
 #endif
 //---------------------------------------------------------------------------
 
-bool CheckSprintf(int iRetVal, const size_t &szMax, const char * sMsg) {
+bool CheckSprintf(const int &iRetVal, const size_t &szMax, const char * sMsg) {
     if(iRetVal > 0) {
 		if(szMax != 0 && iRetVal >= (int)szMax) {
 			string sDbgstr = "%s - [ERR] sprintf high value "+string(iRetVal)+"/"+string((uint64_t)szMax)+" in "+string(sMsg)+"\n";
@@ -1017,10 +1019,10 @@ bool CheckSprintf(int iRetVal, const size_t &szMax, const char * sMsg) {
 }
 //---------------------------------------------------------------------------
 
-bool CheckSprintf1(int iRetVal, int iLenVal, const size_t &szMax, const char * sMsg) {
+bool CheckSprintf1(const int &iRetVal, const size_t &szLenVal, const size_t &szMax, const char * sMsg) {
     if(iRetVal > 0) {
-        if(szMax != 0 && iLenVal >= (int)szMax) {
-			string sDbgstr = "%s - [ERR] sprintf high value "+string(iLenVal)+"/"+string((uint64_t)szMax)+" in "+string(sMsg)+"\n";
+        if(szMax != 0 && szLenVal >= szMax) {
+			string sDbgstr = "%s - [ERR] sprintf high value "+string(szLenVal)+"/"+string((uint64_t)szMax)+" in "+string(sMsg)+"\n";
 			AppendDebugLog(sDbgstr.c_str(), 0);
             return false;
         }
@@ -1431,5 +1433,86 @@ bool GetMacAddress(const char * sIP, char * sMac) {
 #endif
 
     return false;
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void CreateGlobalBuffer() {
+    g_szBufferSize = 131072;
+#ifdef _WIN32
+    g_sBuffer = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, g_szBufferSize);
+#else
+    g_sBuffer = (char *)calloc(g_szBufferSize, 1);
+#endif
+    if(g_sBuffer == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot create g_sBuffer\n", 0);
+		exit(EXIT_FAILURE);
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void DeleteGlobalBuffer() {
+#ifdef _WIN32
+    if(g_sBuffer != NULL) {
+        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)g_sBuffer) == 0) {
+            AppendDebugLog("%s - [MEM] Cannot deallocate g_sBuffer\n", 0);
+        }
+    }
+#else
+	free(g_sBuffer);
+#endif
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+bool CheckAndResizeGlobalBuffer(const size_t &szWantedSize) {
+    if(g_szBufferSize >= szWantedSize) {
+        return true;
+    }
+
+    size_t szOldSize = g_szBufferSize;
+    char * sOldBuf = g_sBuffer;
+
+    g_szBufferSize = Allign128K(szWantedSize);
+
+#ifdef _WIN32
+    g_sBuffer = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldBuf, g_szBufferSize);
+#else
+    g_sBuffer = (char *)realloc(sOldBuf, g_szBufferSize);
+#endif
+    if(g_sBuffer == NULL) {
+        g_sBuffer = sOldBuf;
+
+		AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in CheckAndResizeGlobalBuffer for g_sBuffer\n", (uint64_t)g_szBufferSize);
+
+        g_szBufferSize = szOldSize;
+        return false;
+	}
+
+    return true;
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void ReduceGlobalBuffer() {
+    if(g_szBufferSize == 131072) {
+        return;
+    }
+
+    size_t szOldSize = g_szBufferSize;
+    char * sOldBuf = g_sBuffer;
+
+    g_szBufferSize = 131072;
+
+#ifdef _WIN32
+    g_sBuffer = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldBuf, g_szBufferSize);
+#else
+    g_sBuffer = (char *)realloc(sOldBuf, g_szBufferSize);
+#endif
+    if(g_sBuffer == NULL) {
+        g_sBuffer = sOldBuf;
+
+		AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in ReduceGlobalBuffer for g_sBuffer\n", (uint64_t)g_szBufferSize);
+
+        g_szBufferSize = szOldSize;
+        return;
+	}
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

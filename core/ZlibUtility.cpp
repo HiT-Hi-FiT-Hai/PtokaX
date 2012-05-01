@@ -30,7 +30,7 @@
 //---------------------------------------------------------------------------
 #include <zlib.h>
 //---------------------------------------------------------------------------
-static const uint32_t ZBUFFERLEN = 1024*256;
+static const uint32_t ZBUFFERLEN = 131072;
 static const uint32_t ZMINLEN = 100;
 //---------------------------------------------------------------------------
 clsZlibUtility * ZlibUtility = NULL;
@@ -70,10 +70,7 @@ char * clsZlibUtility::CreateZPipe(const char *sInData, const size_t &szInDataSi
     if(szZbufferSize < szInDataSize + 128) {
         size_t szOldZbufferSize = szZbufferSize;
 
-        szZbufferSize += ZBUFFERLEN;
-        while(szZbufferSize < szInDataSize + 128) {
-            szZbufferSize += ZBUFFERLEN;
-        }
+        szZbufferSize = Allign128K(szInDataSize + 128);
 
         char * pOldBuf = sZbuffer;
 #ifdef _WIN32
@@ -139,10 +136,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const size_t &szInDataSize, ch
     if(szZbufferSize < szInDataSize + 128) {
         size_t szOldZbufferSize = szZbufferSize;
 
-        szZbufferSize += ZBUFFERLEN;
-        while(szZbufferSize < szInDataSize + 128) {
-            szZbufferSize += ZBUFFERLEN;
-        }
+        szZbufferSize = Allign128K(szInDataSize + 128);
 
         char * pOldBuf = sZbuffer;
 #ifdef _WIN32
@@ -223,7 +217,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const size_t &szInDataSize, ch
 }
 //---------------------------------------------------------------------------
 
-char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &uiInDataSize, char *sOutData, unsigned int &uiOutDataLen, unsigned int &uiOutDataSize, unsigned int uiOutDataIncrease) {
+char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &uiInDataSize, char *sOutData, unsigned int &uiOutDataLen, unsigned int &uiOutDataSize, size_t (* pAllignFunc)(size_t n)) {
     if(uiInDataSize < ZMINLEN)
         return sOutData;
 
@@ -231,10 +225,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &uiInDataSi
     if(szZbufferSize < uiInDataSize + 128) {
         size_t szOldZbufferSize = szZbufferSize;
 
-        szZbufferSize += ZBUFFERLEN;
-        while(szZbufferSize < uiInDataSize + 128) {
-            szZbufferSize += ZBUFFERLEN;
-        }
+        szZbufferSize = Allign128K(uiInDataSize + 128);
 
         char * pOldBuf = sZbuffer;
 #ifdef _WIN32
@@ -286,21 +277,18 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &uiInDataSi
         uiOutDataLen = 0;
         return sOutData;
     }
-    
+
     // prepare out buffer
     if(uiOutDataSize < uiOutDataLen) {
         unsigned int uiOldOutDataSize = uiOutDataSize;
 
-        uiOutDataSize += uiOutDataIncrease;
-        while(uiOutDataSize < uiOutDataLen) {
-            uiOutDataSize += uiOutDataIncrease;
-        }
+        uiOutDataSize = (unsigned int)(* pAllignFunc)(uiOutDataLen);
 
         char * pOldBuf = sOutData;
 #ifdef _WIN32
-        sOutData = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, uiOutDataSize+1);
+        sOutData = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, uiOutDataSize);
 #else
-		sOutData = (char *)realloc(pOldBuf, uiOutDataSize+1);
+		sOutData = (char *)realloc(pOldBuf, uiOutDataSize);
 #endif
         if(sOutData == NULL) {
             sOutData = pOldBuf;
