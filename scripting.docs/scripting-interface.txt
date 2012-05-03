@@ -60,6 +60,7 @@ GetActualUsersPeak()		- Return actual users peak.
 GetMaxUsersPeak()		- Return max users peak.
 GetCurrentSharedSize()		- Return total hub share size in bytes.
 GetHubIP()			- Return IP if is available, or nil when not.
+GetHubIPs()             - Return table with one or more IP addreses or nil when no address is available.
 GetHubSecAlias()		- Return actual Hub-Security alias.
 GetPtokaXPath() 		- Return PtokaX path.
 GetUsersCount()			- Return hub users count.
@@ -300,6 +301,8 @@ iLlimit			- User L or B limit (from tag).
 iDefloodWarns		- User deflood warns count.
 iMagicByte		- Number of ascii char after connection in myinfo.
 iLoginTime		- User login time in seconds from 1.1.1970
+
+tIPs            - Table with one or more user IP addresses.
 
 
 RegisteredUser.
@@ -724,3 +727,4 @@ User data IDs for Core.GetUserData and Core.GetUserValue call.
 40  - sScriptedEmailLong
 41  - iScriptediShareSizeShort
 42  - iScriptediShareSizeLong
+43  - tIPs

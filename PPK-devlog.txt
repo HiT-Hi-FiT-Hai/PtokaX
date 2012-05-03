@@ -13,6 +13,9 @@ Added: IPv4 search support for users connected to hub by IPv6 when IPv4 connecti
 Added: Setting for manual IPv4 and IPv6 addresses.
 Added: Both IP addresses to !getinfo command for users with IPv6 and IPv4 connection available.
 Added: Both IP addresses to !myip command for users with IPv6 and IPv4 connection available.
+Added: Core.GetHubIPs to Lua API.
+Added: tUser.tIPs to Lua API.
+Added: Missing end line dots on some hub commands reply (thx Alexey for report).
 Changed: Country database for IPv4 from ip-to-country to IpToCountry.
 Changed: Not allowed chars in nick to only space, pipe and dollar. Only those protocol disallow. Issues with other chars is client work.
 Changed: Max simultaneous logins value from 500 to 1000.
@@ -31,6 +34,7 @@ Fixed: Crash on script error loging in some cases.
 Fixed: Memory leak in users and bans ip hashtables.
 Fixed: Bug in gui initialisation causing rare termination on startup.
 Fixed: Incorrect translation of "full" in ban commands (thx Alexey for report).
+Fixed: Shutdown with ctrl+c on non-windows OS (thx Alexey for report).
 Removed: All info related to old ip-to-country database.
 Updated: makefile to work with buggy gold linker.
 
