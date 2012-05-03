@@ -20,6 +20,7 @@
 //---------------------------------------------------------------------------
 #include "stdinc.h"
 //---------------------------------------------------------------------------
+#include "eventqueue.h"
 #include "LanguageManager.h"
 #include "ServerManager.h"
 #include "serviceLoop.h"
@@ -51,11 +52,8 @@ static void SigHandler(int sig) {
 	
 	str += " ending...";
 	
-	AppendLog(str);
-	
-	bIsClose = true;
-	ServerStop();
-	
+    eventqueue->AddThread(eventq::EVENT_SHUTDOWN, str.c_str(), NULL);
+
 	// restore to default...
 	struct sigaction sigact;
 	sigact.sa_handler = SIG_DFL;

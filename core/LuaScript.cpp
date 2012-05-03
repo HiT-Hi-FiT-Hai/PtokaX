@@ -768,6 +768,23 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
     lua_pushliteral(L, "iScriptediShareSizeLong");
     lua_pushnumber(L, (double)u->ui64ChangedSharedSizeLong);
     lua_rawset(L, iTable);
+
+    lua_pushliteral(L, "tIPs");
+    lua_newtable(L);
+
+    int t = lua_gettop(L);
+
+	lua_pushnumber(L, 1);
+	lua_pushlstring(L, u->sIP, u->ui8IpLen);
+	lua_rawset(L, t);
+
+    if(u->sIPv4[0] != '\0') {
+        lua_pushnumber(L, 2);
+        lua_pushlstring(L, u->sIPv4, u->ui8IPv4Len);
+        lua_rawset(L, t);
+    }
+
+    lua_rawset(L, iTable);
 }
 //------------------------------------------------------------------------------
 

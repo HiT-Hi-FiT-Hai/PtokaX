@@ -433,6 +433,43 @@ static int GetHubIP(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
+static int GetHubIPs(lua_State * L) {
+	if(lua_gettop(L) != 0) {
+        luaL_error(L, "bad argument count to 'GetHubIPs' (0 expected, got %d)", lua_gettop(L));
+        lua_settop(L, 0);
+
+        lua_pushnil(L);
+        return 1;
+    }
+
+    if(sHubIP[0] == '\0' && sHubIP6[0] == '\0') {
+        lua_pushnil(L);
+        return 1;
+    }
+
+    lua_newtable(L);
+    int t = lua_gettop(L), i = 0;
+
+    if(sHubIP6[0] != '\0') {
+        i++;
+
+        lua_pushnumber(L, i);
+		lua_pushstring(L, sHubIP6);
+		lua_rawset(L, t);
+	}
+
+    if(sHubIP[0] != '\0') {
+        i++;
+
+        lua_pushnumber(L, i);
+		lua_pushstring(L, sHubIP);
+		lua_rawset(L, t);
+	}
+
+    return 1;
+}
+//------------------------------------------------------------------------------
+
 static int GetHubSecAlias(lua_State * L) {
 	if(lua_gettop(L) != 0) {
         luaL_error(L, "bad argument count to 'GetHubSecAlias' (0 expected, got %d)", lua_gettop(L));
@@ -1180,6 +1217,25 @@ static int GetUserData(lua_State * L) {
         	lua_pushnumber(L, (double)u->ui64ChangedSharedSizeLong);
         	lua_rawset(L, 1);
             break;
+        case 43: {
+            lua_pushliteral(L, "tIPs");
+            lua_newtable(L);
+
+            int t = lua_gettop(L);
+
+            lua_pushnumber(L, 1);
+            lua_pushlstring(L, u->sIP, u->ui8IpLen);
+            lua_rawset(L, t);
+
+            if(u->sIPv4[0] != '\0') {
+                lua_pushnumber(L, 2);
+                lua_pushlstring(L, u->sIPv4, u->ui8IPv4Len);
+                lua_rawset(L, t);
+            }
+
+        	lua_rawset(L, 1);
+            break;
+        }
         default:
             luaL_error(L, "bad argument #2 to 'GetUserData' (it's not valid id)");
     		lua_settop(L, 0);
@@ -1432,6 +1488,23 @@ static int GetUserValue(lua_State * L) {
         case 42:
         	lua_pushnumber(L, (double)u->ui64ChangedSharedSizeLong);
         	return 1;
+        case 43: {
+            lua_newtable(L);
+
+            int t = lua_gettop(L);
+
+            lua_pushnumber(L, 1);
+            lua_pushlstring(L, u->sIP, u->ui8IpLen);
+            lua_rawset(L, t);
+
+            if(u->sIPv4[0] != '\0') {
+                lua_pushnumber(L, 2);
+                lua_pushlstring(L, u->sIPv4, u->ui8IPv4Len);
+                lua_rawset(L, t);
+            }
+
+            return 1;
+        }
         default:
             luaL_error(L, "bad argument #2 to 'GetUserValue' (it's not valid id)");
             
@@ -2342,6 +2415,7 @@ static const luaL_Reg core[] = {
 	{ "GetMaxUsersPeak", GetMaxUsersPeak }, 
 	{ "GetCurrentSharedSize", GetCurrentSharedSize }, 
 	{ "GetHubIP", GetHubIP }, 
+	{ "GetHubIPs", GetHubIPs },
 	{ "GetHubSecAlias", GetHubSecAlias }, 
 	{ "GetPtokaXPath", GetPtokaXPath }, 
 	{ "GetUsersCount", GetUsersCount }, 

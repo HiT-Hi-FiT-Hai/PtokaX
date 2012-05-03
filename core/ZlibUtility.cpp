@@ -282,7 +282,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &uiInDataSi
     if(uiOutDataSize < uiOutDataLen) {
         unsigned int uiOldOutDataSize = uiOutDataSize;
 
-        uiOutDataSize = (unsigned int)(* pAllignFunc)(uiOutDataLen);
+        uiOutDataSize = (unsigned int)(* pAllignFunc)(uiOutDataLen+1);
 
         char * pOldBuf = sOutData;
 #ifdef _WIN32

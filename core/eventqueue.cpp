@@ -271,8 +271,13 @@ void eventq::ProcessEvents() {
 
                 break;
 			case EVENT_SHUTDOWN:
+                if(bIsClose == true) {
+                    break;
+                }
+
                 bIsClose = true;
                 ServerStop();
+
                 break;
             default:
                 break;
@@ -361,6 +366,19 @@ void eventq::ProcessEvents() {
                 DcCommands->SRFromUDP(u, cur->sMsg, szMsgLen);
                 break;
             }
+			case EVENT_SHUTDOWN:
+                if(bIsClose == true) {
+                    break;
+                }
+
+                if(cur->sMsg != NULL) {
+                    AppendLog(cur->sMsg);
+                }
+
+                bIsClose = true;
+                ServerStop();
+
+                break;
             default:
                 break;
         }
