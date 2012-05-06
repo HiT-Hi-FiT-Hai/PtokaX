@@ -783,6 +783,14 @@ const char* LangStr[] = {
     "is available",
     "IPv4 address",
     "IPv6 address",
+    "register",
+    "as",
+    "registered",
+    "You were registered, please enter your password",
+    "Sorry you are already registered", 
+    "Thank you for password, you are now registered as",
+    "register user with specified profile. User is asked by hub for password, and after he enter password then is added to regs",
+    "in command, hub replaced it with your real IP",
 };
 //---------------------------------------------------------------------------
 

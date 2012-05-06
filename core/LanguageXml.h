@@ -783,6 +783,14 @@ const char* LangXmlStr[] = {
     "IsAvailable",
     "IPv4Address",
     "IPv6Address",
+    "Register",
+    "As",
+    "Registered",
+    "YouWereRegisteredPleaseEnterYourPassword",
+    "SorryYouAreAlreadyRegistered",
+    "ThankYouForPasswordYouAreNowRegisteredAs",
+    "RegisterUserWithSpecifiedProfile",
+    "InCommandHubReplacedItWithYourRealIP",
 };
 //---------------------------------------------------------------------------
 

@@ -2232,6 +2232,147 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                 return RangeUnban(curUser, sCommand+15, fromPM, hashBanMan::PERM);
             }
 
+            // !reguser <nick> <profile_name>
+			if(strncasecmp(sCommand+1, "eguser ", 7) == 0) {
+                if(ProfileMan->IsAllowed(curUser, ProfileManager::ADDREGUSER) == false) {
+                    SendNoPermission(curUser, fromPM);
+                    return true;
+                }
+
+                if(dlen > 255) {
+                    int imsgLen = CheckFromPm(curUser, fromPM);
+
+                    int iret = sprintf(msg+imsgLen, "<%s> *** %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_CMD_TOO_LONG]);
+                    imsgLen += iret;
+                    if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand::RegUser1") == true) {
+                        UserSendCharDelayed(curUser, msg, imsgLen);
+                    }
+                    return true;
+                }
+
+                char * sNick = sCommand+8; // nick start
+
+                char * sProfile = strchr(sCommand+8, ' ');
+                if(sProfile == NULL) {
+                    int imsgLen = CheckFromPm(curUser, fromPM);
+
+               	    int iret = sprintf(msg+imsgLen, "<%s> *** %s %creguser <%s> <%s>. %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
+                        LanguageManager->sTexts[LAN_SNTX_ERR_IN_CMD], SettingManager->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], LanguageManager->sTexts[LAN_NICK_LWR],
+                        LanguageManager->sTexts[LAN_PROFILENAME_LWR], LanguageManager->sTexts[LAN_BAD_PARAMS_GIVEN]);
+                    imsgLen += iret;
+                    if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand::RegUser2") == true) {
+                        UserSendCharDelayed(curUser, msg, imsgLen);
+                    }
+                    return true;
+                }
+
+                sProfile[0] = '\0';
+                sProfile++;
+
+                int iProfile = ProfileMan->GetProfileIndex(sProfile);
+                if(iProfile == -1) {
+                    int imsgLen = CheckFromPm(curUser, fromPM);
+
+               	    int iret = sprintf(msg+imsgLen, "<%s> *** %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_ERR_NO_PROFILE_GIVEN_NAME_EXIST]);
+               	    imsgLen += iret;
+                    if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand::RegUser3") == true) {
+                        UserSendCharDelayed(curUser, msg, imsgLen);
+                    }
+                    return true;
+                }
+
+                // check hierarchy
+                // deny if curUser is not Master and tries add equal or higher profile
+                if(curUser->iProfile > 0 && iProfile <= curUser->iProfile) {
+                    int imsgLen = CheckFromPm(curUser, fromPM);
+
+               	    int iret = sprintf(msg+imsgLen, "<%s> *** %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_NOT_ALLOWED_TO_ADD_USER_THIS_PROFILE]);
+               	    imsgLen += iret;
+                    if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand::RegUser4") == true) {
+                        UserSendCharDelayed(curUser, msg, imsgLen);
+                    }
+                    return true;
+                }
+
+                size_t szNickLen = strlen(sNick);
+
+                // try to add the user
+                if(hashRegManager->Find(sNick, szNickLen) != NULL) {
+                    int imsgLen = CheckFromPm(curUser, fromPM);
+
+                    int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_USER], sNick,
+                        LanguageManager->sTexts[LAN_IS_ALREDY_REGISTERED]);
+               	    imsgLen += iret;
+                    if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand::RegUser5") == true) {
+                        UserSendCharDelayed(curUser, msg, imsgLen);
+                    }
+                    return true;
+                }
+
+                User * pUser = hashManager->FindUser(sNick, szNickLen);
+                if(pUser == NULL) {
+                    int imsgLen = CheckFromPm(curUser, fromPM);
+
+                    int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_ERROR], sNick,
+                        LanguageManager->sTexts[LAN_IS_NOT_ONLINE]);
+               	    imsgLen += iret;
+                    if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand::RegUser6") == true) {
+                        UserSendCharDelayed(curUser, msg, imsgLen);
+                    }
+                    return true;
+                }
+
+				UncountDeflood(curUser, fromPM);
+
+                if(pUser->uLogInOut == NULL) {
+                    pUser->uLogInOut = new LoginLogout();
+                    if(pUser->uLogInOut == NULL) {
+                        pUser->ui32BoolBits |= User::BIT_ERROR;
+                        UserClose(pUser);
+
+                        AppendDebugLog("%s - [MEM] Cannot allocate new pUser->uLogInOut in HubCommands::DoCommand::RegUser\n", 0);
+                        return true;
+                    }
+                }
+
+                UserSetPasswd(pUser, sProfile);
+                pUser->ui32BoolBits |= User::BIT_WAITING_FOR_PASS;
+
+                int iMsgLen = sprintf(msg, "<%s> %s.|$GetPass|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_WERE_REGISTERED_PLEASE_ENTER_YOUR_PASSWORD]);
+                if(CheckSprintf(iMsgLen, 1024, "HubCommands::DoCommand::RegUser7") == true) {
+                    UserSendCharDelayed(pUser, msg, iMsgLen);
+                }
+
+                if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
+                    if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
+                        int imsgLen = sprintf(msg, "%s $<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],  SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
+                            curUser->sNick, LanguageManager->sTexts[LAN_REGISTER], sNick, LanguageManager->sTexts[LAN_AS], sProfile);
+                        if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand::RegUser8") == true) {
+							globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+                        }
+                    } else {
+                        int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick,
+                            LanguageManager->sTexts[LAN_REGISTER], sNick, LanguageManager->sTexts[LAN_AS], sProfile);
+                        if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand::RegUser9") == true) {
+                            globalQ->OPStore(msg, imsgLen);
+                        }
+                    }
+                }
+
+                if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == false || ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
+                    int imsgLen = CheckFromPm(curUser, fromPM);
+
+                    int iret = sprintf(msg+imsgLen, "<%s> %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], sNick, LanguageManager->sTexts[LAN_REGISTERED],
+                        LanguageManager->sTexts[LAN_AS], sProfile);
+               	    imsgLen += iret;
+                    if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand::RegUser10") == true) {
+                        UserSendCharDelayed(curUser, msg, imsgLen);
+                    }
+                }
+
+                return true;
+            }
+
             return false;
 
         case 'i':
@@ -4450,9 +4591,16 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                 }
 
                 if(ProfileMan->IsAllowed(curUser, ProfileManager::ADDREGUSER)) {
+                    imsglen = sprintf(msg, "\t%creguser <%s> <%s> - %s.\n", SettingManager->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], LanguageManager->sTexts[LAN_NICK_LWR],
+                        LanguageManager->sTexts[LAN_PROFILENAME_LWR], LanguageManager->sTexts[LAN_REG_USER_WITH_PROFILE]);
+                    if(CheckSprintf(imsglen, 1024, "HubCommands::DoCommand379-1") == false) {
+                        return true;
+                    }
+					help += msg;
+
                     imsglen = sprintf(msg, "\t%caddreguser <%s> <%s> <%s> - %s.\n", SettingManager->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], LanguageManager->sTexts[LAN_NICK_LWR],
                         LanguageManager->sTexts[LAN_PASSWORD_LWR], LanguageManager->sTexts[LAN_PROFILENAME_LWR], LanguageManager->sTexts[LAN_ADD_REG_USER_WITH_PROFILE]);
-                    if(CheckSprintf(imsglen, 1024, "HubCommands::DoCommand379") == false) {
+                    if(CheckSprintf(imsglen, 1024, "HubCommands::DoCommand379-2") == false) {
                         return true;
                     }
 					help += msg;

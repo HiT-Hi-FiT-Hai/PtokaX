@@ -116,6 +116,8 @@ struct User {
     	BIT_QUACK_SUPPORTS             = 0x400000,
     	BIT_IPV6                       = 0x800000,
     	BIT_IPV4                       = 0x1000000,
+    	BIT_WAITING_FOR_PASS           = 0x2000000,
+    	BIT_WARNED_WRONG_IP            = 0x4000000,
     };
 
     enum UserInfoBits {
