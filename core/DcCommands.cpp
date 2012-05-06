@@ -493,6 +493,90 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                 ConnectToMe(curUser, sData, iLen, bCheck, true);
                                 return;
                             }
+                        } else if(memcmp(sData+2, "yPass ", 6) == 0) {
+                            iStatCmdMyPass++;
+                            //MyPass(curUser, sData, iLen);
+                            if((curUser->ui32BoolBits & User::BIT_WAITING_FOR_PASS) == User::BIT_WAITING_FOR_PASS) {
+                                curUser->ui32BoolBits &= ~User::BIT_WAITING_FOR_PASS;
+
+                                if(curUser->uLogInOut != NULL && curUser->uLogInOut->sPassword != NULL) {
+                                    int iProfile = ProfileMan->GetProfileIndex(curUser->uLogInOut->sPassword);
+                                    if(iProfile == -1) {
+               	                        int iMsgLen = sprintf(msg, "<%s> %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_ERR_NO_PROFILE_GIVEN_NAME_EXIST]);
+                                        if(CheckSprintf(iMsgLen, 1024, "cDcCommands::PreProcessData::MyPass->RegUser") == true) {
+                                            UserSendCharDelayed(curUser, msg, iMsgLen);
+                                        }
+
+                                        delete curUser->uLogInOut;
+                                        curUser->uLogInOut = NULL;
+
+                                        return;
+                                    }
+                                    
+                                    if(iLen > 73) {
+                                        int iMsgLen = sprintf(msg, "<%s> %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_MAX_ALWD_PASS_LEN_64_CHARS]);
+                                        if(CheckSprintf(iMsgLen, 1024, "cDcCommands::PreProcessData::MyPass->RegUser1") == true) {
+                                            UserSendCharDelayed(curUser, msg, iMsgLen);
+                                        }
+
+                                        delete curUser->uLogInOut;
+                                        curUser->uLogInOut = NULL;
+
+                                        return;
+                                    }
+
+                                    sData[iLen-1] = '\0'; // cutoff pipe
+
+                                    if(hashRegManager->AddNew(curUser->sNick, sData+8, (uint16_t)iProfile) == false) {
+                                        int iMsgLen = sprintf(msg, "<%s> %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
+                                            LanguageManager->sTexts[LAN_SORRY_YOU_ARE_ALREADY_REGISTERED]);
+                                        if(CheckSprintf(iMsgLen, 1024, "cDcCommands::PreProcessData::MyPass->RegUser2") == true) {
+                                            UserSendCharDelayed(curUser, msg, iMsgLen);
+                                        }
+                                    } else {
+                                        int iMsgLen = sprintf(msg, "<%s> %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
+                                            LanguageManager->sTexts[LAN_THANK_YOU_FOR_PASSWORD_YOU_ARE_NOW_REGISTERED_AS], curUser->uLogInOut->sPassword);
+                                        if(CheckSprintf(iMsgLen, 1024, "cDcCommands::PreProcessData::MyPass->RegUser2") == true) {
+                                            UserSendCharDelayed(curUser, msg, iMsgLen);
+                                        }
+                                    }
+
+                                    delete curUser->uLogInOut;
+                                    curUser->uLogInOut = NULL;
+
+                                    curUser->iProfile = iProfile;
+
+                                    if(((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
+                                        if(ProfileMan->IsAllowed(curUser, ProfileManager::HASKEYICON) == false) {
+                                            return;
+                                        }
+                                        
+                                        curUser->ui32BoolBits |= User::BIT_OPERATOR;
+
+                                        colUsers->Add2OpList(curUser);
+                                        globalQ->OpListStore(curUser->sNick);
+
+                                        if(ProfileMan->IsAllowed(curUser, ProfileManager::ALLOWEDOPCHAT) == true) {
+                                            if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true &&
+                                                (SettingManager->bBools[SETBOOL_REG_BOT] == false || SettingManager->bBotsSameNick == false)) {
+                                                if(((curUser->ui32SupportBits & User::SUPPORTBIT_NOHELLO) == User::SUPPORTBIT_NOHELLO) == false) {
+                                                    UserSendCharDelayed(curUser, SettingManager->sPreTexts[SetMan::SETPRETXT_OP_CHAT_HELLO],
+                                                        SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_OP_CHAT_HELLO]);
+                                                }
+
+                                                UserSendCharDelayed(curUser, SettingManager->sPreTexts[SetMan::SETPRETXT_OP_CHAT_MYINFO],
+                                                    SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_OP_CHAT_MYINFO]);
+                                                int imsgLen = sprintf(msg, "$OpList %s$$|", SettingManager->sTexts[SETTXT_OP_CHAT_NICK]);
+                                                if(CheckSprintf(imsgLen, 1024, "cDcCommands::PreProcessData::MyPass->RegUser3") == true) {
+                                                    UserSendCharDelayed(curUser, msg, imsgLen);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                return;
+                            }
                         }
                         break;
                     case 'G': {
@@ -993,12 +1077,66 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
 	}
 
     char *towho = strchr(sData+(bMulti == false ? 13 : 18), ' ');
-    if(towho == NULL)
+    if(towho == NULL) {
         return;
+    }
+
+    towho[0] = '\0';
+
+    User * pOtherUser = hashManager->FindUser(sData+(bMulti == false ? 13 : 18), towho-(sData+(bMulti == false ? 13 : 18)));
+    // PPK ... no connection to yourself !!!
+    if(pOtherUser == NULL || pOtherUser == curUser || pOtherUser->ui8State != User::STATE_ADDED) {
+        return;
+    }
+
+    towho[0] = ' ';
 
     // IP check
     if(bCheck == true && SettingManager->bBools[SETBOOL_CHECK_IP_IN_COMMANDS] == true && ProfileMan->IsAllowed(curUser, ProfileManager::NOIPCHECK) == false) {
         if(CheckIP(curUser, towho+1) == false) {
+            size_t szPortLen = 0;
+            char * sPort = GetPort(towho+1, '|', szPortLen);
+            if(sPort != NULL) {
+                if((curUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6 && (pOtherUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
+                    int imsgLen = sprintf(g_sBuffer, "$ConnectToMe %s [%s]:%s|", pOtherUser->sNick, curUser->sIP, sPort);
+                    if(CheckSprintf(imsgLen, g_szBufferSize, "cDcCommands::ConnectToMe4") == true) {
+                        UserAddPrcsdCmd(curUser, PrcsdUsrCmd::CTM_MCTM_RCTM_SR_TO, g_sBuffer, imsgLen, pOtherUser);
+                    }
+
+                    char * sBadIP = towho+1;
+                    if(sBadIP[0] == '[') {
+                        sBadIP[strlen(sBadIP)-1] = '\0';
+                        sBadIP++;
+                    } else if(strchr(sBadIP, '.') == NULL) {
+                        *(sPort-1) = ':';
+                    }
+
+                    SendIPFixedMsg(curUser, sBadIP, curUser->sIP);
+                    return;
+                } else if((curUser->ui32BoolBits & User::BIT_IPV4) == User::BIT_IPV4 && (pOtherUser->ui32BoolBits & User::BIT_IPV4) == User::BIT_IPV4) {
+                    char * sIP = curUser->ui8IPv4Len == 0 ? curUser->sIP : curUser->sIPv4;
+
+                    int imsgLen = sprintf(g_sBuffer, "$ConnectToMe %s %s:%s|", pOtherUser->sNick, sIP, sPort);
+                    if(CheckSprintf(imsgLen, g_szBufferSize, "cDcCommands::ConnectToMe5") == true) {
+                        UserAddPrcsdCmd(curUser, PrcsdUsrCmd::CTM_MCTM_RCTM_SR_TO, g_sBuffer, imsgLen, pOtherUser);
+                    }
+
+                    char * sBadIP = towho+1;
+                    if(sBadIP[0] == '[') {
+                        sBadIP[strlen(sBadIP)-1] = '\0';
+                        sBadIP++;
+                    } else if(strchr(sBadIP, '.') == NULL) {
+                        *(sPort-1) = ':';
+                    }
+
+                    SendIPFixedMsg(curUser, sBadIP, sIP);
+                    return;
+                }
+
+                *(sPort-1) = ':';
+                *(sPort+szPortLen) = '|';
+            }
+
             SendIncorrectIPMsg(curUser, towho+1, true);
 
             if(iLen > 65000) {
@@ -1006,7 +1144,7 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
             }
 
             int imsgLen = sprintf(g_sBuffer, "[SYS] Bad IP in %sCTM from %s (%s). (%s)", bMulti == false ? "" : "M", curUser->sNick, curUser->sIP, sData);
-            if(CheckSprintf(imsgLen, g_szBufferSize, "cDcCommands::ConnectToMe5") == true) {
+            if(CheckSprintf(imsgLen, g_szBufferSize, "cDcCommands::ConnectToMe6") == true) {
                 UdpDebug->Broadcast(g_sBuffer, imsgLen);
             }
 
@@ -1015,17 +1153,10 @@ void cDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen
         }
     }
 
-    towho[0] = '\0';
-    
-    User *OtherUser = hashManager->FindUser(sData+(bMulti == false ? 13 : 18), towho-(sData+(bMulti == false ? 13 : 18)));
-    // PPK ... no connection to yourself !!!
-    if(OtherUser != NULL && OtherUser != curUser && OtherUser->ui8State == User::STATE_ADDED) {
-        towho[0] = ' ';
-        if(bMulti == true) {
-            sData[5] = '$';
-        }
-        UserAddPrcsdCmd(curUser, PrcsdUsrCmd::CTM_MCTM_RCTM_SR_TO, bMulti == false ? sData : sData+5, bMulti == false ? iLen : iLen-5, OtherUser);
+    if(bMulti == true) {
+        sData[5] = '$';
     }
+    UserAddPrcsdCmd(curUser, PrcsdUsrCmd::CTM_MCTM_RCTM_SR_TO, bMulti == false ? sData : sData+5, bMulti == false ? iLen : iLen-5, pOtherUser);
 }
 //---------------------------------------------------------------------------
 
@@ -1651,7 +1782,41 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
             }
         }
 
+        if(bCheck == true && ProfileMan->IsAllowed(curUser, ProfileManager::NOSEARCHLIMITS) == false &&
+            (SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN] != 0 || SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0)) {
+            // PPK ... search string len check
+            // $Search 1.2.3.4:1 F?F?0?2?test|
+            uint32_t iChar = iAfterCmd+11;
+            uint32_t iCount = 0;
+            for(; iChar < iLen; iChar++) {
+                if(sData[iChar] == '?') {
+                    iCount++;
+                    if(iCount == 4)
+                        break;
+                }
+            }
+            iCount = iLen-2-iChar;
+
+            if(iCount < (uint32_t)SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]) {
+                int imsgLen = sprintf(msg, "<%s> %s %hd.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SORRY_MIN_SEARCH_LEN_IS],
+                    SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]);
+                if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search10") == true) {
+                    UserSendCharDelayed(curUser, msg, imsgLen);
+                }
+                return;
+            }
+            if(SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0 && iCount > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]) {
+                int imsgLen = sprintf(msg, "<%s> %s %hd.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SORRY_MAX_SEARCH_LEN_IS],
+                    SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]);
+                if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search11") == true) {
+                    UserSendCharDelayed(curUser, msg, imsgLen);
+                }
+                return;
+            }
+        }
+
         curUser->iSR = 0;
+
         if(curUser->cmdPSearch != NULL) {
             char * pOldBuf = curUser->cmdPSearch->sCommand;
 #ifdef _WIN32
@@ -1710,6 +1875,49 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
         // IP check
         if(bCheck == true && SettingManager->bBools[SETBOOL_CHECK_IP_IN_COMMANDS] == true && ProfileMan->IsAllowed(curUser, ProfileManager::NOIPCHECK) == false) {
             if(CheckIP(curUser, sData+iAfterCmd) == false) {
+                size_t szPortLen = 0;
+                char * sPort = GetPort(sData+iAfterCmd, ' ', szPortLen);
+                if(sPort != NULL) {
+                    if((curUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
+                        int imsgLen = sprintf(g_sBuffer, "$Search [%s]:%s %s", curUser->sIP, sPort, sPort+szPortLen+1);
+                        if(CheckSprintf(imsgLen, g_szBufferSize, "cDcCommands::Search12") == true) {
+                            AddActiveSearch(curUser, g_sBuffer, imsgLen);
+                        }
+
+                        char * sBadIP = sData+iAfterCmd;
+                        if(sBadIP[0] == '[') {
+                            sBadIP[strlen(sBadIP)-1] = '\0';
+                            sBadIP++;
+                        } else if(strchr(sBadIP, '.') == NULL) {
+                            *(sPort-1) = ':';
+                        }
+
+                        SendIPFixedMsg(curUser, sBadIP, curUser->sIP);
+                        return;
+                    } else if((curUser->ui32BoolBits & User::BIT_IPV4) == User::BIT_IPV4) {
+                        char * sIP = curUser->ui8IPv4Len == 0 ? curUser->sIP : curUser->sIPv4;
+
+                        int imsgLen = sprintf(g_sBuffer, "$Search %s:%s %s", sIP, sPort, sPort+szPortLen+1);
+                        if(CheckSprintf(imsgLen, g_szBufferSize, "cDcCommands::Search13") == true) {
+                            AddActiveSearch(curUser, g_sBuffer, imsgLen);
+                        }
+
+                        char * sBadIP = sData+iAfterCmd;
+                        if(sBadIP[0] == '[') {
+                            sBadIP[strlen(sBadIP)-1] = '\0';
+                            sBadIP++;
+                        } else if(strchr(sBadIP, '.') == NULL) {
+                            *(sPort-1) = ':';
+                        }
+
+                        SendIPFixedMsg(curUser, sBadIP, sIP);
+                        return;
+                    }
+
+                    *(sPort-1) = ':';
+                    *(sPort+szPortLen) = ' ';
+                }
+
                 SendIncorrectIPMsg(curUser, sData+iAfterCmd, false);
 
                 if(iLen > 65000) {
@@ -1717,44 +1925,11 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
                 }
 
                 int imsgLen = sprintf(g_sBuffer, "[SYS] Bad IP in Search from %s (%s). (%s)", curUser->sNick, curUser->sIP, sData);
-                if(CheckSprintf(imsgLen, g_szBufferSize, "cDcCommands::Search8") == true) {
+                if(CheckSprintf(imsgLen, g_szBufferSize, "cDcCommands::Search14") == true) {
                     UdpDebug->Broadcast(g_sBuffer, imsgLen);
                 }
 
                 UserClose(curUser);
-                return;
-            }
-        }
-
-        if(bCheck == true && ProfileMan->IsAllowed(curUser, ProfileManager::NOSEARCHLIMITS) == false &&
-            (SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN] != 0 || SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0)) {
-            // PPK ... search string len check
-            // $Search 1.2.3.4:1 F?F?0?2?test|
-            uint32_t iChar = iAfterCmd+11;
-            uint32_t iCount = 0;
-            for(; iChar < iLen; iChar++) {
-                if(sData[iChar] == '?') {
-                    iCount++;
-                    if(iCount == 4) 
-                        break;
-                }
-            }
-            iCount = iLen-2-iChar;
-
-            if(iCount < (uint32_t)SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]) {
-                int imsgLen = sprintf(msg, "<%s> %s %hd.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SORRY_MIN_SEARCH_LEN_IS],
-                    SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]);
-                if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search10") == true) {
-                    UserSendCharDelayed(curUser, msg, imsgLen);
-                }
-                return;
-            }
-            if(SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0 && iCount > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]) {
-                int imsgLen = sprintf(msg, "<%s> %s %hd.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SORRY_MAX_SEARCH_LEN_IS],
-                    SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]);
-                if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search11") == true) {
-                    UserSendCharDelayed(curUser, msg, imsgLen);
-                }
                 return;
             }
         }
@@ -1765,59 +1940,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
             iLen -= 5;
         }
 
-        if(curUser->cmdASearch != NULL) {
-            char * pOldBuf = curUser->cmdASearch->sCommand;
-#ifdef _WIN32
-            curUser->cmdASearch->sCommand = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, curUser->cmdASearch->iLen+iLen+1);
-#else
-			curUser->cmdASearch->sCommand = (char *)realloc(pOldBuf, curUser->cmdASearch->iLen+iLen+1);
-#endif
-            if(curUser->cmdASearch->sCommand == NULL) {
-                curUser->cmdASearch->sCommand = pOldBuf;
-                curUser->ui32BoolBits |= User::BIT_ERROR;
-                UserClose(curUser);
-
-				AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for DcCommands::Search1\n", (uint64_t)(curUser->cmdASearch->iLen+iLen+1));
-
-                return;
-            }
-            memcpy(curUser->cmdASearch->sCommand+curUser->cmdASearch->iLen, sData, iLen);
-            curUser->cmdASearch->iLen += iLen;
-            curUser->cmdASearch->sCommand[curUser->cmdASearch->iLen] = '\0';
-            colUsers->ui16ActSearchs++;
-        } else {
-            curUser->cmdASearch = new PrcsdUsrCmd();
-            if(curUser->cmdASearch == NULL) {
-                curUser->ui32BoolBits |= User::BIT_ERROR;
-                UserClose(curUser);
-
-				AppendDebugLog("%s - [MEM] Cannot allocate new curUser->cmdASearch in cDcCommands::Search1\n", 0);
-            	return;
-            }
-
-#ifdef _WIN32
-            curUser->cmdASearch->sCommand = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
-#else
-			curUser->cmdASearch->sCommand = (char *)malloc(iLen+1);
-#endif
-			if(curUser->cmdASearch->sCommand == NULL) {
-                delete curUser->cmdASearch;
-                curUser->cmdASearch = NULL;
-
-                curUser->ui32BoolBits |= User::BIT_ERROR;
-                UserClose(curUser);
-
-				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::Search5\n", (uint64_t)(iLen+1));
-
-                return;
-            }
-
-            memcpy(curUser->cmdASearch->sCommand, sData, iLen);
-            curUser->cmdASearch->sCommand[iLen] = '\0';
-
-            curUser->cmdASearch->iLen = iLen;
-            colUsers->ui16ActSearchs++;
-        }
+        AddActiveSearch(curUser, sData, iLen);
     }
 }
 //---------------------------------------------------------------------------
@@ -3686,7 +3809,36 @@ bool cDcCommands::CheckIP(const User * curUser, const char * sIP) {
 
     return false;
 }
-//---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+char * cDcCommands::GetPort(char * sData, char cPortEnd, size_t &szPortLen) {
+    char * sPortEnd = strchr(sData, cPortEnd);
+    if(sPortEnd == NULL) {
+        return NULL;
+    }
+
+    sPortEnd[0] = '\0';
+
+    char * sPortStart = strrchr(sData, ':');
+    if(sPortStart == NULL || sPortStart[1] == '\0') {
+        sPortEnd[0] = cPortEnd;
+        return NULL;
+    }
+
+    sPortStart[0] = '\0';
+    sPortStart++;
+    szPortLen = (sPortEnd-sPortStart);
+
+    int iPort = atoi(sPortStart);
+    if(iPort < 1 || iPort > 65535) {
+        *(sPortStart-1) = ':';
+        sPortEnd[0] = cPortEnd;
+        return NULL;
+    }
+
+    return sPortStart;
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void cDcCommands::SendIncorrectIPMsg(User * curUser, char * sBadIP, const bool &bCTM) {
 	int imsgLen = sprintf(msg, "<%s> %s ", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOUR_CLIENT_SEND_INCORRECT_IP]);
@@ -3734,7 +3886,22 @@ void cDcCommands::SendIncorrectIPMsg(User * curUser, char * sBadIP, const bool &
 		UserSendCharDelayed(curUser, msg, imsgLen);
     }
 }
-//---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void cDcCommands::SendIPFixedMsg(User * pUser, char * sBadIP, char * sRealIP) {
+    if((pUser->ui32BoolBits & User::BIT_WARNED_WRONG_IP) == User::BIT_WARNED_WRONG_IP) {
+        return;
+    }
+
+    int imsgLen = sprintf(g_sBuffer, "<%s> %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOUR_CLIENT_SEND_INCORRECT_IP], sBadIP,
+        LanguageManager->sTexts[LAN_IN_COMMAND_HUB_REPLACED_IT_WITH_YOUR_REAL_IP], sRealIP);
+    if(CheckSprintf(imsgLen, g_szBufferSize, "SendIncorrectIPMsg1") == true) {
+        UserSendCharDelayed(pUser, g_sBuffer, imsgLen);
+    }
+
+    pUser->ui32BoolBits |= User::BIT_WARNED_WRONG_IP;
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void cDcCommands::MyNick(User * pUser, char * sData, const uint32_t &ui32Len) {
     if((pUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
@@ -3785,4 +3952,61 @@ void cDcCommands::MyNick(User * pUser, char * sData, const uint32_t &ui32Len) {
 	}
 */
 }
-//---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void cDcCommands::AddActiveSearch(User * pUser, char * sSearch, const size_t &szLen) {
+    if(pUser->cmdASearch != NULL) {
+        char * pOldBuf = pUser->cmdASearch->sCommand;
+#ifdef _WIN32
+        pUser->cmdASearch->sCommand = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, pUser->cmdASearch->iLen+szLen+1);
+#else
+		pUser->cmdASearch->sCommand = (char *)realloc(pOldBuf, pUser->cmdASearch->iLen+szLen+1);
+#endif
+        if(pUser->cmdASearch->sCommand == NULL) {
+            pUser->cmdASearch->sCommand = pOldBuf;
+            pUser->ui32BoolBits |= User::BIT_ERROR;
+            UserClose(pUser);
+
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for cDcCommands::AddActiveSearch1\n", (uint64_t)(pUser->cmdASearch->iLen+szLen+1));
+
+            return;
+        }
+        memcpy(pUser->cmdASearch->sCommand+pUser->cmdASearch->iLen, sSearch, szLen);
+        pUser->cmdASearch->iLen += (uint32_t)szLen;
+        pUser->cmdASearch->sCommand[pUser->cmdASearch->iLen] = '\0';
+        colUsers->ui16ActSearchs++;
+    } else {
+        pUser->cmdASearch = new PrcsdUsrCmd();
+        if(pUser->cmdASearch == NULL) {
+            pUser->ui32BoolBits |= User::BIT_ERROR;
+            UserClose(pUser);
+
+			AppendDebugLog("%s - [MEM] Cannot allocate new pUser->cmdASearch in cDcCommands::AddActiveSearch1\n", 0);
+            return;
+        }
+
+#ifdef _WIN32
+        pUser->cmdASearch->sCommand = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
+#else
+		pUser->cmdASearch->sCommand = (char *)malloc(szLen+1);
+#endif
+		if(pUser->cmdASearch->sCommand == NULL) {
+            delete pUser->cmdASearch;
+            pUser->cmdASearch = NULL;
+
+            pUser->ui32BoolBits |= User::BIT_ERROR;
+            UserClose(pUser);
+
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::Search5\n", (uint64_t)(szLen+1));
+
+            return;
+        }
+
+        memcpy(pUser->cmdASearch->sCommand, sSearch, szLen);
+        pUser->cmdASearch->sCommand[szLen] = '\0';
+
+        pUser->cmdASearch->iLen = (uint32_t)szLen;
+        colUsers->ui16ActSearchs++;
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

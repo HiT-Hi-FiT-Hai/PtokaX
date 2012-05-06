@@ -61,7 +61,11 @@ private:
 	void Remove(PassBf * PassBfItem);
 
     bool CheckIP(const User * curUser, const char * sIP);
+    char * GetPort(char * sData, char cPortEnd, size_t &szPortLen);
     void SendIncorrectIPMsg(User * curUser, char * sBadIP, const bool &bCTM);
+    void SendIPFixedMsg(User * pUser, char * sBadIP, char * sRealIP);
+
+    void AddActiveSearch(User * pUser, char * sSearch, const size_t &szLen);
 protected:
 public:
 	cDcCommands();
