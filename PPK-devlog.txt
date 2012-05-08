@@ -37,6 +37,7 @@ Fixed: Memory leak in users and bans ip hashtables.
 Fixed: Bug in gui initialisation causing rare termination on startup.
 Fixed: Incorrect translation of "full" in ban commands (thx Alexey for report).
 Fixed: Shutdown with ctrl+c on non-windows OS (thx Alexey for report).
+Fixed: Crash in Lua 5.1 on invalid conversion specifier in os.date (fix from Lua 5.2).
 Removed: All info related to old ip-to-country database.
 Updated: makefile to work with buggy gold linker.
 Updated: zlib to 1.2.7.

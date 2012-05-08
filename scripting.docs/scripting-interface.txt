@@ -728,3 +728,17 @@ User data IDs for Core.GetUserData and Core.GetUserValue call.
 41  - iScriptediShareSizeShort
 42  - iScriptediShareSizeLong
 43  - tIPs
+
+
+User info IDs for Core.SetUserInfo call.
+-------------------
+0   - DescriptionShort
+1   - DescriptionLong
+2   - TagShort
+3   - TagLong
+4   - ConnectionShort
+5   - ConnectionLong
+6   - EmailShort
+7   - EmailLong
+8   - ShareSizeShort
+9   - ShareSizeLong
