@@ -1749,6 +1749,7 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
             UserClose(curUser);
             return;
         }
+
         if(bCheck == true && ProfileMan->IsAllowed(curUser, ProfileManager::NOSEARCHLIMITS) == false &&
             (SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN] != 0 || SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0)) {
             // PPK ... search string len check
@@ -1776,39 +1777,6 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
                 int imsgLen = sprintf(msg, "<%s> %s %hd.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SORRY_MAX_SEARCH_LEN_IS],
                     SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]);
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search6") == true) {
-                    UserSendCharDelayed(curUser, msg, imsgLen);
-                }
-                return;
-            }
-        }
-
-        if(bCheck == true && ProfileMan->IsAllowed(curUser, ProfileManager::NOSEARCHLIMITS) == false &&
-            (SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN] != 0 || SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0)) {
-            // PPK ... search string len check
-            // $Search 1.2.3.4:1 F?F?0?2?test|
-            uint32_t iChar = iAfterCmd+11;
-            uint32_t iCount = 0;
-            for(; iChar < iLen; iChar++) {
-                if(sData[iChar] == '?') {
-                    iCount++;
-                    if(iCount == 4)
-                        break;
-                }
-            }
-            iCount = iLen-2-iChar;
-
-            if(iCount < (uint32_t)SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]) {
-                int imsgLen = sprintf(msg, "<%s> %s %hd.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SORRY_MIN_SEARCH_LEN_IS],
-                    SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]);
-                if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search10") == true) {
-                    UserSendCharDelayed(curUser, msg, imsgLen);
-                }
-                return;
-            }
-            if(SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0 && iCount > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]) {
-                int imsgLen = sprintf(msg, "<%s> %s %hd.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SORRY_MAX_SEARCH_LEN_IS],
-                    SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]);
-                if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search11") == true) {
                     UserSendCharDelayed(curUser, msg, imsgLen);
                 }
                 return;
@@ -1872,6 +1840,42 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
         }
     } else {
         curUser->ui32BoolBits |= User::BIT_ACTIVE;
+
+        if(bCheck == true && ProfileMan->IsAllowed(curUser, ProfileManager::NOSEARCHLIMITS) == false &&
+            (SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN] != 0 || SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0)) {
+            // PPK ... search string len check
+            // $Search 1.2.3.4:1 F?F?0?2?test|
+            uint32_t iChar = iAfterCmd+11;
+            uint32_t iCount = 0;
+
+            for(; iChar < iLen; iChar++) {
+                if(sData[iChar] == '?') {
+                    iCount++;
+                    if(iCount == 4)
+                        break;
+                }
+            }
+
+            iCount = iLen-2-iChar;
+
+            if(iCount < (uint32_t)SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]) {
+                int imsgLen = sprintf(msg, "<%s> %s %hd.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SORRY_MIN_SEARCH_LEN_IS],
+                    SettingManager->iShorts[SETSHORT_MIN_SEARCH_LEN]);
+                if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search10") == true) {
+                    UserSendCharDelayed(curUser, msg, imsgLen);
+                }
+                return;
+            }
+            if(SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN] != 0 && iCount > (uint32_t)SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]) {
+                int imsgLen = sprintf(msg, "<%s> %s %hd.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SORRY_MAX_SEARCH_LEN_IS],
+                    SettingManager->iShorts[SETSHORT_MAX_SEARCH_LEN]);
+                if(CheckSprintf(imsgLen, 1024, "cDcCommands::Search11") == true) {
+                    UserSendCharDelayed(curUser, msg, imsgLen);
+                }
+                return;
+            }
+        }
+
         // IP check
         if(bCheck == true && SettingManager->bBools[SETBOOL_CHECK_IP_IN_COMMANDS] == true && ProfileMan->IsAllowed(curUser, ProfileManager::NOIPCHECK) == false) {
             if(CheckIP(curUser, sData+iAfterCmd) == false) {
