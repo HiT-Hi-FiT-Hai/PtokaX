@@ -366,6 +366,7 @@ const char* LangStr[] = {
     "Temp bans cleared", 
     "has cleared perm bans", 
     "Perm bans cleared", 
+    "has cleared temp range bans",
     "Temp range bans cleared", 
     "has cleared perm range bans", 
     "Perm range bans cleared", 

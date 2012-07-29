@@ -26,7 +26,7 @@ Changed: Max send buffer size on small hubs from 128 kB to 256 kB.
 Changed: Disabled keep slow client online for clients with zpipe support.
 Changed: Memory allocation failures checking. When memory allocation fail then user who caused that is disconnected and hub not crash.
 Changed: Line ending to \n on windoze.
-Fixed: TmrMan.RemoveTimer Lua api call in windoze version (thx Cêñoßy†ê for report).
+Fixed: TmrMan.RemoveTimer Lua api call in windoze version (thx Cêño-y†ê for report).
 Fixed: MOTD was not updated after change in gui (thx mappy for report).
 Fixed: Few settings was not updated after change in gui.
 Fixed: Buggy chat input line after using some settings pages (thx The-Master for report).
@@ -39,6 +39,8 @@ Fixed: Incorrect translation of "full" in ban commands (thx Alexey for report).
 Fixed: Shutdown with ctrl+c on non-windows OS (thx Alexey for report).
 Fixed: Crash in Lua 5.1 on invalid conversion specifier in os.date (fix from Lua 5.2).
 Fixed: Buggy search length checking for active and passive users (thx Alexey for report).
+Fixed: Compile with Clang compiler on Linux.
+Fixed: Message returned on !clrrangetempbans (thx Alexey for report).
 Removed: All info related to old ip-to-country database.
 Updated: makefile to work with buggy gold linker.
 Updated: zlib to 1.2.7.
@@ -324,7 +326,7 @@ Fixed: Crash in profilemanager if no profile selected and remove is pressed (thx
 Fixed: Few crashes in lua if hub not running (thx Northwind for report).
 Fixed: Crash on dblclick on script files (thx GeceBekcisi for report).
 Fixed: Scripts state saving on exit (thx GeceBekcisi for report).
-Fixed: Bug in nickban allowing to ban user with higher profile (thx •§kÂ®•™ for report).
+Fixed: Bug in nickban allowing to ban user with higher profile (thx •§kT®•™ for report).
 Fixed: Buffer overflow caused by sending of long data from lua. Added limits, check Scripting-Interface.txt !
 Changed: Name of error.log to system.log, old name confusing users.
 Changed: Memory management in data procesing for better performance (thx BigMuscle for hint).

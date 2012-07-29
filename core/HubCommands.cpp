@@ -3387,12 +3387,12 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
                     if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
                         int imsgLen = sprintf(msg, "%s $<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
-                            curUser->sNick, LanguageManager->sTexts[LAN_TEMP_RANGE_BANS_CLEARED]);
+                            curUser->sNick, LanguageManager->sTexts[LAN_HAS_CLEARED_TEMP_RANGEBANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand250") == true) {
 							globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
                         }
                     } else {
-                        int imsgLen = sprintf(msg, "<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_TEMP_RANGE_BANS_CLEARED]);
+                        int imsgLen = sprintf(msg, "<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_HAS_CLEARED_TEMP_RANGEBANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand251") == true) {
                             globalQ->OPStore(msg, imsgLen);
                         }
