@@ -366,6 +366,7 @@ const char* LangXmlStr[] = {
     "TempBansCleared", 
     "HasClearedPermBans", 
     "PermBansCleared", 
+    "HasClearedTempRangeBans",
     "TempRangeBansCleared", 
     "HasClearedPermRangeBans", 
     "PermRangeBansCleared", 

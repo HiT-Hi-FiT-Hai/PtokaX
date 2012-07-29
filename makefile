@@ -45,7 +45,7 @@ PtokaX: $(CURDIR)/obj/ClientTagManager.o $(CURDIR)/obj/colUsers.o $(CURDIR)/obj/
         $(CURDIR)/obj/LuaProfManLib.o $(CURDIR)/obj/LuaRegManLib.o $(CURDIR)/obj/LuaScript.o $(CURDIR)/obj/LuaScriptManager.o $(CURDIR)/obj/LuaScriptManLib.o $(CURDIR)/obj/LuaSetManLib.o $(CURDIR)/obj/LuaTmrManLib.o \
         $(CURDIR)/obj/LuaUDPDbgLib.o $(CURDIR)/obj/ProfileManager.o $(CURDIR)/obj/PtokaX.o $(CURDIR)/obj/pxstring.o $(CURDIR)/obj/RegThread.o $(CURDIR)/obj/ResNickManager.o $(CURDIR)/obj/ServerManager.o $(CURDIR)/obj/ServerThread.o \
         $(CURDIR)/obj/serviceLoop.o $(CURDIR)/obj/SettingManager.o $(CURDIR)/obj/TextFileManager.o $(CURDIR)/obj/UdpDebug.o $(CURDIR)/obj/UDPThread.o $(CURDIR)/obj/User.o $(CURDIR)/obj/utility.o $(CURDIR)/obj/ZlibUtility.o \
-        $(CURDIR)/tinyxml/tinyxml.a -o PtokaX -lpthread -llua5.1 -lrt -lz
+        $(CURDIR)/tinyxml/tinyxml.a -o PtokaX -lstdc++ -lpthread -llua5.1 -lrt -lz
 
 #*******************************************************************************
 # Files to compile

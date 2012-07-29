@@ -223,7 +223,9 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 
     if(AccptSocket->addr.ss_family == AF_INET6) {
         if(IN6_IS_ADDR_V4MAPPED(&((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr)) {
-            strcpy(sIP, inet_ntoa(*((in_addr *)(((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr.s6_addr + 12))));
+			in_addr ipv4addr;
+			memcpy(&ipv4addr, ((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr.s6_addr + 12, 4);
+			strcpy(sIP, inet_ntoa(ipv4addr));
         } else {
             bIPv6 = true;
 #ifdef _WIN32

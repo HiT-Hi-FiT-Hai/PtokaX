@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
 	            }
             }
 	    } else if(strcasecmp(argv[i], "-v") == 0) {
-	        printf((sTitle+" built on "+__DATE__+" "+__TIME__+"\n").c_str());
+	        printf("%s built on %s %s\n", sTitle.c_str(), __DATE__, __TIME__);
 	        return EXIT_SUCCESS;
 	    } else if(strcasecmp(argv[i], "-h") == 0) {
 	        printf("PtokaX [-d] [-c <configdir>] [-v]\n");
@@ -134,7 +134,7 @@ int main(int argc, char* argv[]) {
 	}
 	
 	if(bDaemon == true) {
-	    printf(("Starting "+sTitle+" as daemon using "+PATH+" as config directory.\n").c_str());
+	    printf("Starting %s as daemon using %s as config directory.\n", sTitle.c_str(), PATH.c_str());
 	
 	    pid_t pid1 = fork();
 	    if(pid1 == -1) {
@@ -223,7 +223,7 @@ int main(int argc, char* argv[]) {
 	    }
 	    return EXIT_FAILURE;
 	} else if(bDaemon == false) {
-	    printf((sTitle+" running...\n").c_str());
+	    printf("%s running...\n", sTitle.c_str());
 	}
 
     struct timespec sleeptime;
@@ -241,7 +241,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	if(bDaemon == false) {
-	    printf((sTitle+" ending...\n").c_str());
+	    printf("%s ending...\n", sTitle.c_str());
 	}
 
     return EXIT_SUCCESS;
