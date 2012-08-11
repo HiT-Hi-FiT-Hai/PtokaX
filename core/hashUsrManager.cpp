@@ -282,7 +282,7 @@ User * hashMan::FindUser(const uint8_t * ui128IpHash) {
 }
 //---------------------------------------------------------------------------
 
-uint32_t hashMan::GetUserIpCount(User * u) {
+uint32_t hashMan::GetUserIpCount(User * u) const {
     uint16_t ui16dx = *((uint16_t *)(u->ui128IpHash+13));
 
 	IpTableItem * next = iptable[ui16dx];

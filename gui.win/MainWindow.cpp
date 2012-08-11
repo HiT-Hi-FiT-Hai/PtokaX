@@ -654,7 +654,7 @@ HWND MainWindow::CreateEx() {
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::UpdateSysTray() {
+void MainWindow::UpdateSysTray() const {
     if(bCmdNoTray == false) {
         NOTIFYICONDATA nid;
         memset(&nid, 0, sizeof(NOTIFYICONDATA));
@@ -674,7 +674,7 @@ void MainWindow::UpdateSysTray() {
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::UpdateStats() {
+void MainWindow::UpdateStats() const {
     ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_JOINS_VALUE], string(ui32Joins).c_str());
     ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_PARTS_VALUE], string(ui32Parts).c_str());
     ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_ACTIVE_VALUE], string(ui32Joins - ui32Parts).c_str());
@@ -743,22 +743,22 @@ void MainWindow::UpdateLanguage() {
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::EnableStartButton(const BOOL &bEnable) {
+void MainWindow::EnableStartButton(const BOOL &bEnable) const {
     ::EnableWindow(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::BTN_START_STOP], bEnable);
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::SetStartButtonText(const char * sText) {
+void MainWindow::SetStartButtonText(const char * sText) const {
     ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::BTN_START_STOP], sText);
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::SetStatusValue(const char * sText) {
+void MainWindow::SetStatusValue(const char * sText) const {
     ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_STATUS_VALUE], sText);
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::EnableGuiItems(const BOOL &bEnable) {
+void MainWindow::EnableGuiItems(const BOOL &bEnable) const {
     for(uint8_t ui8i = 2; ui8i < 20; ui8i++) {
         ::EnableWindow(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[ui8i], bEnable);
     }
@@ -798,4 +798,9 @@ void MainWindow::OnSelChanged() {
 
     ::BringWindowToTop(((MainWindowPage *)tcItem.lParam)->m_hWnd);
 }
+//---------------------------------------------------------------------------
+
+void MainWindow::SaveGuiSettings() const {
+    g_GuiSettingManager->Save();
+};
 //---------------------------------------------------------------------------

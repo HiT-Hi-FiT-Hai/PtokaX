@@ -39,7 +39,7 @@ private:
 
 	char sMsg[2048];
 
-    void Message(char * sMessage, const size_t &szLen);
+    void Message(char * sMessage, const size_t &szLen) const;
     bool Receive();
     bool SendHeader();
 public:

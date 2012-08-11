@@ -45,14 +45,15 @@ public:
 
     HWND CreateEx();
 
-    void UpdateSysTray();
-    void UpdateStats();
+    void UpdateSysTray() const;
+    void UpdateStats() const;
     void UpdateTitleBar();
     void UpdateLanguage();
-    void EnableStartButton(const BOOL &bEnable);
-    void SetStartButtonText(const char * sText);
-    void SetStatusValue(const char * sText);
-    void EnableGuiItems(const BOOL &bEnable);
+    void EnableStartButton(const BOOL &bEnable) const;
+    void SetStartButtonText(const char * sText) const;
+    void SetStatusValue(const char * sText) const;
+    void EnableGuiItems(const BOOL &bEnable) const;
+    void SaveGuiSettings() const;
 private:
     MainWindowPage * MainWindowPages[3];
 

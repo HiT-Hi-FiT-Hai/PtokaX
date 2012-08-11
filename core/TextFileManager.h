@@ -38,7 +38,7 @@ public:
 	TextFileMan();
 	~TextFileMan();
 
-	bool ProcessTextFilesCmd(User * u, char * cmd, bool fromPM = false);
+	bool ProcessTextFilesCmd(User * u, char * cmd, bool fromPM = false) const;
 	void RefreshTextFiles();
 };
 //---------------------------------------------------------------------------

@@ -26,6 +26,7 @@ Changed: Max send buffer size on small hubs from 128 kB to 256 kB.
 Changed: Disabled keep slow client online for clients with zpipe support.
 Changed: Memory allocation failures checking. When memory allocation fail then user who caused that is disconnected and hub not crash.
 Changed: Line ending to \n on windoze.
+Changed: Registered users are now stored in binary file instead of xml.
 Fixed: TmrMan.RemoveTimer Lua api call in windoze version (thx Cêño-y†ê for report).
 Fixed: MOTD was not updated after change in gui (thx mappy for report).
 Fixed: Few settings was not updated after change in gui.

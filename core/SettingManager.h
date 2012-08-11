@@ -131,7 +131,7 @@ public:
     void UpdateBotsSameNick();
     void UpdateLanguage();
     void UpdateUDPPort();
-    void UpdateScripting();
+    void UpdateScripting() const;
 };
 //--------------------------------------------------------------------------- 
 extern SetMan *SettingManager;

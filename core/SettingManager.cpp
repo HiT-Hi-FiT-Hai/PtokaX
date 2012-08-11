@@ -2610,7 +2610,7 @@ void SetMan::UpdateUDPPort() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateScripting() {
+void SetMan::UpdateScripting() const {
     if(bUpdateLocked == true || bServerRunning == false) {
         return;
     }

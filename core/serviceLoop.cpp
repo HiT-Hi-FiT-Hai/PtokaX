@@ -87,61 +87,40 @@ static void RegTimerHandler() {
 #endif
 //---------------------------------------------------------------------------
 
+void theLoop::Looper() {
 #ifdef _WIN32
-    void theLoop::Looper() {
-		KillTimer(NULL, srvLoopTimer);
-
-		// PPK ... two loop stategy for saving badwith
-		if(srvLoop->bRecv == true) {
-			srvLoop->ReceiveLoop();
-	    } else {
-			srvLoop->SendLoop();
-			eventqueue->ProcessEvents();
-	    }
-	
-		if(bServerTerminated == false) {
-			srvLoop->bRecv = !srvLoop->bRecv;
-
-            srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
-
-	        if(srvLoopTimer == 0) {
-	        	AppendDebugLog("%s - [ERR] Cannot start Looper in theLoop::Looper\n", 0);
-	        	exit(EXIT_FAILURE);
-	        }
-	    } else {
-	        // tell the scripts about the end
-	    	ScriptManager->OnExit();
-	    
-	        // send last possible global data
-	        globalQ->SendGlobalQ();
-	    
-	        ServerFinalStop(true);
-	
-	    }
-	}
-#else
-	void theLoop::Looper() {
-		// PPK ... two loop stategy for saving badwith
-		if(bRecv == true) {
-			ReceiveLoop();
-	    } else {
-			SendLoop();
-			eventqueue->ProcessEvents();
-	    }
-	
-		if(bServerTerminated == false) {
-			bRecv = !bRecv;
-	    } else {
-	        // tell the scripts about the end
-	    	ScriptManager->OnExit();
-	
-	        // send last possible global data
-	        globalQ->SendGlobalQ();
-	
-	        ServerFinalStop(true);
-	    }
-	}
+	KillTimer(NULL, srvLoopTimer);
 #endif
+
+	// PPK ... two loop stategy for saving badwith
+	if(bRecv == true) {
+		ReceiveLoop();
+	} else {
+		SendLoop();
+		eventqueue->ProcessEvents();
+	}
+
+	if(bServerTerminated == false) {
+		bRecv = !bRecv;
+
+#ifdef _WIN32
+        srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
+
+	    if(srvLoopTimer == 0) {
+	        AppendDebugLog("%s - [ERR] Cannot start Looper in theLoop::Looper\n", 0);
+	        exit(EXIT_FAILURE);
+	    }
+#endif
+	} else {
+	    // tell the scripts about the end
+	    ScriptManager->OnExit();
+	    
+	    // send last possible global data
+	    globalQ->SendGlobalQ();
+	    
+	    ServerFinalStop(true);
+	}
+}
 //---------------------------------------------------------------------------
 
 theLoop::theLoop() {

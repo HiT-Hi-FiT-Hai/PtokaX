@@ -1653,7 +1653,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
 //---------------------------------------------------------------------------
 
 // $Search $MultiSearch
-bool cDcCommands::SearchDeflood(User *curUser, char * sData, const uint32_t &iLen, const bool &bCheck, const bool &bMulti) {
+bool cDcCommands::SearchDeflood(User *curUser, char * sData, const uint32_t &iLen, const bool &bCheck, const bool &bMulti) const {
     // search flood protection ... modified by PPK ;-)
     if(bCheck == true && ProfileMan->IsAllowed(curUser, ProfileManager::NODEFLOODSEARCH) == false) {
         if(SettingManager->iShorts[SETSHORT_SEARCH_ACTION] != 0) {  
@@ -2003,7 +2003,7 @@ bool cDcCommands::MyINFODeflood(User * curUser, char * sData, const uint32_t &iL
 //---------------------------------------------------------------------------
 
 // $MyINFO $ALL  $ $$$$|
-bool cDcCommands::MyINFO(User * curUser, char * sData, const uint32_t &iLen) {
+bool cDcCommands::MyINFO(User * curUser, char * sData, const uint32_t &iLen) const {
     // if no change, just return
     // else store MyINFO and perform all checks again
     if(curUser->sMyInfoOriginal != NULL) { // PPK ... optimizations
@@ -2569,7 +2569,7 @@ void cDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const b
 //---------------------------------------------------------------------------
 
 // $SR <nickname> - Search Respond for active users from UDP
-void cDcCommands::SRFromUDP(User * curUser, char * sData, const size_t &szLen) {
+void cDcCommands::SRFromUDP(User * curUser, char * sData, const size_t &szLen) const {
 	if(ScriptManager->Arrival(curUser, sData, szLen, ScriptMan::UDP_SR_ARRIVAL) == true ||
 		curUser->ui8State >= User::STATE_CLOSING) {
 		return;
@@ -3008,7 +3008,7 @@ void cDcCommands::Version(User * curUser, char * sData, const uint32_t &iLen) {
 //---------------------------------------------------------------------------
 
 // Chat message
-bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {
+bool cDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) const {
 #ifdef _BUILD_GUI
     if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_CHAT], BM_GETCHECK, 0, 0) == BST_CHECKED) {
         sData[iLen - 1] = '\0';
@@ -3800,7 +3800,7 @@ void cDcCommands::ProcessCmds(User * curUser) {
 }
 //---------------------------------------------------------------------------
 
-bool cDcCommands::CheckIP(const User * curUser, const char * sIP) {
+bool cDcCommands::CheckIP(const User * curUser, const char * sIP) const {
     if((curUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
         if(sIP[0] == '[' && sIP[1+curUser->ui8IpLen] == ']' && sIP[2+curUser->ui8IpLen] == ':' && strncmp(sIP+1, curUser->sIP, curUser->ui8IpLen) == 0) {
             return true;
@@ -3892,7 +3892,7 @@ void cDcCommands::SendIncorrectIPMsg(User * curUser, char * sBadIP, const bool &
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void cDcCommands::SendIPFixedMsg(User * pUser, char * sBadIP, char * sRealIP) {
+void cDcCommands::SendIPFixedMsg(User * pUser, char * sBadIP, char * sRealIP) const {
     if((pUser->ui32BoolBits & User::BIT_WARNED_WRONG_IP) == User::BIT_WARNED_WRONG_IP) {
         return;
     }
@@ -3958,7 +3958,7 @@ void cDcCommands::MyNick(User * pUser, char * sData, const uint32_t &ui32Len) {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void cDcCommands::AddActiveSearch(User * pUser, char * sSearch, const size_t &szLen) {
+void cDcCommands::AddActiveSearch(User * pUser, char * sSearch, const size_t &szLen) const {
     if(pUser->cmdASearch != NULL) {
         char * pOldBuf = pUser->cmdASearch->sCommand;
 #ifdef _WIN32

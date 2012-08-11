@@ -64,13 +64,13 @@ private:
     LRESULT MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     void OnContextMenu(HWND hWindow, LPARAM lParam);
-    void OpenScriptEditor(char * sScript = NULL);
+    void OpenScriptEditor(char * sScript = NULL) const;
     void RefreshScripts();
     void OnItemChanged(const LPNMLISTVIEW &pListView);
-    void OnDoubleClick(const LPNMITEMACTIVATE &pItemActivate);
+    void OnDoubleClick(const LPNMITEMACTIVATE &pItemActivate) const;
     void MoveUp();
     void MoveDown();
-    void RestartScripts();
+    void RestartScripts() const;
     void UpdateUpDown();
     void OpenInExternalEditor();
     void DeleteScript();
