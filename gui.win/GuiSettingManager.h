@@ -41,7 +41,7 @@ public:
     void SetBool(const size_t &szBoolId, const bool &bValue); //g_GuiSettingManager->SetBool()
     void SetInteger(const size_t &szIntegerId, const int32_t &i32Value); //g_GuiSettingManager->SetInteger()
 
-    void Save();
+    void Save() const;
 };
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 extern GuiSettingManager * g_GuiSettingManager;

@@ -701,11 +701,11 @@ bool GetIpParts(char * sIP, const size_t ui32Len, uint32_t &a, uint32_t &b, uint
 //---------------------------------------------------------------------------
 
 uint32_t HashNick(const char * sNick, const size_t &szNickLen) {
-	char c;
+	unsigned char c;
     uint32_t h = 5381;
 
 	for(size_t szi = 0; szi < szNickLen; szi++) {
-        c = (char)tolower(sNick[szi]);
+        c = (unsigned char)tolower(sNick[szi]);
         h += (h << 5);
         h ^= c;
     }
@@ -1068,8 +1068,8 @@ void AppendLog(const string & sData, const bool &bScript/* == false*/) {
 	}
 
     if(UdpDebug != NULL && bScript == false) {
-        static char msg[1024];
         if(sData.size() < 1000) {
+            static char msg[1024];
             int imsgLen = sprintf(msg, "[LOG] %s", sData.c_str());
             if(CheckSprintf(imsgLen, 1024, "AppendLog1") == true) {
                 UdpDebug->Broadcast(msg, imsgLen);

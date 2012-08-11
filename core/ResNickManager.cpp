@@ -129,7 +129,7 @@ ResNickMan::~ResNickMan() {
 //---------------------------------------------------------------------------
 
 // Check for reserved nicks true = reserved
-bool ResNickMan::CheckReserved(const char * sNick, const uint32_t &hash) {
+bool ResNickMan::CheckReserved(const char * sNick, const uint32_t &hash) const {
     ReservedNick *next = ReservedNicks;
 
     while(next != NULL) {

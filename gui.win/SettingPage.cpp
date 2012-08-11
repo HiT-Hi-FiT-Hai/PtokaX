@@ -89,7 +89,7 @@ void SettingPage::CreateHWND(HWND hOwner) {
 }
 //---------------------------------------------------------------------------
 
-void SettingPage::RemovePipes(HWND hWnd) {//RemovePipes((HWND)lParam);
+void SettingPage::RemovePipes(HWND hWnd) const {
     char buf[257];
     ::GetWindowText(hWnd, buf, 257);
 
@@ -115,7 +115,7 @@ void SettingPage::RemovePipes(HWND hWnd) {//RemovePipes((HWND)lParam);
 }
 //---------------------------------------------------------------------------
 
-void SettingPage::MinMaxCheck(HWND hWnd, const int &iMin, const int &iMax) {
+void SettingPage::MinMaxCheck(HWND hWnd, const int &iMin, const int &iMax) const {
     char buf[6];
     ::GetWindowText(hWnd, buf, 6);
 
@@ -146,7 +146,7 @@ void SettingPage::AddUpDown(HWND &hWnd, const int &iX, const int &iY, const int 
 }
 //---------------------------------------------------------------------------
 
-void SettingPage::AddToolTip(const HWND &hWnd, char * sTipText) {
+void SettingPage::AddToolTip(const HWND &hWnd, char * sTipText) const {
     HWND hWndTooltip = CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS, "", TTS_NOPREFIX | TTS_ALWAYSTIP | TTS_BALLOON, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
         hWnd, NULL, g_hInstance, NULL);
 

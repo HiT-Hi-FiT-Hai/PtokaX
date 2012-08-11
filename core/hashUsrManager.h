@@ -45,7 +45,7 @@ public:
     User * FindUser(User * u);
     User * FindUser(const uint8_t * ui128IpHash);
 
-    uint32_t GetUserIpCount(User * u);
+    uint32_t GetUserIpCount(User * u) const;
 };
 
 //---------------------------------------------------------------------------

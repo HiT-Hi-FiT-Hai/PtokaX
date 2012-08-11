@@ -73,7 +73,7 @@ TextFileMan::~TextFileMan() {
 }
 //---------------------------------------------------------------------------
 
-bool TextFileMan::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = false*/) {
+bool TextFileMan::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = false*/) const {
     TextFile * next = TextFiles;
 
     while(next != NULL) {

@@ -103,12 +103,12 @@ clsUdpDebug::~clsUdpDebug() {
 }
 //---------------------------------------------------------------------------
 
-void clsUdpDebug::Broadcast(const char * msg) {
+void clsUdpDebug::Broadcast(const char * msg) const {
     Broadcast(msg, strlen(msg));
 }
 //---------------------------------------------------------------------------
 
-void clsUdpDebug::Broadcast(const char * msg, const size_t &szMsgLen) {
+void clsUdpDebug::Broadcast(const char * msg, const size_t &szMsgLen) const {
     if(llist == NULL)
         return;
 
@@ -153,7 +153,7 @@ void clsUdpDebug::Broadcast(const char * msg, const size_t &szMsgLen) {
 }
 //---------------------------------------------------------------------------
 
-void clsUdpDebug::Broadcast(const string & msg) {
+void clsUdpDebug::Broadcast(const string & msg) const {
     Broadcast(msg.c_str(), msg.size());
 }
 //---------------------------------------------------------------------------
@@ -527,7 +527,7 @@ void clsUdpDebug::Remove(char * sScriptName) {
 }
 //---------------------------------------------------------------------------
 
-bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) {
+bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) const {
     UdpDbgItem *next = llist;
 	while(next != NULL) {
         UdpDbgItem *cur = next;
@@ -549,7 +549,7 @@ bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) {
 }
 //---------------------------------------------------------------------------
 
-void clsUdpDebug::Send(char * sScriptName, char * sMessage, const size_t &szMsgLen) {
+void clsUdpDebug::Send(char * sScriptName, char * sMessage, const size_t &szMsgLen) const {
     UdpDbgItem *next = ScriptList;
 	while(next != NULL) {
         UdpDbgItem *cur = next;

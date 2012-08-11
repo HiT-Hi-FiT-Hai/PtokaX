@@ -942,7 +942,7 @@ void globalqueue::ClearQueues() {
 }
 //---------------------------------------------------------------------------
 
-void globalqueue::ProcessQueues(User * u) {
+void globalqueue::ProcessQueues(User * u) const {
     bool bHaveH, bHaveA, bHaveP, bHaveFull, bHaveOp;
     struct QzBuf *Q, *ActQ, *PasQ, *OpQ, *OpActQ, *OpPasQ,
         *HlStrpQ, *HlStrpActQ, *HlStrpPasQ, *HlFullQ, *HlFullActQ, *HlFullPasQ,
@@ -1232,7 +1232,7 @@ void globalqueue::ProcessQueues(User * u) {
 }
 //---------------------------------------------------------------------------
 
-void globalqueue::ProcessSingleItems(User * u) {
+void globalqueue::ProcessSingleItems(User * u) const {
     size_t szLen = 0;
 
     QueueDataItem *qdinxt = SingleItemsQueueS;
@@ -1346,7 +1346,7 @@ void globalqueue::ProcessSingleItems(User * u) {
 }
 //---------------------------------------------------------------------------
 
-void globalqueue::SendGlobalQ() {
+void globalqueue::SendGlobalQ() const {
     if(Qa->len != 0) {
 		User *nxt = colUsers->llist;
         while(nxt != NULL) {

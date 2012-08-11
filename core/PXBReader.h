@@ -26,7 +26,7 @@ class PXBReader {
 private:
     bool bFullRead;
 
-    char * sFile, *sActualPosition;
+    char * sActualPosition;
 
     FILE * pFile;
 
@@ -50,10 +50,10 @@ public:
 	PXBReader();
 	~PXBReader();
 
-    bool LoadFile(const char * sFilename);
+    bool OpenFileRead(const char * sFilename);
     bool ReadNextItem(const uint16_t * sExpectedIdentificators, const uint8_t &ui8ExpectedSubItems);
 
-    bool SaveFile(const char * sFilename);
+    bool OpenFileSave(const char * sFilename);
     bool WriteNextItem(const uint32_t &ui32Length, const uint8_t &ui8SubItems);
     void WriteRemaining();
 };

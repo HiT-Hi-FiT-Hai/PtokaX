@@ -939,6 +939,10 @@ void ServerFinalClose() {
     delete ResNickManager;
     ResNickManager = NULL;
 
+#ifdef _BUILD_GUI
+    pMainWindow->SaveGuiSettings();
+#endif
+
     DeleteGlobalBuffer();
 
 #ifdef _WIN32

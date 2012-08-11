@@ -39,7 +39,7 @@ private:
 
 	bool OnMouseMove(WPARAM wParam, LPARAM lParam);
 	void OnLButtonDown(LPARAM lParam);
-	void OnLButtonUp();
+	void OnLButtonUp() const;
 
     void SetSplitterPosition(int iPos, const bool &bUpdate = true);
 	bool IsCursorOverSplitter(const int &iX, const int &iY) const;

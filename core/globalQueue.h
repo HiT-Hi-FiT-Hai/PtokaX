@@ -136,9 +136,9 @@ public:
     void UserIPStore(User * curUser);
     void FinalizeQueues();
     void ClearQueues();
-    void ProcessQueues(User * u);
-    void ProcessSingleItems(User * u);
-    void SendGlobalQ();
+    void ProcessQueues(User * u) const;
+    void ProcessSingleItems(User * u) const;
+    void SendGlobalQ() const;
     void SingleItemStore(char * sData, const size_t &szDataLen, User * pFromUser, const int32_t &i32Profile, const uint32_t &ui32Type);
 };
 

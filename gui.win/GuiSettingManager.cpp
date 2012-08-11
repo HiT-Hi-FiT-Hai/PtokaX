@@ -50,7 +50,6 @@ GuiSettingManager::GuiSettingManager(void) {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 GuiSettingManager::~GuiSettingManager(void) {
-    Save();
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -58,7 +57,7 @@ void GuiSettingManager::Load() {
     PXBReader pxbSetting;
 
     // Open setting file
-    if(pxbSetting.LoadFile((PATH + "\\cfg\\GuiSettigs.pxb").c_str()) == false) {
+    if(pxbSetting.OpenFileRead((PATH + "\\cfg\\GuiSettigs.pxb").c_str()) == false) {
         return;
     }
 
@@ -106,11 +105,11 @@ void GuiSettingManager::Load() {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GuiSettingManager::Save() {
+void GuiSettingManager::Save() const {
     PXBReader pxbSetting;
 
     // Open setting file
-    if(pxbSetting.SaveFile((PATH + "\\cfg\\GuiSettigs.pxb").c_str()) == false) {
+    if(pxbSetting.OpenFileSave((PATH + "\\cfg\\GuiSettigs.pxb").c_str()) == false) {
         return;
     }
 
@@ -124,7 +123,8 @@ void GuiSettingManager::Save() {
     pxbSetting.sItemIdentifiers[1][0] = 'F';
     pxbSetting.sItemIdentifiers[1][1] = 'V';
     pxbSetting.ui16ItemLengths[1] = 4;
-    pxbSetting.pItemDatas[1] = (void *)1;
+    uint32_t ui32Version = 1;
+    pxbSetting.pItemDatas[1] = (void *)&ui32Version;
     pxbSetting.ui8ItemValues[1] = PXBReader::PXB_FOUR_BYTES;
 
     if(pxbSetting.WriteNextItem(23, 2) == false) {
@@ -166,7 +166,7 @@ void GuiSettingManager::Save() {
         pxbSetting.ui8ItemValues[0] = PXBReader::PXB_STRING;
 
         pxbSetting.ui16ItemLengths[1] = 4;
-        pxbSetting.pItemDatas[1] = (void *)iIntegers[szi];
+        pxbSetting.pItemDatas[1] = (void *)&iIntegers[szi];
         pxbSetting.ui8ItemValues[1] = PXBReader::PXB_FOUR_BYTES;
 
         if(pxbSetting.WriteNextItem(pxbSetting.ui16ItemLengths[0] + pxbSetting.ui16ItemLengths[1], 2) == false) {
