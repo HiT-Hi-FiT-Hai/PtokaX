@@ -22,7 +22,7 @@
     <ClCompile Include="gui.win\MainWindow.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
-    <ClCompile Include="core\globalQueue.cpp">
+    <ClCompile Include="core\GlobalDataQueue.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="core\hashBanManager.cpp">
@@ -249,7 +249,7 @@
     <ClInclude Include="core\LuaUDPDbgLib.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="core\globalQueue.h">
+    <ClInclude Include="core\GlobalDataQueue.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="core\hashBanManager.h">

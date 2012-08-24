@@ -20,7 +20,7 @@
 //---------------------------------------------------------------------------
 #include "stdinc.h"
 //---------------------------------------------------------------------------
-#include "globalQueue.h"
+#include "GlobalDataQueue.h"
 #include "hashBanManager.h"
 #include "LanguageManager.h"
 #include "ServerManager.h"
@@ -452,13 +452,13 @@ void DeFloodReport(User * u, const uint8_t ui8DefloodType, char *sAction) {
             int imsgLen = sprintf(msg, "%s $<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                 DeFloodGetMessage(ui8DefloodType, 2), u->sNick, LanguageManager->sTexts[LAN_WITH_IP], u->sIP, sAction);
             if(CheckSprintf(imsgLen, 1024, "DeFloodReport1") == true) {
-				globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+				g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
             }
         } else {
             int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], DeFloodGetMessage(ui8DefloodType, 2), u->sNick,
                 LanguageManager->sTexts[LAN_WITH_IP], u->sIP, sAction);
             if(CheckSprintf(imsgLen, 1024, "DeFloodReport2") == true) {
-                globalQ->OPStore(msg, imsgLen);
+				g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
             }
         }
     }

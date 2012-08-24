@@ -23,7 +23,7 @@
 #include "MainWindowPageStats.h"
 //---------------------------------------------------------------------------
 #include "../core/colUsers.h"
-#include "../core/globalQueue.h"
+#include "../core/GlobalDataQueue.h"
 #include "../core/LanguageManager.h"
 #include "../core/ServerManager.h"
 #include "../core/SettingManager.h"
@@ -292,7 +292,7 @@ void OnMassMessageOk(char * sLine, const int &iLen) {
         return;
     }
 
-    globalQ->SingleItemStore(sMSG, imsgLen, NULL, 0, globalqueue::PM2ALL);
+    g_GlobalDataQueue->SingleItemStore(sMSG, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2ALL);
 
     if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMSG) == 0) {
 		AppendDebugLog("%s - [MEM] Cannot deallocate sMSG in OnMassMessageOk\n", 0);

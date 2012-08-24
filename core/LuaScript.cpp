@@ -24,7 +24,7 @@
 //---------------------------------------------------------------------------
 #include "colUsers.h"
 #include "eventqueue.h"
-#include "globalQueue.h"
+#include "GlobalDataQueue.h"
 #include "hashUsrManager.h"
 #include "LanguageManager.h"
 #include "LuaScriptManager.h"
@@ -396,7 +396,7 @@ void ScriptStop(Script * cur) {
 
 			int iMsgLen = sprintf(g_sBuffer, "$Quit %s|", bot->sNick);
            	if(CheckSprintf(iMsgLen, g_szBufferSize, "ScriptStop") == true) {
-                globalQ->InfoStore(g_sBuffer, iMsgLen);
+                g_GlobalDataQueue->AddQueueItem(g_sBuffer, iMsgLen, NULL, 0, GlobalDataQueue::CMD_QUIT);
             }
 		}
 
@@ -609,7 +609,11 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "bActive");
-	(u->ui32BoolBits & User::BIT_ACTIVE) == User::BIT_ACTIVE ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+	if((u->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
+        (u->ui32BoolBits & User::BIT_IPV6_ACTIVE) == User::BIT_IPV6_ACTIVE ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+    } else {
+	   (u->ui32BoolBits & User::BIT_IPV4_ACTIVE) == User::BIT_IPV4_ACTIVE ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+    }
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "bOperator");

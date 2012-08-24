@@ -23,7 +23,7 @@
 #include "MainWindowPageUsersChat.h"
 //---------------------------------------------------------------------------
 #include "../core/colUsers.h"
-#include "../core/globalQueue.h"
+#include "../core/GlobalDataQueue.h"
 #include "../core/hashBanManager.h"
 #include "../core/hashRegManager.h"
 #include "../core/hashUsrManager.h"
@@ -444,7 +444,7 @@ bool MainWindowPageUsersChat::OnEditEnter() {
     ::GetWindowText(hWndPageItems[EDT_CHAT], buf+SettingManager->ui16TextsLens[SETTXT_ADMIN_NICK]+3, iAllocLen+1);
     buf[iAllocLen+3+SettingManager->ui16TextsLens[SETTXT_ADMIN_NICK]] = '|';
 
-    globalQ->Store(buf, iAllocLen+4+SettingManager->ui16TextsLens[SETTXT_ADMIN_NICK]);
+    g_GlobalDataQueue->AddQueueItem(buf, iAllocLen+4+SettingManager->ui16TextsLens[SETTXT_ADMIN_NICK], NULL, 0, GlobalDataQueue::CMD_CHAT);
 
     buf[iAllocLen+3+SettingManager->ui16TextsLens[SETTXT_ADMIN_NICK]] = '\0';
 
@@ -634,14 +634,14 @@ void MainWindowPageUsersChat::DisconnectUser() {
             imsgLen = sprintf(msg, "%s $<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                 curUser->sNick, LanguageManager->sTexts[LAN_WITH_IP], curUser->sIP, LanguageManager->sTexts[LAN_WAS_CLOSED_BY], SettingManager->sTexts[SETTXT_ADMIN_NICK]);
             if(CheckSprintf(imsgLen, 1024, "MainWindowPageUsersChat::DisconnectUser2") == true) {
-				globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+				g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
             }
         } else {
             imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_WITH_IP], curUser->sIP,
                 LanguageManager->sTexts[LAN_WAS_CLOSED_BY], SettingManager->sTexts[SETTXT_ADMIN_NICK]);
             if(CheckSprintf(imsgLen, 1024, "MainWindowPageUsersChat::DisconnectUser3") == true) {
-                globalQ->OPStore(msg, imsgLen);
-        }
+                g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
+            }
         }
     }
 
@@ -694,9 +694,9 @@ void OnKickOk(char * sLine, const int &iLen) {
         imsgLen += iret;
         if(CheckSprintf1(iret, imsgLen, 1024, "OnKickOk3") == true) {
             if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-    			globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+    			g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
             } else {
-                globalQ->OPStore(msg, imsgLen);
+                g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
             }
         }
     }
@@ -773,9 +773,9 @@ void OnBanOk(char * sLine, const int &iLen) {
         imsgLen += iret;
         if(CheckSprintf1(iret, imsgLen, 1024, "OnBanOk3") == true) {
             if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-    			globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+    			g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
             } else {
-                globalQ->OPStore(msg, imsgLen);
+                g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
             }
         }
     }
@@ -838,9 +838,9 @@ void OnRedirectOk(char * sLine, const int &iLen) {
         imsgLen += iret;
         if(CheckSprintf1(iret, imsgLen, 2048, "OnRedirectOk2") == true) {
             if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-    			globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+    			g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
             } else {
-                globalQ->OPStore(msg, imsgLen);
+                g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
             }
         }
     }

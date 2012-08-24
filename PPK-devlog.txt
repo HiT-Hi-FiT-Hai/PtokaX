@@ -18,6 +18,7 @@ Added: tUser.tIPs to Lua API.
 Added: Missing end line dots on some hub commands reply (thx Alexey for report).
 Added: RegUser hub command. OP need to provide online nick and profile. Hub will ask user for password and after password is entered then user is added to registered users.
 Added: IP in $Search and $ConnectToMe commands is replaced with correct one when user send wrong IP.
+Added: Smart searching for IPv6 users with IPv4 support.
 Changed: Country database for IPv4 from ip-to-country to IpToCountry.
 Changed: Not allowed chars in nick to only space, pipe and dollar. Only those protocol disallow. Issues with other chars is client work.
 Changed: Max simultaneous logins value from 500 to 1000.
@@ -42,7 +43,9 @@ Fixed: Crash in Lua 5.1 on invalid conversion specifier in os.date (fix from Lua
 Fixed: Buggy search length checking for active and passive users (thx Alexey for report).
 Fixed: Compile with Clang compiler on Linux.
 Fixed: Message returned on !clrrangetempbans (thx Alexey for report).
+Fixed: Rare case when short myinfo was sent to ops when they should get long myinfo.
 Removed: All info related to old ip-to-country database.
+Rewritten: Global data queues for better IPv6 support.
 Updated: makefile to work with buggy gold linker.
 Updated: zlib to 1.2.7.
 

@@ -23,7 +23,7 @@
 #include "hashRegManager.h"
 //---------------------------------------------------------------------------
 #include "colUsers.h"
-#include "globalQueue.h"
+#include "GlobalDataQueue.h"
 #include "hashUsrManager.h"
 #include "LanguageManager.h"
 #include "ProfileManager.h"
@@ -177,7 +177,7 @@ bool hashRegMan::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) 
 
             if(((AddedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
 				colUsers->Add2OpList(AddedUser);
-                globalQ->OpListStore(AddedUser->sNick);
+                g_GlobalDataQueue->OpListStore(AddedUser->sNick);
 
                 if(bAllowedOpChat != ProfileMan->IsAllowed(AddedUser, ProfileManager::ALLOWEDOPCHAT)) {
 					if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true &&
@@ -279,7 +279,7 @@ void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui
             if(ProfileMan->IsAllowed(ChangedUser, ProfileManager::HASKEYICON) == true) {
                 ChangedUser->ui32BoolBits |= User::BIT_OPERATOR;
                 colUsers->Add2OpList(ChangedUser);
-                globalQ->OpListStore(ChangedUser->sNick);
+                g_GlobalDataQueue->OpListStore(ChangedUser->sNick);
             } else {
                 ChangedUser->ui32BoolBits &= ~User::BIT_OPERATOR;
                 colUsers->DelFromOpList(ChangedUser->sNick);
@@ -488,7 +488,11 @@ void hashRegMan::Load(void) {
     PXBReader pxbRegs;
 
     // Open regs file
+#ifdef _WIN32
     if(pxbRegs.OpenFileRead((PATH + "\\cfg\\RegisteredUsers.pxb").c_str()) == false) {
+#else
+    if(pxbRegs.OpenFileRead((PATH + "/cfg/RegisteredUsers.pxb").c_str()) == false) {
+#endif
         return;
     }
 

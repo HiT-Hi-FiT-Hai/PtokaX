@@ -24,7 +24,7 @@
 //---------------------------------------------------------------------------
 #include "colUsers.h"
 #include "eventqueue.h"
-#include "globalQueue.h"
+#include "GlobalDataQueue.h"
 #include "hashBanManager.h"
 #include "hashUsrManager.h"
 #include "LanguageManager.h"
@@ -116,7 +116,7 @@ void theLoop::Looper() {
 	    ScriptManager->OnExit();
 	    
 	    // send last possible global data
-	    globalQ->SendGlobalQ();
+	    g_GlobalDataQueue->SendFinalQueue();
 	    
 	    ServerFinalStop(true);
 	}
@@ -716,28 +716,27 @@ void theLoop::ReceiveLoop() {
                 // PPK ... change to NoHello supports
             	int imsgLen = sprintf(msg, "$Hello %s|", curUser->sNick);
             	if(CheckSprintf(imsgLen, 1024, "theLoop::ReceiveLoop6") == true) {
-                    globalQ->HStore(msg, imsgLen);
+                    g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_HELLO);
                 }
 
-                globalQ->UserIPStore(curUser);
+                g_GlobalDataQueue->UserIPStore(curUser);
 
                 switch(SettingManager->ui8FullMyINFOOption) {
                     case 0:
-                        globalQ->InfoStore(curUser->sMyInfoLong, curUser->ui16MyInfoLongLen);
+                        g_GlobalDataQueue->AddQueueItem(curUser->sMyInfoLong, curUser->ui16MyInfoLongLen, NULL, 0, GlobalDataQueue::CMD_MYINFO);
                         break;
                     case 1:
-                        globalQ->FullInfoStore(curUser->sMyInfoLong, curUser->ui16MyInfoLongLen);
-                        globalQ->StrpInfoStore(curUser->sMyInfoShort, curUser->ui16MyInfoShortLen);
+                        g_GlobalDataQueue->AddQueueItem(curUser->sMyInfoShort, curUser->ui16MyInfoShortLen, curUser->sMyInfoLong, curUser->ui16MyInfoLongLen, GlobalDataQueue::CMD_MYINFO);
                         break;
                     case 2:
-                        globalQ->InfoStore(curUser->sMyInfoShort, curUser->ui16MyInfoShortLen);
+                        g_GlobalDataQueue->AddQueueItem(curUser->sMyInfoShort, curUser->ui16MyInfoShortLen, NULL, 0, GlobalDataQueue::CMD_MYINFO);
                         break;
                     default:
                         break;
                 }
                 
                 if(((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
-                    globalQ->OpListStore(curUser->sNick);
+                    g_GlobalDataQueue->OpListStore(curUser->sNick);
                 }
                 
                 curUser->iLastMyINFOSendTick = ui64ActualTick;
@@ -846,23 +845,35 @@ void theLoop::ReceiveLoop() {
                 }
         
                 if(ui8SrCntr == 0) {
-                    if(curUser->cmdASearch != NULL) {
-                        globalQ->AStore(curUser->cmdASearch->sCommand, curUser->cmdASearch->iLen);
-                    }
-                    if(curUser->cmdPSearch != NULL) {
-                        globalQ->PStore(curUser->cmdPSearch->sCommand, curUser->cmdPSearch->iLen);
+                    if(curUser->cmdActive6Search != NULL) {
+						if(curUser->cmdActive4Search != NULL) {
+							g_GlobalDataQueue->AddQueueItem(curUser->cmdActive6Search->sCommand, curUser->cmdActive6Search->iLen, 
+								curUser->cmdActive4Search->sCommand, curUser->cmdActive4Search->iLen, GlobalDataQueue::CMD_ACTIVE_SEARCH_V64);
+						} else {
+							g_GlobalDataQueue->AddQueueItem(curUser->cmdActive6Search->sCommand, curUser->cmdActive6Search->iLen, NULL, 0, GlobalDataQueue::CMD_ACTIVE_SEARCH_V6);
+						}
+                    } else if(curUser->cmdActive4Search != NULL) {
+						g_GlobalDataQueue->AddQueueItem(curUser->cmdActive4Search->sCommand, curUser->cmdActive4Search->iLen, NULL, 0, GlobalDataQueue::CMD_ACTIVE_SEARCH_V4);
+					}
 
-#ifdef _WIN32
-                        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->cmdPSearch->sCommand) == 0) {
-							AppendDebugLog("%s - [MEM] Cannot deallocate curUser->cmdPSearch->sCommand in theLoop::ReceiveLoop\n", 0);
-                        }
-#else
-						free(curUser->cmdPSearch->sCommand);
-#endif
-                        curUser->cmdPSearch->sCommand = NULL;
-        
-                        delete curUser->cmdPSearch;
-                        curUser->cmdPSearch = NULL;
+                    if(curUser->cmdPassiveSearch != NULL) {
+						uint8_t ui8CmdType = GlobalDataQueue::CMD_PASSIVE_SEARCH_V4;
+						if((curUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
+							if((curUser->ui32BoolBits & User::BIT_IPV4) == User::BIT_IPV4) {
+                                if((curUser->ui32BoolBits & User::BIT_IPV6_ACTIVE) == User::BIT_IPV6_ACTIVE) {
+                                    ui8CmdType = GlobalDataQueue::CMD_PASSIVE_SEARCH_V4_ONLY;
+                                } else {
+                                    ui8CmdType = GlobalDataQueue::CMD_PASSIVE_SEARCH_V64;
+                                }
+                            } else {
+								ui8CmdType = GlobalDataQueue::CMD_PASSIVE_SEARCH_V6;
+                            }
+						}
+
+						g_GlobalDataQueue->AddQueueItem(curUser->cmdPassiveSearch->sCommand, curUser->cmdPassiveSearch->iLen, NULL, 0, ui8CmdType);
+
+                        UserDeletePrcsdUsrCmd(curUser->cmdPassiveSearch);
+                        curUser->cmdPassiveSearch = NULL;
                     }
                 }
 
@@ -970,9 +981,6 @@ void theLoop::SendLoop() {
     // Sending Loop
     uint32_t iSendRests = 0;
 
-    // PPK ... now finalize queues
-    globalQ->FinalizeQueues();
-
     User *nextUser = colUsers->llist;
     while(nextUser != 0 && bServerTerminated == false) {
         User *curUser = nextUser;
@@ -1047,16 +1055,18 @@ void theLoop::SendLoop() {
             	continue;
             }
             case User::STATE_ADDED: {
-                // process global data queues
-                if(globalQ->bHaveQueue == true) {
-                    globalQ->ProcessQueues(curUser);
-                } else if(((curUser->ui32BoolBits & User::BIT_GETNICKLIST) == User::BIT_GETNICKLIST) == true) {
+                if(((curUser->ui32BoolBits & User::BIT_GETNICKLIST) == User::BIT_GETNICKLIST) == true) {
                     UserAddUserList(curUser);
                     curUser->ui32BoolBits &= ~User::BIT_GETNICKLIST;
                 }
+
+                // process global data queues
+                if(g_GlobalDataQueue->pQueueItems[0] != NULL) {
+                    g_GlobalDataQueue->ProcessQueues(curUser);
+                }
                 
-            	if(globalQ->SingleItemsQueueS != NULL) {
-                    globalQ->ProcessSingleItems(curUser);
+            	if(g_GlobalDataQueue->pSingleItems[0] != NULL) {
+                    g_GlobalDataQueue->ProcessSingleItems(curUser);
             	}
 
                 // send data acumulated by queues above
@@ -1080,7 +1090,7 @@ void theLoop::SendLoop() {
         }
     }
 
-    globalQ->ClearQueues();
+    g_GlobalDataQueue->ClearQueues();
 
     if(iLoopsForLogins >= 40) {
         dLoggedUsers = 0;

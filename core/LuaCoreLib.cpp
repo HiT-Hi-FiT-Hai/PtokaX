@@ -26,7 +26,7 @@
 //---------------------------------------------------------------------------
 #include "colUsers.h"
 #include "eventqueue.h"
-#include "globalQueue.h"
+#include "GlobalDataQueue.h"
 #include "hashBanManager.h"
 #include "hashUsrManager.h"
 #include "LanguageManager.h"
@@ -216,13 +216,13 @@ static int RegBot(lua_State * L) {
     // PPK ... fixed hello sending only to users without NoHello
     int iMsgLen = sprintf(g_sBuffer, "$Hello %s|", pNewBot->sNick);
     if(CheckSprintf(iMsgLen, g_szBufferSize, "RegBot") == true) {
-        globalQ->HStore(g_sBuffer, iMsgLen);
+        g_GlobalDataQueue->AddQueueItem(g_sBuffer, iMsgLen, NULL, 0, GlobalDataQueue::CMD_HELLO);
     }
     
-    globalQ->InfoStore(pNewBot->sMyINFO, strlen(pNewBot->sMyINFO));
+    g_GlobalDataQueue->AddQueueItem(pNewBot->sMyINFO, strlen(pNewBot->sMyINFO), NULL, 0, GlobalDataQueue::CMD_MYINFO);
         
     if(pNewBot->bIsOP == true) {
-        globalQ->OpListStore(pNewBot->sNick);
+        g_GlobalDataQueue->OpListStore(pNewBot->sNick);
     }
 
     lua_pushboolean(L, 1);
@@ -281,7 +281,7 @@ static int UnregBot(lua_State * L) {
 
             int iMsgLen = sprintf(g_sBuffer, "$Quit %s|", cur->sNick);
             if(CheckSprintf(iMsgLen, g_szBufferSize, "UnregBot") == true) {
-                globalQ->InfoStore(g_sBuffer, iMsgLen);
+                g_GlobalDataQueue->AddQueueItem(g_sBuffer, iMsgLen, NULL, 0, GlobalDataQueue::CMD_QUIT);
             }
 
             if(cur->prev == NULL) {
@@ -1012,7 +1012,11 @@ static int GetUserData(lua_State * L) {
             break;
         case 10:
         	lua_pushliteral(L, "bActive");
-        	(u->ui32BoolBits & User::BIT_ACTIVE) == User::BIT_ACTIVE ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+        	if((u->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
+                (u->ui32BoolBits & User::BIT_IPV6_ACTIVE) == User::BIT_IPV6_ACTIVE ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+            } else {
+                (u->ui32BoolBits & User::BIT_IPV4_ACTIVE) == User::BIT_IPV4_ACTIVE ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+            }
         	lua_rawset(L, 1);
             break;
         case 11:
@@ -1347,7 +1351,11 @@ static int GetUserValue(lua_State * L) {
         	u->ui8State == User::STATE_ADDED ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
         	return 1;
         case 10:
-        	(u->ui32BoolBits & User::BIT_ACTIVE) == User::BIT_ACTIVE ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+            if((u->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
+                (u->ui32BoolBits & User::BIT_IPV6_ACTIVE) == User::BIT_IPV6_ACTIVE ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+            } else {
+        	   (u->ui32BoolBits & User::BIT_IPV4_ACTIVE) == User::BIT_IPV4_ACTIVE ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+            }
         	return 1;
         case 11:
         	(u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
@@ -1617,13 +1625,13 @@ static int Kick(lua_State * L) {
                 SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], u->sNick, LanguageManager->sTexts[LAN_WITH_LWR], u->sIP, LanguageManager->sTexts[LAN_WAS_KICKED_BY], sKicker,
                 LanguageManager->sTexts[LAN_BECAUSE_LWR], sReason);
             if(CheckSprintf(imsgLen, g_szBufferSize, "Kick6") == true) {
-				globalQ->SingleItemStore(g_sBuffer, imsgLen, NULL, 0, globalqueue::PM2OPS);
+				g_GlobalDataQueue->SingleItemStore(g_sBuffer, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
             }
     	} else {
     	    imsgLen = sprintf(g_sBuffer, "<%s> *** %s %s IP %s %s %s %s: %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], u->sNick,
                 LanguageManager->sTexts[LAN_WITH_LWR], u->sIP, LanguageManager->sTexts[LAN_WAS_KICKED_BY], sKicker, LanguageManager->sTexts[LAN_BECAUSE_LWR], sReason);
             if(CheckSprintf(imsgLen, g_szBufferSize, "Kick7") == true) {
-                globalQ->OPStore(g_sBuffer, imsgLen);
+                g_GlobalDataQueue->AddQueueItem(g_sBuffer, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
             }
     	}
     }
@@ -1749,13 +1757,13 @@ static int DefloodWarn(lua_State * L) {
                     SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_FLOODER], u->sNick, LanguageManager->sTexts[LAN_WITH_IP], u->sIP,
                     LanguageManager->sTexts[LAN_DISCONN_BY_SCRIPT]);
                 if(CheckSprintf(imsgLen, g_szBufferSize, "DefloodWarn1") == true) {
-                    globalQ->SingleItemStore(g_sBuffer, imsgLen, NULL, 0, globalqueue::PM2OPS);
+                    g_GlobalDataQueue->SingleItemStore(g_sBuffer, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                 }
             } else {
                 imsgLen = sprintf(g_sBuffer, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_FLOODER], u->sNick,
                     LanguageManager->sTexts[LAN_WITH_IP], u->sIP, LanguageManager->sTexts[LAN_DISCONN_BY_SCRIPT]);
                 if(CheckSprintf(imsgLen, g_szBufferSize, "DefloodWarn2") == true) {
-                    globalQ->OPStore(g_sBuffer, imsgLen);
+                    g_GlobalDataQueue->AddQueueItem(g_sBuffer, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                 }
             }
         }
@@ -1796,9 +1804,9 @@ static int SendToAll(lua_State * L) {
                 memcpy(g_sBuffer, sData, szLen);
                 g_sBuffer[szLen] = '|';
                 g_sBuffer[szLen+1] = '\0';
-				globalQ->Store(g_sBuffer, szLen+1);
+				g_GlobalDataQueue->AddQueueItem(g_sBuffer, szLen+1, NULL, 0, GlobalDataQueue::CMD_LUA);
 			} else {
-				globalQ->Store(sData, szLen);
+				g_GlobalDataQueue->AddQueueItem(sData, szLen, NULL, 0, GlobalDataQueue::CMD_LUA);
             }
         }
     }
@@ -1872,7 +1880,7 @@ static int SendToOpChat(lua_State * L) {
     if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true) {
         int iLen = sprintf(g_sBuffer, "%s $<%s> %s|", SettingManager->sTexts[SETTXT_OP_CHAT_NICK], SettingManager->sTexts[SETTXT_OP_CHAT_NICK], sData);
         if(CheckSprintf(iLen, g_szBufferSize, "SendToOpChat") == true) {
-			globalQ->SingleItemStore(g_sBuffer, iLen, NULL, 0, globalqueue::OPCHAT);
+			g_GlobalDataQueue->SingleItemStore(g_sBuffer, iLen, NULL, 0, GlobalDataQueue::SI_OPCHAT);
         }
     }
 
@@ -1906,9 +1914,9 @@ static int SendToOps(lua_State * L) {
         memcpy(g_sBuffer, sData, szLen);
         g_sBuffer[szLen] = '|';
         g_sBuffer[szLen+1] = '\0';
-        globalQ->OPStore(g_sBuffer, szLen+1);
+        g_GlobalDataQueue->AddQueueItem(g_sBuffer, szLen+1, NULL, 0, GlobalDataQueue::CMD_OPS);
     } else {
-        globalQ->OPStore(sData, szLen);
+        g_GlobalDataQueue->AddQueueItem(sData, szLen, NULL, 0, GlobalDataQueue::CMD_OPS);
     }
 
     lua_settop(L, 0);
@@ -1944,9 +1952,9 @@ static int SendToProfile(lua_State * L) {
         memcpy(g_sBuffer, sData, szDataLen);
 		g_sBuffer[szDataLen] = '|';
         g_sBuffer[szDataLen+1] = '\0';
-		globalQ->SingleItemStore(g_sBuffer, szDataLen+1, NULL, i32Profile, globalqueue::TOPROFILE);
+		g_GlobalDataQueue->SingleItemStore(g_sBuffer, szDataLen+1, NULL, i32Profile, GlobalDataQueue::SI_TOPROFILE);
     } else {
-		globalQ->SingleItemStore(sData, szDataLen, NULL, i32Profile, globalqueue::TOPROFILE);
+		g_GlobalDataQueue->SingleItemStore(sData, szDataLen, NULL, i32Profile, GlobalDataQueue::SI_TOPROFILE);
     }
 
     lua_settop(L, 0);
@@ -2022,7 +2030,7 @@ static int SendPmToAll(lua_State * L) {
 
     int imsgLen = sprintf(g_sBuffer, "%s $<%s> %s|", sFrom, sFrom, sData);
     if(CheckSprintf(imsgLen, g_szBufferSize, "SendPmToAll") == true) {
-		globalQ->SingleItemStore(g_sBuffer, imsgLen, NULL, 0, globalqueue::PM2ALL);
+		g_GlobalDataQueue->SingleItemStore(g_sBuffer, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2ALL);
     }
 
     lua_settop(L, 0);
@@ -2093,7 +2101,7 @@ static int SendPmToOps(lua_State * L) {
 
     int imsgLen = sprintf(g_sBuffer, "%s $<%s> %s|", sFrom, sFrom, sData);
     if(CheckSprintf(imsgLen, g_szBufferSize, "SendPmToOps") == true) {
-		globalQ->SingleItemStore(g_sBuffer, imsgLen, NULL, 0, globalqueue::PM2OPS);
+		g_GlobalDataQueue->SingleItemStore(g_sBuffer, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
     }
 
     lua_settop(L, 0);
@@ -2129,7 +2137,7 @@ static int SendPmToProfile(lua_State * L) {
 
     int imsgLen = sprintf(g_sBuffer, "%s $<%s> %s|", sFrom, sFrom, sData);
     if(CheckSprintf(imsgLen, g_szBufferSize, "SendPmToProfile") == true) {
-		globalQ->SingleItemStore(g_sBuffer, imsgLen, NULL, iProfile, globalqueue::PM2PROFILE);
+		g_GlobalDataQueue->SingleItemStore(g_sBuffer, imsgLen, NULL, iProfile, GlobalDataQueue::SI_PM2PROFILE);
     }
 
     lua_settop(L, 0);

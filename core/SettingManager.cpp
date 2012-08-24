@@ -25,7 +25,7 @@
 #include "SettingManager.h"
 //---------------------------------------------------------------------------
 #include "colUsers.h"
-#include "globalQueue.h"
+#include "GlobalDataQueue.h"
 #include "LanguageManager.h"
 #include "LuaScriptManager.h"
 #include "ProfileManager.h"
@@ -1451,7 +1451,7 @@ void SetMan::UpdateHubName() {
     ui16PreTextsLens[SETPRETXT_HUB_NAME] = (uint16_t)iMsgLen;
 
 	if(bServerRunning == true) {
-        globalQ->Store(sPreTexts[SetMan::SETPRETXT_HUB_NAME], ui16PreTextsLens[SetMan::SETPRETXT_HUB_NAME]);
+        g_GlobalDataQueue->AddQueueItem(sPreTexts[SetMan::SETPRETXT_HUB_NAME], ui16PreTextsLens[SetMan::SETPRETXT_HUB_NAME], NULL, 0, GlobalDataQueue::CMD_HUBNAME);
     }
 }
 //---------------------------------------------------------------------------
@@ -2387,14 +2387,14 @@ void SetMan::UpdateBot(const bool &bNickChanged/* = true*/) {
         char sMsg[128];
         iMsgLen = sprintf(sMsg, "$Hello %s|", sTexts[SETTXT_BOT_NICK]);
         if(CheckSprintf(iMsgLen, 128, "SetMan::UpdateBot1") == true) {
-            globalQ->HStore(sMsg, iMsgLen);
+            g_GlobalDataQueue->AddQueueItem(sMsg, iMsgLen, NULL, 0, GlobalDataQueue::CMD_HELLO);
         }
     }
 
-    globalQ->InfoStore(sPreTexts[SETPRETXT_HUB_BOT_MYINFO], ui16PreTextsLens[SETPRETXT_HUB_BOT_MYINFO]);
+    g_GlobalDataQueue->AddQueueItem(sPreTexts[SETPRETXT_HUB_BOT_MYINFO], ui16PreTextsLens[SETPRETXT_HUB_BOT_MYINFO], NULL, 0, GlobalDataQueue::CMD_MYINFO);
 
     if(bNickChanged == true && bBotsSameNick == false) {
-        globalQ->OpListStore(sTexts[SETTXT_BOT_NICK]);
+        g_GlobalDataQueue->OpListStore(sTexts[SETTXT_BOT_NICK]);
     }
 }
 //---------------------------------------------------------------------------
@@ -2423,7 +2423,7 @@ void SetMan::DisableBot(const bool &bNickChanged/* = true*/) {
                     }
                 }
             } else {
-                globalQ->InfoStore(sMsg, iMsgLen);
+                g_GlobalDataQueue->AddQueueItem(sMsg, iMsgLen, NULL, 0, GlobalDataQueue::CMD_QUIT);
             }
         }
     }

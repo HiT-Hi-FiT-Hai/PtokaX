@@ -25,7 +25,7 @@
 #include "LuaRegManLib.h"
 //---------------------------------------------------------------------------
 #include "colUsers.h"
-#include "globalQueue.h"
+#include "GlobalDataQueue.h"
 #include "hashRegManager.h"
 #include "hashUsrManager.h"
 #include "LuaScriptManager.h"
