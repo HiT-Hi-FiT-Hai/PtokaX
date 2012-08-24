@@ -25,7 +25,7 @@
 #include "colUsers.h"
 #include "DcCommands.h"
 #include "eventqueue.h"
-#include "globalQueue.h"
+#include "GlobalDataQueue.h"
 #include "hashBanManager.h"
 #include "hashUsrManager.h"
 #include "hashRegManager.h"
@@ -629,9 +629,9 @@ bool ServerStart() {
     	exit(EXIT_FAILURE);
     }
 
-    globalQ = new globalqueue();
-    if(globalQ == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate globalQ in ServerStart\n", 0);
+    g_GlobalDataQueue = new GlobalDataQueue();
+    if(g_GlobalDataQueue == NULL) {
+    	AppendDebugLog("%s - [MEM] Cannot allocate g_GlobalDataQueue in ServerStart\n", 0);
     	exit(EXIT_FAILURE);
     }
 
@@ -825,8 +825,8 @@ void ServerFinalStop(const bool &bFromServiceLoop) {
     delete hashManager;
     hashManager = NULL;
 
-	delete globalQ;
-    globalQ = NULL;
+	delete g_GlobalDataQueue;
+    g_GlobalDataQueue = NULL;
 
     if(RegisterThread != NULL) {
         RegisterThread->Close();

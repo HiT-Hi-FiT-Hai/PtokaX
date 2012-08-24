@@ -22,6 +22,7 @@
 #define DcCommandsH
 //---------------------------------------------------------------------------
 struct User;
+struct PrcsdUsrCmd;
 struct PassBf;
 //---------------------------------------------------------------------------
 
@@ -65,7 +66,7 @@ private:
     void SendIncorrectIPMsg(User * curUser, char * sBadIP, const bool &bCTM);
     void SendIPFixedMsg(User * pUser, char * sBadIP, char * sRealIP) const;
 
-    void AddActiveSearch(User * pUser, char * sSearch, const size_t &szLen) const;
+    PrcsdUsrCmd * AddSearch(User * pUser, PrcsdUsrCmd * cmdSearch, char * sSearch, const size_t &szLen, const bool &bActive) const;
 protected:
 public:
 	cDcCommands();

@@ -23,7 +23,7 @@
 #include "colUsers.h"
 #include "DcCommands.h"
 #include "eventqueue.h"
-#include "globalQueue.h"
+#include "GlobalDataQueue.h"
 #include "hashBanManager.h"
 #include "hashRegManager.h"
 #include "hashUsrManager.h"
@@ -333,13 +333,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, 
                             LanguageManager->sTexts[LAN_HAS_GAGGED], user->sNick);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand14") == true) {
-							globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+							g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
                     } else {
                         imsgLen = sprintf(msg, "<%s> *** %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick,
                             LanguageManager->sTexts[LAN_HAS_GAGGED], user->sNick);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand15") == true) {
-                            globalQ->OPStore(msg, imsgLen);
+                            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
                     }
                 } 
@@ -1172,7 +1172,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                                 }
                             }
                         }
-						globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+						g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
         	        } else {
                         int imsgLen;
                         if(reason == NULL) {
@@ -1203,7 +1203,8 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                                 }
                             }
                         }
-            	        globalQ->OPStore(msg, imsgLen);
+
+            	        g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                   	}
         		}
 
@@ -1444,7 +1445,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                             }
                         }
 
-						globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+						g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                    	} else {
                         int imsgLen;
                         if(sCmdParts[2] != NULL && iCmdPartsLen[2] > 512) {
@@ -1469,7 +1470,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                             }
                         }
 
-                        globalQ->OPStore(msg, imsgLen);
+                        g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                     }
                 }
 
@@ -1672,13 +1673,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, 
                             LanguageManager->sTexts[LAN_REMOVED_LWR], sCommand, LanguageManager->sTexts[LAN_FROM_TEMP_BANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand100") == true) {
-                            globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+                            g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
               	    } else {
                    	    int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, 
                             LanguageManager->sTexts[LAN_REMOVED_LWR], sCommand, LanguageManager->sTexts[LAN_FROM_TEMP_BANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand101") == true) {
-          	        	    globalQ->OPStore(msg, imsgLen);
+          	        	    g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
           	    	}
                 }
@@ -1737,8 +1738,9 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
 
 				if(strcasecmp(sCommand, "off") == 0) {
                     SettingManager->SetText(SETTXT_HUB_TOPIC, "", 0);
-                    globalQ->Store(SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_NAME],
-                        SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_NAME]);
+
+                    g_GlobalDataQueue->AddQueueItem(SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_NAME], SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_NAME], NULL, 0,
+                        GlobalDataQueue::CMD_HUBNAME);
 
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
@@ -1750,7 +1752,9 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                     }
                 } else {
                     SettingManager->SetText(SETTXT_HUB_TOPIC, sCommand, dlen-6);
-                    globalQ->Store(SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_NAME], SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_NAME]);
+
+                    g_GlobalDataQueue->AddQueueItem(SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_NAME], SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_NAME], NULL, 0,
+                        GlobalDataQueue::CMD_HUBNAME);
 
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
@@ -1816,7 +1820,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
 
                 int imsgLen = sprintf(g_sBuffer, "%s $<%s> %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, sCommand+8);
                 if(CheckSprintf(imsgLen, g_szBufferSize, "HubCommands::DoCommand117") == true) {
-					globalQ->SingleItemStore(g_sBuffer, imsgLen, curUser, 0, globalqueue::PM2ALL);
+					g_GlobalDataQueue->SingleItemStore(g_sBuffer, imsgLen, curUser, 0, GlobalDataQueue::SI_PM2ALL);
                 }
 
                 imsgLen = CheckFromPm(curUser, fromPM);
@@ -1901,13 +1905,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                         int imsgLen = sprintf(msg, "%s $<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_RESTARTED_SCRIPTS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand122") == true) {
-							globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+							g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
            	        } else {
                         int imsgLen = sprintf(msg, "<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, 
                             LanguageManager->sTexts[LAN_RESTARTED_SCRIPTS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand123") == true) {
-               	            globalQ->OPStore(msg, imsgLen);
+               	            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
                	    }
                 }
@@ -1976,13 +1980,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
               	      	int imsgLen = sprintf(msg, "%s $<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_RELOAD_TXT_FILES_LWR]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand129") == true) {
-							globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+							g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
         	        } else {
             	      	int imsgLen = sprintf(msg, "<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, 
                             LanguageManager->sTexts[LAN_RELOAD_TXT_FILES_LWR]);
             	      	if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand130") == true) {
-                            globalQ->OPStore(msg, imsgLen);
+                            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
                     }
                 }
@@ -2073,13 +2077,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                                 SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, 
                                 LanguageManager->sTexts[LAN_RESTARTED_SCRIPT], sCommand);
                             if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand139") == true) {
-								globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+								g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                             }
                         } else {
                             int imsgLen = sprintf(msg, "<%s> *** %s %s: %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick,
                                 LanguageManager->sTexts[LAN_RESTARTED_SCRIPT], sCommand);
                             if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand140") == true) {
-                                globalQ->OPStore(msg, imsgLen);
+                                g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                             }
                         }
                     }
@@ -2348,13 +2352,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                         int imsgLen = sprintf(msg, "%s $<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],  SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                             curUser->sNick, LanguageManager->sTexts[LAN_REGISTER], sNick, LanguageManager->sTexts[LAN_AS], sProfile);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand::RegUser8") == true) {
-							globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+							g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
                     } else {
                         int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick,
                             LanguageManager->sTexts[LAN_REGISTER], sNick, LanguageManager->sTexts[LAN_AS], sProfile);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand::RegUser9") == true) {
-                            globalQ->OPStore(msg, imsgLen);
+                            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
                     }
                 }
@@ -2548,13 +2552,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_REMOVED_LWR], 
                             sCommand, LanguageManager->sTexts[LAN_FROM_BANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand161") == true) {
-                            globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+                            g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
               	    } else {
                    	    int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, 
                             LanguageManager->sTexts[LAN_REMOVED_LWR], sCommand, LanguageManager->sTexts[LAN_FROM_BANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand162") == true) {
-          	        	    globalQ->OPStore(msg, imsgLen);
+          	        	    g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
           	    	}
                 }
@@ -2649,13 +2653,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, 
                             LanguageManager->sTexts[LAN_HAS_UNGAGGED], user->sNick);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand172") == true) {
-							globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+							g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
          	        } else {
                   		imsgLen = sprintf(msg, "<%s> *** %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick,
                             LanguageManager->sTexts[LAN_HAS_UNGAGGED], user->sNick);
                   		if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand173") == true) {
-                            globalQ->OPStore(msg, imsgLen);
+                            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
           		    }
                 }
@@ -2771,7 +2775,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                 if(CheckSprintf1(iret, imsgLen, 1024, "HubCommands::DoCommand185") == true) {
                     UserSendCharDelayed(user, msg, imsgLen);
                 }
-                globalQ->OpListStore(user->sNick);
+                g_GlobalDataQueue->OpListStore(user->sNick);
 
                 if(bAllowedOpChat != ProfileMan->IsAllowed(user, ProfileManager::ALLOWEDOPCHAT)) {
                     if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true &&
@@ -2795,13 +2799,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, 
                             LanguageManager->sTexts[LAN_SETS_OP_MODE_TO], user->sNick);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand187") == true) {
-							globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+							g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
                     } else {
                         imsgLen = sprintf(msg, "<%s> *** %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick,
                             LanguageManager->sTexts[LAN_SETS_OP_MODE_TO], user->sNick);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand188") == true) {
-                            globalQ->OPStore(msg, imsgLen);
+                            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
                     }
                 }
@@ -2849,7 +2853,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
 
                 int imsgLen = sprintf(g_sBuffer, "%s $<%s> %s|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, sCommand+10);
                 if(CheckSprintf(imsgLen, g_szBufferSize, "HubCommands::DoCommand193") == true) {
-					globalQ->SingleItemStore(g_sBuffer, imsgLen, curUser, 0, globalqueue::PM2OPS);
+					g_GlobalDataQueue->SingleItemStore(g_sBuffer, imsgLen, curUser, 0, GlobalDataQueue::SI_PM2OPS);
                 }
 
                 imsgLen = CheckFromPm(curUser, fromPM);
@@ -2996,7 +3000,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                             }
                         }
 
-						globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+						g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
          	    	} else {
                         int imsgLen;
                         if(reason != NULL && strlen(reason) > 512) {
@@ -3021,7 +3025,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                             }
                         }
 
-                        globalQ->OPStore(msg, imsgLen);
+                        g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
          			}
                 }
 
@@ -3128,13 +3132,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                             SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_REMOVED_LWR], 
                             sCommand, LanguageManager->sTexts[LAN_FROM_REGS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand219") == true) {
-							globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+							g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
                     } else {
                         int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, 
                             LanguageManager->sTexts[LAN_REMOVED_LWR], sCommand, LanguageManager->sTexts[LAN_FROM_REGS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand220") == true) {
-                            globalQ->OPStore(msg, imsgLen);
+                            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
                     }
                 }
@@ -3315,12 +3319,12 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                         int imsgLen = sprintf(msg, "%s $<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                             curUser->sNick, LanguageManager->sTexts[LAN_HAS_CLEARED_TEMPBANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand242") == true) {
-							globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+							g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
                     } else {
                         int imsgLen = sprintf(msg, "<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_HAS_CLEARED_TEMPBANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand243") == true) {
-                            globalQ->OPStore(msg, imsgLen);
+                            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
                     }
                 }
@@ -3352,12 +3356,12 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                         int imsgLen = sprintf(msg, "%s $<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                             curUser->sNick, LanguageManager->sTexts[LAN_HAS_CLEARED_PERMBANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand246") == true) {
-							globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+							g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
                     } else {
                         int imsgLen = sprintf(msg, "<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_HAS_CLEARED_PERMBANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand247") == true) {
-                            globalQ->OPStore(msg, imsgLen);
+                            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
                     }
                 }
@@ -3389,12 +3393,12 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                         int imsgLen = sprintf(msg, "%s $<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                             curUser->sNick, LanguageManager->sTexts[LAN_HAS_CLEARED_TEMP_RANGEBANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand250") == true) {
-							globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+							g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
                     } else {
                         int imsgLen = sprintf(msg, "<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_HAS_CLEARED_TEMP_RANGEBANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand251") == true) {
-                            globalQ->OPStore(msg, imsgLen);
+                            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
                     }
                 }
@@ -3426,13 +3430,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                         int imsgLen = sprintf(msg, "%s $<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                             curUser->sNick, LanguageManager->sTexts[LAN_HAS_CLEARED_PERM_RANGEBANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand254") == true) {
-							globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+							g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
                     } else {
                         int imsgLen = sprintf(msg, "<%s> *** %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick,
                             LanguageManager->sTexts[LAN_HAS_CLEARED_PERM_RANGEBANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand255") == true) {
-                            globalQ->OPStore(msg, imsgLen);
+                            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
                     }
                 }
@@ -4126,13 +4130,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                         int imsgLen = sprintf(msg, "%s $<%s> *** %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],  SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                             curUser->sNick, LanguageManager->sTexts[LAN_SUCCESSFULLY_ADDED], sCmdParts[0], LanguageManager->sTexts[LAN_TO_REGISTERED_USERS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand324") == true) {
-							globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+							g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
                     } else {
                         int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick,
                             LanguageManager->sTexts[LAN_SUCCESSFULLY_ADDED], sCmdParts[0], LanguageManager->sTexts[LAN_TO_REGISTERED_USERS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand325") == true) {
-                            globalQ->OPStore(msg, imsgLen);
+                            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
                     }
                 }
@@ -4161,7 +4165,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
 
                         if(((AddedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                             colUsers->Add2OpList(AddedUser);
-                            globalQ->OpListStore(AddedUser->sNick);
+                            g_GlobalDataQueue->OpListStore(AddedUser->sNick);
                             if(bAllowedOpChat != ProfileMan->IsAllowed(AddedUser, ProfileManager::ALLOWEDOPCHAT)) {
                                 if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true &&
                                     (SettingManager->bBools[SETBOOL_REG_BOT] == false || SettingManager->bBotsSameNick == false)) {
@@ -4958,13 +4962,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
 						int imsgLen = sprintf(msg, "%s $<%s> *** %s %s: %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                             curUser->sNick, LanguageManager->sTexts[LAN_STOPPED_SCRIPT], sCommand);
 						if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand405") == true) {
-							globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+							g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
 						}
 					} else {
 						int imsgLen = sprintf(msg, "<%s> *** %s %s: %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_STOPPED_SCRIPT],
                             sCommand);
 						if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand406") == true) {
-							globalQ->OPStore(msg, imsgLen);
+							g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
 						}
 					}
 				}
@@ -5061,13 +5065,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
 								int imsgLen = sprintf(msg, "%s $<%s> *** %s %s: %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                                     curUser->sNick, LanguageManager->sTexts[LAN_STARTED_SCRIPT], sCommand);
 								if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand419") == true) {
-									globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+									g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
 								}
 							} else {
 								int imsgLen = sprintf(msg, "<%s> *** %s %s: %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick,
                                     LanguageManager->sTexts[LAN_STARTED_SCRIPT], sCommand);
 								if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand420") == true) {
-									globalQ->OPStore(msg, imsgLen);
+									g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
 								}
 							}
 						}
@@ -5104,13 +5108,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
 							int imsgLen = sprintf(msg, "%s $<%s> *** %s %s: %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                                 curUser->sNick, LanguageManager->sTexts[LAN_STARTED_SCRIPT], sCommand);
 							if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand427") == true) {
-								globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+								g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
 							}
 						} else {
 							int imsgLen = sprintf(msg, "<%s> *** %s %s: %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_STARTED_SCRIPT],
                                 sCommand);
 							if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand428") == true) {
-								globalQ->OPStore(msg, imsgLen);
+								g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
 							}
 						}
 					}
@@ -5278,13 +5282,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
            	            int imsgLen = sprintf(msg, "%s $<%s> *** %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                             curUser->sNick, LanguageManager->sTexts[LAN_REMOVED_LWR], sCommand, LanguageManager->sTexts[LAN_FROM_BANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand447") == true) {
-                            globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+                            g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
               	    } else {
                    	    int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, LanguageManager->sTexts[LAN_REMOVED_LWR],
                             sCommand, LanguageManager->sTexts[LAN_FROM_BANS]);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand448") == true) {
-          	        	    globalQ->OPStore(msg, imsgLen);
+          	        	    g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
           	    	}
                 }
@@ -5579,7 +5583,7 @@ bool HubCommands::Ban(User * curUser, char * sCommand, bool fromPM, bool bFull) 
                 }
             }
 
-			globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+			g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
         } else {
             if(reason != NULL && strlen(reason) > 512) {
                 imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s%s %s %s %s: ", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], sCommand, LanguageManager->sTexts[LAN_WITH_IP], uban->sIP,
@@ -5602,7 +5606,7 @@ bool HubCommands::Ban(User * curUser, char * sCommand, bool fromPM, bool bFull) 
                 }
             }
 
-            globalQ->OPStore(msg, imsgLen);
+            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
         }
     }
 
@@ -5743,7 +5747,7 @@ bool HubCommands::BanIp(User * curUser, char * sCommand, bool fromPM, bool bFull
                         }
                     }
 
-					globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+					g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                 } else {
                     int imsgLen;
                     if(reason == NULL) {
@@ -5775,7 +5779,7 @@ bool HubCommands::BanIp(User * curUser, char * sCommand, bool fromPM, bool bFull
                         }
                     }
 
-                    globalQ->OPStore(msg, imsgLen);
+                    g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                 }
             }
 
@@ -5987,7 +5991,7 @@ bool HubCommands::TempBan(User * curUser, char * sCommand, const size_t &dlen, b
                 }
             }
 
-			globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+			g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
         } else {
             if(sCmdParts[2] != NULL && iCmdPartsLen[2] > 512) {
                 imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s%s %s %s %s: %s %s: ", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], sCmdParts[0], LanguageManager->sTexts[LAN_WITH_IP],
@@ -6011,7 +6015,7 @@ bool HubCommands::TempBan(User * curUser, char * sCommand, const size_t &dlen, b
                 }
             }
 
-            globalQ->OPStore(msg, imsgLen);
+            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
         }
     }
 
@@ -6234,7 +6238,7 @@ bool HubCommands::TempBanIp(User * curUser, char * sCommand, const size_t &dlen,
                 }
             }
 
-			globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+			g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
         } else {
             int imsgLen;
             if(sCmdParts[2] != NULL && iCmdPartsLen[2] > 512) {
@@ -6258,7 +6262,7 @@ bool HubCommands::TempBanIp(User * curUser, char * sCommand, const size_t &dlen,
                 }
             }
 
-            globalQ->OPStore(msg, imsgLen);
+            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
         }
     }
 
@@ -6422,7 +6426,7 @@ bool HubCommands::RangeBan(User * curUser, char * sCommand, const size_t &dlen, 
                 }
             }
 
-			globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+			g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
         } else {
             int imsgLen;
             if(sCmdParts[2] == NULL) {
@@ -6454,7 +6458,8 @@ bool HubCommands::RangeBan(User * curUser, char * sCommand, const size_t &dlen, 
                     }
                 }
             }
-            globalQ->OPStore(msg, imsgLen);
+
+            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
         }
     }
 
@@ -6619,7 +6624,7 @@ bool HubCommands::RangeTempBan(User * curUser, char * sCommand, const size_t &dl
                 }
             }
 
-			globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+			g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
         } else {
             int imsgLen;
             if(sCmdParts[3] == NULL) {
@@ -6652,7 +6657,7 @@ bool HubCommands::RangeTempBan(User * curUser, char * sCommand, const size_t &dl
                 }
             }
 
-            globalQ->OPStore(msg, imsgLen);
+            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
         }
     }
 
@@ -6725,13 +6730,13 @@ bool HubCommands::RangeUnban(User * curUser, char * sCommand, bool fromPM, unsig
                 LanguageManager->sTexts[LAN_RANGE], sCommand, toip, LanguageManager->sTexts[LAN_IS_REMOVED_FROM_RANGE],
                 cType == 1 ? LanguageManager->sTexts[LAN_TEMP_BANS_LWR] : LanguageManager->sTexts[LAN_PERM_BANS_LWR], LanguageManager->sTexts[LAN_BY_LWR], curUser->sNick);
             if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand550") == true) {
-				globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+				g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
             }
         } else {
             int imsgLen = sprintf(msg, "<%s> *** %s %s-%s %s %s by %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_RANGE], sCommand, toip,
                 LanguageManager->sTexts[LAN_IS_REMOVED_FROM_RANGE], cType == 1 ? LanguageManager->sTexts[LAN_TEMP_BANS_LWR] : LanguageManager->sTexts[LAN_PERM_BANS_LWR], curUser->sNick);
             if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand551") == true) {
-                globalQ->OPStore(msg, imsgLen);
+                g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
             }
         }
     }
@@ -6805,13 +6810,13 @@ bool HubCommands::RangeUnban(User * curUser, char * sCommand, bool fromPM) {
             int imsgLen = sprintf(msg, "%s $<%s> *** %s %s-%s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
                 LanguageManager->sTexts[LAN_RANGE], sCommand, toip, LanguageManager->sTexts[LAN_IS_REMOVED_FROM_RANGE_BANS_BY], curUser->sNick);
             if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand560") == true) {
-                globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+                g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
             }
         } else {
             int imsgLen = sprintf(msg, "<%s> *** %s %s-%s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_RANGE], sCommand, toip,
                 LanguageManager->sTexts[LAN_IS_REMOVED_FROM_RANGE_BANS_BY], curUser->sNick);
             if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand561") == true) {
-                globalQ->OPStore(msg, imsgLen);
+                g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
             }
         }
     }

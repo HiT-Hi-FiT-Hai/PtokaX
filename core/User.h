@@ -100,7 +100,7 @@ struct User {
     	BIT_OPERATOR                   = 0x4,
     	BIT_GAGGED                     = 0x8,
     	BIT_GETNICKLIST                = 0x10,
-    	BIT_ACTIVE                     = 0x20,
+    	BIT_IPV4_ACTIVE                = 0x20,
     	BIT_OLDHUBSTAG                 = 0x40,
     	BIT_TEMP_OPERATOR              = 0x80,
     	BIT_PINGER                     = 0x100,
@@ -118,6 +118,7 @@ struct User {
     	BIT_IPV4                       = 0x1000000,
     	BIT_WAITING_FOR_PASS           = 0x2000000,
     	BIT_WARNED_WRONG_IP            = 0x4000000,
+    	BIT_IPV6_ACTIVE                = 0x8000000,
     };
 
     enum UserInfoBits {
@@ -194,7 +195,7 @@ struct User {
     PrcsdToUsrCmd *cmdToUserStrt, *cmdToUserEnd;
 
     PrcsdUsrCmd *cmdStrt, *cmdEnd, 
-        *cmdASearch, *cmdPSearch;
+        * cmdActive4Search, * cmdActive6Search, * cmdPassiveSearch;
 
     User *prev, *next, *hashtableprev, *hashtablenext, *hashiptableprev, *hashiptablenext;
 
@@ -234,7 +235,6 @@ void UserSendCharDelayed(User * u, const char * cText);
 void UserSendCharDelayed(User * u, const char * cText, const size_t &szTextLen);
 void UserSendText(User * u, const string & sText);
 void UserSendTextDelayed(User * u, const string & sText);
-void UserSendQueue(User * u, QzBuf * Queue, bool bChckActSr = true);
 bool UserPutInSendBuf(User * u, const char * Text, const size_t &szTxtLen);
 bool UserTry2Send(User * u);
 
@@ -267,6 +267,10 @@ void UserAddPrcsdCmd(User * u, const unsigned char &cType, char * sCommand, cons
 void UserAddMeOrIPv4Check(User * pUser);
 
 char * UserSetUserInfo(char * sOldData, uint8_t &ui8OldDataLen, char * sNewData, size_t &szNewDataLen, const char * sDataName);
+
+void UserRemFromSendBuf(User * u, const char * sData, const uint32_t &iLen, const uint32_t &iSbLen);
+
+void UserDeletePrcsdUsrCmd(PrcsdUsrCmd * pCommand);
 //---------------------------------------------------------------------------
 
 #endif

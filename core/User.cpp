@@ -24,7 +24,7 @@
 //---------------------------------------------------------------------------
 #include "colUsers.h"
 #include "DcCommands.h"
-#include "globalQueue.h"
+#include "GlobalDataQueue.h"
 #include "hashUsrManager.h"
 #include "LanguageManager.h"
 #include "LuaScriptManager.h"
@@ -129,16 +129,6 @@ static bool UserProcessLines(User * u, const uint32_t &iStrtLen) {
             u->recvbuf[1] = '\0';
             return true;
         }
-    }
-}
-//------------------------------------------------------------------------------
-
-static void UserRemFromSendBuf(User * u, const char * sData, const uint32_t &iLen, const uint32_t &iSbLen) {
-	char *match = strstr(u->sendbuf+iSbLen, sData);
-    if(match != NULL) {
-        memmove(match, match+iLen, u->sbdatalen-((match+(iLen))-u->sendbuf));
-        u->sbdatalen -= iLen;
-        u->sendbuf[u->sbdatalen] = '\0';
     }
 }
 //------------------------------------------------------------------------------
@@ -348,6 +338,12 @@ static void UserParseMyInfo(User * u) {
                                 u->sModes[0] = sTagPart[2];
                                 u->sModes[1] = sTagPart[3];
                                 u->sModes[2] = '\0';
+
+                                if(toupper(sTagPart[3]) == 'A') {
+                                    u->ui32BoolBits |= User::BIT_IPV6_ACTIVE;
+                                } else {
+                                    u->ui32BoolBits &= ~User::BIT_IPV6_ACTIVE;
+                                }
                             } else {
                                 if(sTagPart[2] == '\0' || sTagPart[3] != '\0') {
                                     UserSetBadTag(u, u->sMyInfoOriginal+(sMyINFOParts[0]-msg), (uint8_t)iMyINFOPartsLen[0]);
@@ -358,9 +354,9 @@ static void UserParseMyInfo(User * u) {
                             }
 
                             if(toupper(sTagPart[2]) == 'A') {
-                                u->ui32BoolBits |= User::BIT_ACTIVE;
+                                u->ui32BoolBits |= User::BIT_IPV4_ACTIVE;
                             } else {
-                                u->ui32BoolBits &= ~User::BIT_ACTIVE;
+                                u->ui32BoolBits &= ~User::BIT_IPV4_ACTIVE;
                             }
 
                             reqVals++;
@@ -712,7 +708,7 @@ User::User() {
     memset(&ui128IpHash, 0, 16);
 
 	ui32BoolBits = 0;
-	ui32BoolBits |= User::BIT_ACTIVE;
+	ui32BoolBits |= User::BIT_IPV4_ACTIVE;
 	ui32BoolBits |= User::BIT_OLDHUBSTAG;
 
     ui32InfoBits = 0;
@@ -770,8 +766,11 @@ User::User() {
 
 	cmdStrt = NULL;
 	cmdEnd = NULL;
-	cmdASearch = NULL;
-	cmdPSearch = NULL;
+
+	cmdActive4Search = NULL;
+	cmdActive6Search = NULL;
+	cmdPassiveSearch = NULL;
+
 	cmdToUserStrt = NULL;
 	cmdToUserEnd = NULL;
 
@@ -973,32 +972,19 @@ User::~User() {
         
 	delete uLogInOut;
     
-	if(cmdASearch != NULL) {
-#ifdef _WIN32
-		if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cmdASearch->sCommand) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate cmdASearch->sCommand in User::~User\n", 0);
-        }
-#else
-		free(cmdASearch->sCommand);
-#endif
-		cmdASearch->sCommand = NULL;
-
-		delete cmdASearch;
-		cmdASearch = NULL;
+	if(cmdActive4Search != NULL) {
+        UserDeletePrcsdUsrCmd(cmdActive4Search);
+		cmdActive4Search = NULL;
     }
-       
-	if(cmdPSearch != NULL) {
-#ifdef _WIN32
-		if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cmdPSearch->sCommand) == 0) {
-            AppendDebugLog("%s - [MEM] Cannot deallocate cmdPSearch->sCommand in User::~User\n", 0);
-        }
-#else
-		free(cmdPSearch->sCommand);
-#endif
-		cmdPSearch->sCommand = NULL;
 
-		delete cmdPSearch;
-		cmdPSearch = NULL;
+	if(cmdActive6Search != NULL) {
+        UserDeletePrcsdUsrCmd(cmdActive6Search);
+		cmdActive6Search = NULL;
+    }
+
+	if(cmdPassiveSearch != NULL) {
+        UserDeletePrcsdUsrCmd(cmdPassiveSearch);
+		cmdPassiveSearch = NULL;
     }
                 
 	PrcsdUsrCmd *next = cmdStrt;
@@ -1415,138 +1401,6 @@ void UserSendTextDelayed(User * u, const string &sText) {
         } else {
             UserPutInSendBuf(u, sData, iLen);
             ui64BytesSentSaved += sText.size()-iLen;
-        }
-    }
-}
-//---------------------------------------------------------------------------
-
-void UserSendQueue(User * u, QzBuf * Queue, bool bChckActSr/* = true*/) {
-    if(Queue->len == 0) {
-        if(ui8SrCntr == 0) {
-            if(u->cmdASearch != NULL) {
-#ifdef _WIN32
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)u->cmdASearch->sCommand) == 0) {
-					AppendDebugLog("%s - [MEM] Cannot deallocate u->cmdASearch->sCommand in UserSendQueue\n", 0);
-                }
-#else
-				free(u->cmdASearch->sCommand);
-#endif
-                u->cmdASearch->sCommand = NULL;
-
-                delete u->cmdASearch;
-                u->cmdASearch = NULL;
-            }
-        }
-
-        return;
-    }
-
-    if(ui8SrCntr == 0) {
-        if(bChckActSr == true) {
-            if(((u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false) {
-                uint32_t iSbLen = u->sbdatalen;
-                UserPutInSendBuf(u, Queue->buffer, Queue->len);
-                                                                  
-                if(u->cmdASearch != NULL) {
-                    // PPK ... check if adding of searchs not cause buffer overflow !
-                    if(u->sbdatalen <= iSbLen) {
-                        iSbLen = 0;
-                    }
-
-                    UserRemFromSendBuf(u, u->cmdASearch->sCommand, u->cmdASearch->iLen, iSbLen);
-
-#ifdef _WIN32
-                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)u->cmdASearch->sCommand) == 0) {
-						AppendDebugLog("%s - [MEM] Cannot deallocate u->cmdASearch->sCommand1 in UserSendQueue\n", 0);
-					}
-#else
-					free(u->cmdASearch->sCommand);
-#endif
-                    u->cmdASearch->sCommand = NULL;
-
-                    delete u->cmdASearch;
-                    u->cmdASearch = NULL;
-                }
-            } else {
-                if(Queue->zlined == false) {
-                    Queue->zlined = true;
-                    Queue->zbuffer = ZlibUtility->CreateZPipe(Queue->buffer, Queue->len, Queue->zbuffer,
-                        Queue->zlen, Queue->zsize);
-                }
-                
-                if(Queue->zlen != 0 && (u->cmdASearch == NULL || Queue->zlen <= (Queue->len-u->cmdASearch->iLen))) {
-                    UserPutInSendBuf(u, Queue->zbuffer, Queue->zlen);
-                    ui64BytesSentSaved += Queue->len-Queue->zlen;
-                    if(u->cmdASearch != NULL) {
-#ifdef _WIN32
-                        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)u->cmdASearch->sCommand) == 0) {
-							AppendDebugLog("%s - [MEM] Cannot deallocate u->cmdASearch->sCommand2 in UserSendQueue\n", 0);
-                        }
-#else
-						free(u->cmdASearch->sCommand);
-#endif
-                        u->cmdASearch->sCommand = NULL;
-
-                        delete u->cmdASearch;
-                        u->cmdASearch = NULL;
-                    }
-                } else {
-                    uint32_t iSbLen = u->sbdatalen;
-                    UserPutInSendBuf(u, Queue->buffer, Queue->len);
-                                    
-                    if(u->cmdASearch != NULL) {
-                        // PPK ... check if adding of searchs not cause buffer overflow !
-                        if(u->sbdatalen <= iSbLen) {
-                            iSbLen = 0;
-                        }
-
-                        UserRemFromSendBuf(u, u->cmdASearch->sCommand, u->cmdASearch->iLen, iSbLen);
-#ifdef _WIN32
-                        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)u->cmdASearch->sCommand) == 0) {
-							AppendDebugLog("%s - [MEM] Cannot deallocate u->cmdASearch->sCommand3 in UserSendQueue\n", 0);
-                        }
-#else
-						free(u->cmdASearch->sCommand);
-#endif
-                        u->cmdASearch->sCommand = NULL;
-
-                        delete u->cmdASearch;
-                        u->cmdASearch = NULL;
-                    }
-                }
-            }
-            return;
-        } else {
-            if(u->cmdASearch != NULL) {
-#ifdef _WIN32
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)u->cmdASearch->sCommand) == 0) {
-					AppendDebugLog("%s - [MEM] Cannot deallocate u->cmdASearch->sCommand4 in UserSendQueue\n", 0);
-                }
-#else
-				free(u->cmdASearch->sCommand);
-#endif
-                u->cmdASearch->sCommand = NULL;
-
-                delete u->cmdASearch;
-                u->cmdASearch = NULL;
-            }
-        }
-    }
-
-    if(((u->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false) {
-        UserPutInSendBuf(u, Queue->buffer, Queue->len);
-    } else {
-        if(Queue->zlined == false) {
-            Queue->zlined = true;
-            Queue->zbuffer = ZlibUtility->CreateZPipe(Queue->buffer, Queue->len, Queue->zbuffer,
-                Queue->zlen, Queue->zsize);
-        }
-            
-        if(Queue->zlen == 0) {
-            UserPutInSendBuf(u, Queue->buffer, Queue->len);
-        } else {
-            ui64BytesSentSaved += Queue->len-Queue->zlen;
-            UserPutInSendBuf(u, Queue->zbuffer, Queue->zlen);
         }
     }
 }
@@ -2239,7 +2093,7 @@ void UserClose(User * u, bool bNoQuit/* = false*/) {
         if(bNoQuit == false) {         
             int imsgLen = sprintf(msg, "$Quit %s|", u->sNick); 
             if(CheckSprintf(imsgLen, 1024, "UserClose") == true) {
-                globalQ->InfoStore(msg, imsgLen);
+                g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_QUIT);
             }
 
 			colUsers->Add2RecTimes(u);
@@ -2267,31 +2121,19 @@ void UserClose(User * u, bool bNoQuit/* = false*/) {
 
 	u->ui8State = User::STATE_CLOSING;
 	
-    if(u->cmdASearch != NULL) {
-#ifdef _WIN32
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)u->cmdASearch->sCommand) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate u->cmdASearch->sCommand in UserClose\n", 0);
-        }
-#else
-		free(u->cmdASearch->sCommand);
-#endif
-        u->cmdASearch->sCommand = NULL;
-
-        delete u->cmdASearch;
-        u->cmdASearch = NULL;
+    if(u->cmdActive4Search != NULL) {
+        UserDeletePrcsdUsrCmd(u->cmdActive4Search);
+        u->cmdActive4Search = NULL;
     }
-                        
-    if(u->cmdPSearch != NULL) {
-#ifdef _WIN32
-        if(u->cmdPSearch->sCommand != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)u->cmdPSearch->sCommand) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate u->cmdPSearch->sCommand in UserClose\n", 0);
-        }
-#else
-		free(u->cmdPSearch->sCommand);
-#endif
 
-        delete u->cmdPSearch;
-        u->cmdPSearch = NULL;
+    if(u->cmdActive6Search != NULL) {
+        UserDeletePrcsdUsrCmd(u->cmdActive6Search);
+        u->cmdActive6Search = NULL;
+    }
+
+    if(u->cmdPassiveSearch != NULL) {
+        UserDeletePrcsdUsrCmd(u->cmdPassiveSearch);
+        u->cmdPassiveSearch = NULL;
     }
                         
     PrcsdUsrCmd *next = u->cmdStrt;
@@ -2957,7 +2799,7 @@ void UserHasSuspiciousTag(User *curUser) {
                 memcpy(msg+imsgLen, curUser->sDescription, (size_t)curUser->ui8DescriptionLen);
                 imsgLen += (int)curUser->ui8DescriptionLen;
                 msg[imsgLen] = '|';
-                globalQ->SingleItemStore(msg, imsgLen+1, NULL, 0, globalqueue::PM2OPS);
+                g_GlobalDataQueue->SingleItemStore(msg, imsgLen+1, NULL, 0, GlobalDataQueue::SI_PM2OPS);
             }
 		} else {
 			int imsgLen = sprintf(msg, "<%s> *** %s (%s) %s. %s: ", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick, curUser->sIP, 
@@ -2966,7 +2808,7 @@ void UserHasSuspiciousTag(User *curUser) {
                 memcpy(msg+imsgLen, curUser->sDescription, (size_t)curUser->ui8DescriptionLen);
                 imsgLen += (int)curUser->ui8DescriptionLen;
                 msg[imsgLen] = '|';
-                globalQ->OPStore(msg, imsgLen+1);
+                g_GlobalDataQueue->AddQueueItem(msg, imsgLen+1, NULL, 0, GlobalDataQueue::CMD_OPS);
             }
 	   }
     }
@@ -3218,3 +3060,24 @@ char * UserSetUserInfo(char * sOldData, uint8_t &ui8OldDataLen, char * sNewData,
     return sOldData;
 }
 //---------------------------------------------------------------------------
+
+void UserRemFromSendBuf(User * u, const char * sData, const uint32_t &iLen, const uint32_t &iSbLen) {
+	char *match = strstr(u->sendbuf+iSbLen, sData);
+    if(match != NULL) {
+        memmove(match, match+iLen, u->sbdatalen-((match+(iLen))-u->sendbuf));
+        u->sbdatalen -= iLen;
+        u->sendbuf[u->sbdatalen] = '\0';
+    }
+}
+//------------------------------------------------------------------------------
+
+void UserDeletePrcsdUsrCmd(PrcsdUsrCmd * pCommand) {
+#ifdef _WIN32
+    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCommand->sCommand) == 0) {
+        AppendDebugLog("%s - [MEM] Cannot deallocate pCommand->sCommand in UserDeletePrcsdUsrCmd\n", 0);
+    }
+#else
+    free(pCommand->sCommand);
+#endif
+    delete pCommand;
+}

@@ -22,7 +22,7 @@
 //---------------------------------------------------------------------------
 #include "colUsers.h"
 //---------------------------------------------------------------------------
-#include "globalQueue.h"
+#include "GlobalDataQueue.h"
 #include "LanguageManager.h"
 #include "ProfileManager.h"
 #include "ServerManager.h"
@@ -665,12 +665,12 @@ void classUsers::SendChat2All(User * cur, char * sData, const size_t &szChatLen)
                         int imsgLen = sprintf(msg, "%s $<%s> *** %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
                             LanguageManager->sTexts[LAN_GLOBAL_CHAT_FLOOD_DETECTED]);
                         if(CheckSprintf(imsgLen, 1024, "classUsers::SendChat2All1") == true) {
-                            globalQ->SingleItemStore(msg, imsgLen, NULL, 0, globalqueue::PM2OPS);
+                            g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
                     } else {
                         int imsgLen = sprintf(msg, "<%s> *** %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_GLOBAL_CHAT_FLOOD_DETECTED]);
                         if(CheckSprintf(imsgLen, 1024, "classUsers::SendChat2All2") == true) {
-                            globalQ->OPStore(msg, imsgLen);
+                            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
                     }
                 }
@@ -692,7 +692,7 @@ void classUsers::SendChat2All(User * cur, char * sData, const size_t &szChatLen)
                         memcpy(g_sBuffer+iMsgLen, sData, szChatLen);
                         iMsgLen += (uint32_t)szChatLen;
                         g_sBuffer[iMsgLen] = '\0';
-                        globalQ->OPStore(g_sBuffer, iMsgLen);
+                        g_GlobalDataQueue->AddQueueItem(g_sBuffer, iMsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                     }
 
                     return;
@@ -703,7 +703,7 @@ void classUsers::SendChat2All(User * cur, char * sData, const size_t &szChatLen)
         }
     }
 
-    globalQ->Store(sData, szChatLen);
+    g_GlobalDataQueue->AddQueueItem(sData, szChatLen, NULL, 0, GlobalDataQueue::CMD_CHAT);
 }
 //---------------------------------------------------------------------------
 

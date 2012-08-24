@@ -444,7 +444,7 @@
     <ClInclude Include="core\DeFlood.h" />
     <ClInclude Include="core\eventqueue.h" />
     <ClInclude Include="core\ExceptionHandling.h" />
-    <ClInclude Include="core\globalQueue.h" />
+    <ClInclude Include="core\GlobalDataQueue.h" />
     <ClInclude Include="core\hashBanManager.h" />
     <ClInclude Include="core\hashRegManager.h" />
     <ClInclude Include="core\hashUsrManager.h" />
@@ -540,7 +540,7 @@
     <ClCompile Include="core\DeFlood.cpp" />
     <ClCompile Include="core\eventqueue.cpp" />
     <ClCompile Include="core\ExceptionHandling.cpp" />
-    <ClCompile Include="core\globalQueue.cpp" />
+    <ClCompile Include="core\GlobalDataQueue.cpp" />
     <ClCompile Include="core\hashBanManager.cpp" />
     <ClCompile Include="core\hashRegManager.cpp" />
     <ClCompile Include="core\hashUsrManager.cpp" />
