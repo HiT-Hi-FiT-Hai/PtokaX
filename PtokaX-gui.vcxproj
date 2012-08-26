@@ -438,7 +438,6 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="core\ClientTagManager.h" />
     <ClInclude Include="core\colUsers.h" />
     <ClInclude Include="core\DcCommands.h" />
     <ClInclude Include="core\DeFlood.h" />
@@ -534,7 +533,6 @@
     <None Include="ico\Lua-64x64x32.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="core\ClientTagManager.cpp" />
     <ClCompile Include="core\colUsers.cpp" />
     <ClCompile Include="core\DcCommands.cpp" />
     <ClCompile Include="core\DeFlood.cpp" />

@@ -97,8 +97,6 @@ void SettingPageMyINFO::Save() {
         return;
     }
 
-    SettingManager->SetBool(SETBOOL_ACCEPT_UNKNOWN_TAG, ::SendMessage(hWndPageItems[BTN_ACCEPT_UNKNOWN], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
-
     char buf[257];
     int iLen = ::GetWindowText(hWndPageItems[EDT_NO_TAG_MESSAGE], buf, 257);
 
@@ -164,41 +162,37 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
     int iGBinGBinGB = (rcThis.right - rcThis.left) - 25;
     int iGBinGBinGBEDT = (rcThis.right - rcThis.left) - 41;
 
-    int iPosX = (2 * iGroupBoxMargin) + (2 * iCheckHeight) + 4 + iEditHeight + (2 * iOneLineGB) + 12;
+    int iPosX = (2 * iGroupBoxMargin) + iCheckHeight + 1 + iEditHeight + (2 * iOneLineGB) + 12;
 
     hWndPageItems[GB_DESCRIPTION_TAG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_DESCRIPTION_TAG], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         0, 0, iFullGB, iPosX, m_hWnd, NULL, g_hInstance, NULL);
 
-    hWndPageItems[BTN_ACCEPT_UNKNOWN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT_UNKNOWN_TAG], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, iGroupBoxMargin, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[BTN_ACCEPT_UNKNOWN], BM_SETCHECK, (SettingManager->bBools[SETBOOL_ACCEPT_UNKNOWN_TAG] == true ? BST_CHECKED : BST_UNCHECKED), 0);
-
     hWndPageItems[BTN_REPORT_SUSPICIOUS_TAG] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REPORT_BAD_TAGS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, iGroupBoxMargin + iCheckHeight + 3, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
+        8, iGroupBoxMargin, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_REPORT_SUSPICIOUS_TAG], BM_SETCHECK, (SettingManager->bBools[SETBOOL_REPORT_SUSPICIOUS_TAG] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[GB_NO_TAG_ACTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_NO_TAG_ACTION], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        5, iGroupBoxMargin + (2 * iCheckHeight) + 4, iGBinGB, iGroupBoxMargin + iEditHeight + (2 * iOneLineGB) + 7, m_hWnd, NULL, g_hInstance, NULL);
+        5, iGroupBoxMargin + iCheckHeight + 1, iGBinGB, iGroupBoxMargin + iEditHeight + (2 * iOneLineGB) + 7, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[CB_NO_TAG_ACTION] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
-        13, (2 * iGroupBoxMargin) + (2 * iCheckHeight) + 4, iGBinGBEDT, iEditHeight, m_hWnd, (HMENU)CB_NO_TAG_ACTION, g_hInstance, NULL);
+        13, (2 * iGroupBoxMargin) + iCheckHeight + 1, iGBinGBEDT, iEditHeight, m_hWnd, (HMENU)CB_NO_TAG_ACTION, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[CB_NO_TAG_ACTION], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_ACCEPT]);
     ::SendMessage(hWndPageItems[CB_NO_TAG_ACTION], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_REJECT]);
     ::SendMessage(hWndPageItems[CB_NO_TAG_ACTION], CB_ADDSTRING, 0, (LPARAM)LanguageManager->sTexts[LAN_REDIR]);
     ::SendMessage(hWndPageItems[CB_NO_TAG_ACTION], CB_SETCURSEL, SettingManager->iShorts[SETSHORT_NO_TAG_OPTION], 0);
 
     hWndPageItems[GB_NO_TAG_MESSAGE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        10, (2 * iGroupBoxMargin) + (2 * iCheckHeight) + iEditHeight + 6, iGBinGBinGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+        10, (2 * iGroupBoxMargin) + iCheckHeight + iEditHeight + 3, iGBinGBinGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_NO_TAG_MESSAGE] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_NO_TAG_MSG], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        18, (3 * iGroupBoxMargin) + (2 * iCheckHeight) + iEditHeight + 6, iGBinGBinGBEDT, iEditHeight, m_hWnd, (HMENU)EDT_NO_TAG_MESSAGE, g_hInstance, NULL);
+        18, (3 * iGroupBoxMargin) + iCheckHeight + iEditHeight + 3, iGBinGBinGBEDT, iEditHeight, m_hWnd, (HMENU)EDT_NO_TAG_MESSAGE, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_NO_TAG_MESSAGE], EM_SETLIMITTEXT, 256, 0);
 
     hWndPageItems[GB_NO_TAG_REDIRECT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_REDIRECT_ADDRESS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        10, (2 * iGroupBoxMargin) + (2 * iCheckHeight) + iEditHeight + 6 + iOneLineGB, iGBinGBinGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+        10, (2 * iGroupBoxMargin) + iCheckHeight + iEditHeight + 3 + iOneLineGB, iGBinGBinGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
 
     hWndPageItems[EDT_NO_TAG_REDIRECT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_NO_TAG_REDIR_ADDRESS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        18, (3 * iGroupBoxMargin) + (2 * iCheckHeight) + iEditHeight + 6 + iOneLineGB, iGBinGBinGBEDT, iEditHeight, m_hWnd, (HMENU)EDT_NO_TAG_REDIRECT, g_hInstance, NULL);
+        18, (3 * iGroupBoxMargin) + iCheckHeight + iEditHeight + 3 + iOneLineGB, iGBinGBinGBEDT, iEditHeight, m_hWnd, (HMENU)EDT_NO_TAG_REDIRECT, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_NO_TAG_REDIRECT], EM_SETLIMITTEXT, 256, 0);
     AddToolTip(hWndPageItems[EDT_NO_TAG_REDIRECT], LanguageManager->sTexts[LAN_REDIRECT_HINT]);
 

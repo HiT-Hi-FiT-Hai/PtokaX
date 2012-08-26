@@ -98,7 +98,6 @@ const char* LangXmlStr[] = {
     "ReportBadTags",
     "ReportBadPass",
     "AdvPassProtect",
-    "AcceptUnknownTag",
     "KeepSlow",
     "CheckStartupNewVersion",
     "MyinfoProcess",

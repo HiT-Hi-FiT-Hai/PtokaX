@@ -511,16 +511,16 @@ Settings bool IDs forSetMan.(G/S)etBool
 42	- Listen only on single IP.
 43	- Resolve hostname to IP.
 44	- Redir user when he's don't have nick in length limits.
-45	- Not used. In pre 0.4.2.0 version it was send UserIP to user on login.
+45	- Not used. Before version 0.4.2.0 version it was send UserIP to user on login.
 46	- Send ip in ban message.
 47	- Send range in ban message.
 48	- Send nick in ban message.
 49	- Send reason in ban message.
 50	- Send who create ban in ban message.
 51	- Report suspicious tag to OPs.
-52	- Accept tag from unknown clients.
+52	- Not used. Before version 0.5 version it was accept tag from unknown clients.
 53	- Check IP in commands.
-54	- Not used. In pre 0.4.2.0 version it was popup scripts window on script error.
+54	- Not used. Before version 0.4.2.0 version it was popup scripts window on script error.
 55	- Save script errors to log.
 56	- Disallow clients sending buggy supports.
 

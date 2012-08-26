@@ -862,6 +862,8 @@ void theLoop::ReceiveLoop() {
 							if((curUser->ui32BoolBits & User::BIT_IPV4) == User::BIT_IPV4) {
                                 if((curUser->ui32BoolBits & User::BIT_IPV6_ACTIVE) == User::BIT_IPV6_ACTIVE) {
                                     ui8CmdType = GlobalDataQueue::CMD_PASSIVE_SEARCH_V4_ONLY;
+                                } else if((curUser->ui32BoolBits & User::BIT_IPV4_ACTIVE) == User::BIT_IPV4_ACTIVE) {
+                                    ui8CmdType = GlobalDataQueue::CMD_PASSIVE_SEARCH_V6_ONLY;
                                 } else {
                                     ui8CmdType = GlobalDataQueue::CMD_PASSIVE_SEARCH_V64;
                                 }

@@ -44,11 +44,10 @@ public:
     char * GetPageName();
     void FocusLastItem();
 private:
-    HWND hWndPageItems[22];
+    HWND hWndPageItems[21];
     
     enum enmPageItems {
         GB_DESCRIPTION_TAG,
-        BTN_ACCEPT_UNKNOWN,
         BTN_REPORT_SUSPICIOUS_TAG,
         GB_NO_TAG_ACTION,
         CB_NO_TAG_ACTION,

@@ -42,7 +42,6 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-#include "ClientTagManager.h"
 #include "HubCommands.h"
 #include "IP2Country.h"
 #include "LuaScript.h"
@@ -299,12 +298,6 @@ void ServerInitialize() {
     ZlibUtility = new clsZlibUtility();
     if(ZlibUtility == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate ZlibUtility in ServerInitialize\n", 0);
-    	exit(EXIT_FAILURE);
-    }
-
-    ClientTagManager = new ClientTagMan();
-    if(ClientTagManager == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate ClientTagManager in ServerInitialize\n", 0);
     	exit(EXIT_FAILURE);
     }
 
@@ -908,9 +901,6 @@ void ServerFinalClose() {
 
     delete ScriptManager;
 	ScriptManager = NULL;
-
-    delete ClientTagManager;
-    ClientTagManager = NULL;
 
     delete TextFileManager;
     TextFileManager = NULL;

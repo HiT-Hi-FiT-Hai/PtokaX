@@ -1838,20 +1838,27 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
                 char * sPort = GetPort(sData+iAfterCmd, ' ', szPortLen);
                 if(sPort != NULL) {
                     if((curUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
-                        int imsgLen = sprintf(g_sBuffer, "$Search [%s]:%s %s", curUser->sIP, sPort, sPort+szPortLen+1);
-                        if(CheckSprintf(imsgLen, g_szBufferSize, "cDcCommands::Search12") == true) {
-							curUser->cmdActive6Search = AddSearch(curUser, curUser->cmdActive6Search, g_sBuffer, imsgLen, true);
+                        if((curUser->ui32BoolBits & User::BIT_IPV6_ACTIVE) == User::BIT_IPV6_ACTIVE) {
+                            int imsgLen = sprintf(g_sBuffer, "$Search [%s]:%s %s", curUser->sIP, sPort, sPort+szPortLen+1);
+                            if(CheckSprintf(imsgLen, g_szBufferSize, "cDcCommands::Search12") == true) {
+							 curUser->cmdActive6Search = AddSearch(curUser, curUser->cmdActive6Search, g_sBuffer, imsgLen, true);
+                            }
+                        } else {
+                            int imsgLen = sprintf(g_sBuffer, "$Search Hub:%s %s", curUser->sNick, sPort+szPortLen+1);
+                            if(CheckSprintf(imsgLen, g_szBufferSize, "cDcCommands::Search12-1") == true) {
+                                curUser->cmdPassiveSearch = AddSearch(curUser, curUser->cmdPassiveSearch, g_sBuffer, imsgLen, false);
+                            }
                         }
 
 						if((curUser->ui32BoolBits & User::BIT_IPV4) == User::BIT_IPV4) {
                             if((curUser->ui32BoolBits & User::BIT_IPV4_ACTIVE) == User::BIT_IPV4_ACTIVE) {
-                                imsgLen = sprintf(g_sBuffer, "$Search %s:%s %s", curUser->sIPv4, sPort, sPort+szPortLen+1);
-                                if(CheckSprintf(imsgLen, g_szBufferSize, "cDcCommands::Search12-1") == true) {
+                                int imsgLen = sprintf(g_sBuffer, "$Search %s:%s %s", curUser->sIPv4, sPort, sPort+szPortLen+1);
+                                if(CheckSprintf(imsgLen, g_szBufferSize, "cDcCommands::Search12-2") == true) {
                                     curUser->cmdActive4Search = AddSearch(curUser, curUser->cmdActive4Search, g_sBuffer, imsgLen, true);
                                 }
                             } else {
-                                imsgLen = sprintf(g_sBuffer, "$Search Hub:%s %s", curUser->sNick, sPort+szPortLen+1);
-                                if(CheckSprintf(imsgLen, g_szBufferSize, "cDcCommands::Search12-2") == true) {
+                                int imsgLen = sprintf(g_sBuffer, "$Search Hub:%s %s", curUser->sNick, sPort+szPortLen+1);
+                                if(CheckSprintf(imsgLen, g_szBufferSize, "cDcCommands::Search12-3") == true) {
                                     curUser->cmdPassiveSearch = AddSearch(curUser, curUser->cmdPassiveSearch, g_sBuffer, imsgLen, false);
                                 }
                             }
@@ -1935,7 +1942,18 @@ void cDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const bool 
 					}
 				}
 			} else {
-				curUser->cmdActive4Search = AddSearch(curUser, curUser->cmdActive4Search, sData, iLen, true);
+                curUser->cmdActive4Search = AddSearch(curUser, curUser->cmdActive4Search, sData, iLen, true);
+
+                if(((curUser->ui32BoolBits & User::BIT_IPV6_ACTIVE) == User::BIT_IPV6_ACTIVE) == false) {
+					size_t szPortLen = 0;
+					char * sPort = GetPort(sData+8, ' ', szPortLen);
+					if(sPort != NULL) {
+                        int imsgLen = sprintf(g_sBuffer, "$Search Hub:%s %s", curUser->sNick, sPort+szPortLen+1);
+                        if(CheckSprintf(imsgLen, g_szBufferSize, "cDcCommands::Search17") == true) {
+                            curUser->cmdPassiveSearch = AddSearch(curUser, curUser->cmdPassiveSearch, g_sBuffer, imsgLen, false);
+                        }
+                    }
+                }
 			}
 		} else {
 			curUser->cmdActive4Search = AddSearch(curUser, curUser->cmdActive4Search, sData, iLen, true);

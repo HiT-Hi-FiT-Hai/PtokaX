@@ -544,6 +544,11 @@ void GlobalDataQueue::ProcessQueues(User * pUser) {
                             AddDataToQueue(GlobalQueues[ui32QueueType], pCur->sCommand1, pCur->szLen1);
                         }
                         break;
+                    case CMD_PASSIVE_SEARCH_V6_ONLY:
+                        if((ui16QueueBits & BIT_ALL_SEARCHES_IPV6) == BIT_ALL_SEARCHES_IPV6) {
+                            AddDataToQueue(GlobalQueues[ui32QueueType], pCur->sCommand1, pCur->szLen1);
+                        }
+                        break;
                     case CMD_HUBNAME:
                     case CMD_CHAT:
                     case CMD_QUIT:
