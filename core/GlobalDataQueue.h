@@ -85,6 +85,7 @@ public:
         CMD_PASSIVE_SEARCH_V64,
         CMD_PASSIVE_SEARCH_V4,
         CMD_PASSIVE_SEARCH_V4_ONLY,
+        CMD_PASSIVE_SEARCH_V6_ONLY,
     };
 
     enum {

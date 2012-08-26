@@ -98,7 +98,6 @@ const char* LangStr[] = {
     "Report suspicious description tag to operators",
     "Report to Operators when bad password is received 3 times",
     "Enable advanced password protection",
-    "Accept description tag from uknown client when is valid",
     "Keep slow users online",
     "Check on startup if new PtokaX version is available",
     "MyINFO processing",

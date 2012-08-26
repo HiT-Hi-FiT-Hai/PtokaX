@@ -39,7 +39,6 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-#include "ClientTagManager.h"
 #include "DeFlood.h"
 //---------------------------------------------------------------------------
 #ifdef _BUILD_GUI
@@ -268,42 +267,27 @@ static void UserParseMyInfo(User * u) {
             if(DCTag[3] == ' ' && *((uint16_t *)(DCTag+1)) == ui16plusplus) {
                 u->ui32SupportBits |= User::SUPPORTBIT_NOHELLO;
             }
-                
-            // PPK ... tag code with customizable tag file support... but only god knows how slow is :(
-            // PPK's code replaced with a faster one by Pta.
-            size_t szTagPattLen = 0;
-            uint32_t k = 0;
-            while(ClientTagManager->cliTags[k].PattLen) { // PattLen == 0 means end of tags list
-                static const uint16_t ui16V = *((uint16_t *)" V");
-                if(*((uint16_t *)(DCTag+ClientTagManager->cliTags[k].PattLen+1)) == ui16V && strncasecmp(DCTag+1, ClientTagManager->cliTags[k].TagPatt, ClientTagManager->cliTags[k].PattLen) == 0) {
-                    u->sClient = ClientTagManager->cliTags[k].CliName;
-                    u->ui8ClientLen = (uint8_t)strlen(ClientTagManager->cliTags[k].CliName);
-                    szTagPattLen = ClientTagManager->cliTags[k].PattLen+2;
-                    break;
-                }
-                k++;
+
+            static const uint16_t ui16V = *((uint16_t *)"V:");
+
+            char * sTemp = strchr(DCTag, ' ');
+
+            if(sTemp != NULL && *((uint16_t *)(sTemp+1)) == ui16V) {
+                sTemp[0] = '\0';
+                u->sClient = u->sMyInfoOriginal+((DCTag+1)-msg);
+                u->ui8ClientLen = (uint8_t)((sTemp-DCTag)-1);
+            } else {
+                u->sClient = (char *)sUnknownTag;
+                u->ui8ClientLen = 11;
+                u->sTag = NULL;
+                u->ui8TagLen = 0;
+                sMyINFOParts[0][iMyINFOPartsLen[0]-1] = '>'; // not valid DC Tag, add back > tag ending
+                u->sDescription = u->sMyInfoOriginal+(sMyINFOParts[0]-msg);
+                u->ui8DescriptionLen = (uint8_t)iMyINFOPartsLen[0];
+                return;
             }
 
-            // no match ? set NoDCTag and return
-            if(ClientTagManager->cliTags[k].PattLen == 0) {
-                char * sTemp;
-                static const uint16_t ui16V = *((uint16_t *)"V:");
-                if(SettingManager->bBools[SETBOOL_ACCEPT_UNKNOWN_TAG] == true && (sTemp = strchr(DCTag, ' ')) != NULL && *((uint16_t *)(sTemp+1)) == ui16V) {
-                    sTemp[0] = '\0';
-                    u->sClient = u->sMyInfoOriginal+((DCTag+1)-msg);
-                    u->ui8ClientLen = (uint8_t)((sTemp-DCTag)-1);
-                    szTagPattLen = (uint32_t)((sTemp-DCTag)+1);
-                } else {
-                    u->sClient = (char *)sUnknownTag;
-                    u->ui8ClientLen = 11;
-                    u->sTag = NULL;
-                    u->ui8TagLen = 0;
-                    sMyINFOParts[0][iMyINFOPartsLen[0]-1] = '>'; // not valid DC Tag, add back > tag ending
-                    u->sDescription = u->sMyInfoOriginal+(sMyINFOParts[0]-msg);
-                    u->ui8DescriptionLen = (uint8_t)iMyINFOPartsLen[0];
-                    return;
-                }
-            }
+            size_t szTagPattLen = ((sTemp-DCTag)+1);
 
             sMyINFOParts[0][iMyINFOPartsLen[0]-1] = ','; // terminate tag end with ',' for easy tag parsing
 
