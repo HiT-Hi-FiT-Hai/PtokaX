@@ -19,6 +19,7 @@ Added: Missing end line dots on some hub commands reply (thx Alexey for report).
 Added: RegUser hub command. OP need to provide online nick and profile. Hub will ask user for password and after password is entered then user is added to registered users.
 Added: IP in $Search and $ConnectToMe commands is replaced with correct one when user send wrong IP.
 Added: Smart searching for IPv6 users with IPv4 support.
+Added: IP2Country now work for 6to4 and Teredo connections.
 Changed: Country database for IPv4 from ip-to-country to IpToCountry.
 Changed: Not allowed chars in nick to only space, pipe and dollar. Only those protocol disallow. Issues with other chars is client work.
 Changed: Max simultaneous logins value from 500 to 1000.

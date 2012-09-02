@@ -977,6 +977,8 @@ void theLoop::ReceiveLoop() {
 //---------------------------------------------------------------------------
 
 void theLoop::SendLoop() {
+    g_GlobalDataQueue->PrepareQueueItems();
+
     // PPK ... send loop
     // now logging users get changed myinfo with myinfos
     // old users get it in this loop from queue -> badwith saving !!! no more twice myinfo =)
@@ -1063,11 +1065,11 @@ void theLoop::SendLoop() {
                 }
 
                 // process global data queues
-                if(g_GlobalDataQueue->pQueueItems[0] != NULL) {
+                if(g_GlobalDataQueue->pQueueItems != NULL) {
                     g_GlobalDataQueue->ProcessQueues(curUser);
                 }
                 
-            	if(g_GlobalDataQueue->pSingleItems[0] != NULL) {
+            	if(g_GlobalDataQueue->pSingleItems != NULL) {
                     g_GlobalDataQueue->ProcessSingleItems(curUser);
             	}
 
