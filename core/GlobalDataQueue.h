@@ -59,7 +59,11 @@ private:
         SingleDataItem * pPrev, * pNext;
         User * pFromUser;
     };
+
     GlobalQueue * pCreatedGlobalQueues;
+
+    QueueItem * pNewQueueItems[2];
+    SingleDataItem * pNewSingleItems[2];
 
 	struct OpsQueue OpListQueue;
 	struct IPsQueue UserIPQueue;
@@ -111,8 +115,8 @@ public:
         SI_PM2PROFILE,
     };
 
-    QueueItem * pQueueItems[2];
-    SingleDataItem * pSingleItems[2];
+    QueueItem * pQueueItems;
+    SingleDataItem * pSingleItems;
 
     GlobalDataQueue();
     ~GlobalDataQueue();
@@ -120,6 +124,7 @@ public:
     void AddQueueItem(char * sCommand1, const size_t &szLen1, char * sCommand2, const size_t &szLen2, const uint8_t &ui8CmdType);
     void OpListStore(char * sNick);
     void UserIPStore(User * pUser);
+    void PrepareQueueItems();
     void ClearQueues();
     void ProcessQueues(User * u);
     void ProcessSingleItems(User * u) const;

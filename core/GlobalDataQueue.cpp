@@ -67,11 +67,13 @@ GlobalDataQueue::GlobalDataQueue() {
     UserIPQueue.szSize = 255;
 	UserIPQueue.bHaveDollars = false;
 
-    pQueueItems[0] = NULL;
-    pQueueItems[1] = NULL;
+    pNewQueueItems[0] = NULL;
+    pNewQueueItems[1] = NULL;
     pCreatedGlobalQueues = NULL;
-    pSingleItems[0] = NULL;
-    pSingleItems[1] = NULL;
+    pNewSingleItems[0] = NULL;
+    pNewSingleItems[1] = NULL;
+    pQueueItems = NULL;
+    pSingleItems = NULL;
 
     for(uint8_t ui8i = 0; ui8i < 144; ui8i++) {
         GlobalQueues[ui8i].szLen = 0;
@@ -119,8 +121,8 @@ GlobalDataQueue::~GlobalDataQueue() {
 	free(UserIPQueue.sBuffer);
 #endif
 
-    if(pSingleItems[0] != NULL) {
-        SingleDataItem * pNext = pSingleItems[0];
+    if(pNewSingleItems[0] != NULL) {
+        SingleDataItem * pNext = pNewSingleItems[0];
         while(pNext != NULL) {
             SingleDataItem * pCur = pNext;
             pNext = pCur->pNext;
@@ -138,8 +140,52 @@ GlobalDataQueue::~GlobalDataQueue() {
 		}
     }
 
-    if(pQueueItems[0] != NULL) {
-        QueueItem * pNext = pQueueItems[0];
+    if(pSingleItems != NULL) {
+        SingleDataItem * pNext = pSingleItems;
+        while(pNext != NULL) {
+            SingleDataItem * pCur = pNext;
+            pNext = pCur->pNext;
+
+#ifdef _WIN32
+            if(pCur->sData != NULL) {
+                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sData) == 0) {
+					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sData in globalqueue::~globalqueue\n", 0);
+                }
+            }
+#else
+			free(pCur->sData);
+#endif
+            delete pCur;
+		}
+    }
+
+    if(pNewQueueItems[0] != NULL) {
+        QueueItem * pNext = pNewQueueItems[0];
+        while(pNext != NULL) {
+            QueueItem * pCur = pNext;
+            pNext = pCur->pNext;
+
+#ifdef _WIN32
+            if(pCur->sCommand1 != NULL) {
+                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sCommand1) == 0) {
+					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sCommand1 in globalqueue::~globalqueue\n", 0);
+                }
+            }
+            if(pCur->sCommand2 != NULL) {
+                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sCommand2) == 0) {
+					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sCommand2 in globalqueue::~globalqueue\n", 0);
+                }
+            }
+#else
+			free(pCur->sCommand1);
+			free(pCur->sCommand2);
+#endif
+            delete pCur;
+		}
+    }
+
+    if(pQueueItems != NULL) {
+        QueueItem * pNext = pQueueItems;
         while(pNext != NULL) {
             QueueItem * pCur = pNext;
             pNext = pCur->pNext;
@@ -243,12 +289,12 @@ void GlobalDataQueue::AddQueueItem(char * sCommand1, const size_t &szLen1, char 
 
 	pNewItem->pNext = NULL;
 
-    if(pQueueItems[0] == NULL) {
-        pQueueItems[0] = pNewItem;
-        pQueueItems[1] = pNewItem;
+    if(pNewQueueItems[0] == NULL) {
+        pNewQueueItems[0] = pNewItem;
+        pNewQueueItems[1] = pNewItem;
     } else {
-        pQueueItems[1]->pNext = pNewItem;
-        pQueueItems[1] = pNewItem;
+        pNewQueueItems[1]->pNext = pNewItem;
+        pNewQueueItems[1] = pNewItem;
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -324,6 +370,19 @@ void GlobalDataQueue::UserIPStore(User * pUser) {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+void GlobalDataQueue::PrepareQueueItems() {
+    pQueueItems = pNewQueueItems[0];
+
+    pNewQueueItems[0] = NULL;
+    pNewQueueItems[1] = NULL;
+
+    pSingleItems = pNewSingleItems[0];
+
+    pNewSingleItems[0] = NULL;
+    pNewSingleItems[1] = NULL;
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 void GlobalDataQueue::ClearQueues() {
     if(pCreatedGlobalQueues != NULL) {
         GlobalQueue * pNext = pCreatedGlobalQueues;
@@ -348,8 +407,8 @@ void GlobalDataQueue::ClearQueues() {
     UserIPQueue.sBuffer[0] = '\0';
     UserIPQueue.szLen = 0;
 
-    if(pQueueItems[0] != NULL) {
-        QueueItem * pNext = pQueueItems[0];
+    if(pQueueItems != NULL) {
+        QueueItem * pNext = pQueueItems;
 
         while(pNext != NULL) {
             QueueItem * pCur = pNext;
@@ -374,11 +433,10 @@ void GlobalDataQueue::ClearQueues() {
 		}
     }
 
-    pQueueItems[0] = NULL;
-    pQueueItems[1] = NULL;
+    pQueueItems = NULL;
 
-    if(pSingleItems[0] != NULL) {
-        SingleDataItem * pNext = pSingleItems[0];
+    if(pSingleItems != NULL) {
+        SingleDataItem * pNext = pSingleItems;
 
         while(pNext != NULL) {
             SingleDataItem * pCur = pNext;
@@ -397,8 +455,7 @@ void GlobalDataQueue::ClearQueues() {
 		}
     }
 
-    pSingleItems[0] = NULL;
-    pSingleItems[1] = NULL;
+    pSingleItems = NULL;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -468,8 +525,8 @@ void GlobalDataQueue::ProcessQueues(User * pUser) {
     }
 
     if(GlobalQueues[ui32QueueType].bCreated == false) {
-        if(pQueueItems[0] != NULL) {
-            QueueItem * pNext = pQueueItems[0];
+        if(pQueueItems != NULL) {
+            QueueItem * pNext = pQueueItems;
 
             while(pNext != NULL) {
                 QueueItem * pCur = pNext;
@@ -666,7 +723,7 @@ void GlobalDataQueue::ProcessQueues(User * pUser) {
 void GlobalDataQueue::ProcessSingleItems(User * u) const {
     size_t szLen = 0;
 
-    SingleDataItem * pNext = pSingleItems[0];
+    SingleDataItem * pNext = pSingleItems;
 
     while(pNext != NULL) {
         SingleDataItem * pCur = pNext;
@@ -815,20 +872,39 @@ void GlobalDataQueue::SingleItemStore(char * sData, const size_t &szDataLen, Use
 
     pNewItem->i32Profile = i32Profile;
 
-    if(pSingleItems[0] == NULL) {
-        pSingleItems[0] = pNewItem;
-        pSingleItems[1] = pNewItem;
+    if(pNewSingleItems[0] == NULL) {
+        pNewSingleItems[0] = pNewItem;
+        pNewSingleItems[1] = pNewItem;
     } else {
-        pNewItem->pPrev = pSingleItems[1];
-        pSingleItems[1]->pNext = pNewItem;
-        pSingleItems[1] = pNewItem;
+        pNewItem->pPrev = pNewSingleItems[1];
+        pNewSingleItems[1]->pNext = pNewItem;
+        pNewSingleItems[1] = pNewItem;
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void GlobalDataQueue::SendFinalQueue() {
-    if(pQueueItems[0] != NULL) {
-        QueueItem * pNext = pQueueItems[0];
+    if(pQueueItems != NULL) {
+        QueueItem * pNext = pQueueItems;
+
+        while(pNext != NULL) {
+            QueueItem * pCur = pNext;
+            pNext = pCur->pNext;
+
+            switch(pCur->ui8CommandType) {
+                case CMD_OPS:
+                case CMD_CHAT:
+                case CMD_LUA:
+                    AddDataToQueue(GlobalQueues[0], pCur->sCommand1, pCur->szLen1);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    if(pNewQueueItems[0] != NULL) {
+        QueueItem * pNext = pNewQueueItems[0];
 
         while(pNext != NULL) {
             QueueItem * pCur = pNext;

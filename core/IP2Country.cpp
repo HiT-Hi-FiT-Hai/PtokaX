@@ -462,6 +462,18 @@ const char * IP2CC::Find(const uint8_t * ui128IpHash, const bool &bCountryName) 
         ui32IpHash = 16777216 * ui128IpHash[12] + 65536 * ui128IpHash[13] + 256 * ui128IpHash[14] + ui128IpHash[15];
     }
 
+    if(bIPv4 == false) {
+        if(ui128IpHash[0] == 32 && ui128IpHash[1] == 2) { // 6to4 tunnel
+            bIPv4 = true;
+
+            ui32IpHash = 16777216 * ui128IpHash[2] + 65536 * ui128IpHash[3] + 256 * ui128IpHash[4] + ui128IpHash[5];
+        } else if(ui128IpHash[0] == 32 && ui128IpHash[1] == 1 && ui128IpHash[2] == 0 && ui128IpHash[3] == 0) { // teredo tunnel
+            bIPv4 = true;
+
+            ui32IpHash = (16777216 * ui128IpHash[12] + 65536 * ui128IpHash[13] + 256 * ui128IpHash[14] + ui128IpHash[15]) ^ 0xffffffff;
+        }
+    }
+
     if(bIPv4 == true) {
         for(uint32_t ui32i = 0; ui32i < ui32Count; ui32i++) {
             if(ui32RangeFrom[ui32i] < ui32IpHash && ui32RangeTo[ui32i] > ui32IpHash) {
@@ -500,6 +512,18 @@ uint8_t IP2CC::Find(const uint8_t * ui128IpHash) {
         bIPv4 = true;
 
         ui32IpHash = 16777216 * ui128IpHash[12] + 65536 * ui128IpHash[13] + 256 * ui128IpHash[14] + ui128IpHash[15];
+    }
+
+    if(bIPv4 == false) {
+        if(ui128IpHash[0] == 32 && ui128IpHash[1] == 2) { // 6to4 tunnel
+            bIPv4 = true;
+
+            ui32IpHash = 16777216 * ui128IpHash[2] + 65536 * ui128IpHash[3] + 256 * ui128IpHash[4] + ui128IpHash[5];
+        } else if(ui128IpHash[0] == 32 && ui128IpHash[1] == 1 && ui128IpHash[2] == 0 && ui128IpHash[3] == 0) { // teredo tunnel
+            bIPv4 = true;
+
+            ui32IpHash = (16777216 * ui128IpHash[12] + 65536 * ui128IpHash[13] + 256 * ui128IpHash[14] + ui128IpHash[15]) ^ 0xffffffff;
+        }
     }
 
     if(bIPv4 == true) {
