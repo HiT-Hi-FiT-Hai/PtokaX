@@ -186,7 +186,7 @@ void AboutDialog::DoModal(HWND hWndParent) {
     "http://board.ptokax.ch\\par\n"
     "\\par\n"
     "Wiki:\\par\n"
-    "http://wiki.ptokax.ch\\par\n"
+    "http://wiki.PtokaX.org\\par\n"
     "\\par\n"
     "Designers:\\par\n"
     "\\cf1 PPK\\cf0\\b0, PPK@PtokaX.org, ICQ: 122442343\\par\n"

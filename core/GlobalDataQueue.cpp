@@ -943,7 +943,7 @@ void GlobalDataQueue::SendFinalQueue() {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GlobalDataQueue::AddDataToQueue(GlobalQueue &pQueue, char * sData, const size_t &szLen) const {
+void GlobalDataQueue::AddDataToQueue(GlobalQueue &pQueue, char * sData, const size_t &szLen) {
     if(pQueue.szSize < (pQueue.szLen + szLen)) {
         size_t szAllignLen = Allign256(pQueue.szLen + szLen);
         char * pOldBuf = pQueue.sBuffer;

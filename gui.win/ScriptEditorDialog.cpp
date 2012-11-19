@@ -34,6 +34,15 @@
 //---------------------------------------------------------------------------
 #pragma hdrstop
 //---------------------------------------------------------------------------
+#include "../core/LuaCoreLib.h"
+#include "../core/LuaBanManLib.h"
+#include "../core/LuaIP2CountryLib.h"
+#include "../core/LuaProfManLib.h"
+#include "../core/LuaRegManLib.h"
+#include "../core/LuaScriptManLib.h"
+#include "../core/LuaSetManLib.h"
+#include "../core/LuaTmrManLib.h"
+#include "../core/LuaUDPDbgLib.h"
 #include "MainWindowPageScripts.h"
 #include "Resources.h"
 //---------------------------------------------------------------------------
@@ -373,6 +382,47 @@ void ScriptEditorDialog::OnCheckSyntax() {
     }
 
 	luaL_openlibs(L);
+
+    if(bServerRunning == true) {
+#if LUA_VERSION_NUM == 501
+	   RegCore(L);
+	   RegSetMan(L);
+	   RegRegMan(L);
+	   RegBanMan(L);
+	   RegProfMan(L);
+	   RegTmrMan(L);
+	   RegUDPDbg(L);
+	   RegScriptMan(L);
+	   RegIP2Country(L);
+#else
+        luaL_requiref(L, "Core", RegCore, 1);
+        lua_pop(L, 1);
+
+        luaL_requiref(L, "SetMan", RegSetMan, 1);
+        lua_pop(L, 1);
+
+        luaL_requiref(L, "RegMan", RegRegMan, 1);
+        lua_pop(L, 1);
+
+        luaL_requiref(L, "BanMan", RegBanMan, 1);
+        lua_pop(L, 1);
+
+        luaL_requiref(L, "ProfMan", RegProfMan, 1);
+        lua_pop(L, 1);
+
+        luaL_requiref(L, "TmrMan", RegTmrMan, 1);
+        lua_pop(L, 1);
+
+        luaL_requiref(L, "UDPDbg", RegUDPDbg, 1);
+        lua_pop(L, 1);
+
+        luaL_requiref(L, "ScriptMan", RegScriptMan, 1);
+        lua_pop(L, 1);
+
+        luaL_requiref(L, "IP2Country", RegIP2Country, 1);
+        lua_pop(L, 1);
+#endif
+    }
 
 	if(luaL_dostring(L, sBuf) == 0) {
 		::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_NO_SYNERR_IN_SCRIPT], sTitle.c_str(), MB_OK);

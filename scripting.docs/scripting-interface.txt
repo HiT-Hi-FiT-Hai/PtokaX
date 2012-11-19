@@ -149,7 +149,8 @@ GetOps()			- Return table with all registered users with operator status as regi
 GetReg(sNick)			- Return registered user with given nick as registered user table or nil when reg with this nick not exist.
 GetRegs()			- Return table with all registered users as registered user tables.
 
-AddReg(sNick, sPass, nProfileNumber)	- Chars $|<>:?*"/\ and space not allowed in nick. Char | not allowed in password. Max nick/pass length 64 chars. Return nil when failed, true if success.
+RegMan.AddReg(sNick, nProfileNumber)    - Chars $| and space not allowed in nick. Max nick length 64 chars. Hub will ask user for password and after password is received then user will be registered. Return nil when failed, true if success.
+AddReg(sNick, sPass, nProfileNumber)	- Chars $| and space not allowed in nick. Char | not allowed in password. Max nick/pass length 64 chars. Return nil when failed, true if success.
 DelReg(sNick)				- Return nil when failed, true if success.
 ChangeReg(sNick, sPass, nProfileNumber)	- Return nil when failed, true if success.
 
@@ -262,7 +263,8 @@ IP2Country.
 -------------------
 GetCountryCode(sIP)		- Return country code of given IP or nil when IP is not valid.
 GetCountryName(sIP)		- Return country name of given IP or nil when IP is not valid.
-GetCountryName(tUser)		- Return country name for given user.
+GetCountryName(tUser)	- Return country name for given user.
+IP2Country.Reload()     - Reload (update) database from database files.
 
 
 User.

@@ -53,7 +53,7 @@ public:
     void SetStartButtonText(const char * sText) const;
     void SetStatusValue(const char * sText) const;
     void EnableGuiItems(const BOOL &bEnable) const;
-    void SaveGuiSettings() const;
+    static void SaveGuiSettings();
 private:
     MainWindowPage * MainWindowPages[3];
 

@@ -178,12 +178,12 @@ void GuiSettingManager::Save() const {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-bool GuiSettingManager::GetDefaultBool(const size_t &szBoolId) const {
+bool GuiSettingManager::GetDefaultBool(const size_t &szBoolId) {
     return GuiSetBoolDef[szBoolId];
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-int32_t GuiSettingManager::GetDefaultInteger(const size_t &szIntegerId) const {
+int32_t GuiSettingManager::GetDefaultInteger(const size_t &szIntegerId) {
     return GuiSetIntegerDef[szIntegerId];;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

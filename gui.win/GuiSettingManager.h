@@ -35,8 +35,8 @@ public:
     GuiSettingManager(void);
     ~GuiSettingManager(void);
 
-    bool GetDefaultBool(const size_t &szBoolId) const;
-    int32_t GetDefaultInteger(const size_t &szIntegerId) const;
+    static bool GetDefaultBool(const size_t &szBoolId);
+    static int32_t GetDefaultInteger(const size_t &szIntegerId);
 
     void SetBool(const size_t &szBoolId, const bool &bValue); //g_GuiSettingManager->SetBool()
     void SetInteger(const size_t &szIntegerId, const int32_t &i32Value); //g_GuiSettingManager->SetInteger()

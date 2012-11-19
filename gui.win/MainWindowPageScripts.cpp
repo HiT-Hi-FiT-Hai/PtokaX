@@ -419,7 +419,7 @@ void MainWindowPageScripts::OnContextMenu(HWND hWindow, LPARAM lParam) {
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::OpenScriptEditor(char * sScript/* = NULL*/) const {
+void MainWindowPageScripts::OpenScriptEditor(char * sScript/* = NULL*/) {
     ScriptEditorDialog * pScriptEditorDialog = new ScriptEditorDialog();
 
     if(pScriptEditorDialog != NULL) {
@@ -534,9 +534,13 @@ void MainWindowPageScripts::OnItemChanged(const LPNMLISTVIEW &pListView) {
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::OnDoubleClick(const LPNMITEMACTIVATE &pItemActivate) const {
-    string sScript = SCRIPT_PATH + ScriptManager->ScriptTable[pItemActivate->iItem]->sName;
-    OpenScriptEditor(sScript.c_str());
+void MainWindowPageScripts::OnDoubleClick(const LPNMITEMACTIVATE &pItemActivate) {
+    RECT rc = { LVIR_ICON, 0, 0, 0 };
+
+    if(::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETITEMRECT, pItemActivate->iItem, (LPARAM)&rc) == FALSE || pItemActivate->ptAction.x > rc.left) {
+        string sScript = SCRIPT_PATH + ScriptManager->ScriptTable[pItemActivate->iItem]->sName;
+        OpenScriptEditor(sScript.c_str());
+    }
 }
 //------------------------------------------------------------------------------
 
@@ -638,7 +642,7 @@ void MainWindowPageScripts::MoveDown() {
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::RestartScripts() const {
+void MainWindowPageScripts::RestartScripts() {
     ScriptManager->Restart();
 }
 //------------------------------------------------------------------------------

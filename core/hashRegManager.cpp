@@ -234,7 +234,7 @@ void hashRegMan::Add2Table(RegUser * Reg) {
 }
 //---------------------------------------------------------------------------
 
-void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui16NewProfile) const {
+void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui16NewProfile) {
     if(strcmp(pReg->sPass, sNewPasswd) != 0) {
         size_t szPassLen = strlen(sNewPasswd);
 
@@ -685,7 +685,7 @@ void hashRegMan::Save(void) const {
     pxbRegs.sItemIdentifiers[2][0] = 'P';
     pxbRegs.sItemIdentifiers[2][1] = 'R';
 
-    RegUser *next = hashRegManager->RegListS;
+    RegUser *next = RegListS;
     while(next != NULL) {
         RegUser *curReg = next;
 		next = curReg->next;
