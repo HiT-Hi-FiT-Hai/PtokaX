@@ -2300,7 +2300,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
 
                 size_t szNickLen = strlen(sNick);
 
-                // try to add the user
+                // check if user is registered
                 if(hashRegManager->Find(sNick, szNickLen) != NULL) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
@@ -2350,13 +2350,13 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
                     if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
                         int imsgLen = sprintf(msg, "%s $<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],  SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
-                            curUser->sNick, LanguageManager->sTexts[LAN_REGISTER], sNick, LanguageManager->sTexts[LAN_AS], sProfile);
+                            curUser->sNick, LanguageManager->sTexts[LAN_REGISTERED], sNick, LanguageManager->sTexts[LAN_AS], sProfile);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand::RegUser8") == true) {
 							g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
                         }
                     } else {
                         int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], curUser->sNick,
-                            LanguageManager->sTexts[LAN_REGISTER], sNick, LanguageManager->sTexts[LAN_AS], sProfile);
+                            LanguageManager->sTexts[LAN_REGISTERED], sNick, LanguageManager->sTexts[LAN_AS], sProfile);
                         if(CheckSprintf(imsgLen, 1024, "HubCommands::DoCommand::RegUser9") == true) {
                             g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
                         }
@@ -6861,7 +6861,7 @@ int HubCommands::CheckFromPm(User * curUser, const bool &fromPM) {
 }
 //---------------------------------------------------------------------------
 
-void HubCommands::UncountDeflood(User * curUser, const bool &fromPM) const {
+void HubCommands::UncountDeflood(User * curUser, const bool &fromPM) {
     if(fromPM == false) {
         if(curUser->ui16ChatMsgs != 0) {
 			curUser->ui16ChatMsgs--;

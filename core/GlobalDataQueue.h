@@ -72,7 +72,7 @@ private:
 
     char msg[128];
 
-    void AddDataToQueue(GlobalQueue &pQueue, char * sData, const size_t &szLen) const;
+    static void AddDataToQueue(GlobalQueue &pQueue, char * sData, const size_t &szLen);
 public:
     enum {
         CMD_HUBNAME,

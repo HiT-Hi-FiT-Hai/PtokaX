@@ -157,7 +157,7 @@ ProfileManager::~ProfileManager() {
 }
 //---------------------------------------------------------------------------
 
-void ProfileManager::CreateDefaultProfiles() const {
+void ProfileManager::CreateDefaultProfiles() {
     const char* profilenames[] = { "Master", "Operator", "VIP", "Reg" };
     const char* profilepermisions[] = {
         "1001111111111111111111111111111111111111111110100011111100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",

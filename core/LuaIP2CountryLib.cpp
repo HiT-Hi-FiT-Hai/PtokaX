@@ -121,9 +121,23 @@ static int GetCountryName(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
+static int Reload(lua_State * L) {
+	if(lua_gettop(L) != 0) {
+        luaL_error(L, "bad argument count to 'IP2Country.Reload' (0 expected, got %d)", lua_gettop(L));
+        lua_settop(L, 0);
+        return 0;
+    }
+
+	IP2Country->Reload();
+
+    return 0;
+}
+//------------------------------------------------------------------------------
+
 static const luaL_Reg ip2country[] = {
 	{ "GetCountryCode", GetCountryCode },
 	{ "GetCountryName", GetCountryName }, 
+	{ "Reload", Reload },
 	{ NULL, NULL }
 };
 //---------------------------------------------------------------------------

@@ -37,10 +37,10 @@ private:
     bool GetNickList(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck);
 	void Key(User * curUser, char * sData, const uint32_t &iLen);
 	void Kick(User * curUser, char * sData, const uint32_t &iLen);
-    bool SearchDeflood(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck, const bool &bMulti) const;
+    static bool SearchDeflood(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck, const bool &bMulti);
     void Search(User * curUser, char * sData, uint32_t iLen, const bool &bCheck, const bool &bMulti);
     bool MyINFODeflood(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck);
-	bool MyINFO(User * curUser, char * sData, const uint32_t &iLen) const;
+	static bool MyINFO(User * curUser, char * sData, const uint32_t &iLen);
 	void MyPass(User * curUser, char * sData, const uint32_t &iLen);
 	void OpForceMove(User * curUser, char * sData, const uint32_t &iLen);
 	void RevConnectToMe(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck);
@@ -49,7 +49,7 @@ private:
     void To(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck);
 	void ValidateNick(User * curUser, char * sData, const uint32_t &iLen);
 	void Version(User * curUser, char * sData, const uint32_t &iLen);
-    bool ChatDeflood(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) const;
+    static bool ChatDeflood(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck);
 	void Chat(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck);
 	void Close(User * curUser, char * sData, const uint32_t &iLen);
     
@@ -61,10 +61,10 @@ private:
 	PassBf * Find(const uint8_t * ui128IpHash);
 	void Remove(PassBf * PassBfItem);
 
-    bool CheckIP(const User * curUser, const char * sIP) const;
+    static bool CheckIP(const User * curUser, const char * sIP);
     char * GetPort(char * sData, char cPortEnd, size_t &szPortLen);
     void SendIncorrectIPMsg(User * curUser, char * sBadIP, const bool &bCTM);
-    void SendIPFixedMsg(User * pUser, char * sBadIP, char * sRealIP) const;
+    static void SendIPFixedMsg(User * pUser, char * sBadIP, char * sRealIP);
 
     PrcsdUsrCmd * AddSearch(User * pUser, PrcsdUsrCmd * cmdSearch, char * sSearch, const size_t &szLen, const bool &bActive) const;
 protected:
@@ -75,7 +75,7 @@ public:
     void PreProcessData(User * curUser, char * sData, const bool &bCheck, const uint32_t &iLen);
     void ProcessCmds(User * curUser);
 
-    void SRFromUDP(User * curUser, char * sData, const size_t &szLen) const;
+    static void SRFromUDP(User * curUser, char * sData, const size_t &szLen);
     
 	uint32_t iStatChat, iStatCmdUnknown, iStatCmdTo, iStatCmdMyInfo, iStatCmdSearch, iStatCmdSR, iStatCmdRevCTM;
 	uint32_t iStatCmdOpForceMove, iStatCmdMyPass, iStatCmdValidate, iStatCmdKey, iStatCmdGetInfo, iStatCmdGetNickList;

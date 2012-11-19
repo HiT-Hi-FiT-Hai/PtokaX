@@ -735,7 +735,7 @@ bool RegThread::Receive(RegSocket * Sock) {
 }
 //---------------------------------------------------------------------------
 
-void RegThread::Add2SendBuf(RegSocket * Sock, char * sData) const {
+void RegThread::Add2SendBuf(RegSocket * Sock, char * sData) {
     size_t szLen = strlen(sData);
     
     Sock->sSendBuf = (char *)malloc(szLen+1);

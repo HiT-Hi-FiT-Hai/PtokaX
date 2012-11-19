@@ -57,8 +57,8 @@ public:
     virtual void FocusLastItem() = NULL;
 protected:
     void CreateHWND(HWND hOwner);
-    void RemovePipes(HWND hWnd) const;
-    void MinMaxCheck(HWND hWnd, const int &iMin, const int &iMax) const;
+    static void RemovePipes(HWND hWnd);
+    static void MinMaxCheck(HWND hWnd, const int &iMin, const int &iMax);
     void AddUpDown(HWND &hWnd, const int &iX, const int &iY, const int &iWidth, const int &iHeight, const LPARAM &lpRange, const WPARAM &wpBuddy, const LPARAM &lpPos);
     void AddToolTip(const HWND &hWnd, char * sTipText) const;
 private:

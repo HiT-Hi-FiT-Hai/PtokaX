@@ -20,6 +20,8 @@ Added: RegUser hub command. OP need to provide online nick and profile. Hub will
 Added: IP in $Search and $ConnectToMe commands is replaced with correct one when user send wrong IP.
 Added: Smart searching for IPv6 users with IPv4 support.
 Added: IP2Country now work for 6to4 and Teredo connections.
+Added: IP2Country.Reload to Lua api.
+Added: RegMan.AddReg now support second syntax RegMan.AddReg(sNick, nProfileNumber). That way user is asked for password and registered after he send it.
 Changed: Country database for IPv4 from ip-to-country to IpToCountry.
 Changed: Not allowed chars in nick to only space, pipe and dollar. Only those protocol disallow. Issues with other chars is client work.
 Changed: Max simultaneous logins value from 500 to 1000.
@@ -29,7 +31,7 @@ Changed: Disabled keep slow client online for clients with zpipe support.
 Changed: Memory allocation failures checking. When memory allocation fail then user who caused that is disconnected and hub not crash.
 Changed: Line ending to \n on windoze.
 Changed: Registered users are now stored in binary file instead of xml.
-Fixed: TmrMan.RemoveTimer Lua api call in windoze version (thx C©‰o·y≈© for report).
+Fixed: TmrMan.RemoveTimer Lua api call in windoze version (thx C©‰o·y+© for report).
 Fixed: MOTD was not updated after change in gui (thx mappy for report).
 Fixed: Few settings was not updated after change in gui.
 Fixed: Buggy chat input line after using some settings pages (thx The-Master for report).
@@ -45,6 +47,8 @@ Fixed: Buggy search length checking for active and passive users (thx Alexey for
 Fixed: Compile with Clang compiler on Linux.
 Fixed: Message returned on !clrrangetempbans (thx Alexey for report).
 Fixed: Rare case when short myinfo was sent to ops when they should get long myinfo.
+Fixed: Error message on script syntax checking when PtokaX api call is outside function.
+Fixed: Doubleclick in gui on script now open script editor only when it is not on checkbox.
 Removed: All info related to old ip-to-country database.
 Removed: Obsolete client tags.
 Removed: Obsolete setting to accept unknown tag.

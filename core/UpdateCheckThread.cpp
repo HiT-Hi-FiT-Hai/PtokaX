@@ -280,7 +280,7 @@ void UpdateCheckThread::WaitFor() {
 }
 //---------------------------------------------------------------------------
 
-void UpdateCheckThread::Message(char * sMessage, const size_t &szLen) const {
+void UpdateCheckThread::Message(char * sMessage, const size_t &szLen) {
 	char *sMess = (char *)malloc(szLen + 1);
 	if(sMess == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMess in UpdateCheckThread::Message\n", (uint64_t)(szLen+1));

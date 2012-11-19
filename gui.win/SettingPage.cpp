@@ -89,7 +89,7 @@ void SettingPage::CreateHWND(HWND hOwner) {
 }
 //---------------------------------------------------------------------------
 
-void SettingPage::RemovePipes(HWND hWnd) const {
+void SettingPage::RemovePipes(HWND hWnd) {
     char buf[257];
     ::GetWindowText(hWnd, buf, 257);
 
@@ -115,7 +115,7 @@ void SettingPage::RemovePipes(HWND hWnd) const {
 }
 //---------------------------------------------------------------------------
 
-void SettingPage::MinMaxCheck(HWND hWnd, const int &iMin, const int &iMax) const {
+void SettingPage::MinMaxCheck(HWND hWnd, const int &iMin, const int &iMax) {
     char buf[6];
     ::GetWindowText(hWnd, buf, 6);
 

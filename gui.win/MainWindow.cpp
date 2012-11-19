@@ -483,7 +483,7 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     ::ShellExecute(NULL, NULL, "http://board.ptokax.ch", NULL, NULL, SW_SHOWNORMAL);
                     return 0;
                 case IDC_WIKI:
-                    ::ShellExecute(NULL, NULL, "http://wiki.ptokax.ch", NULL, NULL, SW_SHOWNORMAL);
+                    ::ShellExecute(NULL, NULL, "http://wiki.PtokaX.org", NULL, NULL, SW_SHOWNORMAL);
                     return 0;
                 case IDC_UPDATE_CHECK: {
                     pUpdateDialog = new UpdateDialog();
@@ -800,7 +800,7 @@ void MainWindow::OnSelChanged() {
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::SaveGuiSettings() const {
+void MainWindow::SaveGuiSettings() {
     g_GuiSettingManager->Save();
 };
 //---------------------------------------------------------------------------

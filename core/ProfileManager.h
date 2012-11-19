@@ -35,7 +35,7 @@ struct ProfileItem {
 
 class ProfileManager {
 private:	// User declarations  
-    void CreateDefaultProfiles() const;
+    static void CreateDefaultProfiles();
     ProfileItem * CreateProfile(const char * name);
 public:		// User declarations
     enum ProfilePermissions {
