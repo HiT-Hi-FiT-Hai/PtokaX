@@ -312,7 +312,7 @@ static int AddReg(lua_State * L) {
         lua_pushboolean(L, 1);
         return 1;
     } else {
-        luaL_error(L, "bad argument count to 'AddReg' (3 expected, got %d)", lua_gettop(L));
+        luaL_error(L, "bad argument count to 'RegMan.AddReg' (2 or 3 expected, got %d)", lua_gettop(L));
         lua_settop(L, 0);
         lua_pushnil(L);
         return 1;

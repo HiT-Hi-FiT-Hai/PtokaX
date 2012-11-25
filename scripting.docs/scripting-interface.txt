@@ -264,7 +264,7 @@ IP2Country.
 GetCountryCode(sIP)		- Return country code of given IP or nil when IP is not valid.
 GetCountryName(sIP)		- Return country name of given IP or nil when IP is not valid.
 GetCountryName(tUser)	- Return country name for given user.
-IP2Country.Reload()     - Reload (update) database from database files.
+Reload()                - Reload (update) database from database files.
 
 
 User.

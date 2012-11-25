@@ -663,6 +663,26 @@ void theLoop::ReceiveLoop() {
                     curUser->uLogInOut->sLockUsrConn = NULL;
                 }
 
+                if((curUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6 && ((curUser->ui32BoolBits & User::SUPPORTBIT_IPV4) == User::SUPPORTBIT_IPV4) == false) {
+                    in_addr ipv4addr;
+					ipv4addr.s_addr = INADDR_NONE;
+
+                    if(curUser->ui128IpHash[0] == 32 && curUser->ui128IpHash[1] == 2) { // 6to4 tunnel
+                        memcpy(&ipv4addr, curUser->ui128IpHash + 2, 4);
+                    } else if(curUser->ui128IpHash[0] == 32 && curUser->ui128IpHash[1] == 1 && curUser->ui128IpHash[2] == 0 && curUser->ui128IpHash[3] == 0) { // teredo tunnel
+                        uint32_t ui32Ip = 0;
+                        memcpy(&ui32Ip, curUser->ui128IpHash + 12, 4);
+                        ui32Ip ^= 0xffffffff;
+                        memcpy(&ipv4addr, &ui32Ip, 4);
+                    }
+
+                    if(ipv4addr.s_addr != INADDR_NONE) {
+                        strcpy(curUser->sIPv4, inet_ntoa(ipv4addr));
+                        curUser->ui8IPv4Len = (uint8_t)strlen(curUser->sIPv4);
+                        curUser->ui32BoolBits |= User::BIT_IPV4;
+                    }
+                }
+
                 //New User Connected ... the user is operator ? invoke lua User/OpConnected
                 uint32_t iBeforeLuaLen = curUser->sbdatalen;
 
