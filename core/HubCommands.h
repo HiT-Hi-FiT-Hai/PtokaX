@@ -30,8 +30,10 @@ private:
 
     bool Ban(User * curUser, char * sCommand, bool fromPM, bool bFull);
     bool BanIp(User * curUser, char * sCommand, bool fromPM, bool bFull);
+    bool NickBan(User * curUser, char * sNick, char * sReason, bool bFromPM);
     bool TempBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
     bool TempBanIp(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
+    bool TempNickBan(User * curUser, char * sNick, char * sTime, const size_t &szTimeLen, char * sReason, bool bFromPM);
     bool RangeBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
     bool RangeTempBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
     bool RangeUnban(User * curUser, char * sCommand, bool fromPM);

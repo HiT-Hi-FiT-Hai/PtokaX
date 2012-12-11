@@ -200,11 +200,17 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
     uint8_t ui128IpHash[16];
     memset(ui128IpHash, 0, 16);
 
+    uint16_t ui16IpTableIdx = 0;
+
     if(AccptSocket->addr.ss_family == AF_INET6) {
+        memcpy(ui128IpHash, &((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr.s6_addr, 16);
+
         if(IN6_IS_ADDR_V4MAPPED(&((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr)) {
 			in_addr ipv4addr;
 			memcpy(&ipv4addr, ((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr.s6_addr + 12, 4);
 			strcpy(sIP, inet_ntoa(ipv4addr));
+
+            ui16IpTableIdx = ui128IpHash[14] * ui128IpHash[15];
         } else {
             bIPv6 = true;
 #ifdef _WIN32
@@ -212,15 +218,16 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 #else
             inet_ntop(AF_INET6, &((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr, sIP, 46);
 #endif
+            ui16IpTableIdx = GetIpTableIdx(ui128IpHash);
         }
-
-        memcpy(ui128IpHash, &((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr.s6_addr, 16);
     } else {
         strcpy(sIP, inet_ntoa(((struct sockaddr_in *)&AccptSocket->addr)->sin_addr));
 
         ui128IpHash[10] = 255;
         ui128IpHash[11] = 255;
         memcpy(ui128IpHash+12, &((struct sockaddr_in *)&AccptSocket->addr)->sin_addr.s_addr, 4);
+
+        ui16IpTableIdx = ui128IpHash[14] * ui128IpHash[15];
     }
 
     // set the recv buffer
@@ -415,6 +422,7 @@ void theLoop::AcceptUser(AcceptedSocket *AccptSocket) {
     pUser->ui8State = User::STATE_KEY_OR_SUP;
 
     memcpy(pUser->ui128IpHash, ui128IpHash, 16);
+    pUser->ui16IpTableIdx = ui16IpTableIdx;
 
     UserSetIP(pUser, sIP);
 
@@ -686,9 +694,12 @@ void theLoop::ReceiveLoop() {
                 //New User Connected ... the user is operator ? invoke lua User/OpConnected
                 uint32_t iBeforeLuaLen = curUser->sbdatalen;
 
-				ScriptManager->UserConnected(curUser);
+				bool bRet = ScriptManager->UserConnected(curUser);
 				if(curUser->ui8State >= User::STATE_CLOSING) {// connection closed by script?
-                    ScriptManager->UserDisconnected(curUser);
+                    if(bRet == false) { // only when all scripts process userconnected
+                        ScriptManager->UserDisconnected(curUser);
+                    }
+
 					continue;
 				}
 

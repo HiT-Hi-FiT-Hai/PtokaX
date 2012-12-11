@@ -253,25 +253,31 @@ void hashBanMan::Add2NickTable(BanItem *Ban) {
 //---------------------------------------------------------------------------
 
 bool hashBanMan::Add2IpTable(BanItem *Ban) {
-    uint16_t ui16dx = *((uint16_t *)(Ban->ui128IpHash+13));
-    
-    if(iptable[ui16dx] == NULL) {
-		iptable[ui16dx] = new IpTableItem();
+    uint16_t ui16IpTableIdx = 0;
 
-        if(iptable[ui16dx] == NULL) {
+    if(Ban->ui128IpHash[10] == 255 && Ban->ui128IpHash[11] == 255 && memcmp(Ban->ui128IpHash, "\0\0\0\0\0\0\0\0\0\0", 10) == 0) {
+        ui16IpTableIdx = Ban->ui128IpHash[14] * Ban->ui128IpHash[15];
+    } else {
+        ui16IpTableIdx = GetIpTableIdx(Ban->ui128IpHash);
+    }
+    
+    if(iptable[ui16IpTableIdx] == NULL) {
+		iptable[ui16IpTableIdx] = new IpTableItem();
+
+        if(iptable[ui16IpTableIdx] == NULL) {
 			AppendDebugLog("%s - [MEM] Cannot allocate IpTableItem in hashBanMan::Add2IpTable\n", 0);
             return false;
         }
 
-        iptable[ui16dx]->next = NULL;
-        iptable[ui16dx]->prev = NULL;
+        iptable[ui16IpTableIdx]->next = NULL;
+        iptable[ui16IpTableIdx]->prev = NULL;
 
-        iptable[ui16dx]->FirstBan = Ban;
+        iptable[ui16IpTableIdx]->FirstBan = Ban;
 
         return true;
     }
 
-    IpTableItem * next = iptable[ui16dx];
+    IpTableItem * next = iptable[ui16IpTableIdx];
 
     while(next != NULL) {
         IpTableItem * cur = next;
@@ -295,11 +301,11 @@ bool hashBanMan::Add2IpTable(BanItem *Ban) {
 
     cur->FirstBan = Ban;
 
-    cur->next = iptable[ui16dx];
+    cur->next = iptable[ui16IpTableIdx];
     cur->prev = NULL;
 
-    iptable[ui16dx]->prev = cur;
-    iptable[ui16dx] = cur;
+    iptable[ui16IpTableIdx]->prev = cur;
+    iptable[ui16IpTableIdx] = cur;
 
     return true;
 }
@@ -389,10 +395,16 @@ void hashBanMan::RemFromNickTable(BanItem *Ban) {
 //---------------------------------------------------------------------------
 
 void hashBanMan::RemFromIpTable(BanItem *Ban) {   
-	uint16_t ui16dx = *((uint16_t *)(Ban->ui128IpHash+13));
+    uint16_t ui16IpTableIdx = 0;
+
+    if(Ban->ui128IpHash[10] == 255 && Ban->ui128IpHash[11] == 255 && memcmp(Ban->ui128IpHash, "\0\0\0\0\0\0\0\0\0\0", 10) == 0) {
+        ui16IpTableIdx = Ban->ui128IpHash[14] * Ban->ui128IpHash[15];
+    } else {
+        ui16IpTableIdx = GetIpTableIdx(Ban->ui128IpHash);
+    }
 
 	if(Ban->hashiptableprev == NULL) {
-        IpTableItem * next = iptable[ui16dx];
+        IpTableItem * next = iptable[ui16IpTableIdx];
 
         while(next != NULL) {
             IpTableItem * cur = next;
@@ -402,10 +414,10 @@ void hashBanMan::RemFromIpTable(BanItem *Ban) {
 				if(Ban->hashiptablenext == NULL) {
 					if(cur->prev == NULL) {
 						if(cur->next == NULL) {
-                            iptable[ui16dx] = NULL;
+                            iptable[ui16IpTableIdx] = NULL;
 						} else {
 							cur->next->prev = NULL;
-                            iptable[ui16dx] = cur->next;
+                            iptable[ui16IpTableIdx] = cur->next;
                         }
 					} else if(cur->next == NULL) {
 						cur->prev->next = NULL;
@@ -657,9 +669,7 @@ BanItem* hashBanMan::FindNick(User* u) {
 //---------------------------------------------------------------------------
 
 BanItem* hashBanMan::FindIP(User* u) {
-    uint16_t ui16dx = *((uint16_t *)(u->ui128IpHash+13));
-
-    IpTableItem * next = iptable[ui16dx];
+    IpTableItem * next = iptable[u->ui16IpTableIdx];
 
     time_t acc_time;
     time(&acc_time);
@@ -731,9 +741,15 @@ BanItem* hashBanMan::FindFull(const uint8_t * ui128IpHash) {
 //---------------------------------------------------------------------------
 
 BanItem* hashBanMan::FindFull(const uint8_t * ui128IpHash, const time_t &acc_time) {
-    uint16_t ui16dx = *((uint16_t *)(ui128IpHash+13));
+    uint16_t ui16IpTableIdx = 0;
 
-	IpTableItem * next = iptable[ui16dx];
+    if(ui128IpHash[10] == 255 && ui128IpHash[11] == 255 && memcmp(ui128IpHash, "\0\0\0\0\0\0\0\0\0\0", 10) == 0) {
+        ui16IpTableIdx = ui128IpHash[14] * ui128IpHash[15];
+    } else {
+        ui16IpTableIdx = GetIpTableIdx(ui128IpHash);
+    }
+
+	IpTableItem * next = iptable[ui16IpTableIdx];
 
     BanItem *fnd = NULL;
 
@@ -841,9 +857,15 @@ BanItem* hashBanMan::FindNick(const uint32_t &ui32Hash, const time_t &acc_time, 
 //---------------------------------------------------------------------------
 
 BanItem* hashBanMan::FindIP(const uint8_t * ui128IpHash, const time_t &acc_time) {
-    uint16_t ui16dx = *((uint16_t *)(ui128IpHash+13));
+    uint16_t ui16IpTableIdx = 0;
 
-    IpTableItem * next = iptable[ui16dx];
+    if(ui128IpHash[10] == 255 && ui128IpHash[11] == 255 && memcmp(ui128IpHash, "\0\0\0\0\0\0\0\0\0\0", 10) == 0) {
+        ui16IpTableIdx = ui128IpHash[14] * ui128IpHash[15];
+    } else {
+        ui16IpTableIdx = GetIpTableIdx(ui128IpHash);
+    }
+
+    IpTableItem * next = iptable[ui16IpTableIdx];
 
     while(next != NULL) {
         IpTableItem * cur = next;
@@ -966,9 +988,15 @@ BanItem* hashBanMan::FindTempNick(const uint32_t &ui32Hash,  const time_t &acc_t
 //---------------------------------------------------------------------------
 
 BanItem* hashBanMan::FindTempIP(const uint8_t * ui128IpHash, const time_t &acc_time) {
-    uint16_t ui16dx = *((uint16_t *)(ui128IpHash+13));
+    uint16_t ui16IpTableIdx = 0;
 
-    IpTableItem * next = iptable[ui16dx];
+    if(ui128IpHash[10] == 255 && ui128IpHash[11] == 255 && memcmp(ui128IpHash, "\0\0\0\0\0\0\0\0\0\0", 10) == 0) {
+        ui16IpTableIdx = ui128IpHash[14] * ui128IpHash[15];
+    } else {
+        ui16IpTableIdx = GetIpTableIdx(ui128IpHash);
+    }
+
+    IpTableItem * next = iptable[ui16IpTableIdx];
 
     while(next != NULL) {
         IpTableItem * cur = next;
@@ -1029,9 +1057,15 @@ BanItem* hashBanMan::FindPermNick(const uint32_t &ui32Hash, char * sNick) {
 //---------------------------------------------------------------------------
 
 BanItem* hashBanMan::FindPermIP(const uint8_t * ui128IpHash) {
-    uint16_t ui16dx = *((uint16_t *)(ui128IpHash+13));
+    uint16_t ui16IpTableIdx = 0;
 
-	IpTableItem * next = iptable[ui16dx];
+    if(ui128IpHash[10] == 255 && ui128IpHash[11] == 255 && memcmp(ui128IpHash, "\0\0\0\0\0\0\0\0\0\0", 10) == 0) {
+        ui16IpTableIdx = ui128IpHash[14] * ui128IpHash[15];
+    } else {
+        ui16IpTableIdx = GetIpTableIdx(ui128IpHash);
+    }
+
+	IpTableItem * next = iptable[ui16IpTableIdx];
 
     while(next != NULL) {
         IpTableItem * cur = next;
@@ -2748,9 +2782,15 @@ bool hashBanMan::TempUnban(char * sWhat) {
 //---------------------------------------------------------------------------
 
 void hashBanMan::RemoveAllIP(const uint8_t * ui128IpHash) {
-    uint16_t ui16dx = *((uint16_t *)(ui128IpHash+13));
+    uint16_t ui16IpTableIdx = 0;
 
-    IpTableItem * next = iptable[ui16dx];
+    if(ui128IpHash[10] == 255 && ui128IpHash[11] == 255 && memcmp(ui128IpHash, "\0\0\0\0\0\0\0\0\0\0", 10) == 0) {
+        ui16IpTableIdx = ui128IpHash[14] * ui128IpHash[15];
+    } else {
+        ui16IpTableIdx = GetIpTableIdx(ui128IpHash);
+    }
+
+    IpTableItem * next = iptable[ui16IpTableIdx];
 
     while(next != NULL) {
         IpTableItem * cur = next;
@@ -2774,9 +2814,15 @@ void hashBanMan::RemoveAllIP(const uint8_t * ui128IpHash) {
 //---------------------------------------------------------------------------
 
 void hashBanMan::RemovePermAllIP(const uint8_t * ui128IpHash) {
-    uint16_t ui16dx = *((uint16_t *)(ui128IpHash+13));
+    uint16_t ui16IpTableIdx = 0;
 
-    IpTableItem * next = iptable[ui16dx];
+    if(ui128IpHash[10] == 255 && ui128IpHash[11] == 255 && memcmp(ui128IpHash, "\0\0\0\0\0\0\0\0\0\0", 10) == 0) {
+        ui16IpTableIdx = ui128IpHash[14] * ui128IpHash[15];
+    } else {
+        ui16IpTableIdx = GetIpTableIdx(ui128IpHash);
+    }
+
+    IpTableItem * next = iptable[ui16IpTableIdx];
 
     while(next != NULL) {
         IpTableItem * cur = next;
@@ -2802,9 +2848,15 @@ void hashBanMan::RemovePermAllIP(const uint8_t * ui128IpHash) {
 //---------------------------------------------------------------------------
 
 void hashBanMan::RemoveTempAllIP(const uint8_t * ui128IpHash) {
-    uint16_t ui16dx = *((uint16_t *)(ui128IpHash+13));
+    uint16_t ui16IpTableIdx = 0;
 
-    IpTableItem * next = iptable[ui16dx];
+    if(ui128IpHash[10] == 255 && ui128IpHash[11] == 255 && memcmp(ui128IpHash, "\0\0\0\0\0\0\0\0\0\0", 10) == 0) {
+        ui16IpTableIdx = ui128IpHash[14] * ui128IpHash[15];
+    } else {
+        ui16IpTableIdx = GetIpTableIdx(ui128IpHash);
+    }
+
+    IpTableItem * next = iptable[ui16IpTableIdx];
 
     while(next != NULL) {
         IpTableItem * cur = next;

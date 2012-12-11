@@ -968,3 +968,63 @@ void GlobalDataQueue::AddDataToQueue(GlobalQueue &pQueue, char * sData, const si
     pQueue.sBuffer[pQueue.szLen] = '\0';
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void * GlobalDataQueue::GetLastQueueItem() {
+    return pNewQueueItems[1];
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void * GlobalDataQueue::GetFirstQueueItem() {
+    return pNewQueueItems[0];
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void GlobalDataQueue::InsertQueueItem(char * sCommand, const size_t &szLen, void * pBeforeItem, const uint8_t &ui8CmdType) {
+    QueueItem * pNewItem = new QueueItem();
+    if(pNewItem == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem in GlobalDataQueue::InsertQueueItem\n", 0);
+    	return;
+    }
+
+#ifdef _WIN32
+    pNewItem->sCommand1 = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen);
+#else
+	pNewItem->sCommand1 = (char *)malloc(szLen+1);
+#endif
+    if(pNewItem->sCommand1 == NULL) {
+        delete pNewItem;
+
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pNewItem->sCommand1 in GlobalDataQueue::InsertQueueItem\n", (uint64_t)(szLen+1));
+
+        return;
+    }
+
+    memcpy(pNewItem->sCommand1, sCommand, szLen);
+    pNewItem->sCommand1[szLen] = '\0';
+
+	pNewItem->szLen1 = szLen;
+
+    pNewItem->sCommand2 = NULL;
+    pNewItem->szLen2 = 0;
+
+	pNewItem->ui8CommandType = ui8CmdType;
+
+	pNewItem->pNext = (QueueItem *)pBeforeItem;
+
+    QueueItem * pNext = pNewQueueItems[0];
+    if(pNext == pBeforeItem) {
+        pNewQueueItems[0] = pNewItem;
+        return;
+    }
+
+    while(pNext != NULL) {
+        QueueItem * pCur = pNext;
+        pNext = pCur->pNext;
+
+        if(pNext == pBeforeItem) {
+            pCur->pNext = pNewItem;
+            return;
+        }
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -58,6 +58,7 @@ bool GetIpParts(char * sIP, const size_t ui32Len, uint32_t &a, uint32_t &b, uint
 uint32_t HashNick(const char * sNick, const size_t &szNickLen);
 
 bool HashIP(const char * sIP, uint8_t * ui128IpHash);
+uint16_t GetIpTableIdx(const uint8_t * ui128IpHash);
 
 char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_time);
 char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const time_t &acc_time);
@@ -103,6 +104,7 @@ bool DirExist(char * sPath);
     void win_inet_ntop(PVOID pAddr, PTSTR pStringBuf, size_t szStringBufSize);
 #endif
 
+void CheckForIPv4();
 void CheckForIPv6();
 
 bool GetMacAddress(const char * sIP, char * sMac);
@@ -115,7 +117,7 @@ void ReduceGlobalBuffer();
 extern string PATH, SCRIPT_PATH, sTitle;
 extern size_t g_szBufferSize;
 extern char * g_sBuffer;
-extern bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bCmdNoKeyCheck, bUseIPv6, bIPv6DualStack;
+extern bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bCmdNoKeyCheck, bUseIPv4, bUseIPv6, bIPv6DualStack;
 #ifdef _WIN32
 	extern HANDLE hConsole, hLuaHeap, hPtokaXHeap, hRecvHeap, hSendHeap;
 	extern string PATH_LUA, sOs;

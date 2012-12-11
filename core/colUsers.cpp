@@ -640,7 +640,7 @@ void classUsers::DelFromOpList(char * Nick) {
 //---------------------------------------------------------------------------
 
 // PPK ... check global mainchat flood and add to global queue
-void classUsers::SendChat2All(User * cur, char * sData, const size_t &szChatLen) {
+void classUsers::SendChat2All(User * cur, char * sData, const size_t &szChatLen, void * ptr) {
     UdpDebug->Broadcast(sData, szChatLen);
 
     if(ProfileMan->IsAllowed(cur, ProfileManager::NODEFLOODMAINCHAT) == false && 
@@ -703,7 +703,11 @@ void classUsers::SendChat2All(User * cur, char * sData, const size_t &szChatLen)
         }
     }
 
-    g_GlobalDataQueue->AddQueueItem(sData, szChatLen, NULL, 0, GlobalDataQueue::CMD_CHAT);
+    if(ptr == NULL) {
+        g_GlobalDataQueue->AddQueueItem(sData, szChatLen, NULL, 0, GlobalDataQueue::CMD_CHAT);
+    } else {
+        g_GlobalDataQueue->InsertQueueItem(sData, szChatLen, ptr, GlobalDataQueue::CMD_CHAT);
+    }
 }
 //---------------------------------------------------------------------------
 

@@ -22,6 +22,7 @@ Added: Smart searching for IPv6 users with IPv4 support.
 Added: IP2Country now work for 6to4 and Teredo connections.
 Added: IP2Country.Reload to Lua api.
 Added: RegMan.AddReg now support second syntax RegMan.AddReg(sNick, nProfileNumber). That way user is asked for password and registered after he send it.
+Added: Users connected with IPv6 using 6to4 or teredo tunneling have automatically IPv4 active connection available without need to support any protocol extension.
 Changed: Country database for IPv4 from ip-to-country to IpToCountry.
 Changed: Not allowed chars in nick to only space, pipe and dollar. Only those protocol disallow. Issues with other chars is client work.
 Changed: Max simultaneous logins value from 500 to 1000.
@@ -31,6 +32,7 @@ Changed: Disabled keep slow client online for clients with zpipe support.
 Changed: Memory allocation failures checking. When memory allocation fail then user who caused that is disconnected and hub not crash.
 Changed: Line ending to \n on windoze.
 Changed: Registered users are now stored in binary file instead of xml.
+Changed: !ban and !tempban now working for offline nicks and create nickban for them.
 Fixed: TmrMan.RemoveTimer Lua api call in windoze version (thx C©äoáy+© for report).
 Fixed: MOTD was not updated after change in gui (thx mappy for report).
 Fixed: Few settings was not updated after change in gui.
@@ -49,6 +51,10 @@ Fixed: Message returned on !clrrangetempbans (thx Alexey for report).
 Fixed: Rare case when short myinfo was sent to ops when they should get long myinfo.
 Fixed: Error message on script syntax checking when PtokaX api call is outside function.
 Fixed: Doubleclick in gui on script now open script editor only when it is not on checkbox.
+Fixed: !nickban and !nicktempban allowed to ban user with higher profile when he was offline.
+Fixed: Reply to chat from Lua script was sent before that chat (ie from talkbot).
+Fixed: Missing GB translation in !getinfo command (thx Alexey for report).
+Fixed: Compile errors on Haiku OS.
 Removed: All info related to old ip-to-country database.
 Removed: Obsolete client tags.
 Removed: Obsolete setting to accept unknown tag.

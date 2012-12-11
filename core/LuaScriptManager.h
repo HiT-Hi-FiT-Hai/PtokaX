@@ -96,8 +96,8 @@ public:
     void OnStartup();
     void OnExit(bool bForce = false);
     bool Arrival(User * u, char * sData, const size_t &szLen, const unsigned char &uiType);
-    void UserConnected(User * u);
-	void UserDisconnected(User * u);
+    bool UserConnected(User * u);
+	void UserDisconnected(User * u, Script * pScript = NULL);
 
     void PrepareMove(lua_State * L);
 };

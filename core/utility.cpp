@@ -43,7 +43,7 @@ static const int MAX_ALPHABET_SIZE = 255;
 string PATH = "", SCRIPT_PATH = "", sTitle = "";
 size_t g_szBufferSize = 0;
 char * g_sBuffer = NULL;
-bool bCmdAutoStart = false, bCmdNoAutoStart = false, bCmdNoTray = false, bCmdNoKeyCheck = false, bUseIPv6 = true, bIPv6DualStack = false;
+bool bCmdAutoStart = false, bCmdNoAutoStart = false, bCmdNoTray = false, bCmdNoKeyCheck = false, bUseIPv4 = true, bUseIPv6 = true, bIPv6DualStack = false;
 #ifdef _WIN32
 	HANDLE hConsole = NULL, hLuaHeap = NULL, hPtokaXHeap = NULL, hRecvHeap = NULL, hSendHeap = NULL;
 	string PATH_LUA = "", sOs = "";
@@ -740,7 +740,26 @@ bool HashIP(const char * sIP, uint8_t * ui128IpHash) {
 
 	return true;
 }
-//---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+uint16_t GetIpTableIdx(const uint8_t * ui128IpHash) {
+	unsigned char c;
+    uint32_t h = 5381;
+
+	for(uint8_t ui8i = 0; ui8i < 16; ui8i++) {
+        c = (unsigned char)ui128IpHash[ui8i];
+        h += (h << 5);
+        h ^= c;
+    }
+
+    h += 1;
+
+    uint16_t ui16Idx = 0;
+    memcpy(&ui16Idx, &h, 2);
+
+	return ui16Idx;
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_time) {
     static char banmsg[2048], banmsg1[512];
@@ -1022,7 +1041,7 @@ bool CheckSprintf(const int &iRetVal, const size_t &szMax, const char * sMsg) {
 bool CheckSprintf1(const int &iRetVal, const size_t &szLenVal, const size_t &szMax, const char * sMsg) {
     if(iRetVal > 0) {
         if(szMax != 0 && szLenVal >= szMax) {
-			string sDbgstr = "%s - [ERR] sprintf high value "+string(szLenVal)+"/"+string((uint64_t)szMax)+" in "+string(sMsg)+"\n";
+			string sDbgstr = "%s - [ERR] sprintf high value "+string((uint64_t)szLenVal)+"/"+string((uint64_t)szMax)+" in "+string(sMsg)+"\n";
 			AppendDebugLog(sDbgstr.c_str(), 0);
             return false;
         }
@@ -1293,7 +1312,32 @@ pInetPton MyInetPton = NULL;
 typedef PCTSTR (WSAAPI *pInetNtop)(INT, PVOID, PTSTR, size_t);
 pInetNtop MyInetNtop = NULL;
 #endif
-//---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void CheckForIPv4() {
+#ifdef _WIN32
+    SOCKET sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+    if(sock == INVALID_SOCKET) {
+        int iError = WSAGetLastError();
+        if(iError == WSAEAFNOSUPPORT) {
+#else
+    int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if(sock == -1) {
+        if(errno == EAFNOSUPPORT) {
+#endif
+            bUseIPv4 = false;
+            return;
+        }
+    }
+
+#ifdef _WIN32
+    closesocket(sock);
+#else
+    close(sock);
+#endif
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void CheckForIPv6() {
 #ifdef _WIN32
@@ -1337,7 +1381,7 @@ void CheckForIPv6() {
     ::FreeLibrary(hWs2_32);
 #endif
 }
-//---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #ifdef _WIN32
 INT win_inet_pton(PCTSTR pAddrString, PVOID pAddrBuf) {

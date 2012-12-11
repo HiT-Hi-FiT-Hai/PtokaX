@@ -56,6 +56,7 @@ struct PrcsdUsrCmd {
     uint32_t iLen;
     char * sCommand;
     PrcsdUsrCmd *next;
+    void * ptr;
     unsigned char cType;
 };
 //---------------------------------------------------------------------------
@@ -207,6 +208,7 @@ struct User {
     uint16_t ui16Searchs2, ui16MyINFOs2, ui16CTMs, ui16CTMs2;
     uint16_t ui16RCTMs, ui16RCTMs2, ui16SRs, ui16SRs2;
     uint16_t ui16ChatIntMsgs, ui16PMsInt, ui16SearchsInt;
+    uint16_t ui16IpTableIdx;
 
     uint8_t ui8NickLen;
     uint8_t ui8IpLen, ui8ConnectionLen, ui8DescriptionLen, ui8EmailLen, ui8TagLen, ui8ClientLen, ui8TagVersionLen;

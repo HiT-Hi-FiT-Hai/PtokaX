@@ -690,6 +690,7 @@ User::User() {
 	ui32NickHash = 0;
 
     memset(&ui128IpHash, 0, 16);
+    ui16IpTableIdx = 0;
 
 	ui32BoolBits = 0;
 	ui32BoolBits |= User::BIT_IPV4_ACTIVE;
@@ -1418,11 +1419,11 @@ bool UserPutInSendBuf(User * u, const char * Text, const size_t &szTxtLen) {
                         UserClose(u);
 
                         UdpDebug->Broadcast("[SYS] " + string(u->sNick, u->ui8NickLen) + " (" + string(u->sIP, u->ui8IpLen) +") SendBuffer overflow (AL:"+string((uint64_t)szAllignLen)+
-                            "[SL:"+string(u->sbdatalen)+"|NL:"+string((uint64_t)szTxtLen)+"|FL:"+string(u->sbplayhead-u->sendbuf)+"]/ML:"+string((uint64_t)szMaxBufLen)+"). User disconnected.");
+                            "[SL:"+string(u->sbdatalen)+"|NL:"+string((uint64_t)szTxtLen)+"|FL:"+string((uint64_t)(u->sbplayhead-u->sendbuf))+"]/ML:"+string((uint64_t)szMaxBufLen)+"). User disconnected.");
                         return false;
                     } else {
     				    UdpDebug->Broadcast("[SYS] " + string(u->sNick, u->ui8NickLen) + " (" + string(u->sIP, u->ui8IpLen) +") SendBuffer overflow (AL:"+string((uint64_t)szAllignLen)+
-                            "[SL:"+string(u->sbdatalen)+"|NL:"+string((uint64_t)szTxtLen)+"|FL:"+string(u->sbplayhead-u->sendbuf)+"]/ML:"+string((uint64_t)szMaxBufLen)+
+                            "[SL:"+string(u->sbdatalen)+"|NL:"+string((uint64_t)szTxtLen)+"|FL:"+string((uint64_t)(u->sbplayhead-u->sendbuf))+"]/ML:"+string((uint64_t)szMaxBufLen)+
                             "). Buffer cleared - user stays online.");
                     }
 
@@ -2987,6 +2988,7 @@ void UserAddPrcsdCmd(User * u, const unsigned char &cType, char * sCommand, cons
     pNewcmd->iLen = (uint32_t)szCommandLen;
     pNewcmd->cType = cType;
     pNewcmd->next = NULL;
+    pNewcmd->ptr = (void *)to;
 
     if(u->cmdStrt == NULL) {
         u->cmdStrt = pNewcmd;
@@ -2999,7 +3001,7 @@ void UserAddPrcsdCmd(User * u, const unsigned char &cType, char * sCommand, cons
 //---------------------------------------------------------------------------
 
 void UserAddMeOrIPv4Check(User * pUser) {
-    if(((pUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) && ((pUser->ui32SupportBits & User::SUPPORTBIT_IPV4) == User::SUPPORTBIT_IPV4) && sHubIP[0] != '\0') {
+    if(((pUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) && ((pUser->ui32SupportBits & User::SUPPORTBIT_IPV4) == User::SUPPORTBIT_IPV4) && sHubIP[0] != '\0' && bUseIPv4 == true) {
         pUser->ui8State = User::STATE_IPV4_CHECK;
 
         int imsgLen = sprintf(msg, "$ConnectToMe %s %s:%s|", pUser->sNick, sHubIP, string(SettingManager->iPortNumbers[0]).c_str());

@@ -833,9 +833,9 @@ bool ScriptMan::Arrival(User * u, char * sData, const size_t &szLen, const unsig
 }
 //------------------------------------------------------------------------------
 
-void ScriptMan::UserConnected(User * u) {
+bool ScriptMan::UserConnected(User * u) {
 	if(SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == false) {
-        return;
+        return false;
     }
 
     uint8_t ui8Type = 0; // User
@@ -918,13 +918,17 @@ void ScriptMan::UserConnected(User * u) {
             // clear the stack for sure
             lua_settop(cur->LUA, 0);
 
-            return; // means DO NOT process by next scripts
+            UserDisconnected(u, cur);
+
+            return true; // means DO NOT process by next scripts
         }
     }
+
+    return false;
 }
 //------------------------------------------------------------------------------
 
-void ScriptMan::UserDisconnected(User * u) {
+void ScriptMan::UserDisconnected(User * u, Script * pScript/* = NULL*/) {
 	if(SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == false) {
         return;
     }
@@ -945,6 +949,10 @@ void ScriptMan::UserDisconnected(User * u) {
     while(next != NULL) {
     	Script *cur = next;
         next = cur->next;
+
+        if(cur == pScript) {
+            return;
+        }
 
 		static const uint32_t iDisconnectedBits[] = { Script::USERDISCONNECTED, Script::REGDISCONNECTED, Script::OPDISCONNECTED };
 
