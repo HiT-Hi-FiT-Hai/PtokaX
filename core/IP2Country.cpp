@@ -79,6 +79,10 @@ static const char * CountryCodes[] = { "AD", "AE", "AF", "AG", "AI", "AL", "AM",
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void IP2CC::LoadIPv4() {
+    if(bUseIPv4 == false) {
+        return;
+    }
+
 #ifdef _WIN32
 	FILE * ip2country = fopen((PATH + "\\cfg\\IpToCountry.csv").c_str(), "r");
 #else

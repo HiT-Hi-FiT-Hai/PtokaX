@@ -68,12 +68,10 @@ bool hashMan::Add(User * u) {
 
     nicktable[ui16dx] = u;
 
-    ui16dx = *((uint16_t *)(u->ui128IpHash+13));
+    if(iptable[u->ui16IpTableIdx] == NULL) {
+        iptable[u->ui16IpTableIdx] = new IpTableItem();
 
-    if(iptable[ui16dx] == NULL) {
-        iptable[ui16dx] = new IpTableItem();
-
-        if(iptable[ui16dx] == NULL) {
+        if(iptable[u->ui16IpTableIdx] == NULL) {
             u->ui32BoolBits |= User::BIT_ERROR;
             UserClose(u);
 
@@ -81,16 +79,16 @@ bool hashMan::Add(User * u) {
             return false;
         }
 
-        iptable[ui16dx]->next = NULL;
-        iptable[ui16dx]->prev = NULL;
+        iptable[u->ui16IpTableIdx]->next = NULL;
+        iptable[u->ui16IpTableIdx]->prev = NULL;
 
-        iptable[ui16dx]->FirstUser = u;
-		iptable[ui16dx]->ui16Count = 1;
+        iptable[u->ui16IpTableIdx]->FirstUser = u;
+		iptable[u->ui16IpTableIdx]->ui16Count = 1;
 
         return true;
     }
 
-    IpTableItem * next = iptable[ui16dx];
+    IpTableItem * next = iptable[u->ui16IpTableIdx];
 
     while(next != NULL) {
         IpTableItem * cur = next;
@@ -119,11 +117,11 @@ bool hashMan::Add(User * u) {
     cur->FirstUser = u;
 	cur->ui16Count = 1;
 
-    cur->next = iptable[ui16dx];
+    cur->next = iptable[u->ui16IpTableIdx];
     cur->prev = NULL;
 
-    iptable[ui16dx]->prev = cur;
-    iptable[ui16dx] = cur;
+    iptable[u->ui16IpTableIdx]->prev = cur;
+    iptable[u->ui16IpTableIdx] = cur;
 
     return true;
 }
@@ -150,10 +148,8 @@ void hashMan::Remove(User * u) {
     u->hashtableprev = NULL;
     u->hashtablenext = NULL;
 
-	uint16_t ui16dx = *((uint16_t *)(u->ui128IpHash+13));
-
 	if(u->hashiptableprev == NULL) {
-        IpTableItem * next = iptable[ui16dx];
+        IpTableItem * next = iptable[u->ui16IpTableIdx];
     
         while(next != NULL) {
             IpTableItem * cur = next;
@@ -165,10 +161,10 @@ void hashMan::Remove(User * u) {
                 if(u->hashiptablenext == NULL) {
                     if(cur->prev == NULL) {
                         if(cur->next == NULL) {
-                            iptable[ui16dx] = NULL;
+                            iptable[u->ui16IpTableIdx] = NULL;
                         } else {
                             cur->next->prev = NULL;
-                            iptable[ui16dx] = cur->next;
+                            iptable[u->ui16IpTableIdx] = cur->next;
                         }
                     } else if(cur->next == NULL) {
                         cur->prev->next = NULL;
@@ -199,7 +195,7 @@ void hashMan::Remove(User * u) {
     u->hashiptableprev = NULL;
     u->hashiptablenext = NULL;
 
-    IpTableItem * next = iptable[ui16dx];
+    IpTableItem * next = iptable[u->ui16IpTableIdx];
 
     while(next != NULL) {
         IpTableItem * cur = next;
@@ -265,9 +261,15 @@ User * hashMan::FindUser(User * u) {
 //---------------------------------------------------------------------------
 
 User * hashMan::FindUser(const uint8_t * ui128IpHash) {
-    uint16_t ui16dx = *((uint16_t *)(ui128IpHash+13));
+    uint16_t ui16IpTableIdx = 0;
 
-	IpTableItem * next = iptable[ui16dx];
+    if(ui128IpHash[10] == 255 && ui128IpHash[11] == 255 && memcmp(ui128IpHash, "\0\0\0\0\0\0\0\0\0\0", 10) == 0) {
+        ui16IpTableIdx = ui128IpHash[14] * ui128IpHash[15];
+    } else {
+        ui16IpTableIdx = GetIpTableIdx(ui128IpHash);
+    }
+
+	IpTableItem * next = iptable[ui16IpTableIdx];
 
     while(next != NULL) {
 		IpTableItem * cur = next;
@@ -283,9 +285,7 @@ User * hashMan::FindUser(const uint8_t * ui128IpHash) {
 //---------------------------------------------------------------------------
 
 uint32_t hashMan::GetUserIpCount(User * u) const {
-    uint16_t ui16dx = *((uint16_t *)(u->ui128IpHash+13));
-
-	IpTableItem * next = iptable[ui16dx];
+	IpTableItem * next = iptable[u->ui16IpTableIdx];
 
 	while(next != NULL) {
 		IpTableItem * cur = next;

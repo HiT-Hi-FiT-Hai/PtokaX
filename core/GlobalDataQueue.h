@@ -130,6 +130,9 @@ public:
     void ProcessSingleItems(User * u) const;
     void SingleItemStore(char * sData, const size_t &szDataLen, User * pFromUser, const int32_t &i32Profile, const uint8_t &ui8Type);
     void SendFinalQueue();
+    void * GetLastQueueItem();
+    void * GetFirstQueueItem();
+    void InsertQueueItem(char * sCommand, const size_t &szLen, void * pBeforeItem, const uint8_t &ui8CmdType);
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

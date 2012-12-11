@@ -22,7 +22,18 @@ CXXFLAGS = -O -g -Wall -Wextra
 #*******************************************************************************
 # Include
 #*******************************************************************************
-INCLUDE = -Itinyxml -I/usr/include -I/usr/local/include -I/usr/include/lua5.1 -I/usr/pkg/include -I/usr/include/lua -I/usr/include/lua/5.1
+INCLUDE = -Itinyxml -I/usr/include -I/usr/include/lua5.1
+
+#*******************************************************************************
+# Files to compile and link
+#*******************************************************************************
+
+OBJS = $(CURDIR)/obj/colUsers.o $(CURDIR)/obj/DcCommands.o $(CURDIR)/obj/DeFlood.o $(CURDIR)/obj/eventqueue.o $(CURDIR)/obj/GlobalDataQueue.o $(CURDIR)/obj/hashBanManager.o $(CURDIR)/obj/hashUsrManager.o \
+        $(CURDIR)/obj/hashRegManager.o $(CURDIR)/obj/HubCommands.o $(CURDIR)/obj/IP2Country.o $(CURDIR)/obj/LanguageManager.o $(CURDIR)/obj/LuaBanManLib.o $(CURDIR)/obj/LuaCoreLib.o $(CURDIR)/obj/LuaIP2CountryLib.o \
+        $(CURDIR)/obj/LuaProfManLib.o $(CURDIR)/obj/LuaRegManLib.o $(CURDIR)/obj/LuaScript.o $(CURDIR)/obj/LuaScriptManager.o $(CURDIR)/obj/LuaScriptManLib.o $(CURDIR)/obj/LuaSetManLib.o $(CURDIR)/obj/LuaTmrManLib.o \
+        $(CURDIR)/obj/LuaUDPDbgLib.o $(CURDIR)/obj/ProfileManager.o $(CURDIR)/obj/PtokaX.o $(CURDIR)/obj/PXBReader.o $(CURDIR)/obj/pxstring.o $(CURDIR)/obj/RegThread.o $(CURDIR)/obj/ResNickManager.o $(CURDIR)/obj/ServerManager.o \
+        $(CURDIR)/obj/ServerThread.o $(CURDIR)/obj/serviceLoop.o $(CURDIR)/obj/SettingManager.o $(CURDIR)/obj/TextFileManager.o $(CURDIR)/obj/UdpDebug.o $(CURDIR)/obj/UDPThread.o $(CURDIR)/obj/User.o $(CURDIR)/obj/utility.o \
+        $(CURDIR)/obj/ZlibUtility.o
 
 #*******************************************************************************
 # Binary to create
@@ -34,19 +45,31 @@ INCLUDE = -Itinyxml -I/usr/include -I/usr/local/include -I/usr/include/lua5.1 -I
 # but as static library (liblua.a default when you compile Lua from sources)
 # then remove -llua5.1 and after tinyxml/tinyxml.a add /usr/local/lib/liblua.a (default path when is Lua compiled from sources).
 #*******************************************************************************
-PtokaX: $(CURDIR)/obj/colUsers.o $(CURDIR)/obj/DcCommands.o $(CURDIR)/obj/DeFlood.o $(CURDIR)/obj/eventqueue.o $(CURDIR)/obj/GlobalDataQueue.o $(CURDIR)/obj/hashBanManager.o $(CURDIR)/obj/hashUsrManager.o \
-  $(CURDIR)/obj/hashRegManager.o $(CURDIR)/obj/HubCommands.o $(CURDIR)/obj/IP2Country.o $(CURDIR)/obj/LanguageManager.o $(CURDIR)/obj/LuaBanManLib.o $(CURDIR)/obj/LuaCoreLib.o $(CURDIR)/obj/LuaIP2CountryLib.o $(CURDIR)/obj/LuaProfManLib.o \
-  $(CURDIR)/obj/LuaRegManLib.o $(CURDIR)/obj/LuaScript.o $(CURDIR)/obj/LuaScriptManager.o $(CURDIR)/obj/LuaScriptManLib.o $(CURDIR)/obj/LuaSetManLib.o $(CURDIR)/obj/LuaTmrManLib.o $(CURDIR)/obj/LuaUDPDbgLib.o $(CURDIR)/obj/ProfileManager.o \
-  $(CURDIR)/obj/PtokaX.o $(CURDIR)/obj/PXBReader.o $(CURDIR)/obj/pxstring.o $(CURDIR)/obj/RegThread.o $(CURDIR)/obj/ResNickManager.o $(CURDIR)/obj/ServerManager.o $(CURDIR)/obj/ServerThread.o $(CURDIR)/obj/serviceLoop.o \
-  $(CURDIR)/obj/SettingManager.o $(CURDIR)/obj/TextFileManager.o $(CURDIR)/obj/UdpDebug.o $(CURDIR)/obj/UDPThread.o $(CURDIR)/obj/User.o $(CURDIR)/obj/utility.o $(CURDIR)/obj/ZlibUtility.o
-	$(CXX) \
-        $(CURDIR)/obj/colUsers.o $(CURDIR)/obj/DcCommands.o $(CURDIR)/obj/DeFlood.o $(CURDIR)/obj/eventqueue.o $(CURDIR)/obj/GlobalDataQueue.o $(CURDIR)/obj/hashBanManager.o $(CURDIR)/obj/hashUsrManager.o \
-        $(CURDIR)/obj/hashRegManager.o $(CURDIR)/obj/HubCommands.o $(CURDIR)/obj/IP2Country.o $(CURDIR)/obj/LanguageManager.o $(CURDIR)/obj/LuaBanManLib.o $(CURDIR)/obj/LuaCoreLib.o $(CURDIR)/obj/LuaIP2CountryLib.o \
-        $(CURDIR)/obj/LuaProfManLib.o $(CURDIR)/obj/LuaRegManLib.o $(CURDIR)/obj/LuaScript.o $(CURDIR)/obj/LuaScriptManager.o $(CURDIR)/obj/LuaScriptManLib.o $(CURDIR)/obj/LuaSetManLib.o $(CURDIR)/obj/LuaTmrManLib.o \
-        $(CURDIR)/obj/LuaUDPDbgLib.o $(CURDIR)/obj/ProfileManager.o $(CURDIR)/obj/PtokaX.o $(CURDIR)/obj/PXBReader.o $(CURDIR)/obj/pxstring.o $(CURDIR)/obj/RegThread.o $(CURDIR)/obj/ResNickManager.o $(CURDIR)/obj/ServerManager.o \
-        $(CURDIR)/obj/ServerThread.o $(CURDIR)/obj/serviceLoop.o $(CURDIR)/obj/SettingManager.o $(CURDIR)/obj/TextFileManager.o $(CURDIR)/obj/UdpDebug.o $(CURDIR)/obj/UDPThread.o $(CURDIR)/obj/User.o $(CURDIR)/obj/utility.o \
-        $(CURDIR)/obj/ZlibUtility.o \
-        $(CURDIR)/tinyxml/tinyxml.a -o PtokaX -lstdc++ -lpthread -llua5.1 -lrt -lz
+
+PtokaX: $(OBJS)
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a -o PtokaX -lstdc++ -lpthread -llua5.1 -lrt -lz
+
+lua52: INCLUDE = -Itinyxml -I/usr/include -I/usr/include/lua5.2
+lua52: $(OBJS)
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a -o PtokaX -lstdc++ -lpthread -llua5.2 -lrt -lz
+
+centos5-32: $(OBJS)
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a /usr/lib/liblua.a -o PtokaX -lstdc++ -lpthread -lrt -lz
+
+centos5-64: $(OBJS)
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a /usr/lib64/liblua.a -o PtokaX -lstdc++ -lpthread -lrt -lz
+
+centos6: $(OBJS)
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a -o PtokaX -lstdc++ -lpthread -llua-5.1 -lrt -lz
+
+freebsd: INCLUDE = -Itinyxml -I/usr/include -I/usr/local/include/lua51
+freebsd: $(OBJS)
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a /usr/local/lib/lua51/liblua.a -o PtokaX -lstdc++ -lpthread -lrt -lz
+
+haiku: CXXFLAGS = -O -g -Wall
+haiku: $(OBJS)
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a -o PtokaX -lnetwork -llua -lz
+
 
 #*******************************************************************************
 # Files to compile
@@ -249,9 +272,4 @@ $(CURDIR)/obj/ZlibUtility.o: $(CURDIR)/core/ZlibUtility.cpp $(CURDIR)/core/stdin
 # Cleanup
 #*******************************************************************************
 clean:
-	-rm $(CURDIR)/obj/colUsers.o $(CURDIR)/obj/DcCommands.o $(CURDIR)/obj/DeFlood.o $(CURDIR)/obj/eventqueue.o $(CURDIR)/obj/GlobalDataQueue.o $(CURDIR)/obj/hashBanManager.o $(CURDIR)/obj/hashUsrManager.o \
-        $(CURDIR)/obj/hashRegManager.o $(CURDIR)/obj/HubCommands.o $(CURDIR)/obj/IP2Country.o $(CURDIR)/obj/LanguageManager.o $(CURDIR)/obj/LuaBanManLib.o $(CURDIR)/obj/LuaCoreLib.o $(CURDIR)/obj/LuaIP2CountryLib.o \
-        $(CURDIR)/obj/LuaProfManLib.o $(CURDIR)/obj/LuaRegManLib.o $(CURDIR)/obj/LuaScript.o $(CURDIR)/obj/LuaScriptManager.o $(CURDIR)/obj/LuaScriptManLib.o $(CURDIR)/obj/LuaSetManLib.o $(CURDIR)/obj/LuaTmrManLib.o \
-        $(CURDIR)/obj/LuaUDPDbgLib.o $(CURDIR)/obj/ProfileManager.o $(CURDIR)/obj/PtokaX.o $(CURDIR)/obj/PXBReader.o $(CURDIR)/obj/pxstring.o $(CURDIR)/obj/RegThread.o $(CURDIR)/obj/ResNickManager.o $(CURDIR)/obj/ServerManager.o \
-        $(CURDIR)/obj/ServerThread.o $(CURDIR)/obj/serviceLoop.o $(CURDIR)/obj/SettingManager.o $(CURDIR)/obj/TextFileManager.o $(CURDIR)/obj/UdpDebug.o $(CURDIR)/obj/UDPThread.o $(CURDIR)/obj/User.o $(CURDIR)/obj/utility.o \
-        $(CURDIR)/obj/ZlibUtility.o PtokaX
+	-rm $(OBJS) PtokaX

@@ -3152,10 +3152,23 @@ void cDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, const
     if(((curUser->ui32BoolBits & User::BIT_GAGGED) == User::BIT_GAGGED) == true)
         return;
 
+    void * pQueueItem1 = g_GlobalDataQueue->GetLastQueueItem();
+
 	if(ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::CHAT_ARRIVAL) == true ||
 		curUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
+
+    User * pToUser = NULL;
+    void * pQueueItem2 = g_GlobalDataQueue->GetLastQueueItem();
+
+    if(pQueueItem1 != pQueueItem2) {
+        if(pQueueItem1 == NULL) {
+            pToUser = (User *)g_GlobalDataQueue->GetFirstQueueItem();
+        } else {
+            pToUser = (User *)pQueueItem1;
+        }
+    }
 
 	// PPK ... filtering kick messages
 	if(ProfileMan->IsAllowed(curUser, ProfileManager::KICK) == true) {
@@ -3217,7 +3230,7 @@ void cDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, const
         }        
 	}
 
-    UserAddPrcsdCmd(curUser, PrcsdUsrCmd::CHAT, sData, iLen, NULL);
+    UserAddPrcsdCmd(curUser, PrcsdUsrCmd::CHAT, sData, iLen, pToUser);
 }
 //---------------------------------------------------------------------------
 
@@ -3548,10 +3561,14 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &sz
            	        if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick14") == true) {
                         UserSendChar(curUser, msg, imsgLen);
                     }
-                    imsgLen = sprintf(msg, "[SYS] Nick taken [%s (%s)] %s (%s) - user closed.", OtherUser->sNick, OtherUser->sIP, curUser->sNick, curUser->sIP);
-                    if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick15") == true) {
-                        UdpDebug->Broadcast(msg, imsgLen);
+
+                    if(strcmp(OtherUser->sIP, curUser->sIP) != 0 || strcmp(OtherUser->sNick, curUser->sNick) != 0) {
+                        imsgLen = sprintf(msg, "[SYS] Nick taken [%s (%s)] %s (%s) - user closed.", OtherUser->sNick, OtherUser->sIP, curUser->sNick, curUser->sIP);
+                        if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick15") == true) {
+                            UdpDebug->Broadcast(msg, imsgLen);
+                        }
                     }
+
                     UserClose(curUser);
                     return false;
                 } else {
@@ -3744,7 +3761,7 @@ void cDcCommands::ProcessCmds(User * curUser) {
                 }
            
             	// everything's ok, let's chat
-            	colUsers->SendChat2All(curUser, cur->sCommand, cur->iLen);
+            	colUsers->SendChat2All(curUser, cur->sCommand, cur->iLen, cur->ptr);
             
                 break;
             }
