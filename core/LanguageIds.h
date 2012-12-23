@@ -726,7 +726,7 @@ enum LangIds {
     LAN_HELP,
     LAN_EXIT,
     LAN_WEBSITE,
-    LAN_BOARD,
+    LAN_FORUM,
     LAN_WIKI,
     LAN_MENU_ABOUT,
     LAN_CHECK_FOR_UPDATE,

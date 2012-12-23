@@ -1,4 +1,4 @@
-PtokaX 0.4.2.0
+PtokaX 0.5.0.0
 ---------------
 
 This is PtokaX version without gui able to run from console or as windows service.
@@ -17,7 +17,7 @@ When no config dir is specified then PtokaX running from console use actual dire
 
 Homepage: http://www.PtokaX.org
 
-PtokaX LUA Scripts forum: http://board.ptokax.ch
+PtokaX LUA Scripts forum: http://forum.PtokaX.org
 
 PtokaX Wiki: http://wiki.PtokaX.org
 

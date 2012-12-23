@@ -5,13 +5,13 @@ OnExit()					- Is called on script exit.
 
 OnTimer(uTimerId)				- Default function called by timer on given interval.
 
-UserConnected(tUser)				- Is called when user finish login sequence.
+UserConnected(tUser)				- Is called when user finish login sequence. When true is returned then hub don't send it to next scripts.
 UserDisconnected(tUser)				- Is called when user disconnect or was disconnected.
 
-RegConnected(tUser)				- Is called when reg finish login sequence.
+RegConnected(tUser)				- Is called when reg finish login sequence. When true is returned then hub don't send it to next scripts.
 RegDisconnected(tUser)				- Is called when reg disconnect or was disconnected.
 
-OpConnected(tUser)				- Is called when operator finish login sequence.
+OpConnected(tUser)				- Is called when operator finish login sequence. When true is returned then hub don't send it to next scripts.
 OpDisconnected(tUser)				- Is called when operator disconnect or was disconnected.
 
 OnError(sErrorMsg)				- Is called when error was found in script.

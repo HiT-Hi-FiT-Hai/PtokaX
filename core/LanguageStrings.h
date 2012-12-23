@@ -726,7 +726,7 @@ const char* LangStr[] = {
     "&Help",
     "&Exit",
     "&website",
-    "&board",
+    "&forum",
     "w&iki",
     "&About",
     "&Check for update",

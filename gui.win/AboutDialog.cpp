@@ -183,7 +183,7 @@ void AboutDialog::DoModal(HWND hWndParent) {
     "http://www.PtokaX.org\\par\n"
     "\\par\n"
     "LUA Scripts forum:\\par\n"
-    "http://board.ptokax.ch\\par\n"
+    "http://forum.PtokaX.org\\par\n"
     "\\par\n"
     "Wiki:\\par\n"
     "http://wiki.PtokaX.org\\par\n"
