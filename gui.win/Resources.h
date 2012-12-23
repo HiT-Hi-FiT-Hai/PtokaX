@@ -36,7 +36,7 @@
 #define IDC_RANGE_BANS              1005
 #define IDC_ABOUT                   1008
 #define IDC_HOMEPAGE                1009
-#define IDC_BOARD                   1010
+#define IDC_FORUM                   1010
 #define IDC_WIKI                    1011
 #define IDC_UPDATE_CHECK            1012
 #define IDC_SAVE_SETTINGS           1013

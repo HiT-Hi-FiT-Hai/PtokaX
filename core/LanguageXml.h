@@ -726,7 +726,7 @@ const char* LangXmlStr[] = {
     "Help",
     "Exit",
     "website",
-    "board",
+    "forum",
     "wiki",
     "MenuAbout",
     "CheckForUpdate",

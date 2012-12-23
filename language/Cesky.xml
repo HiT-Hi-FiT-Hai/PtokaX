@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1252" standalone="yes" ?>
-<Language Name="Èeština" Author="Petr &apos;PPK&apos; Kozelka" Version="0.4.1.2 build 240">
+<Language Name="Èeština" Author="Petr &apos;PPK&apos; Kozelka" Version="0.5.0.0 build 421">
     <String Name="ThisHubIsRunning">Tento hub pohání</String>
     <String Name="HubName">Jméno hubu</String>
     <String Name="MOTD(motd)">MOTD (zpráva dne)</String>
@@ -7,8 +7,8 @@
     <String Name="HubDescription">Popis hubu</String>
     <String Name="AntiMoGLODescription">Popis proti MoGLO</String>
     <String Name="HubAddress">Adresa hubu (hostname nebo IP adresa)</String>
-    <String Name="ResolveHostToIP">Resolvovat hostname na IP adresu (je potøeba pro nastavení níže)</String>
-    <String Name="ListenOnlyOnIP">Akceptovat spojení jen na této adrese</String>
+    <String Name="ResolveHostToIPs">Resolvovat hostname na IP adresu</String>
+    <String Name="ListenOnlyOnIPs">Pøijímat spojení jen na této adrese</String>
     <String Name="TCPPorts">TCP porty</String>
     <String Name="TCPPortsHint">Více portù jako 4861;666;411</String>
     <String Name="UDPPort">UDP port</String>
@@ -29,7 +29,7 @@
     <String Name="Chat">Chat</String>
     <String Name="CMDs">CMDs</String>
     <String Name="MassMsg">Hromadná zpráva</String>
-    <String Name="RedirectAllUsers">Pøesmìrovat všechny</String>
+    <String Name="RedirectAllUsers">Pøesmìrovat všechny uživatele</String>
     <String Name="RegUsers">Registrovaní uživatelé</String>
     <String Name="User">Uživatel</String>
     <String Name="Password">Heslo</String>
@@ -57,12 +57,12 @@
     <String Name="MaxLen">Maximální délka</String>
     <String Name="ScriptFile">Soubor skriptu</String>
     <String Name="MemUsage">Použitá pamì</String>
-    <String Name="MoveUp">Nahoru</String>
-    <String Name="MoveDown">Dolù</String>
+    <String Name="MoveUp">Posunout nahoru</String>
+    <String Name="MoveDown">Posunout dolù</String>
     <String Name="CheckSyntax">Zkontrolovat syntaxi</String>
     <String Name="RestartScripts">Restartovat skripty</String>
     <String Name="EnableTray">Zapnout ikonu v tray a minimalizovat do ní</String>
-    <String Name="MinimizeOnStartup">Minimalizovat do tray po spuštìní (tray ikona musí být zapnutá)</String>
+    <String Name="MinimizeOnStartup">Minimalizovat do lišty po spuštìní (ikona v lištì musí být zapnutá)</String>
     <String Name="EnableScripting">Zapnout Lua skriptovací inteface</String>
     <String Name="StopScriptError">Zastavit skript pokud v nìm Lua najde chybu</String>
     <String Name="ReplyHubCmdsPm">Odpovídat na pøíkazy hubu v PM</String>
@@ -75,9 +75,8 @@
     <String Name="ReportBadTags">Hlásit podezøelé tagy v popisu operátorùm</String>
     <String Name="ReportBadPass">Hlásit operátorùm pokud bylo obdrženo tøikrát chybné heslo</String>
     <String Name="AdvPassProtect">Zapnout pokroèilou ochranu hesel</String>
-    <String Name="AcceptUnknownTag">Akceptovat tag v popisu od neznámých klientù pokud je správný</String>
     <String Name="KeepSlow">Ponechávat pomalé uživatele online</String>
-    <String Name="CheckStartupNewVersion">Kontrolovat po spuštìní jestli je dostupná nová verze</String>
+    <String Name="CheckStartupNewVersion">Kontrolovat po spuštìní jestli je dostupná nová verze PtokaXu</String>
     <String Name="MyinfoProcess">Zpracování MyINFO</String>
     <String Name="ToAllUsers">Všem uživatelùm</String>
     <String Name="OnlyAllowedProfiles">Jen povoleným profilùm</String>
@@ -109,7 +108,7 @@
     <String Name="Disconnect">Odpojit</String>
     <String Name="Kick">Kopnout</String>
     <String Name="TempBan">Temp Ban</String>
-    <String Name="PermBan">Perm Ban</String>
+    <String Name="PermBan">Trvalý ban</String>
     <String Name="SecLwr">sek</String>
     <String Name="SameMainChat">Stejné zprávy do hlavního chatu</String>
     <String Name="SameMultiMainChat">Stejné víceøadkové zprávy do hlavního chatu</String>
@@ -206,13 +205,13 @@
     <String Name="AddRegisteredUser">Pøidání registrovaného uživatele</String>
     <String Name="DelRegisteredUser">Smazání registrovaného uživatele</String>
     <String Name="AllowedForOpChat">Má povolen OpChat</String>
-    <String Name="SendFullMyinfos">Posílat plná myinfa</String>
+    <String Name="SendLongMyinfos">Poslat dlouhá MyINFO</String>
     <String Name="SendUsersIP">Posílat IP všech uživatelù</String>
     <String Name="DontCheckIP">Nekontrolovat IP v DC pøíkazech</String>
     <String Name="HaveKeyIsOp">Má klíè / je Op</String>
     <String Name="ProfilesLoadingFailed">Naètení Profiles.xml selhalo!</String>
     <String Name="ProfileDelFailed">Smazání profilu selhalo. Profil se používá.</String>
-    <String Name="NewProfileName">Jméno nového profilu:</String>
+    <String Name="NewProfileName">Jméno nového profilu</String>
     <String Name="ProfileNameExist">Jméno nového profilu již existuje v seznamu!</String>
     <String Name="RegisteredUser">Registrovaný uživatel</String>
     <String Name="Discard">Zahodit</String>
@@ -233,7 +232,7 @@
     <String Name="Flooder">Flooder</String>
     <String Name="WithIP">s IP</String>
     <String Name="DisconnByScript">odpojen skriptem</String>
-    <String Name="FatalErrInScript">Kritická chyba ve skriptu</String>
+    <String Name="FatalErrInScript">Závažná chyba ve skriptu</String>
     <String Name="ScriptStopped">Skript byl vypnut</String>
     <String Name="Banned">Zabanován</String>
     <String Name="By">Od</String>
@@ -343,6 +342,7 @@
     <String Name="TempBansCleared">Doèasné bany smazány</String>
     <String Name="HasClearedPermBans">smazal trvalé bany</String>
     <String Name="PermBansCleared">Trvalé bany smazány</String>
+    <String Name="HasClearedTempRangeBans">smazal doèasné bany rozsahù</String>
     <String Name="TempRangeBansCleared">Doèasné bany rozsahù smazány</String>
     <String Name="HasClearedPermRangeBans">smazal trvalé bany rozsahù</String>
     <String Name="PermRangeBansCleared">Trvalé bany rozsahù smazány</String>
@@ -495,7 +495,7 @@
     <String Name="GlobalChatFloodDetected">Globální flood chatu detekován</String>
     <String Name="YouMyINFOIsCorrupted">Vaše MyINFO je poškozené</String>
     <String Name="FakeTag">Falešný tag</String>
-    <String Name="HasSuspiciousTagCheckHim">má podezøelý tag, zkontrolovat</String>
+    <String Name="HasSuspiciousTagCheckHim">má podezøelý tag, zkontrolujte ho</String>
     <String Name="FullDescription">Celý popis</String>
     <String Name="PingerFromIP">Pinger z IP</String>
     <String Name="WithNick">s pøezdívkou</String>
@@ -519,7 +519,7 @@
     <String Name="MyINFOFlooder">MyINFO flooder</String>
     <String Name="YourIPBannedBruteForceAttack">Vaše IP bude zabanována pro podezøení na útok hrubou silou</String>
     <String Name="Your ASS is banned">Vaše pozadí je zabanováno</String>
-    <String Name="BannedBecause3xBadPassForNick">zabanován pro trojnásobné zadání špatného hesla pro pøezdívku</String>
+    <String Name="BannedBecause3xBadPassForNick">zabanován protože zadal 3x špatné heslo pro pøezdívku</String>
     <String Name="IncorrectPassword">Nesprávné heslo</String>
     <String Name="YouAreNotAllowedToRedirect">Nejste oprávnìn pøesmìrovat</String>
     <String Name="YouAreRedirectedTo">Budete pøesmìrován na</String>
@@ -568,7 +568,7 @@
     <String Name="ShareLimits">Limity sdílení</String>
     <String Name="ExpertsOnly">Jen pro experty</String>
     <String Name="PasswordProtection">Protekce hesel</String>
-    <String Name="HubStartupAndTrayIcon">Start hubu a ikona v tray</String>
+    <String Name="HubStartupAndTrayIcon">Start hubu a ikona v lištì</String>
     <String Name="HubCommands">Pøíkazy hubu</String>
     <String Name="Scripting">Skriptování</String>
     <String Name="KickMessages">Zprávy o kopnutí</String>
@@ -647,7 +647,7 @@
     <String Name="MoreMoreDeflood">Více více defloodu</String>
     <String Name="MyINFOLengthLimit">Limit délky MyINFO</String>
     <String Name="YourClientSendIncorrectIP">Váš klient poslal nesprávnou IP</String>
-    <String Name="InCTMReqRealIPIs">v pøíkazu na spojení, vaše správna IP je</String>
+    <String Name="InCTMReqRealIPIs">v pøíkazu na spojení, vaše správná IP je</String>
     <String Name="InSearchReqRealIPIs">v pøíkazu na vyhledávání, vaše správná IP je</String>
     <String Name="ConnectToMe">ConnectToMe</String>
     <String Name="NoCTMDeflood">Žádný ConnectToMe deflood</String>
@@ -703,14 +703,14 @@
     <String Name="Help">&amp;Nápovìda</String>
     <String Name="Exit">&amp;Ukonèit</String>
     <String Name="website">&amp;webová stránka</String>
-    <String Name="board">&amp;fórum</String>
+    <String Name="forum">fórum</String>
     <String Name="wiki">w&amp;iki</String>
     <String Name="MenuAbout">&amp;O</String>
     <String Name="CheckForUpdate">&amp;Zkontrolovat aktualizaci</String>
     <String Name="ReloadTextFiles">&amp;Znovu naèíst textové soubory</String>
     <String Name="RedirectAllUsersTo">Pøesmìrovat všechny uživatele na</String>
-    <String Name="SendOriginalMyINFO">Posílat pùvodní MyINFO</String>
-    <String Name="OptionsForModifiedMyINFO">Volby pro zmìnìné MyINFO</String>
+    <String Name="SendLongMyINFO">Poslat dlouhé MyINFO</String>
+    <String Name="OptionsForShortMyINFO">Volby pro krátké MyINFO</String>
     <String Name="RemoveDescription">Odebrat popis</String>
     <String Name="RemoveTag">Odebrat tag</String>
     <String Name="RemoveConnection">Odebrat pøipojení</String>
@@ -758,4 +758,14 @@
     <String Name="FilterRangeBans">Filtrovat bany rozsahù</String>
     <String Name="RangeBanDeletedAcceptToNew">Ban rozsahu byl smazán. Pokud nyní stisknete pøijmout tak bude vytvoøen nový ban rozsahu!</String>
     <String Name="IsAvailable">je dostupný</String>
+    <String Name="IPv4Address">IPv4 adresa</String>
+    <String Name="IPv6Address">IPv6 adresa</String>
+    <String Name="Register">zaregistrovat</String>
+    <String Name="As">jako</String>
+    <String Name="Registered">zaregistrován</String>
+    <String Name="YouWereRegisteredPleaseEnterYourPassword">Byl jste zaregistrován, prosím zadejte heslo</String>
+    <String Name="SorryYouAreAlreadyRegistered">Promiòte ale již jste zaregistrován</String>
+    <String Name="ThankYouForPasswordYouAreNowRegisteredAs">Dìkuji za heslo, nyní jste zaregistrován jako</String>
+    <String Name="RegisterUserWithSpecifiedProfile">zaregistrovat uživatele s daným profilem. Uživatel je požádán hubem o heslo a až ho zadá tak bude zaregistrován</String>
+    <String Name="InCommandHubReplacedItWithYourRealIP">v pøíkazu, hub ji zmìnil na vaši pravou IP</String>
 </Language>

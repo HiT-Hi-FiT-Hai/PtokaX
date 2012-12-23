@@ -479,8 +479,8 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 case IDC_HOMEPAGE:
                     ::ShellExecute(NULL, NULL, "http://www.PtokaX.org", NULL, NULL, SW_SHOWNORMAL);
                     return 0;
-                case IDC_BOARD:
-                    ::ShellExecute(NULL, NULL, "http://board.ptokax.ch", NULL, NULL, SW_SHOWNORMAL);
+                case IDC_FORUM:
+                    ::ShellExecute(NULL, NULL, "http://forum.PtokaX.org/", NULL, NULL, SW_SHOWNORMAL);
                     return 0;
                 case IDC_WIKI:
                     ::ShellExecute(NULL, NULL, "http://wiki.PtokaX.org", NULL, NULL, SW_SHOWNORMAL);
@@ -623,7 +623,7 @@ HWND MainWindow::CreateEx() {
     ::AppendMenu(hHelpMenu, MF_STRING, IDC_UPDATE_CHECK, (string(LanguageManager->sTexts[LAN_CHECK_FOR_UPDATE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_FOR_UPDATE]) + "...").c_str());
     ::AppendMenu(hHelpMenu, MF_SEPARATOR, 0, 0);
     ::AppendMenu(hHelpMenu, MF_STRING, IDC_HOMEPAGE, (string("PtokaX ") +LanguageManager->sTexts[LAN_WEBSITE]).c_str());
-    ::AppendMenu(hHelpMenu, MF_STRING, IDC_BOARD, (string("PtokaX ") +LanguageManager->sTexts[LAN_BOARD]).c_str());
+    ::AppendMenu(hHelpMenu, MF_STRING, IDC_FORUM, (string("PtokaX ") +LanguageManager->sTexts[LAN_FORUM]).c_str());
     ::AppendMenu(hHelpMenu, MF_STRING, IDC_WIKI, (string("PtokaX ") +LanguageManager->sTexts[LAN_WIKI]).c_str());
     ::AppendMenu(hHelpMenu, MF_SEPARATOR, 0, 0);
     ::AppendMenu(hHelpMenu, MF_STRING, IDC_ABOUT, (string(LanguageManager->sTexts[LAN_MENU_ABOUT], (size_t)LanguageManager->ui16TextsLens[LAN_MENU_ABOUT]) + " PtokaX").c_str());
@@ -726,7 +726,7 @@ void MainWindow::UpdateLanguage() {
     ::ModifyMenu(hMenu, IDC_RANGE_BANS, MF_BYCOMMAND, IDC_RANGE_BANS, LanguageManager->sTexts[LAN_RANGE_BANS]);
 
     ::ModifyMenu(hMenu, IDC_HOMEPAGE, MF_BYCOMMAND, IDC_HOMEPAGE, (string("PtokaX ") +LanguageManager->sTexts[LAN_WEBSITE]).c_str());
-    ::ModifyMenu(hMenu, IDC_BOARD, MF_BYCOMMAND, IDC_BOARD, (string("PtokaX ") +LanguageManager->sTexts[LAN_BOARD]).c_str());
+    ::ModifyMenu(hMenu, IDC_FORUM, MF_BYCOMMAND, IDC_FORUM, (string("PtokaX ") +LanguageManager->sTexts[LAN_FORUM]).c_str());
     ::ModifyMenu(hMenu, IDC_WIKI, MF_BYCOMMAND, IDC_WIKI, (string("PtokaX ") +LanguageManager->sTexts[LAN_WIKI]).c_str());
 
     ::ModifyMenu(hMenu, IDC_ABOUT, MF_BYCOMMAND, IDC_ABOUT,
