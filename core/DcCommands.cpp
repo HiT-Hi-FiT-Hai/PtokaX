@@ -111,7 +111,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
     // micro spam
     if(iLen < 5 && bCheck) {
     	#ifdef _DEBUG
-    	    int iret = sprintf(msg, ">>> Garbage DATA from %s (%s) -> %s", curUser->Nick, curUser->IP, sData);
+    	    int iret = sprintf(msg, ">>> Garbage DATA from %s (%s) -> %s", curUser->sNick, curUser->sIP, sData);
     	    if(CheckSprintf(iret, 1024, "cDcCommands::PreProcessData2") == true) {
                 Memo(msg);
             }

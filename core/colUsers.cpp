@@ -354,7 +354,7 @@ void classUsers::RemUser(User * u) {
         u->next->prev = u->prev;
     }
     #ifdef _DEBUG
-        int iret = sprintf(msg, "# User %s removed from linked list.", u->Nick);
+        int iret = sprintf(msg, "# User %s removed from linked list.", u->sNick);
         if(CheckSprintf(iret, 1024, "classUsers::RemUser") == true) {
             Cout(msg);
         }
