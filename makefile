@@ -22,7 +22,7 @@ CXXFLAGS = -O -g -Wall -Wextra
 #*******************************************************************************
 # Include
 #*******************************************************************************
-INCLUDE = -Itinyxml -I/usr/include -I/usr/include/lua5.1
+INCLUDE = -Itinyxml -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.1
 
 #*******************************************************************************
 # Files to compile and link
@@ -47,28 +47,28 @@ OBJS = $(CURDIR)/obj/colUsers.o $(CURDIR)/obj/DcCommands.o $(CURDIR)/obj/DeFlood
 #*******************************************************************************
 
 PtokaX: $(OBJS)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a -o PtokaX -lstdc++ -lpthread -llua5.1 -lrt -lz
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -llua5.1 -lrt -lz
 
-lua52: INCLUDE = -Itinyxml -I/usr/include -I/usr/include/lua5.2
+lua52: INCLUDE = -Itinyxml -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.2
 lua52: $(OBJS)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a -o PtokaX -lstdc++ -lpthread -llua5.2 -lrt -lz
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -llua5.2 -lrt -lz
 
 centos5-32: $(OBJS)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a /usr/lib/liblua.a -o PtokaX -lstdc++ -lpthread -lrt -lz
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a /usr/lib/liblua.a -o PtokaX -lstdc++ -lpthread -lrt -lz
 
 centos5-64: $(OBJS)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a /usr/lib64/liblua.a -o PtokaX -lstdc++ -lpthread -lrt -lz
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a /usr/lib64/liblua.a -o PtokaX -lstdc++ -lpthread -lrt -lz
 
 centos6: $(OBJS)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a -o PtokaX -lstdc++ -lpthread -llua-5.1 -lrt -lz
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -llua-5.1 -lrt -lz
 
-freebsd: INCLUDE = -Itinyxml -I/usr/include -I/usr/local/include/lua51
+freebsd: INCLUDE = -Itinyxml -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include/lua51
 freebsd: $(OBJS)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a /usr/local/lib/lua51/liblua.a -o PtokaX -lstdc++ -lpthread -lrt -lz
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a /usr/local/lib/lua51/liblua.a -o PtokaX -lstdc++ -lpthread -lrt -lz
 
 haiku: CXXFLAGS = -O -g -Wall
 haiku: $(OBJS)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a -o PtokaX -lnetwork -llua -lz
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lnetwork -llua -lz
 
 
 #*******************************************************************************

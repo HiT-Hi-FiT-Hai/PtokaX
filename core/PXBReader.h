@@ -51,7 +51,7 @@ public:
 	~PXBReader();
 
     bool OpenFileRead(const char * sFilename);
-    bool ReadNextItem(const uint16_t * sExpectedIdentificators, const uint8_t &ui8ExpectedSubItems);
+    bool ReadNextItem(const uint16_t * sExpectedIdentificators, const uint8_t &ui8ExpectedSubItems, const uint8_t &ui8ExtraSubItems = 0);
 
     bool OpenFileSave(const char * sFilename);
     bool WriteNextItem(const uint32_t &ui32Length, const uint8_t &ui8SubItems);

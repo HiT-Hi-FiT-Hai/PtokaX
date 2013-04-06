@@ -37,8 +37,11 @@ struct LoginLogout {
     ~LoginLogout();
 
     uint64_t logonClk, ui64IPv4CheckTick;
+
     uint32_t iToCloseLoops, iUserConnectedLen;
-    char *sLockUsrConn, *sPassword, *sKickMsg;
+
+    char * pBuffer;
+
     UserBan *uBan;
 };
 //---------------------------------------------------------------------------
@@ -120,6 +123,7 @@ struct User {
     	BIT_WAITING_FOR_PASS           = 0x2000000,
     	BIT_WARNED_WRONG_IP            = 0x4000000,
     	BIT_IPV6_ACTIVE                = 0x8000000,
+    	BIT_CHAT_INSERT                = 0x10000000,
     };
 
     enum UserInfoBits {
@@ -244,11 +248,10 @@ void UserSetIP(User * u, char * sNewIP);
 void UserSetNick(User * u, char * sNewNick, const uint8_t &ui8NewNickLen);
 void UserSetMyInfoOriginal(User * u, char * sNewMyInfo, const uint16_t &ui16NewMyInfoLen);
 void UserSetVersion(User * u, char * sNewVer);
-void UserSetPasswd(User * u, char * sNewPass);
 void UserSetLastChat(User * u, char * sNewData, const size_t &szLen);
 void UserSetLastPM(User * u, char * sNewData, const size_t &szLen);
 void UserSetLastSearch(User * u, char * sNewData, const size_t &szLen);
-void UserSetKickMsg(User * u, char * sKickMsg, size_t szLen = 0);
+void UserSetBuffer(User * u, char * sKickMsg, size_t szLen = 0);
 
 void UserClose(User * u, bool bNoQuit = false);
 

@@ -80,6 +80,7 @@ const char* SetBoolXmlStr[] = {
 /*Obsolete "PopupScriptsWindow"*/"",
     "LogScriptErrors", 
     "NoQuackSupports", 
+    "HashPasswords",
 };
 
 const char* SetShortXmlStr[] = {

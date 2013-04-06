@@ -107,9 +107,11 @@
         <!-- Save script errors to log. -->
         <Bool Name="NoQuackSupports">0</Bool>
         <!-- Disallow clients sending buggy $Supports. -->
+        <Bool Name="HashPasswords">0</Bool>
+        <!-- Store registered users passwords as hashes -->
     </Booleans>
     <Integers>
-        <Integer Name="MaxUsers">250</Integer>
+        <Integer Name="MaxUsers">500</Integer>
         <!-- Max users limit -->
         <Integer Name="MinShareLimit">0</Integer>
         <!-- Min share limit. Max 9999. -->

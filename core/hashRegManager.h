@@ -25,17 +25,31 @@ struct User;
 //---------------------------------------------------------------------------
 
 struct RegUser {
-    char *sNick;
-    char *sPass;
-    time_t tLastBadPass;
-    uint16_t iProfile;
-    uint32_t ui32Hash;
+    char * sNick;
+
+    union {
+        char * sPass;
+        uint8_t * ui8PassHash;
+    };
+
     RegUser *prev, *next;
     RegUser *hashtableprev, *hashtablenext;
-    unsigned char iBadPassCount;
 
-    RegUser(char * Nick, char * Pass, const uint16_t &iProfile);
+    time_t tLastBadPass;
+
+    uint32_t ui32Hash;
+
+    uint16_t ui16Profile;
+
+    uint8_t ui8BadPassCount;
+
+    bool bPassHash;
+
+    RegUser();
     ~RegUser(void);
+
+    static RegUser * CreateReg(char * sRegNick, size_t szRegNickLen, char * sRegPassword, size_t szRegPassLen, uint8_t * ui8RegPassHash, const uint16_t &ui16RegProfile);
+    bool UpdatePassword(char * sNewPass, size_t &szNewLen);
 }; 
 //---------------------------------------------------------------------------
 
@@ -65,6 +79,8 @@ public:
 
     void Load(void);
     void Save(void) const;
+
+    void HashPasswords();
 };
 
 //--------------------------------------------------------------------------- 

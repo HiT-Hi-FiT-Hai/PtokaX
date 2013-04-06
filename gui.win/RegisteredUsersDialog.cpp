@@ -331,15 +331,26 @@ void RegisteredUsersDialog::AddReg(const RegUser * pReg) {
     int i = (int)::SendMessage(hWndWindowItems[LV_REGS], LVM_INSERTITEM, 0, (LPARAM)&lvItem);
 
     if(i != -1) {
+        char sHexaHash[129];
+
         lvItem.mask = LVIF_TEXT;
         lvItem.iItem = i;
         lvItem.iSubItem = 1;
-        lvItem.pszText = pReg->sPass;
+
+        if(pReg->bPassHash == true) {
+            memset(&sHexaHash, 0, 129);
+            for(uint8_t ui8i = 0; ui8i < 64; ui8i++) {
+                sprintf(sHexaHash+(ui8i*2), "%02X", pReg->ui8PassHash[ui8i]);
+            }
+            lvItem.pszText = sHexaHash;
+        } else {
+            lvItem.pszText = pReg->sPass;
+        }
 
         ::SendMessage(hWndWindowItems[LV_REGS], LVM_SETITEM, 0, (LPARAM)&lvItem);
 
         lvItem.iSubItem = 2;
-        lvItem.pszText = ProfileMan->ProfilesTable[pReg->iProfile]->sName;
+        lvItem.pszText = ProfileMan->ProfilesTable[pReg->ui16Profile]->sName;
 
         ::SendMessage(hWndWindowItems[LV_REGS], LVM_SETITEM, 0, (LPARAM)&lvItem);
     }
@@ -356,7 +367,7 @@ int RegisteredUsersDialog::CompareRegs(const void * pItem, const void * pOtherIt
         case 1:
             return _stricmp(pFirstReg->sPass, pSecondReg->sPass);
         case 2:
-            return (pFirstReg->iProfile > pSecondReg->iProfile) ? 1 : ((pFirstReg->iProfile == pSecondReg->iProfile) ? 0 : -1);
+            return (pFirstReg->ui16Profile > pSecondReg->ui16Profile) ? 1 : ((pFirstReg->ui16Profile == pSecondReg->ui16Profile) ? 0 : -1);
         default:
             return 0; // never happen, but we need to make compiler/complainer happy ;o)
     }
@@ -448,7 +459,7 @@ void RegisteredUsersDialog::FilterRegs() {
                     }
                     break;
                 case 2:
-                    if(stristr2(ProfileMan->ProfilesTable[curReg->iProfile]->sName, sFilterString.c_str()) == NULL) {
+                    if(stristr2(ProfileMan->ProfilesTable[curReg->ui16Profile]->sName, sFilterString.c_str()) == NULL) {
                         continue;
                     }
                     break;
@@ -492,7 +503,7 @@ void RegisteredUsersDialog::UpdateProfiles() {
         pReg = (RegUser *)ListViewGetItem(hWndWindowItems[LV_REGS], i);
 
         lvItem.iItem = i;
-        lvItem.pszText = ProfileMan->ProfilesTable[pReg->iProfile]->sName;
+        lvItem.pszText = ProfileMan->ProfilesTable[pReg->ui16Profile]->sName;
 
         ::SendMessage(hWndWindowItems[LV_REGS], LVM_SETITEM, 0, (LPARAM)&lvItem);
     }

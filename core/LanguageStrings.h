@@ -717,8 +717,7 @@ const char* LangStr[] = {
     "Country", 
     "Save script errors to log", 
     "Sorry, this hub does not allow clients sending buggy $Supports command", 
-    "Clients with buggy $Supports command", 
-    "Disallow clients sending buggy $Supports command", 
+    "Disallow clients sending buggy $Supports command",
     "Max allowed topic length is 256 characters",
     "Max allowed script name length is 256 characters",
     "Max allowed IP length is 15 characters",
@@ -791,6 +790,9 @@ const char* LangStr[] = {
     "Thank you for password, you are now registered as",
     "register user with specified profile. User is asked by hub for password, and after he enter password then is added to regs",
     "in command, hub replaced it with your real IP",
+    "Your nick contains illegal whitespace character",
+    "This box is empty because password si hashed",
+    "Save passwords for registered users as hashes",
 };
 //---------------------------------------------------------------------------
 

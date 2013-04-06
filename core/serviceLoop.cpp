@@ -660,15 +660,15 @@ void theLoop::ReceiveLoop() {
                 }
 
                 // PPK ... is not more needed, free mem ;)
-                if(curUser->uLogInOut->sLockUsrConn != NULL) {
+                if(curUser->uLogInOut->pBuffer != NULL) {
 #ifdef _WIN32
-                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->uLogInOut->sLockUsrConn) == 0) {
-						AppendDebugLog("%s - [MEM] Cannot deallocate curUser->uLogInOut->sLockUsrConn in theLoop::ReceiveLoop\n", 0);
+                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->uLogInOut->pBuffer) == 0) {
+						AppendDebugLog("%s - [MEM] Cannot deallocate curUser->uLogInOut->pBuffer in theLoop::ReceiveLoop\n", 0);
                     }
 #else
-					free(curUser->uLogInOut->sLockUsrConn);
+					free(curUser->uLogInOut->pBuffer);
 #endif
-                    curUser->uLogInOut->sLockUsrConn = NULL;
+                    curUser->uLogInOut->pBuffer = NULL;
                 }
 
                 if((curUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6 && ((curUser->ui32BoolBits & User::SUPPORTBIT_IPV4) == User::SUPPORTBIT_IPV4) == false) {
@@ -705,12 +705,18 @@ void theLoop::ReceiveLoop() {
 
                 if(iBeforeLuaLen < curUser->sbdatalen) {
                     size_t szNeededLen = curUser->sbdatalen-iBeforeLuaLen;
+
+					void * sOldBuf = curUser->uLogInOut->pBuffer;
 #ifdef _WIN32
-                    curUser->uLogInOut->sLockUsrConn = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededLen+1);
+					if(curUser->uLogInOut->pBuffer == NULL) {
+						curUser->uLogInOut->pBuffer = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededLen+1);
+					} else {
+						curUser->uLogInOut->pBuffer = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, sOldBuf, szNeededLen+1);
+					}
 #else
-					curUser->uLogInOut->sLockUsrConn = (char *)malloc(szNeededLen+1);
+					curUser->uLogInOut->pBuffer = (char *)realloc(sOldBuf, szNeededLen+1);
 #endif
-                    if(curUser->uLogInOut->sLockUsrConn == NULL) {
+                    if(curUser->uLogInOut->pBuffer == NULL) {
                         curUser->ui32BoolBits |= User::BIT_ERROR;
                         UserClose(curUser);
 
@@ -718,9 +724,9 @@ void theLoop::ReceiveLoop() {
 
                 		continue;
                     }
-                    memcpy(curUser->uLogInOut->sLockUsrConn, curUser->sendbuf+iBeforeLuaLen, szNeededLen);
+                    memcpy(curUser->uLogInOut->pBuffer, curUser->sendbuf+iBeforeLuaLen, szNeededLen);
                 	curUser->uLogInOut->iUserConnectedLen = (uint32_t)szNeededLen;
-                	curUser->uLogInOut->sLockUsrConn[curUser->uLogInOut->iUserConnectedLen] = '\0';
+                	curUser->uLogInOut->pBuffer[curUser->uLogInOut->iUserConnectedLen] = '\0';
                 	curUser->sbdatalen = iBeforeLuaLen;
                 	curUser->sendbuf[curUser->sbdatalen] = '\0';
                 }
@@ -1066,15 +1072,16 @@ void theLoop::SendLoop() {
                     UdpDebug->CheckUdpSub(curUser, true);
 
                 if(curUser->uLogInOut->iUserConnectedLen != 0) {
-                    UserPutInSendBuf(curUser, curUser->uLogInOut->sLockUsrConn, curUser->uLogInOut->iUserConnectedLen);
+                    UserPutInSendBuf(curUser, curUser->uLogInOut->pBuffer, curUser->uLogInOut->iUserConnectedLen);
 #ifdef _WIN32
-                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->uLogInOut->sLockUsrConn) == 0) {
-						AppendDebugLog("%s - [MEM] Cannot deallocate curUser->uLogInOut->sLockUsrConn in theLoop::SendLoop\n", 0);
+                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->uLogInOut->pBuffer) == 0) {
+						AppendDebugLog("%s - [MEM] Cannot deallocate curUser->uLogInOut->pBuffer in theLoop::SendLoop\n", 0);
                     }
 #else
-					free(curUser->uLogInOut->sLockUsrConn);
+					free(curUser->uLogInOut->pBuffer);
 #endif
-                    curUser->uLogInOut->sLockUsrConn = NULL;
+
+                    curUser->uLogInOut->pBuffer = NULL;
                 }
 
                 // Login struct no more needed, free mem ! ;)

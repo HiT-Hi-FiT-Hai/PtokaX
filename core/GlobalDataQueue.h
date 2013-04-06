@@ -132,7 +132,8 @@ public:
     void SendFinalQueue();
     void * GetLastQueueItem();
     void * GetFirstQueueItem();
-    void InsertQueueItem(char * sCommand, const size_t &szLen, void * pBeforeItem, const uint8_t &ui8CmdType);
+    void * InsertBlankQueueItem(void * pAfterItem, const uint8_t &ui8CmdType);
+    void FillBlankQueueItem(char * sCommand, const size_t &szLen, void * pQueueItem);
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

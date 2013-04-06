@@ -567,7 +567,7 @@ const char * IP2CC::Find(const uint8_t * ui128IpHash, const bool &bCountryName) 
 
     if(bIPv4 == true) {
         for(uint32_t ui32i = 0; ui32i < ui32Count; ui32i++) {
-            if(ui32RangeFrom[ui32i] < ui32IpHash && ui32RangeTo[ui32i] > ui32IpHash) {
+            if(ui32RangeFrom[ui32i] <= ui32IpHash && ui32RangeTo[ui32i] >= ui32IpHash) {
                 if(bCountryName == false) {
                     return CountryCodes[ui8RangeCI[ui32i]];
                 } else {
@@ -619,7 +619,7 @@ uint8_t IP2CC::Find(const uint8_t * ui128IpHash) {
 
     if(bIPv4 == true) {
         for(uint32_t ui32i = 0; ui32i < ui32Count; ui32i++) {
-            if(ui32RangeFrom[ui32i] < ui32IpHash && ui32RangeTo[ui32i] > ui32IpHash) {
+            if(ui32RangeFrom[ui32i] <= ui32IpHash && ui32RangeTo[ui32i] >= ui32IpHash) {
                 return ui8RangeCI[ui32i];
             }
         }

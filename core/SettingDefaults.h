@@ -80,6 +80,7 @@ bool SetBoolDef[] = {
 /*OBSOLETE*/false, //ABSOLOTE_POPUP_SCRIPT_WINDOW
     false, //LOG_SCRIPT_ERRORS
     false, //NO_QUACK_SUPPORTS
+    false, //HASH_PASSWORDS
 };
 
 int16_t SetShortDef[] = {

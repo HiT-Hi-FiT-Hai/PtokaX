@@ -25,6 +25,7 @@
 #include "LuaSetManLib.h"
 //---------------------------------------------------------------------------
 #include "eventqueue.h"
+#include "../core/hashRegManager.h"
 #include "hashUsrManager.h"
 #include "LuaScriptManager.h"
 #include "SettingManager.h"
@@ -147,9 +148,13 @@ static int SetBool(lua_State * L) {
         return 0;
     }  
 
-    if(szId == 22 && bValue == false) {
+    if(szId == SETBOOL_ENABLE_SCRIPTING && bValue == false) {
         eventqueue->AddNormal(eventq::EVENT_STOP_SCRIPTING, NULL);
         return 0;
+    }
+
+    if(szId == SETBOOL_HASH_PASSWORDS && bValue == true) {
+        hashRegManager->HashPasswords();
     }
 
     SettingManager->SetBool(szId, bValue);
@@ -519,26 +524,41 @@ static int SetOpChat(lua_State * L) {
     }
 
     bool bBotHaveNewNick = (strcmp(SettingManager->sTexts[SETTXT_OP_CHAT_NICK], NewBotName) != 0);
+    bool bEnableBot = (lua_toboolean(L, 1) == 0 ? false : true);
+
+    bool bRegStateChange = false, bDescriptionChange = false, bEmailChange = false;
+
+    if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] != bEnableBot) {
+        bRegStateChange = true;
+    }
 
     if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true) {
-        SettingManager->DisableOpChat(bBotHaveNewNick);
+        SettingManager->DisableOpChat((bBotHaveNewNick == true || bEnableBot == false));
     }
 
     SettingManager->bUpdateLocked = true;
 
-    SettingManager->SetBool(SETBOOL_REG_OP_CHAT, (lua_toboolean(L, 1) == 0 ? false : true));
+    SettingManager->SetBool(SETBOOL_REG_OP_CHAT, bEnableBot);
 
     if(bBotHaveNewNick == true) {
         SettingManager->SetText(SETTXT_OP_CHAT_NICK, NewBotName);
     }
 
-    if(SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION] == NULL || 
+    if(SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION] == NULL ||
         strcmp(SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION], NewBotDescription) != 0) {
+        if(szDescrLen != (size_t)(SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION] == NULL ? 0 : -1)) {
+            bDescriptionChange = true;
+        }
+
         SettingManager->SetText(SETTXT_OP_CHAT_DESCRIPTION, NewBotDescription);
     }
 
     if(SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL] == NULL || 
         strcmp(SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL], NewBotEmail) != 0) {
+        if(szEmailLen != (size_t)(SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL] == NULL ? 0 : -1)) {
+            bEmailChange = true;
+        }
+
         SettingManager->SetText(SETTXT_OP_CHAT_EMAIL, NewBotEmail);
     }
 
@@ -546,8 +566,9 @@ static int SetOpChat(lua_State * L) {
 
     SettingManager->UpdateBotsSameNick();
 
-    if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true) {
-        SettingManager->UpdateOpChat(bBotHaveNewNick);
+    if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true &&
+        (bRegStateChange == true || bBotHaveNewNick == true || bDescriptionChange == true || bEmailChange == true)) {
+        SettingManager->UpdateOpChat((bBotHaveNewNick == true || bRegStateChange == true));
     }
 
     lua_settop(L, 0);
@@ -638,28 +659,48 @@ static int SetHubBot(lua_State * L) {
     }
 
     bool bBotHaveNewNick = (strcmp(SettingManager->sTexts[SETTXT_BOT_NICK], NewBotName) != 0);
+    bool bEnableBot = (lua_toboolean(L, 1) == 0 ? false : true);
 
-    if(SettingManager->bBools[SETBOOL_REG_BOT] == true) {
-        SettingManager->DisableBot(bBotHaveNewNick);
+    bool bRegStateChange = false, bDescriptionChange = false, bEmailChange = false;
+
+    if(SettingManager->bBools[SETBOOL_REG_BOT] != bEnableBot) {
+        bRegStateChange = true;
     }
 
     SettingManager->bUpdateLocked = true;
 
-    SettingManager->SetBool(SETBOOL_REG_BOT, (lua_toboolean(L, 1) == 0 ? false : true));
+    if(SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] == NULL ||
+        strcmp(SettingManager->sTexts[SETTXT_BOT_DESCRIPTION], NewBotDescription) != 0) {
+        if(szDescrLen != (size_t)(SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] == NULL ? 0 : -1)) {
+            bDescriptionChange = true;
+        }
+
+        SettingManager->SetText(SETTXT_BOT_DESCRIPTION, NewBotDescription);
+    }
+
+    if(SettingManager->sTexts[SETTXT_BOT_EMAIL] == NULL ||
+        strcmp(SettingManager->sTexts[SETTXT_BOT_EMAIL], NewBotEmail) != 0) {
+        if(szEmailLen != (size_t)(SettingManager->sTexts[SETTXT_BOT_EMAIL] == NULL ? 0 : -1)) {
+            bEmailChange = true;
+        }
+
+        SettingManager->SetText(SETTXT_BOT_EMAIL, NewBotEmail);
+    }
+
+    SettingManager->SetBool(SETBOOL_USE_BOT_NICK_AS_HUB_SEC, (lua_toboolean(L, 5) == 0 ? false : true));
+
+    if(SettingManager->bBools[SETBOOL_REG_BOT] == true) {
+        SettingManager->bUpdateLocked = false;
+        SettingManager->DisableBot((bBotHaveNewNick == true || bEnableBot == false),
+            (bRegStateChange == true || bBotHaveNewNick == true || bDescriptionChange == true || bEmailChange == true) ? true : false);
+        SettingManager->bUpdateLocked = true;
+    }
+
+    SettingManager->SetBool(SETBOOL_REG_BOT, bEnableBot);
 
     if(bBotHaveNewNick == true) {
         SettingManager->SetText(SETTXT_BOT_NICK, NewBotName);
     }
-
-    if(NewBotDescription != NULL && (SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] == NULL ||
-        strcmp(SettingManager->sTexts[SETTXT_BOT_DESCRIPTION], NewBotDescription) != 0))
-        SettingManager->SetText(SETTXT_BOT_DESCRIPTION, NewBotDescription);
-
-    if(NewBotEmail != NULL && (SettingManager->sTexts[SETTXT_BOT_EMAIL] == NULL ||
-        strcmp(SettingManager->sTexts[SETTXT_BOT_EMAIL], NewBotEmail) != 0))
-        SettingManager->SetText(SETTXT_BOT_EMAIL, NewBotEmail);
-
-    SettingManager->SetBool(SETBOOL_USE_BOT_NICK_AS_HUB_SEC, (lua_toboolean(L, 5) == 0 ? false : true));
 
     SettingManager->bUpdateLocked = false;
 
@@ -675,8 +716,9 @@ static int SetHubBot(lua_State * L) {
     SettingManager->UpdateNickLimitMessage();
     SettingManager->UpdateBotsSameNick();
 
-    if(SettingManager->bBools[SETBOOL_REG_BOT] == true) {
-        SettingManager->UpdateBot(bBotHaveNewNick);
+    if(SettingManager->bBools[SETBOOL_REG_BOT] == true &&
+        (bRegStateChange == true || bBotHaveNewNick == true || bDescriptionChange == true || bEmailChange == true)) {
+        SettingManager->UpdateBot((bBotHaveNewNick == true || bRegStateChange == true));
     }
 
     return 0;

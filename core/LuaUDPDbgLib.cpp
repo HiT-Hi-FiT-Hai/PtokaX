@@ -63,7 +63,7 @@ static int Reg(lua_State * L) {
     size_t szLen;
     char * sIP = (char *)lua_tolstring(L, 1, &szLen);
 
-    if(szLen < 7 || szLen > 15 || isIP(sIP, szLen) == false) {
+    if(szLen < 7 || szLen > 15 || isIP(sIP) == false) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;

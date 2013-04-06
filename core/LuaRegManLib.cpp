@@ -51,11 +51,15 @@ static void PushReg(lua_State * L, RegUser * r) {
     lua_rawset(L, i);
 
     lua_pushliteral(L, "sPassword");
-    lua_pushstring(L, r->sPass);
+    if(r->bPassHash == true) {
+        lua_pushnil(L);
+    } else {
+        lua_pushstring(L, r->sPass);
+    }
     lua_rawset(L, i);
             
     lua_pushliteral(L, "iProfile");
-    lua_pushnumber(L, r->iProfile);
+    lua_pushnumber(L, r->ui16Profile);
     lua_rawset(L, i);
 }
 //------------------------------------------------------------------------------
@@ -101,7 +105,7 @@ static int GetRegsByProfile(lua_State * L) {
         RegUser *cur = next;
         next = cur->next;
         
-		if(cur->iProfile == (int32_t)iProfile) {
+		if(cur->ui16Profile == iProfile) {
             lua_pushnumber(L, ++i);
             PushReg(L, cur);
             lua_rawset(L, t);
@@ -133,7 +137,7 @@ static int GetRegsByOpStatus(lua_State * L, const bool &bOperator) {
         RegUser *curReg = next;
 		next = curReg->next;
 
-        if(ProfileMan->IsProfileAllowed(curReg->iProfile, ProfileManager::HASKEYICON) == bOperator) {
+        if(ProfileMan->IsProfileAllowed(curReg->ui16Profile, ProfileManager::HASKEYICON) == bOperator) {
             lua_pushnumber(L, ++i);
 			PushReg(L, curReg);
             lua_rawset(L, t);
@@ -300,7 +304,7 @@ static int AddReg(lua_State * L) {
             }
         }
 
-        UserSetPasswd(pUser, ProfileMan->ProfilesTable[ui16Profile]->sName);
+        UserSetBuffer(pUser, ProfileMan->ProfilesTable[ui16Profile]->sName);
         pUser->ui32BoolBits |= User::BIT_WAITING_FOR_PASS;
 
         int iMsgLen = sprintf(g_sBuffer, "<%s> %s.|$GetPass|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_WERE_REGISTERED_PLEASE_ENTER_YOUR_PASSWORD]);
@@ -368,21 +372,35 @@ static int ChangeReg(lua_State * L) {
         return 1;
     }
 
-    if(lua_type(L, 1) != LUA_TSTRING || lua_type(L, 2) != LUA_TSTRING || lua_type(L, 3) != LUA_TNUMBER) {
+    if(lua_type(L, 1) != LUA_TSTRING || lua_type(L, 3) != LUA_TNUMBER) {
         luaL_checktype(L, 1, LUA_TSTRING);
-        luaL_checktype(L, 2, LUA_TSTRING);
         luaL_checktype(L, 3, LUA_TNUMBER);
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
     }
 
-    size_t szNickLen, szPassLen;
-    char *sNick = (char *)lua_tolstring(L, 1, &szNickLen);
-    char *sPass = (char *)lua_tolstring(L, 2, &szPassLen);
+    size_t szNickLen, szPassLen = 0;
+    char * sNick = (char *)lua_tolstring(L, 1, &szNickLen);
+    char * sPass = NULL;
+
+    if(lua_type(L, 2) == LUA_TSTRING) {
+        char * sPass = (char *)lua_tolstring(L, 2, &szPassLen);
+        if(szPassLen == 0 || szPassLen > 64 || strpbrk(sPass, "|") != NULL) {
+            lua_settop(L, 0);
+            lua_pushnil(L);
+            return 1;
+        }
+    } else if(lua_type(L, 2) != LUA_TNIL) {
+        luaL_checktype(L, 2, LUA_TSTRING);
+		lua_settop(L, 0);
+		lua_pushnil(L);
+        return 1;
+    }
+
 	uint16_t i16Profile = (uint16_t)lua_tonumber(L, 3);
 
-	if(i16Profile > ProfileMan->iProfileCount-1 || szNickLen == 0 || szNickLen > 64 || szPassLen == 0 || szPassLen > 64 || strpbrk(sNick, " $|") != NULL || strpbrk(sPass, "|") != NULL) {
+	if(i16Profile > ProfileMan->iProfileCount-1 || szNickLen == 0 || szNickLen > 64 || strpbrk(sNick, " $|") != NULL) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -426,7 +444,7 @@ static int ClrRegBadPass(lua_State * L) {
     if(szNickLen != 0) {
         RegUser *Reg = hashRegManager->Find(sNick, szNickLen);
         if(Reg != NULL) {
-            Reg->iBadPassCount = 0;
+            Reg->ui8BadPassCount = 0;
         } else {
 			lua_settop(L, 0);
 			lua_pushnil(L);

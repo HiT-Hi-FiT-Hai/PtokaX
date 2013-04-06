@@ -717,8 +717,7 @@ const char* LangXmlStr[] = {
     "Country", 
     "LogScriptErrors", 
     "QuackSupports", 
-    "ClientsBuggySupports", 
-    "DisallowBuggySupports", 
+    "DisallowBuggySupports",
     "MaxAlwdTopicLen256Chars",
     "MaxAlwdScriptNameLen256Chars",
     "MaxAlwdIPLen15Chars",
@@ -791,6 +790,9 @@ const char* LangXmlStr[] = {
     "ThankYouForPasswordYouAreNowRegisteredAs",
     "RegisterUserWithSpecifiedProfile",
     "InCommandHubReplacedItWithYourRealIP",
+    "YourNickContainsIllegalWhiteCharacter",
+    "PasswordIsHashed",
+    "StoreRegPassHashed", 
 };
 //---------------------------------------------------------------------------
 

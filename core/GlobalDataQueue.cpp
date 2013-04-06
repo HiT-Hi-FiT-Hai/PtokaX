@@ -606,8 +606,12 @@ void GlobalDataQueue::ProcessQueues(User * pUser) {
                             AddDataToQueue(GlobalQueues[ui32QueueType], pCur->sCommand1, pCur->szLen1);
                         }
                         break;
-                    case CMD_HUBNAME:
                     case CMD_CHAT:
+                        if(pCur->sCommand1 != NULL) {
+                            AddDataToQueue(GlobalQueues[ui32QueueType], pCur->sCommand1, pCur->szLen1);
+                        }
+                        break;
+                    case CMD_HUBNAME:
                     case CMD_QUIT:
                     case CMD_LUA:
                         AddDataToQueue(GlobalQueues[ui32QueueType], pCur->sCommand1, pCur->szLen1);
@@ -979,52 +983,73 @@ void * GlobalDataQueue::GetFirstQueueItem() {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GlobalDataQueue::InsertQueueItem(char * sCommand, const size_t &szLen, void * pBeforeItem, const uint8_t &ui8CmdType) {
+void * GlobalDataQueue::InsertBlankQueueItem(void * pAfterItem, const uint8_t &ui8CmdType) {
     QueueItem * pNewItem = new QueueItem();
     if(pNewItem == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem in GlobalDataQueue::InsertQueueItem\n", 0);
-    	return;
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem in GlobalDataQueue::InsertBlankQueueItem\n", 0);
+    	return NULL;
     }
 
-#ifdef _WIN32
-    pNewItem->sCommand1 = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen);
-#else
-	pNewItem->sCommand1 = (char *)malloc(szLen+1);
-#endif
-    if(pNewItem->sCommand1 == NULL) {
-        delete pNewItem;
-
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pNewItem->sCommand1 in GlobalDataQueue::InsertQueueItem\n", (uint64_t)(szLen+1));
-
-        return;
-    }
-
-    memcpy(pNewItem->sCommand1, sCommand, szLen);
-    pNewItem->sCommand1[szLen] = '\0';
-
-	pNewItem->szLen1 = szLen;
+    pNewItem->sCommand1 = NULL;
+	pNewItem->szLen1 = 0;
 
     pNewItem->sCommand2 = NULL;
     pNewItem->szLen2 = 0;
 
 	pNewItem->ui8CommandType = ui8CmdType;
 
-	pNewItem->pNext = (QueueItem *)pBeforeItem;
+    if(pAfterItem == pNewQueueItems[0]) {
+        pNewItem->pNext = pNewQueueItems[0];
+        pNewQueueItems[0] = pNewItem;
+        return pNewItem;
+    }
 
     QueueItem * pNext = pNewQueueItems[0];
-    if(pNext == pBeforeItem) {
-        pNewQueueItems[0] = pNewItem;
-        return;
-    }
 
     while(pNext != NULL) {
         QueueItem * pCur = pNext;
         pNext = pCur->pNext;
 
-        if(pNext == pBeforeItem) {
+        if(pCur == pAfterItem) {
+            if(pCur->pNext == NULL) {
+                pNewQueueItems[1] = pNewItem;
+            }
+
+            pNewItem->pNext = pCur->pNext;
             pCur->pNext = pNewItem;
-            return;
+            return pNewItem;
         }
     }
+
+	pNewItem->pNext = NULL;
+
+    if(pNewQueueItems[0] == NULL) {
+        pNewQueueItems[0] = pNewItem;
+        pNewQueueItems[1] = pNewItem;
+    } else {
+        pNewQueueItems[1]->pNext = pNewItem;
+        pNewQueueItems[1] = pNewItem;
+    }
+
+    return pNewItem;
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void GlobalDataQueue::FillBlankQueueItem(char * sCommand, const size_t &szLen, void * pQueueItem) {
+#ifdef _WIN32
+    ((QueueItem *)pQueueItem)->sCommand1 = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
+#else
+	((QueueItem *)pQueueItem)->sCommand1 = (char *)malloc(szLen+1);
+#endif
+    if(((QueueItem *)pQueueItem)->sCommand1 == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pNewItem->sCommand1 in GlobalDataQueue::FillBlankQueueItem\n", (uint64_t)(szLen+1));
+
+        return;
+    }
+
+    memcpy(((QueueItem *)pQueueItem)->sCommand1, sCommand, szLen);
+    ((QueueItem *)pQueueItem)->sCommand1[szLen] = '\0';
+
+	((QueueItem *)pQueueItem)->szLen1 = szLen;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

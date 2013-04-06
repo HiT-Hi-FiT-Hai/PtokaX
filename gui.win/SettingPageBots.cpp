@@ -135,16 +135,19 @@ void SettingPageBots::Save() {
         return;
     }
 
+    char sBot[65];
+    int iBotLen = ::GetWindowText(hWndPageItems[EDT_HUB_BOT_NICK], sBot, 65);
+
+    bool bBotHaveNewNick = (strcmp(SettingManager->sTexts[SETTXT_BOT_NICK], sBot) != 0);
     bool bRegBot = ::SendMessage(hWndPageItems[BTN_HUB_BOT_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false;
 
-    if(bRegBot == false && SettingManager->bBools[SETBOOL_REG_BOT] == true) {
-		SettingManager->DisableBot();
-	}
+    bool bRegStateChange = false, bDescriptionChange = false, bEmailChange = false;
 
-    char buf[65];
-    int iLen = ::GetWindowText(hWndPageItems[EDT_HUB_BOT_NICK], buf, 65);
+    if(SettingManager->bBools[SETBOOL_REG_BOT] != bRegBot) {
+        bRegStateChange = true;
+    }
 
-    if(strcmp(buf, SettingManager->sTexts[SETTXT_BOT_NICK]) != NULL) {
+    if(strcmp(sBot, SettingManager->sTexts[SETTXT_BOT_NICK]) != NULL) {
         bUpdateHubSec = true;
         bUpdateMOTD = true;
         bUpdateHubNameWelcome = true;
@@ -158,10 +161,7 @@ void SettingPageBots::Save() {
         bUpdateBotsSameNick = true;
 		bBotNickChanged = true;
         bUpdateBot = true;
-        SettingManager->DisableBot();
     }
-
-    SettingManager->SetText(SETTXT_BOT_NICK, buf, iLen);
 
 	if((bUpdateBot == false || bBotNickChanged == false) && (bRegBot == true && SettingManager->bBools[SETBOOL_REG_BOT] == false)) {
 		bUpdateBot = true;
@@ -185,14 +185,20 @@ void SettingPageBots::Save() {
 
     SettingManager->SetBool(SETBOOL_USE_BOT_NICK_AS_HUB_SEC, bHubBotIsHubSec);
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_HUB_BOT_DESCRIPTION], buf, 65);
+    char buf[65];
+    int iLen = ::GetWindowText(hWndPageItems[EDT_HUB_BOT_DESCRIPTION], buf, 65);
 
     if(bUpdateBot == false &&
         ((SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] == NULL && iLen != 0) ||
         (SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] != NULL &&
         strcmp(buf, SettingManager->sTexts[SETTXT_BOT_DESCRIPTION]) != NULL))) {
         bUpdateBot = true;
-        SettingManager->DisableBot(false);
+    }
+
+    if((SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] == NULL && iLen != 0) ||
+        (SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] != NULL &&
+        strcmp(buf, SettingManager->sTexts[SETTXT_BOT_DESCRIPTION]) != NULL)) {
+        bDescriptionChange = true;
     }
 
     SettingManager->SetText(SETTXT_BOT_DESCRIPTION, buf, iLen);
@@ -204,42 +210,49 @@ void SettingPageBots::Save() {
         (SettingManager->sTexts[SETTXT_BOT_EMAIL] != NULL &&
         strcmp(buf, SettingManager->sTexts[SETTXT_BOT_EMAIL]) != NULL)) {
         bUpdateBot = true;
-        SettingManager->DisableBot(false);
+    }
+
+    if((SettingManager->sTexts[SETTXT_BOT_EMAIL] == NULL && iLen != 0) ||
+        (SettingManager->sTexts[SETTXT_BOT_EMAIL] != NULL &&
+        strcmp(buf, SettingManager->sTexts[SETTXT_BOT_EMAIL]) != NULL)) {
+        bEmailChange = true;
     }
 
     SettingManager->SetText(SETTXT_BOT_EMAIL, buf, iLen);
 
+    if(SettingManager->bBools[SETBOOL_REG_BOT] == true) {
+        SettingManager->bUpdateLocked = false;
+		SettingManager->DisableBot((bBotHaveNewNick == true || bRegBot == false),
+            (bRegStateChange == true || bBotHaveNewNick == true || bDescriptionChange == true || bEmailChange == true) ? true : false);
+		SettingManager->bUpdateLocked = true;
+	}
+
+    SettingManager->SetText(SETTXT_BOT_NICK, sBot, iBotLen);
+
+    iBotLen = ::GetWindowText(hWndPageItems[EDT_OP_CHAT_BOT_NICK], sBot, 65);
+
     bool bRegOpChat = ::SendMessage(hWndPageItems[BTN_OP_CHAT_BOT_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false;
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_OP_CHAT_BOT_NICK], buf, 65);
+    bBotHaveNewNick = (strcmp(SettingManager->sTexts[SETTXT_OP_CHAT_NICK], sBot) != 0);
 
     if(bUpdateBotsSameNick == false && (bRegBot != SettingManager->bBools[SETBOOL_REG_BOT] ||
         bRegOpChat != SettingManager->bBools[SETBOOL_REG_OP_CHAT] ||
-        strcmp(buf, SettingManager->sTexts[SETTXT_OP_CHAT_NICK]) != NULL)) {
+        strcmp(sBot, SettingManager->sTexts[SETTXT_OP_CHAT_NICK]) != NULL)) {
         bUpdateBotsSameNick = true;
     }
 
     SettingManager->SetBool(SETBOOL_REG_BOT, bRegBot);
 
-    if(strcmp(buf, SettingManager->sTexts[SETTXT_OP_CHAT_NICK]) != NULL) {
+    if(strcmp(sBot, SettingManager->sTexts[SETTXT_OP_CHAT_NICK]) != NULL) {
 		bOpChatNickChanged = true;
 		bUpdateOpChat = true;
-        SettingManager->DisableOpChat();
     }
     
-	if(bUpdateOpChat == false && (bRegOpChat == false && SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true)) {
-		SettingManager->DisableOpChat();
-	}
-
-    SettingManager->SetText(SETTXT_OP_CHAT_NICK, buf, iLen);
-
 	if((bUpdateOpChat == false || bOpChatNickChanged == false) &&
 		(bRegOpChat == true && SettingManager->bBools[SETBOOL_REG_OP_CHAT] == false)) {
 		bUpdateOpChat = true;
 		bOpChatNickChanged = true;
 	}
-
-    SettingManager->SetBool(SETBOOL_REG_OP_CHAT, bRegOpChat);
 
     iLen = ::GetWindowText(hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION], buf, 65);
 
@@ -248,7 +261,6 @@ void SettingPageBots::Save() {
         (SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION] != NULL &&
         strcmp(buf, SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION]) != NULL))) {
         bUpdateOpChat = true;
-        SettingManager->DisableOpChat(false);
     }
 
     SettingManager->SetText(SETTXT_OP_CHAT_DESCRIPTION, buf, iLen);
@@ -260,12 +272,19 @@ void SettingPageBots::Save() {
         (SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL] != NULL &&
         strcmp(buf, SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL]) != NULL)) {
         bUpdateOpChat = true;
-        SettingManager->DisableOpChat(false);
     }
 
     SettingManager->SetText(SETTXT_OP_CHAT_EMAIL, buf, iLen);
 
-    SettingManager->SetBool(SETBOOL_KEEP_SLOW_USERS, ::SendMessage(hWndPageItems[BTN_KEEP_SLOW_CLIENTS_ONLINE], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
+	if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true) {
+        SettingManager->bUpdateLocked = false;
+		SettingManager->DisableOpChat((bBotHaveNewNick == true || bRegOpChat == false));
+		SettingManager->bUpdateLocked = true;
+	}
+
+    SettingManager->SetText(SETTXT_OP_CHAT_NICK, sBot, iBotLen);
+
+    SettingManager->SetBool(SETBOOL_REG_OP_CHAT, bRegOpChat);
 }
 //------------------------------------------------------------------------------
 
@@ -392,16 +411,6 @@ bool SettingPageBots::CreateSettingPage(HWND hOwner) {
         13, iPosX + (2 * iGroupBoxMargin) + iCheckHeight + 1 + (2 * iOneLineGB), iGBinGBEDT, iEditHeight, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_EMAIL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], EM_SETLIMITTEXT, 64, 0);
 
-    iPosX += iGroupBoxMargin + iCheckHeight + (3 * iOneLineGB) + 1 + 5;
-
-    hWndPageItems[GB_EXPERTS_ONLY] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_EXPERTS_ONLY], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, iPosX, iFullGB, iOneCheckGB, m_hWnd, NULL, g_hInstance, NULL);
-
-    hWndPageItems[BTN_KEEP_SLOW_CLIENTS_ONLINE] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_KEEP_SLOW], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, iPosX + iGroupBoxMargin, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[BTN_KEEP_SLOW_CLIENTS_ONLINE], BM_SETCHECK, (SettingManager->bBools[SETBOOL_KEEP_SLOW_USERS] == true ? BST_CHECKED : BST_UNCHECKED), 0);
-
-
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {
             return false;
@@ -419,7 +428,7 @@ bool SettingPageBots::CreateSettingPage(HWND hOwner) {
     ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION], SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true ? TRUE : FALSE);
     ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true ? TRUE : FALSE);
 
-    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_KEEP_SLOW_CLIENTS_ONLINE], GWLP_WNDPROC, (LONG_PTR)ButtonProc);
+    wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], GWLP_WNDPROC, (LONG_PTR)EditProc);
 
 	return true;
 }
@@ -431,6 +440,6 @@ char * SettingPageBots::GetPageName() {
 //------------------------------------------------------------------------------
 
 void SettingPageBots::FocusLastItem() {
-    ::SetFocus(hWndPageItems[BTN_KEEP_SLOW_CLIENTS_ONLINE]);
+    ::SetFocus(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL]);
 }
 //------------------------------------------------------------------------------

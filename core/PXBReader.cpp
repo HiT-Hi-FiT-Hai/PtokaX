@@ -86,7 +86,7 @@ bool PXBReader::OpenFileRead(const char * sFilename) {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-bool PXBReader::ReadNextItem(const uint16_t * sExpectedIdentificators, const uint8_t &ui8ExpectedSubItems) {
+bool PXBReader::ReadNextItem(const uint16_t * sExpectedIdentificators, const uint8_t &ui8ExpectedSubItems, const uint8_t &ui8ExtraSubItems/* = 0*/) {
     if(szRemainingSize == 0) {
         return false;
     }
@@ -135,7 +135,7 @@ bool PXBReader::ReadNextItem(const uint16_t * sExpectedIdentificators, const uin
 
             ui8ActualItem++;
         } else { // for compatibility with newer versions...
-            for(uint8_t ui8i = 0; ui8i < ui8ExpectedSubItems; ui8i++) {
+            for(uint8_t ui8i = 0; ui8i < (ui8ExpectedSubItems + ui8ExtraSubItems); ui8i++) {
                 if(sExpectedIdentificators[ui8i] == *((uint16_t *)(sActualPosition+2))) {
                     ui16ItemLengths[ui8i] = (ui16SubItemSize - 4);
                     pItemDatas[ui8i] = (sActualPosition + 4);

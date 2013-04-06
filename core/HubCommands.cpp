@@ -1797,49 +1797,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                 }
                 return true;
             }
-#ifdef _WIN32
-            //Hub-Commands: !memstat !memstats
-            if((dlen == 7 && strnicmp(sCommand+1, "emstat", 6) == 0) || (dlen == 8 && strnicmp(sCommand+1, "emstats", 7) == 0)) {
-                int imsglen = CheckFromPm(curUser, fromPM);
 
-                int iret = sprintf(msg+imsglen, "<%s>", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC]);
-                imsglen += iret;
-                if(CheckSprintf1(iret, imsglen, 1024, "HubCommands::DoCommand memstat1") == false) {
-                    return true;
-                }
-
-				string Statinfo(msg, imsglen);
-
-                Statinfo+= "\n------------------------------------------------------------\n";
-                Statinfo+="Current memory stats:\n";
-                Statinfo+="------------------------------------------------------------\n";
-
-                DWORD dwCommitted = 0, dwUnCommitted = 0;
-                GetHeapStats(hPtokaXHeap, dwCommitted, dwUnCommitted);
-
-				Statinfo+="PX total commited: "+string((uint32_t)dwCommitted)+ "\n";
-				Statinfo+="PX total uncommited: "+string((uint32_t)dwUnCommitted)+ "\n";
-
-                dwCommitted = 0, dwUnCommitted = 0;
-                GetHeapStats(hRecvHeap, dwCommitted, dwUnCommitted);
-				Statinfo+="Recv total commited: "+string((uint32_t)dwCommitted)+ "\n";
-				Statinfo+="Recv total uncommited: "+string((uint32_t)dwUnCommitted)+ "\n";
-
-                dwCommitted = 0, dwUnCommitted = 0;
-                GetHeapStats(hSendHeap, dwCommitted, dwUnCommitted);
-				Statinfo+="Send total commited: "+string((uint32_t)dwCommitted)+ "\n";
-				Statinfo+="Send total uncommited: "+string((uint32_t)dwUnCommitted)+ "\n";
-
-                dwCommitted = 0, dwUnCommitted = 0;
-                GetHeapStats(hLuaHeap, dwCommitted, dwUnCommitted);
-				Statinfo+="Lua total commited: "+string((uint32_t)dwCommitted)+ "\n";
-				Statinfo+="Lua total uncommited: "+string((uint32_t)dwUnCommitted)+ "\n";
-
-                Statinfo+="|";
-				UserSendTextDelayed(curUser, Statinfo);
-                return true;
-            }
-#endif
             return false;
 
         case 'r':
@@ -2303,7 +2261,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                     }
                 }
 
-                UserSetPasswd(pUser, sProfile);
+                UserSetBuffer(pUser, sProfile);
                 pUser->ui32BoolBits |= User::BIT_WAITING_FOR_PASS;
 
                 int iMsgLen = sprintf(msg, "<%s> %s.|$GetPass|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_WERE_REGISTERED_PLEASE_ENTER_YOUR_PASSWORD]);
@@ -3074,7 +3032,7 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
 
                 // check hierarchy
                 // deny if curUser is not Master and tries delete equal or higher profile
-                if(curUser->iProfile > 0 && reg->iProfile <= curUser->iProfile) {
+                if(curUser->iProfile > 0 && reg->ui16Profile <= curUser->iProfile) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
                	    int iret = sprintf(msg+imsgLen, "<%s> *** %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
@@ -5160,22 +5118,9 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
 
                 size_t szPassLen = strlen(sCommand+7);
 
-                char * sOldPass = pReg->sPass;
-
-#ifdef _WIN32
-                pReg->sPass = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldPass, szPassLen+1);
-#else
-				pReg->sPass = (char *)realloc(sOldPass, szPassLen+1);
-#endif
-                if(pReg->sPass == NULL) {
-                    pReg->sPass = sOldPass;
-
-					AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for Hub-Commands passwd\n", (uint64_t)(szPassLen+1));
-
+                if(pReg->UpdatePassword(sCommand+7, szPassLen) == false) {
                     return true;
-                }   
-                memcpy(pReg->sPass, sCommand+7, szPassLen);
-                pReg->sPass[szPassLen] = '\0';
+                }
 
 #ifdef _BUILD_GUI
                 if(pRegisteredUsersDialog != NULL) {
@@ -5794,7 +5739,7 @@ bool HubCommands::NickBan(User * curUser, char * sNick, char * sReason, bool bFr
     RegUser * pReg = hashRegManager->Find(sNick, strlen(sNick));
 
     // don't nickban user with higher profile
-    if(pReg != NULL && curUser->iProfile > pReg->iProfile) {
+    if(pReg != NULL && curUser->iProfile > pReg->ui16Profile) {
         int imsgLen = CheckFromPm(curUser, bFromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_NOT_ALLOWED_TO],
@@ -6372,7 +6317,7 @@ bool HubCommands::TempNickBan(User * curUser, char * sNick, char * sTime, const 
     RegUser * pReg = hashRegManager->Find(sNick, strlen(sNick));
 
     // don't nickban user with higher profile
-    if(pReg != NULL && curUser->iProfile > pReg->iProfile) {
+    if(pReg != NULL && curUser->iProfile > pReg->ui16Profile) {
         int imsgLen = CheckFromPm(curUser, bFromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_NOT_ALLOWED_TO],

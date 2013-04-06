@@ -22,6 +22,7 @@
 //---------------------------------------------------------------------------
 #include "SettingPageGeneral2.h"
 //---------------------------------------------------------------------------
+#include "../core/hashRegManager.h"
 #include "../core/LanguageManager.h"
 #include "../core/SettingManager.h"
 //---------------------------------------------------------------------------
@@ -166,7 +167,13 @@ void SettingPageGeneral2::Save() {
 
     SettingManager->SetText(SETTXT_REG_ONLY_REDIR_ADDRESS, buf, iLen);
 
+    SettingManager->SetBool(SETBOOL_KEEP_SLOW_USERS, ::SendMessage(hWndPageItems[BTN_KEEP_SLOW_CLIENTS_ONLINE], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
+    SettingManager->SetBool(SETBOOL_HASH_PASSWORDS, ::SendMessage(hWndPageItems[BTN_HASH_PASSWORDS], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
     SettingManager->SetBool(SETBOOL_NO_QUACK_SUPPORTS, ::SendMessage(hWndPageItems[BTN_KILL_THAT_DUCK], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
+
+    if(SettingManager->bBools[SETBOOL_HASH_PASSWORDS] == true) {
+        hashRegManager->HashPasswords();
+    }
 }
 //------------------------------------------------------------------------------
 
@@ -302,11 +309,19 @@ bool SettingPageGeneral2::CreateSettingPage(HWND hOwner) {
 
     iPosX +=  iGroupBoxMargin + iCheckHeight + (2 * iOneLineGB) + 6;
 
-    hWndPageItems[GB_KILL_THAT_DUCK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_CLIENTS_BUGGY_SUPPORTS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, iPosX, iFullGB, iOneCheckGB, m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_EXPERTS_ONLY] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_EXPERTS_ONLY], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        0, iPosX, iFullGB, iGroupBoxMargin + (3 * iCheckHeight) + 14, m_hWnd, NULL, g_hInstance, NULL);
+
+    hWndPageItems[BTN_KEEP_SLOW_CLIENTS_ONLINE] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_KEEP_SLOW], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+        8, iPosX + iGroupBoxMargin, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[BTN_KEEP_SLOW_CLIENTS_ONLINE], BM_SETCHECK, (SettingManager->bBools[SETBOOL_KEEP_SLOW_USERS] == true ? BST_CHECKED : BST_UNCHECKED), 0);
+
+    hWndPageItems[BTN_HASH_PASSWORDS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_STORE_REG_PASS_HASHED], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+        8, iPosX + iGroupBoxMargin + iCheckHeight + 3, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
+    ::SendMessage(hWndPageItems[BTN_HASH_PASSWORDS], BM_SETCHECK, (SettingManager->bBools[SETBOOL_HASH_PASSWORDS] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[BTN_KILL_THAT_DUCK] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISALLOW_BUGGY_SUPPORTS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, iPosX + iGroupBoxMargin, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
+        8, iPosX + iGroupBoxMargin + (2 * iCheckHeight) + 6, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_KILL_THAT_DUCK], BM_SETCHECK, (SettingManager->bBools[SETBOOL_NO_QUACK_SUPPORTS] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {

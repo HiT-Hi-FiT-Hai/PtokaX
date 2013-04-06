@@ -1109,10 +1109,13 @@ void SetMan::SetText(const size_t &szTxtId, const char * sTxt, const size_t &szL
             UpdateNoTagMessage();
             UpdateNickLimitMessage();
             UpdateBotsSameNick();
+
             if(ServersS != NULL && bBotsSameNick == false) {
                 ResNickManager->AddReservedNick(sTexts[SETTXT_BOT_NICK]);
             }
+
             UpdateBot();
+
             break;
         case SETTXT_BOT_DESCRIPTION:
         case SETTXT_BOT_EMAIL:
@@ -2391,7 +2394,8 @@ void SetMan::UpdateBot(const bool &bNickChanged/* = true*/) {
         }
     }
 
-    g_GlobalDataQueue->AddQueueItem(sPreTexts[SETPRETXT_HUB_BOT_MYINFO], ui16PreTextsLens[SETPRETXT_HUB_BOT_MYINFO], NULL, 0, GlobalDataQueue::CMD_MYINFO);
+    g_GlobalDataQueue->AddQueueItem(sPreTexts[SETPRETXT_HUB_BOT_MYINFO], ui16PreTextsLens[SETPRETXT_HUB_BOT_MYINFO],
+        sPreTexts[SETPRETXT_HUB_BOT_MYINFO], ui16PreTextsLens[SETPRETXT_HUB_BOT_MYINFO], GlobalDataQueue::CMD_MYINFO);
 
     if(bNickChanged == true && bBotsSameNick == false) {
         g_GlobalDataQueue->OpListStore(sTexts[SETTXT_BOT_NICK]);
@@ -2399,7 +2403,7 @@ void SetMan::UpdateBot(const bool &bNickChanged/* = true*/) {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::DisableBot(const bool &bNickChanged/* = true*/) {
+void SetMan::DisableBot(const bool &bNickChanged/* = true*/, const bool &bRemoveMyINFO/* = true*/) {
 	if(bUpdateLocked == true || bServerRunning == false) {
         return;
     }
@@ -2428,7 +2432,7 @@ void SetMan::DisableBot(const bool &bNickChanged/* = true*/) {
         }
     }
 
-    if(sPreTexts[SETPRETXT_HUB_BOT_MYINFO] != NULL && bBotsSameNick == false) {
+    if(sPreTexts[SETPRETXT_HUB_BOT_MYINFO] != NULL && bBotsSameNick == false && bRemoveMyINFO == true) {
         colUsers->DelBotFromMyInfos(sPreTexts[SETPRETXT_HUB_BOT_MYINFO]);
     }
 }

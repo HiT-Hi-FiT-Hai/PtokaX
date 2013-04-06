@@ -328,7 +328,7 @@ bool ProfileManager::RemoveProfile(const uint16_t &iProfile) {
     while(next != NULL) {
         RegUser *curReg = next;
 		next = curReg->next;
-		if(curReg->iProfile == iProfile) {
+		if(curReg->ui16Profile == iProfile) {
             //Profile in use can't be deleted!
             return false;
         }
@@ -366,8 +366,8 @@ bool ProfileManager::RemoveProfile(const uint16_t &iProfile) {
     while(next != NULL) {
         RegUser *curReg = next;
 		next = curReg->next;
-        if(curReg->iProfile > iProfile) {
-            curReg->iProfile--;
+        if(curReg->ui16Profile > iProfile) {
+            curReg->ui16Profile--;
         }
     }
 
@@ -463,10 +463,10 @@ void ProfileManager::MoveProfileDown(const uint16_t &iProfile) {
         RegUser *curReg = nextReg;
 		nextReg = curReg->next;
 
-		if(curReg->iProfile == iProfile) {
-			curReg->iProfile++;
-		} else if(curReg->iProfile == iProfile+1) {
-			curReg->iProfile--;
+		if(curReg->ui16Profile == iProfile) {
+			curReg->ui16Profile++;
+		} else if(curReg->ui16Profile == iProfile+1) {
+			curReg->ui16Profile--;
 		}
 	}
 
@@ -516,10 +516,10 @@ void ProfileManager::MoveProfileUp(const uint16_t &iProfile) {
 		RegUser *curReg = nextReg;
 		nextReg = curReg->next;
 
-        if(curReg->iProfile == iProfile) {
-			curReg->iProfile--;
-		} else if(curReg->iProfile == iProfile-1) {
-			curReg->iProfile++;
+        if(curReg->ui16Profile == iProfile) {
+			curReg->ui16Profile--;
+		} else if(curReg->ui16Profile == iProfile-1) {
+			curReg->ui16Profile++;
 		}
 	}
 
