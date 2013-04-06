@@ -254,9 +254,25 @@ void RegisteredUserDialog::DoModal(HWND hWndParent, RegUser * pReg/* = NULL*/, c
         ::SetWindowText(hWndWindowItems[EDT_NICK], pRegToChange->sNick);
         ::EnableWindow(hWndWindowItems[EDT_NICK], FALSE);
 
-        ::SetWindowText(hWndWindowItems[EDT_PASSWORD], pRegToChange->sPass);
+        if(pRegToChange->bPassHash == false) {
+            ::SetWindowText(hWndWindowItems[EDT_PASSWORD], pRegToChange->sPass);
+        } else {
+            HWND hWndTooltip = CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS, "", TTS_NOPREFIX | TTS_ALWAYSTIP | TTS_BALLOON, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+                hWndWindowItems[EDT_PASSWORD], NULL, g_hInstance, NULL);
 
-        ::SendMessage(hWndWindowItems[CB_PROFILE], CB_SETCURSEL, pRegToChange->iProfile, 0);
+            TOOLINFO ti = { 0 };
+            ti.cbSize = sizeof(TOOLINFO);
+            ti.uFlags = TTF_SUBCLASS | TTF_IDISHWND;
+            ti.hwnd = hWndWindowItems[WINDOW_HANDLE];
+            ti.uId = (UINT_PTR)hWndWindowItems[EDT_PASSWORD];
+            ti.hinst = g_hInstance;
+            ti.lpszText = LanguageManager->sTexts[LAN_PASSWORD_IS_HASHED];
+
+            ::SendMessage(hWndTooltip, TTM_ADDTOOL, 0, (LPARAM)&ti);
+            ::SendMessage(hWndTooltip, TTM_SETDELAYTIME, TTDT_AUTOPOP, MAKELPARAM(30000, 0));
+        }
+
+        ::SendMessage(hWndWindowItems[CB_PROFILE], CB_SETCURSEL, pRegToChange->ui16Profile, 0);
     } else if(sNick != NULL) {
         ::SetWindowText(hWndWindowItems[EDT_NICK], sNick);
     }
@@ -275,7 +291,7 @@ void RegisteredUserDialog::UpdateProfiles() {
     }
 
     if(pRegToChange != NULL) {
-        ::SendMessage(hWndWindowItems[CB_PROFILE], CB_SETCURSEL, pRegToChange->iProfile, 0);
+        ::SendMessage(hWndWindowItems[CB_PROFILE], CB_SETCURSEL, pRegToChange->ui16Profile, 0);
     } else {
         iSel = (int)::SendMessage(hWndWindowItems[CB_PROFILE], CB_SETCURSEL, iSel, 0);
 
@@ -292,12 +308,14 @@ bool RegisteredUserDialog::OnAccept() {
         return false;
     }
 
-    if(::GetWindowTextLength(hWndWindowItems[EDT_PASSWORD]) == 0) {
+    if(pRegToChange == NULL && ::GetWindowTextLength(hWndWindowItems[EDT_PASSWORD]) == 0) {
         ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_PASS_MUST_SPECIFIED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
         return false;
     }
 
     char sNick[65], sPassword[65];
+
+    sPassword[0] = '\0';
 
     ::GetWindowText(hWndWindowItems[EDT_NICK], sNick, 65);
     ::GetWindowText(hWndWindowItems[EDT_PASSWORD], sPassword, 65);
@@ -312,7 +330,7 @@ bool RegisteredUserDialog::OnAccept() {
 
         return true;
     } else {
-        hashRegManager->ChangeReg(pRegToChange, sPassword, ui16Profile);
+        hashRegManager->ChangeReg(pRegToChange, sPassword[0] == '\0' ? NULL : sPassword, ui16Profile);
         return true;
     }
 }
@@ -325,7 +343,7 @@ void RegisteredUserDialog::RegChanged(RegUser * pReg) {
 
     ::SetWindowText(hWndWindowItems[EDT_PASSWORD], pRegToChange->sPass);
 
-    ::SendMessage(hWndWindowItems[CB_PROFILE], CB_SETCURSEL, pRegToChange->iProfile, 0);
+    ::SendMessage(hWndWindowItems[CB_PROFILE], CB_SETCURSEL, pRegToChange->ui16Profile, 0);
 
     ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_USER_CHANGED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 }

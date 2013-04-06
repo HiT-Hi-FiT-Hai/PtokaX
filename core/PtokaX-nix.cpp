@@ -107,8 +107,6 @@ int main(int argc, char* argv[]) {
 	    } else if(strcasecmp(argv[i], "-h") == 0) {
 	        printf("PtokaX [-d] [-c <configdir>] [-v]\n");
 	        return EXIT_SUCCESS;
-	    } else if(strcasecmp(argv[i], "/nokeycheck") == 0) {
-	        bCmdNoKeyCheck = true;
 	    } else if(strcasecmp(argv[i], "/generatexmllanguage") == 0) {
 	        LangMan::GenerateXmlExample();
 	        return EXIT_SUCCESS;

@@ -106,11 +106,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 	                    bCmdAutoStart = true;
 	                }
 	                break;
-	            case 11:
-	                if(strnicmp(sParam, "/nokeycheck", 11) == NULL) {
-	                    bCmdNoKeyCheck = true;
-	                }
-	                break;
 	            case 12:
 	                if(strnicmp(sParam, "/noautostart", 12) == NULL) {
 	                    bCmdNoAutoStart = true;

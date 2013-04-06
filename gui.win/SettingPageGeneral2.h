@@ -45,7 +45,7 @@ public:
     char * GetPageName();
     void FocusLastItem();
 private:
-    HWND hWndPageItems[21];
+    HWND hWndPageItems[23];
     
     enum enmPageItems {
         GB_TEXT_FILES,
@@ -67,8 +67,10 @@ private:
         GB_NON_REG_REDIR,
         BTN_NON_REG_REDIR_ENABLE,
         EDT_NON_REG_REDIR_ADDR,
-        GB_KILL_THAT_DUCK,
-        BTN_KILL_THAT_DUCK
+        GB_EXPERTS_ONLY,
+        BTN_KEEP_SLOW_CLIENTS_ONLINE,
+        BTN_HASH_PASSWORDS,
+        BTN_KILL_THAT_DUCK,
     };
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);

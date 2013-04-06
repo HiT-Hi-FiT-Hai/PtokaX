@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1252" standalone="yes" ?>
-<Language Name="Èeština" Author="Petr &apos;PPK&apos; Kozelka" Version="0.5.0.0 build 421">
+<Language Name="Èeština" Author="Petr &apos;PPK&apos; Kozelka" Version="0.5.0.1 build 430">
     <String Name="ThisHubIsRunning">Tento hub pohání</String>
     <String Name="HubName">Jméno hubu</String>
     <String Name="MOTD(motd)">MOTD (zpráva dne)</String>
@@ -694,7 +694,6 @@
     <String Name="Country">Zemì</String>
     <String Name="LogScriptErrors">Zapsat chyby skriptù do logu</String>
     <String Name="QuackSupports">Promiòte, tento hub nepovoluje klinty posílající poškozený pøíkaz $Supports</String>
-    <String Name="ClientsBuggySupports">Klienti s poškozeným pøíkazem $Supports</String>
     <String Name="DisallowBuggySupports">Zakázat klienty posílající poškozený pøíkaz $Supports</String>
     <String Name="MaxAlwdTopicLen256Chars">Maximální povolená délka topicu je 256 znakù</String>
     <String Name="MaxAlwdScriptNameLen256Chars">Maximální povolená délka jména skriptu je 256 znakù</String>
@@ -768,4 +767,7 @@
     <String Name="ThankYouForPasswordYouAreNowRegisteredAs">Dìkuji za heslo, nyní jste zaregistrován jako</String>
     <String Name="RegisterUserWithSpecifiedProfile">zaregistrovat uživatele s daným profilem. Uživatel je požádán hubem o heslo a až ho zadá tak bude zaregistrován</String>
     <String Name="InCommandHubReplacedItWithYourRealIP">v pøíkazu, hub ji zmìnil na vaši pravou IP</String>
+    <String Name="YourNickContainsIllegalWhiteCharacter">Vaše pøezdívka obsahuje nepovolený netisknutelný znak</String>
+    <String Name="PasswordIsHashed">Toto pole je prázdné protože heslo uživatele je hashované</String>
+    <String Name="StoreRegPassHashed">Ukládat hesla pro registrované uživatele jako hashe</String>
 </Language>

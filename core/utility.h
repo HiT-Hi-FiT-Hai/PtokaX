@@ -52,8 +52,7 @@ char * formatSecTime(uint64_t rest);
 char * stristr(const char *str1, const char *str2);
 char * stristr2(const char *str1, const char *str2);
 
-bool isIP(char * IP, const size_t ui32Len);
-bool GetIpParts(char * sIP, const size_t ui32Len, uint32_t &a, uint32_t &b, uint32_t &c, uint32_t &d);
+bool isIP(char * sIP);
 
 uint32_t HashNick(const char * sNick, const size_t &szNickLen);
 
@@ -113,11 +112,13 @@ void CreateGlobalBuffer();
 void DeleteGlobalBuffer();
 bool CheckAndResizeGlobalBuffer(const size_t &szWantedSize);
 void ReduceGlobalBuffer();
+
+bool HashPassword(char * sPassword, size_t &szPassLen, uint8_t * ui8PassHash);
 //---------------------------------------------------------------------------
 extern string PATH, SCRIPT_PATH, sTitle;
 extern size_t g_szBufferSize;
 extern char * g_sBuffer;
-extern bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bCmdNoKeyCheck, bUseIPv4, bUseIPv6, bIPv6DualStack;
+extern bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bUseIPv4, bUseIPv6, bIPv6DualStack;
 #ifdef _WIN32
 	extern HANDLE hConsole, hLuaHeap, hPtokaXHeap, hRecvHeap, hSendHeap;
 	extern string PATH_LUA, sOs;

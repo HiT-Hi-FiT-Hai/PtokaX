@@ -151,8 +151,20 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                     case 'K':
                         if(memcmp(sData+2, "ey ", 3) == 0) {
                             iStatCmdKey++;
-                            if(((curUser->ui32BoolBits & User::BIT_HAVE_SUPPORTS) == User::BIT_HAVE_SUPPORTS) == false)
+                            if(((curUser->ui32BoolBits & User::BIT_HAVE_SUPPORTS) == User::BIT_HAVE_SUPPORTS) == false) {
                                 Key(curUser, sData, iLen);
+                            } else {
+#ifdef _WIN32
+                                if(curUser->uLogInOut->pBuffer != NULL) {
+                                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->uLogInOut->pBuffer) == 0) {
+                                        AppendDebugLog("%s - [MEM] Cannot deallocate curUser->uLogInOut->pBuffer in cDcCommands::PreProcessData\n", 0);
+                                    }
+                                }
+#else
+                                free(curUser->uLogInOut->pBuffer);
+#endif
+                                curUser->uLogInOut->pBuffer = NULL;
+                            }
 
                             return;
                         }
@@ -210,7 +222,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                             cTemp[0] = ' ';
                             
                             // 1st time MyINFO, user is being added to nicklist
-                            if(MyINFO(curUser, sData, iLen) == false || curUser->uLogInOut->sPassword != NULL || 
+                            if(MyINFO(curUser, sData, iLen) == false || curUser->uLogInOut->pBuffer != NULL || 
                                 ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true)
                                 return;
 
@@ -292,7 +304,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                     return;
                                 }
         
-                                if(MyINFO(curUser, sData, iLen) == false || curUser->uLogInOut->sPassword != NULL || 
+                                if(MyINFO(curUser, sData, iLen) == false || curUser->uLogInOut->pBuffer != NULL || 
                                     ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true)
                                     return;
                                 
@@ -344,7 +356,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                         return;
                     }
         
-                    if(MyINFO(curUser, sData, iLen) == false || curUser->uLogInOut->sPassword != NULL || 
+                    if(MyINFO(curUser, sData, iLen) == false || curUser->uLogInOut->pBuffer != NULL || 
                         ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true)
                         return;
                     
@@ -499,8 +511,8 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                             if((curUser->ui32BoolBits & User::BIT_WAITING_FOR_PASS) == User::BIT_WAITING_FOR_PASS) {
                                 curUser->ui32BoolBits &= ~User::BIT_WAITING_FOR_PASS;
 
-                                if(curUser->uLogInOut != NULL && curUser->uLogInOut->sPassword != NULL) {
-                                    int iProfile = ProfileMan->GetProfileIndex(curUser->uLogInOut->sPassword);
+                                if(curUser->uLogInOut != NULL && curUser->uLogInOut->pBuffer != NULL) {
+                                    int iProfile = ProfileMan->GetProfileIndex(curUser->uLogInOut->pBuffer);
                                     if(iProfile == -1) {
                	                        int iMsgLen = sprintf(msg, "<%s> %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_ERR_NO_PROFILE_GIVEN_NAME_EXIST]);
                                         if(CheckSprintf(iMsgLen, 1024, "cDcCommands::PreProcessData::MyPass->RegUser") == true) {
@@ -535,7 +547,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                         }
                                     } else {
                                         int iMsgLen = sprintf(msg, "<%s> %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC],
-                                            LanguageManager->sTexts[LAN_THANK_YOU_FOR_PASSWORD_YOU_ARE_NOW_REGISTERED_AS], curUser->uLogInOut->sPassword);
+                                            LanguageManager->sTexts[LAN_THANK_YOU_FOR_PASSWORD_YOU_ARE_NOW_REGISTERED_AS], curUser->uLogInOut->pBuffer);
                                         if(CheckSprintf(iMsgLen, 1024, "cDcCommands::PreProcessData::MyPass->RegUser2") == true) {
                                             UserSendCharDelayed(curUser, msg, iMsgLen);
                                         }
@@ -1385,14 +1397,10 @@ void cDcCommands::Key(User * curUser, char * sData, const uint32_t &iLen) {
     }
     
     curUser->ui32BoolBits |= User::BIT_HAVE_KEY;
-    
-    if(bCmdNoKeyCheck == true) {
-        return;
-    }
-    
+
     sData[iLen-1] = '\0'; // cutoff pipe
 
-    if(iLen < 6 || strcmp(Lock2Key(curUser->uLogInOut->sLockUsrConn), sData+5) != 0) {
+    if(iLen < 6 || strcmp(Lock2Key(curUser->uLogInOut->pBuffer), sData+5) != 0) {
         if(iLen > 65000) {
             sData[65000] = '\0';
         }
@@ -1405,7 +1413,17 @@ void cDcCommands::Key(User * curUser, char * sData, const uint32_t &iLen) {
         UserClose(curUser);
         return;
     }
-    
+
+#ifdef _WIN32
+	if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->uLogInOut->pBuffer) == 0) {
+		AppendDebugLog("%s - [MEM] Cannot deallocate curUser->uLogInOut->pBuffer in cDcCommands::Key\n", 0);
+    }
+#else
+	free(curUser->uLogInOut->pBuffer);
+#endif
+
+	curUser->uLogInOut->pBuffer = NULL;
+
     sData[iLen-1] = '|'; // add back pipe
 
 	ScriptManager->Arrival(curUser, sData, iLen, ScriptMan::KEY_ARRIVAL);
@@ -1514,12 +1532,12 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
         }
 
         char * sBanTime;
-		if(OtherUser->uLogInOut != NULL && OtherUser->uLogInOut->sKickMsg != NULL &&
-			(sBanTime = stristr(OtherUser->uLogInOut->sKickMsg, "_BAN_")) != NULL) {
+		if(OtherUser->uLogInOut != NULL && OtherUser->uLogInOut->pBuffer != NULL &&
+			(sBanTime = stristr(OtherUser->uLogInOut->pBuffer, "_BAN_")) != NULL) {
 			sBanTime[0] = '\0';
 
 			if(sBanTime[5] == '\0' || sBanTime[5] == ' ') { // permban
-				hashBanManager->Ban(OtherUser, OtherUser->uLogInOut->sKickMsg, curUser->sNick, false);
+				hashBanManager->Ban(OtherUser, OtherUser->uLogInOut->pBuffer, curUser->sNick, false);
     
                 if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
                     int imsgLen = 0;
@@ -1569,7 +1587,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
 				time_t acc_time, ban_time;
 
 				if(cTime != '\0' && iTime > 0 && GenerateTempBanTime(cTime, iTime, acc_time, ban_time) == true) {
-					hashBanManager->TempBan(OtherUser, OtherUser->uLogInOut->sKickMsg, curUser->sNick, 0, ban_time, false);
+					hashBanManager->TempBan(OtherUser, OtherUser->uLogInOut->pBuffer, curUser->sNick, 0, ban_time, false);
 
                     static char sTime[256];
                     strcpy(sTime, formatTime((ban_time-acc_time)/60));
@@ -1615,7 +1633,7 @@ void cDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
             }
 		}
 
-        hashBanManager->TempBan(OtherUser, OtherUser->uLogInOut != NULL ? OtherUser->uLogInOut->sKickMsg : NULL, curUser->sNick, 0, 0, false);
+        hashBanManager->TempBan(OtherUser, OtherUser->uLogInOut != NULL ? OtherUser->uLogInOut->pBuffer : NULL, curUser->sNick, 0, 0, false);
 
         if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
             int imsgLen = 0;
@@ -2060,7 +2078,8 @@ bool cDcCommands::MyINFO(User * curUser, char * sData, const uint32_t &iLen) {
 
 // $MyPass
 void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
-    if(curUser->uLogInOut->sPassword == NULL) {
+    RegUser * pReg = hashRegManager->Find(curUser);
+    if(pReg == NULL) {
         // no password required
         int imsgLen = sprintf(msg, "[SYS] $MyPass without request from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass1") == true) {
@@ -2086,15 +2105,28 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
 
     sData[iLen-1] = '\0'; // cutoff pipe
 
+    bool bBadPass = false;
+
+	if(pReg->bPassHash == true) {
+		uint8_t ui8Hash[64];
+
+		size_t szLen = iLen-9;
+
+		if(HashPassword(sData+8, szLen, ui8Hash) == false || memcmp(pReg->ui8PassHash, ui8Hash, 64) != 0) {
+			bBadPass = true;
+		}
+	} else {
+		if(strcmp(pReg->sPass, sData+8) != 0) {
+			bBadPass = true;
+		}
+	}
+
     // if password is wrong, close the connection
-    if(strcmp(curUser->uLogInOut->sPassword, sData+8) != 0) {
+    if(bBadPass == true) {
         if(SettingManager->bBools[SETBOOL_ADVANCED_PASS_PROTECTION] == true) {
-			RegUser *Reg = hashRegManager->Find(curUser);
-            if(Reg != NULL) {
-                time(&Reg->tLastBadPass);
-                if(Reg->iBadPassCount < 255)
-                    Reg->iBadPassCount++;
-            }
+            time(&pReg->tLastBadPass);
+            if(pReg->ui8BadPassCount < 255)
+                pReg->ui8BadPassCount++;
         }
     
         if(SettingManager->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] != 0) {
@@ -2187,24 +2219,12 @@ void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
         UserClose(curUser);
         return;
     } else {
-		RegUser *Reg = hashRegManager->Find(curUser);
-        if(Reg != NULL) {
-            Reg->iBadPassCount = 0;
-        }
+        pReg->ui8BadPassCount = 0;
+
         PassBf * PassBfItem = Find(curUser->ui128IpHash);
         if(PassBfItem != NULL) {
             Remove(PassBfItem);
         }
-
-        // PPK ... memory clean up, is not needed anymore
-#ifdef _WIN32
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->uLogInOut->sPassword) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate curUser->uLogInOut->Password in cDcCommands::MyPass\n", 0);
-        }
-#else
-		free(curUser->uLogInOut->sPassword);
-#endif
-        curUser->uLogInOut->sPassword = NULL;
 
         sData[iLen-1] = '|'; // add back pipe
 
@@ -3164,10 +3184,16 @@ void cDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, const
 
     if(pQueueItem1 != pQueueItem2) {
         if(pQueueItem1 == NULL) {
-            pToUser = (User *)g_GlobalDataQueue->GetFirstQueueItem();
+            pToUser = (User *)g_GlobalDataQueue->InsertBlankQueueItem(g_GlobalDataQueue->GetFirstQueueItem(), GlobalDataQueue::CMD_CHAT);
         } else {
-            pToUser = (User *)pQueueItem1;
+            pToUser = (User *)g_GlobalDataQueue->InsertBlankQueueItem(pQueueItem1, GlobalDataQueue::CMD_CHAT);
         }
+
+        if(pToUser != NULL) {
+            curUser->ui32BoolBits |= User::BIT_CHAT_INSERT;
+        }
+    } else if((curUser->ui32BoolBits & User::BIT_CHAT_INSERT) == User::BIT_CHAT_INSERT) {
+        pToUser = (User *)g_GlobalDataQueue->InsertBlankQueueItem(pQueueItem1, GlobalDataQueue::CMD_CHAT);
     }
 
 	// PPK ... filtering kick messages
@@ -3193,7 +3219,7 @@ void cDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, const
                     }
                     if(temp1[10] != '|') {
                         sData[iLen-1] = '\0'; // get rid of the pipe
-                        UserSetKickMsg(KickedUser, temp1+10, iLen-(temp1-sData)-11);
+                        UserSetBuffer(KickedUser, temp1+10, iLen-(temp1-sData)-11);
                         sData[iLen-1] = '|'; // add back pipe
                     }
                 }
@@ -3351,12 +3377,24 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &sz
                 if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick1") == true) {
                     UserSendChar(curUser, msg, imsgLen);
                 }
-        //        int imsgLen = sprintf(msg, "[SYS] Nick with bad chars (%s) from %s (%s) - user closed.", Nick, curUser->Nick, curUser->IP);
-        //        UdpDebug->Broadcast(msg, imsgLen);
+//                int imsgLen = sprintf(msg, "[SYS] Nick with bad chars (%s) from %s (%s) - user closed.", Nick, curUser->Nick, curUser->IP);
+//                UdpDebug->Broadcast(msg, imsgLen);
                 UserClose(curUser);
                 return false;
             }
             default:
+                if((unsigned char)Nick[ui32i] < 32) {
+           	        int imsgLen = sprintf(msg, "<%s> %s! %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOUR_NICK_CONTAINS_ILLEGAL_WHITE_CHARACTER],
+                        LanguageManager->sTexts[LAN_PLS_CORRECT_IT_AND_GET_BACK_AGAIN]);
+                    if(CheckSprintf(imsgLen, 1024, "cDcCommands::ValidateUserNick1-1") == true) {
+                        UserSendChar(curUser, msg, imsgLen);
+                    }
+//                    int imsgLen = sprintf(msg, "[SYS] Nick with white chars (%s) from %s (%s) - user closed.", Nick, curUser->Nick, curUser->IP);
+//                    UdpDebug->Broadcast(msg, imsgLen);
+                    UserClose(curUser);
+                    return false;
+                }
+
                 continue;
         }
     }
@@ -3407,14 +3445,14 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &sz
     // Nick is ok, check for registered nick
     RegUser *Reg = hashRegManager->Find(curUser);
     if(Reg != NULL) {
-        if(SettingManager->bBools[SETBOOL_ADVANCED_PASS_PROTECTION] == true && Reg->iBadPassCount != 0) {
+        if(SettingManager->bBools[SETBOOL_ADVANCED_PASS_PROTECTION] == true && Reg->ui8BadPassCount != 0) {
             time_t acc_time;
             time(&acc_time);
 
 #ifdef _WIN32
-			uint32_t iMinutes2Wait = (uint32_t)pow((float)2, Reg->iBadPassCount-1);
+			uint32_t iMinutes2Wait = (uint32_t)pow((float)2, Reg->ui8BadPassCount-1);
 #else
-			uint32_t iMinutes2Wait = (uint32_t)pow(2, Reg->iBadPassCount-1);
+			uint32_t iMinutes2Wait = (uint32_t)pow(2, Reg->ui8BadPassCount-1);
 #endif
             if(acc_time < (time_t)(Reg->tLastBadPass+(60*iMinutes2Wait))) {
                 int imsgLen = sprintf(msg, "<%s> %s %s %s!|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_LAST_PASS_WAS_WRONG_YOU_NEED_WAIT], 
@@ -3433,8 +3471,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &sz
             }
         }
             
-        curUser->iProfile = (int32_t)Reg->iProfile;
-        UserSetPasswd(curUser, Reg->sPass);
+        curUser->iProfile = (int32_t)Reg->ui16Profile;
     }
 
     // PPK ... moved IP ban check here, we need to allow registered users on shared IP to log in if not have banned nick, but only IP.
@@ -3665,6 +3702,8 @@ void cDcCommands::Remove(PassBf * PassBfItem) {
 //---------------------------------------------------------------------------
 
 void cDcCommands::ProcessCmds(User * curUser) {
+    curUser->ui32BoolBits &= ~User::BIT_CHAT_INSERT;
+
     PrcsdUsrCmd *next = curUser->cmdStrt;
     
     while(next != NULL) {
@@ -3933,7 +3972,7 @@ void cDcCommands::SendIncorrectIPMsg(User * curUser, char * sBadIP, const bool &
         }
     }
 
-	int iret = sprintf(msg+imsgLen, " %s %s.|", bCTM == true ? LanguageManager->sTexts[LAN_IN_CTM_REQ_REAL_IP_IS] : LanguageManager->sTexts[LAN_IN_SEARCH_REQ_REAL_IP_IS], curUser->sIP);
+	int iret = sprintf(msg+imsgLen, " %s %s !|", bCTM == true ? LanguageManager->sTexts[LAN_IN_CTM_REQ_REAL_IP_IS] : LanguageManager->sTexts[LAN_IN_SEARCH_REQ_REAL_IP_IS], curUser->sIP);
 	imsgLen += iret;
 	if(CheckSprintf1(iret, imsgLen, 1024, "SendIncorrectIPMsg2") == true) {
 		UserSendCharDelayed(curUser, msg, imsgLen);
@@ -3946,7 +3985,7 @@ void cDcCommands::SendIPFixedMsg(User * pUser, char * sBadIP, char * sRealIP) {
         return;
     }
 
-    int imsgLen = sprintf(g_sBuffer, "<%s> %s %s %s %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOUR_CLIENT_SEND_INCORRECT_IP], sBadIP,
+    int imsgLen = sprintf(g_sBuffer, "<%s> %s %s %s %s !|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOUR_CLIENT_SEND_INCORRECT_IP], sBadIP,
         LanguageManager->sTexts[LAN_IN_COMMAND_HUB_REPLACED_IT_WITH_YOUR_REAL_IP], sRealIP);
     if(CheckSprintf(imsgLen, g_szBufferSize, "SendIncorrectIPMsg1") == true) {
         UserSendCharDelayed(pUser, g_sBuffer, imsgLen);

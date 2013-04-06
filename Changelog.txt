@@ -1,10 +1,19 @@
-PtokaX DC hub software - Ptaczek/Frontline3k/aMutex (c) 2oo2/2oo3
+﻿PtokaX DC hub software - Ptaczek/Frontline3k/aMutex (c) 2oo2/2oo3
 PtokaX DC hub software - Ptaczek/PPK (c) 2004/2005
 PtokaX DC hub software - PPK (c) 2006/2012
 ------------------------------------------------------------------------------
 
 
 ----------------------------------------Next Release...---------------------------------------
+Added: White space characters (ascii chars below 32) are not allowed in nicks anymore.
+Added: Option to store passwords for registered users as hashes.
+Fixed: IpToCountry for IPv4 ignored first and last ip in country range (thx Alexey and alex82 for report).
+Fixed: Crash in windows version when script send some global data as reaction to chat without blocking it (thx Alexey for report).
+Fixed: Wrong chat lines order when multiple messages was received in one loop and script send global data reply for one of them.
+Fixed: On hub bot nick change old bot was not removed from userlist (thx Alexey for report).
+Fixed: Few other issues related to hub bot nick and info changes.
+Fixed: Issues related to OpChat bot nick and info changes.
+Fixed: 64bit windoze build was limited to only 2 GB of memory.
 
 
 ----------------------------------------0.5.0.0 23 December 2012-----------------------------

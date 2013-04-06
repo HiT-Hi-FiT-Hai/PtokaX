@@ -47,45 +47,25 @@
 hashRegMan *hashRegManager = NULL;
 //---------------------------------------------------------------------------
 
-RegUser::RegUser(char * Nick, char * Pass, const uint16_t &iRegProfile) {
+RegUser::RegUser() {
+    sNick = NULL;
+    sPass = NULL;
+
     prev = NULL;
     next = NULL;
-    
-    size_t szNickLen = strlen(Nick);
-#ifdef _WIN32
-    sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
-#else
-	sNick = (char *)malloc(szNickLen+1);
-#endif
-    if(sNick == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in RegUser::RegUser\n", (uint64_t)(szNickLen+1));
 
-        return;
-    }   
-    memcpy(sNick, Nick, szNickLen);
-    sNick[szNickLen] = '\0';
-    
-    size_t szPassLen = strlen(Pass);
-#ifdef _WIN32
-    sPass = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szPassLen+1);
-#else
-	sPass = (char *)malloc(szPassLen+1);
-#endif
-    if(sPass == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sPass in RegUser::RegUser\n", (uint64_t)(szPassLen+1));
-
-        return;
-    }   
-    memcpy(sPass, Pass, szPassLen);
-    sPass[szPassLen] = '\0';
-
-    tLastBadPass = 0;
-    iBadPassCount = 0;
-    
-    iProfile = iRegProfile;
-	ui32Hash = HashNick(sNick, szNickLen);
     hashtableprev = NULL;
     hashtablenext = NULL;
+
+    tLastBadPass = 0;
+
+    ui32Hash = 0;
+
+    ui16Profile = 0;
+
+    ui8BadPassCount = 0;
+
+    bPassHash = false;
 }
 //---------------------------------------------------------------------------
 
@@ -97,18 +77,153 @@ RegUser::~RegUser(void) {
 #else
 	free(sNick);
 #endif
-    sNick = NULL;
+
+    if(bPassHash == true) {
+#ifdef _WIN32
+        if(ui8PassHash != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ui8PassHash) == 0) {
+		  AppendDebugLog("%s - [MEM] Cannot deallocate ui8PassHash in RegUser::~RegUser\n", 0);
+        }
+#else
+	   free(ui8PassHash);
+#endif
+    } else {
+#ifdef _WIN32
+        if(sPass != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPass) == 0) {
+		  AppendDebugLog("%s - [MEM] Cannot deallocate sPass in RegUser::~RegUser\n", 0);
+        }
+#else
+	   free(sPass);
+#endif
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+RegUser * RegUser::CreateReg(char * sRegNick, size_t szRegNickLen, char * sRegPassword, size_t szRegPassLen, uint8_t * ui8RegPassHash, const uint16_t &ui16RegProfile) {
+    RegUser * pReg = new RegUser();
+
+    if(pReg == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate new Reg in RegUser::CreateReg\n", 0);
+
+        return NULL;
+    }
 
 #ifdef _WIN32
-    if(sPass != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPass) == 0) {
-		AppendDebugLog("%s - [MEM] Cannot deallocate sPass in RegUser::~RegUser\n", 0);
-    }
+    pReg->sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szRegNickLen+1);
 #else
-	free(sPass);
+	pReg->sNick = (char *)malloc(szRegNickLen+1);
 #endif
-    sPass = NULL;
+    if(pReg->sNick == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in RegUser::RegUser\n", (uint64_t)(szRegNickLen+1));
+
+        delete pReg;
+        return NULL;
+    }
+    memcpy(pReg->sNick, sRegNick, szRegNickLen);
+    pReg->sNick[szRegNickLen] = '\0';
+
+    if(ui8RegPassHash != NULL) {
+#ifdef _WIN32
+        pReg->ui8PassHash = (uint8_t *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, 64);
+#else
+        pReg->ui8PassHash = (uint8_t *)malloc(64);
+#endif
+        if(pReg->ui8PassHash == NULL) {
+            AppendDebugLog("%s - [MEM] Cannot allocate 64 bytes for ui8PassHash in RegUser::RegUser\n", 0);
+
+            delete pReg;
+            return NULL;
+        }
+        memcpy(pReg->ui8PassHash, ui8RegPassHash, 64);
+        pReg->bPassHash = true;
+    } else {
+#ifdef _WIN32
+        pReg->sPass = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szRegPassLen+1);
+#else
+        pReg->sPass = (char *)malloc(szRegPassLen+1);
+#endif
+        if(pReg->sPass == NULL) {
+            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sPass in RegUser::RegUser\n", (uint64_t)(szRegPassLen+1));
+
+            delete pReg;
+            return NULL;
+        }
+        memcpy(pReg->sPass, sRegPassword, szRegPassLen);
+        pReg->sPass[szRegPassLen] = '\0';
+    }
+
+    pReg->ui16Profile = ui16RegProfile;
+	pReg->ui32Hash = HashNick(sRegNick, szRegNickLen);
+
+    return pReg;
 }
-//---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+bool RegUser::UpdatePassword(char * sNewPass, size_t &szNewLen) {
+    if(SettingManager->bBools[SETBOOL_HASH_PASSWORDS] == false) {
+        if(bPassHash == true) {
+            void * sOldBuf = ui8PassHash;
+#ifdef _WIN32
+            sPass = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldBuf, szNewLen+1);
+#else
+            sPass = (char *)realloc(sOldBuf, szNewLen+1);
+#endif
+            if(sPass == NULL) {
+                ui8PassHash = (uint8_t *)sOldBuf;
+
+                AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for ui8PassHash->sPass in RegUser::UpdatePassword\n", (uint64_t)(szNewLen+1));
+
+                return false;
+            }
+            memcpy(sPass, sNewPass, szNewLen);
+            sPass[szNewLen] = '\0';
+
+            bPassHash = false;
+        } else if(strcmp(sPass, sNewPass) == 0) {
+            char * sOldPass = sPass;
+#ifdef _WIN32
+            sPass = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldPass, szNewLen+1);
+#else
+            sPass = (char *)realloc(sOldPass, szNewLen+1);
+#endif
+            if(sPass == NULL) {
+                sPass = sOldPass;
+
+                AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sPass in RegUser::UpdatePassword\n", (uint64_t)(szNewLen+1));
+
+                return false;
+            }
+            memcpy(sPass, sNewPass, szNewLen);
+            sPass[szNewLen] = '\0';
+        }
+    } else {
+        if(bPassHash == true) {
+            HashPassword(sNewPass, szNewLen, ui8PassHash);
+        } else {
+            char * sOldPass = sPass;
+#ifdef _WIN32
+            ui8PassHash = (uint8_t *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldPass, 64);
+#else
+            ui8PassHash = (uint8_t *)realloc(sOldPass, 64);
+#endif
+            if(ui8PassHash == NULL) {
+                sPass = sOldPass;
+
+                AppendDebugLog("%s - [MEM] Cannot reallocate 64 bytes for sPass->ui8PassHash in RegUser::UpdatePassword\n", 0);
+
+                return false;
+            }
+
+            if(HashPassword(sNewPass, szNewLen, ui8PassHash) == true) {
+                bPassHash = true;
+            } else {
+                sPass = (char *)ui8PassHash;
+            }
+        }
+    }
+
+    return true;
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 hashRegMan::hashRegMan(void) {
     RegListS = RegListE = NULL;
@@ -135,18 +250,25 @@ bool hashRegMan::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) 
         return false;
     }
 
-    RegUser * pNewUser = new RegUser(sNick, sPasswd, iProfile);
-    if(pNewUser == NULL || pNewUser->sNick == NULL || pNewUser->sPass == NULL) {
-        if(pNewUser == NULL) {
-            AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in hashRegMan::AddNew\n", 0);
-        } else if(pNewUser->sNick == NULL) {
-            delete pNewUser;
-            AppendDebugLog("%s - [MEM] Cannot allocate pNewUser->sNick in hashRegMan::AddNew\n", 0);
-        } else if(pNewUser->sPass) {
-            delete pNewUser;
-            AppendDebugLog("%s - [MEM] Cannot allocate pNewUser->sPass in hashRegMan::AddNew\n", 0);
+    RegUser * pNewUser = NULL;
+
+    if(SettingManager->bBools[SETBOOL_HASH_PASSWORDS] == true) {
+        uint8_t ui8Hash[64];
+
+        size_t szPassLen = strlen(sPasswd);
+
+        if(HashPassword(sPasswd, szPassLen, ui8Hash) == false) {
+            return false;
         }
 
+        pNewUser = RegUser::CreateReg(sNick, strlen(sNick), NULL, 0, ui8Hash, iProfile);
+    } else {
+        pNewUser = RegUser::CreateReg(sNick, strlen(sNick), sPasswd, strlen(sPasswd), NULL, iProfile);
+    }
+
+    if(pNewUser == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in hashRegMan::AddNew\n", 0);
+ 
         return false;
     }
 
@@ -235,27 +357,13 @@ void hashRegMan::Add2Table(RegUser * Reg) {
 //---------------------------------------------------------------------------
 
 void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui16NewProfile) {
-    if(strcmp(pReg->sPass, sNewPasswd) != 0) {
+    if(sNewPasswd != NULL) {
         size_t szPassLen = strlen(sNewPasswd);
 
-        char * sOldPass = pReg->sPass;
-#ifdef _WIN32
-        pReg->sPass = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldPass, szPassLen+1);
-#else
-		pReg->sPass = (char *)realloc(sOldPass, szPassLen+1);
-#endif
-        if(pReg->sPass == NULL) {
-            pReg->sPass = sOldPass;
-
-			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sPass in hashRegMan::ChangeReg\n", (uint64_t)(szPassLen+1));
-
-            return;
-        }
-        memcpy(pReg->sPass, sNewPasswd, szPassLen);
-        pReg->sPass[szPassLen] = '\0';
+        pReg->UpdatePassword(sNewPasswd, szPassLen);
     }
 
-    pReg->iProfile = ui16NewProfile;
+    pReg->ui16Profile = ui16NewProfile;
 
 #ifdef _BUILD_GUI
     if(pRegisteredUsersDialog != NULL) {
@@ -497,7 +605,7 @@ void hashRegMan::Load(void) {
     }
 
     // Read file header
-    uint16_t ui16Identificators[3] = { *((uint16_t *)"FI"), *((uint16_t *)"FV"), *((uint16_t *)"  ") };
+    uint16_t ui16Identificators[4] = { *((uint16_t *)"FI"), *((uint16_t *)"FV"), *((uint16_t *)"  "), *((uint16_t *)"  ") };
 
     if(pxbRegs.ReadNextItem(ui16Identificators, 2) == false) {
         return;
@@ -518,10 +626,11 @@ void hashRegMan::Load(void) {
 
     // Read regs =)
     ui16Identificators[0] = *((uint16_t *)"NI");
-    ui16Identificators[1] = *((uint16_t *)"PA");
+    ui16Identificators[1] = *((uint16_t *)"PS");
     ui16Identificators[2] = *((uint16_t *)"PR");
+    ui16Identificators[3] = *((uint16_t *)"PA");
 
-    bool bSuccess = pxbRegs.ReadNextItem(ui16Identificators, 3);
+    bool bSuccess = pxbRegs.ReadNextItem(ui16Identificators, 3, 1);
 
     while(bSuccess == true) {
 		if(pxbRegs.ui16ItemLengths[0] < 65 && pxbRegs.ui16ItemLengths[1] < 65 && pxbRegs.ui16ItemLengths[2] == 2) {
@@ -531,18 +640,28 @@ void hashRegMan::Load(void) {
                 iProfile = iProfilesCount;
             }
 
-            RegUser * pNewUser = new RegUser(string((char *)pxbRegs.pItemDatas[0], pxbRegs.ui16ItemLengths[0]).c_str(),
-                string((char *)pxbRegs.pItemDatas[1], pxbRegs.ui16ItemLengths[1]).c_str(), iProfile);
-            if(pNewUser == NULL || pNewUser->sNick == NULL || pNewUser->sPass == NULL) {
-                if(pNewUser == NULL) {
-                    AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in hashRegMan::Load\n", 0);
-                } else if(pNewUser->sNick == NULL) {
-                    delete pNewUser;
-                    AppendDebugLog("%s - [MEM] Cannot allocate pNewUser->sNick in hashRegMan::Load\n", 0);
-                } else if(pNewUser->sPass) {
-                    delete pNewUser;
-                    AppendDebugLog("%s - [MEM] Cannot allocate pNewUser->sPass in hashRegMan::Load\n", 0);
+            RegUser * pNewUser = NULL;
+
+            if(pxbRegs.ui16ItemLengths[3] != 0) {
+                if(SettingManager->bBools[SETBOOL_HASH_PASSWORDS] == true) {
+                    uint8_t ui8Hash[64];
+
+                    size_t szPassLen = (size_t)pxbRegs.ui16ItemLengths[3];
+
+                    if(HashPassword((char *)pxbRegs.pItemDatas[3], szPassLen, ui8Hash) == false) {
+                        pNewUser = RegUser::CreateReg((char *)pxbRegs.pItemDatas[0], pxbRegs.ui16ItemLengths[0], (char *)pxbRegs.pItemDatas[3], pxbRegs.ui16ItemLengths[3], NULL, iProfile);
+                    } else {
+                        pNewUser = RegUser::CreateReg((char *)pxbRegs.pItemDatas[0], pxbRegs.ui16ItemLengths[0], NULL, 0, ui8Hash, iProfile);
+                    }
+                } else {
+                    pNewUser = RegUser::CreateReg((char *)pxbRegs.pItemDatas[0], pxbRegs.ui16ItemLengths[0], (char *)pxbRegs.pItemDatas[3], pxbRegs.ui16ItemLengths[3], NULL, iProfile);
                 }
+            } else if(pxbRegs.ui16ItemLengths[1] == 64) {
+                pNewUser = RegUser::CreateReg((char *)pxbRegs.pItemDatas[0], pxbRegs.ui16ItemLengths[0], NULL, 0, (uint8_t *)pxbRegs.pItemDatas[1], iProfile);
+            }
+
+            if(pNewUser == NULL) {
+				AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in hashRegMan::Load\n", 0);
 
                 exit(EXIT_FAILURE);
             }
@@ -550,7 +669,7 @@ void hashRegMan::Load(void) {
 			Add(pNewUser);
 		}
 
-        bSuccess = pxbRegs.ReadNextItem(ui16Identificators, 3);
+        bSuccess = pxbRegs.ReadNextItem(ui16Identificators, 3, 1);
     }
 }
 //---------------------------------------------------------------------------
@@ -611,17 +730,9 @@ void hashRegMan::LoadXML() {
                 }
 
                 if(Find((char*)nick, strlen(nick)) == NULL) {
-                    RegUser * pNewUser = new RegUser(nick, pass, iProfile);
-                    if(pNewUser == NULL || pNewUser->sNick == NULL || pNewUser->sPass == NULL) {
-                        if(pNewUser == NULL) {
-                            AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in hashRegMan::Load\n", 0);
-                        } else if(pNewUser->sNick == NULL) {
-                            delete pNewUser;
-                            AppendDebugLog("%s - [MEM] Cannot allocate pNewUser->sNick in hashRegMan::Load\n", 0);
-                        } else if(pNewUser->sPass) {
-                            delete pNewUser;
-                            AppendDebugLog("%s - [MEM] Cannot allocate pNewUser->sPass in hashRegMan::Load\n", 0);
-                        }
+                    RegUser * pNewUser = RegUser::CreateReg(nick, strlen(nick), pass, strlen(pass), NULL, iProfile);
+                    if(pNewUser == NULL) {
+						AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in hashRegMan::LoadXML\n", 0);
 
                     	exit(EXIT_FAILURE);
                     }
@@ -685,6 +796,10 @@ void hashRegMan::Save(void) const {
     pxbRegs.sItemIdentifiers[2][0] = 'P';
     pxbRegs.sItemIdentifiers[2][1] = 'R';
 
+    pxbRegs.ui8ItemValues[0] = PXBReader::PXB_STRING;
+    pxbRegs.ui8ItemValues[1] = PXBReader::PXB_STRING;
+    pxbRegs.ui8ItemValues[2] = PXBReader::PXB_TWO_BYTES;
+
     RegUser *next = RegListS;
     while(next != NULL) {
         RegUser *curReg = next;
@@ -694,13 +809,20 @@ void hashRegMan::Save(void) const {
         pxbRegs.pItemDatas[0] = (void *)curReg->sNick;
         pxbRegs.ui8ItemValues[0] = PXBReader::PXB_STRING;
 
-        pxbRegs.ui16ItemLengths[1] = (uint16_t)strlen(curReg->sPass);
-        pxbRegs.pItemDatas[1] = (void *)curReg->sPass;
-        pxbRegs.ui8ItemValues[1] = PXBReader::PXB_STRING;
+        if(curReg->bPassHash == true) {
+            pxbRegs.sItemIdentifiers[1][1] = 'S';
+
+            pxbRegs.ui16ItemLengths[1] = 64;
+            pxbRegs.pItemDatas[1] = (void *)curReg->ui8PassHash;
+        } else {
+            pxbRegs.sItemIdentifiers[1][1] = 'A';
+
+            pxbRegs.ui16ItemLengths[1] = (uint16_t)strlen(curReg->sPass);
+            pxbRegs.pItemDatas[1] = (void *)curReg->sPass;
+        }
 
         pxbRegs.ui16ItemLengths[2] = 2;
-        pxbRegs.pItemDatas[2] = (void *)&curReg->iProfile;
-        pxbRegs.ui8ItemValues[2] = PXBReader::PXB_TWO_BYTES;
+        pxbRegs.pItemDatas[2] = (void *)&curReg->ui16Profile;
 
         if(pxbRegs.WriteNextItem(pxbRegs.ui16ItemLengths[0] + pxbRegs.ui16ItemLengths[1] + pxbRegs.ui16ItemLengths[2], 3) == false) {
             break;
@@ -709,4 +831,53 @@ void hashRegMan::Save(void) const {
 
     pxbRegs.WriteRemaining();
 }
-//---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void hashRegMan::HashPasswords() {
+    RegUser * pNextReg = RegListS;
+    while(pNextReg != NULL) {
+        RegUser * pCurReg = pNextReg;
+		pNextReg = pCurReg->next;
+
+        if(pCurReg->bPassHash == false) {
+            char * sOldPass = pCurReg->sPass;
+#ifdef _WIN32
+            pCurReg->ui8PassHash = (uint8_t *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, 64);
+#else
+            pCurReg->ui8PassHash = (uint8_t *)malloc(64);
+#endif
+            if(pCurReg->ui8PassHash == NULL) {
+                pCurReg->sPass = sOldPass;
+
+                AppendDebugLog("%s - [MEM] Cannot reallocate 64bytes for sPass->ui8PassHash in hashRegMan::HashPasswords\n", 64);
+
+                continue;
+            }
+
+            size_t szPassLen = strlen(sOldPass);
+
+            if(HashPassword(sOldPass, szPassLen, pCurReg->ui8PassHash) == true) {
+                pCurReg->bPassHash = true;
+
+#ifdef _WIN32
+                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldPass) == 0) {
+                    AppendDebugLog("%s - [MEM] Cannot deallocate sOldPass in hashRegMan::HashPasswords\n", 0);
+                }
+#else
+                free(sOldPass);
+#endif
+            } else {
+#ifdef _WIN32
+                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCurReg->ui8PassHash) == 0) {
+                    AppendDebugLog("%s - [MEM] Cannot deallocate pCurReg->ui8PassHash in hashRegMan::HashPasswords\n", 0);
+                }
+#else
+                free(pCurReg->ui8PassHash);
+#endif
+
+                pCurReg->sPass = sOldPass;
+            }
+        }
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

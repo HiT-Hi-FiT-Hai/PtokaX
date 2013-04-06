@@ -300,8 +300,6 @@ int __cdecl main(int argc, char* argv[]) {
 	    } else if(stricmp(argv[i], "-h") == NULL || stricmp(argv[i], "/help") == NULL) {
 	    	printf("PtokaX [-c <configdir>] [-i <servicename>] [-u <servicename>] [-v]");
 	    	return EXIT_SUCCESS;
-	    } else if(stricmp(argv[i], "/nokeycheck") == NULL) {
-	        bCmdNoKeyCheck = true;
 	    } else if(stricmp(argv[i], "/generatexmllanguage") == NULL) {
 	        LangMan::GenerateXmlExample();
 	        return EXIT_SUCCESS;

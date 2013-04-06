@@ -37,13 +37,15 @@
     #include "../gui.win/MainWindowPageUsersChat.h"
 #endif
 //---------------------------------------------------------------------------
+#include <skein.h>
+//---------------------------------------------------------------------------
 static const int MAX_PAT_SIZE = 64;
 static const int MAX_ALPHABET_SIZE = 255;
 //---------------------------------------------------------------------------
 string PATH = "", SCRIPT_PATH = "", sTitle = "";
 size_t g_szBufferSize = 0;
 char * g_sBuffer = NULL;
-bool bCmdAutoStart = false, bCmdNoAutoStart = false, bCmdNoTray = false, bCmdNoKeyCheck = false, bUseIPv4 = true, bUseIPv6 = true, bIPv6DualStack = false;
+bool bCmdAutoStart = false, bCmdNoAutoStart = false, bCmdNoTray = false, bUseIPv4 = true, bUseIPv6 = true, bIPv6DualStack = false;
 #ifdef _WIN32
 	HANDLE hConsole = NULL, hLuaHeap = NULL, hPtokaXHeap = NULL, hRecvHeap = NULL, hSendHeap = NULL;
 	string PATH_LUA = "", sOs = "";
@@ -552,151 +554,25 @@ char* stristr2(const char *str1, const char *str2) {
 // check IP string.
 // false - no ip
 // true - valid ip
-bool isIP(char * IP, const size_t ui32Len) {
-	uint32_t a, b, c, d;
-	if(GetIpParts(IP, ui32Len, a, b, c, d) == true) {
-        return true;
-    } else {
-	   return false;
-    }
-}
-//---------------------------------------------------------------------------
-
-bool GetIpParts(char * sIP, const size_t ui32Len, uint32_t &a, uint32_t &b, uint32_t &c, uint32_t &d) {
-    if(ui32Len < 7 || ui32Len > 15)
-        return false;
-
-    uint8_t iDots = 0, iChars = 0, iActualChar;
-    uint16_t iFirst = 0, iSecond = 0, iThird = 0;
-
-    for(uint32_t ui32i = 0; ui32i < ui32Len; ui32i++) {
-        iChars++;
-        switch(sIP[ui32i]) {
-            case '0':
-                iActualChar = 0;
-                break;
-            case '1':
-                iActualChar = 1;
-                break;
-            case '2':
-                iActualChar = 2;
-                break;
-            case '3':
-                iActualChar = 3;
-                break;
-            case '4':
-                iActualChar = 4;
-                break;
-            case '5':
-                iActualChar = 5;
-                break;
-            case '6':
-                iActualChar = 6;
-                break;
-            case '7':
-                iActualChar = 7;
-                break;
-            case '8':
-                iActualChar = 8;
-                break;
-            case '9':
-                iActualChar = 9;
-                break;
-            case '.':
-                if(iDots == 3) {
-                    return false;
-                }
-
-                iDots++;
-
-                switch(iDots) {
-                    case 1:
-                        switch(iChars) {
-                            case 2:
-                                a = iFirst;
-                                break;
-                            case 3:
-                                a = (iFirst*10)+(iSecond);
-                                break;
-                            case 4:
-                                a = (iFirst*100)+(iSecond*10)+(iThird);
-                                break;
-                            default:
-                                return false;
-                        }
-                        break;
-                    case 2:
-                        switch(iChars) {
-                            case 2:
-                                b = iFirst;
-                                break;
-                            case 3:
-                                b = (iFirst*10)+(iSecond);
-                                break;
-                            case 4:
-                                b = (iFirst*100)+(iSecond*10)+(iThird);
-                                break;
-                            default:
-                                return false;
-                        }
-                        break;
-                    case 3:
-                        switch(iChars) {
-                            case 2:
-                                c = iFirst;
-                                break;
-                            case 3:
-                                c = (iFirst*10)+(iSecond);
-                                break;
-                            case 4:
-                                c = (iFirst*100)+(iSecond*10)+(iThird);
-                                break;
-                            default:
-                                return false;
-                        }
-                        break;
-                }
-
-                iChars = 0;
-                continue;
-            default:
-                return false;
-        }
-
-        switch(iChars) {
-            case 1:
-                iFirst = iActualChar;
-                break;
-            case 2:
-                iSecond = iActualChar;
-                break;
-            case 3:
-                iThird = iActualChar;
-                break;
-            default:
-                return false;
-        }
-    }
-
-    switch(iChars++) {
-        case 1:
-            d = iFirst;
-            break;
-        case 2:
-            d = (iFirst*10)+(iSecond);
-            break;
-        case 3:
-            d = (iFirst*100)+(iSecond*10)+(iThird);
-            break;
-        default:
+bool isIP(char * sIP) {
+    if(bUseIPv6 == true && strchr(sIP, '.') == NULL) {
+        uint8_t ui128IpHash[16];
+#ifdef _WIN32
+        if(win_inet_pton(sIP, ui128IpHash) != 1) {
+#else
+        if(inet_pton(AF_INET6, sIP, ui128IpHash) != 1) {
+#endif
             return false;
+        }
+    } else {
+        uint32_t ui32IpHash = inet_addr(sIP);
+
+        if(ui32IpHash == INADDR_NONE) {
+            return false;
+        }
     }
 
-    if(iDots != 3 || a > 255 || b > 255 || c > 255 || d > 255) {
-        return false;
-    } else {
-        return true;
-    }
+	return true;
 }
 //---------------------------------------------------------------------------
 
@@ -1558,5 +1434,20 @@ void ReduceGlobalBuffer() {
         g_szBufferSize = szOldSize;
         return;
 	}
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+bool HashPassword(char * sPassword, size_t &szPassLen, uint8_t * ui8PassHash) {
+    Skein1024_Ctxt_t ctx1024;
+
+    if(Skein1024_Init(&ctx1024, 512) == SKEIN_SUCCESS) {
+        if(Skein1024_Update(&ctx1024, (u08b_t *)sPassword, szPassLen) == SKEIN_SUCCESS) {
+            if(Skein1024_Final(&ctx1024, ui8PassHash) == SKEIN_SUCCESS) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

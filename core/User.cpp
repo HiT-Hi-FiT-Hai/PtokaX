@@ -531,9 +531,7 @@ UserBan::~UserBan() {
 LoginLogout::LoginLogout() {
     uBan = NULL;
 
-    sLockUsrConn = NULL;
-    sPassword = NULL;
-    sKickMsg = NULL;
+    pBuffer = NULL;
 
     iToCloseLoops = 0;
     iUserConnectedLen = 0;
@@ -547,33 +545,13 @@ LoginLogout::~LoginLogout() {
     delete uBan;
 
 #ifdef _WIN32
-    if(sLockUsrConn != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sLockUsrConn) == 0) {
-            AppendDebugLog("%s - [MEM] Cannot deallocate sLockUsrConn in LoginLogout::~LoginLogout\n", 0);
+    if(pBuffer != NULL) {
+        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pBuffer) == 0) {
+            AppendDebugLog("%s - [MEM] Cannot deallocate pBuffer in LoginLogout::~LoginLogout\n", 0);
         }
     }
 #else
-	free(sLockUsrConn);
-#endif
-
-#ifdef _WIN32
-    if(sPassword != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPassword) == 0) {
-            AppendDebugLog("%s - [MEM] Cannot deallocate sPassword in LoginLogout::~LoginLogout\n", 0);
-        }
-    }
-#else
-	free(sPassword);
-#endif
-
-#ifdef _WIN32
-    if(sKickMsg != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sKickMsg) == 0) {
-            AppendDebugLog("%s - [MEM] Cannot deallocate sKickMsg in LoginLogout::~LoginLogout\n", 0);
-        }
-    }
-#else
-	free(sKickMsg);
+	free(pBuffer);
 #endif
 }
 //---------------------------------------------------------------------------
@@ -1084,17 +1062,17 @@ bool UserMakeLock(User * u) {
 //	Memo(string(u->sendbuf, u->sbdatalen));
 
 #ifdef _WIN32
-    u->uLogInOut->sLockUsrConn = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, 64);
+    u->uLogInOut->pBuffer = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, 64);
 #else
-	u->uLogInOut->sLockUsrConn = (char *)malloc(64);
+	u->uLogInOut->pBuffer = (char *)malloc(64);
 #endif
-    if(u->uLogInOut->sLockUsrConn == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate 64 bytes for sLockUsrConn in UserMakeLock\n", 0);
+    if(u->uLogInOut->pBuffer == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate 64 bytes for pBuffer in UserMakeLock\n", 0);
 		return false;
     }
     
-    memcpy(u->uLogInOut->sLockUsrConn, u->sendbuf, 63);
-    u->uLogInOut->sLockUsrConn[63] = '\0';
+    memcpy(u->uLogInOut->pBuffer, u->sendbuf, 63);
+	u->uLogInOut->pBuffer[63] = '\0';
 
     return true;
 }
@@ -1859,37 +1837,6 @@ void UserSetVersion(User * u, char * sNewVer) {
 }
 //------------------------------------------------------------------------------
 
-void UserSetPasswd(User * u, char * sNewPass) {
-	if(u->uLogInOut->sPassword != NULL) {
-#ifdef _WIN32
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)u->uLogInOut->sPassword) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate u->uLogInOut->Password in UserSetPasswd\n", 0);
-        }
-#else
-		free(u->uLogInOut->sPassword);
-#endif
-        u->uLogInOut->sPassword = NULL;
-    }
-        
-    size_t szLen = strlen(sNewPass);
-#ifdef _WIN32
-    u->uLogInOut->sPassword = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
-#else
-	u->uLogInOut->sPassword = (char *)malloc(szLen+1);
-#endif
-    if(u->uLogInOut->sPassword == NULL) {
-        u->ui32BoolBits |= User::BIT_ERROR;
-        UserClose(u);
-
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for Password in UserSetPasswd\n", (uint64_t)(szLen+1));
-
-        return;
-    }   
-    memcpy(u->uLogInOut->sPassword, sNewPass, szLen);
-    u->uLogInOut->sPassword[szLen] = '\0';
-}
-//------------------------------------------------------------------------------
-
 void UserSetLastChat(User * u, char * sNewData, const size_t &szLen) {
 #ifdef _WIN32
     if(u->sLastChat != NULL) {
@@ -1991,68 +1938,67 @@ void UserSetLastSearch(User * u, char * sNewData, const size_t &szLen) {
 }
 //------------------------------------------------------------------------------
 
-void UserSetKickMsg(User * u, char * sKickMsg, size_t szLen/* = 0*/) {
+void UserSetBuffer(User * u, char * sKickMsg, size_t szLen/* = 0*/) {
     if(szLen == 0) {
         szLen = strlen(sKickMsg);
     }
 
-    if(u->uLogInOut != NULL) {
-        if(u->uLogInOut->sKickMsg != NULL) {
-#ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)u->uLogInOut->sKickMsg) == 0) {
-				AppendDebugLog("%s - [MEM] Cannot deallocate u->uLogInOut->sKickMsg in UserSetKickMsg\n", 0);
-            }
-#else
-			free(u->uLogInOut->sKickMsg);
-#endif
-            u->uLogInOut->sKickMsg = NULL;
-        }
-    } else {
+    if(u->uLogInOut == NULL) {
         u->uLogInOut = new LoginLogout();
         if(u->uLogInOut == NULL) {
     		u->ui32BoolBits |= User::BIT_ERROR;
     		UserClose(u);
 
-    		AppendDebugLog("%s - [MEM] Cannot allocate new u->uLogInOut in UserSetKickMsg\n", 0);
+    		AppendDebugLog("%s - [MEM] Cannot allocate new u->uLogInOut in UserSetBuffer\n", 0);
     		return;
         }
     }
 
-    if(szLen < 256) {
+	void * pOldBuf = u->uLogInOut->pBuffer;
+
+    if(szLen < 512) {
 #ifdef _WIN32
-        u->uLogInOut->sKickMsg = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
+		if(u->uLogInOut->pBuffer == NULL) {
+			u->uLogInOut->pBuffer = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
+		} else {
+			u->uLogInOut->pBuffer = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, pOldBuf, szLen+1);
+		}
 #else
-		u->uLogInOut->sKickMsg = (char *)malloc(szLen+1);
+		u->uLogInOut->pBuffer = (char *)realloc(pOldBuf, szLen+1);
 #endif
-        if(u->uLogInOut->sKickMsg == NULL) {
+        if(u->uLogInOut->pBuffer == NULL) {
             u->ui32BoolBits |= User::BIT_ERROR;
             UserClose(u);
 
-			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sKickMsg in UserSetKickMsg\n", (uint64_t)(szLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pBuffer in UserSetBuffer\n", (uint64_t)(szLen+1));
 
             return;
         }
-        memcpy(u->uLogInOut->sKickMsg, sKickMsg, szLen);
-        u->uLogInOut->sKickMsg[szLen] = '\0';
+        memcpy(u->uLogInOut->pBuffer, sKickMsg, szLen);
+        u->uLogInOut->pBuffer[szLen] = '\0';
     } else {
 #ifdef _WIN32
-        u->uLogInOut->sKickMsg = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, 256);
+		if(u->uLogInOut->pBuffer == NULL) {
+			u->uLogInOut->pBuffer = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, 512);
+		} else {
+			u->uLogInOut->pBuffer = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, pOldBuf, 512);
+		}
 #else
-		u->uLogInOut->sKickMsg = (char *)malloc(256);
+		u->uLogInOut->pBuffer = (char *)realloc(pOldBuf, 512);
 #endif
-        if(u->uLogInOut->sKickMsg == NULL) {
+        if(u->uLogInOut->pBuffer == NULL) {
             u->ui32BoolBits |= User::BIT_ERROR;
             UserClose(u);
 
-			AppendDebugLog("%s - [MEM] Cannot allocate 256 bytes for sKickMsg in UserSetKickMsg1\n", 0);
+			AppendDebugLog("%s - [MEM] Cannot allocate 256 bytes for pBuffer in UserSetBuffer\n", 0);
 
             return;
         }
-        memcpy(u->uLogInOut->sKickMsg, sKickMsg, 252);
-        u->uLogInOut->sKickMsg[255] = '\0';
-        u->uLogInOut->sKickMsg[254] = '.';
-        u->uLogInOut->sKickMsg[253] = '.';
-        u->uLogInOut->sKickMsg[252] = '.';
+        memcpy(u->uLogInOut->pBuffer, sKickMsg, 508);
+        u->uLogInOut->pBuffer[511] = '\0';
+        u->uLogInOut->pBuffer[510] = '.';
+        u->uLogInOut->pBuffer[509] = '.';
+        u->uLogInOut->pBuffer[508] = '.';
     }
 }
 //------------------------------------------------------------------------------

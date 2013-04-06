@@ -104,7 +104,7 @@ public:
     void SetText(const size_t &szTxtId, const string & sTxt);
 
     void UpdateBot(const bool &bNickChanged = true);
-    void DisableBot(const bool &bNickChanged = true);
+    void DisableBot(const bool &bNickChanged = true, const bool &bRemoveMyINFO = true);
     void UpdateOpChat(const bool &bNickChanged = true);
     void DisableOpChat(const bool &bNickChanged = true);
 

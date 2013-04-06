@@ -706,7 +706,7 @@ void classUsers::SendChat2All(User * cur, char * sData, const size_t &szChatLen,
     if(ptr == NULL) {
         g_GlobalDataQueue->AddQueueItem(sData, szChatLen, NULL, 0, GlobalDataQueue::CMD_CHAT);
     } else {
-        g_GlobalDataQueue->InsertQueueItem(sData, szChatLen, ptr, GlobalDataQueue::CMD_CHAT);
+        g_GlobalDataQueue->FillBlankQueueItem(sData, szChatLen, ptr);
     }
 }
 //---------------------------------------------------------------------------

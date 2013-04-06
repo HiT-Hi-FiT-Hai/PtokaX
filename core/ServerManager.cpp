@@ -466,7 +466,7 @@ bool ServerStart() {
     sHubIP6[0] = '\0';
 
     if(SettingManager->bBools[SETBOOL_RESOLVE_TO_IP] == true) {
-        if(isIP(SettingManager->sTexts[SETTXT_HUB_ADDRESS], SettingManager->ui16TextsLens[SETTXT_HUB_ADDRESS]) == false) {
+        if(isIP(SettingManager->sTexts[SETTXT_HUB_ADDRESS]) == false) {
 #ifdef _BUILD_GUI
             pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_RESOLVING_HUB_ADDRESS], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_HUB_ADDRESS])+"...").c_str());
 #endif

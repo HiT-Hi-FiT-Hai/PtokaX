@@ -300,7 +300,7 @@ bool SettingPageAdvanced::CreateSettingPage(HWND hOwner) {
 
     ::EnableWindow(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM], SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true ? TRUE : FALSE);
 
-    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM], GWLP_WNDPROC, (LONG_PTR)ButtonProc);
+    wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_ADMIN_NICK], GWLP_WNDPROC, (LONG_PTR)EditProc);
 
 	return true;
 }

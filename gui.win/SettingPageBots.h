@@ -46,7 +46,7 @@ public:
     char * GetPageName();
     void FocusLastItem();
 private:
-    HWND hWndPageItems[19];
+    HWND hWndPageItems[17];
     
     enum enmPageItems {
         GB_HUB_BOT,
@@ -65,9 +65,7 @@ private:
         GB_OP_CHAT_BOT_DESCRIPTION,
         EDT_OP_CHAT_BOT_DESCRIPTION,
         GB_OP_CHAT_BOT_EMAIL,
-        EDT_OP_CHAT_BOT_EMAIL,
-        GB_EXPERTS_ONLY,
-        BTN_KEEP_SLOW_CLIENTS_ONLINE
+        EDT_OP_CHAT_BOT_EMAIL
     };
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
