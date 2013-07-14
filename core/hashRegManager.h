@@ -57,6 +57,8 @@ class hashRegMan {
 private:
     RegUser *table[65536];
 
+    uint8_t ui8SaveCalls;
+
     void LoadXML();
 public:
     RegUser *RegListS, *RegListE;
@@ -78,7 +80,7 @@ public:
     RegUser* Find(uint32_t hash, char * sNick);
 
     void Load(void);
-    void Save(void) const;
+    void Save(const bool &bSaveOnChange = false, const bool &bSaveOnTime = false);
 
     void HashPasswords();
 };

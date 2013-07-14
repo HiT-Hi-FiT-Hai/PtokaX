@@ -252,6 +252,7 @@ void UserSetLastChat(User * u, char * sNewData, const size_t &szLen);
 void UserSetLastPM(User * u, char * sNewData, const size_t &szLen);
 void UserSetLastSearch(User * u, char * sNewData, const size_t &szLen);
 void UserSetBuffer(User * u, char * sKickMsg, size_t szLen = 0);
+void UserFreeBuffer(User * u);
 
 void UserClose(User * u, bool bNoQuit = false);
 

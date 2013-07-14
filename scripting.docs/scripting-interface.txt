@@ -73,13 +73,13 @@ GetOnlineRegs()														- Return table with all logged and registered (prof
 GetOnlineRegs(bAllData)												- Return table with all logged and registered (profile > -1) user tables. Use true for bAllData if you want user tables with all data.
 GetOnlineUsers()													- Return table with all logged user tables.
 GetOnlineUsers(bAllData)											- Return table with all logged user tables. Use true for bAllData if you want user tables with all data.
-GetOnlineUsers(nProfileNumber)										- Return table with users of given profile.
-GetOnlineUsers(nProfileNumber, bAllData)							- Return table with users of given profile. Use true for bAllData if you want user tables with all data.
+GetOnlineUsers(iProfileNumber)										- Return table with users of given profile.
+GetOnlineUsers(iProfileNumber, bAllData)							- Return table with users of given profile. Use true for bAllData if you want user tables with all data.
 GetUser(sNick)														- Return online user as user table.
 GetUser(sNick, bAllData)											- Return online user as user table. Use true for bAllData if you want user table with all data.
 GetUserAllData(tUser)												- Add or update all user data in user table. Return nil when failed (user is not online) or true when sucess.
-GetUserData(tUser, nValueId)										- Add or update value of given id in user table. Return nil when failed (user is not online) or true when sucess.
-GetUserValue(tUser, nValueId)										- Return value of wanted nValueId or nil when failed (user is not online).
+GetUserData(tUser, iValueId)										- Add or update value of given id in user table. Return nil when failed (user is not online) or true when sucess.
+GetUserValue(tUser, iValueId)										- Return value of wanted nValueId or nil when failed (user is not online).
 GetUsers(sIP)														- Return online users from given ip as table with user tables or nil when no user with that IP is found or invalid IP is given.
 GetUsers(sIP, bAllData)												- Return online users from given ip as table with user tables or nil when no user with that IP is found or invalid IP is given. Use true for bAllData if you want user table with all data.
 
@@ -95,16 +95,16 @@ SendToAll(sData)													- Send data to all users. Max sData length 128000 c
 SendToNick(sNick, sData)											- Send data to user with given nick. Max sData length 128000 chars. When data don't contains | on end, will be automatically added.
 SendToOpChat(sData)													- Send data as private message in OpChat. Max sData length 128000 chars. If OpChat is not enabled then nothing is sent.
 SendToOps(sData)													- Send data to operators. Max sData length 128000 chars. When data don't contains | on end, will be automatically added.
-SendToProfile(nProfileNumber, sData)								- Send data to users with given profile. Max sData length 128000 chars. When data don't contains | on end, will be automatically added.
+SendToProfile(iProfileNumber, sData)								- Send data to users with given profile. Max sData length 128000 chars. When data don't contains | on end, will be automatically added.
 SendToUser(tUser, sData)											- Send data to user. Max Data length 128000 chars. When data don't contains | on end, will be automatically added.
 
 SendPmToAll(sFromNick, sData)										- Send data as private message to all users. Max FromNick length 64 chars, max Data length 128000 chars.
 SendPmToNick(sToNick, sFromNick, sData)								- Send data as private message to user with given nick. Max FromNick length 64 chars, max Data length 128000 chars.
 SendPmToOps(sFromNick, sData)										- Send data to operators. Max FromNick length 64 chars, max Data length 128000 chars.
-SendPmToProfile(nProfileNumber, sFromNick, sData)					- Send data as private message to users with given profile. Max FromNick length 64 chars, max Data length 128000 chars.
+SendPmToProfile(iProfileNumber, sFromNick, sData)					- Send data as private message to users with given profile. Max FromNick length 64 chars, max Data length 128000 chars.
 SendPmToUser(tUser, sFromNick, sData)								- Send private message to user. Max FromNick length 64 chars, max Data length 128000 chars.
 
-Core.SetUserInfo(tUser, nValueId, nil/sValue/nValue, bPermanent)	- Set user info in MyINFO. Max sValue lenght 64 chars, $ and | is not allowed. Use bPermanent when you want to apply change permanently.
+Core.SetUserInfo(tUser, iValueId, nil/sValue/iValue, bPermanent)	- Set user info in MyINFO. Max sValue lenght 64 chars, $ and | is not allowed. Use bPermanent when you want to apply change permanently.
 
 
 SetMan.
@@ -114,24 +114,24 @@ Save()																				- Save settings.
 GetMOTD()
 SetMOTD(sString)																	- | is not allowed.
 
-GetBool(nBoolId)																	- true or nil.
-SetBool(nBoolId, bBoolean)
+GetBool(iBoolId)																	- true or nil.
+SetBool(iBoolId, bBoolean)
 
-GetNumber(nNumberId)
-SetNumber(nNumberId, nNumber)
+GetNumber(iNumberId)
+SetNumber(iNumberId, iNumber)
 
-GetString(nStringId)																- String or nil.
-SetString(nStringId, sString)
+GetString(iStringId)																- String or nil.
+SetString(iStringId, sString)
 
 GetMinShare()																		- Return min share in bytes.
-SetMinShare(nShareInBytes)
-SetMinShare(nMinShare, nShareUnits)													- nMinShare max is 9999. nShareUnits 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB
+SetMinShare(iShareInBytes)
+SetMinShare(iMinShare, iShareUnits)													- iMinShare max is 9999. iShareUnits 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB
 
 GetMaxShare()																		- Return max share in bytes.
-SetMaxShare(nShareInBytes)
-SetMaxShare(nMaxShare, nShareUnits)													- nMaxShare max is 9999. nShareUnits 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB
+SetMaxShare(iShareInBytes)
+SetMaxShare(iMaxShare, iShareUnits)													- iMaxShare max is 9999. iShareUnits 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB
 
-SetHubSlotRatio(nHubs, nSlots)
+SetHubSlotRatio(iHubs, iSlots)
 
 GetOpChat()																			- Return table with sNick, sDescription, sEmail, bEnabled.
 SetOpChat(bEnabled, sNewOpChatName, sNewDescription, sNewEmail)						- Max length of string is 64 chars !!! In nick is not allowed $|<>:?*"/\ and space. In Description and Email is not allowed $ and |. Return nil when failed, true when success.
@@ -143,16 +143,16 @@ RegMan.
 -------------------
 Save()									- Save registered users.
 
-GetRegsByProfile(nProfileNumber)		- Return table with all registered users with given profile as registered user tables.
+GetRegsByProfile(iProfileNumber)		- Return table with all registered users with given profile as registered user tables.
 GetNonOps()								- Return table with all registered users without operator status as registered user tables.
 GetOps()								- Return table with all registered users with operator status as registered user tables.
 GetReg(sNick)							- Return registered user with given nick as registered user table or nil when reg with this nick not exist.
 GetRegs()								- Return table with all registered users as registered user tables.
 
-AddReg(sNick, nProfileNumber)			- Chars $| and space not allowed in nick. Max nick length 64 chars. Hub will ask user for password and after password is received then user will be registered. Return nil when failed, true if success.
-AddReg(sNick, sPass, nProfileNumber)	- Chars $| and space not allowed in nick. Char | not allowed in password. Max nick/pass length 64 chars. Return nil when failed, true if success.
+AddReg(sNick, iProfileNumber)			- Chars $| and space not allowed in nick. Max nick length 64 chars. Hub will ask user for password and after password is received then user will be registered. Return nil when failed, true if success.
+AddReg(sNick, sPass, iProfileNumber)	- Chars $| and space not allowed in nick. Char | not allowed in password. Max nick/pass length 64 chars. Return nil when failed, true if success.
 DelReg(sNick)							- Return nil when failed, true if success.
-ChangeReg(sNick, sPass/nil, nProfileNumber)	- Return nil when failed, true if success. When you don't want to change password then use nil instead of string as second param.
+ChangeReg(sNick, sPass/nil, iProfileNumber)	- Return nil when failed, true if success. When you don't want to change password then use nil instead of string as second param.
 
 ClrRegBadPass(sNick)					- Clear advanced password protection bad password count for given nick. Return nil when failed, true if success.
 
@@ -201,12 +201,12 @@ Ban(tUser, sReason, sBy, bFull)								- Perm ban user. Return nil when failed, 
 BanIP(sIP, sReason, sBy, bFull)								- Perm ban given ip. Return nil when failed, true if success.
 BanNick(sNick, sReason, sBy)								- Perm ban given nick. Return nil when failed, true if success.
 
-TempBan(tUser, nTime, sReason, sBy, bFull)					- Temp ban user. nTime is in minutes (0 = default tempban time from settings) ! Return nil when failed, true if success.
-TempBanIP(sIP, nTime, sReason, sBy, bFull)					- Temp ban given ip. nTime is in minutes (0 = default tempban time from settings) ! Return nil when failed, true if success.
-TempBanNick(sNick, nTime, sReason, sBy)						- Temp ban given nick. nTime is in minutes (0 = default tempban time from settings) ! Return nil when failed, true if success.
+TempBan(tUser, iTime, sReason, sBy, bFull)					- Temp ban user. iTime is in minutes (0 = default tempban time from settings) ! Return nil when failed, true if success.
+TempBanIP(sIP, iTime, sReason, sBy, bFull)					- Temp ban given ip. iTime is in minutes (0 = default tempban time from settings) ! Return nil when failed, true if success.
+TempBanNick(sNick, iTime, sReason, sBy)						- Temp ban given nick. iTime is in minutes (0 = default tempban time from settings) ! Return nil when failed, true if success.
 
 RangeBan(sIPFrom, sIPTo, sReason, sBy, bFull)				- Range perm ban given range. Return nil when failed, true if success.
-RangeTempBan(sIPFrom, sIPTo, nTime, sReason, sBy, bFull)	- Range temp ban given range. nTime is in minutes (0 = default tempban time from settings) ! Return nil when failed, true if success.
+RangeTempBan(sIPFrom, sIPTo, iTime, sReason, sBy, bFull)	- Range temp ban given range. iTime is in minutes (0 = default tempban time from settings) ! Return nil when failed, true if success.
 
 
 ProfMan.
@@ -214,30 +214,30 @@ ProfMan.
 AddProfile(sProfileName)										- Add profile to profilemanager, return nProfileNumber if success or nil when profile already exist.
 RemoveProfile(sProfileName)										- Remove profile from profilemanager, return true if success or nil when profile not exist or is in use.
 
-MoveDown(nProfileNumber)										- Move profile down. Return nil when failed, true if success.
-MoveUp(nProfileNumber)											- Move profile up. Return nil when failed, true if success.
+MoveDown(iProfileNumber)										- Move profile down. Return nil when failed, true if success.
+MoveUp(iProfileNumber)											- Move profile up. Return nil when failed, true if success.
 
-GetProfile(sProfileName/nProfileNumber)							- Return profile as profile table or nil if not exist.
+GetProfile(sProfileName/iProfileNumber)							- Return profile as profile table or nil if not exist.
 GetProfiles()													- Return table with profiles as profile tables.
 
-GetProfilePermission(nProfileNumber, nPermissionId)				- Return true if permission is true, or nil.
-GetProfilePermissions(nProfileNumber)							- Return table with profile permissions.
+GetProfilePermission(iProfileNumber, iPermissionId)				- Return true if permission is true, or nil.
+GetProfilePermissions(iProfileNumber)							- Return table with profile permissions.
 
-SetProfileName(nProfileNumber, sProfileName)					- Change profile name, return true if success or nil if profile not exist.
-SetProfilePermission(nProfileNumber, nPermissionId, bBoolean)	- Change profile permission, return true if success or nil if profile not exist.
+SetProfileName(iProfileNumber, sProfileName)					- Change profile name, return true if success or nil if profile not exist.
+SetProfilePermission(iProfileNumber, iPermissionId, bBoolean)	- Change profile permission, return true if success or nil if profile not exist.
 Save()															- Save profiles.
 
 
 TmrMan.
 -------------------
-AddTimer(nTimerInterval)				- Add new timer for script. nTimerInterval is in ms. Return nil when failed or uTimerId when success.
-AddTimer(nTimerInterval, sFunctionName)	- Add new timer for script. nTimerInterval is in ms. sFunctionName is name of function called by this timer. Return nil when failed or uTimerId when success.
+AddTimer(iTimerInterval)				- Add new timer for script. nTimerInterval is in ms. Return nil when failed or uTimerId when success.
+AddTimer(iTimerInterval, sFunctionName)	- Add new timer for script. nTimerInterval is in ms. sFunctionName is name of function called by this timer. Return nil when failed or uTimerId when success.
 RemoveTimer(uTimerId)					- Remove timer with given ID from script.
 
 
 UDPDbg.
 -------------------
-Reg(sIp, nPort, bAllData)	- Register to receiving data to PtokaX UDP Debug receiver, bAllData false means to receive only data from this script. Return nil when failed or true when success.
+Reg(sIp, iPort, bAllData)	- Register to receiving data to PtokaX UDP Debug receiver, bAllData false means to receive only data from this script. Return nil when failed or true when success.
 Unreg()						- Remove from receiving data.
 Send(sData)					- Send data to udp debug. If script is registered then only to this reg, else to all. Return nil when failed or true when success.
 

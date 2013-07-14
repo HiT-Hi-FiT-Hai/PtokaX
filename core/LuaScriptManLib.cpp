@@ -66,7 +66,13 @@ static int GetScript(lua_State * L) {
 	lua_rawset(L, s);
 
 	lua_pushliteral(L, "iMemUsage");
+
+#if LUA_VERSION_NUM == 501
 	lua_pushnumber(L, lua_gc(cur->LUA, LUA_GCCOUNT, 0));
+#else
+	lua_pushunsigned(L, lua_gc(cur->LUA, LUA_GCCOUNT, 0));
+#endif
+
 	lua_rawset(L, s);
 
     return 1;
@@ -86,7 +92,11 @@ static int GetScripts(lua_State * L) {
 	int t = lua_gettop(L), n = 0;
 
 	for(uint8_t ui8i = 0; ui8i < ScriptManager->ui8ScriptCount; ui8i++) {
+#if LUA_VERSION_NUM == 501
 		lua_pushnumber(L, ++n);
+#else
+		lua_pushunsigned(L, ++n);
+#endif
 
 		lua_newtable(L);
 		int s = lua_gettop(L);
@@ -101,7 +111,12 @@ static int GetScripts(lua_State * L) {
 
 		lua_pushliteral(L, "iMemUsage");
 		ScriptManager->ScriptTable[ui8i]->LUA == NULL ? lua_pushnil(L) :
-            lua_pushnumber(L, lua_gc(ScriptManager->ScriptTable[ui8i]->LUA, LUA_GCCOUNT, 0));
+#if LUA_VERSION_NUM == 501
+			lua_pushnumber(L, lua_gc(ScriptManager->ScriptTable[ui8i]->LUA, LUA_GCCOUNT, 0));
+#else
+            lua_pushunsigned(L, lua_gc(ScriptManager->ScriptTable[ui8i]->LUA, LUA_GCCOUNT, 0));
+#endif
+
 		lua_rawset(L, s);
 
 		lua_rawset(L, t);

@@ -791,7 +791,7 @@ const char* LangStr[] = {
     "register user with specified profile. User is asked by hub for password, and after he enter password then is added to regs",
     "in command, hub replaced it with your real IP",
     "Your nick contains illegal whitespace character",
-    "This box is empty because password si hashed",
+    "This box is empty because password is hashed",
     "Save passwords for registered users as hashes",
 };
 //---------------------------------------------------------------------------

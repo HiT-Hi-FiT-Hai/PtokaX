@@ -514,7 +514,7 @@ void ScriptPushUser(lua_State * L, User * u, const bool &bFullTable/* = false*/)
 	lua_rawset(L, i);
 
 	lua_pushliteral(L, "iProfile");
-	lua_pushnumber(L, u->iProfile);
+	lua_pushinteger(L, u->iProfile);
 	lua_rawset(L, i);
 
     if(bFullTable == true) {
@@ -633,43 +633,83 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iShareSize");
+#if LUA_VERSION_NUM == 501
 	lua_pushnumber(L, (double)u->ui64SharedSize);
+#else
+	lua_pushunsigned(L, u->ui64SharedSize);
+#endif
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iHubs");
+#if LUA_VERSION_NUM == 501
 	lua_pushnumber(L, u->Hubs);
+#else
+	lua_pushunsigned(L, u->Hubs);
+#endif
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iNormalHubs");
+#if LUA_VERSION_NUM == 501
 	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushnumber(L, u->iNormalHubs);
+#else
+	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushunsigned(L, u->iNormalHubs);
+#endif
 	lua_rawset(L, iTable);
     
 	lua_pushliteral(L, "iRegHubs");
+#if LUA_VERSION_NUM == 501
 	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushnumber(L, u->iRegHubs);
+#else
+	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushunsigned(L, u->iRegHubs);
+#endif
 	lua_rawset(L, iTable);
     
 	lua_pushliteral(L, "iOpHubs");
+#if LUA_VERSION_NUM == 501
 	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushnumber(L, u->iOpHubs);
+#else
+	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushunsigned(L, u->iOpHubs);
+#endif
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iSlots");
+#if LUA_VERSION_NUM == 501
 	lua_pushnumber(L, u->Slots);
+#else
+	lua_pushunsigned(L, u->Slots);
+#endif
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iLlimit");
+#if LUA_VERSION_NUM == 501
 	lua_pushnumber(L, u->LLimit);
+#else
+	lua_pushunsigned(L, u->LLimit);
+#endif
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iDefloodWarns");
+#if LUA_VERSION_NUM == 501
 	lua_pushnumber(L, u->iDefloodWarnings);
+#else
+	lua_pushunsigned(L, u->iDefloodWarnings);
+#endif
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iMagicByte");
+#if LUA_VERSION_NUM == 501
 	lua_pushnumber(L, u->MagicByte);
+#else
+	lua_pushunsigned(L, u->MagicByte);
+#endif
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iLoginTime");
+#if LUA_VERSION_NUM == 501
 	lua_pushnumber(L, (double)u->LoginTime);
+#else
+	lua_pushunsigned(L, u->LoginTime);
+#endif
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sMac");
@@ -766,11 +806,19 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
     lua_rawset(L, iTable);
 
     lua_pushliteral(L, "iScriptediShareSizeShort");
-    lua_pushnumber(L, (double)u->ui64ChangedSharedSizeShort);
+#if LUA_VERSION_NUM == 501
+	lua_pushnumber(L, (double)u->ui64ChangedSharedSizeShort);
+#else
+    lua_pushunsigned(L, u->ui64ChangedSharedSizeShort);
+#endif
     lua_rawset(L, iTable);
 
     lua_pushliteral(L, "iScriptediShareSizeLong");
-    lua_pushnumber(L, (double)u->ui64ChangedSharedSizeLong);
+#if LUA_VERSION_NUM == 501
+	lua_pushnumber(L, (double)u->ui64ChangedSharedSizeLong);
+#else
+    lua_pushunsigned(L, u->ui64ChangedSharedSizeLong);
+#endif
     lua_rawset(L, iTable);
 
     lua_pushliteral(L, "tIPs");
@@ -778,12 +826,20 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 
     int t = lua_gettop(L);
 
+#if LUA_VERSION_NUM == 501
 	lua_pushnumber(L, 1);
+#else
+	lua_pushunsigned(L, 1);
+#endif
 	lua_pushlstring(L, u->sIP, u->ui8IpLen);
 	lua_rawset(L, t);
 
     if(u->sIPv4[0] != '\0') {
-        lua_pushnumber(L, 2);
+#if LUA_VERSION_NUM == 501
+		lua_pushnumber(L, 2);
+#else
+        lua_pushunsigned(L, 2);
+#endif
         lua_pushlstring(L, u->sIPv4, u->ui8IPv4Len);
         lua_rawset(L, t);
     }

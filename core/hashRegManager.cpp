@@ -29,7 +29,6 @@
 #include "ProfileManager.h"
 #include "ServerManager.h"
 #include "SettingManager.h"
-#include "UdpDebug.h"
 #include "User.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
@@ -231,6 +230,8 @@ hashRegMan::hashRegMan(void) {
     for(uint32_t ui32i = 0; ui32i < 65536; ui32i++) {
         table[ui32i] = NULL;
     }
+
+    ui8SaveCalls = 0;
 }
 //---------------------------------------------------------------------------
 
@@ -279,6 +280,8 @@ bool hashRegMan::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) 
         pRegisteredUsersDialog->AddReg(pNewUser);
     }
 #endif
+
+    Save(true);
 
     if(bServerRunning == false) {
         return true;
@@ -371,6 +374,8 @@ void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui
         pRegisteredUsersDialog->AddReg(pReg);
     }
 #endif
+
+    hashRegManager->Save(true);
 
     if(bServerRunning == false) {
         return;
@@ -472,6 +477,8 @@ void hashRegMan::Delete(RegUser * pReg, const bool &/*bFromGui = false*/) {
 #endif
 
     delete pReg;
+
+    Save(true);
 }
 //---------------------------------------------------------------------------
 
@@ -759,7 +766,19 @@ void hashRegMan::LoadXML() {
 }
 //---------------------------------------------------------------------------
 
-void hashRegMan::Save(void) const {
+void hashRegMan::Save(const bool &bSaveOnChange/* = false*/, const bool &bSaveOnTime/* = false*/) {
+    if(bSaveOnTime == true && ui8SaveCalls == 0) {
+        return;
+    }
+
+    ui8SaveCalls++;
+
+    if(bSaveOnChange == true && ui8SaveCalls < 100) {
+        return;
+    }
+
+    ui8SaveCalls = 0;
+
     PXBReader pxbRegs;
 
     // Open regs file

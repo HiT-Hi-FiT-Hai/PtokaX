@@ -84,7 +84,7 @@ bool SetBoolDef[] = {
 };
 
 int16_t SetShortDef[] = {
-    250, //MAX_USERS
+    500, //MAX_USERS
     0, //MIN_SHARE_LIMIT
     0, //MIN_SHARE_UNITS
     0, //MAX_SHARE_LIMIT

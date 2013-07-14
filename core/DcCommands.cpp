@@ -154,16 +154,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                             if(((curUser->ui32BoolBits & User::BIT_HAVE_SUPPORTS) == User::BIT_HAVE_SUPPORTS) == false) {
                                 Key(curUser, sData, iLen);
                             } else {
-#ifdef _WIN32
-                                if(curUser->uLogInOut->pBuffer != NULL) {
-                                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->uLogInOut->pBuffer) == 0) {
-                                        AppendDebugLog("%s - [MEM] Cannot deallocate curUser->uLogInOut->pBuffer in cDcCommands::PreProcessData\n", 0);
-                                    }
-                                }
-#else
-                                free(curUser->uLogInOut->pBuffer);
-#endif
-                                curUser->uLogInOut->pBuffer = NULL;
+                                UserFreeBuffer(curUser);
                             }
 
                             return;
@@ -220,9 +211,9 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                             if(ValidateUserNick(curUser, sData+13, (cTemp-sData)-13, false) == false) return;
                             
                             cTemp[0] = ' ';
-                            
+
                             // 1st time MyINFO, user is being added to nicklist
-                            if(MyINFO(curUser, sData, iLen) == false || curUser->uLogInOut->pBuffer != NULL || 
+                            if(MyINFO(curUser, sData, iLen) == false || (curUser->ui32BoolBits & User::BIT_WAITING_FOR_PASS) == User::BIT_WAITING_FOR_PASS ||
                                 ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true)
                                 return;
 
@@ -304,12 +295,10 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                                     return;
                                 }
         
-                                if(MyINFO(curUser, sData, iLen) == false || curUser->uLogInOut->pBuffer != NULL || 
+                                if(MyINFO(curUser, sData, iLen) == false || (curUser->ui32BoolBits & User::BIT_WAITING_FOR_PASS) == User::BIT_WAITING_FOR_PASS ||
                                     ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true)
                                     return;
                                 
-                                curUser->ui8State = User::STATE_ADDME;
-
                                 UserAddMeOrIPv4Check(curUser);
 
                                 return;
@@ -356,7 +345,7 @@ void cDcCommands::PreProcessData(User * curUser, char * sData, const bool &bChec
                         return;
                     }
         
-                    if(MyINFO(curUser, sData, iLen) == false || curUser->uLogInOut->pBuffer != NULL || 
+                    if(MyINFO(curUser, sData, iLen) == false || (curUser->ui32BoolBits & User::BIT_WAITING_FOR_PASS) == User::BIT_WAITING_FOR_PASS ||
                         ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true)
                         return;
                     
@@ -1414,15 +1403,7 @@ void cDcCommands::Key(User * curUser, char * sData, const uint32_t &iLen) {
         return;
     }
 
-#ifdef _WIN32
-	if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->uLogInOut->pBuffer) == 0) {
-		AppendDebugLog("%s - [MEM] Cannot deallocate curUser->uLogInOut->pBuffer in cDcCommands::Key\n", 0);
-    }
-#else
-	free(curUser->uLogInOut->pBuffer);
-#endif
-
-	curUser->uLogInOut->pBuffer = NULL;
+    UserFreeBuffer(curUser);
 
     sData[iLen-1] = '|'; // add back pipe
 
@@ -2079,7 +2060,9 @@ bool cDcCommands::MyINFO(User * curUser, char * sData, const uint32_t &iLen) {
 // $MyPass
 void cDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
     RegUser * pReg = hashRegManager->Find(curUser);
-    if(pReg == NULL) {
+    if(pReg != NULL && (curUser->ui32BoolBits & User::BIT_WAITING_FOR_PASS) == User::BIT_WAITING_FOR_PASS) {
+        curUser->ui32BoolBits &= ~User::BIT_WAITING_FOR_PASS;
+    } else {
         // no password required
         int imsgLen = sprintf(msg, "[SYS] $MyPass without request from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "cDcCommands::MyPass1") == true) {
@@ -3487,13 +3470,13 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &sz
             return false;
         }
     }
-    
+
     // PPK ... delete user ban if we have it
     if(curUser->uLogInOut->uBan != NULL) {
         delete curUser->uLogInOut->uBan;
         curUser->uLogInOut->uBan = NULL;
     }
-    
+
     // first check for user limit ! PPK ... allow hublist pinger to check hub any time ;)
     if(ProfileMan->IsAllowed(curUser, ProfileManager::ENTERFULLHUB) == false && ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == false) {
         // user is NOT allowed enter full hub, check for maxClients
@@ -3611,6 +3594,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &sz
                 } else {
                     // PPK ... addition for registered users, kill your own ghost >:-]
                     curUser->ui8State = User::STATE_VERSION_OR_MYPASS;
+                    curUser->ui32BoolBits |= User::BIT_WAITING_FOR_PASS;
                     UserAddPrcsdCmd(curUser, PrcsdUsrCmd::GETPASS, NULL, 0, NULL);
                     return true;
                 }
@@ -3663,6 +3647,7 @@ bool cDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &sz
 
         curUser->ui32BoolBits |= User::BIT_HASHED;
         curUser->ui8State = User::STATE_VERSION_OR_MYPASS;
+        curUser->ui32BoolBits |= User::BIT_WAITING_FOR_PASS;
         UserAddPrcsdCmd(curUser, PrcsdUsrCmd::GETPASS, NULL, 0, NULL);
         return true;
     }

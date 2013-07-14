@@ -26,6 +26,7 @@
 #include "eventqueue.h"
 #include "GlobalDataQueue.h"
 #include "hashBanManager.h"
+#include "hashRegManager.h"
 #include "hashUsrManager.h"
 #include "LanguageManager.h"
 #include "LuaScriptManager.h"
@@ -536,8 +537,9 @@ void theLoop::ReceiveLoop() {
     	iValue = acctime / 60;
         iMins = iValue;
 
-#ifdef _WIN32
         if(iMins == 0 || iMins == 15 || iMins == 30 || iMins == 45) {
+            hashRegManager->Save(false, true);
+#ifdef _WIN32
             if(HeapValidate(GetProcessHeap(), 0, 0) == 0) {
                 AppendDebugLog("%s - [ERR] Process memory heap corrupted\n", 0);
             }
@@ -562,8 +564,8 @@ void theLoop::ReceiveLoop() {
                 AppendDebugLog("%s - [ERR] Lua memory heap corrupted\n", 0);
             }
             HeapCompact(hLuaHeap, 0);
-        }
 #endif
+        }
 
         iLstUptmTck = ui64ActualTick;
     }
@@ -660,16 +662,7 @@ void theLoop::ReceiveLoop() {
                 }
 
                 // PPK ... is not more needed, free mem ;)
-                if(curUser->uLogInOut->pBuffer != NULL) {
-#ifdef _WIN32
-                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->uLogInOut->pBuffer) == 0) {
-						AppendDebugLog("%s - [MEM] Cannot deallocate curUser->uLogInOut->pBuffer in theLoop::ReceiveLoop\n", 0);
-                    }
-#else
-					free(curUser->uLogInOut->pBuffer);
-#endif
-                    curUser->uLogInOut->pBuffer = NULL;
-                }
+                UserFreeBuffer(curUser);
 
                 if((curUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6 && ((curUser->ui32BoolBits & User::SUPPORTBIT_IPV4) == User::SUPPORTBIT_IPV4) == false) {
                     in_addr ipv4addr;
@@ -1073,15 +1066,8 @@ void theLoop::SendLoop() {
 
                 if(curUser->uLogInOut->iUserConnectedLen != 0) {
                     UserPutInSendBuf(curUser, curUser->uLogInOut->pBuffer, curUser->uLogInOut->iUserConnectedLen);
-#ifdef _WIN32
-                    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->uLogInOut->pBuffer) == 0) {
-						AppendDebugLog("%s - [MEM] Cannot deallocate curUser->uLogInOut->pBuffer in theLoop::SendLoop\n", 0);
-                    }
-#else
-					free(curUser->uLogInOut->pBuffer);
-#endif
 
-                    curUser->uLogInOut->pBuffer = NULL;
+                    UserFreeBuffer(curUser);
                 }
 
                 // Login struct no more needed, free mem ! ;)

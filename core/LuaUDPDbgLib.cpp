@@ -69,7 +69,11 @@ static int Reg(lua_State * L) {
         return 1;
     }
 
-    uint16_t usPort = (uint16_t)lua_tonumber(L, 2);
+#if LUA_VERSION_NUM == 501
+	uint16_t usPort = (uint16_t)lua_tonumber(L, 2);
+#else
+    uint16_t usPort = (uint16_t)lua_tounsigned(L, 2);
+#endif
 
     bool bAllData = lua_toboolean(L, 3) == 0 ? false : true;
 

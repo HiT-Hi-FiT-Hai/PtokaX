@@ -5122,6 +5122,8 @@ bool HubCommands::DoCommand(User * curUser, char * sCommand, const size_t &szCmd
                     return true;
                 }
 
+                hashRegManager->Save(true);
+
 #ifdef _BUILD_GUI
                 if(pRegisteredUsersDialog != NULL) {
                     pRegisteredUsersDialog->RemoveReg(pReg);

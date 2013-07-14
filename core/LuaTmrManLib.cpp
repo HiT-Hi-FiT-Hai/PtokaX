@@ -97,7 +97,11 @@ static int AddTimer(lua_State * L) {
     }
 
 #ifdef _WIN32
+#if LUA_VERSION_NUM == 501
 	UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tonumber(L, 1), NULL);
+#else
+	UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tounsigned(L, 1), NULL);
+#endif
 
     if(timer == 0) {
         lua_settop(L, 0);
@@ -137,7 +141,11 @@ static int AddTimer(lua_State * L) {
 
     pNewtimer->TimerId = scrtimer;
 
-    uint32_t ui32Milis = (uint32_t)lua_tonumber(L, 1);// ms
+#if LUA_VERSION_NUM == 501
+	uint32_t ui32Milis = (uint32_t)lua_tonumber(L, 1);// ms
+#else
+    uint32_t ui32Milis = (uint32_t)lua_tounsigned(L, 1);// ms
+#endif
 
     uint32_t ui32Sec = ui32Milis / 1000;
 	ui32Milis = (ui32Milis-(ui32Sec*1000))*1000;

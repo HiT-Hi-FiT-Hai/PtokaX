@@ -59,7 +59,11 @@ static void PushReg(lua_State * L, RegUser * r) {
     lua_rawset(L, i);
             
     lua_pushliteral(L, "iProfile");
-    lua_pushnumber(L, r->ui16Profile);
+#if LUA_VERSION_NUM == 501
+	lua_pushnumber(L, r->ui16Profile);
+#else
+    lua_pushunsigned(L, r->ui16Profile);
+#endif
     lua_rawset(L, i);
 }
 //------------------------------------------------------------------------------
@@ -92,7 +96,11 @@ static int GetRegsByProfile(lua_State * L) {
         return 1;
     }
 
-    uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
+#if LUA_VERSION_NUM == 501
+	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
+#else
+    uint16_t iProfile = (uint16_t)lua_tounsigned(L, 1);
+#endif
 
     lua_settop(L, 0);
 
@@ -106,7 +114,11 @@ static int GetRegsByProfile(lua_State * L) {
         next = cur->next;
         
 		if(cur->ui16Profile == iProfile) {
-            lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+			lua_pushnumber(L, ++i);
+#else
+            lua_pushunsigned(L, ++i);
+#endif
             PushReg(L, cur);
             lua_rawset(L, t);
         }
@@ -138,7 +150,11 @@ static int GetRegsByOpStatus(lua_State * L, const bool &bOperator) {
 		next = curReg->next;
 
         if(ProfileMan->IsProfileAllowed(curReg->ui16Profile, ProfileManager::HASKEYICON) == bOperator) {
-            lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+			lua_pushnumber(L, ++i);
+#else
+            lua_pushunsigned(L, ++i);
+#endif
 			PushReg(L, curReg);
             lua_rawset(L, t);
         }
@@ -214,7 +230,11 @@ static int GetRegs(lua_State * L) {
         RegUser *curReg = next;
 		next = curReg->next;
 
-        lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+		lua_pushnumber(L, ++i);
+#else
+        lua_pushunsigned(L, ++i);
+#endif
 
 		PushReg(L, curReg); 
     
@@ -239,7 +259,12 @@ static int AddReg(lua_State * L) {
         size_t szNickLen, szPassLen;
         char *sNick = (char *)lua_tolstring(L, 1, &szNickLen);
         char *sPass = (char *)lua_tolstring(L, 2, &szPassLen);
-        uint16_t i16Profile = (uint16_t)lua_tonumber(L, 3);
+
+#if LUA_VERSION_NUM == 501
+		uint16_t i16Profile = (uint16_t)lua_tonumber(L, 3);
+#else
+        uint16_t i16Profile = (uint16_t)lua_tounsigned(L, 3);
+#endif
 
         if(i16Profile > ProfileMan->iProfileCount-1 || szNickLen == 0 || szNickLen > 64 || szPassLen == 0 || szPassLen > 64 || strpbrk(sNick, " $|") != NULL || strchr(sPass, '|') != NULL) {
             lua_settop(L, 0);
@@ -269,7 +294,12 @@ static int AddReg(lua_State * L) {
 
         size_t szNickLen;
         char *sNick = (char *)lua_tolstring(L, 1, &szNickLen);
-        uint16_t ui16Profile = (uint16_t)lua_tonumber(L, 2);
+
+#if LUA_VERSION_NUM == 501
+		uint16_t ui16Profile = (uint16_t)lua_tonumber(L, 2);
+#else
+        uint16_t ui16Profile = (uint16_t)lua_tounsigned(L, 2);
+#endif
 
         if(ui16Profile > ProfileMan->iProfileCount-1 || szNickLen == 0 || szNickLen > 64 || strpbrk(sNick, " $|") != NULL) {
             lua_settop(L, 0);
@@ -398,7 +428,11 @@ static int ChangeReg(lua_State * L) {
         return 1;
     }
 
+#if LUA_VERSION_NUM == 501
 	uint16_t i16Profile = (uint16_t)lua_tonumber(L, 3);
+#else
+	uint16_t i16Profile = (uint16_t)lua_tounsigned(L, 3);
+#endif
 
 	if(i16Profile > ProfileMan->iProfileCount-1 || szNickLen == 0 || szNickLen > 64 || strpbrk(sNick, " $|") != NULL) {
 		lua_settop(L, 0);

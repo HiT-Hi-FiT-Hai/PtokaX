@@ -330,7 +330,10 @@ bool RegisteredUserDialog::OnAccept() {
 
         return true;
     } else {
-        hashRegManager->ChangeReg(pRegToChange, sPassword[0] == '\0' ? NULL : sPassword, ui16Profile);
+        RegUser * pReg = pRegToChange;
+        pRegToChange = NULL;
+
+        hashRegManager->ChangeReg(pReg, sPassword[0] == '\0' ? NULL : sPassword, ui16Profile);
         return true;
     }
 }

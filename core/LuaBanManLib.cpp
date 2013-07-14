@@ -77,7 +77,11 @@ static void PushBan(lua_State * L, BanItem * b) {
     lua_rawset(L, i);
 
     lua_pushliteral(L, "iExpireTime");
-    ((b->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == false ? lua_pushnil(L) : lua_pushnumber(L, (double)b->tempbanexpire);
+#if LUA_VERSION_NUM == 501
+	((b->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == false ? lua_pushnil(L) : lua_pushnumber(L, (double)b->tempbanexpire);
+#else
+    ((b->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == false ? lua_pushnil(L) : lua_pushunsigned(L, b->tempbanexpire);
+#endif
     lua_rawset(L, i);
 
     lua_pushliteral(L, "bIpBan");
@@ -125,7 +129,11 @@ static void PushRangeBan(lua_State * L, RangeBanItem * rb) {
     lua_rawset(L, i);
 
     lua_pushliteral(L, "iExpireTime");
-    ((rb->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == false ? lua_pushnil(L) : lua_pushnumber(L, (double)rb->tempbanexpire);
+#if LUA_VERSION_NUM == 501
+	((rb->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == false ? lua_pushnil(L) : lua_pushnumber(L, (double)rb->tempbanexpire);
+#else
+    ((rb->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == false ? lua_pushnil(L) : lua_pushunsigned(L, rb->tempbanexpire);
+#endif
     lua_rawset(L, i);
 
     lua_pushliteral(L, "bFullIpBan");
@@ -174,7 +182,11 @@ static int GetBans(lua_State * L) {
 			continue;
         }
 
-        lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+		lua_pushnumber(L, ++i);
+#else
+        lua_pushunsigned(L, ++i);
+#endif
         PushBan(L, curBan);        
         lua_rawset(L, t);
     }
@@ -185,7 +197,11 @@ static int GetBans(lua_State * L) {
         BanItem *curBan = nextBan;
 		nextBan = curBan->next;
 
-        lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+		lua_pushnumber(L, ++i);
+#else
+        lua_pushunsigned(L, ++i);
+#endif
         PushBan(L, curBan);        
         lua_rawset(L, t);
     }
@@ -221,7 +237,11 @@ static int GetTempBans(lua_State * L) {
 			continue;
         }
 
-        lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+		lua_pushnumber(L, ++i);
+#else
+        lua_pushunsigned(L, ++i);
+#endif
         PushBan(L, curBan);        
         lua_rawset(L, t);
     }
@@ -247,7 +267,11 @@ static int GetPermBans(lua_State * L) {
         BanItem *curBan = nextBan;
 		nextBan = curBan->next;
 
-        lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+		lua_pushnumber(L, ++i);
+#else
+        lua_pushunsigned(L, ++i);
+#endif
         PushBan(L, curBan);        
         lua_rawset(L, t);
     }
@@ -289,14 +313,22 @@ static int GetBan(lua_State * L) {
         int t = lua_gettop(L), i = 0;
 
         if(Ban != NULL) {
-            lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+			lua_pushnumber(L, ++i);
+#else
+            lua_pushunsigned(L, ++i);
+#endif
             PushBan(L, Ban); 
             lua_rawset(L, t);
         }
 
 		Ban = hashBanManager->FindIP(ui128Hash, acc_time);
         if(Ban != NULL) {
-            lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+			lua_pushnumber(L, ++i);
+#else
+            lua_pushunsigned(L, ++i);
+#endif
             PushBan(L, Ban);        
             lua_rawset(L, t);
 
@@ -313,7 +345,11 @@ static int GetBan(lua_State * L) {
         			continue;
                 }
 
-                lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+				lua_pushnumber(L, ++i);
+#else
+                lua_pushunsigned(L, ++i);
+#endif
                 PushBan(L, curBan);        
                 lua_rawset(L, t);
             }
@@ -363,14 +399,22 @@ static int GetPermBan(lua_State * L) {
         int t = lua_gettop(L), i = 0;
 
         if(Ban != NULL) {
-            lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+			lua_pushnumber(L, ++i);
+#else
+            lua_pushunsigned(L, ++i);
+#endif
             PushBan(L, Ban); 
             lua_rawset(L, t);
         }
 
 		Ban = hashBanManager->FindPermIP(ui128Hash);
         if(Ban != NULL) {
-            lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+			lua_pushnumber(L, ++i);
+#else
+            lua_pushunsigned(L, ++i);
+#endif
             PushBan(L, Ban);        
             lua_rawset(L, t);
 
@@ -384,7 +428,11 @@ static int GetPermBan(lua_State * L) {
         			continue;
                 }
 
-                lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+				lua_pushnumber(L, ++i);
+#else
+                lua_pushunsigned(L, ++i);
+#endif
                 PushBan(L, curBan);        
                 lua_rawset(L, t);
             }
@@ -437,14 +485,22 @@ static int GetTempBan(lua_State * L) {
         int t = lua_gettop(L), i = 0;
 
         if(Ban != NULL) {
-            lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+			lua_pushnumber(L, ++i);
+#else
+            lua_pushunsigned(L, ++i);
+#endif
             PushBan(L, Ban); 
             lua_rawset(L, t);
         }
 
 		Ban = hashBanManager->FindTempIP(ui128Hash, acc_time);
         if(Ban != NULL) {
-            lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+			lua_pushnumber(L, ++i);
+#else
+            lua_pushunsigned(L, ++i);
+#endif
             PushBan(L, Ban);        
             lua_rawset(L, t);
 
@@ -462,7 +518,11 @@ static int GetTempBan(lua_State * L) {
             			continue;
                     }
 
-                    lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+					lua_pushnumber(L, ++i);
+#else
+                    lua_pushunsigned(L, ++i);
+#endif
                     PushBan(L, curBan);        
                     lua_rawset(L, t);
                 }
@@ -510,7 +570,11 @@ static int GetRangeBans(lua_State * L) {
 			continue;
         }
 
-        lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+		lua_pushnumber(L, ++i);
+#else
+        lua_pushunsigned(L, ++i);
+#endif
         PushRangeBan(L, curBan);
         lua_rawset(L, t);
     }
@@ -550,7 +614,11 @@ static int GetTempRangeBans(lua_State * L) {
 			continue;
         }
 
-        lua_pushnumber(L, ++i);
+#if LUA_VERSION_NUM == 501
+		lua_pushnumber(L, ++i);
+#else
+        lua_pushunsigned(L, ++i);
+#endif
         PushRangeBan(L, curBan);
         lua_rawset(L, t);
     }
@@ -579,8 +647,12 @@ static int GetPermRangeBans(lua_State * L) {
         if(((curBan->ui8Bits & hashBanMan::PERM) == hashBanMan::PERM) == false) {
             continue;
         }
-        
-        lua_pushnumber(L, ++i);
+
+#if LUA_VERSION_NUM == 501
+		lua_pushnumber(L, ++i);
+#else
+        lua_pushunsigned(L, ++i);
+#endif
         PushRangeBan(L, curBan);
         lua_rawset(L, t);
     }
@@ -1364,7 +1436,11 @@ static int TempBan(lua_State * L) {
         return 1;
     }
 
+#if LUA_VERSION_NUM == 501
 	uint32_t iMinutes = (uint32_t)lua_tonumber(L, 2);
+#else
+	uint32_t iMinutes = (uint32_t)lua_tounsigned(L, 2);
+#endif
 
 	size_t szReasonLen;
     char * sReason = (char *)lua_tolstring(L, 3, &szReasonLen);
@@ -1423,7 +1499,11 @@ static int TempBanIP(lua_State * L) {
         return 1;
     }
 
+#if LUA_VERSION_NUM == 501
 	uint32_t i32Minutes = (uint32_t)lua_tonumber(L, 2);
+#else
+	uint32_t i32Minutes = (uint32_t)lua_tounsigned(L, 2);
+#endif
 
     size_t szReasonLen;
     char * sReason = (char *)lua_tolstring(L, 3, &szReasonLen);
@@ -1477,7 +1557,11 @@ static int TempBanNick(lua_State * L) {
         return 1;
     }
 
+#if LUA_VERSION_NUM == 501
 	uint32_t i32Minutes = (uint32_t)lua_tonumber(L, 2);
+#else
+	uint32_t i32Minutes = (uint32_t)lua_tounsigned(L, 2);
+#endif
 
     size_t szReasonLen;
     char * sReason = (char *)lua_tolstring(L, 3, &szReasonLen);
@@ -1604,7 +1688,11 @@ static int RangeTempBan(lua_State * L) {
     size_t szToIpLen;
     char * sToIP = (char *)lua_tolstring(L, 2, &szToIpLen);
 
-    uint32_t i32Minutes = (uint32_t)lua_tonumber(L, 3);
+#if LUA_VERSION_NUM == 501
+	uint32_t i32Minutes = (uint32_t)lua_tonumber(L, 3);
+#else
+    uint32_t i32Minutes = (uint32_t)lua_tounsigned(L, 3);
+#endif
 
     size_t szReasonLen;
     char * sReason = (char *)lua_tolstring(L, 4, &szReasonLen);

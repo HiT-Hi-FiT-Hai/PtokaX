@@ -276,7 +276,11 @@ static void PushProfile(lua_State * L, const uint16_t &iProfile) {
     lua_rawset(L, i);
 
     lua_pushliteral(L, "iProfileNumber");
+#if LUA_VERSION_NUM == 501
 	lua_pushnumber(L, iProfile);
+#else
+	lua_pushunsigned(L, iProfile);
+#endif
     lua_rawset(L, i);
 
     lua_pushliteral(L, "tProfilePermissions");
@@ -317,7 +321,13 @@ static int AddProfile(lua_State * L) {
     }
 
     lua_settop(L, 0);
-    lua_pushnumber(L, idx);
+
+#if LUA_VERSION_NUM == 501
+	lua_pushnumber(L, idx);
+#else
+    lua_pushunsigned(L, idx);
+#endif
+
     return 1;
 }
 //------------------------------------------------------------------------------
@@ -375,7 +385,11 @@ static int MoveDown(lua_State * L) {
         return 1;
     }
 
+#if LUA_VERSION_NUM == 501
 	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
+#else
+	uint16_t iProfile = (uint16_t)lua_tounsigned(L, 1);
+#endif
     
     // if the requested index is out of bounds return nil
     if(iProfile >= ProfileMan->iProfileCount-1) {
@@ -408,7 +422,11 @@ static int MoveUp(lua_State * L) {
         return 1;
     }
 
+#if LUA_VERSION_NUM == 501
 	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
+#else
+	uint16_t iProfile = (uint16_t)lua_tounsigned(L, 1);
+#endif
     
     // if the requested index is out of bounds return nil
     if(iProfile == 0 || iProfile >= ProfileMan->iProfileCount) {
@@ -454,7 +472,11 @@ static int GetProfile(lua_State * L) {
         PushProfile(L, (uint16_t)idx);
         return 1;
     } else if(lua_type(L, 1) == LUA_TNUMBER) {
-    	uint16_t idx = (uint16_t)lua_tonumber(L, 1);
+#if LUA_VERSION_NUM == 501
+		uint16_t idx = (uint16_t)lua_tonumber(L, 1);
+#else
+    	uint16_t idx = (uint16_t)lua_tounsigned(L, 1);
+#endif
 
     	lua_settop(L, 0);
     
@@ -487,7 +509,12 @@ static int GetProfiles(lua_State * L) {
     int t = lua_gettop(L);
 
     for(uint16_t ui16i = 0; ui16i < ProfileMan->iProfileCount; ui16i++) {
-        lua_pushnumber(L, (ui16i+1));
+#if LUA_VERSION_NUM == 501
+		lua_pushnumber(L, (ui16i+1));
+#else
+        lua_pushunsigned(L, (ui16i+1));
+#endif
+
         PushProfile(L, ui16i);
         lua_rawset(L, t);
     }
@@ -512,8 +539,13 @@ static int GetProfilePermission(lua_State * L) {
         return 1;
     }
 
-    uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
-    size_t szId = (size_t)lua_tonumber(L, 2);
+#if LUA_VERSION_NUM == 501
+	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
+	size_t szId = (size_t)lua_tonumber(L, 2);
+#else
+    uint16_t iProfile = (uint16_t)lua_tounsigned(L, 1);
+    size_t szId = (size_t)lua_tounsigned(L, 2);
+#endif
     
     lua_settop(L, 0);
     
@@ -550,7 +582,11 @@ static int GetProfilePermissions(lua_State * L) {
         return 1;
     }
 
+#if LUA_VERSION_NUM == 501
 	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
+#else
+	uint16_t iProfile = (uint16_t)lua_tounsigned(L, 1);
+#endif
     
     // if the requested index is out of bounds return nil
     if(iProfile >= ProfileMan->iProfileCount) {
@@ -581,7 +617,11 @@ static int SetProfileName(lua_State * L) {
         return 1;
     }
 
-    uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
+#if LUA_VERSION_NUM == 501
+	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
+#else
+    uint16_t iProfile = (uint16_t)lua_tounsigned(L, 1);
+#endif
 
     if(iProfile >= ProfileMan->iProfileCount) {
         lua_settop(L, 0);
@@ -623,9 +663,13 @@ static int SetProfilePermission(lua_State * L) {
         return 1;
     }
 
-    uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
-
-    size_t szId = (size_t)lua_tonumber(L, 2);
+#if LUA_VERSION_NUM == 501
+	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
+	size_t szId = (size_t)lua_tonumber(L, 2);
+#else
+    uint16_t iProfile = (uint16_t)lua_tounsigned(L, 1);
+    size_t szId = (size_t)lua_tounsigned(L, 2);
+#endif
 
     bool bValue = lua_toboolean(L, 3) == 0 ? false : true;
     

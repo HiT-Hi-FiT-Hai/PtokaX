@@ -2001,7 +2001,21 @@ void UserSetBuffer(User * u, char * sKickMsg, size_t szLen/* = 0*/) {
         u->uLogInOut->pBuffer[508] = '.';
     }
 }
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void UserFreeBuffer(User * u) {
+    if(u->uLogInOut->pBuffer != NULL) {
+#ifdef _WIN32
+        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)u->uLogInOut->pBuffer) == 0) {
+            AppendDebugLog("%s - [MEM] Cannot deallocate u->uLogInOut->pBuffer in UserFreeBuffer\n", 0);
+        }
+#else
+        free(u->uLogInOut->pBuffer);
+#endif
+        u->uLogInOut->pBuffer = NULL;
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void UserClose(User * u, bool bNoQuit/* = false*/) {
     if(u->ui8State >= User::STATE_CLOSING) {
