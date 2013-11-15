@@ -43,7 +43,7 @@
     #include "../gui.win/RegisteredUsersDialog.h"
 #endif
 //---------------------------------------------------------------------------
-hashRegMan *hashRegManager = NULL;
+clsRegManager * clsRegManager::mPtr = NULL;
 //---------------------------------------------------------------------------
 
 RegUser::RegUser() {
@@ -68,9 +68,9 @@ RegUser::RegUser() {
 }
 //---------------------------------------------------------------------------
 
-RegUser::~RegUser(void) {
+RegUser::~RegUser() {
 #ifdef _WIN32
-    if(sNick != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
+    if(sNick != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
 		AppendDebugLog("%s - [MEM] Cannot deallocate sNick in RegUser::~RegUser\n", 0);
     }
 #else
@@ -79,7 +79,7 @@ RegUser::~RegUser(void) {
 
     if(bPassHash == true) {
 #ifdef _WIN32
-        if(ui8PassHash != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ui8PassHash) == 0) {
+        if(ui8PassHash != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ui8PassHash) == 0) {
 		  AppendDebugLog("%s - [MEM] Cannot deallocate ui8PassHash in RegUser::~RegUser\n", 0);
         }
 #else
@@ -87,7 +87,7 @@ RegUser::~RegUser(void) {
 #endif
     } else {
 #ifdef _WIN32
-        if(sPass != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPass) == 0) {
+        if(sPass != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPass) == 0) {
 		  AppendDebugLog("%s - [MEM] Cannot deallocate sPass in RegUser::~RegUser\n", 0);
         }
 #else
@@ -107,7 +107,7 @@ RegUser * RegUser::CreateReg(char * sRegNick, size_t szRegNickLen, char * sRegPa
     }
 
 #ifdef _WIN32
-    pReg->sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szRegNickLen+1);
+    pReg->sNick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szRegNickLen+1);
 #else
 	pReg->sNick = (char *)malloc(szRegNickLen+1);
 #endif
@@ -122,7 +122,7 @@ RegUser * RegUser::CreateReg(char * sRegNick, size_t szRegNickLen, char * sRegPa
 
     if(ui8RegPassHash != NULL) {
 #ifdef _WIN32
-        pReg->ui8PassHash = (uint8_t *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, 64);
+        pReg->ui8PassHash = (uint8_t *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, 64);
 #else
         pReg->ui8PassHash = (uint8_t *)malloc(64);
 #endif
@@ -136,7 +136,7 @@ RegUser * RegUser::CreateReg(char * sRegNick, size_t szRegNickLen, char * sRegPa
         pReg->bPassHash = true;
     } else {
 #ifdef _WIN32
-        pReg->sPass = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szRegPassLen+1);
+        pReg->sPass = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szRegPassLen+1);
 #else
         pReg->sPass = (char *)malloc(szRegPassLen+1);
 #endif
@@ -158,11 +158,11 @@ RegUser * RegUser::CreateReg(char * sRegNick, size_t szRegNickLen, char * sRegPa
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 bool RegUser::UpdatePassword(char * sNewPass, size_t &szNewLen) {
-    if(SettingManager->bBools[SETBOOL_HASH_PASSWORDS] == false) {
+    if(clsSettingManager::mPtr->bBools[SETBOOL_HASH_PASSWORDS] == false) {
         if(bPassHash == true) {
             void * sOldBuf = ui8PassHash;
 #ifdef _WIN32
-            sPass = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldBuf, szNewLen+1);
+            sPass = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldBuf, szNewLen+1);
 #else
             sPass = (char *)realloc(sOldBuf, szNewLen+1);
 #endif
@@ -180,7 +180,7 @@ bool RegUser::UpdatePassword(char * sNewPass, size_t &szNewLen) {
         } else if(strcmp(sPass, sNewPass) == 0) {
             char * sOldPass = sPass;
 #ifdef _WIN32
-            sPass = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldPass, szNewLen+1);
+            sPass = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldPass, szNewLen+1);
 #else
             sPass = (char *)realloc(sOldPass, szNewLen+1);
 #endif
@@ -200,7 +200,7 @@ bool RegUser::UpdatePassword(char * sNewPass, size_t &szNewLen) {
         } else {
             char * sOldPass = sPass;
 #ifdef _WIN32
-            ui8PassHash = (uint8_t *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldPass, 64);
+            ui8PassHash = (uint8_t *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldPass, 64);
 #else
             ui8PassHash = (uint8_t *)realloc(sOldPass, 64);
 #endif
@@ -224,7 +224,7 @@ bool RegUser::UpdatePassword(char * sNewPass, size_t &szNewLen) {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-hashRegMan::hashRegMan(void) {
+clsRegManager::clsRegManager(void) {
     RegListS = RegListE = NULL;
 
     for(uint32_t ui32i = 0; ui32i < 65536; ui32i++) {
@@ -235,7 +235,7 @@ hashRegMan::hashRegMan(void) {
 }
 //---------------------------------------------------------------------------
 
-hashRegMan::~hashRegMan(void) {
+clsRegManager::~clsRegManager(void) {
     RegUser *next = RegListS;
         
     while(next != NULL) {
@@ -246,14 +246,14 @@ hashRegMan::~hashRegMan(void) {
 }
 //---------------------------------------------------------------------------
 
-bool hashRegMan::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) {
+bool clsRegManager::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) {
     if(Find(sNick, strlen(sNick)) != NULL) {
         return false;
     }
 
     RegUser * pNewUser = NULL;
 
-    if(SettingManager->bBools[SETBOOL_HASH_PASSWORDS] == true) {
+    if(clsSettingManager::mPtr->bBools[SETBOOL_HASH_PASSWORDS] == true) {
         uint8_t ui8Hash[64];
 
         size_t szPassLen = strlen(sPasswd);
@@ -268,7 +268,7 @@ bool hashRegMan::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) 
     }
 
     if(pNewUser == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in hashRegMan::AddNew\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in clsRegManager::AddNew\n", 0);
  
         return false;
     }
@@ -276,49 +276,49 @@ bool hashRegMan::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) 
 	Add(pNewUser);
 
 #ifdef _BUILD_GUI
-    if(pRegisteredUsersDialog != NULL) {
-        pRegisteredUsersDialog->AddReg(pNewUser);
+    if(clsRegisteredUsersDialog::mPtr != NULL) {
+        clsRegisteredUsersDialog::mPtr->AddReg(pNewUser);
     }
 #endif
 
     Save(true);
 
-    if(bServerRunning == false) {
+    if(clsServerManager::bServerRunning == false) {
         return true;
     }
 
-	User * AddedUser = hashManager->FindUser(pNewUser->sNick, strlen(pNewUser->sNick));
+	User * AddedUser = clsHashManager::mPtr->FindUser(pNewUser->sNick, strlen(pNewUser->sNick));
 
     if(AddedUser != NULL) {
-        bool bAllowedOpChat = ProfileMan->IsAllowed(AddedUser, ProfileManager::ALLOWEDOPCHAT);
+        bool bAllowedOpChat = clsProfileManager::mPtr->IsAllowed(AddedUser, clsProfileManager::ALLOWEDOPCHAT);
         AddedUser->iProfile = iProfile;
 
         if(((AddedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
-            if(ProfileMan->IsAllowed(AddedUser, ProfileManager::HASKEYICON) == true) {
+            if(clsProfileManager::mPtr->IsAllowed(AddedUser, clsProfileManager::HASKEYICON) == true) {
                 AddedUser->ui32BoolBits |= User::BIT_OPERATOR;
             } else {
                 AddedUser->ui32BoolBits &= ~User::BIT_OPERATOR;
             }
 
             if(((AddedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
-				colUsers->Add2OpList(AddedUser);
-                g_GlobalDataQueue->OpListStore(AddedUser->sNick);
+				clsUsers::mPtr->Add2OpList(AddedUser);
+                clsGlobalDataQueue::mPtr->OpListStore(AddedUser->sNick);
 
-                if(bAllowedOpChat != ProfileMan->IsAllowed(AddedUser, ProfileManager::ALLOWEDOPCHAT)) {
-					if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true &&
-                        (SettingManager->bBools[SETBOOL_REG_BOT] == false || SettingManager->bBotsSameNick == false)) {
+                if(bAllowedOpChat != clsProfileManager::mPtr->IsAllowed(AddedUser, clsProfileManager::ALLOWEDOPCHAT)) {
+					if(clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] == true &&
+                        (clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] == false || clsSettingManager::mPtr->bBotsSameNick == false)) {
                         if(((AddedUser->ui32SupportBits & User::SUPPORTBIT_NOHELLO) == User::SUPPORTBIT_NOHELLO) == false) {
-                            UserSendCharDelayed(AddedUser, SettingManager->sPreTexts[SetMan::SETPRETXT_OP_CHAT_HELLO],
-                                SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_OP_CHAT_HELLO]);
+                            AddedUser->SendCharDelayed(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_OP_CHAT_HELLO],
+                                clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_OP_CHAT_HELLO]);
                         }
 
-                        UserSendCharDelayed(AddedUser, SettingManager->sPreTexts[SetMan::SETPRETXT_OP_CHAT_MYINFO],
-                            SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_OP_CHAT_MYINFO]);
+                        AddedUser->SendCharDelayed(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_OP_CHAT_MYINFO],
+                            clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_OP_CHAT_MYINFO]);
 
 						char msg[128];
-						int imsgLen = sprintf(msg, "$OpList %s$$|", SettingManager->sTexts[SETTXT_OP_CHAT_NICK]);
-                        if(CheckSprintf(imsgLen, 128, "hashRegMan::AddNew") == true) {
-                            UserSendCharDelayed(AddedUser, msg, imsgLen);
+						int imsgLen = sprintf(msg, "$OpList %s$$|", clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]);
+                        if(CheckSprintf(imsgLen, 128, "clsRegManager::AddNew") == true) {
+                            AddedUser->SendCharDelayed(msg, imsgLen);
                         }
                     }
                 }
@@ -330,7 +330,7 @@ bool hashRegMan::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile) 
 }
 //---------------------------------------------------------------------------
 
-void hashRegMan::Add(RegUser * Reg) {
+void clsRegManager::Add(RegUser * Reg) {
 	Add2Table(Reg);
     
     if(RegListE == NULL) {
@@ -346,7 +346,7 @@ void hashRegMan::Add(RegUser * Reg) {
 }
 //---------------------------------------------------------------------------
 
-void hashRegMan::Add2Table(RegUser * Reg) {
+void clsRegManager::Add2Table(RegUser * Reg) {
     uint16_t ui16dx = 0;
     memcpy(&ui16dx, &Reg->ui32Hash, sizeof(uint16_t));
 
@@ -359,7 +359,7 @@ void hashRegMan::Add2Table(RegUser * Reg) {
 }
 //---------------------------------------------------------------------------
 
-void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui16NewProfile) {
+void clsRegManager::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui16NewProfile) {
     if(sNewPasswd != NULL) {
         size_t szPassLen = strlen(sNewPasswd);
 
@@ -369,60 +369,60 @@ void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui
     pReg->ui16Profile = ui16NewProfile;
 
 #ifdef _BUILD_GUI
-    if(pRegisteredUsersDialog != NULL) {
-        pRegisteredUsersDialog->RemoveReg(pReg);
-        pRegisteredUsersDialog->AddReg(pReg);
+    if(clsRegisteredUsersDialog::mPtr != NULL) {
+        clsRegisteredUsersDialog::mPtr->RemoveReg(pReg);
+        clsRegisteredUsersDialog::mPtr->AddReg(pReg);
     }
 #endif
 
-    hashRegManager->Save(true);
+    clsRegManager::mPtr->Save(true);
 
-    if(bServerRunning == false) {
+    if(clsServerManager::bServerRunning == false) {
         return;
     }
 
-    User *ChangedUser = hashManager->FindUser(pReg->sNick, strlen(pReg->sNick));
+    User *ChangedUser = clsHashManager::mPtr->FindUser(pReg->sNick, strlen(pReg->sNick));
     if(ChangedUser != NULL && ChangedUser->iProfile != (int32_t)ui16NewProfile) {
-        bool bAllowedOpChat = ProfileMan->IsAllowed(ChangedUser, ProfileManager::ALLOWEDOPCHAT);
+        bool bAllowedOpChat = clsProfileManager::mPtr->IsAllowed(ChangedUser, clsProfileManager::ALLOWEDOPCHAT);
 
         ChangedUser->iProfile = (int32_t)ui16NewProfile;
 
         if(((ChangedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) !=
-            ProfileMan->IsAllowed(ChangedUser, ProfileManager::HASKEYICON)) {
-            if(ProfileMan->IsAllowed(ChangedUser, ProfileManager::HASKEYICON) == true) {
+            clsProfileManager::mPtr->IsAllowed(ChangedUser, clsProfileManager::HASKEYICON)) {
+            if(clsProfileManager::mPtr->IsAllowed(ChangedUser, clsProfileManager::HASKEYICON) == true) {
                 ChangedUser->ui32BoolBits |= User::BIT_OPERATOR;
-                colUsers->Add2OpList(ChangedUser);
-                g_GlobalDataQueue->OpListStore(ChangedUser->sNick);
+                clsUsers::mPtr->Add2OpList(ChangedUser);
+                clsGlobalDataQueue::mPtr->OpListStore(ChangedUser->sNick);
             } else {
                 ChangedUser->ui32BoolBits &= ~User::BIT_OPERATOR;
-                colUsers->DelFromOpList(ChangedUser->sNick);
+                clsUsers::mPtr->DelFromOpList(ChangedUser->sNick);
             }
         }
 
-        if(bAllowedOpChat != ProfileMan->IsAllowed(ChangedUser, ProfileManager::ALLOWEDOPCHAT)) {
-            if(ProfileMan->IsAllowed(ChangedUser, ProfileManager::ALLOWEDOPCHAT) == true) {
-                if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true &&
-                    (SettingManager->bBools[SETBOOL_REG_BOT] == false || SettingManager->bBotsSameNick == false)) {
+        if(bAllowedOpChat != clsProfileManager::mPtr->IsAllowed(ChangedUser, clsProfileManager::ALLOWEDOPCHAT)) {
+            if(clsProfileManager::mPtr->IsAllowed(ChangedUser, clsProfileManager::ALLOWEDOPCHAT) == true) {
+                if(clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] == true &&
+                    (clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] == false || clsSettingManager::mPtr->bBotsSameNick == false)) {
                     if(((ChangedUser->ui32SupportBits & User::SUPPORTBIT_NOHELLO) == User::SUPPORTBIT_NOHELLO) == false) {
-                        UserSendCharDelayed(ChangedUser, SettingManager->sPreTexts[SetMan::SETPRETXT_OP_CHAT_HELLO],
-                        SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_OP_CHAT_HELLO]);
+                        ChangedUser->SendCharDelayed(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_OP_CHAT_HELLO],
+                        clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_OP_CHAT_HELLO]);
                     }
 
-                    UserSendCharDelayed(ChangedUser, SettingManager->sPreTexts[SetMan::SETPRETXT_OP_CHAT_MYINFO],
-                        SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_OP_CHAT_MYINFO]);
+                    ChangedUser->SendCharDelayed(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_OP_CHAT_MYINFO],
+                        clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_OP_CHAT_MYINFO]);
 
                     char msg[128];
-                    int imsgLen = sprintf(msg, "$OpList %s$$|", SettingManager->sTexts[SETTXT_OP_CHAT_NICK]);
-                    if(CheckSprintf(imsgLen, 128, "hashRegMan::ChangeReg1") == true) {
-                        UserSendCharDelayed(ChangedUser, msg, imsgLen);
+                    int imsgLen = sprintf(msg, "$OpList %s$$|", clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]);
+                    if(CheckSprintf(imsgLen, 128, "clsRegManager::ChangeReg1") == true) {
+                        ChangedUser->SendCharDelayed(msg, imsgLen);
                     }
                 }
             } else {
-                if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true && (SettingManager->bBools[SETBOOL_REG_BOT] == false || SettingManager->bBotsSameNick == false)) {
+                if(clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] == true && (clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] == false || clsSettingManager::mPtr->bBotsSameNick == false)) {
                     char msg[128];
-                    int imsgLen = sprintf(msg, "$Quit %s|", SettingManager->sTexts[SETTXT_OP_CHAT_NICK]);
-                    if(CheckSprintf(imsgLen, 128, "hashRegMan::ChangeReg2") == true) {
-                        UserSendCharDelayed(ChangedUser, msg, imsgLen);
+                    int imsgLen = sprintf(msg, "$Quit %s|", clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]);
+                    if(CheckSprintf(imsgLen, 128, "clsRegManager::ChangeReg2") == true) {
+                        ChangedUser->SendCharDelayed(msg, imsgLen);
                     }
                 }
             }
@@ -430,32 +430,32 @@ void hashRegMan::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t &ui
     }
 
 #ifdef _BUILD_GUI
-    if(pRegisteredUserDialog != NULL) {
-        pRegisteredUserDialog->RegChanged(pReg);
+    if(clsRegisteredUserDialog::mPtr != NULL) {
+        clsRegisteredUserDialog::mPtr->RegChanged(pReg);
     }
 #endif
 }
 //---------------------------------------------------------------------------
 
 #ifdef _BUILD_GUI
-void hashRegMan::Delete(RegUser * pReg, const bool &bFromGui/* = false*/) {
+void clsRegManager::Delete(RegUser * pReg, const bool &bFromGui/* = false*/) {
 #else
-void hashRegMan::Delete(RegUser * pReg, const bool &/*bFromGui = false*/) {
+void clsRegManager::Delete(RegUser * pReg, const bool &/*bFromGui = false*/) {
 #endif
-	if(bServerRunning == true) {
-        User * pRemovedUser = hashManager->FindUser(pReg->sNick, strlen(pReg->sNick));
+	if(clsServerManager::bServerRunning == true) {
+        User * pRemovedUser = clsHashManager::mPtr->FindUser(pReg->sNick, strlen(pReg->sNick));
 
         if(pRemovedUser != NULL) {
             pRemovedUser->iProfile = -1;
             if(((pRemovedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
-                colUsers->DelFromOpList(pRemovedUser->sNick);
+                clsUsers::mPtr->DelFromOpList(pRemovedUser->sNick);
                 pRemovedUser->ui32BoolBits &= ~User::BIT_OPERATOR;
 
-                if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true && (SettingManager->bBools[SETBOOL_REG_BOT] == false || SettingManager->bBotsSameNick == false)) {
+                if(clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] == true && (clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] == false || clsSettingManager::mPtr->bBotsSameNick == false)) {
                     char msg[128];
-                    int imsgLen = sprintf(msg, "$Quit %s|", SettingManager->sTexts[SETTXT_OP_CHAT_NICK]);
-                    if(CheckSprintf(imsgLen, 128, "hashRegMan::Delete") == true) {
-                        UserSendCharDelayed(pRemovedUser, msg, imsgLen);
+                    int imsgLen = sprintf(msg, "$Quit %s|", clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]);
+                    if(CheckSprintf(imsgLen, 128, "clsRegManager::Delete") == true) {
+                        pRemovedUser->SendCharDelayed(msg, imsgLen);
                     }
                 }
             }
@@ -463,16 +463,16 @@ void hashRegMan::Delete(RegUser * pReg, const bool &/*bFromGui = false*/) {
     }
 
 #ifdef _BUILD_GUI
-    if(bFromGui == false && pRegisteredUsersDialog != NULL) {
-        pRegisteredUsersDialog->RemoveReg(pReg);
+    if(bFromGui == false && clsRegisteredUsersDialog::mPtr != NULL) {
+        clsRegisteredUsersDialog::mPtr->RemoveReg(pReg);
     }
 #endif
 
 	Rem(pReg);
 
 #ifdef _BUILD_GUI
-    if(pRegisteredUserDialog != NULL) {
-        pRegisteredUserDialog->RegDeleted(pReg);
+    if(clsRegisteredUserDialog::mPtr != NULL) {
+        clsRegisteredUserDialog::mPtr->RegDeleted(pReg);
     }
 #endif
 
@@ -482,7 +482,7 @@ void hashRegMan::Delete(RegUser * pReg, const bool &/*bFromGui = false*/) {
 }
 //---------------------------------------------------------------------------
 
-void hashRegMan::Rem(RegUser * Reg) {
+void clsRegManager::Rem(RegUser * Reg) {
 	RemFromTable(Reg);
     
     RegUser *prev, *next;
@@ -506,7 +506,7 @@ void hashRegMan::Rem(RegUser * Reg) {
 }
 //---------------------------------------------------------------------------
 
-void hashRegMan::RemFromTable(RegUser * Reg) {
+void clsRegManager::RemFromTable(RegUser * Reg) {
     if(Reg->hashtableprev == NULL) {
         uint16_t ui16dx = 0;
         memcpy(&ui16dx, &Reg->ui32Hash, sizeof(uint16_t));
@@ -529,7 +529,7 @@ void hashRegMan::RemFromTable(RegUser * Reg) {
 }
 //---------------------------------------------------------------------------
 
-RegUser* hashRegMan::Find(char * sNick, const size_t &szNickLen) {
+RegUser* clsRegManager::Find(char * sNick, const size_t &szNickLen) {
     uint32_t ui32Hash = HashNick(sNick, szNickLen);
 
     uint16_t ui16dx = 0;
@@ -550,7 +550,7 @@ RegUser* hashRegMan::Find(char * sNick, const size_t &szNickLen) {
 }
 //---------------------------------------------------------------------------
 
-RegUser* hashRegMan::Find(User * u) {
+RegUser* clsRegManager::Find(User * u) {
     uint16_t ui16dx = 0;
     memcpy(&ui16dx, &u->ui32NickHash, sizeof(uint16_t));
 
@@ -569,7 +569,7 @@ RegUser* hashRegMan::Find(User * u) {
 }
 //---------------------------------------------------------------------------
 
-RegUser* hashRegMan::Find(uint32_t ui32Hash, char * sNick) {
+RegUser* clsRegManager::Find(uint32_t ui32Hash, char * sNick) {
     uint16_t ui16dx = 0;
     memcpy(&ui16dx, &ui32Hash, sizeof(uint16_t));
 
@@ -588,25 +588,25 @@ RegUser* hashRegMan::Find(uint32_t ui32Hash, char * sNick) {
 }
 //---------------------------------------------------------------------------
 
-void hashRegMan::Load(void) {
+void clsRegManager::Load(void) {
 #ifdef _WIN32
-    if(FileExist((PATH + "\\cfg\\RegisteredUsers.pxb").c_str()) == false) {
+    if(FileExist((clsServerManager::sPath + "\\cfg\\RegisteredUsers.pxb").c_str()) == false) {
 #else
-    if(FileExist((PATH + "/cfg/RegisteredUsers.pxb").c_str()) == false) {
+    if(FileExist((clsServerManager::sPath + "/cfg/RegisteredUsers.pxb").c_str()) == false) {
 #endif
         LoadXML();
         return;
     }
 
-    uint16_t iProfilesCount = (uint16_t)(ProfileMan->iProfileCount-1);
+    uint16_t iProfilesCount = (uint16_t)(clsProfileManager::mPtr->iProfileCount-1);
 
     PXBReader pxbRegs;
 
     // Open regs file
 #ifdef _WIN32
-    if(pxbRegs.OpenFileRead((PATH + "\\cfg\\RegisteredUsers.pxb").c_str()) == false) {
+    if(pxbRegs.OpenFileRead((clsServerManager::sPath + "\\cfg\\RegisteredUsers.pxb").c_str()) == false) {
 #else
-    if(pxbRegs.OpenFileRead((PATH + "/cfg/RegisteredUsers.pxb").c_str()) == false) {
+    if(pxbRegs.OpenFileRead((clsServerManager::sPath + "/cfg/RegisteredUsers.pxb").c_str()) == false) {
 #endif
         return;
     }
@@ -650,7 +650,7 @@ void hashRegMan::Load(void) {
             RegUser * pNewUser = NULL;
 
             if(pxbRegs.ui16ItemLengths[3] != 0) {
-                if(SettingManager->bBools[SETBOOL_HASH_PASSWORDS] == true) {
+                if(clsSettingManager::mPtr->bBools[SETBOOL_HASH_PASSWORDS] == true) {
                     uint8_t ui8Hash[64];
 
                     size_t szPassLen = (size_t)pxbRegs.ui16ItemLengths[3];
@@ -668,7 +668,7 @@ void hashRegMan::Load(void) {
             }
 
             if(pNewUser == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in hashRegMan::Load\n", 0);
+				AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in clsRegManager::Load\n", 0);
 
                 exit(EXIT_FAILURE);
             }
@@ -681,13 +681,13 @@ void hashRegMan::Load(void) {
 }
 //---------------------------------------------------------------------------
 
-void hashRegMan::LoadXML() {
-    uint16_t iProfilesCount = (uint16_t)(ProfileMan->iProfileCount-1);
+void clsRegManager::LoadXML() {
+    uint16_t iProfilesCount = (uint16_t)(clsProfileManager::mPtr->iProfileCount-1);
 
 #ifdef _WIN32
-    TiXmlDocument doc((PATH+"\\cfg\\RegisteredUsers.xml").c_str());
+    TiXmlDocument doc((clsServerManager::sPath+"\\cfg\\RegisteredUsers.xml").c_str());
 #else
-	TiXmlDocument doc((PATH+"/cfg/RegisteredUsers.xml").c_str());
+	TiXmlDocument doc((clsServerManager::sPath+"/cfg/RegisteredUsers.xml").c_str());
 #endif
 
     if(doc.LoadFile()) {
@@ -722,12 +722,12 @@ void hashRegMan::LoadXML() {
 
 				if(iProfile > iProfilesCount) {
                     char msg[1024];
-                    int imsgLen = sprintf(msg, "%s %s %s! %s %s.", LanguageManager->sTexts[LAN_USER], nick, LanguageManager->sTexts[LAN_HAVE_NOT_EXIST_PROFILE],
-                        LanguageManager->sTexts[LAN_CHANGED_PROFILE_TO], ProfileMan->ProfilesTable[iProfilesCount]->sName);
-					CheckSprintf(imsgLen, 1024, "hashRegMan::Load");
+                    int imsgLen = sprintf(msg, "%s %s %s! %s %s.", clsLanguageManager::mPtr->sTexts[LAN_USER], nick, clsLanguageManager::mPtr->sTexts[LAN_HAVE_NOT_EXIST_PROFILE],
+                        clsLanguageManager::mPtr->sTexts[LAN_CHANGED_PROFILE_TO], clsProfileManager::mPtr->ProfilesTable[iProfilesCount]->sName);
+					CheckSprintf(imsgLen, 1024, "clsRegManager::Load");
 
 #ifdef _BUILD_GUI
-					::MessageBox(NULL, msg, sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+					::MessageBox(NULL, msg, clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 #else
 					AppendLog(msg);
 #endif
@@ -739,19 +739,19 @@ void hashRegMan::LoadXML() {
                 if(Find((char*)nick, strlen(nick)) == NULL) {
                     RegUser * pNewUser = RegUser::CreateReg(nick, strlen(nick), pass, strlen(pass), NULL, iProfile);
                     if(pNewUser == NULL) {
-						AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in hashRegMan::LoadXML\n", 0);
+						AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in clsRegManager::LoadXML\n", 0);
 
                     	exit(EXIT_FAILURE);
                     }
 					Add(pNewUser);
                 } else {
                     char msg[1024];
-                    int imsgLen = sprintf(msg, "%s %s %s! %s.", LanguageManager->sTexts[LAN_USER], nick, LanguageManager->sTexts[LAN_IS_ALREADY_IN_REGS], 
-                        LanguageManager->sTexts[LAN_USER_DELETED]);
-					CheckSprintf(imsgLen, 1024, "hashRegMan::Load1");
+                    int imsgLen = sprintf(msg, "%s %s %s! %s.", clsLanguageManager::mPtr->sTexts[LAN_USER], nick, clsLanguageManager::mPtr->sTexts[LAN_IS_ALREADY_IN_REGS], 
+                        clsLanguageManager::mPtr->sTexts[LAN_USER_DELETED]);
+					CheckSprintf(imsgLen, 1024, "clsRegManager::Load1");
 
 #ifdef _BUILD_GUI
-					::MessageBox(NULL, msg, sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+					::MessageBox(NULL, msg, clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 #else
 					AppendLog(msg);
 #endif
@@ -766,7 +766,7 @@ void hashRegMan::LoadXML() {
 }
 //---------------------------------------------------------------------------
 
-void hashRegMan::Save(const bool &bSaveOnChange/* = false*/, const bool &bSaveOnTime/* = false*/) {
+void clsRegManager::Save(const bool &bSaveOnChange/* = false*/, const bool &bSaveOnTime/* = false*/) {
     if(bSaveOnTime == true && ui8SaveCalls == 0) {
         return;
     }
@@ -783,9 +783,9 @@ void hashRegMan::Save(const bool &bSaveOnChange/* = false*/, const bool &bSaveOn
 
     // Open regs file
 #ifdef _WIN32
-    if(pxbRegs.OpenFileSave((PATH + "\\cfg\\RegisteredUsers.pxb").c_str()) == false) {
+    if(pxbRegs.OpenFileSave((clsServerManager::sPath + "\\cfg\\RegisteredUsers.pxb").c_str()) == false) {
 #else
-    if(pxbRegs.OpenFileSave((PATH + "/cfg/RegisteredUsers.pxb").c_str()) == false) {
+    if(pxbRegs.OpenFileSave((clsServerManager::sPath + "/cfg/RegisteredUsers.pxb").c_str()) == false) {
 #endif
         return;
     }
@@ -852,7 +852,7 @@ void hashRegMan::Save(const bool &bSaveOnChange/* = false*/, const bool &bSaveOn
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void hashRegMan::HashPasswords() {
+void clsRegManager::HashPasswords() {
     RegUser * pNextReg = RegListS;
     while(pNextReg != NULL) {
         RegUser * pCurReg = pNextReg;
@@ -861,14 +861,14 @@ void hashRegMan::HashPasswords() {
         if(pCurReg->bPassHash == false) {
             char * sOldPass = pCurReg->sPass;
 #ifdef _WIN32
-            pCurReg->ui8PassHash = (uint8_t *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, 64);
+            pCurReg->ui8PassHash = (uint8_t *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, 64);
 #else
             pCurReg->ui8PassHash = (uint8_t *)malloc(64);
 #endif
             if(pCurReg->ui8PassHash == NULL) {
                 pCurReg->sPass = sOldPass;
 
-                AppendDebugLog("%s - [MEM] Cannot reallocate 64bytes for sPass->ui8PassHash in hashRegMan::HashPasswords\n", 64);
+                AppendDebugLog("%s - [MEM] Cannot reallocate 64bytes for sPass->ui8PassHash in clsRegManager::HashPasswords\n", 64);
 
                 continue;
             }
@@ -879,16 +879,16 @@ void hashRegMan::HashPasswords() {
                 pCurReg->bPassHash = true;
 
 #ifdef _WIN32
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldPass) == 0) {
-                    AppendDebugLog("%s - [MEM] Cannot deallocate sOldPass in hashRegMan::HashPasswords\n", 0);
+                if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldPass) == 0) {
+                    AppendDebugLog("%s - [MEM] Cannot deallocate sOldPass in clsRegManager::HashPasswords\n", 0);
                 }
 #else
                 free(sOldPass);
 #endif
             } else {
 #ifdef _WIN32
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCurReg->ui8PassHash) == 0) {
-                    AppendDebugLog("%s - [MEM] Cannot deallocate pCurReg->ui8PassHash in hashRegMan::HashPasswords\n", 0);
+                if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCurReg->ui8PassHash) == 0) {
+                    AppendDebugLog("%s - [MEM] Cannot deallocate pCurReg->ui8PassHash in clsRegManager::HashPasswords\n", 0);
                 }
 #else
                 free(pCurReg->ui8PassHash);

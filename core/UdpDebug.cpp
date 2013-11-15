@@ -32,7 +32,7 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-clsUdpDebug *UdpDebug = NULL;
+clsUdpDebug * clsUdpDebug::mPtr = NULL;
 //---------------------------------------------------------------------------
 
 clsUdpDebug::UdpDbgItem::UdpDbgItem() {
@@ -58,7 +58,7 @@ clsUdpDebug::UdpDbgItem::UdpDbgItem() {
 clsUdpDebug::UdpDbgItem::~UdpDbgItem() {
 #ifdef _WIN32
     if(Nick != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)Nick) == 0) {
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)Nick) == 0) {
             AppendDebugLog("%s - [MEM] Cannot deallocate Nick in clsUdpDebug::UdpDbgItem::~UdpDbgItem\n", 0);
         }
     }
@@ -112,10 +112,10 @@ void clsUdpDebug::Broadcast(const char * msg, const size_t &szMsgLen) const {
     if(llist == NULL)
         return;
 
-    size_t szLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+szMsgLen;
+    size_t szLen = 4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+szMsgLen;
 
 #ifdef _WIN32
-    char * sMsg = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen);
+    char * sMsg = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szLen);
 #else
 	char * sMsg = (char *)malloc(szLen);
 #endif
@@ -126,10 +126,10 @@ void clsUdpDebug::Broadcast(const char * msg, const size_t &szMsgLen) const {
     }
 
     // create packet
-    ((uint16_t *)sMsg)[0] = (uint16_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME];
+    ((uint16_t *)sMsg)[0] = (uint16_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME];
     ((uint16_t *)sMsg)[1] = (uint16_t)szMsgLen;
-    memcpy(sMsg+4, SettingManager->sTexts[SETTXT_HUB_NAME], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
-    memcpy(sMsg+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME], msg, szMsgLen);
+    memcpy(sMsg+4, clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]);
+    memcpy(sMsg+4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME], msg, szMsgLen);
      
     UdpDbgItem *next = llist;
 	while(next != NULL) {
@@ -140,11 +140,11 @@ void clsUdpDebug::Broadcast(const char * msg, const size_t &szMsgLen) const {
 #else
 		sendto(cur->s, sMsg, szLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
 #endif
-        ui64BytesSent += szLen;
+        clsServerManager::ui64BytesSent += szLen;
     }
 
 #ifdef _WIN32
-    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMsg) == 0) {
+    if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMsg) == 0) {
 		AppendDebugLog("%s - [MEM] Cannot deallocate sMsg in clsUdpDebug::Broadcast\n", 0);
 	}
 #else
@@ -167,7 +167,7 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
 
     // initialize dbg item
 #ifdef _WIN32
-    pNewDbg->Nick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
+    pNewDbg->Nick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
 #else
 	pNewDbg->Nick = (char *)malloc(u->ui8NickLen+1);
 #endif
@@ -207,13 +207,13 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
 #else
     if(pNewDbg->s == -1) {
 #endif
-		string Txt = "*** [ERR] "+string(LanguageManager->sTexts[LAN_UDP_SCK_CREATE_ERR], (size_t)LanguageManager->ui16TextsLens[LAN_UDP_SCK_CREATE_ERR])+
+		string Txt = "*** [ERR] "+string(clsLanguageManager::mPtr->sTexts[LAN_UDP_SCK_CREATE_ERR], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_UDP_SCK_CREATE_ERR])+
 #ifdef _WIN32
 			": "+string(WSErrorStr(err))+" ("+string(err)+")";
 #else
 			": "+string(errno);
 #endif
-        UserSendTextDelayed(u, Txt);
+        u->SendTextDelayed(Txt);
         delete pNewDbg;
         return false;
     }
@@ -227,13 +227,13 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
     int oldFlag = fcntl(pNewDbg->s, F_GETFL, 0);
     if(fcntl(pNewDbg->s, F_SETFL, oldFlag | O_NONBLOCK) == -1) {
 #endif
-		string Txt = "*** [ERR] "+string(LanguageManager->sTexts[LAN_UDP_NON_BLOCK_FAIL], (size_t)LanguageManager->ui16TextsLens[LAN_UDP_NON_BLOCK_FAIL])+
+		string Txt = "*** [ERR] "+string(clsLanguageManager::mPtr->sTexts[LAN_UDP_NON_BLOCK_FAIL], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_UDP_NON_BLOCK_FAIL])+
 #ifdef _WIN32
 			": "+string(WSErrorStr(err))+" ("+string(err)+")";
 #else
 			": "+string(errno);
 #endif
-		UserSendTextDelayed(u, Txt);
+		u->SendTextDelayed(Txt);
         delete pNewDbg;
         return false;
     }
@@ -251,12 +251,12 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
 
     char msg[128];
 
-	int iLen = sprintf(msg, "[HUB] Subscribed, users online: %u", ui32Logged);
+	int iLen = sprintf(msg, "[HUB] Subscribed, users online: %u", clsServerManager::ui32Logged);
     if(CheckSprintf(iLen, 128, "clsUdpDebug::New") == true) {
-	    size_t szLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iLen;
+	    size_t szLen = 4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+iLen;
 	
 #ifdef _WIN32
-	    char * sMsg = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen);
+	    char * sMsg = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szLen);
 #else
 		char * sMsg = (char *)malloc(szLen);
 #endif
@@ -267,20 +267,20 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
 	    }
 	
 	    // create packet
-	    ((uint16_t *)sMsg)[0] = (uint16_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME];
+	    ((uint16_t *)sMsg)[0] = (uint16_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME];
 	    ((uint16_t *)sMsg)[1] = (uint16_t)iLen;
-	    memcpy(sMsg+4, SettingManager->sTexts[SETTXT_HUB_NAME], SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
-	    memcpy(sMsg+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME], msg, iLen);
+	    memcpy(sMsg+4, clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]);
+	    memcpy(sMsg+4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME], msg, iLen);
 	
 #ifdef _WIN32
 		sendto(pNewDbg->s, sMsg, (int)szLen, 0, (struct sockaddr *)&pNewDbg->sas_to, pNewDbg->sas_len);
 #else
 		sendto(pNewDbg->s, sMsg, szLen, 0, (struct sockaddr *)&pNewDbg->sas_to, pNewDbg->sas_len);
 #endif
-        ui64BytesSent += szLen;
+        clsServerManager::ui64BytesSent += szLen;
 
 #ifdef _WIN32		
-	    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMsg) == 0) {
+	    if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMsg) == 0) {
 			AppendDebugLog("%s - [MEM] Cannot deallocate full in clsUdpDebug::New\n", 0);
         }
 #else
@@ -304,7 +304,7 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
     // initialize dbg item
     size_t szNameLen = strlen(sScriptName);
 #ifdef _WIN32
-    pNewDbg->Nick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNameLen+1);
+    pNewDbg->Nick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNameLen+1);
 #else
 	pNewDbg->Nick = (char *)malloc(szNameLen+1);
 #endif
@@ -386,15 +386,15 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
 
     char msg[128];
 
-	int iLen = sprintf(msg, "[HUB] Subscribed, users online: %u", ui32Logged);
+	int iLen = sprintf(msg, "[HUB] Subscribed, users online: %u", clsServerManager::ui32Logged);
     if(CheckSprintf(iLen, 128, "clsUdpDebug::New") == true) {
-	    size_t szLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iLen;
+	    size_t szLen = 4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+iLen;
 	    if(bAllData == false) {
             szLen += szNameLen+2;
         }
 
 #ifdef _WIN32
-	    char * sMsg = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen);
+	    char * sMsg = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szLen);
 #else
 		char * sMsg = (char *)malloc(szLen);
 #endif
@@ -406,21 +406,21 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
 	
 	    // create packet
 	    if(bAllData == true) {
-	       ((uint16_t *)sMsg)[0] = (uint16_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME];
+	       ((uint16_t *)sMsg)[0] = (uint16_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME];
         } else {
-            ((uint16_t *)sMsg)[0] = (uint16_t)(SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+szNameLen+2);
+            ((uint16_t *)sMsg)[0] = (uint16_t)(clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+szNameLen+2);
         }
 
 	    ((uint16_t *)sMsg)[1] = (uint16_t)iLen;
 
-	    memcpy(sMsg+4, SettingManager->sTexts[SETTXT_HUB_NAME], SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
+	    memcpy(sMsg+4, clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]);
 	    if(bAllData == false) {
-			sMsg[4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]] = '[';
-            memcpy(sMsg+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+1, sScriptName, szNameLen);
-			sMsg[4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+1+szNameLen] = ']';
-            memcpy(sMsg+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+szNameLen+2, msg, iLen);
+			sMsg[4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]] = '[';
+            memcpy(sMsg+4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+1, sScriptName, szNameLen);
+			sMsg[4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+1+szNameLen] = ']';
+            memcpy(sMsg+4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+szNameLen+2, msg, iLen);
         } else {
-	       memcpy(sMsg+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME], msg, iLen);
+	       memcpy(sMsg+4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME], msg, iLen);
         }
 
 #ifdef _WIN32
@@ -428,10 +428,10 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
 #else
 		sendto(pNewDbg->s, sMsg, szLen, 0, (struct sockaddr *)&pNewDbg->sas_to, pNewDbg->sas_len);
 #endif
-        ui64BytesSent += szLen;
+        clsServerManager::ui64BytesSent += szLen;
 
 #ifdef _WIN32
-	    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMsg) == 0) {
+	    if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMsg) == 0) {
 			AppendDebugLog("%s - [MEM] Cannot deallocate full in clsUdpDebug::New\n", 0);
         }
 #else
@@ -535,11 +535,11 @@ bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) const {
 
 		if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->Nick, u->sNick) == 0) {
             if(bSndMess == true) {
-				string Txt = "<"+string(SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], (size_t)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC])+
-					"> *** "+string(LanguageManager->sTexts[LAN_YOU_SUBSCRIBED_UDP_DBG], (size_t)LanguageManager->ui16TextsLens[LAN_YOU_SUBSCRIBED_UDP_DBG])+
+				string Txt = "<"+string(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], (size_t)clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_HUB_SEC])+
+					"> *** "+string(clsLanguageManager::mPtr->sTexts[LAN_YOU_SUBSCRIBED_UDP_DBG], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_YOU_SUBSCRIBED_UDP_DBG])+
 					" "+string(ntohs(cur->sas_to.ss_family == AF_INET6 ? ((struct sockaddr_in6 *)&cur->sas_to)->sin6_port : ((struct sockaddr_in *)&cur->sas_to)->sin_port))+". "+
-                    string(LanguageManager->sTexts[LAN_TO_UNSUB_UDP_DBG], (size_t)LanguageManager->ui16TextsLens[LAN_TO_UNSUB_UDP_DBG])+".|";
-				UserSendTextDelayed(u, Txt);
+                    string(clsLanguageManager::mPtr->sTexts[LAN_TO_UNSUB_UDP_DBG], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_TO_UNSUB_UDP_DBG])+".|";
+				u->SendTextDelayed(Txt);
             }
                 
             return true;
@@ -557,10 +557,10 @@ void clsUdpDebug::Send(char * sScriptName, char * sMessage, const size_t &szMsgL
 
 		if(strcasecmp(cur->Nick, sScriptName) == 0) {
             size_t szNameLen = strlen(sScriptName);
-            size_t szLen = 4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+szNameLen+2+szMsgLen;
+            size_t szLen = 4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+szNameLen+2+szMsgLen;
 
 #ifdef _WIN32
-            char * sMsg = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen);
+            char * sMsg = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szLen);
 #else
 			char * sMsg = (char *)malloc(szLen);
 #endif
@@ -571,26 +571,26 @@ void clsUdpDebug::Send(char * sScriptName, char * sMessage, const size_t &szMsgL
             }
         
             // create packet
-			((uint16_t *)sMsg)[0] = (uint16_t)(SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+szNameLen+2);
+			((uint16_t *)sMsg)[0] = (uint16_t)(clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+szNameLen+2);
             ((uint16_t *)sMsg)[1] = (uint16_t)szMsgLen;
 
-            memcpy(sMsg+4, SettingManager->sTexts[SETTXT_HUB_NAME], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
+            memcpy(sMsg+4, clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]);
           
-			sMsg[4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]] = '[';
-            memcpy(sMsg+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+1, sScriptName, szNameLen);
-			sMsg[4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+1+szNameLen] = ']';
+			sMsg[4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]] = '[';
+            memcpy(sMsg+4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+1, sScriptName, szNameLen);
+			sMsg[4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+1+szNameLen] = ']';
 
-            memcpy(sMsg+4+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+szNameLen+2, sMessage, szMsgLen);
+            memcpy(sMsg+4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+szNameLen+2, sMessage, szMsgLen);
 
 #ifdef _WIN32
             sendto(cur->s, sMsg, (int)szLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
 #else
 			sendto(cur->s, sMsg, szLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
 #endif
-            ui64BytesSent += szLen;
+            clsServerManager::ui64BytesSent += szLen;
 
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMsg) == 0) {
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMsg) == 0) {
 				AppendDebugLog("%s - [MEM] Cannot deallocate full in clsUdpDebug::Send\n", 0);
         	}
 #else

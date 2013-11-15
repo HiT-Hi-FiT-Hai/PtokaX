@@ -22,10 +22,12 @@
 #define UpdateDialogH
 //------------------------------------------------------------------------------
 
-class UpdateDialog {
+class clsUpdateDialog {
 public:
-    UpdateDialog();
-    ~UpdateDialog();
+    static clsUpdateDialog * mPtr;
+
+    clsUpdateDialog();
+    ~clsUpdateDialog();
 
     static LRESULT CALLBACK StaticUpdateDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -42,8 +44,6 @@ private:
 
     LRESULT UpdateDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
-//------------------------------------------------------------------------------
-extern UpdateDialog * pUpdateDialog;
 //------------------------------------------------------------------------------
 
 #endif

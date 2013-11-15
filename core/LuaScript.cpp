@@ -57,6 +57,8 @@
     #include "../gui.win/MainWindowPageScripts.h"
 #endif
 //---------------------------------------------------------------------------
+char ScriptTimer::sDefaultTimerFunc[] = "OnTimer";
+//---------------------------------------------------------------------------
 
 static int ScriptPanic(lua_State * L) {
     size_t szLen = 0;
@@ -70,49 +72,22 @@ static int ScriptPanic(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
-ScriptBot::ScriptBot(char * sBotNick, const size_t &szNickLen, char * sDescription, const size_t &szDscrLen, char * sEmail, const size_t &szEmlLen, const bool &bOP) {
-    ScriptManager->ui8BotsCount++;
+ScriptBot::ScriptBot() {
+    sNick = NULL;
+    sMyINFO = NULL;
 
     prev = NULL;
     next = NULL;
 
-#ifdef _WIN32
-    sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
-#else
-	sNick = (char *)malloc(szNickLen+1);
-#endif
-    if(sNick == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in ScriptBot::ScriptBot\n", (uint64_t)(szNickLen+1));
+    bIsOP = false;
 
-		return;
-    }
-    memcpy(sNick, sBotNick, szNickLen);
-    sNick[szNickLen] = '\0';
-
-    bIsOP = bOP;
-
-    size_t szWantLen = 24+szNickLen+szDscrLen+szEmlLen;
-
-#ifdef _WIN32
-    sMyINFO = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szWantLen);
-#else
-	sMyINFO = (char *)malloc(szWantLen);
-#endif
-    if(sMyINFO == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMyINFO in ScriptBot::ScriptBot\n", (uint64_t)szWantLen);
-
-		return;
-    }
-
-	int iLen = sprintf(sMyINFO, "$MyINFO $ALL %s %s$ $$%s$$|", sNick, sDescription != NULL ? sDescription : "", sEmail != NULL ? sEmail : "");
-
-	CheckSprintf(iLen, szWantLen, "ScriptBot::ScriptBot");
+    clsScriptManager::mPtr->ui8BotsCount++;
 }
 //------------------------------------------------------------------------------
 
 ScriptBot::~ScriptBot() {
 #ifdef _WIN32
-    if(sNick != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
+    if(sNick != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
 		AppendDebugLog("%s - [MEM] Cannot deallocate sNick in ScriptBot::~ScriptBot\n", 0);
     }
 #else
@@ -120,91 +95,144 @@ ScriptBot::~ScriptBot() {
 #endif
 
 #ifdef _WIN32
-    if(sMyINFO != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMyINFO) == 0) {
+    if(sMyINFO != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMyINFO) == 0) {
 		AppendDebugLog("%s - [MEM] Cannot deallocate sMyINFO in ScriptBot::~ScriptBot\n", 0);
     }
 #else
 	free(sMyINFO);
 #endif
 
-	ScriptManager->ui8BotsCount--;
+	clsScriptManager::mPtr->ui8BotsCount--;
 }
 //------------------------------------------------------------------------------
 
-#ifdef _WIN32
-	ScriptTimer::ScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &szLen) {
-#else
-	ScriptTimer::ScriptTimer(char * sFunctName, const size_t &szLen) {
-#endif
-	if(sFunctName != NULL) {
-#ifdef _WIN32
-        sFunctionName = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
-#else
-		sFunctionName = (char *)malloc(szLen+1);
-#endif
-        if(sFunctionName == NULL) {
-			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sFunctionName in ScriptTimer::ScriptTimer\n", (uint64_t)(szLen+1));
+ScriptBot * ScriptBot::CreateScriptBot(char * sBotNick, const size_t &szNickLen, char * sDescription, const size_t &szDscrLen, char * sEmail, const size_t &szEmlLen, const bool &bOP) {
+    ScriptBot * pScriptBot = new ScriptBot();
 
-			return;
-        }
+    if(pScriptBot == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate new pScriptBot in ScriptBot::CreateScriptBot\n", 0);
 
-        memcpy(sFunctionName, sFunctName, szLen);
-        sFunctionName[szLen] = '\0';
-    } else {
-        sFunctionName = NULL;
+        return NULL;
     }
 
-    prev = NULL;
-    next = NULL;
+#ifdef _WIN32
+    pScriptBot->sNick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
+#else
+	pScriptBot->sNick = (char *)malloc(szNickLen+1);
+#endif
+    if(pScriptBot->sNick == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pScriptBot->sNick in ScriptBot::CreateScriptBot\n", (uint64_t)(szNickLen+1));
+
+        delete pScriptBot;
+		return NULL;
+    }
+    memcpy(pScriptBot->sNick, sBotNick, szNickLen);
+    pScriptBot->sNick[szNickLen] = '\0';
+
+    pScriptBot->bIsOP = bOP;
+
+    size_t szWantLen = 24+szNickLen+szDscrLen+szEmlLen;
 
 #ifdef _WIN32
-	uiTimerId = uiTmrId;
+    pScriptBot->sMyINFO = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szWantLen);
+#else
+	pScriptBot->sMyINFO = (char *)malloc(szWantLen);
+#endif
+    if(pScriptBot->sMyINFO == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pScriptBot->sMyINFO in ScriptBot::CreateScriptBot\n", (uint64_t)szWantLen);
+
+        delete pScriptBot;
+		return NULL;
+    }
+
+	int iLen = sprintf(pScriptBot->sMyINFO, "$MyINFO $ALL %s %s$ $$%s$$|", sBotNick, sDescription != NULL ? sDescription : "", sEmail != NULL ? sEmail : "");
+
+	CheckSprintf(iLen, szWantLen, "ScriptBot::CreateScriptBot");
+
+    return pScriptBot;
+}
+//------------------------------------------------------------------------------
+
+ScriptTimer::ScriptTimer() {
+#ifdef _WIN32
+	uiTimerId = NULL;
 #else
 	TimerId = 0;
 #endif
+
+	sFunctionName = NULL;
+
+    iFunctionRef = 0;
+
+    prev = NULL;
+    next = NULL;
 }
 //------------------------------------------------------------------------------
 
 ScriptTimer::~ScriptTimer() {
 #ifdef _WIN32
-	if(sFunctionName != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sFunctionName) == 0) {
+	if(sFunctionName != NULL && sFunctionName != sDefaultTimerFunc) {
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sFunctionName) == 0) {
 			AppendDebugLog("%s - [MEM] Cannot deallocate sFunctionName in ScriptTimer::~ScriptTimer\n", 0);
         }
-    }
 #else
-	free(sFunctionName);
+    if(sFunctionName != sDefaultTimerFunc) {
+        free(sFunctionName);
 #endif
+    }
 }
 //------------------------------------------------------------------------------
 
-Script::Script(char * Name, const bool &enabled) {
-    bEnabled = enabled;
+#ifdef _WIN32
+ScriptTimer * ScriptTimer::CreateScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &szLen, const int &iRef) {
+#else
+ScriptTimer * ScriptTimer::CreateScriptTimer(char * sFunctName, const size_t &szLen, const int &iRef) {
+#endif
+    ScriptTimer * pScriptTimer = new ScriptTimer();
+
+    if(pScriptTimer == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate new pScriptTimer in ScriptTimer::CreateScriptTimer\n", 0);
+
+        return NULL;
+    }
+
+	if(sFunctName != NULL) {
+        if(sFunctName != sDefaultTimerFunc) {
+#ifdef _WIN32
+            pScriptTimer->sFunctionName = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
+#else
+            pScriptTimer->sFunctionName = (char *)malloc(szLen+1);
+#endif
+            if(pScriptTimer->sFunctionName == NULL) {
+                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pScriptTimer->sFunctionName in ScriptTimer::CreateScriptTimer\n", (uint64_t)(szLen+1));
+
+                delete pScriptTimer;
+                return NULL;
+            }
+
+            memcpy(pScriptTimer->sFunctionName, sFunctName, szLen);
+            pScriptTimer->sFunctionName[szLen] = '\0';
+        } else {
+            pScriptTimer->sFunctionName = sDefaultTimerFunc;
+        }
+    } else {
+        pScriptTimer->iFunctionRef = iRef;
+    }
 
 #ifdef _WIN32
-	string ExtractedFilename = ExtractFileName(Name);
-	size_t szNameLen = ExtractedFilename.size();
-
-    sName = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNameLen+1);
-#else
-    size_t szNameLen = strlen(Name);
-
-    sName = (char *)malloc(szNameLen+1);
+	pScriptTimer->uiTimerId = uiTmrId;
 #endif
-    if(sName == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in Script::Script\n", (uint64_t)szNameLen+1);
 
-        return;
-    }   
-#ifdef _WIN32
-    memcpy(sName, ExtractedFilename.c_str(), ExtractedFilename.size());
-#else
-    memcpy(sName, Name, szNameLen);
-#endif
-    sName[szNameLen] = '\0';
+    return pScriptTimer;
+}
+//------------------------------------------------------------------------------
 
-    ui16Functions = 65535;
+Script::Script() {
     ui32DataArrivals = 4294967295U;
+
+    sName = NULL;
+
+    LUA = NULL;
 
     prev = NULL;
     next = NULL;
@@ -213,8 +241,9 @@ Script::Script(char * Name, const bool &enabled) {
 
     TimerList = NULL;
 
-    LUA = NULL;
+    ui16Functions = 65535;
 
+    bEnabled = false;
     bRegUDP = false;
     bProcessed = false;
 }
@@ -222,7 +251,7 @@ Script::Script(char * Name, const bool &enabled) {
 
 Script::~Script() {
     if(bRegUDP == true) {
-        UdpDebug->Remove(sName);
+		clsUdpDebug::mPtr->Remove(sName);
         bRegUDP = false;
     }
 
@@ -249,12 +278,50 @@ Script::~Script() {
     }
 
 #ifdef _WIN32
-	if(sName != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sName) == 0) {
+	if(sName != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sName) == 0) {
         AppendDebugLog("%s - [MEM] Cannot deallocate sName in Script::~Script\n", 0);
     }
 #else
 	free(sName);
 #endif
+}
+//------------------------------------------------------------------------------
+
+Script * Script::CreateScript(char * Name, const bool &enabled) {
+    Script * pScript = new Script();
+
+    if(pScript == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate new pScript in Script::CreateScript\n", 0);
+
+        return NULL;
+    }
+
+#ifdef _WIN32
+	string ExtractedFilename = ExtractFileName(Name);
+	size_t szNameLen = ExtractedFilename.size();
+
+    pScript->sName = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNameLen+1);
+#else
+    size_t szNameLen = strlen(Name);
+
+    pScript->sName = (char *)malloc(szNameLen+1);
+#endif
+    if(pScript->sName == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in Script::CreateScript\n", (uint64_t)szNameLen+1);
+
+        delete pScript;
+        return NULL;
+    }
+#ifdef _WIN32
+    memcpy(pScript->sName, ExtractedFilename.c_str(), ExtractedFilename.size());
+#else
+    memcpy(pScript->sName, Name, szNameLen);
+#endif
+    pScript->sName[szNameLen] = '\0';
+
+    pScript->bEnabled = enabled;
+
+    return pScript;
 }
 //------------------------------------------------------------------------------
 
@@ -279,17 +346,7 @@ bool ScriptStart(Script * cur) {
 
 	lua_atpanic(cur->LUA, ScriptPanic);
 
-#if LUA_VERSION_NUM == 501
-	RegCore(cur->LUA);
-	RegSetMan(cur->LUA);
-	RegRegMan(cur->LUA);
-	RegBanMan(cur->LUA);
-	RegProfMan(cur->LUA);
-	RegTmrMan(cur->LUA);
-	RegUDPDbg(cur->LUA);
-	RegScriptMan(cur->LUA);
-	RegIP2Country(cur->LUA);
-#else
+#if LUA_VERSION_NUM > 501
     luaL_requiref(cur->LUA, "Core", RegCore, 1);
     lua_pop(cur->LUA, 1);
 
@@ -316,12 +373,22 @@ bool ScriptStart(Script * cur) {
 
     luaL_requiref(cur->LUA, "IP2Country", RegIP2Country, 1);
     lua_pop(cur->LUA, 1);
+#else
+	RegCore(cur->LUA);
+	RegSetMan(cur->LUA);
+	RegRegMan(cur->LUA);
+	RegBanMan(cur->LUA);
+	RegProfMan(cur->LUA);
+	RegTmrMan(cur->LUA);
+	RegUDPDbg(cur->LUA);
+	RegScriptMan(cur->LUA);
+	RegIP2Country(cur->LUA);
 #endif
 
-	if(luaL_dofile(cur->LUA, (SCRIPT_PATH+cur->sName).c_str()) == 0) {
+	if(luaL_dofile(cur->LUA, (clsServerManager::sScriptPath+cur->sName).c_str()) == 0) {
 #ifdef _BUILD_GUI
-        RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
-            (string(LanguageManager->sTexts[LAN_NO_SYNERR_IN_SCRIPT_FILE], (size_t)LanguageManager->ui16TextsLens[LAN_NO_SYNERR_IN_SCRIPT_FILE]) + " " + string(cur->sName)).c_str());
+        RichEditAppendText(clsMainWindowPageScripts::mPtr->hWndPageItems[clsMainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+            (string(clsLanguageManager::mPtr->sTexts[LAN_NO_SYNERR_IN_SCRIPT_FILE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_NO_SYNERR_IN_SCRIPT_FILE]) + " " + string(cur->sName)).c_str());
 #endif
 
         return true;
@@ -332,13 +399,13 @@ bool ScriptStart(Script * cur) {
         string sMsg(stmp, szLen);
 
 #ifdef _BUILD_GUI
-        RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
-            (string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
+        RichEditAppendText(clsMainWindowPageScripts::mPtr->hWndPageItems[clsMainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+            (string(clsLanguageManager::mPtr->sTexts[LAN_SYNTAX], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
 #endif
 
-		UdpDebug->Broadcast("[LUA] "+sMsg);
+		clsUdpDebug::mPtr->Broadcast("[LUA] "+sMsg);
 
-        if(SettingManager->bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true) {
+        if(clsSettingManager::mPtr->bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true) {
             AppendLog(sMsg, true);
         }
 
@@ -352,7 +419,7 @@ bool ScriptStart(Script * cur) {
 
 void ScriptStop(Script * cur) {
 	if(cur->bRegUDP == true) {
-        UdpDebug->Remove(cur->sName);
+        clsUdpDebug::mPtr->Remove(cur->sName);
         cur->bRegUDP = false;
     }
 
@@ -387,16 +454,16 @@ void ScriptStop(Script * cur) {
         ScriptBot * bot = next;
         next = bot->next;
 
-        ResNickManager->DelReservedNick(bot->sNick, true);
+        clsReservedNicksManager::mPtr->DelReservedNick(bot->sNick, true);
 
-        if(bServerRunning == true) {
-   			colUsers->DelFromNickList(bot->sNick, bot->bIsOP);
+        if(clsServerManager::bServerRunning == true) {
+   			clsUsers::mPtr->DelFromNickList(bot->sNick, bot->bIsOP);
 
-            colUsers->DelBotFromMyInfos(bot->sMyINFO);
+            clsUsers::mPtr->DelBotFromMyInfos(bot->sMyINFO);
 
-			int iMsgLen = sprintf(g_sBuffer, "$Quit %s|", bot->sNick);
-           	if(CheckSprintf(iMsgLen, g_szBufferSize, "ScriptStop") == true) {
-                g_GlobalDataQueue->AddQueueItem(g_sBuffer, iMsgLen, NULL, 0, GlobalDataQueue::CMD_QUIT);
+			int iMsgLen = sprintf(clsServerManager::sGlobalBuffer, "$Quit %s|", bot->sNick);
+           	if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "ScriptStop") == true) {
+                clsGlobalDataQueue::mPtr->AddQueueItem(clsServerManager::sGlobalBuffer, iMsgLen, NULL, 0, clsGlobalDataQueue::CMD_QUIT);
             }
 		}
 
@@ -463,7 +530,7 @@ static bool ScriptOnError(Script * cur, char * sErrorMsg, const size_t &szMsgLen
         return true;
     }
 
-	ScriptManager->ActualUser = NULL;
+	clsScriptManager::mPtr->ActualUser = NULL;
     
     lua_pushlstring(cur->LUA, sErrorMsg, szMsgLen);
 
@@ -474,14 +541,14 @@ static bool ScriptOnError(Script * cur, char * sErrorMsg, const size_t &szMsgLen
 		string sMsg(stmp, szLen);
 
 #ifdef _BUILD_GUI
-        RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
-            (string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
-        RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
-            (string(LanguageManager->sTexts[LAN_FATAL_ERR_SCRIPT], (size_t)LanguageManager->ui16TextsLens[LAN_FATAL_ERR_SCRIPT]) + " " + string(cur->sName) + " ! " +
-			string(LanguageManager->sTexts[LAN_SCRIPT_STOPPED], (size_t)LanguageManager->ui16TextsLens[LAN_SCRIPT_STOPPED]) + "!").c_str());
+        RichEditAppendText(clsMainWindowPageScripts::mPtr->hWndPageItems[clsMainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+            (string(clsLanguageManager::mPtr->sTexts[LAN_SYNTAX], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
+        RichEditAppendText(clsMainWindowPageScripts::mPtr->hWndPageItems[clsMainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+            (string(clsLanguageManager::mPtr->sTexts[LAN_FATAL_ERR_SCRIPT], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_FATAL_ERR_SCRIPT]) + " " + string(cur->sName) + " ! " +
+			string(clsLanguageManager::mPtr->sTexts[LAN_SCRIPT_STOPPED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SCRIPT_STOPPED]) + "!").c_str());
 #endif
 
-		if(SettingManager->bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true) {
+		if(clsSettingManager::mPtr->bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true) {
 			AppendLog(sMsg, true);
 		}
 
@@ -597,8 +664,8 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "sCountryCode");
-	if(IP2Country->ui32Count != 0) {
-		lua_pushlstring(L, IP2Country->GetCountry(u->ui8Country, false), 2);
+	if(clsIpP2Country::mPtr->ui32Count != 0) {
+		lua_pushlstring(L, clsIpP2Country::mPtr->GetCountry(u->ui8Country, false), 2);
 	} else {
 		lua_pushnil(L);
 	}
@@ -633,7 +700,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iShareSize");
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, (double)u->ui64SharedSize);
 #else
 	lua_pushunsigned(L, u->ui64SharedSize);
@@ -641,7 +708,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iHubs");
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, u->Hubs);
 #else
 	lua_pushunsigned(L, u->Hubs);
@@ -649,7 +716,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iNormalHubs");
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushnumber(L, u->iNormalHubs);
 #else
 	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushunsigned(L, u->iNormalHubs);
@@ -657,7 +724,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
     
 	lua_pushliteral(L, "iRegHubs");
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushnumber(L, u->iRegHubs);
 #else
 	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushunsigned(L, u->iRegHubs);
@@ -665,7 +732,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
     
 	lua_pushliteral(L, "iOpHubs");
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushnumber(L, u->iOpHubs);
 #else
 	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushunsigned(L, u->iOpHubs);
@@ -673,7 +740,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iSlots");
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, u->Slots);
 #else
 	lua_pushunsigned(L, u->Slots);
@@ -681,7 +748,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iLlimit");
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, u->LLimit);
 #else
 	lua_pushunsigned(L, u->LLimit);
@@ -689,7 +756,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iDefloodWarns");
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, u->iDefloodWarnings);
 #else
 	lua_pushunsigned(L, u->iDefloodWarnings);
@@ -697,7 +764,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iMagicByte");
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, u->MagicByte);
 #else
 	lua_pushunsigned(L, u->MagicByte);
@@ -705,7 +772,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iLoginTime");
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, (double)u->LoginTime);
 #else
 	lua_pushunsigned(L, u->LoginTime);
@@ -806,7 +873,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
     lua_rawset(L, iTable);
 
     lua_pushliteral(L, "iScriptediShareSizeShort");
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, (double)u->ui64ChangedSharedSizeShort);
 #else
     lua_pushunsigned(L, u->ui64ChangedSharedSizeShort);
@@ -814,7 +881,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
     lua_rawset(L, iTable);
 
     lua_pushliteral(L, "iScriptediShareSizeLong");
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, (double)u->ui64ChangedSharedSizeLong);
 #else
     lua_pushunsigned(L, u->ui64ChangedSharedSizeLong);
@@ -826,7 +893,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 
     int t = lua_gettop(L);
 
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, 1);
 #else
 	lua_pushunsigned(L, 1);
@@ -835,7 +902,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 	lua_rawset(L, t);
 
     if(u->sIPv4[0] != '\0') {
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 		lua_pushnumber(L, 2);
 #else
         lua_pushunsigned(L, 2);
@@ -863,7 +930,7 @@ User * ScriptGetUser(lua_State * L, const int &iTop, const char * sFunction) {
         return NULL;
     }
 
-	if(u != ScriptManager->ActualUser) {
+	if(u != clsScriptManager::mPtr->ActualUser) {
         lua_pushliteral(L, "sNick");
         lua_gettable(L, 1);
 
@@ -875,7 +942,7 @@ User * ScriptGetUser(lua_State * L, const int &iTop, const char * sFunction) {
         size_t szNickLen;
         char * sNick = (char *)lua_tolstring(L, iTop+2, &szNickLen);
 
-		if(u != hashManager->FindUser(sNick, szNickLen)) {
+		if(u != clsHashManager::mPtr->FindUser(sNick, szNickLen)) {
             return NULL;
         }
     }
@@ -891,20 +958,20 @@ void ScriptError(Script * cur) {
 	string sMsg(stmp, szLen);
 
 #ifdef _BUILD_GUI
-    RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
-        (string(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
+    RichEditAppendText(clsMainWindowPageScripts::mPtr->hWndPageItems[clsMainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+        (string(clsLanguageManager::mPtr->sTexts[LAN_SYNTAX], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
 #endif
 
-	UdpDebug->Broadcast("[LUA] " + sMsg);
+	clsUdpDebug::mPtr->Broadcast("[LUA] " + sMsg);
 
-    if(SettingManager->bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true) {
+    if(clsSettingManager::mPtr->bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true) {
         AppendLog(sMsg, true);
     }
 
 	if((((cur->ui16Functions & Script::ONERROR) == Script::ONERROR) == true && ScriptOnError(cur, stmp, szLen) == false) ||
-        SettingManager->bBools[SETBOOL_STOP_SCRIPT_ON_ERROR] == true) {
+        clsSettingManager::mPtr->bBools[SETBOOL_STOP_SCRIPT_ON_ERROR] == true) {
         // PPK ... stop buggy script ;)
-		eventqueue->AddNormal(eventq::EVENT_STOPSCRIPT, cur->sName);
+		clsEventQueue::mPtr->AddNormal(clsEventQueue::EVENT_STOPSCRIPT, cur->sName);
     }
 }
 //------------------------------------------------------------------------------
@@ -914,7 +981,7 @@ void ScriptError(Script * cur) {
 #else
 	void ScriptOnTimer(ScriptTimer * AccTimer) {
 #endif
-	Script *next = ScriptManager->RunningScriptS;
+	Script *next = clsScriptManager::mPtr->RunningScriptS;
 
     while(next != NULL) {
     	Script *cur = next;
@@ -928,17 +995,16 @@ void ScriptError(Script * cur) {
 
 #ifdef _WIN32
             if(tmr->uiTimerId == uiTimerId) {
-                if(tmr->sFunctionName == NULL) {
 #else
 			if(tmr == AccTimer) {
-				if(tmr->sFunctionName == NULL) {
 #endif
-					lua_getglobal(cur->LUA, "OnTimer");
-				} else {
+                if(tmr->sFunctionName != NULL) {
 					lua_getglobal(cur->LUA, tmr->sFunctionName);
-				}
+				} else {
+                    lua_rawgeti(cur->LUA, LUA_REGISTRYINDEX, tmr->iFunctionRef);
+                }
 
-				ScriptManager->ActualUser = NULL;
+				clsScriptManager::mPtr->ActualUser = NULL;
 
 				lua_checkstack(cur->LUA, 1); // we need 1 empty slots in stack, check it to be sure
 

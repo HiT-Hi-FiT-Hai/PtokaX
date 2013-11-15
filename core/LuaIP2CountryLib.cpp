@@ -63,7 +63,7 @@ static int GetCountryCode(lua_State * L) {
         return 1;
     }
 
-    const char * sCountry = IP2Country->Find(ui128Hash, false);
+    const char * sCountry = clsIpP2Country::mPtr->Find(ui128Hash, false);
 
     lua_settop(L, 0);
 
@@ -96,7 +96,7 @@ static int GetCountryName(lua_State * L) {
             return 1;
         }
 
-        sCountry = IP2Country->Find(ui128Hash, true);
+        sCountry = clsIpP2Country::mPtr->Find(ui128Hash, true);
     } else if(lua_type(L, 1) == LUA_TTABLE) {
 		User * u = ScriptGetUser(L, 1, "GetCountryName");
         if(u == NULL) {
@@ -105,7 +105,7 @@ static int GetCountryName(lua_State * L) {
             return 1;
         }
 
-        sCountry = IP2Country->GetCountry(u->ui8Country, true);
+        sCountry = clsIpP2Country::mPtr->GetCountry(u->ui8Country, true);
     } else {
         luaL_error(L, "bad argument to 'GetCountryName' (string or table expected, got %s)", lua_typename(L, lua_type(L, 1)));
 		lua_settop(L, 0);
@@ -128,7 +128,7 @@ static int Reload(lua_State * L) {
         return 0;
     }
 
-	IP2Country->Reload();
+	clsIpP2Country::mPtr->Reload();
 
     return 0;
 }
@@ -142,13 +142,13 @@ static const luaL_Reg ip2country[] = {
 };
 //---------------------------------------------------------------------------
 
-#if LUA_VERSION_NUM == 501
-void RegIP2Country(lua_State * L) {
-    luaL_register(L, "IP2Country", ip2country);
-#else
+#if LUA_VERSION_NUM > 501
 int RegIP2Country(lua_State * L) {
     luaL_newlib(L, ip2country);
     return 1;
+#else
+void RegIP2Country(lua_State * L) {
+    luaL_register(L, "IP2Country", ip2country);
 #endif
 }
 //---------------------------------------------------------------------------

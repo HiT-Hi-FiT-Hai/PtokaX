@@ -24,33 +24,32 @@
 //---------------------------------------------------------------------------
 #include "../core/hashBanManager.h"
 #include "../core/LanguageManager.h"
+#include "../core/ServerManager.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #pragma hdrstop
 //---------------------------------------------------------------------------
 #include "RangeBansDialog.h"
 //---------------------------------------------------------------------------
-RangeBanDialog * pRangeBanDialog = NULL;
-//---------------------------------------------------------------------------
 static ATOM atomRangeBanDialog = 0;
 //---------------------------------------------------------------------------
 
-RangeBanDialog::RangeBanDialog() {
+clsRangeBanDialog::clsRangeBanDialog() {
     memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
 
     pRangeBanToChange = NULL;
 }
 //---------------------------------------------------------------------------
 
-RangeBanDialog::~RangeBanDialog() {
-    pRangeBanDialog = NULL;
+clsRangeBanDialog::~clsRangeBanDialog() {
 }
 //---------------------------------------------------------------------------
 
-LRESULT CALLBACK RangeBanDialog::StaticRangeBanDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    RangeBanDialog * pRangeBanDialog = (RangeBanDialog *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
+LRESULT CALLBACK clsRangeBanDialog::StaticRangeBanDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    clsRangeBanDialog * pRangeBanDialog = (clsRangeBanDialog *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
     if(pRangeBanDialog == NULL) {
         return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -60,7 +59,7 @@ LRESULT CALLBACK RangeBanDialog::StaticRangeBanDialogProc(HWND hWnd, UINT uMsg, 
 }
 //------------------------------------------------------------------------------
 
-LRESULT RangeBanDialog::RangeBanDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT clsRangeBanDialog::RangeBanDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch(uMsg) {
         case WM_COMMAND:
             switch(LOWORD(wParam)) {
@@ -90,7 +89,7 @@ LRESULT RangeBanDialog::RangeBanDialogProc(UINT uMsg, WPARAM wParam, LPARAM lPar
             break;
         case WM_CLOSE:
             ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
-            g_hWndActiveDialog = NULL;
+            clsServerManager::hWndActiveDialog = NULL;
             break;
         case WM_NCDESTROY:
             delete this;
@@ -105,7 +104,7 @@ LRESULT RangeBanDialog::RangeBanDialogProc(UINT uMsg, WPARAM wParam, LPARAM lPar
 }
 //------------------------------------------------------------------------------
 
-void RangeBanDialog::DoModal(HWND hWndParent, RangeBanItem * pRangeBan/* = NULL*/) {
+void clsRangeBanDialog::DoModal(HWND hWndParent, RangeBanItem * pRangeBan/* = NULL*/) {
     pRangeBanToChange = pRangeBan;
 
     if(atomRangeBanDialog == 0) {
@@ -115,7 +114,7 @@ void RangeBanDialog::DoModal(HWND hWndParent, RangeBanItem * pRangeBan/* = NULL*
         m_wc.lpfnWndProc = ::DefWindowProc;
         m_wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
         m_wc.lpszClassName = "PtokaX_RangeBanDialog";
-        m_wc.hInstance = g_hInstance;
+        m_wc.hInstance = clsServerManager::hInstance;
         m_wc.hCursor = ::LoadCursor(m_wc.hInstance, IDC_ARROW);
         m_wc.style = CS_HREDRAW | CS_VREDRAW;
 
@@ -128,15 +127,15 @@ void RangeBanDialog::DoModal(HWND hWndParent, RangeBanItem * pRangeBan/* = NULL*
     int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(300) / 2);
     int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(307) / 2);
 
-    hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomRangeBanDialog), LanguageManager->sTexts[LAN_RANGE_BAN],
+    hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomRangeBanDialog), clsLanguageManager::mPtr->sTexts[LAN_RANGE_BAN],
         WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(300), ScaleGui(307),
-        hWndParent, NULL, g_hInstance, NULL);
+        hWndParent, NULL, clsServerManager::hInstance, NULL);
 
     if(hWndWindowItems[WINDOW_HANDLE] == NULL) {
         return;
     }
 
-    g_hWndActiveDialog = hWndWindowItems[WINDOW_HANDLE];
+    clsServerManager::hWndActiveDialog = hWndWindowItems[WINDOW_HANDLE];
 
     ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_USERDATA, (LONG_PTR)this);
     ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_WNDPROC, (LONG_PTR)StaticRangeBanDialogProc);
@@ -144,7 +143,7 @@ void RangeBanDialog::DoModal(HWND hWndParent, RangeBanItem * pRangeBan/* = NULL*
     ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
     {
-        int iHeight = iOneLineOneChecksGB + (2 * iOneLineGB) + (iGroupBoxMargin + iCheckHeight + iOneLineGB + 5) + iEditHeight + 6;
+        int iHeight = clsGuiSettingManager::iOneLineOneChecksGB + (2 * clsGuiSettingManager::iOneLineGB) + (clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + clsGuiSettingManager::iOneLineGB + 5) + clsGuiSettingManager::iEditHeight + 6;
 
         int iDiff = rcParent.bottom - iHeight;
 
@@ -161,83 +160,83 @@ void RangeBanDialog::DoModal(HWND hWndParent, RangeBanItem * pRangeBan/* = NULL*
 
     ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
-    hWndWindowItems[GB_RANGE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_RANGE], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, 0, rcParent.right - 6, iOneLineOneChecksGB, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
+    hWndWindowItems[GB_RANGE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_RANGE], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        3, 0, rcParent.right - 6, clsGuiSettingManager::iOneLineOneChecksGB, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
 
     hWndWindowItems[EDT_FROM_IP] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, iGroupBoxMargin, (rcParent.right / 2) - 13, iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
+        11, clsGuiSettingManager::iGroupBoxMargin, (rcParent.right / 2) - 13, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_FROM_IP], EM_SETLIMITTEXT, 39, 0);
 
     hWndWindowItems[EDT_TO_IP] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        (rcParent.right / 2) + 3, iGroupBoxMargin, (rcParent.right / 2) - 13, iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
+        (rcParent.right / 2) + 3, clsGuiSettingManager::iGroupBoxMargin, (rcParent.right / 2) - 13, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_TO_IP], EM_SETLIMITTEXT, 39, 0);
 
-    hWndWindowItems[BTN_FULL_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_FULL_BAN], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        11, iGroupBoxMargin + iEditHeight + 4, rcParent.right - 22, iCheckHeight, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
+    hWndWindowItems[BTN_FULL_BAN] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_FULL_BAN], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+        11, clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 4, rcParent.right - 22, clsGuiSettingManager::iCheckHeight, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
 
-    int iPosX = iOneLineOneChecksGB;
+    int iPosX = clsGuiSettingManager::iOneLineOneChecksGB;
 
-    hWndWindowItems[GB_REASON] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_REASON], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, iPosX, rcParent.right - 6, iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
+    hWndWindowItems[GB_REASON] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_REASON], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        3, iPosX, rcParent.right - 6, clsGuiSettingManager::iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
 
     hWndWindowItems[EDT_REASON] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, iPosX + iGroupBoxMargin, rcParent.right - 22, iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
+        11, iPosX + clsGuiSettingManager::iGroupBoxMargin, rcParent.right - 22, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_REASON], EM_SETLIMITTEXT, 255, 0);
 
-    iPosX += iOneLineGB;
+    iPosX += clsGuiSettingManager::iOneLineGB;
 
-    hWndWindowItems[GB_BY] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_CREATED_BY], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, iPosX, rcParent.right - 6, iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
+    hWndWindowItems[GB_BY] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_CREATED_BY], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        3, iPosX, rcParent.right - 6, clsGuiSettingManager::iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
 
     hWndWindowItems[EDT_BY] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, iPosX + iGroupBoxMargin, rcParent.right - 22, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)EDT_BY, g_hInstance, NULL);
+        11, iPosX + clsGuiSettingManager::iGroupBoxMargin, rcParent.right - 22, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)EDT_BY, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_BY], EM_SETLIMITTEXT, 64, 0);
 
-    iPosX += iOneLineGB;
+    iPosX += clsGuiSettingManager::iOneLineGB;
 
     hWndWindowItems[GB_BAN_TYPE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, iPosX, rcParent.right - 6, iGroupBoxMargin + iCheckHeight + iOneLineGB + 5, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
+        3, iPosX, rcParent.right - 6, clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + clsGuiSettingManager::iOneLineGB + 5, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
 
     hWndWindowItems[GB_TEMP_BAN] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, NULL, WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        8, iPosX + iGroupBoxMargin + iCheckHeight, rcParent.right - 16, iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
+        8, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight, rcParent.right - 16, clsGuiSettingManager::iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
 
-    hWndWindowItems[RB_PERM_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_PERMANENT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,
-        16, iPosX + iGroupBoxMargin, rcParent.right - 32, iCheckHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)RB_PERM_BAN, g_hInstance, NULL);
+    hWndWindowItems[RB_PERM_BAN] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_PERMANENT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,
+        16, iPosX + clsGuiSettingManager::iGroupBoxMargin, rcParent.right - 32, clsGuiSettingManager::iCheckHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)RB_PERM_BAN, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndWindowItems[RB_PERM_BAN], BM_SETCHECK, BST_CHECKED, 0);
 
     int iThird = (rcParent.right - 32) / 3;
 
-    hWndWindowItems[RB_TEMP_BAN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_TEMPORARY], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,
-        16, iPosX + (2 * iGroupBoxMargin) + iCheckHeight + ((iEditHeight - iCheckHeight) / 2), iThird - 2, iCheckHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)RB_TEMP_BAN, g_hInstance, NULL);
+    hWndWindowItems[RB_TEMP_BAN] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_TEMPORARY], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,
+        16, iPosX + (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iCheckHeight) / 2), iThird - 2, clsGuiSettingManager::iCheckHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)RB_TEMP_BAN, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndWindowItems[RB_TEMP_BAN], BM_SETCHECK, BST_UNCHECKED, 0);
 
     hWndWindowItems[DT_TEMP_BAN_EXPIRE_DATE] = ::CreateWindowEx(0, DATETIMEPICK_CLASS, NULL, WS_CHILD | WS_VISIBLE | WS_DISABLED | DTS_SHORTDATECENTURYFORMAT,
-        iThird + 16, iPosX + (2 * iGroupBoxMargin) + iCheckHeight, iThird - 2, iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
+        iThird + 16, iPosX + (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight, iThird - 2, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
 
     hWndWindowItems[DT_TEMP_BAN_EXPIRE_TIME] = ::CreateWindowEx(0, DATETIMEPICK_CLASS, NULL, WS_CHILD | WS_VISIBLE | WS_DISABLED | DTS_TIMEFORMAT | DTS_UPDOWN,
-        (iThird * 2) + 19, iPosX + (2 * iGroupBoxMargin) + iCheckHeight, iThird - 2, iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
+        (iThird * 2) + 19, iPosX + (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight, iThird - 2, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
 
-    iPosX += iGroupBoxMargin + iCheckHeight + iOneLineGB + 9;
+    iPosX += clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + clsGuiSettingManager::iOneLineGB + 9;
 
-    hWndWindowItems[BTN_ACCEPT] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        2, iPosX, (rcParent.right / 2) - 3, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDOK, g_hInstance, NULL);
+    hWndWindowItems[BTN_ACCEPT] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+        2, iPosX, (rcParent.right / 2) - 3, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDOK, clsServerManager::hInstance, NULL);
 
-    hWndWindowItems[BTN_DISCARD] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        (rcParent.right / 2) + 2, iPosX, (rcParent.right / 2) - 4, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDCANCEL, g_hInstance, NULL);
+    hWndWindowItems[BTN_DISCARD] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+        (rcParent.right / 2) + 2, iPosX, (rcParent.right / 2) - 4, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDCANCEL, clsServerManager::hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
         if(hWndWindowItems[ui8i] == NULL) {
             return;
         }
 
-        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)clsGuiSettingManager::hFont, MAKELPARAM(TRUE, 0));
     }
 
     if(pRangeBanToChange != NULL) {
         ::SetWindowText(hWndWindowItems[EDT_FROM_IP], pRangeBanToChange->sIpFrom);
         ::SetWindowText(hWndWindowItems[EDT_TO_IP], pRangeBanToChange->sIpTo);
 
-        if(((pRangeBanToChange->ui8Bits & hashBanMan::FULL) == hashBanMan::FULL) == true) {
+        if(((pRangeBanToChange->ui8Bits & clsBanManager::FULL) == clsBanManager::FULL) == true) {
             ::SendMessage(hWndWindowItems[BTN_FULL_BAN], BM_SETCHECK, BST_CHECKED, 0);
         }
 
@@ -249,7 +248,7 @@ void RangeBanDialog::DoModal(HWND hWndParent, RangeBanItem * pRangeBan/* = NULL*
             ::SetWindowText(hWndWindowItems[EDT_BY], pRangeBanToChange->sBy);
         }
 
-        if(((pRangeBanToChange->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true) {
+        if(((pRangeBanToChange->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true) {
             ::SendMessage(hWndWindowItems[RB_PERM_BAN], BM_SETCHECK, BST_UNCHECKED, 0);
             ::SendMessage(hWndWindowItems[RB_TEMP_BAN], BM_SETCHECK, BST_CHECKED, 0);
 
@@ -279,7 +278,7 @@ void RangeBanDialog::DoModal(HWND hWndParent, RangeBanItem * pRangeBan/* = NULL*
 }
 //------------------------------------------------------------------------------
 
-bool RangeBanDialog::OnAccept() {
+bool clsRangeBanDialog::OnAccept() {
     int iIpFromLen = ::GetWindowTextLength(hWndWindowItems[EDT_FROM_IP]);
 
     char sFromIP[40];
@@ -289,10 +288,10 @@ bool RangeBanDialog::OnAccept() {
     memset(ui128FromIpHash, 0, 16);
 
 	if(iIpFromLen == 0) {
-		::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_NO_VALID_IP_SPECIFIED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_NO_VALID_IP_SPECIFIED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	} else if(HashIP(sFromIP, ui128FromIpHash) == false) {
-		::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(sFromIP) + " " + LanguageManager->sTexts[LAN_IS_NOT_VALID_IP_ADDRESS]).c_str(), sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(sFromIP) + " " + clsLanguageManager::mPtr->sTexts[LAN_IS_NOT_VALID_IP_ADDRESS]).c_str(), clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	}
 
@@ -305,15 +304,15 @@ bool RangeBanDialog::OnAccept() {
     memset(ui128ToIpHash, 0, 16);
 
 	if(iIpToLen == 0) {
-		::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_NO_VALID_IP_SPECIFIED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_NO_VALID_IP_SPECIFIED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	} else if(HashIP(sToIP, ui128ToIpHash) == false) {
-		::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(sToIP) + " " + LanguageManager->sTexts[LAN_IS_NOT_VALID_IP_ADDRESS]).c_str(), sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(sToIP) + " " + clsLanguageManager::mPtr->sTexts[LAN_IS_NOT_VALID_IP_ADDRESS]).c_str(), clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	}
 
     if(memcmp(ui128ToIpHash, ui128FromIpHash, 16) <= 0) {
-		::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_NO_VALID_IP_RANGE_SPECIFIED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_NO_VALID_IP_RANGE_SPECIFIED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 		return false;
     }
 
@@ -330,7 +329,7 @@ bool RangeBanDialog::OnAccept() {
 
         if(::SendMessage(hWndWindowItems[DT_TEMP_BAN_EXPIRE_DATE], DTM_GETSYSTEMTIME, 0, (LPARAM)&stDate) != GDT_VALID ||
             ::SendMessage(hWndWindowItems[DT_TEMP_BAN_EXPIRE_TIME], DTM_GETSYSTEMTIME, 0, (LPARAM)&stTime) != GDT_VALID) {
-            ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_BAD_TIME_SPECIFIED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+            ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_BAD_TIME_SPECIFIED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 
             return false;
         }
@@ -350,7 +349,7 @@ bool RangeBanDialog::OnAccept() {
 		ban_time = mktime(tm);
 
 		if(ban_time <= acc_time || ban_time == (time_t)-1) {
-			::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_BAD_TIME_SPECIFIED_BAN_EXPIRED], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+			::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_BAD_TIME_SPECIFIED_BAN_EXPIRED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 
 			return false;
         }
@@ -359,15 +358,15 @@ bool RangeBanDialog::OnAccept() {
 	if(pRangeBanToChange == NULL) {
 		RangeBanItem * pRangeBan = new RangeBanItem();
 		if(pRangeBan == NULL) {
-			AppendDebugLog("%s - [MEM] Cannot allocate pRangeBan in RangeBanDialog::OnAccept\n", 0);
+			AppendDebugLog("%s - [MEM] Cannot allocate pRangeBan in clsRangeBanDialog::OnAccept\n", 0);
 			return false;
 		}
 
 		if(bTempBan == true) {
-			pRangeBan->ui8Bits |= hashBanMan::TEMP;
+			pRangeBan->ui8Bits |= clsBanManager::TEMP;
 			pRangeBan->tempbanexpire = ban_time;
 		} else {
-			pRangeBan->ui8Bits |= hashBanMan::PERM;
+			pRangeBan->ui8Bits |= clsBanManager::PERM;
 		}
 
 		strcpy(pRangeBan->sIpFrom, sFromIP);
@@ -377,18 +376,18 @@ bool RangeBanDialog::OnAccept() {
 		memcpy(pRangeBan->ui128ToIpHash, ui128ToIpHash, 16);
 
         if(::SendMessage(hWndWindowItems[BTN_FULL_BAN], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-			pRangeBan->ui8Bits |= hashBanMan::FULL;
+			pRangeBan->ui8Bits |= clsBanManager::FULL;
         }
 
-		RangeBanItem *nxtBan = hashBanManager->RangeBanListS;
+		RangeBanItem *nxtBan = clsBanManager::mPtr->RangeBanListS;
 
 		// PPK ... don't add range ban if is already here same range ban
 		while(nxtBan != NULL) {
 			RangeBanItem *curBan = nxtBan;
 			nxtBan = curBan->next;
 
-			if(((curBan->ui8Bits & hashBanMan::TEMP) == hashBanMan::TEMP) == true && acc_time > curBan->tempbanexpire) {
-				hashBanManager->RemRange(curBan);
+			if(((curBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true && acc_time > curBan->tempbanexpire) {
+				clsBanManager::mPtr->RemRange(curBan);
 				delete curBan;
 
 				continue;
@@ -397,7 +396,7 @@ bool RangeBanDialog::OnAccept() {
 			if(memcmp(curBan->ui128FromIpHash, pRangeBan->ui128FromIpHash, 16) == 0 && memcmp(curBan->ui128ToIpHash, pRangeBan->ui128ToIpHash, 16) == 0) {
 				delete pRangeBan;
 
-				::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_SIMILAR_BAN_EXIST], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+				::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_SIMILAR_BAN_EXIST], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 				return false;
 			}
 		}
@@ -405,9 +404,9 @@ bool RangeBanDialog::OnAccept() {
         int iReasonLen = ::GetWindowTextLength(hWndWindowItems[EDT_REASON]);
 
 		if(iReasonLen != 0) {
-            pRangeBan->sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
+            pRangeBan->sReason = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
             if(pRangeBan->sReason == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in RangeBanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
+                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in clsRangeBanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
 
                 delete pRangeBan;
 
@@ -420,9 +419,9 @@ bool RangeBanDialog::OnAccept() {
         int iByLen = ::GetWindowTextLength(hWndWindowItems[EDT_BY]);
 
         if(iByLen != 0) {
-            pRangeBan->sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
+            pRangeBan->sBy = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
             if(pRangeBan->sBy == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in RangeBanDialog::OnAccept\n", (uint64_t)(iByLen+1));
+                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in clsRangeBanDialog::OnAccept\n", (uint64_t)(iByLen+1));
 
                 delete pRangeBan;
 
@@ -432,19 +431,19 @@ bool RangeBanDialog::OnAccept() {
             ::GetWindowText(hWndWindowItems[EDT_BY], pRangeBan->sBy, iByLen+1);
 		}
 
-		hashBanManager->AddRange(pRangeBan);
+		clsBanManager::mPtr->AddRange(pRangeBan);
 
 		return true;
 	} else {
 		if(bTempBan == true) {
-			pRangeBanToChange->ui8Bits &= ~hashBanMan::PERM;
+			pRangeBanToChange->ui8Bits &= ~clsBanManager::PERM;
 
-			pRangeBanToChange->ui8Bits |= hashBanMan::TEMP;
+			pRangeBanToChange->ui8Bits |= clsBanManager::TEMP;
 			pRangeBanToChange->tempbanexpire = ban_time;
 		} else {
-			pRangeBanToChange->ui8Bits &= ~hashBanMan::TEMP;
+			pRangeBanToChange->ui8Bits &= ~clsBanManager::TEMP;
 
-			pRangeBanToChange->ui8Bits |= hashBanMan::PERM;
+			pRangeBanToChange->ui8Bits |= clsBanManager::PERM;
 		}
 
 		strcpy(pRangeBanToChange->sIpFrom, sFromIP);
@@ -454,18 +453,18 @@ bool RangeBanDialog::OnAccept() {
 		memcpy(pRangeBanToChange->ui128ToIpHash, ui128ToIpHash, 16);
 
 		if(::SendMessage(hWndWindowItems[BTN_FULL_BAN], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-			pRangeBanToChange->ui8Bits |= hashBanMan::FULL;
+			pRangeBanToChange->ui8Bits |= clsBanManager::FULL;
 		} else {
-			pRangeBanToChange->ui8Bits &= ~hashBanMan::FULL;
+			pRangeBanToChange->ui8Bits &= ~clsBanManager::FULL;
 		}
 
         int iReasonLen = ::GetWindowTextLength(hWndWindowItems[EDT_REASON]);
 
         char * sReason = NULL;
 		if(iReasonLen != 0) {
-            sReason = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
+            sReason = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
             if(sReason == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in RangeBanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
+                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in clsRangeBanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
 
                 return false;
             }
@@ -476,8 +475,8 @@ bool RangeBanDialog::OnAccept() {
 		if(iReasonLen != 0) {
 			if(pRangeBanToChange->sReason == NULL || strcmp(pRangeBanToChange->sReason, sReason) != NULL) {
 				if(pRangeBanToChange->sReason != NULL) {
-					if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pRangeBanToChange->sReason) == 0) {
-						AppendDebugLog("%s - [MEM] Cannot deallocate sReason in RangeBanDialog::OnAccept\n", 0);
+					if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pRangeBanToChange->sReason) == 0) {
+						AppendDebugLog("%s - [MEM] Cannot deallocate sReason in clsRangeBanDialog::OnAccept\n", 0);
 					}
 					pRangeBanToChange->sReason = NULL;
 				}
@@ -485,7 +484,7 @@ bool RangeBanDialog::OnAccept() {
 				pRangeBanToChange->sReason = sReason;
 			}
 		} else if(pRangeBanToChange->sReason != NULL) {
-			if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pRangeBanToChange->sReason) == 0) {
+			if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pRangeBanToChange->sReason) == 0) {
 				AppendDebugLog("%s - [MEM] Cannot deallocate sReason in BanDialog::OnAccept\n", 0);
 			}
 
@@ -493,8 +492,8 @@ bool RangeBanDialog::OnAccept() {
         }
 
         if(sReason != NULL && (pRangeBanToChange->sReason != sReason)) {
-			if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sReason) == 0) {
-				AppendDebugLog("%s - [MEM] Cannot deallocate sReason in RangeBanDialog::OnAccept\n", 0);
+			if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sReason) == 0) {
+				AppendDebugLog("%s - [MEM] Cannot deallocate sReason in clsRangeBanDialog::OnAccept\n", 0);
 			}
         }
 
@@ -502,9 +501,9 @@ bool RangeBanDialog::OnAccept() {
 
         char * sBy = NULL;
         if(iByLen != 0) {
-            sBy = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
+            sBy = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
             if(sBy == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in RangeBanDialog::OnAccept\n", (uint64_t)(iByLen+1));
+                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in clsRangeBanDialog::OnAccept\n", (uint64_t)(iByLen+1));
 
     			return false;
             }
@@ -515,8 +514,8 @@ bool RangeBanDialog::OnAccept() {
 		if(iByLen != 0) {
 			if(pRangeBanToChange->sBy == NULL || strcmp(pRangeBanToChange->sBy, sBy) != NULL) {
 				if(pRangeBanToChange->sBy != NULL) {
-					if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pRangeBanToChange->sBy) == 0) {
-						AppendDebugLog("%s - [MEM] Cannot deallocate sBy in RangeBanDialog::OnAccept\n", 0);
+					if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pRangeBanToChange->sBy) == 0) {
+						AppendDebugLog("%s - [MEM] Cannot deallocate sBy in clsRangeBanDialog::OnAccept\n", 0);
 					}
 					pRangeBanToChange->sBy = NULL;
 				}
@@ -524,21 +523,21 @@ bool RangeBanDialog::OnAccept() {
 				pRangeBanToChange->sBy = sBy;
 			}
 		} else if(pRangeBanToChange->sBy != NULL) {
-			if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pRangeBanToChange->sBy) == 0) {
-				AppendDebugLog("%s - [MEM] Cannot deallocate sBy in RangeBanDialog::OnAccept\n", 0);
+			if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pRangeBanToChange->sBy) == 0) {
+				AppendDebugLog("%s - [MEM] Cannot deallocate sBy in clsRangeBanDialog::OnAccept\n", 0);
 			}
 			pRangeBanToChange->sBy = NULL;
         }
 
         if(sBy != NULL && (pRangeBanToChange->sBy != sBy)) {
-			if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sBy) == 0) {
-				AppendDebugLog("%s - [MEM] Cannot deallocate sBy in RangeBanDialog::OnAccept\n", 0);
+			if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sBy) == 0) {
+				AppendDebugLog("%s - [MEM] Cannot deallocate sBy in clsRangeBanDialog::OnAccept\n", 0);
 			}
         }
 
-        if(pRangeBansDialog != NULL) {
-            pRangeBansDialog->RemoveRangeBan(pRangeBanToChange);
-            pRangeBansDialog->AddRangeBan(pRangeBanToChange);
+        if(clsRangeBansDialog::mPtr != NULL) {
+            clsRangeBansDialog::mPtr->RemoveRangeBan(pRangeBanToChange);
+            clsRangeBansDialog::mPtr->AddRangeBan(pRangeBanToChange);
         }
 
 		return true;
@@ -546,11 +545,11 @@ bool RangeBanDialog::OnAccept() {
 }
 //------------------------------------------------------------------------------
 
-void RangeBanDialog::RangeBanDeleted(RangeBanItem * pRangeBan) {
+void clsRangeBanDialog::RangeBanDeleted(RangeBanItem * pRangeBan) {
     if(pRangeBanToChange == NULL || pRangeBan != pRangeBanToChange) {
         return;
     }
 
-    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_RANGE_BAN_DELETED_ACCEPT_TO_NEW], sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_RANGE_BAN_DELETED_ACCEPT_TO_NEW], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 }
 //------------------------------------------------------------------------------

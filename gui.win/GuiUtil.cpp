@@ -30,36 +30,17 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "Resources.h"
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-float fScaleFactor = 1.0;
-int iGroupBoxMargin = 17;
-int iCheckHeight = 16;
-int iEditHeight = 23;
-int iTextHeight = 15;
-int iUpDownWidth = 17;
-int iOneLineGB = 17 + 23 + 8;
-int iOneLineOneChecksGB = 17 + 16 + 23 + 12;
-int iOneLineTwoChecksGB = 17 + (2 * 16) + 23 + 15;
-HFONT hFont = NULL;
-HCURSOR hArrowCursor = NULL;
-HCURSOR hVerticalCursor = NULL;
-WNDPROC wpOldButtonProc = NULL;
-WNDPROC wpOldEditProc = NULL;
-WNDPROC wpOldListViewProc = NULL;
-WNDPROC wpOldMultiRichEditProc = NULL;
-WNDPROC wpOldTabsProc = NULL;
-WNDPROC wpOldTreeProc = NULL;
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int ScaleGui(const int &iValue) {
-    return (int)(iValue * fScaleFactor);
+    return (int)(iValue * clsGuiSettingManager::fScaleFactor);
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int ScaleGuiDefaultsOnly(const int &iValue) {
-    if(g_GuiSettingManager->iIntegers[iValue] == g_GuiSettingManager->GetDefaultInteger(iValue)) {
-        return (int)(g_GuiSettingManager->iIntegers[iValue] * fScaleFactor);
+    if(clsGuiSettingManager::mPtr->iIntegers[iValue] == clsGuiSettingManager::mPtr->GetDefaultInteger(iValue)) {
+        return (int)(clsGuiSettingManager::mPtr->iIntegers[iValue] * clsGuiSettingManager::fScaleFactor);
     } else {
-        return g_GuiSettingManager->iIntegers[iValue];
+        return clsGuiSettingManager::mPtr->iIntegers[iValue];
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -87,11 +68,11 @@ void RichEditOpenLink(const HWND &hRichEdit, const ENLINK * pEnLink) {
 void RichEditPopupMenu(const HWND &hRichEdit, const HWND &hParent, const LPARAM &lParam) {
     HMENU hMenu = ::CreatePopupMenu();
 
-    ::AppendMenu(hMenu, MF_STRING, IDC_COPY, LanguageManager->sTexts[LAN_MENU_COPY]);
+    ::AppendMenu(hMenu, MF_STRING, IDC_COPY, clsLanguageManager::mPtr->sTexts[LAN_MENU_COPY]);
     ::AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
-    ::AppendMenu(hMenu, MF_STRING, IDC_SELECT_ALL, LanguageManager->sTexts[LAN_MENU_SELECT_ALL]);
+    ::AppendMenu(hMenu, MF_STRING, IDC_SELECT_ALL, clsLanguageManager::mPtr->sTexts[LAN_MENU_SELECT_ALL]);
     ::AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
-    ::AppendMenu(hMenu, MF_STRING, IDC_CLEAR_ALL, LanguageManager->sTexts[LAN_CLEAR_ALL]);
+    ::AppendMenu(hMenu, MF_STRING, IDC_CLEAR_ALL, clsLanguageManager::mPtr->sTexts[LAN_CLEAR_ALL]);
 
     ::SetMenuDefaultItem(hMenu, IDC_CLEAR_ALL, FALSE);
 
@@ -315,11 +296,11 @@ static LRESULT WantTabProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, W
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 LRESULT CALLBACK TabsProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    return WantTabProc(hWnd, uMsg, wParam, lParam, wpOldTabsProc);
+    return WantTabProc(hWnd, uMsg, wParam, lParam, clsGuiSettingManager::wpOldTabsProc);
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 LRESULT CALLBACK TreeProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    return WantTabProc(hWnd, uMsg, wParam, lParam, wpOldTreeProc);
+    return WantTabProc(hWnd, uMsg, wParam, lParam, clsGuiSettingManager::wpOldTreeProc);
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

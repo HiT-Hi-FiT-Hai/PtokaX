@@ -26,7 +26,7 @@ struct PrcsdUsrCmd;
 struct PassBf;
 //---------------------------------------------------------------------------
 
-class cDcCommands {
+class clsDcCommands {
 private:
     PassBf * PasswdBfCheck;
     char msg[1024];
@@ -69,8 +69,10 @@ private:
     PrcsdUsrCmd * AddSearch(User * pUser, PrcsdUsrCmd * cmdSearch, char * sSearch, const size_t &szLen, const bool &bActive) const;
 protected:
 public:
-	cDcCommands();
-    ~cDcCommands();
+	clsDcCommands();
+    ~clsDcCommands();
+
+    static clsDcCommands * mPtr;
 
     void PreProcessData(User * curUser, char * sData, const bool &bCheck, const uint32_t &iLen);
     void ProcessCmds(User * curUser);
@@ -82,9 +84,6 @@ public:
 	uint32_t iStatCmdConnectToMe, iStatCmdVersion, iStatCmdKick, iStatCmdSupports, iStatBotINFO, iStatZPipe;
     uint32_t iStatCmdMultiSearch, iStatCmdMultiConnectToMe, iStatCmdClose;
 };
-
-//---------------------------------------------------------------------------
-extern cDcCommands *DcCommands;
 //---------------------------------------------------------------------------
 
 #endif

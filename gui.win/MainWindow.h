@@ -28,8 +28,10 @@
 #define WM_UPDATE_CHECK_DATA (WM_USER+13)
 //------------------------------------------------------------------------------
 
-class MainWindow {
+class clsMainWindow {
 public:
+    static clsMainWindow * mPtr;
+
     HWND m_hWnd;
 
     HWND hWndWindowItems[1];
@@ -38,8 +40,8 @@ public:
         TC_TABS
     };
 
-    MainWindow();
-    ~MainWindow();
+    clsMainWindow();
+    ~clsMainWindow();
 
     static LRESULT CALLBACK StaticMainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -64,8 +66,6 @@ private:
 
     void OnSelChanged();
 };
-//------------------------------------------------------------------------------
-extern MainWindow * pMainWindow;
 //------------------------------------------------------------------------------
 
 #endif

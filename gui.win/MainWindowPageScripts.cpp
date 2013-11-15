@@ -41,30 +41,30 @@
 #include "Resources.h"
 #include "ScriptEditorDialog.h"
 //---------------------------------------------------------------------------
-MainWindowPageScripts * pMainWindowPageScripts = NULL;
+clsMainWindowPageScripts * clsMainWindowPageScripts::mPtr = NULL;
 //---------------------------------------------------------------------------
 #define IDC_OPEN_IN_EXT_EDITOR      500
 #define IDC_OPEN_IN_SCRIPT_EDITOR   501
 #define IDC_DELETE_SCRIPT           502
 //---------------------------------------------------------------------------
 
-MainWindowPageScripts::MainWindowPageScripts() {
-    pMainWindowPageScripts = this;
+clsMainWindowPageScripts::clsMainWindowPageScripts() {
+    clsMainWindowPageScripts::mPtr = this;
 
     memset(&hWndPageItems, 0, (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])) * sizeof(HWND));
 
     bIgnoreItemChanged = false;
 
-    iPercentagePos = g_GuiSettingManager->iIntegers[GUISETINT_SCRIPTS_SPLITTER];
+    iPercentagePos = clsGuiSettingManager::mPtr->iIntegers[GUISETINT_SCRIPTS_SPLITTER];
 }
 //---------------------------------------------------------------------------
 
-MainWindowPageScripts::~MainWindowPageScripts() {
-    pMainWindowPageScripts = NULL;
+clsMainWindowPageScripts::~clsMainWindowPageScripts() {
+    clsMainWindowPageScripts::mPtr = NULL;
 }
 //---------------------------------------------------------------------------
 
-LRESULT MainWindowPageScripts::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT clsMainWindowPageScripts::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch(uMsg) {
         case WM_SETFOCUS: {
             CHARRANGE cr = { 0, 0 };
@@ -130,16 +130,16 @@ LRESULT MainWindowPageScripts::MainWindowPageProc(UINT uMsg, WPARAM wParam, LPAR
                 }
             } else if(((LPNMHDR)lParam)->hwndFrom == hWndPageItems[REDT_SCRIPTS_ERRORS] && ((LPNMHDR)lParam)->code == EN_LINK) {
                 if(((ENLINK *)lParam)->msg == WM_LBUTTONUP) {
-                    RichEditOpenLink(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS], (ENLINK *)lParam);
+                    RichEditOpenLink(clsMainWindowPageScripts::mPtr->hWndPageItems[clsMainWindowPageScripts::REDT_SCRIPTS_ERRORS], (ENLINK *)lParam);
                     return 1;
                 }
             }
 
             break;
         case WM_DESTROY:
-            g_GuiSettingManager->SetInteger(GUISETINT_SCRIPTS_SPLITTER, iPercentagePos);
-            g_GuiSettingManager->SetInteger(GUISETINT_SCRIPT_NAMES, (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETCOLUMNWIDTH, 0, 0));
-            g_GuiSettingManager->SetInteger(GUISETINT_SCRIPT_MEMORY_USAGES, (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETCOLUMNWIDTH, 1, 0));
+            clsGuiSettingManager::mPtr->SetInteger(GUISETINT_SCRIPTS_SPLITTER, iPercentagePos);
+            clsGuiSettingManager::mPtr->SetInteger(GUISETINT_SCRIPT_NAMES, (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETCOLUMNWIDTH, 0, 0));
+            clsGuiSettingManager::mPtr->SetInteger(GUISETINT_SCRIPT_MEMORY_USAGES, (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETCOLUMNWIDTH, 1, 0));
 
             break;
     }
@@ -157,17 +157,17 @@ static LRESULT CALLBACK MultiRichEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
         return DLGC_WANTTAB;
     } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
         if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
-            ::SetFocus(::GetNextDlgTabItem(pMainWindow->m_hWnd, hWnd, FALSE));
+            ::SetFocus(::GetNextDlgTabItem(clsMainWindow::mPtr->m_hWnd, hWnd, FALSE));
 			return 0;
         }
 
-		::SetFocus(pMainWindow->hWndWindowItems[MainWindow::TC_TABS]);
+		::SetFocus(clsMainWindow::mPtr->hWndWindowItems[clsMainWindow::TC_TABS]);
 		return 0;
     } else if(uMsg == WM_KEYDOWN && wParam == VK_ESCAPE) {
         return 0;
     }
 
-    return ::CallWindowProc(wpOldMultiRichEditProc, hWnd, uMsg, wParam, lParam);
+    return ::CallWindowProc(clsGuiSettingManager::wpOldMultiRichEditProc, hWnd, uMsg, wParam, lParam);
 }
 //---------------------------------------------------------------------------
 
@@ -180,37 +180,37 @@ static LRESULT CALLBACK ScriptsProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
         }
     } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
         if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
-            MainWindowPageScripts * pParent = (MainWindowPageScripts *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
+            clsMainWindowPageScripts * pParent = (clsMainWindowPageScripts *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
             if(pParent != NULL) {
-                if(::IsWindowEnabled(pParent->hWndPageItems[MainWindowPageScripts::BTN_MOVE_UP])) {
-                    ::SetFocus(pParent->hWndPageItems[MainWindowPageScripts::BTN_MOVE_UP]);
+                if(::IsWindowEnabled(pParent->hWndPageItems[clsMainWindowPageScripts::BTN_MOVE_UP])) {
+                    ::SetFocus(pParent->hWndPageItems[clsMainWindowPageScripts::BTN_MOVE_UP]);
                     return 0;
-                } else if(::IsWindowEnabled(pParent->hWndPageItems[MainWindowPageScripts::BTN_MOVE_DOWN])) {
-                    ::SetFocus(pParent->hWndPageItems[MainWindowPageScripts::BTN_MOVE_DOWN]);
+                } else if(::IsWindowEnabled(pParent->hWndPageItems[clsMainWindowPageScripts::BTN_MOVE_DOWN])) {
+                    ::SetFocus(pParent->hWndPageItems[clsMainWindowPageScripts::BTN_MOVE_DOWN]);
                     return 0;
-                } else if(::IsWindowEnabled(pParent->hWndPageItems[MainWindowPageScripts::BTN_RESTART_SCRIPTS])) {
-                    ::SetFocus(pParent->hWndPageItems[MainWindowPageScripts::BTN_RESTART_SCRIPTS]);
+                } else if(::IsWindowEnabled(pParent->hWndPageItems[clsMainWindowPageScripts::BTN_RESTART_SCRIPTS])) {
+                    ::SetFocus(pParent->hWndPageItems[clsMainWindowPageScripts::BTN_RESTART_SCRIPTS]);
                     return 0;
                 }
             }
 
-            ::SetFocus(pMainWindow->hWndWindowItems[MainWindow::TC_TABS]);
+            ::SetFocus(clsMainWindow::mPtr->hWndWindowItems[clsMainWindow::TC_TABS]);
 
             return 0;
         } else {
-			::SetFocus(::GetNextDlgTabItem(pMainWindow->m_hWnd, hWnd, TRUE));
+			::SetFocus(::GetNextDlgTabItem(clsMainWindow::mPtr->m_hWnd, hWnd, TRUE));
             return 0;
         }
     } else if(uMsg == WM_CHAR && wParam == VK_RETURN) {
-        MainWindowPageScripts * pParent = (MainWindowPageScripts *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
+        clsMainWindowPageScripts * pParent = (clsMainWindowPageScripts *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
         if(pParent != NULL) {
             pParent->OpenInScriptEditor();
             return 0;
         }
     }
 
-    return ::CallWindowProc(wpOldListViewProc, hWnd, uMsg, wParam, lParam);
+    return ::CallWindowProc(clsGuiSettingManager::wpOldListViewProc, hWnd, uMsg, wParam, lParam);
 }
 //---------------------------------------------------------------------------
 
@@ -219,28 +219,28 @@ static LRESULT CALLBACK MoveUpProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
         return DLGC_WANTTAB;
     } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
         if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
-            MainWindowPageScripts * pParent = (MainWindowPageScripts *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
+            clsMainWindowPageScripts * pParent = (clsMainWindowPageScripts *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
             if(pParent != NULL) {
-                if(::IsWindowEnabled(pParent->hWndPageItems[MainWindowPageScripts::BTN_MOVE_DOWN])) {
-                    ::SetFocus(pParent->hWndPageItems[MainWindowPageScripts::BTN_MOVE_DOWN]);
+                if(::IsWindowEnabled(pParent->hWndPageItems[clsMainWindowPageScripts::BTN_MOVE_DOWN])) {
+                    ::SetFocus(pParent->hWndPageItems[clsMainWindowPageScripts::BTN_MOVE_DOWN]);
                     return 0;
-                } else if(::IsWindowEnabled(pParent->hWndPageItems[MainWindowPageScripts::BTN_RESTART_SCRIPTS])) {
-                    ::SetFocus(pParent->hWndPageItems[MainWindowPageScripts::BTN_RESTART_SCRIPTS]);
+                } else if(::IsWindowEnabled(pParent->hWndPageItems[clsMainWindowPageScripts::BTN_RESTART_SCRIPTS])) {
+                    ::SetFocus(pParent->hWndPageItems[clsMainWindowPageScripts::BTN_RESTART_SCRIPTS]);
                     return 0;
                 }
             }
 
-            ::SetFocus(pMainWindow->hWndWindowItems[MainWindow::TC_TABS]);
+            ::SetFocus(clsMainWindow::mPtr->hWndWindowItems[clsMainWindow::TC_TABS]);
 
             return 0;
         } else {
-			::SetFocus(::GetNextDlgTabItem(pMainWindow->m_hWnd, hWnd, TRUE));
+			::SetFocus(::GetNextDlgTabItem(clsMainWindow::mPtr->m_hWnd, hWnd, TRUE));
             return 0;
         }
     }
 
-    return ::CallWindowProc(wpOldButtonProc, hWnd, uMsg, wParam, lParam);
+    return ::CallWindowProc(clsGuiSettingManager::wpOldButtonProc, hWnd, uMsg, wParam, lParam);
 }
 //---------------------------------------------------------------------------
 
@@ -249,67 +249,67 @@ static LRESULT CALLBACK MoveDownProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
         return DLGC_WANTTAB;
     } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
         if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
-            MainWindowPageScripts * pParent = (MainWindowPageScripts *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
+            clsMainWindowPageScripts * pParent = (clsMainWindowPageScripts *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
             if(pParent != NULL) {
-                if(::IsWindowEnabled(pParent->hWndPageItems[MainWindowPageScripts::BTN_RESTART_SCRIPTS])) {
-                    ::SetFocus(pParent->hWndPageItems[MainWindowPageScripts::BTN_RESTART_SCRIPTS]);
+                if(::IsWindowEnabled(pParent->hWndPageItems[clsMainWindowPageScripts::BTN_RESTART_SCRIPTS])) {
+                    ::SetFocus(pParent->hWndPageItems[clsMainWindowPageScripts::BTN_RESTART_SCRIPTS]);
                     return 0;
                 }
             }
 
-            ::SetFocus(pMainWindow->hWndWindowItems[MainWindow::TC_TABS]);
+            ::SetFocus(clsMainWindow::mPtr->hWndWindowItems[clsMainWindow::TC_TABS]);
 
             return 0;
         } else {
-			::SetFocus(::GetNextDlgTabItem(pMainWindow->m_hWnd, hWnd, TRUE));
+			::SetFocus(::GetNextDlgTabItem(clsMainWindow::mPtr->m_hWnd, hWnd, TRUE));
             return 0;
         }
     }
 
-    return ::CallWindowProc(wpOldButtonProc, hWnd, uMsg, wParam, lParam);
+    return ::CallWindowProc(clsGuiSettingManager::wpOldButtonProc, hWnd, uMsg, wParam, lParam);
 }
 //---------------------------------------------------------------------------
 
-bool MainWindowPageScripts::CreateMainWindowPage(HWND hOwner) {
+bool clsMainWindowPageScripts::CreateMainWindowPage(HWND hOwner) {
     CreateHWND(hOwner);
 
     RECT rcMain;
     ::GetClientRect(m_hWnd, &rcMain);
 
-    hWndPageItems[GB_SCRIPTS_ERRORS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_SCRIPTS_ERRORS],
-        WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | BS_GROUPBOX, 3, 0, rcMain.right - ScaleGui(145) - 9, rcMain.bottom - 3, m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_SCRIPTS_ERRORS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_SCRIPTS_ERRORS],
+        WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | BS_GROUPBOX, 3, 0, rcMain.right - ScaleGui(145) - 9, rcMain.bottom - 3, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[REDT_SCRIPTS_ERRORS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, /*MSFTEDIT_CLASS*/RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL | ES_AUTOVSCROLL | ES_MULTILINE | ES_READONLY,
-        11, iGroupBoxMargin, rcMain.right - ScaleGui(145) - 25, rcMain.bottom - (iGroupBoxMargin + 11), m_hWnd, (HMENU)REDT_SCRIPTS_ERRORS, g_hInstance, NULL);
+        11, clsGuiSettingManager::iGroupBoxMargin, rcMain.right - ScaleGui(145) - 25, rcMain.bottom - (clsGuiSettingManager::iGroupBoxMargin + 11), m_hWnd, (HMENU)REDT_SCRIPTS_ERRORS, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[REDT_SCRIPTS_ERRORS], EM_EXLIMITTEXT, 0, (LPARAM)1048576);
     ::SendMessage(hWndPageItems[REDT_SCRIPTS_ERRORS], EM_AUTOURLDETECT, TRUE, 0);
     ::SendMessage(hWndPageItems[REDT_SCRIPTS_ERRORS], EM_SETEVENTMASK, 0, (LPARAM)::SendMessage(hWndPageItems[REDT_SCRIPTS_ERRORS], EM_GETEVENTMASK, 0, 0) | ENM_LINK);
 
-    hWndPageItems[BTN_OPEN_SCRIPT_EDITOR] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_OPEN_SCRIPT_EDITOR], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        rcMain.right - ScaleGui(145) - 4, 1, ScaleGui(145) + 2, iEditHeight, m_hWnd, (HMENU)BTN_OPEN_SCRIPT_EDITOR, g_hInstance, NULL);
+    hWndPageItems[BTN_OPEN_SCRIPT_EDITOR] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_OPEN_SCRIPT_EDITOR], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+        rcMain.right - ScaleGui(145) - 4, 1, ScaleGui(145) + 2, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)BTN_OPEN_SCRIPT_EDITOR, clsServerManager::hInstance, NULL);
 
-    hWndPageItems[BTN_REFRESH_SCRIPTS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_REFRESH_SCRIPTS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        rcMain.right - ScaleGui(145) - 4, iEditHeight + 4, ScaleGui(145) + 2, iEditHeight, m_hWnd, (HMENU)BTN_REFRESH_SCRIPTS, g_hInstance, NULL);
+    hWndPageItems[BTN_REFRESH_SCRIPTS] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_REFRESH_SCRIPTS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+        rcMain.right - ScaleGui(145) - 4, clsGuiSettingManager::iEditHeight + 4, ScaleGui(145) + 2, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)BTN_REFRESH_SCRIPTS, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LV_SCRIPTS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL,
-        rcMain.right - ScaleGui(145) - 3, (2 * iEditHeight) + 8, ScaleGui(145), rcMain.bottom - ((2 * iEditHeight) + 8) - ((2 * iEditHeight) - 5) - 14, m_hWnd, NULL, g_hInstance, NULL);
+        rcMain.right - ScaleGui(145) - 3, (2 * clsGuiSettingManager::iEditHeight) + 8, ScaleGui(145), rcMain.bottom - ((2 * clsGuiSettingManager::iEditHeight) + 8) - ((2 * clsGuiSettingManager::iEditHeight) - 5) - 14, m_hWnd, NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_LABELTIP | LVS_EX_CHECKBOXES);
 
-    hWndPageItems[BTN_MOVE_UP] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MOVE_UP], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_TABSTOP | BS_PUSHBUTTON,
-        rcMain.right - ScaleGui(145) - 4, rcMain.bottom - (2 * iEditHeight) - 5, ScaleGui(72), iEditHeight, m_hWnd, (HMENU)BTN_MOVE_UP, g_hInstance, NULL);
+    hWndPageItems[BTN_MOVE_UP] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_MOVE_UP], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_TABSTOP | BS_PUSHBUTTON,
+        rcMain.right - ScaleGui(145) - 4, rcMain.bottom - (2 * clsGuiSettingManager::iEditHeight) - 5, ScaleGui(72), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)BTN_MOVE_UP, clsServerManager::hInstance, NULL);
 
-    hWndPageItems[BTN_MOVE_DOWN] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MOVE_DOWN], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_TABSTOP | BS_PUSHBUTTON,
-        rcMain.right - ScaleGui(72) - 2, rcMain.bottom - (2 * iEditHeight) - 5, ScaleGui(72), iEditHeight, m_hWnd, (HMENU)BTN_MOVE_DOWN, g_hInstance, NULL);
+    hWndPageItems[BTN_MOVE_DOWN] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_MOVE_DOWN], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_TABSTOP | BS_PUSHBUTTON,
+        rcMain.right - ScaleGui(72) - 2, rcMain.bottom - (2 * clsGuiSettingManager::iEditHeight) - 5, ScaleGui(72), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)BTN_MOVE_DOWN, clsServerManager::hInstance, NULL);
 
     {
         DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON;
-        if(SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == false || bServerRunning == false) {
+        if(clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_SCRIPTING] == false || clsServerManager::bServerRunning == false) {
             dwStyle |= WS_DISABLED;
         }
 
-        hWndPageItems[BTN_RESTART_SCRIPTS] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_RESTART_SCRIPTS], dwStyle,
-            rcMain.right - ScaleGui(145) - 4, rcMain.bottom - iEditHeight - 2, ScaleGui(145) + 2, iEditHeight, m_hWnd, (HMENU)BTN_RESTART_SCRIPTS, g_hInstance, NULL);
+        hWndPageItems[BTN_RESTART_SCRIPTS] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_RESTART_SCRIPTS], dwStyle,
+            rcMain.right - ScaleGui(145) - 4, rcMain.bottom - clsGuiSettingManager::iEditHeight - 2, ScaleGui(145) + 2, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)BTN_RESTART_SCRIPTS, clsServerManager::hInstance, NULL);
     }
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
@@ -317,7 +317,7 @@ bool MainWindowPageScripts::CreateMainWindowPage(HWND hOwner) {
             return false;
         }
 
-        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)clsGuiSettingManager::hFont, MAKELPARAM(TRUE, 0));
     }
 
     SetSplitterRect(&rcMain);
@@ -325,66 +325,66 @@ bool MainWindowPageScripts::CreateMainWindowPage(HWND hOwner) {
     LVCOLUMN lvColumn = { 0 };
     lvColumn.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
     lvColumn.fmt = LVCFMT_LEFT;
-    lvColumn.cx = g_GuiSettingManager->iIntegers[GUISETINT_SCRIPT_NAMES];
-    lvColumn.pszText = LanguageManager->sTexts[LAN_SCRIPT_FILE];
+    lvColumn.cx = clsGuiSettingManager::mPtr->iIntegers[GUISETINT_SCRIPT_NAMES];
+    lvColumn.pszText = clsLanguageManager::mPtr->sTexts[LAN_SCRIPT_FILE];
     lvColumn.iSubItem = 0;
 
     ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_INSERTCOLUMN, 0, (LPARAM)&lvColumn);
 
     lvColumn.fmt = LVCFMT_RIGHT;
-    lvColumn.cx = g_GuiSettingManager->iIntegers[GUISETINT_SCRIPT_MEMORY_USAGES];
-    lvColumn.pszText = LanguageManager->sTexts[LAN_MEM_USAGE];
+    lvColumn.cx = clsGuiSettingManager::mPtr->iIntegers[GUISETINT_SCRIPT_MEMORY_USAGES];
+    lvColumn.pszText = clsLanguageManager::mPtr->sTexts[LAN_MEM_USAGE];
     lvColumn.iSubItem = 1;
     ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_INSERTCOLUMN, 1, (LPARAM)&lvColumn);
 
 	AddScriptsToList(false);
 
-    wpOldMultiRichEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[REDT_SCRIPTS_ERRORS], GWLP_WNDPROC, (LONG_PTR)MultiRichEditProc);
+    clsGuiSettingManager::wpOldMultiRichEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[REDT_SCRIPTS_ERRORS], GWLP_WNDPROC, (LONG_PTR)MultiRichEditProc);
 
     ::SetWindowLongPtr(hWndPageItems[LV_SCRIPTS], GWLP_USERDATA, (LONG_PTR)this);
-    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[LV_SCRIPTS], GWLP_WNDPROC, (LONG_PTR)ScriptsProc);
+    clsGuiSettingManager::wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[LV_SCRIPTS], GWLP_WNDPROC, (LONG_PTR)ScriptsProc);
 
     ::SetWindowLongPtr(hWndPageItems[BTN_MOVE_UP], GWLP_USERDATA, (LONG_PTR)this);
-    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_MOVE_UP], GWLP_WNDPROC, (LONG_PTR)MoveUpProc);
+    clsGuiSettingManager::wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_MOVE_UP], GWLP_WNDPROC, (LONG_PTR)MoveUpProc);
 
     ::SetWindowLongPtr(hWndPageItems[BTN_MOVE_DOWN], GWLP_USERDATA, (LONG_PTR)this);
-    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_MOVE_DOWN], GWLP_WNDPROC, (LONG_PTR)MoveDownProc);
+    clsGuiSettingManager::wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_MOVE_DOWN], GWLP_WNDPROC, (LONG_PTR)MoveDownProc);
 
-    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_RESTART_SCRIPTS], GWLP_WNDPROC, (LONG_PTR)LastButtonProc);
+    clsGuiSettingManager::wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_RESTART_SCRIPTS], GWLP_WNDPROC, (LONG_PTR)LastButtonProc);
 
 	return true;
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::UpdateLanguage() {
-    ::SetWindowText(hWndPageItems[GB_SCRIPTS_ERRORS], LanguageManager->sTexts[LAN_SCRIPTS_ERRORS]);
-    ::SetWindowText(hWndPageItems[BTN_OPEN_SCRIPT_EDITOR], LanguageManager->sTexts[LAN_OPEN_SCRIPT_EDITOR]);
-    ::SetWindowText(hWndPageItems[BTN_REFRESH_SCRIPTS], LanguageManager->sTexts[LAN_REFRESH_SCRIPTS]);
+void clsMainWindowPageScripts::UpdateLanguage() {
+    ::SetWindowText(hWndPageItems[GB_SCRIPTS_ERRORS], clsLanguageManager::mPtr->sTexts[LAN_SCRIPTS_ERRORS]);
+    ::SetWindowText(hWndPageItems[BTN_OPEN_SCRIPT_EDITOR], clsLanguageManager::mPtr->sTexts[LAN_OPEN_SCRIPT_EDITOR]);
+    ::SetWindowText(hWndPageItems[BTN_REFRESH_SCRIPTS], clsLanguageManager::mPtr->sTexts[LAN_REFRESH_SCRIPTS]);
 
     LVCOLUMN lvColumn = { 0 };
     lvColumn.mask = LVCF_TEXT;
-    lvColumn.pszText = LanguageManager->sTexts[LAN_SCRIPT_FILE];
+    lvColumn.pszText = clsLanguageManager::mPtr->sTexts[LAN_SCRIPT_FILE];
 
     ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_SETCOLUMN, 0, (LPARAM)&lvColumn);
 
-    lvColumn.pszText = LanguageManager->sTexts[LAN_MEM_USAGE];
+    lvColumn.pszText = clsLanguageManager::mPtr->sTexts[LAN_MEM_USAGE];
 
     ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_SETCOLUMN, 1, (LPARAM)&lvColumn);
 
-    ::SetWindowText(hWndPageItems[BTN_MOVE_UP], LanguageManager->sTexts[LAN_MOVE_UP]);
-    ::SetWindowText(hWndPageItems[BTN_MOVE_DOWN], LanguageManager->sTexts[LAN_MOVE_DOWN]);
-    ::SetWindowText(hWndPageItems[BTN_RESTART_SCRIPTS], LanguageManager->sTexts[LAN_RESTART_SCRIPTS]);
+    ::SetWindowText(hWndPageItems[BTN_MOVE_UP], clsLanguageManager::mPtr->sTexts[LAN_MOVE_UP]);
+    ::SetWindowText(hWndPageItems[BTN_MOVE_DOWN], clsLanguageManager::mPtr->sTexts[LAN_MOVE_DOWN]);
+    ::SetWindowText(hWndPageItems[BTN_RESTART_SCRIPTS], clsLanguageManager::mPtr->sTexts[LAN_RESTART_SCRIPTS]);
 }
 //---------------------------------------------------------------------------
 
-char * MainWindowPageScripts::GetPageName() {
-    return LanguageManager->sTexts[LAN_SCRIPTS];
+char * clsMainWindowPageScripts::GetPageName() {
+    return clsLanguageManager::mPtr->sTexts[LAN_SCRIPTS];
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::OnContextMenu(HWND hWindow, LPARAM lParam) {
+void clsMainWindowPageScripts::OnContextMenu(HWND hWindow, LPARAM lParam) {
     if(hWindow == hWndPageItems[REDT_SCRIPTS_ERRORS]) {
-        RichEditPopupMenu(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS], pMainWindowPageScripts->m_hWnd, lParam);
+        RichEditPopupMenu(clsMainWindowPageScripts::mPtr->hWndPageItems[clsMainWindowPageScripts::REDT_SCRIPTS_ERRORS], clsMainWindowPageScripts::mPtr->m_hWnd, lParam);
         return;
     }
 
@@ -400,11 +400,11 @@ void MainWindowPageScripts::OnContextMenu(HWND hWindow, LPARAM lParam) {
 
     HMENU hMenu = ::CreatePopupMenu();
 
-    ::AppendMenu(hMenu, MF_STRING, IDC_OPEN_IN_EXT_EDITOR, LanguageManager->sTexts[LAN_OPEN_EXT_EDIT]);
+    ::AppendMenu(hMenu, MF_STRING, IDC_OPEN_IN_EXT_EDITOR, clsLanguageManager::mPtr->sTexts[LAN_OPEN_EXT_EDIT]);
     ::AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
-    ::AppendMenu(hMenu, MF_STRING, IDC_OPEN_IN_SCRIPT_EDITOR, LanguageManager->sTexts[LAN_OPEN_IN_SCRIPT_EDITOR]);
+    ::AppendMenu(hMenu, MF_STRING, IDC_OPEN_IN_SCRIPT_EDITOR, clsLanguageManager::mPtr->sTexts[LAN_OPEN_IN_SCRIPT_EDITOR]);
     ::AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
-    ::AppendMenu(hMenu, MF_STRING, IDC_DELETE_SCRIPT, LanguageManager->sTexts[LAN_DELETE_SCRIPT]);
+    ::AppendMenu(hMenu, MF_STRING, IDC_DELETE_SCRIPT, clsLanguageManager::mPtr->sTexts[LAN_DELETE_SCRIPT]);
 
     ::SetMenuDefaultItem(hMenu, IDC_OPEN_IN_SCRIPT_EDITOR, FALSE);
 
@@ -419,11 +419,11 @@ void MainWindowPageScripts::OnContextMenu(HWND hWindow, LPARAM lParam) {
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::OpenScriptEditor(char * sScript/* = NULL*/) {
+void clsMainWindowPageScripts::OpenScriptEditor(char * sScript/* = NULL*/) {
     ScriptEditorDialog * pScriptEditorDialog = new ScriptEditorDialog();
 
     if(pScriptEditorDialog != NULL) {
-        pScriptEditorDialog->DoModal(pMainWindow->m_hWnd);
+        pScriptEditorDialog->DoModal(clsMainWindow::mPtr->m_hWnd);
 
         if(sScript != NULL) {
             pScriptEditorDialog->LoadScript(sScript);
@@ -432,22 +432,22 @@ void MainWindowPageScripts::OpenScriptEditor(char * sScript/* = NULL*/) {
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::RefreshScripts() {
-    ScriptManager->CheckForDeletedScripts();
-	ScriptManager->CheckForNewScripts();
+void clsMainWindowPageScripts::RefreshScripts() {
+    clsScriptManager::mPtr->CheckForDeletedScripts();
+	clsScriptManager::mPtr->CheckForNewScripts();
 
 	AddScriptsToList(true);
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::AddScriptsToList(const bool &bDelete) {
+void clsMainWindowPageScripts::AddScriptsToList(const bool &bDelete) {
     ::SendMessage(hWndPageItems[LV_SCRIPTS], WM_SETREDRAW, (WPARAM)FALSE, 0);
 
     if(bDelete == true) {
         ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_DELETEALLITEMS, 0, 0);
     }
 
-	for(uint8_t ui8i = 0; ui8i < ScriptManager->ui8ScriptCount; ui8i++) {
+	for(uint8_t ui8i = 0; ui8i < clsScriptManager::mPtr->ui8ScriptCount; ui8i++) {
         ScriptToList(ui8i, true, false);
 	}
 
@@ -459,14 +459,14 @@ void MainWindowPageScripts::AddScriptsToList(const bool &bDelete) {
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::ScriptToList(const uint8_t &ui8ScriptId, const bool &bInsert, const bool &bSelected) {
+void clsMainWindowPageScripts::ScriptToList(const uint8_t &ui8ScriptId, const bool &bInsert, const bool &bSelected) {
     bIgnoreItemChanged = true;
 
     LVITEM lvItem = { 0 };
     lvItem.mask = LVIF_PARAM | LVIF_TEXT;
     lvItem.iItem = ui8ScriptId;
-    lvItem.pszText = ScriptManager->ScriptTable[ui8ScriptId]->sName;
-    lvItem.lParam = (LPARAM)ScriptManager->ScriptTable[ui8ScriptId];
+    lvItem.pszText = clsScriptManager::mPtr->ScriptTable[ui8ScriptId]->sName;
+    lvItem.lParam = (LPARAM)clsScriptManager::mPtr->ScriptTable[ui8ScriptId];
 
     if(bSelected == true) {
         lvItem.mask |= LVIF_STATE;
@@ -484,7 +484,7 @@ void MainWindowPageScripts::ScriptToList(const uint8_t &ui8ScriptId, const bool 
 
     if(i != -1 || bInsert == false) {
         lvItem.mask = LVIF_STATE;
-        lvItem.state = INDEXTOSTATEIMAGEMASK(ScriptManager->ScriptTable[ui8ScriptId]->bEnabled == true ? 2 : 1);
+        lvItem.state = INDEXTOSTATEIMAGEMASK(clsScriptManager::mPtr->ScriptTable[ui8ScriptId]->bEnabled == true ? 2 : 1);
         lvItem.stateMask = LVIS_STATEIMAGEMASK;
 
         ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_SETITEMSTATE, ui8ScriptId, (LPARAM)&lvItem);
@@ -494,7 +494,7 @@ void MainWindowPageScripts::ScriptToList(const uint8_t &ui8ScriptId, const bool 
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::OnItemChanged(const LPNMLISTVIEW &pListView) {
+void clsMainWindowPageScripts::OnItemChanged(const LPNMLISTVIEW &pListView) {
     UpdateUpDown();
 
     if(bIgnoreItemChanged == true || pListView->iItem == -1 || (pListView->uNewState & LVIS_STATEIMAGEMASK) == (pListView->uOldState & LVIS_STATEIMAGEMASK)) {
@@ -502,69 +502,69 @@ void MainWindowPageScripts::OnItemChanged(const LPNMLISTVIEW &pListView) {
     }
 
     if((((pListView->uNewState & LVIS_STATEIMAGEMASK) >> 12) - 1) == 0) {
-        if(ScriptManager->ScriptTable[pListView->iItem]->bEnabled == false) {
+        if(clsScriptManager::mPtr->ScriptTable[pListView->iItem]->bEnabled == false) {
             return;
         }
 
-        ScriptManager->ScriptTable[pListView->iItem]->bEnabled = false;
+        clsScriptManager::mPtr->ScriptTable[pListView->iItem]->bEnabled = false;
 
-        if(SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == false || bServerRunning == false) {
+        if(clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_SCRIPTING] == false || clsServerManager::bServerRunning == false) {
 			return;
         }
 
-		ScriptManager->StopScript(ScriptManager->ScriptTable[pListView->iItem], false);
+		clsScriptManager::mPtr->StopScript(clsScriptManager::mPtr->ScriptTable[pListView->iItem], false);
 		ClearMemUsage((uint8_t)pListView->iItem);
 
-		RichEditAppendText(hWndPageItems[REDT_SCRIPTS_ERRORS], (string(LanguageManager->sTexts[LAN_SCRIPT_STOPPED], (size_t)LanguageManager->ui16TextsLens[LAN_SCRIPT_STOPPED])+".").c_str());
+		RichEditAppendText(hWndPageItems[REDT_SCRIPTS_ERRORS], (string(clsLanguageManager::mPtr->sTexts[LAN_SCRIPT_STOPPED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SCRIPT_STOPPED])+".").c_str());
     } else {
-        if(ScriptManager->ScriptTable[pListView->iItem]->bEnabled == true) {
+        if(clsScriptManager::mPtr->ScriptTable[pListView->iItem]->bEnabled == true) {
             return;
         }
 
-        ScriptManager->ScriptTable[pListView->iItem]->bEnabled = true;
+        clsScriptManager::mPtr->ScriptTable[pListView->iItem]->bEnabled = true;
 
-		if(SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == false || bServerRunning == false) {
+		if(clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_SCRIPTING] == false || clsServerManager::bServerRunning == false) {
             return;
         }
 
-		if(ScriptManager->StartScript(ScriptManager->ScriptTable[pListView->iItem], false) == true) {
-			RichEditAppendText(hWndPageItems[REDT_SCRIPTS_ERRORS], (string(LanguageManager->sTexts[LAN_SCRIPT_STARTED], (size_t)LanguageManager->ui16TextsLens[LAN_SCRIPT_STARTED])+".").c_str());
+		if(clsScriptManager::mPtr->StartScript(clsScriptManager::mPtr->ScriptTable[pListView->iItem], false) == true) {
+			RichEditAppendText(hWndPageItems[REDT_SCRIPTS_ERRORS], (string(clsLanguageManager::mPtr->sTexts[LAN_SCRIPT_STARTED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SCRIPT_STARTED])+".").c_str());
 		}
     }
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::OnDoubleClick(const LPNMITEMACTIVATE &pItemActivate) {
+void clsMainWindowPageScripts::OnDoubleClick(const LPNMITEMACTIVATE &pItemActivate) {
     RECT rc = { LVIR_ICON, 0, 0, 0 };
 
     if(::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETITEMRECT, pItemActivate->iItem, (LPARAM)&rc) == FALSE || pItemActivate->ptAction.x > rc.left) {
-        string sScript = SCRIPT_PATH + ScriptManager->ScriptTable[pItemActivate->iItem]->sName;
+        string sScript = clsServerManager::sScriptPath + clsScriptManager::mPtr->ScriptTable[pItemActivate->iItem]->sName;
         OpenScriptEditor(sScript.c_str());
     }
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::ClearMemUsageAll() {
-	for(uint8_t ui8i = 0; ui8i < ScriptManager->ui8ScriptCount; ui8i++) {
+void clsMainWindowPageScripts::ClearMemUsageAll() {
+	for(uint8_t ui8i = 0; ui8i < clsScriptManager::mPtr->ui8ScriptCount; ui8i++) {
         ClearMemUsage(ui8i);
 	}
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::UpdateMemUsage() {
-	for(uint8_t ui8i = 0; ui8i < ScriptManager->ui8ScriptCount; ui8i++) {
-        if(ScriptManager->ScriptTable[ui8i]->bEnabled == false) {
+void clsMainWindowPageScripts::UpdateMemUsage() {
+	for(uint8_t ui8i = 0; ui8i < clsScriptManager::mPtr->ui8ScriptCount; ui8i++) {
+        if(clsScriptManager::mPtr->ScriptTable[ui8i]->bEnabled == false) {
             continue;
         }
 
-        string tmp(lua_gc(ScriptManager->ScriptTable[ui8i]->LUA, LUA_GCCOUNT, 0));
+        string tmp(lua_gc(clsScriptManager::mPtr->ScriptTable[ui8i]->LUA, LUA_GCCOUNT, 0));
 
         LVITEM lvItem = { 0 };
         lvItem.mask = LVIF_TEXT;
         lvItem.iItem = ui8i;
         lvItem.iSubItem = 1;
 
-        string sMemUsage(lua_gc(ScriptManager->ScriptTable[ui8i]->LUA, LUA_GCCOUNT, 0));
+        string sMemUsage(lua_gc(clsScriptManager::mPtr->ScriptTable[ui8i]->LUA, LUA_GCCOUNT, 0));
         lvItem.pszText = sMemUsage.c_str();
 
         ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_SETITEM, 0, (LPARAM)&lvItem);
@@ -572,7 +572,7 @@ void MainWindowPageScripts::UpdateMemUsage() {
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::MoveUp() {
+void clsMainWindowPageScripts::MoveUp() {
     HWND hWndFocus = ::GetFocus();
 
     int iSel = (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
@@ -581,7 +581,7 @@ void MainWindowPageScripts::MoveUp() {
         return;
     }
 
-	ScriptManager->MoveScript((uint8_t)iSel, true);
+	clsScriptManager::mPtr->MoveScript((uint8_t)iSel, true);
 
     ::SendMessage(hWndPageItems[LV_SCRIPTS], WM_SETREDRAW, (WPARAM)FALSE, 0);
 
@@ -598,7 +598,7 @@ void MainWindowPageScripts::MoveUp() {
     UpdateUpDown();
 
     if(hWndFocus == hWndPageItems[BTN_MOVE_UP]) {
-        if(::IsWindowEnabled(hWndPageItems[MainWindowPageScripts::BTN_MOVE_UP])) {
+        if(::IsWindowEnabled(hWndPageItems[clsMainWindowPageScripts::BTN_MOVE_UP])) {
             ::SetFocus(hWndPageItems[BTN_MOVE_UP]);
         } else {
             ::SetFocus(hWndPageItems[BTN_MOVE_DOWN]);
@@ -607,7 +607,7 @@ void MainWindowPageScripts::MoveUp() {
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::MoveDown() {
+void clsMainWindowPageScripts::MoveDown() {
     HWND hWndFocus = ::GetFocus();
 
     int iSel = (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
@@ -616,7 +616,7 @@ void MainWindowPageScripts::MoveDown() {
         return;
     }
 
-	ScriptManager->MoveScript((uint8_t)iSel, false);
+	clsScriptManager::mPtr->MoveScript((uint8_t)iSel, false);
 
     ::SendMessage(hWndPageItems[LV_SCRIPTS], WM_SETREDRAW, (WPARAM)FALSE, 0);
 
@@ -633,7 +633,7 @@ void MainWindowPageScripts::MoveDown() {
     UpdateUpDown();
 
     if(hWndFocus == hWndPageItems[BTN_MOVE_DOWN]) {
-        if(::IsWindowEnabled(hWndPageItems[MainWindowPageScripts::BTN_MOVE_DOWN])) {
+        if(::IsWindowEnabled(hWndPageItems[clsMainWindowPageScripts::BTN_MOVE_DOWN])) {
             ::SetFocus(hWndPageItems[BTN_MOVE_DOWN]);
         } else {
             ::SetFocus(hWndPageItems[BTN_MOVE_UP]);
@@ -642,12 +642,12 @@ void MainWindowPageScripts::MoveDown() {
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::RestartScripts() {
-    ScriptManager->Restart();
+void clsMainWindowPageScripts::RestartScripts() {
+    clsScriptManager::mPtr->Restart();
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::UpdateUpDown() {
+void clsMainWindowPageScripts::UpdateUpDown() {
     int iSel = (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
 
     if(iSel == -1) {
@@ -655,12 +655,12 @@ void MainWindowPageScripts::UpdateUpDown() {
 		::EnableWindow(hWndPageItems[BTN_MOVE_DOWN], FALSE);
 	} else if(iSel == 0) {
 		::EnableWindow(hWndPageItems[BTN_MOVE_UP], FALSE);
-		if(iSel == (ScriptManager->ui8ScriptCount-1)) {
+		if(iSel == (clsScriptManager::mPtr->ui8ScriptCount-1)) {
 			::EnableWindow(hWndPageItems[BTN_MOVE_DOWN], FALSE);
 		} else {
             ::EnableWindow(hWndPageItems[BTN_MOVE_DOWN], TRUE);
 		}
-	} else if(iSel == (ScriptManager->ui8ScriptCount-1)) {
+	} else if(iSel == (clsScriptManager::mPtr->ui8ScriptCount-1)) {
 		::EnableWindow(hWndPageItems[BTN_MOVE_UP], TRUE);
 		::EnableWindow(hWndPageItems[BTN_MOVE_DOWN], FALSE);
 	} else {
@@ -670,47 +670,47 @@ void MainWindowPageScripts::UpdateUpDown() {
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::OpenInExternalEditor() {
+void clsMainWindowPageScripts::OpenInExternalEditor() {
     int iSel = (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
 
     if(iSel == -1) {
         return;
     }
 
-    ::ShellExecute(NULL, NULL, (SCRIPT_PATH + ScriptManager->ScriptTable[iSel]->sName).c_str(), NULL, NULL, SW_SHOWNORMAL);
+    ::ShellExecute(NULL, NULL, (clsServerManager::sScriptPath + clsScriptManager::mPtr->ScriptTable[iSel]->sName).c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::OpenInScriptEditor() {
+void clsMainWindowPageScripts::OpenInScriptEditor() {
     int iSel = (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
 
     if(iSel == -1) {
         return;
     }
 
-    string sScript = SCRIPT_PATH + ScriptManager->ScriptTable[iSel]->sName;
+    string sScript = clsServerManager::sScriptPath + clsScriptManager::mPtr->ScriptTable[iSel]->sName;
     OpenScriptEditor(sScript.c_str());
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::DeleteScript() {
+void clsMainWindowPageScripts::DeleteScript() {
     int iSel = (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
 
     if(iSel == -1) {
         return;
     }
 
-    if(::MessageBox(m_hWnd, (string(LanguageManager->sTexts[LAN_ARE_YOU_SURE], (size_t)LanguageManager->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(),
-        sTitle.c_str(), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO) {
+    if(::MessageBox(m_hWnd, (string(clsLanguageManager::mPtr->sTexts[LAN_ARE_YOU_SURE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(),
+        clsServerManager::sTitle.c_str(), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO) {
 		return;
 	}
 
-	ScriptManager->DeleteScript((uint8_t)iSel);
+	clsScriptManager::mPtr->DeleteScript((uint8_t)iSel);
 	::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_DELETEITEM, iSel, 0);
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::MoveScript(uint8_t ui8ScriptId, const bool &bUp) {
+void clsMainWindowPageScripts::MoveScript(uint8_t ui8ScriptId, const bool &bUp) {
     int iSel = (int)::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
 
     ::SendMessage(hWndPageItems[LV_SCRIPTS], WM_SETREDRAW, (WPARAM)FALSE, 0);
@@ -733,12 +733,12 @@ void MainWindowPageScripts::MoveScript(uint8_t ui8ScriptId, const bool &bUp) {
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::UpdateCheck(const uint8_t &ui8ScriptId) {
+void clsMainWindowPageScripts::UpdateCheck(const uint8_t &ui8ScriptId) {
     bIgnoreItemChanged = true;
 
-    ListView_SetItemState(hWndPageItems[LV_SCRIPTS], ui8ScriptId, INDEXTOSTATEIMAGEMASK(ScriptManager->ScriptTable[ui8ScriptId]->bEnabled == true ? 2 : 1), LVIS_STATEIMAGEMASK);
+    ListView_SetItemState(hWndPageItems[LV_SCRIPTS], ui8ScriptId, INDEXTOSTATEIMAGEMASK(clsScriptManager::mPtr->ScriptTable[ui8ScriptId]->bEnabled == true ? 2 : 1), LVIS_STATEIMAGEMASK);
 
-    if(ScriptManager->ScriptTable[ui8ScriptId]->bEnabled == false) {
+    if(clsScriptManager::mPtr->ScriptTable[ui8ScriptId]->bEnabled == false) {
         ClearMemUsage(ui8ScriptId);
     }
 
@@ -746,7 +746,7 @@ void MainWindowPageScripts::UpdateCheck(const uint8_t &ui8ScriptId) {
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::ClearMemUsage(uint8_t ui8ScriptId) {
+void clsMainWindowPageScripts::ClearMemUsage(uint8_t ui8ScriptId) {
     LVITEM lvItem = { 0 };
     lvItem.mask = LVIF_TEXT;
     lvItem.iItem = ui8ScriptId;
@@ -757,12 +757,12 @@ void MainWindowPageScripts::ClearMemUsage(uint8_t ui8ScriptId) {
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::FocusFirstItem() {
+void clsMainWindowPageScripts::FocusFirstItem() {
     ::SetFocus(hWndPageItems[REDT_SCRIPTS_ERRORS]);
 }
 //------------------------------------------------------------------------------
 
-void MainWindowPageScripts::FocusLastItem() {
+void clsMainWindowPageScripts::FocusLastItem() {
     if(::IsWindowEnabled(hWndPageItems[BTN_RESTART_SCRIPTS])) {
         ::SetFocus(hWndPageItems[BTN_RESTART_SCRIPTS]);
     } else if(::IsWindowEnabled(hWndPageItems[BTN_MOVE_DOWN])) {
@@ -775,24 +775,24 @@ void MainWindowPageScripts::FocusLastItem() {
 }
 //------------------------------------------------------------------------------
 
-HWND MainWindowPageScripts::GetWindowHandle() {
+HWND clsMainWindowPageScripts::GetWindowHandle() {
     return m_hWnd;
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------
 
-void MainWindowPageScripts::UpdateSplitterParts() {
-    ::SetWindowPos(hWndPageItems[BTN_RESTART_SCRIPTS], NULL, iSplitterPos + 2, rcSplitter.bottom - iEditHeight - 2, rcSplitter.right - (iSplitterPos + 4), iEditHeight,
+void clsMainWindowPageScripts::UpdateSplitterParts() {
+    ::SetWindowPos(hWndPageItems[BTN_RESTART_SCRIPTS], NULL, iSplitterPos + 2, rcSplitter.bottom - clsGuiSettingManager::iEditHeight - 2, rcSplitter.right - (iSplitterPos + 4), clsGuiSettingManager::iEditHeight,
         SWP_NOZORDER);
 
     int iButtonWidth = (rcSplitter.right - (iSplitterPos + 7)) / 2;
-    ::SetWindowPos(hWndPageItems[BTN_MOVE_DOWN], NULL, rcSplitter.right - iButtonWidth - 2, rcSplitter.bottom - (2 * iEditHeight) - 5, iButtonWidth, iEditHeight, SWP_NOZORDER);
-    ::SetWindowPos(hWndPageItems[BTN_MOVE_UP], NULL, iSplitterPos + 2, rcSplitter.bottom - (2 * iEditHeight) - 5, iButtonWidth, iEditHeight, SWP_NOZORDER);
+    ::SetWindowPos(hWndPageItems[BTN_MOVE_DOWN], NULL, rcSplitter.right - iButtonWidth - 2, rcSplitter.bottom - (2 * clsGuiSettingManager::iEditHeight) - 5, iButtonWidth, clsGuiSettingManager::iEditHeight, SWP_NOZORDER);
+    ::SetWindowPos(hWndPageItems[BTN_MOVE_UP], NULL, iSplitterPos + 2, rcSplitter.bottom - (2 * clsGuiSettingManager::iEditHeight) - 5, iButtonWidth, clsGuiSettingManager::iEditHeight, SWP_NOZORDER);
 
-    ::SetWindowPos(hWndPageItems[LV_SCRIPTS], NULL, iSplitterPos + 2, (2 * iEditHeight) + 8, rcSplitter.right - (iSplitterPos + 4),
-        rcSplitter.bottom - ((2 * iEditHeight) + 8) - ((2 * iEditHeight) - 5) - 14, SWP_NOZORDER);
-    ::SetWindowPos(hWndPageItems[BTN_REFRESH_SCRIPTS], NULL, iSplitterPos + 2, iEditHeight + 4, rcSplitter.right - (iSplitterPos + 4), iEditHeight, SWP_NOZORDER);
-    ::SetWindowPos(hWndPageItems[BTN_OPEN_SCRIPT_EDITOR], NULL, iSplitterPos + 2, 1, rcSplitter.right - (iSplitterPos + 4), iEditHeight, SWP_NOZORDER);
-    ::SetWindowPos(hWndPageItems[REDT_SCRIPTS_ERRORS], NULL, 0, 0, iSplitterPos - 19, rcSplitter.bottom - (iGroupBoxMargin + 11), SWP_NOMOVE | SWP_NOZORDER);
+    ::SetWindowPos(hWndPageItems[LV_SCRIPTS], NULL, iSplitterPos + 2, (2 * clsGuiSettingManager::iEditHeight) + 8, rcSplitter.right - (iSplitterPos + 4),
+        rcSplitter.bottom - ((2 * clsGuiSettingManager::iEditHeight) + 8) - ((2 * clsGuiSettingManager::iEditHeight) - 5) - 14, SWP_NOZORDER);
+    ::SetWindowPos(hWndPageItems[BTN_REFRESH_SCRIPTS], NULL, iSplitterPos + 2, clsGuiSettingManager::iEditHeight + 4, rcSplitter.right - (iSplitterPos + 4), clsGuiSettingManager::iEditHeight, SWP_NOZORDER);
+    ::SetWindowPos(hWndPageItems[BTN_OPEN_SCRIPT_EDITOR], NULL, iSplitterPos + 2, 1, rcSplitter.right - (iSplitterPos + 4), clsGuiSettingManager::iEditHeight, SWP_NOZORDER);
+    ::SetWindowPos(hWndPageItems[REDT_SCRIPTS_ERRORS], NULL, 0, 0, iSplitterPos - 19, rcSplitter.bottom - (clsGuiSettingManager::iGroupBoxMargin + 11), SWP_NOMOVE | SWP_NOZORDER);
     ::SendMessage(hWndPageItems[REDT_SCRIPTS_ERRORS], WM_VSCROLL, SB_BOTTOM, NULL);
     ::SetWindowPos(hWndPageItems[GB_SCRIPTS_ERRORS], NULL, 0, 0, iSplitterPos - 3, rcSplitter.bottom - 3, SWP_NOMOVE | SWP_NOZORDER);
 }

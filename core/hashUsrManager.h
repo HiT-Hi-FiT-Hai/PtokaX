@@ -24,7 +24,7 @@
 struct User;
 //---------------------------------------------------------------------------
 
-class hashMan {
+class clsHashManager {
 private:
     struct IpTableItem {
         IpTableItem *prev, *next;
@@ -35,8 +35,10 @@ private:
     User *nicktable[65536];
     IpTableItem *iptable[65536];
 public:
-    hashMan();
-    ~hashMan();
+    static clsHashManager * mPtr;
+
+    clsHashManager();
+    ~clsHashManager();
 
     bool Add(User * u);
     void Remove(User * u);
@@ -47,9 +49,6 @@ public:
 
     uint32_t GetUserIpCount(User * u) const;
 };
-
-//---------------------------------------------------------------------------
-extern hashMan *hashManager;
 //---------------------------------------------------------------------------
 
 #endif

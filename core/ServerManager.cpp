@@ -61,50 +61,74 @@
     #include "regtmrinc.h"
 #endif
 //---------------------------------------------------------------------------
-static ServerThread *ServersE = NULL;
+static ServerThread * ServersE = NULL;
+//---------------------------------------------------------------------------
+
 #ifdef _WIN32
-    UINT_PTR sectimer = 0;
-    UINT_PTR regtimer = 0;
+    UINT_PTR clsServerManager::sectimer = 0;
+    UINT_PTR clsServerManager::regtimer = 0;
+
+	HANDLE clsServerManager::hConsole = NULL, clsServerManager::hLuaHeap = NULL, clsServerManager::hPtokaXHeap = NULL, clsServerManager::hRecvHeap = NULL, clsServerManager::hSendHeap = NULL;
+	string clsServerManager::sLuaPath = "", clsServerManager::sOS = "";
 #else
     static int SIGSECTMR = SIGRTMIN+1;
 	static timer_t sectimer, regtimer;
 #endif
-//---------------------------------------------------------------------------
-double CpuUsage[60], cpuUsage = 0;
-uint64_t ui64ActualTick = 0, ui64TotalShare = 0;
-uint64_t ui64BytesRead = 0, ui64BytesSent = 0, ui64BytesSentSaved = 0;
-uint64_t iLastBytesRead = 0, iLastBytesSent = 0;
-uint32_t ui32Joins = 0, ui32Parts = 0, ui32Logged = 0, ui32Peak = 0;
+
+string clsServerManager::sPath = "", clsServerManager::sScriptPath = "", clsServerManager::sTitle = "";
+size_t clsServerManager::szGlobalBufferSize = 0;
+char * clsServerManager::sGlobalBuffer = NULL;
+bool clsServerManager::bCmdAutoStart = false, clsServerManager::bCmdNoAutoStart = false, clsServerManager::bCmdNoTray = false, clsServerManager::bUseIPv4 = true,
+    clsServerManager::bUseIPv6 = true, clsServerManager::bIPv6DualStack = false;
+
+double clsServerManager::daCpuUsage[60];
+double clsServerManager::dCpuUsage = 0;
+
+uint64_t clsServerManager::ui64ActualTick = 0, clsServerManager::ui64TotalShare = 0;
+uint64_t clsServerManager::ui64BytesRead = 0, clsServerManager::ui64BytesSent = 0, clsServerManager::ui64BytesSentSaved = 0;
+uint64_t clsServerManager::ui64LastBytesRead = 0, clsServerManager::ui64LastBytesSent = 0;
+uint64_t clsServerManager::ui64Mins = 0, clsServerManager::ui64Hours = 0, clsServerManager::ui64Days = 0;
+
 #ifndef _WIN32
-	uint32_t ui32CpuCount = 0;
+	uint32_t clsServerManager::ui32CpuCount = 0;
 #endif
-uint32_t UploadSpeed[60], DownloadSpeed[60];
-uint32_t iActualBytesRead = 0, iActualBytesSent = 0;
-uint32_t iAverageBytesRead = 0, iAverageBytesSent = 0;
-ServerThread *ServersS = NULL;
-time_t starttime = 0;
-uint64_t iMins = 0, iHours = 0, iDays = 0;
-bool bServerRunning = false, bServerTerminated = false, bIsRestart = false, bIsClose = false;
+
+uint32_t clsServerManager::ui32aUploadSpeed[60], clsServerManager::ui32aDownloadSpeed[60];
+uint32_t clsServerManager::ui32Joins = 0, clsServerManager::ui32Parts = 0, clsServerManager::ui32Logged = 0, clsServerManager::ui32Peak = 0;
+uint32_t clsServerManager::ui32ActualBytesRead = 0, clsServerManager::ui32ActualBytesSent = 0;
+uint32_t clsServerManager::ui32AverageBytesRead = 0, clsServerManager::ui32AverageBytesSent = 0;
+
+ServerThread * clsServerManager::ServersS = NULL;
+
+time_t clsServerManager::tStartTime = 0;
+
+bool clsServerManager::bServerRunning = false, clsServerManager::bServerTerminated = false, clsServerManager::bIsRestart = false, clsServerManager::bIsClose = false;
+
 #ifdef _WIN32
 	#ifndef _BUILD_GUI
-	    bool bService = false;
+	    bool clsServerManager::bService = false;
+	#else
+        HINSTANCE clsServerManager::hInstance;
+        HWND clsServerManager::hWndActiveDialog;
 	#endif
 #else
-	bool bDaemon = false;
+	bool clsServerManager::bDaemon = false;
 #endif
-char sHubIP[16], sHubIP6[46];
-uint8_t ui8SrCntr = 0, ui8MinTick = 0;
+
+char clsServerManager::sHubIP[16], clsServerManager::sHubIP6[46];
+
+uint8_t clsServerManager::ui8SrCntr = 0, clsServerManager::ui8MinTick = 0;
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
-void ServerOnSecTimer() {
+void clsServerManager::OnSecTimer() {
 	FILETIME tmpa, tmpb, kernelTimeFT, userTimeFT;
 	GetProcessTimes(GetCurrentProcess(), &tmpa, &tmpb, &kernelTimeFT, &userTimeFT);
 	int64_t kernelTime = kernelTimeFT.dwLowDateTime | (((int64_t)kernelTimeFT.dwHighDateTime) << 32);
 	int64_t userTime = userTimeFT.dwLowDateTime | (((int64_t)userTimeFT.dwHighDateTime) << 32);
 	double dcpuSec = double(kernelTime + userTime) / double(10000000I64);
-	cpuUsage = dcpuSec - CpuUsage[ui8MinTick];
-	CpuUsage[ui8MinTick] = dcpuSec;
+	dCpuUsage = dcpuSec - daCpuUsage[ui8MinTick];
+	daCpuUsage[ui8MinTick] = dcpuSec;
 #else
 static void SecTimerHandler(int /*sig*/) {
     struct rusage rs;
@@ -113,72 +137,72 @@ static void SecTimerHandler(int /*sig*/) {
 
 	double dcpuSec = double(rs.ru_utime.tv_sec) + (double(rs.ru_utime.tv_usec)/1000000) + 
 	double(rs.ru_stime.tv_sec) + (double(rs.ru_stime.tv_usec)/1000000);
-	cpuUsage = dcpuSec - CpuUsage[ui8MinTick];
-	CpuUsage[ui8MinTick] = dcpuSec;
+	clsServerManager::dCpuUsage = dcpuSec - clsServerManager::daCpuUsage[clsServerManager::ui8MinTick];
+	clsServerManager::daCpuUsage[clsServerManager::ui8MinTick] = dcpuSec;
 #endif
 
-	if(++ui8MinTick == 60) {
-		ui8MinTick = 0;
+	if(++clsServerManager::ui8MinTick == 60) {
+		clsServerManager::ui8MinTick = 0;
     }
 
 #ifdef _WIN32
-	if(bServerRunning == false) {
+	if(clsServerManager::bServerRunning == false) {
 		return;
 	}
 #endif
 
-    ui64ActualTick++;
+    clsServerManager::ui64ActualTick++;
 
-	iActualBytesRead = (uint32_t)(ui64BytesRead - iLastBytesRead);
-	iActualBytesSent = (uint32_t)(ui64BytesSent - iLastBytesSent);
-	iLastBytesRead = ui64BytesRead;
-	iLastBytesSent = ui64BytesSent;
+	clsServerManager::ui32ActualBytesRead = (uint32_t)(clsServerManager::ui64BytesRead - clsServerManager::ui64LastBytesRead);
+	clsServerManager::ui32ActualBytesSent = (uint32_t)(clsServerManager::ui64BytesSent - clsServerManager::ui64LastBytesSent);
+	clsServerManager::ui64LastBytesRead = clsServerManager::ui64BytesRead;
+	clsServerManager::ui64LastBytesSent = clsServerManager::ui64BytesSent;
 
-	iAverageBytesSent -= UploadSpeed[ui8MinTick];
-	iAverageBytesRead -= DownloadSpeed[ui8MinTick];
+	clsServerManager::ui32AverageBytesSent -= clsServerManager::ui32aUploadSpeed[clsServerManager::ui8MinTick];
+	clsServerManager::ui32AverageBytesRead -= clsServerManager::ui32aDownloadSpeed[clsServerManager::ui8MinTick];
 
-	UploadSpeed[ui8MinTick] = iActualBytesSent;
-	DownloadSpeed[ui8MinTick] = iActualBytesRead;
+	clsServerManager::ui32aUploadSpeed[clsServerManager::ui8MinTick] = clsServerManager::ui32ActualBytesSent;
+	clsServerManager::ui32aDownloadSpeed[clsServerManager::ui8MinTick] = clsServerManager::ui32ActualBytesRead;
 
-	iAverageBytesSent += UploadSpeed[ui8MinTick];
-	iAverageBytesRead += DownloadSpeed[ui8MinTick];
+	clsServerManager::ui32AverageBytesSent += clsServerManager::ui32aUploadSpeed[clsServerManager::ui8MinTick];
+	clsServerManager::ui32AverageBytesRead += clsServerManager::ui32aDownloadSpeed[clsServerManager::ui8MinTick];
 
 #ifdef _BUILD_GUI
-    pMainWindow->UpdateStats();
-    pMainWindowPageScripts->UpdateMemUsage();
+    clsMainWindow::mPtr->UpdateStats();
+    clsMainWindowPageScripts::mPtr->UpdateMemUsage();
 #endif
 }
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
-    void ServerOnRegTimer() {
-	    if(SettingManager->bBools[SETBOOL_AUTO_REG] == true && SettingManager->sTexts[SETTXT_REGISTER_SERVERS] != NULL) {
+    void clsServerManager::OnRegTimer() {
+	    if(clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG] == true && clsSettingManager::mPtr->sTexts[SETTXT_REGISTER_SERVERS] != NULL) {
 			// First destroy old hublist reg thread if any
-	        if(RegisterThread != NULL) {
-	            RegisterThread->Close();
-	            RegisterThread->WaitFor();
-	            delete RegisterThread;
-	            RegisterThread = NULL;
+	        if(clsRegisterThread::mPtr != NULL) {
+	            clsRegisterThread::mPtr->Close();
+	            clsRegisterThread::mPtr->WaitFor();
+	            delete clsRegisterThread::mPtr;
+	            clsRegisterThread::mPtr = NULL;
 	        }
 	        
 	        // Create hublist reg thread
-	        RegisterThread = new RegThread();
-	        if(RegisterThread == NULL) {
-	        	AppendDebugLog("%s - [MEM] Cannot allocate RegisterThread in ServerOnRegTimer\n", 0);
+	        clsRegisterThread::mPtr = new clsRegisterThread();
+	        if(clsRegisterThread::mPtr == NULL) {
+	        	AppendDebugLog("%s - [MEM] Cannot allocate clsRegisterThread::mPtr in ServerOnRegTimer\n", 0);
 	        	return;
 	        }
 	        
 	        // Setup hublist reg thread
-	        RegisterThread->Setup(SettingManager->sTexts[SETTXT_REGISTER_SERVERS], SettingManager->ui16TextsLens[SETTXT_REGISTER_SERVERS]);
+	        clsRegisterThread::mPtr->Setup(clsSettingManager::mPtr->sTexts[SETTXT_REGISTER_SERVERS], clsSettingManager::mPtr->ui16TextsLens[SETTXT_REGISTER_SERVERS]);
 	        
 	        // Start the hublist reg thread
-	    	RegisterThread->Resume();
+	    	clsRegisterThread::mPtr->Resume();
 	    }
 	}
 #endif
 //---------------------------------------------------------------------------
 
-void ServerInitialize() {
+void clsServerManager::Initialize() {
     setlocale(LC_ALL, "");
 #ifdef _WIN32
 	time_t acctime;
@@ -190,25 +214,25 @@ void ServerInitialize() {
 
     hPtokaXHeap = HeapCreate(HEAP_NO_SERIALIZE, 0x100000, 0);
 
-	if(DirExist((PATH+"\\cfg").c_str()) == false) {
-		CreateDirectory((PATH+"\\cfg").c_str(), NULL);
+	if(DirExist((clsServerManager::sPath+"\\cfg").c_str()) == false) {
+		CreateDirectory((clsServerManager::sPath+"\\cfg").c_str(), NULL);
 	}
-	if(DirExist((PATH+"\\logs").c_str()) == false) {
-		CreateDirectory((PATH+"\\logs").c_str(), NULL);
+	if(DirExist((clsServerManager::sPath+"\\logs").c_str()) == false) {
+		CreateDirectory((clsServerManager::sPath+"\\logs").c_str(), NULL);
 	}
-	if(DirExist((PATH+"\\scripts").c_str()) == false) {
-		CreateDirectory((PATH+"\\scripts").c_str(), NULL);
+	if(DirExist((clsServerManager::sPath+"\\scripts").c_str()) == false) {
+		CreateDirectory((clsServerManager::sPath+"\\scripts").c_str(), NULL);
     }
-	if(DirExist((PATH+"\\texts").c_str()) == false) {
-		CreateDirectory((PATH+"\\texts").c_str(), NULL);
+	if(DirExist((clsServerManager::sPath+"\\texts").c_str()) == false) {
+		CreateDirectory((clsServerManager::sPath+"\\texts").c_str(), NULL);
     }
 
-	SCRIPT_PATH = PATH + "\\scripts\\";
+	clsServerManager::sScriptPath = clsServerManager::sPath + "\\scripts\\";
 
-	PATH_LUA = PATH + "/";
+	clsServerManager::sLuaPath = clsServerManager::sPath + "/";
 
-	char * sLuaPath = PATH_LUA.c_str();
-	for(size_t szi = 0; szi < PATH.size(); szi++) {
+	char * sLuaPath = clsServerManager::sLuaPath.c_str();
+	for(size_t szi = 0; szi < clsServerManager::sPath.size(); szi++) {
 		if(sLuaPath[szi] == '\\') {
 			sLuaPath[szi] = '/';
 		}
@@ -220,8 +244,8 @@ void ServerInitialize() {
     time(&acctime);
     srandom(acctime);
 
-	if(DirExist((PATH+"/logs").c_str()) == false) {
-		if(mkdir((PATH+"/logs").c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP) == -1) {
+	if(DirExist((clsServerManager::sPath+"/logs").c_str()) == false) {
+		if(mkdir((clsServerManager::sPath+"/logs").c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP) == -1) {
             if(bDaemon == true) {
                 syslog(LOG_USER | LOG_ERR, "Creating  of logs directory failed!\n");
             } else {
@@ -229,23 +253,23 @@ void ServerInitialize() {
             }
         }
 	}
-	if(DirExist((PATH+"/cfg").c_str()) == false) {
-		if(mkdir((PATH+"/cfg").c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP) == -1) {
+	if(DirExist((clsServerManager::sPath+"/cfg").c_str()) == false) {
+		if(mkdir((clsServerManager::sPath+"/cfg").c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP) == -1) {
             AppendLog("Creating of cfg directory failed!");
         }
 	}
-	if(DirExist((PATH+"/scripts").c_str()) == false) {
-		if(mkdir((PATH+"/scripts").c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP) == -1) {
+	if(DirExist((clsServerManager::sPath+"/scripts").c_str()) == false) {
+		if(mkdir((clsServerManager::sPath+"/scripts").c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP) == -1) {
             AppendLog("Creating of scripts directory failed!");
         }
     }
-	if(DirExist((PATH+"/texts").c_str()) == false) {
-		if(mkdir((PATH+"/texts").c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP) == -1) {
+	if(DirExist((clsServerManager::sPath+"/texts").c_str()) == false) {
+		if(mkdir((clsServerManager::sPath+"/texts").c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP) == -1) {
             AppendLog("Creating of texts directory failed!");
         }
     }
 
-	SCRIPT_PATH = PATH + "/scripts/";
+	clsServerManager::sScriptPath = clsServerManager::sPath + "/scripts/";
 
     // get cpu count
     FILE *fp = fopen("/proc/cpuinfo", "r");
@@ -268,25 +292,25 @@ void ServerInitialize() {
 
     CheckForIPv6();
 
-	ResNickManager = new ResNickMan();
-	if(ResNickManager == NULL) {
-	    AppendDebugLog("%s - [MEM] Cannot allocate ResNickManager in ServerInitialize\n", 0);
+	clsReservedNicksManager::mPtr = new clsReservedNicksManager();
+	if(clsReservedNicksManager::mPtr == NULL) {
+	    AppendDebugLog("%s - [MEM] Cannot allocate clsReservedNicksManager::mPtr in ServerInitialize\n", 0);
 	    exit(EXIT_FAILURE);
 	}
 
     ui64ActualTick = ui64TotalShare = 0;
 	ui64BytesRead = ui64BytesSent = ui64BytesSentSaved = 0;
 
-	iActualBytesRead = iActualBytesSent = iAverageBytesRead = iAverageBytesSent = 0;
+	ui32ActualBytesRead = ui32ActualBytesSent = ui32AverageBytesRead = ui32AverageBytesSent = 0;
 
     ui32Joins = ui32Parts = ui32Logged = ui32Peak = 0;
 
     ServersS = NULL;
     ServersE = NULL;
 
-    starttime = 0;
+    tStartTime = 0;
 
-    iMins = iHours = iDays = 0;
+    ui64Mins = ui64Hours = ui64Days = 0;
 
     bServerRunning = bIsRestart = bIsClose = false;
 
@@ -295,90 +319,90 @@ void ServerInitialize() {
 
     ui8SrCntr = 0;
 
-    ZlibUtility = new clsZlibUtility();
-    if(ZlibUtility == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate ZlibUtility in ServerInitialize\n", 0);
+    clsZlibUtility::mPtr = new clsZlibUtility();
+    if(clsZlibUtility::mPtr == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate clsZlibUtility::mPtr in ServerInitialize\n", 0);
     	exit(EXIT_FAILURE);
     }
 
     ui8MinTick = 0;
 
-    iLastBytesRead = iLastBytesSent = 0;
+    ui64LastBytesRead = ui64LastBytesSent = 0;
 
 	for(uint8_t ui8i = 0 ; ui8i < 60; ui8i++) {
-		CpuUsage[ui8i] = 0;
-		UploadSpeed[ui8i] = 0;
-		DownloadSpeed[ui8i] = 0;
+		daCpuUsage[ui8i] = 0;
+		ui32aUploadSpeed[ui8i] = 0;
+		ui32aDownloadSpeed[ui8i] = 0;
 	}
 
-	cpuUsage = 0.0;
+	dCpuUsage = 0.0;
 
-	SettingManager = new SetMan();
-    if(SettingManager == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate SettingManager in ServerInitialize\n", 0);
+	clsSettingManager::mPtr = new clsSettingManager();
+    if(clsSettingManager::mPtr == NULL) {
+    	AppendDebugLog("%s - [MEM] Cannot allocate clsSettingManager::mPtr in ServerInitialize\n", 0);
     	exit(EXIT_FAILURE);
     }
 
-    LanguageManager = new LangMan();
-    if(LanguageManager == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate LanguageManager in ServerInitialize\n", 0);
+    clsLanguageManager::mPtr = new clsLanguageManager();
+    if(clsLanguageManager::mPtr == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate clsLanguageManager::mPtr in ServerInitialize\n", 0);
         exit(EXIT_FAILURE);
     }
 
-    LanguageManager->LoadLanguage();
+    clsLanguageManager::mPtr->Load();
 
-    ProfileMan = new ProfileManager();
-    if(ProfileMan == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate ProfileMan in ServerInitialize\n", 0);
+    clsProfileManager::mPtr = new clsProfileManager();
+    if(clsProfileManager::mPtr == NULL) {
+    	AppendDebugLog("%s - [MEM] Cannot allocate clsProfileManager::mPtr in ServerInitialize\n", 0);
     	exit(EXIT_FAILURE);
     }
 
-    hashRegManager = new hashRegMan();
-    if(hashRegManager == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate hashRegManager in ServerInitialize\n", 0);
+    clsRegManager::mPtr = new clsRegManager();
+    if(clsRegManager::mPtr == NULL) {
+    	AppendDebugLog("%s - [MEM] Cannot allocate clsRegManager::mPtr in ServerInitialize\n", 0);
     	exit(EXIT_FAILURE);
     }
 
     // Load registered users
-	hashRegManager->Load();
+	clsRegManager::mPtr->Load();
 
-    hashBanManager = new hashBanMan();
-    if(hashBanManager == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate hashBanManager in ServerInitialize\n", 0);
+    clsBanManager::mPtr = new clsBanManager();
+    if(clsBanManager::mPtr == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate clsBanManager::mPtr in ServerInitialize\n", 0);
         exit(EXIT_FAILURE);
     }
 
     // load banlist
-	hashBanManager->Load();
+	clsBanManager::mPtr->Load();
 
-    TextFileManager = new TextFileMan();
-    if(TextFileManager == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate TextFileManager in ServerInitialize\n", 0);
+    clsTextFilesManager::mPtr = new clsTextFilesManager();
+    if(clsTextFilesManager::mPtr == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate clsTextFilesManager::mPtr in ServerInitialize\n", 0);
         exit(EXIT_FAILURE);
     }
 
-    UdpDebug = new clsUdpDebug();
-    if(UdpDebug == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate UdpDebug in ServerInitialize\n", 0);
+    clsUdpDebug::mPtr = new clsUdpDebug();
+    if(clsUdpDebug::mPtr == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate clsUdpDebug::mPtr in ServerInitialize\n", 0);
         exit(EXIT_FAILURE);
     }
 
-    ScriptManager = new ScriptMan();
-    if(ScriptManager == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate ScriptManager in ServerInitialize\n", 0);
+    clsScriptManager::mPtr = new clsScriptManager();
+    if(clsScriptManager::mPtr == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate clsScriptManager::mPtr in ServerInitialize\n", 0);
         exit(EXIT_FAILURE);
     }
 
 #ifdef _BUILD_GUI
-    pMainWindow = new MainWindow();
+    clsMainWindow::mPtr = new clsMainWindow();
 
-    if(pMainWindow == NULL || pMainWindow->CreateEx() == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate pMainWindow in ServerInitialize\n", 0);
+    if(clsMainWindow::mPtr == NULL || clsMainWindow::mPtr->CreateEx() == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate clsMainWindow::mPtr in ServerInitialize\n", 0);
         exit(EXIT_FAILURE);
     }
 #endif
 
-	SettingManager->UpdateAll();
+	clsSettingManager::mPtr->UpdateAll();
 
 #ifdef _WIN32
     sectimer = SetTimer(NULL, 0, 1000, NULL);
@@ -425,8 +449,8 @@ void ServerInitialize() {
 }
 //---------------------------------------------------------------------------
 
-bool ServerStart() {
-    time(&starttime);
+bool clsServerManager::Start() {
+    time(&tStartTime);
 
 #ifndef _WIN32
     struct itimerspec sectmrspec;
@@ -442,33 +466,33 @@ bool ServerStart() {
     }
 #endif
 
-    SettingManager->UpdateAll();
+    clsSettingManager::mPtr->UpdateAll();
 
-    TextFileManager->RefreshTextFiles();
+    clsTextFilesManager::mPtr->RefreshTextFiles();
 
 #ifdef _BUILD_GUI
-    pMainWindow->EnableStartButton(FALSE);
+    clsMainWindow::mPtr->EnableStartButton(FALSE);
 #endif
 
     ui64ActualTick = ui64TotalShare = 0;
 
     ui64BytesRead = ui64BytesSent = ui64BytesSentSaved = 0;
 
-	iActualBytesRead = iActualBytesSent = iAverageBytesRead = iAverageBytesSent = 0;
+	ui32ActualBytesRead = ui32ActualBytesSent = ui32AverageBytesRead = ui32AverageBytesSent = 0;
 
     ui32Joins = ui32Parts = ui32Logged = ui32Peak = 0;
 
-    iMins = iHours = iDays = 0;
+    ui64Mins = ui64Hours = ui64Days = 0;
 
     ui8SrCntr = 0;
 
     sHubIP[0] = '\0';
     sHubIP6[0] = '\0';
 
-    if(SettingManager->bBools[SETBOOL_RESOLVE_TO_IP] == true) {
-        if(isIP(SettingManager->sTexts[SETTXT_HUB_ADDRESS]) == false) {
+    if(clsSettingManager::mPtr->bBools[SETBOOL_RESOLVE_TO_IP] == true) {
+        if(isIP(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS]) == false) {
 #ifdef _BUILD_GUI
-            pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_RESOLVING_HUB_ADDRESS], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_HUB_ADDRESS])+"...").c_str());
+            clsMainWindow::mPtr->SetStatusValue((string(clsLanguageManager::mPtr->sTexts[LAN_RESOLVING_HUB_ADDRESS], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RESOLVING_HUB_ADDRESS])+"...").c_str());
 #endif
 
             struct addrinfo hints;
@@ -482,34 +506,34 @@ bool ServerStart() {
 
             struct addrinfo *res;
 
-            if(::getaddrinfo(SettingManager->sTexts[SETTXT_HUB_ADDRESS], NULL, &hints, &res) != 0 ||
+            if(::getaddrinfo(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS], NULL, &hints, &res) != 0 ||
                 (res->ai_family != AF_INET && res->ai_family != AF_INET6)) {
 #ifdef _WIN32
             	int err = WSAGetLastError();
 	#ifdef _BUILD_GUI
-				::MessageBox(pMainWindow->m_hWnd,(string(LanguageManager->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
-					" '"+string(SettingManager->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(LanguageManager->sTexts[LAN_HAS_FAILED], (size_t)LanguageManager->ui16TextsLens[LAN_HAS_FAILED])+
-					".\n"+string(LanguageManager->sTexts[LAN_ERROR_CODE], (size_t)LanguageManager->ui16TextsLens[LAN_ERROR_CODE])+": "+
+				::MessageBox(clsMainWindow::mPtr->m_hWnd,(string(clsLanguageManager::mPtr->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
+					" '"+string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(clsLanguageManager::mPtr->sTexts[LAN_HAS_FAILED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_HAS_FAILED])+
+					".\n"+string(clsLanguageManager::mPtr->sTexts[LAN_ERROR_CODE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ERROR_CODE])+": "+
 					string(WSErrorStr(err))+" ("+string(err)+")\n\n"+
-					string(LanguageManager->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".").c_str(),
-					LanguageManager->sTexts[LAN_ERROR], MB_OK|MB_ICONERROR);
-                pMainWindow->EnableStartButton(TRUE);
+					string(clsLanguageManager::mPtr->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".").c_str(),
+					clsLanguageManager::mPtr->sTexts[LAN_ERROR], MB_OK|MB_ICONERROR);
+                clsMainWindow::mPtr->EnableStartButton(TRUE);
 	#else
-                AppendLog(string(LanguageManager->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
-					" '"+string(SettingManager->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(LanguageManager->sTexts[LAN_HAS_FAILED], (size_t)LanguageManager->ui16TextsLens[LAN_HAS_FAILED])+
-					".\n"+string(LanguageManager->sTexts[LAN_ERROR_CODE], (size_t)LanguageManager->ui16TextsLens[LAN_ERROR_CODE])+": "+
+                AppendLog(string(clsLanguageManager::mPtr->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
+					" '"+string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(clsLanguageManager::mPtr->sTexts[LAN_HAS_FAILED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_HAS_FAILED])+
+					".\n"+string(clsLanguageManager::mPtr->sTexts[LAN_ERROR_CODE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ERROR_CODE])+": "+
 					string(WSErrorStr(err))+" ("+string(err)+")\n\n"+
-					string(LanguageManager->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".");
+					string(clsLanguageManager::mPtr->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".");
 	#endif
 #else
-                AppendLog(string(LanguageManager->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
-					" '"+string(SettingManager->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(LanguageManager->sTexts[LAN_HAS_FAILED], (size_t)LanguageManager->ui16TextsLens[LAN_HAS_FAILED])+
-					".\n"+string(LanguageManager->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".");
+                AppendLog(string(clsLanguageManager::mPtr->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
+					" '"+string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(clsLanguageManager::mPtr->sTexts[LAN_HAS_FAILED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_HAS_FAILED])+
+					".\n"+string(clsLanguageManager::mPtr->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".");
 #endif
                 return false;
             } else {
-				Memo("*** "+string(SettingManager->sTexts[SETTXT_HUB_ADDRESS], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_ADDRESS])+" "+
-					string(LanguageManager->sTexts[LAN_RESOLVED_SUCCESSFULLY], (size_t)LanguageManager->ui16TextsLens[LAN_RESOLVED_SUCCESSFULLY])+".");
+				Memo("*** "+string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS], (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_ADDRESS])+" "+
+					string(clsLanguageManager::mPtr->sTexts[LAN_RESOLVED_SUCCESSFULLY], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RESOLVED_SUCCESSFULLY])+".");
 
                 if(bUseIPv6 == true) {
                     struct addrinfo *next = res;
@@ -546,44 +570,44 @@ bool ServerStart() {
 				freeaddrinfo(res);
             }
         } else {
-            strcpy(sHubIP, SettingManager->sTexts[SETTXT_HUB_ADDRESS]);
+            strcpy(sHubIP, clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS]);
         }
     } else {
-        if(SettingManager->sTexts[SETTXT_IPV4_ADDRESS] != NULL) {
-            strcpy(sHubIP, SettingManager->sTexts[SETTXT_IPV4_ADDRESS]);
+        if(clsSettingManager::mPtr->sTexts[SETTXT_IPV4_ADDRESS] != NULL) {
+            strcpy(sHubIP, clsSettingManager::mPtr->sTexts[SETTXT_IPV4_ADDRESS]);
         } else {
             sHubIP[0] = '\0';
         }
 
-        if(SettingManager->sTexts[SETTXT_IPV6_ADDRESS] != NULL) {
-            strcpy(sHubIP6, SettingManager->sTexts[SETTXT_IPV6_ADDRESS]);
+        if(clsSettingManager::mPtr->sTexts[SETTXT_IPV6_ADDRESS] != NULL) {
+            strcpy(sHubIP6, clsSettingManager::mPtr->sTexts[SETTXT_IPV6_ADDRESS]);
         } else {
             sHubIP6[0] = '\0';
         }
     }
 
     for(uint8_t ui8i = 0; ui8i < 25; ui8i++) {
-        if(SettingManager->iPortNumbers[ui8i] == 0) {
+        if(clsSettingManager::mPtr->iPortNumbers[ui8i] == 0) {
             break;
         }
 
-        if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true || (bUseIPv6 == true && bIPv6DualStack == false)) {
+        if(clsSettingManager::mPtr->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true || (bUseIPv6 == true && bIPv6DualStack == false)) {
             if(bUseIPv6 == true) {
-                ServerCreateServerThread(AF_INET6, SettingManager->iPortNumbers[ui8i]);
+                CreateServerThread(AF_INET6, clsSettingManager::mPtr->iPortNumbers[ui8i]);
             }
 
-            ServerCreateServerThread(AF_INET, SettingManager->iPortNumbers[ui8i]);
+            CreateServerThread(AF_INET, clsSettingManager::mPtr->iPortNumbers[ui8i]);
         } else {
-            ServerCreateServerThread(bUseIPv6 == true ? AF_INET6 : AF_INET, SettingManager->iPortNumbers[ui8i]);
+            CreateServerThread(bUseIPv6 == true ? AF_INET6 : AF_INET, clsSettingManager::mPtr->iPortNumbers[ui8i]);
         }
     }
 
 	if(ServersS == NULL) {
 #ifdef _BUILD_GUI
-		::MessageBox(pMainWindow->m_hWnd, LanguageManager->sTexts[LAN_NO_VALID_TCP_PORT_SPECIFIED], LanguageManager->sTexts[LAN_ERROR], MB_OK|MB_ICONERROR);
-        pMainWindow->EnableStartButton(TRUE);
+		::MessageBox(clsMainWindow::mPtr->m_hWnd, clsLanguageManager::mPtr->sTexts[LAN_NO_VALID_TCP_PORT_SPECIFIED], clsLanguageManager::mPtr->sTexts[LAN_ERROR], MB_OK|MB_ICONERROR);
+        clsMainWindow::mPtr->EnableStartButton(TRUE);
 #else
-		AppendLog(LanguageManager->sTexts[LAN_NO_VALID_TCP_PORT_SPECIFIED]);
+		AppendLog(clsLanguageManager::mPtr->sTexts[LAN_NO_VALID_TCP_PORT_SPECIFIED]);
 #endif
         return false;
     }
@@ -598,77 +622,71 @@ bool ServerStart() {
         }*/
 //  }
 
-    IP2Country = new IP2CC();
-    if(IP2Country == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate IP2Country in ServerStart\n", 0);
+    clsIpP2Country::mPtr = new clsIpP2Country();
+    if(clsIpP2Country::mPtr == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate clsIpP2Country::mPtr in ServerStart\n", 0);
     	exit(EXIT_FAILURE);
     }
 
-    eventqueue = new eventq();
-    if(eventqueue == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate eventqueue in ServerStart\n", 0);
+    clsEventQueue::mPtr = new clsEventQueue();
+    if(clsEventQueue::mPtr == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate clsEventQueue::mPtr in ServerStart\n", 0);
     	exit(EXIT_FAILURE);
     }
 
-    hashManager = new hashMan();
-    if(hashManager == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate hashManager in ServerStart\n", 0);
+    clsHashManager::mPtr = new clsHashManager();
+    if(clsHashManager::mPtr == NULL) {
+    	AppendDebugLog("%s - [MEM] Cannot allocate clsHashManager::mPtr in ServerStart\n", 0);
         exit(EXIT_FAILURE);
     }
 
-    colUsers = new classUsers();
-	if(colUsers == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate colUsers in ServerStart\n", 0);
+    clsUsers::mPtr = new clsUsers();
+	if(clsUsers::mPtr == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate clsUsers::mPtr in ServerStart\n", 0);
     	exit(EXIT_FAILURE);
     }
 
-    g_GlobalDataQueue = new GlobalDataQueue();
-    if(g_GlobalDataQueue == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate g_GlobalDataQueue in ServerStart\n", 0);
+    clsGlobalDataQueue::mPtr = new clsGlobalDataQueue();
+    if(clsGlobalDataQueue::mPtr == NULL) {
+    	AppendDebugLog("%s - [MEM] Cannot allocate clsGlobalDataQueue::mPtr in ServerStart\n", 0);
     	exit(EXIT_FAILURE);
     }
 
-    HubCmds = new HubCommands();
-    if(HubCmds == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate HubCmds in ServerStart\n", 0);
-    	exit(EXIT_FAILURE);
-    }
-
-    DcCommands = new cDcCommands();
-    if(DcCommands == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate DcCommands in ServerStart\n", 0);
+    clsDcCommands::mPtr = new clsDcCommands();
+    if(clsDcCommands::mPtr == NULL) {
+    	AppendDebugLog("%s - [MEM] Cannot allocate clsDcCommands::mPtr in ServerStart\n", 0);
     	exit(EXIT_FAILURE);
     }
 
     // add botname to reserved nicks
-    ResNickManager->AddReservedNick(SettingManager->sTexts[SETTXT_BOT_NICK]);
-    SettingManager->UpdateBot();
+    clsReservedNicksManager::mPtr->AddReservedNick(clsSettingManager::mPtr->sTexts[SETTXT_BOT_NICK]);
+    clsSettingManager::mPtr->UpdateBot();
 
     // add opchat botname to reserved nicks
-    ResNickManager->AddReservedNick(SettingManager->sTexts[SETTXT_OP_CHAT_NICK]);
-    SettingManager->UpdateOpChat();
+    clsReservedNicksManager::mPtr->AddReservedNick(clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]);
+    clsSettingManager::mPtr->UpdateOpChat();
 
-    ResNickManager->AddReservedNick(SettingManager->sTexts[SETTXT_ADMIN_NICK]);
+    clsReservedNicksManager::mPtr->AddReservedNick(clsSettingManager::mPtr->sTexts[SETTXT_ADMIN_NICK]);
 
-    if((uint16_t)atoi(SettingManager->sTexts[SETTXT_UDP_PORT]) != 0) {
-        if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true || (bUseIPv6 == true && bIPv6DualStack == false)) {
+    if((uint16_t)atoi(clsSettingManager::mPtr->sTexts[SETTXT_UDP_PORT]) != 0) {
+        if(clsSettingManager::mPtr->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true || (bUseIPv6 == true && bIPv6DualStack == false)) {
             if(bUseIPv6 == true) {
-                g_pUDPThread6 = UDPThread::Create(AF_INET6);
+                UDPThread::mPtrIPv6 = UDPThread::Create(AF_INET6);
             }
 
-            g_pUDPThread4 = UDPThread::Create(AF_INET);
+            UDPThread::mPtrIPv4 = UDPThread::Create(AF_INET);
         } else {
-            g_pUDPThread6 = UDPThread::Create(bUseIPv6 == true ? AF_INET6 : AF_INET);
+            UDPThread::mPtrIPv6 = UDPThread::Create(bUseIPv6 == true ? AF_INET6 : AF_INET);
         }
     }
     
-    if(SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == true) {
-		ScriptManager->Start();
+    if(clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_SCRIPTING] == true) {
+		clsScriptManager::mPtr->Start();
     }
 
-    srvLoop = new theLoop();
-    if(srvLoop == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate srvLoop in ServerStart\n", 0);
+    clsServiceLoop::mPtr = new clsServiceLoop();
+    if(clsServiceLoop::mPtr == NULL) {
+    	AppendDebugLog("%s - [MEM] Cannot allocate clsServiceLoop::mPtr in ServerStart\n", 0);
     	exit(EXIT_FAILURE);
     }
 
@@ -684,17 +702,17 @@ bool ServerStart() {
     bServerRunning = true;
 
     // Call lua_Main
-	ScriptManager->OnStartup();
+	clsScriptManager::mPtr->OnStartup();
 
 #ifdef _BUILD_GUI
-    pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_RUNNING], (size_t)LanguageManager->ui16TextsLens[LAN_RUNNING])+"...").c_str());
-    pMainWindow->SetStartButtonText(LanguageManager->sTexts[LAN_STOP_HUB]);
-    pMainWindow->EnableStartButton(TRUE);
-    pMainWindow->EnableGuiItems(TRUE);
+    clsMainWindow::mPtr->SetStatusValue((string(clsLanguageManager::mPtr->sTexts[LAN_RUNNING], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RUNNING])+"...").c_str());
+    clsMainWindow::mPtr->SetStartButtonText(clsLanguageManager::mPtr->sTexts[LAN_STOP_HUB]);
+    clsMainWindow::mPtr->EnableStartButton(TRUE);
+    clsMainWindow::mPtr->EnableGuiItems(TRUE);
 #endif
 
     //Start the HubRegistration timer
-    if(SettingManager->bBools[SETBOOL_AUTO_REG] == true) {
+    if(clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG] == true) {
 #ifdef _WIN32
 		regtimer = SetTimer(NULL, 0, 901000, NULL);
 
@@ -719,9 +737,9 @@ bool ServerStart() {
 }
 //---------------------------------------------------------------------------
 
-void ServerStop() {
+void clsServerManager::Stop() {
 #ifdef _BUILD_GUI
-    pMainWindow->EnableStartButton(FALSE);
+    clsMainWindow::mPtr->EnableStartButton(FALSE);
 #endif
 #ifndef _WIN32
     struct itimerspec sectmrspec;
@@ -744,7 +762,7 @@ void ServerStop() {
     }
 
 	//Stop the HubRegistration timer
-	if(SettingManager->bBools[SETBOOL_AUTO_REG] == true) {
+	if(clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG] == true) {
 #ifdef _WIN32
         if(KillTimer(NULL, regtimer) == 0) {
 #else
@@ -777,62 +795,59 @@ void ServerStop() {
     ServersE = NULL;
 
 	// stop the main hub loop
-	if(srvLoop != NULL) {
+	if(clsServiceLoop::mPtr != NULL) {
 		bServerTerminated = true;
 	} else {
-		ServerFinalStop(false);
+		FinalStop(false);
     }
 }
 //---------------------------------------------------------------------------
 
-void ServerFinalStop(const bool &bFromServiceLoop) {
+void clsServerManager::FinalStop(const bool &bFromServiceLoop) {
     if(bFromServiceLoop == true) {
-		delete srvLoop;
-		srvLoop = NULL;
+		delete clsServiceLoop::mPtr;
+		clsServiceLoop::mPtr = NULL;
     }
 
-    if(SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == true) {
-		ScriptManager->Stop();
+    if(clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_SCRIPTING] == true) {
+		clsScriptManager::mPtr->Stop();
     }
 
-    UDPThread::Destroy(g_pUDPThread6);
-    g_pUDPThread6 = NULL;
+    UDPThread::Destroy(UDPThread::mPtrIPv6);
+    UDPThread::mPtrIPv6 = NULL;
 
-    UDPThread::Destroy(g_pUDPThread4);
-    g_pUDPThread4 = NULL;
+    UDPThread::Destroy(UDPThread::mPtrIPv4);
+    UDPThread::mPtrIPv4 = NULL;
 
 	// delete userlist field
-	if(colUsers != NULL) {
-		colUsers->DisconnectAll();
-		delete colUsers;
-		colUsers = NULL;
+	if(clsUsers::mPtr != NULL) {
+		clsUsers::mPtr->DisconnectAll();
+		delete clsUsers::mPtr;
+		clsUsers::mPtr = NULL;
     }
 
-	delete DcCommands;
-    DcCommands = NULL;
-
-    delete HubCmds;
-    HubCmds = NULL;
+	delete clsDcCommands::mPtr;
+    clsDcCommands::mPtr = NULL;
 
 	// delete hashed userlist manager
-    delete hashManager;
-    hashManager = NULL;
+    delete clsHashManager::mPtr;
+    clsHashManager::mPtr = NULL;
 
-	delete g_GlobalDataQueue;
-    g_GlobalDataQueue = NULL;
+	delete clsGlobalDataQueue::mPtr;
+    clsGlobalDataQueue::mPtr = NULL;
 
-    if(RegisterThread != NULL) {
-        RegisterThread->Close();
-        RegisterThread->WaitFor();
-        delete RegisterThread;
-        RegisterThread = NULL;
+    if(clsRegisterThread::mPtr != NULL) {
+        clsRegisterThread::mPtr->Close();
+        clsRegisterThread::mPtr->WaitFor();
+        delete clsRegisterThread::mPtr;
+        clsRegisterThread::mPtr = NULL;
     }
 
-	delete eventqueue;
-    eventqueue = NULL;
+	delete clsEventQueue::mPtr;
+    clsEventQueue::mPtr = NULL;
 
-	delete IP2Country;
-    IP2Country = NULL;
+	delete clsIpP2Country::mPtr;
+    clsIpP2Country::mPtr = NULL;
 
 /*	if(TLSManager != NULL) {
 		delete TLSManager;
@@ -843,16 +858,16 @@ void ServerFinalStop(const bool &bFromServiceLoop) {
 //    sqldb->FinalizeAllVisits();
 
 #ifdef _BUILD_GUI
-    pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_STOPPED], (size_t)LanguageManager->ui16TextsLens[LAN_STOPPED])+".").c_str());
-    pMainWindow->SetStartButtonText(LanguageManager->sTexts[LAN_START_HUB]);
-    pMainWindow->EnableStartButton(TRUE);
-    pMainWindow->EnableGuiItems(FALSE);
+    clsMainWindow::mPtr->SetStatusValue((string(clsLanguageManager::mPtr->sTexts[LAN_STOPPED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_STOPPED])+".").c_str());
+    clsMainWindow::mPtr->SetStartButtonText(clsLanguageManager::mPtr->sTexts[LAN_START_HUB]);
+    clsMainWindow::mPtr->EnableStartButton(TRUE);
+    clsMainWindow::mPtr->EnableGuiItems(FALSE);
 #endif
 
     ui8SrCntr = 0;
     ui32Joins = ui32Parts = ui32Logged = 0;
 
-    UdpDebug->Cleanup();
+    clsUdpDebug::mPtr->Cleanup();
 
 #ifdef _WIN32
     HeapCompact(GetProcessHeap(), 0);
@@ -866,22 +881,22 @@ void ServerFinalStop(const bool &bFromServiceLoop) {
 
 		// start hub
 #ifdef _BUILD_GUI
-        if(ServerStart() == false) {
-            pMainWindow->SetStatusValue((string(LanguageManager->sTexts[LAN_READY], (size_t)LanguageManager->ui16TextsLens[LAN_READY])+".").c_str());
+        if(Start() == false) {
+            clsMainWindow::mPtr->SetStatusValue((string(clsLanguageManager::mPtr->sTexts[LAN_READY], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_READY])+".").c_str());
         }
 #else
-		if(ServerStart() == false) {
+		if(Start() == false) {
             AppendLog("[ERR] Server start failed in ServerFinalStop");
             exit(EXIT_FAILURE);
         }
 #endif
     } else if(bIsClose == true) {
-		ServerFinalClose();
+		FinalClose();
     }
 }
 //---------------------------------------------------------------------------
 
-void ServerFinalClose() {
+void clsServerManager::FinalClose() {
 #ifdef _WIN32
     KillTimer(NULL, sectimer);
 #else
@@ -889,48 +904,48 @@ void ServerFinalClose() {
     timer_delete(regtimer);
 #endif
 
-	hashBanManager->Save(true);
+	clsBanManager::mPtr->Save(true);
 
-    ProfileMan->SaveProfiles();
+    clsProfileManager::mPtr->SaveProfiles();
 
-    hashRegManager->Save();
+    clsRegManager::mPtr->Save();
 
-	ScriptManager->SaveScripts();
+	clsScriptManager::mPtr->SaveScripts();
 
-	SettingManager->Save();
+	clsSettingManager::mPtr->Save();
 
-    delete ScriptManager;
-	ScriptManager = NULL;
+    delete clsScriptManager::mPtr;
+	clsScriptManager::mPtr = NULL;
 
-    delete TextFileManager;
-    TextFileManager = NULL;
+    delete clsTextFilesManager::mPtr;
+    clsTextFilesManager::mPtr = NULL;
 
-    delete ProfileMan;
-    ProfileMan = NULL;
+    delete clsProfileManager::mPtr;
+    clsProfileManager::mPtr = NULL;
 
-    delete UdpDebug;
-    UdpDebug = NULL;
+    delete clsUdpDebug::mPtr;
+    clsUdpDebug::mPtr = NULL;
 
-    delete hashRegManager;
-    hashRegManager = NULL;
+    delete clsRegManager::mPtr;
+    clsRegManager::mPtr = NULL;
 
-    delete hashBanManager;
-    hashBanManager = NULL;
+    delete clsBanManager::mPtr;
+    clsBanManager::mPtr = NULL;
 
-    delete ZlibUtility;
-    ZlibUtility = NULL;
+    delete clsZlibUtility::mPtr;
+    clsZlibUtility::mPtr = NULL;
 
-    delete LanguageManager;
-    LanguageManager = NULL;
+    delete clsLanguageManager::mPtr;
+    clsLanguageManager::mPtr = NULL;
 
-    delete SettingManager;
-    SettingManager = NULL;
+    delete clsSettingManager::mPtr;
+    clsSettingManager::mPtr = NULL;
 
-    delete ResNickManager;
-    ResNickManager = NULL;
+    delete clsReservedNicksManager::mPtr;
+    clsReservedNicksManager::mPtr = NULL;
 
 #ifdef _BUILD_GUI
-    pMainWindow->SaveGuiSettings();
+    clsMainWindow::mPtr->SaveGuiSettings();
 #endif
 
     DeleteGlobalBuffer();
@@ -945,7 +960,7 @@ void ServerFinalClose() {
 }
 //---------------------------------------------------------------------------
 
-void ServerUpdateServers() {
+void clsServerManager::UpdateServers() {
     // Remove servers for ports we don't want use anymore
     ServerThread *next = ServersS;
     while(next != NULL) {
@@ -955,11 +970,11 @@ void ServerUpdateServers() {
         bool bFound = false;
 
         for(uint8_t ui8i = 0; ui8i < 25; ui8i++) {
-            if(SettingManager->iPortNumbers[ui8i] == 0) {
+            if(clsSettingManager::mPtr->iPortNumbers[ui8i] == 0) {
                 break;
             }
 
-            if(cur->ui16Port == SettingManager->iPortNumbers[ui8i]) {
+            if(cur->ui16Port == clsSettingManager::mPtr->iPortNumbers[ui8i]) {
                 bFound = true;
                 break;
             }
@@ -991,7 +1006,7 @@ void ServerUpdateServers() {
 
     // Add servers for ports that not running
     for(uint8_t ui8i = 0; ui8i < 25; ui8i++) {
-        if(SettingManager->iPortNumbers[ui8i] == 0) {
+        if(clsSettingManager::mPtr->iPortNumbers[ui8i] == 0) {
             break;
         }
 
@@ -1002,27 +1017,27 @@ void ServerUpdateServers() {
             ServerThread *cur = next;
             next = cur->next;
 
-            if(cur->ui16Port == SettingManager->iPortNumbers[ui8i]) {
+            if(cur->ui16Port == clsSettingManager::mPtr->iPortNumbers[ui8i]) {
                 bFound = true;
                 break;
             }
         }
 
         if(bFound == false) {
-            if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true || (bUseIPv6 == true && bIPv6DualStack == false)) {
+            if(clsSettingManager::mPtr->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true || (bUseIPv6 == true && bIPv6DualStack == false)) {
                 if(bUseIPv6 == true) {
-                    ServerCreateServerThread(AF_INET6, SettingManager->iPortNumbers[ui8i], true);
+                    CreateServerThread(AF_INET6, clsSettingManager::mPtr->iPortNumbers[ui8i], true);
                 }
-                ServerCreateServerThread(AF_INET, SettingManager->iPortNumbers[ui8i], true);
+                CreateServerThread(AF_INET, clsSettingManager::mPtr->iPortNumbers[ui8i], true);
             } else {
-                ServerCreateServerThread(bUseIPv6 == true ? AF_INET6 : AF_INET, SettingManager->iPortNumbers[ui8i], true);
+                CreateServerThread(bUseIPv6 == true ? AF_INET6 : AF_INET, clsSettingManager::mPtr->iPortNumbers[ui8i], true);
             }
         }
     }
 }
 //---------------------------------------------------------------------------
 
-void ServerResumeAccepts() {
+void clsServerManager::ResumeAccepts() {
 	if(bServerRunning == false) {
         return;
     }
@@ -1037,15 +1052,15 @@ void ServerResumeAccepts() {
 }
 //---------------------------------------------------------------------------
 
-void ServerSuspendAccepts(const uint32_t &iTime) {
+void clsServerManager::SuspendAccepts(const uint32_t &iTime) {
 	if(bServerRunning == false) {
         return;
     }
 
     if(iTime != 0) {
-        UdpDebug->Broadcast("[SYS] Suspending listening threads to " + string(iTime) + " seconds.");
+        clsUdpDebug::mPtr->Broadcast("[SYS] Suspending listening threads to " + string(iTime) + " seconds.");
     } else {
-        UdpDebug->Broadcast("[SYS] Suspending listening threads.");
+        clsUdpDebug::mPtr->Broadcast("[SYS] Suspending listening threads.");
     }
 
     ServerThread *next = ServersS;
@@ -1058,12 +1073,12 @@ void ServerSuspendAccepts(const uint32_t &iTime) {
 }
 //---------------------------------------------------------------------------
 
-void ServerUpdateAutoRegState() {
+void clsServerManager::UpdateAutoRegState() {
     if(bServerRunning == false) {
         return;
     }
 
-    if(SettingManager->bBools[SETBOOL_AUTO_REG] == true) {
+    if(clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG] == true) {
 #ifdef _WIN32
         regtimer = SetTimer(NULL, 0, 901000, NULL);
 
@@ -1101,7 +1116,7 @@ void ServerUpdateAutoRegState() {
 }
 //---------------------------------------------------------------------------
 
-void ServerCreateServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber, const bool &bResume/* = false*/) {
+void clsServerManager::CreateServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber, const bool &bResume/* = false*/) {
 	ServerThread * pServer = new ServerThread(iAddrFamily, ui16PortNumber);
     if(pServer == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pServer in ServerCreateServerThread\n", 0);

@@ -33,11 +33,13 @@ struct ProfileItem {
 };
 //---------------------------------------------------------------------------
 
-class ProfileManager {
-private:	// User declarations  
+class clsProfileManager {
+private: 
     static void CreateDefaultProfiles();
     ProfileItem * CreateProfile(const char * name);
-public:		// User declarations
+public:
+    static clsProfileManager * mPtr;
+
     enum ProfilePermissions {
         HASKEYICON,
         NODEFLOODGETNICKLIST,
@@ -100,8 +102,8 @@ public:		// User declarations
     uint16_t iProfileCount;
     ProfileItem **ProfilesTable;
 
-    ProfileManager();
-    ~ProfileManager();
+    clsProfileManager();
+    ~clsProfileManager();
 
     bool IsAllowed(User * u, const uint32_t &iOption) const;
     bool IsProfileAllowed(const int32_t &iProfile, const uint32_t &iOption) const;
@@ -115,9 +117,6 @@ public:		// User declarations
     void SaveProfiles();
     bool RemoveProfile(const uint16_t &iProfile);
 };
-
-//---------------------------------------------------------------------------
-extern ProfileManager *ProfileMan;
 //---------------------------------------------------------------------------
 
 #endif

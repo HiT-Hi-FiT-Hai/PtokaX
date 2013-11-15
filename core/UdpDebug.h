@@ -46,6 +46,8 @@ private:
     };
 
 public:
+    static clsUdpDebug * mPtr;
+
     UdpDbgItem *llist, *ScriptList;
 
 	clsUdpDebug();
@@ -62,9 +64,6 @@ public:
 	void Send(char * sScriptName, char * sMsg, const size_t &szLen) const;
 	void Cleanup();
 };
-
-//---------------------------------------------------------------------------
-extern clsUdpDebug *UdpDebug;
 //---------------------------------------------------------------------------
 
 #endif

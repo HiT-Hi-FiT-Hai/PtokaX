@@ -23,8 +23,10 @@
 #include "SettingPageBots.h"
 //---------------------------------------------------------------------------
 #include "../core/LanguageManager.h"
+#include "../core/ServerManager.h"
 #include "../core/SettingManager.h"
 //---------------------------------------------------------------------------
+#include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #pragma hdrstop
@@ -138,16 +140,16 @@ void SettingPageBots::Save() {
     char sBot[65];
     int iBotLen = ::GetWindowText(hWndPageItems[EDT_HUB_BOT_NICK], sBot, 65);
 
-    bool bBotHaveNewNick = (strcmp(SettingManager->sTexts[SETTXT_BOT_NICK], sBot) != 0);
+    bool bBotHaveNewNick = (strcmp(clsSettingManager::mPtr->sTexts[SETTXT_BOT_NICK], sBot) != 0);
     bool bRegBot = ::SendMessage(hWndPageItems[BTN_HUB_BOT_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false;
 
     bool bRegStateChange = false, bDescriptionChange = false, bEmailChange = false;
 
-    if(SettingManager->bBools[SETBOOL_REG_BOT] != bRegBot) {
+    if(clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] != bRegBot) {
         bRegStateChange = true;
     }
 
-    if(strcmp(sBot, SettingManager->sTexts[SETTXT_BOT_NICK]) != NULL) {
+    if(strcmp(sBot, clsSettingManager::mPtr->sTexts[SETTXT_BOT_NICK]) != NULL) {
         bUpdateHubSec = true;
         bUpdateMOTD = true;
         bUpdateHubNameWelcome = true;
@@ -163,14 +165,14 @@ void SettingPageBots::Save() {
         bUpdateBot = true;
     }
 
-	if((bUpdateBot == false || bBotNickChanged == false) && (bRegBot == true && SettingManager->bBools[SETBOOL_REG_BOT] == false)) {
+	if((bUpdateBot == false || bBotNickChanged == false) && (bRegBot == true && clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] == false)) {
 		bUpdateBot = true;
 		bBotNickChanged = true;
 	}
 
     bool bHubBotIsHubSec = ::SendMessage(hWndPageItems[BTN_HUB_BOT_IS_HUB_SEC], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false;
 
-    if(bHubBotIsHubSec != SettingManager->bBools[SETBOOL_USE_BOT_NICK_AS_HUB_SEC]) {
+    if(bHubBotIsHubSec != clsSettingManager::mPtr->bBools[SETBOOL_USE_BOT_NICK_AS_HUB_SEC]) {
         bUpdateHubSec = true;
         bUpdateMOTD = true;
         bUpdateHubNameWelcome = true;
@@ -183,73 +185,73 @@ void SettingPageBots::Save() {
         bUpdateNickLimitMessage = true;
     }
 
-    SettingManager->SetBool(SETBOOL_USE_BOT_NICK_AS_HUB_SEC, bHubBotIsHubSec);
+    clsSettingManager::mPtr->SetBool(SETBOOL_USE_BOT_NICK_AS_HUB_SEC, bHubBotIsHubSec);
 
     char buf[65];
     int iLen = ::GetWindowText(hWndPageItems[EDT_HUB_BOT_DESCRIPTION], buf, 65);
 
     if(bUpdateBot == false &&
-        ((SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] == NULL && iLen != 0) ||
-        (SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] != NULL &&
-        strcmp(buf, SettingManager->sTexts[SETTXT_BOT_DESCRIPTION]) != NULL))) {
+        ((clsSettingManager::mPtr->sTexts[SETTXT_BOT_DESCRIPTION] == NULL && iLen != 0) ||
+        (clsSettingManager::mPtr->sTexts[SETTXT_BOT_DESCRIPTION] != NULL &&
+        strcmp(buf, clsSettingManager::mPtr->sTexts[SETTXT_BOT_DESCRIPTION]) != NULL))) {
         bUpdateBot = true;
     }
 
-    if((SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] == NULL && iLen != 0) ||
-        (SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] != NULL &&
-        strcmp(buf, SettingManager->sTexts[SETTXT_BOT_DESCRIPTION]) != NULL)) {
+    if((clsSettingManager::mPtr->sTexts[SETTXT_BOT_DESCRIPTION] == NULL && iLen != 0) ||
+        (clsSettingManager::mPtr->sTexts[SETTXT_BOT_DESCRIPTION] != NULL &&
+        strcmp(buf, clsSettingManager::mPtr->sTexts[SETTXT_BOT_DESCRIPTION]) != NULL)) {
         bDescriptionChange = true;
     }
 
-    SettingManager->SetText(SETTXT_BOT_DESCRIPTION, buf, iLen);
+    clsSettingManager::mPtr->SetText(SETTXT_BOT_DESCRIPTION, buf, iLen);
 
     iLen = ::GetWindowText(hWndPageItems[EDT_HUB_BOT_EMAIL], buf, 65);
 
     if(bUpdateBot == false &&
-        (SettingManager->sTexts[SETTXT_BOT_EMAIL] == NULL && iLen != 0) ||
-        (SettingManager->sTexts[SETTXT_BOT_EMAIL] != NULL &&
-        strcmp(buf, SettingManager->sTexts[SETTXT_BOT_EMAIL]) != NULL)) {
+        (clsSettingManager::mPtr->sTexts[SETTXT_BOT_EMAIL] == NULL && iLen != 0) ||
+        (clsSettingManager::mPtr->sTexts[SETTXT_BOT_EMAIL] != NULL &&
+        strcmp(buf, clsSettingManager::mPtr->sTexts[SETTXT_BOT_EMAIL]) != NULL)) {
         bUpdateBot = true;
     }
 
-    if((SettingManager->sTexts[SETTXT_BOT_EMAIL] == NULL && iLen != 0) ||
-        (SettingManager->sTexts[SETTXT_BOT_EMAIL] != NULL &&
-        strcmp(buf, SettingManager->sTexts[SETTXT_BOT_EMAIL]) != NULL)) {
+    if((clsSettingManager::mPtr->sTexts[SETTXT_BOT_EMAIL] == NULL && iLen != 0) ||
+        (clsSettingManager::mPtr->sTexts[SETTXT_BOT_EMAIL] != NULL &&
+        strcmp(buf, clsSettingManager::mPtr->sTexts[SETTXT_BOT_EMAIL]) != NULL)) {
         bEmailChange = true;
     }
 
-    SettingManager->SetText(SETTXT_BOT_EMAIL, buf, iLen);
+    clsSettingManager::mPtr->SetText(SETTXT_BOT_EMAIL, buf, iLen);
 
-    if(SettingManager->bBools[SETBOOL_REG_BOT] == true) {
-        SettingManager->bUpdateLocked = false;
-		SettingManager->DisableBot((bBotHaveNewNick == true || bRegBot == false),
+    if(clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] == true) {
+        clsSettingManager::mPtr->bUpdateLocked = false;
+		clsSettingManager::mPtr->DisableBot((bBotHaveNewNick == true || bRegBot == false),
             (bRegStateChange == true || bBotHaveNewNick == true || bDescriptionChange == true || bEmailChange == true) ? true : false);
-		SettingManager->bUpdateLocked = true;
+		clsSettingManager::mPtr->bUpdateLocked = true;
 	}
 
-    SettingManager->SetText(SETTXT_BOT_NICK, sBot, iBotLen);
+    clsSettingManager::mPtr->SetText(SETTXT_BOT_NICK, sBot, iBotLen);
 
     iBotLen = ::GetWindowText(hWndPageItems[EDT_OP_CHAT_BOT_NICK], sBot, 65);
 
     bool bRegOpChat = ::SendMessage(hWndPageItems[BTN_OP_CHAT_BOT_ENABLE], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false;
 
-    bBotHaveNewNick = (strcmp(SettingManager->sTexts[SETTXT_OP_CHAT_NICK], sBot) != 0);
+    bBotHaveNewNick = (strcmp(clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK], sBot) != 0);
 
-    if(bUpdateBotsSameNick == false && (bRegBot != SettingManager->bBools[SETBOOL_REG_BOT] ||
-        bRegOpChat != SettingManager->bBools[SETBOOL_REG_OP_CHAT] ||
-        strcmp(sBot, SettingManager->sTexts[SETTXT_OP_CHAT_NICK]) != NULL)) {
+    if(bUpdateBotsSameNick == false && (bRegBot != clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] ||
+        bRegOpChat != clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] ||
+        strcmp(sBot, clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]) != NULL)) {
         bUpdateBotsSameNick = true;
     }
 
-    SettingManager->SetBool(SETBOOL_REG_BOT, bRegBot);
+    clsSettingManager::mPtr->SetBool(SETBOOL_REG_BOT, bRegBot);
 
-    if(strcmp(sBot, SettingManager->sTexts[SETTXT_OP_CHAT_NICK]) != NULL) {
+    if(strcmp(sBot, clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]) != NULL) {
 		bOpChatNickChanged = true;
 		bUpdateOpChat = true;
     }
     
 	if((bUpdateOpChat == false || bOpChatNickChanged == false) &&
-		(bRegOpChat == true && SettingManager->bBools[SETBOOL_REG_OP_CHAT] == false)) {
+		(bRegOpChat == true && clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] == false)) {
 		bUpdateOpChat = true;
 		bOpChatNickChanged = true;
 	}
@@ -257,34 +259,34 @@ void SettingPageBots::Save() {
     iLen = ::GetWindowText(hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION], buf, 65);
 
     if(bUpdateOpChat == false &&
-        ((SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION] == NULL && iLen != 0) ||
-        (SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION] != NULL &&
-        strcmp(buf, SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION]) != NULL))) {
+        ((clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_DESCRIPTION] == NULL && iLen != 0) ||
+        (clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_DESCRIPTION] != NULL &&
+        strcmp(buf, clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_DESCRIPTION]) != NULL))) {
         bUpdateOpChat = true;
     }
 
-    SettingManager->SetText(SETTXT_OP_CHAT_DESCRIPTION, buf, iLen);
+    clsSettingManager::mPtr->SetText(SETTXT_OP_CHAT_DESCRIPTION, buf, iLen);
 
     iLen = ::GetWindowText(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], buf, 65);
 
     if(bUpdateOpChat == false &&
-        (SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL] == NULL && iLen != 0) ||
-        (SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL] != NULL &&
-        strcmp(buf, SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL]) != NULL)) {
+        (clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_EMAIL] == NULL && iLen != 0) ||
+        (clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_EMAIL] != NULL &&
+        strcmp(buf, clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_EMAIL]) != NULL)) {
         bUpdateOpChat = true;
     }
 
-    SettingManager->SetText(SETTXT_OP_CHAT_EMAIL, buf, iLen);
+    clsSettingManager::mPtr->SetText(SETTXT_OP_CHAT_EMAIL, buf, iLen);
 
-	if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true) {
-        SettingManager->bUpdateLocked = false;
-		SettingManager->DisableOpChat((bBotHaveNewNick == true || bRegOpChat == false));
-		SettingManager->bUpdateLocked = true;
+	if(clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] == true) {
+        clsSettingManager::mPtr->bUpdateLocked = false;
+		clsSettingManager::mPtr->DisableOpChat((bBotHaveNewNick == true || bRegOpChat == false));
+		clsSettingManager::mPtr->bUpdateLocked = true;
 	}
 
-    SettingManager->SetText(SETTXT_OP_CHAT_NICK, sBot, iBotLen);
+    clsSettingManager::mPtr->SetText(SETTXT_OP_CHAT_NICK, sBot, iBotLen);
 
-    SettingManager->SetBool(SETBOOL_REG_OP_CHAT, bRegOpChat);
+    clsSettingManager::mPtr->SetBool(SETBOOL_REG_OP_CHAT, bRegOpChat);
 }
 //------------------------------------------------------------------------------
 
@@ -349,66 +351,66 @@ bool SettingPageBots::CreateSettingPage(HWND hOwner) {
         return false;
     }
 
-    int iPosX = iGroupBoxMargin + iCheckHeight + iOneLineOneChecksGB + (2 * iOneLineGB) + 1 + 5;
+    int iPosX = clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + clsGuiSettingManager::iOneLineOneChecksGB + (2 * clsGuiSettingManager::iOneLineGB) + 1 + 5;
 
-    hWndPageItems[GB_HUB_BOT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_HUB_BOT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, 0, iFullGB, iPosX, m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_HUB_BOT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_HUB_BOT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        0, 0, iFullGB, iPosX, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
-    hWndPageItems[BTN_HUB_BOT_ENABLE] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ENABLE_AND_REG_BOT_ON_HUB], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, iGroupBoxMargin, iFullEDT, iCheckHeight, m_hWnd, (HMENU)BTN_HUB_BOT_ENABLE, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[BTN_HUB_BOT_ENABLE], BM_SETCHECK, (SettingManager->bBools[SETBOOL_REG_BOT] == true ? BST_CHECKED : BST_UNCHECKED), 0);
+    hWndPageItems[BTN_HUB_BOT_ENABLE] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_ENABLE_AND_REG_BOT_ON_HUB], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+        8, clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, (HMENU)BTN_HUB_BOT_ENABLE, clsServerManager::hInstance, NULL);
+    ::SendMessage(hWndPageItems[BTN_HUB_BOT_ENABLE], BM_SETCHECK, (clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    hWndPageItems[GB_HUB_BOT_NICK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_NICK], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        5, iGroupBoxMargin + iCheckHeight + 1, iGBinGB, iOneLineOneChecksGB, m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_HUB_BOT_NICK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_NICK], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        5, clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + 1, iGBinGB, clsGuiSettingManager::iOneLineOneChecksGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
-    hWndPageItems[EDT_HUB_BOT_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_BOT_NICK], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        13, (2 * iGroupBoxMargin) + iCheckHeight + 1, iGBinGBEDT, iEditHeight, m_hWnd, (HMENU)EDT_HUB_BOT_NICK, g_hInstance, NULL);
+    hWndPageItems[EDT_HUB_BOT_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_BOT_NICK], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
+        13, (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + 1, iGBinGBEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_HUB_BOT_NICK, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_BOT_NICK], EM_SETLIMITTEXT, 64, 0);
 
-    hWndPageItems[BTN_HUB_BOT_IS_HUB_SEC] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_USE_AS_ALIAS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        13, (2 * iGroupBoxMargin) + iCheckHeight + 1 + iEditHeight + 4, iGBinGBEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[BTN_HUB_BOT_IS_HUB_SEC], BM_SETCHECK, (SettingManager->bBools[SETBOOL_USE_BOT_NICK_AS_HUB_SEC] == true ? BST_CHECKED : BST_UNCHECKED), 0);
+    hWndPageItems[BTN_HUB_BOT_IS_HUB_SEC] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_USE_AS_ALIAS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+        13, (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + 1 + clsGuiSettingManager::iEditHeight + 4, iGBinGBEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+    ::SendMessage(hWndPageItems[BTN_HUB_BOT_IS_HUB_SEC], BM_SETCHECK, (clsSettingManager::mPtr->bBools[SETBOOL_USE_BOT_NICK_AS_HUB_SEC] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    hWndPageItems[GB_HUB_BOT_DESCRIPTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_DESCRIPTION], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        5, iGroupBoxMargin + iCheckHeight + 1 + iOneLineOneChecksGB, iGBinGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_HUB_BOT_DESCRIPTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_DESCRIPTION], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        5, clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + 1 + clsGuiSettingManager::iOneLineOneChecksGB, iGBinGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
-    hWndPageItems[EDT_HUB_BOT_DESCRIPTION] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_BOT_DESCRIPTION], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        13, (2 * iGroupBoxMargin) + iCheckHeight + 1 + iOneLineOneChecksGB, iGBinGBEDT, iEditHeight, m_hWnd, (HMENU)EDT_HUB_BOT_DESCRIPTION, g_hInstance, NULL);
+    hWndPageItems[EDT_HUB_BOT_DESCRIPTION] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_BOT_DESCRIPTION], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
+        13, (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + 1 + clsGuiSettingManager::iOneLineOneChecksGB, iGBinGBEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_HUB_BOT_DESCRIPTION, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_BOT_DESCRIPTION], EM_SETLIMITTEXT, 64, 0);
 
-    hWndPageItems[GB_HUB_BOT_EMAIL] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_EMAIL], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        5, iGroupBoxMargin + iCheckHeight + 1 + iOneLineOneChecksGB + iOneLineGB, iGBinGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_HUB_BOT_EMAIL] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_EMAIL], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        5, clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + 1 + clsGuiSettingManager::iOneLineOneChecksGB + clsGuiSettingManager::iOneLineGB, iGBinGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
-    hWndPageItems[EDT_HUB_BOT_EMAIL] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_BOT_EMAIL], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        13, (2 * iGroupBoxMargin) + iCheckHeight + 1 + iOneLineOneChecksGB + iOneLineGB, iGBinGBEDT, iEditHeight, m_hWnd, (HMENU)EDT_HUB_BOT_EMAIL, g_hInstance, NULL);
+    hWndPageItems[EDT_HUB_BOT_EMAIL] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_BOT_EMAIL], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
+        13, (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + 1 + clsGuiSettingManager::iOneLineOneChecksGB + clsGuiSettingManager::iOneLineGB, iGBinGBEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_HUB_BOT_EMAIL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_BOT_EMAIL], EM_SETLIMITTEXT, 64, 0);
 
-    hWndPageItems[GB_OP_CHAT_BOT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_OP_CHAT_BOT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, iPosX, iFullGB, iGroupBoxMargin + iCheckHeight + (3 * iOneLineGB) + 1 + 5, m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_OP_CHAT_BOT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_OP_CHAT_BOT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        0, iPosX, iFullGB, clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + (3 * clsGuiSettingManager::iOneLineGB) + 1 + 5, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
-    hWndPageItems[BTN_OP_CHAT_BOT_ENABLE] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ENABLE_AND_REG_BOT_ON_HUB], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, iPosX + iGroupBoxMargin, iFullEDT, iCheckHeight, m_hWnd, (HMENU)BTN_OP_CHAT_BOT_ENABLE, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[BTN_OP_CHAT_BOT_ENABLE], BM_SETCHECK, (SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true ? BST_CHECKED : BST_UNCHECKED), 0);
+    hWndPageItems[BTN_OP_CHAT_BOT_ENABLE] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_ENABLE_AND_REG_BOT_ON_HUB], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+        8, iPosX + clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, (HMENU)BTN_OP_CHAT_BOT_ENABLE, clsServerManager::hInstance, NULL);
+    ::SendMessage(hWndPageItems[BTN_OP_CHAT_BOT_ENABLE], BM_SETCHECK, (clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    hWndPageItems[GB_OP_CHAT_BOT_NICK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_NICK], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        5, iPosX + iGroupBoxMargin + iCheckHeight + 1, iGBinGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_OP_CHAT_BOT_NICK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_NICK], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        5, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + 1, iGBinGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
-    hWndPageItems[EDT_OP_CHAT_BOT_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_OP_CHAT_NICK], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        13, iPosX + (2 * iGroupBoxMargin) + iCheckHeight + 1, iGBinGBEDT, iEditHeight, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_NICK, g_hInstance, NULL);
+    hWndPageItems[EDT_OP_CHAT_BOT_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
+        13, iPosX + (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + 1, iGBinGBEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_NICK, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_OP_CHAT_BOT_NICK], EM_SETLIMITTEXT, 64, 0);
 
-    hWndPageItems[GB_OP_CHAT_BOT_DESCRIPTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_DESCRIPTION], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        5, iPosX + iGroupBoxMargin + iCheckHeight + 1 + iOneLineGB, iGBinGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_OP_CHAT_BOT_DESCRIPTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_DESCRIPTION], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        5, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + 1 + clsGuiSettingManager::iOneLineGB, iGBinGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
-    hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
-        ES_AUTOHSCROLL, 13, iPosX + (2 * iGroupBoxMargin) + iCheckHeight + 1 + iOneLineGB, iGBinGBEDT, iEditHeight, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_DESCRIPTION, g_hInstance, NULL);
+    hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_DESCRIPTION], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
+        ES_AUTOHSCROLL, 13, iPosX + (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + 1 + clsGuiSettingManager::iOneLineGB, iGBinGBEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_DESCRIPTION, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION], EM_SETLIMITTEXT, 64, 0);
 
-    hWndPageItems[GB_OP_CHAT_BOT_EMAIL] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_EMAIL], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        5, iPosX + iGroupBoxMargin + iCheckHeight + 1 + (2 * iOneLineGB), iGBinGB, iOneLineGB, m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_OP_CHAT_BOT_EMAIL] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_EMAIL], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        5, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + 1 + (2 * clsGuiSettingManager::iOneLineGB), iGBinGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
-    hWndPageItems[EDT_OP_CHAT_BOT_EMAIL] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        13, iPosX + (2 * iGroupBoxMargin) + iCheckHeight + 1 + (2 * iOneLineGB), iGBinGBEDT, iEditHeight, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_EMAIL, g_hInstance, NULL);
+    hWndPageItems[EDT_OP_CHAT_BOT_EMAIL] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_EMAIL], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
+        13, iPosX + (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + 1 + (2 * clsGuiSettingManager::iOneLineGB), iGBinGBEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_EMAIL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], EM_SETLIMITTEXT, 64, 0);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
@@ -416,26 +418,26 @@ bool SettingPageBots::CreateSettingPage(HWND hOwner) {
             return false;
         }
 
-        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)clsGuiSettingManager::hFont, MAKELPARAM(TRUE, 0));
     }
 
-    ::EnableWindow(hWndPageItems[EDT_HUB_BOT_NICK], SettingManager->bBools[SETBOOL_REG_BOT] == true ? TRUE : FALSE);
-    ::EnableWindow(hWndPageItems[BTN_HUB_BOT_IS_HUB_SEC], SettingManager->bBools[SETBOOL_REG_BOT] == true ? TRUE : FALSE);
-    ::EnableWindow(hWndPageItems[EDT_HUB_BOT_DESCRIPTION], SettingManager->bBools[SETBOOL_REG_BOT] == true ? TRUE : FALSE);
-    ::EnableWindow(hWndPageItems[EDT_HUB_BOT_EMAIL], SettingManager->bBools[SETBOOL_REG_BOT] == true ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[EDT_HUB_BOT_NICK], clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] == true ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[BTN_HUB_BOT_IS_HUB_SEC], clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] == true ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[EDT_HUB_BOT_DESCRIPTION], clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] == true ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[EDT_HUB_BOT_EMAIL], clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] == true ? TRUE : FALSE);
 
-    ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_NICK], SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true ? TRUE : FALSE);
-    ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION], SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true ? TRUE : FALSE);
-    ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_NICK], clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] == true ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION], clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] == true ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] == true ? TRUE : FALSE);
 
-    wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], GWLP_WNDPROC, (LONG_PTR)EditProc);
+    clsGuiSettingManager::wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], GWLP_WNDPROC, (LONG_PTR)EditProc);
 
 	return true;
 }
 //------------------------------------------------------------------------------
 
 char * SettingPageBots::GetPageName() {
-    return LanguageManager->sTexts[LAN_DEFAULT_BOTS];
+    return clsLanguageManager::mPtr->sTexts[LAN_DEFAULT_BOTS];
 }
 //------------------------------------------------------------------------------
 

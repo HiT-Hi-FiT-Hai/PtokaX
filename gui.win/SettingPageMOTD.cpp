@@ -23,9 +23,11 @@
 #include "SettingPageMOTD.h"
 //---------------------------------------------------------------------------
 #include "../core/LanguageManager.h"
+#include "../core/ServerManager.h"
 #include "../core/SettingManager.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #pragma hdrstop
@@ -58,7 +60,7 @@ LRESULT SettingPageMOTD::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam
             if(HIWORD(wParam) == EN_CHANGE) {
                 int iLen = ::GetWindowTextLength((HWND)lParam);
 
-                char * buf = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
+                char * buf = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
 
                 if(buf == NULL) {
                     AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for buf in SettingPageMOTD::PageMOTDProc\n", (uint64_t)(iLen+1));
@@ -87,7 +89,7 @@ LRESULT SettingPageMOTD::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                     ::SendMessage((HWND)lParam, EM_SETSEL, iStart, iEnd);
                 }
 
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
+                if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
                     AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageMOTD::PageMOTDProc\n", 0);
                 }
 
@@ -116,7 +118,7 @@ void SettingPageMOTD::Save() {
 
     int iAllocLen = ::GetWindowTextLength(hWndPageItems[EDT_MOTD]);
 
-    char * buf = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, iAllocLen+1);
+    char * buf = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iAllocLen+1);
 
     if(buf == NULL) {
         AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for buf in SettingPageMOTD::Save\n", (uint64_t)(iAllocLen+1));
@@ -125,20 +127,20 @@ void SettingPageMOTD::Save() {
 
     int iLen = ::GetWindowText(hWndPageItems[EDT_MOTD], buf, iAllocLen+1);
 
-    if((bDisableMOTD != SettingManager->bBools[SETBOOL_DISABLE_MOTD] || bMOTDAsPM != SettingManager->bBools[SETBOOL_MOTD_AS_PM]) ||
-        (SettingManager->sMOTD == NULL && iLen != 0) || (SettingManager->sMOTD != NULL && strcmp(buf, SettingManager->sMOTD) != NULL)) {
+    if((bDisableMOTD != clsSettingManager::mPtr->bBools[SETBOOL_DISABLE_MOTD] || bMOTDAsPM != clsSettingManager::mPtr->bBools[SETBOOL_MOTD_AS_PM]) ||
+        (clsSettingManager::mPtr->sMOTD == NULL && iLen != 0) || (clsSettingManager::mPtr->sMOTD != NULL && strcmp(buf, clsSettingManager::mPtr->sMOTD) != NULL)) {
         bUpdateMOTD = true;
     }
 
-    SettingManager->SetMOTD(buf, iLen);
+    clsSettingManager::mPtr->SetMOTD(buf, iLen);
 
-    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
+    if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
         AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageMOTD::Save\n", 0);
     }
 
-    SettingManager->SetBool(SETBOOL_MOTD_AS_PM, bMOTDAsPM);
+    clsSettingManager::mPtr->SetBool(SETBOOL_MOTD_AS_PM, bMOTDAsPM);
 
-    SettingManager->SetBool(SETBOOL_DISABLE_MOTD, bDisableMOTD);
+    clsSettingManager::mPtr->SetBool(SETBOOL_DISABLE_MOTD, bDisableMOTD);
 }
 //------------------------------------------------------------------------------
 
@@ -165,43 +167,43 @@ bool SettingPageMOTD::CreateSettingPage(HWND hOwner) {
     RECT rcThis = { 0 };
     ::GetWindowRect(m_hWnd, &rcThis);
 
-    hWndPageItems[GB_MOTD] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, LanguageManager->sTexts[LAN_MOTD], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, 0, iFullGB, (rcThis.bottom - rcThis.top) - 3, m_hWnd, NULL, g_hInstance, NULL);
+    hWndPageItems[GB_MOTD] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_MOTD], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        0, 0, iFullGB, (rcThis.bottom - rcThis.top) - 3, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
-    hWndPageItems[EDT_MOTD] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, SettingManager->sMOTD != NULL ? SettingManager->sMOTD : "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP |
-        ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN, 8, iGroupBoxMargin, iFullEDT, (rcThis.bottom - rcThis.top) - iGroupBoxMargin - (2 * iCheckHeight) - 18,
-        m_hWnd, (HMENU)EDT_MOTD, g_hInstance, NULL);
+    hWndPageItems[EDT_MOTD] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sMOTD != NULL ? clsSettingManager::mPtr->sMOTD : "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP |
+        ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN, 8, clsGuiSettingManager::iGroupBoxMargin, iFullEDT, (rcThis.bottom - rcThis.top) - clsGuiSettingManager::iGroupBoxMargin - (2 * clsGuiSettingManager::iCheckHeight) - 18,
+        m_hWnd, (HMENU)EDT_MOTD, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MOTD], EM_SETLIMITTEXT, 64000, 0);
 
-    hWndPageItems[BTN_MOTD_AS_PM] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_MOTD_IN_PM], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, (rcThis.bottom - rcThis.top) - (2 * iCheckHeight) - 14, iFullEDT, iCheckHeight, m_hWnd, NULL, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[BTN_MOTD_AS_PM], BM_SETCHECK, (SettingManager->bBools[SETBOOL_MOTD_AS_PM] == true ? BST_CHECKED : BST_UNCHECKED), 0);
+    hWndPageItems[BTN_MOTD_AS_PM] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_MOTD_IN_PM], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+        8, (rcThis.bottom - rcThis.top) - (2 * clsGuiSettingManager::iCheckHeight) - 14, iFullEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+    ::SendMessage(hWndPageItems[BTN_MOTD_AS_PM], BM_SETCHECK, (clsSettingManager::mPtr->bBools[SETBOOL_MOTD_AS_PM] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    hWndPageItems[BTN_DISABLE_MOTD] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISABLE_MOTD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, (rcThis.bottom - rcThis.top) - iCheckHeight - 11, iFullEDT, iCheckHeight, m_hWnd, (HMENU)BTN_DISABLE_MOTD, g_hInstance, NULL);
-    ::SendMessage(hWndPageItems[BTN_DISABLE_MOTD], BM_SETCHECK, (SettingManager->bBools[SETBOOL_DISABLE_MOTD] == true ? BST_CHECKED : BST_UNCHECKED), 0);
+    hWndPageItems[BTN_DISABLE_MOTD] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_DISABLE_MOTD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+        8, (rcThis.bottom - rcThis.top) - clsGuiSettingManager::iCheckHeight - 11, iFullEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, (HMENU)BTN_DISABLE_MOTD, clsServerManager::hInstance, NULL);
+    ::SendMessage(hWndPageItems[BTN_DISABLE_MOTD], BM_SETCHECK, (clsSettingManager::mPtr->bBools[SETBOOL_DISABLE_MOTD] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {
             return false;
         }
 
-        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)clsGuiSettingManager::hFont, MAKELPARAM(TRUE, 0));
     }
 
-    ::EnableWindow(hWndPageItems[EDT_MOTD], SettingManager->bBools[SETBOOL_DISABLE_MOTD] == true ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[BTN_MOTD_AS_PM], SettingManager->bBools[SETBOOL_DISABLE_MOTD] == true ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_MOTD], clsSettingManager::mPtr->bBools[SETBOOL_DISABLE_MOTD] == true ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[BTN_MOTD_AS_PM], clsSettingManager::mPtr->bBools[SETBOOL_DISABLE_MOTD] == true ? FALSE : TRUE);
 
     wpOldMultiEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_MOTD], GWLP_WNDPROC, (LONG_PTR)MultiEditProc);
 
-    wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_DISABLE_MOTD], GWLP_WNDPROC, (LONG_PTR)ButtonProc);
+    clsGuiSettingManager::wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_DISABLE_MOTD], GWLP_WNDPROC, (LONG_PTR)ButtonProc);
 
 	return true;
 }
 //------------------------------------------------------------------------------
 
 char * SettingPageMOTD::GetPageName() {
-    return LanguageManager->sTexts[LAN_MOTD_ONLY];
+    return clsLanguageManager::mPtr->sTexts[LAN_MOTD_ONLY];
 }
 //------------------------------------------------------------------------------
 

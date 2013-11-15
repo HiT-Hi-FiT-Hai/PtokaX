@@ -24,7 +24,7 @@
 struct User;
 //---------------------------------------------------------------------------
 
-class theLoop {
+class clsServiceLoop {
 private:
     struct AcceptedSocket {
 #ifdef _WIN32
@@ -63,8 +63,14 @@ private:
     void AcceptUser(AcceptedSocket * AccptSocket);
 protected:
 public:
-	theLoop();
-	~theLoop();
+    static clsServiceLoop * mPtr;
+
+	clsServiceLoop();
+	~clsServiceLoop();
+
+#ifdef _WIN32
+    static UINT_PTR srvLoopTimer;
+#endif
 
     double dLoggedUsers, dActualSrvLoopLogins;
 
@@ -80,11 +86,6 @@ public:
 	void SendLoop();
 	void Looper();
 };
-//---------------------------------------------------------------------------
-extern theLoop *srvLoop;
-#ifdef _WIN32
-    extern UINT_PTR srvLoopTimer;
-#endif
 //---------------------------------------------------------------------------
 
 #endif

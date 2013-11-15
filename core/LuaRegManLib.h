@@ -22,10 +22,10 @@
 #define LuaRegManLibH
 //------------------------------------------------------------------------------
 
-#if LUA_VERSION_NUM == 501
-    void RegRegMan(lua_State * L);
-#else
+#if LUA_VERSION_NUM > 501
     int RegRegMan(lua_State *L);
+#else
+    void RegRegMan(lua_State * L);
 #endif
 //------------------------------------------------------------------------------
 

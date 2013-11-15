@@ -22,7 +22,7 @@
 #define IP2CountryH
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-class IP2CC {
+class clsIpP2Country {
 private:
     uint32_t ui32Size, ui32IPv6Size;
     uint32_t * ui32RangeFrom, * ui32RangeTo;
@@ -32,10 +32,12 @@ private:
     void LoadIPv4();
     void LoadIPv6();
 public:
+    static clsIpP2Country * mPtr;
+
     uint32_t ui32Count, ui32IPv6Count;
 
-	IP2CC();
-	~IP2CC();
+	clsIpP2Country();
+	~clsIpP2Country();
 
 	const char * Find(const uint8_t * ui128IpHash, const bool &bCountryName);
 	uint8_t Find(const uint8_t * ui128IpHash);
@@ -44,8 +46,6 @@ public:
 
     void Reload();
 };
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-extern IP2CC *IP2Country;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #endif

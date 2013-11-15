@@ -27,13 +27,15 @@ struct ScriptTimer;
 struct User;
 //------------------------------------------------------------------------------
 
-class ScriptMan {
+class clsScriptManager {
 private:
 	Script *RunningScriptE;
 
 	void AddRunningScript(Script * curScript);
 	void RemoveRunningScript(Script * curScript);
 public:
+    static clsScriptManager * mPtr;
+
     enum LuaArrivals {
         CHAT_ARRIVAL,
         KEY_ARRIVAL,
@@ -67,8 +69,8 @@ public:
 
     bool bMoved;
     
-    ScriptMan();
-    ~ScriptMan();
+    clsScriptManager();
+    ~clsScriptManager();
     
     void Start();
     void Stop();
@@ -101,9 +103,6 @@ public:
 
     void PrepareMove(lua_State * L);
 };
-
-//------------------------------------------------------------------------------
-extern ScriptMan *ScriptManager;
 //------------------------------------------------------------------------------
 
 #endif

@@ -27,8 +27,10 @@
 struct User;
 //---------------------------------------------------------------------------
 
-class MainWindowPageUsersChat : public MainWindowPage, private BasicSplitter {
+class clsMainWindowPageUsersChat : public MainWindowPage, private BasicSplitter {
 public:
+    static clsMainWindowPageUsersChat * mPtr;
+
     HWND hWndPageItems[7];
 
     enum enmPageItems {
@@ -41,8 +43,8 @@ public:
         BTN_UPDATE_USERS
     };
 
-    MainWindowPageUsersChat();
-    ~MainWindowPageUsersChat();
+    clsMainWindowPageUsersChat();
+    ~clsMainWindowPageUsersChat();
 
     bool CreateMainWindowPage(HWND hOwner);
     void UpdateLanguage();
@@ -67,8 +69,6 @@ private:
     HWND GetWindowHandle();
     void UpdateSplitterParts();
 };
-//------------------------------------------------------------------------------
-extern MainWindowPageUsersChat * pMainWindowPageUsersChat;
 //------------------------------------------------------------------------------
 
 #endif

@@ -22,7 +22,7 @@
 #define eventqueueH
 //---------------------------------------------------------------------------
 
-class eventq {
+class clsEventQueue {
 private:
     struct event {
         char * sMsg;
@@ -41,6 +41,8 @@ private:
 	pthread_mutex_t mtxEventQueue;
 #endif
 public:
+    static clsEventQueue * mPtr;
+
 	enum {
         EVENT_RESTART, 
         EVENT_RSTSCRIPTS, 
@@ -55,16 +57,13 @@ public:
 
     event *NormalS, *ThreadS;
 
-    eventq();
-    ~eventq();
+    clsEventQueue();
+    ~clsEventQueue();
 
     void AddNormal(uint8_t ui8Id, char * sMsg);
     void AddThread(uint8_t ui8Id, char * sMsg, const sockaddr_storage * sas = NULL);
     void ProcessEvents();
 };
-
-//---------------------------------------------------------------------------
-extern eventq *eventqueue;
 //---------------------------------------------------------------------------
 
 #endif

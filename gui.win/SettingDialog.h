@@ -24,8 +24,10 @@
 #include "SettingPage.h"
 //---------------------------------------------------------------------------
 
-class SettingDialog {
+class clsSettingDialog {
 public:
+    static clsSettingDialog * mPtr;
+
     HWND hWndWindowItems[4];
 
     enum enmWindowItems {
@@ -35,8 +37,8 @@ public:
         BTN_CANCEL
     };
 
-    SettingDialog();
-    ~SettingDialog();
+    clsSettingDialog();
+    ~clsSettingDialog();
 
     static LRESULT CALLBACK StaticSettingDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -48,8 +50,6 @@ private:
 
     void OnSelChanged();
 };
-//------------------------------------------------------------------------------
-extern SettingDialog * pSettingDialog;
 //------------------------------------------------------------------------------
 
 #endif

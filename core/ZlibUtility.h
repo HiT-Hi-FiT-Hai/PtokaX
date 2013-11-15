@@ -27,6 +27,8 @@ private:
     size_t szZbufferSize;
     char *sZbuffer;
 public:
+    static clsZlibUtility * mPtr;
+
 	clsZlibUtility();
 	~clsZlibUtility();
 	
@@ -35,7 +37,5 @@ public:
     char * CreateZPipe(char *sInData, const unsigned int &sInDataSize, char *sOutData, unsigned int &iOutDataLen, unsigned int &iOutDataSize, size_t (* pAllignFunc)(size_t n));
 };
 //---------------------------------------------------------------------------
-extern clsZlibUtility *ZlibUtility;
-//--------------------------------------------------------------------------- 
 
 #endif

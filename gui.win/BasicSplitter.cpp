@@ -22,6 +22,7 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "BasicSplitter.h"
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #pragma hdrstop
@@ -62,9 +63,9 @@ bool BasicSplitter::OnMouseMove(WPARAM wParam, LPARAM lParam) {
 		return true;
 	} else {
 		if(IsCursorOverSplitter(ixPos, iyPos) == true) {
-			::SetCursor(hVerticalCursor);
+			::SetCursor(clsGuiSettingManager::hVerticalCursor);
         } else {
-            ::SetCursor(hArrowCursor);
+            ::SetCursor(clsGuiSettingManager::hArrowCursor);
         }
 
 		return false;
@@ -78,7 +79,7 @@ void BasicSplitter::OnLButtonDown(LPARAM lParam) {
 
 	if(IsCursorOverSplitter(ixPos, iyPos) == true) {
 		::SetCapture(GetWindowHandle());
-		::SetCursor(hVerticalCursor);
+		::SetCursor(clsGuiSettingManager::hVerticalCursor);
 	}
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

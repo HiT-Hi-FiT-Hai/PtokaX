@@ -26,25 +26,22 @@ struct Script;
 //---------------------------------------------------------------------------
 
 struct ScriptBot {
-    ScriptBot(char * sNick, const size_t &szNickLen, char * sDescription, const size_t &szDscrLen, char * sEmail, const size_t &szEmailLen, const bool &bOP);
-    ~ScriptBot();
-
     char *sNick;
     char *sMyINFO;
     
     ScriptBot *prev, *next;
 
     bool bIsOP;
+
+    ScriptBot();
+    ~ScriptBot();
+
+    static ScriptBot * CreateScriptBot(char * sNick, const size_t &szNickLen, char * sDescription, const size_t &szDscrLen, char * sEmail, const size_t &szEmailLen, const bool &bOP);
 };
 //------------------------------------------------------------------------------
 
 struct ScriptTimer {
-#ifdef _WIN32
-    ScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &szLen);
-#else
-	ScriptTimer(char * sFunctName, const size_t &szLen);
-#endif
-    ~ScriptTimer();
+    static char sDefaultTimerFunc[];
 
 #ifdef _WIN32
     UINT_PTR uiTimerId;
@@ -54,14 +51,22 @@ struct ScriptTimer {
 
     char * sFunctionName;
 
+    int iFunctionRef;
+
     ScriptTimer *prev, *next;
+
+    ScriptTimer();
+    ~ScriptTimer();
+
+#ifdef _WIN32
+    static ScriptTimer * CreateScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &szLen, const int &iRef);
+#else
+	static ScriptTimer * CreateScriptTimer(char * sFunctName, const size_t &szLen, const int &iRef);
+#endif
 };
 //------------------------------------------------------------------------------
 
 struct Script {
-    Script(char *Name, const bool &enabled);
-    ~Script();
-
     enum LuaFunctions {
 		ONSTARTUP         = 0x1,
 		ONEXIT            = 0x2,
@@ -89,6 +94,11 @@ struct Script {
 	uint16_t ui16Functions;
 
     bool bEnabled, bRegUDP, bProcessed;
+
+    Script();
+    ~Script();
+
+    static Script * CreateScript(char *Name, const bool &enabled);
 };
 //------------------------------------------------------------------------------
 

@@ -27,8 +27,10 @@
 class ScriptEditorDialog;
 //------------------------------------------------------------------------------
 
-class MainWindowPageScripts : public MainWindowPage, private BasicSplitter {
+class clsMainWindowPageScripts : public MainWindowPage, private BasicSplitter {
 public:
+    static clsMainWindowPageScripts * mPtr;
+
     HWND hWndPageItems[8];
 
     enum enmPageItems {
@@ -42,8 +44,8 @@ public:
         BTN_RESTART_SCRIPTS
     };
 
-    MainWindowPageScripts();
-    ~MainWindowPageScripts();
+    clsMainWindowPageScripts();
+    ~clsMainWindowPageScripts();
 
     bool CreateMainWindowPage(HWND hOwner);
     void UpdateLanguage();
@@ -79,8 +81,6 @@ private:
     HWND GetWindowHandle();
     void UpdateSplitterParts();
 };
-//------------------------------------------------------------------------------
-extern MainWindowPageScripts * pMainWindowPageScripts;
 //---------------------------------------------------------------------------
 
 #endif

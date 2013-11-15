@@ -85,17 +85,12 @@
 #include "pxstring.h"
 //---------------------------------------------------------------------------
 #define PtokaXVersionString "0.5.0.1"
-#define BUILD_NUMBER "433"
+#define BUILD_NUMBER "443"
 
 #ifdef _WIN32
     #define PRIu64 "I64u"
     #define strcasecmp stricmp
     #define strncasecmp strnicmp
-#endif
-
-#ifdef _BUILD_GUI
-    extern HINSTANCE g_hInstance;
-    extern HWND g_hWndActiveDialog;
 #endif
 //---------------------------------------------------------------------------
 

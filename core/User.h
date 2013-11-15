@@ -23,12 +23,14 @@
 //---------------------------------------------------------------------------
 
 struct UserBan {
-    UserBan(char * sMess, const uint32_t &iMessLen, const uint32_t &ui32Hash);
+    char * sMessage;
+
+    uint32_t ui32Len, ui32NickHash;
+
+    UserBan();
     ~UserBan();
 
-    uint32_t iLen;
-    uint32_t ui32NickHash;
-    char * sMessage;
+    static UserBan * CreateUserBan(char * sMess, const uint32_t &iMessLen, const uint32_t &ui32Hash);
 };
 //---------------------------------------------------------------------------
 
@@ -75,10 +77,56 @@ struct PrcsdToUsrCmd {
     User *To;
 };
 //---------------------------------------------------------------------------
+struct QzBuf; // for send queue
+//---------------------------------------------------------------------------
 
 struct User {
 	User();
 	~User();
+
+	bool MakeLock();
+	bool DoRecv();
+
+	void SendChar(const char * cText, const size_t &szTextLen);
+	void SendCharDelayed(const char * cText, const size_t &szTextLen);
+	void SendTextDelayed(const string & sText);
+
+    bool PutInSendBuf(const char * Text, const size_t &szTxtLen);
+    bool Try2Send();
+
+    void SetIP(char * sNewIP);
+    void SetNick(char * sNewNick, const uint8_t &ui8NewNickLen);
+    void SetMyInfoOriginal(char * sNewMyInfo, const uint16_t &ui16NewMyInfoLen);
+    void SetVersion(char * sNewVer);
+    void SetLastChat(char * sNewData, const size_t &szLen);
+    void SetLastPM(char * sNewData, const size_t &szLen);
+    void SetLastSearch(char * sNewData, const size_t &szLen);
+    void SetBuffer(char * sKickMsg, size_t szLen = 0);
+    void FreeBuffer();
+
+    void Close(bool bNoQuit = false);
+
+    void Add2Userlist();
+    void AddUserList();
+
+    bool GenerateMyInfoLong();
+    bool GenerateMyInfoShort();
+
+    static void FreeInfo(char * sInfo, const char * sName);
+
+    void HasSuspiciousTag();
+
+    bool ProcessRules();
+
+    void AddPrcsdCmd(const unsigned char &cType, char * sCommand, const size_t &szCommandLen, User * to, const bool &bIsPm = false);
+
+    void AddMeOrIPv4Check();
+
+    static char * SetUserInfo(char * sOldData, uint8_t &ui8OldDataLen, char * sNewData, size_t &szNewDataLen, const char * sDataName);
+
+    void RemFromSendBuf(const char * sData, const uint32_t &iLen, const uint32_t &iSbLen);
+
+    static void DeletePrcsdUsrCmd(PrcsdUsrCmd * pCommand);
 
     enum UserStates {
         STATE_SOCKET_ACCEPTED,
@@ -226,57 +274,6 @@ struct User {
 
     char sModes[3];
 };
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-struct QzBuf; // for send queue
-//---------------------------------------------------------------------------
-
-bool UserMakeLock(User * u);
-
-bool UserDoRecv(User * u);
-
-void UserSendChar(User * u, const char * cText, const size_t &szTextLen);
-void UserSendCharDelayed(User * u, const char * cText);
-void UserSendCharDelayed(User * u, const char * cText, const size_t &szTextLen);
-void UserSendText(User * u, const string & sText);
-void UserSendTextDelayed(User * u, const string & sText);
-bool UserPutInSendBuf(User * u, const char * Text, const size_t &szTxtLen);
-bool UserTry2Send(User * u);
-
-void UserSetIP(User * u, char * sNewIP);
-void UserSetNick(User * u, char * sNewNick, const uint8_t &ui8NewNickLen);
-void UserSetMyInfoOriginal(User * u, char * sNewMyInfo, const uint16_t &ui16NewMyInfoLen);
-void UserSetVersion(User * u, char * sNewVer);
-void UserSetLastChat(User * u, char * sNewData, const size_t &szLen);
-void UserSetLastPM(User * u, char * sNewData, const size_t &szLen);
-void UserSetLastSearch(User * u, char * sNewData, const size_t &szLen);
-void UserSetBuffer(User * u, char * sKickMsg, size_t szLen = 0);
-void UserFreeBuffer(User * u);
-
-void UserClose(User * u, bool bNoQuit = false);
-
-void UserAdd2Userlist(User * u);
-void UserAddUserList(User * u);
-
-bool UserGenerateMyInfoLong(User * u);
-bool UserGenerateMyInfoShort(User * u);
-
-void UserFreeInfo(char * sInfo, const char * sName);
-
-void UserHasSuspiciousTag(User * curUser);
-
-bool UserProcessRules(User * u);
-
-void UserAddPrcsdCmd(User * u, const unsigned char &cType, char * sCommand, const size_t &szCommandLen, User * to, const bool &bIsPm = false);
-
-void UserAddMeOrIPv4Check(User * pUser);
-
-char * UserSetUserInfo(char * sOldData, uint8_t &ui8OldDataLen, char * sNewData, size_t &szNewDataLen, const char * sDataName);
-
-void UserRemFromSendBuf(User * u, const char * sData, const uint32_t &iLen, const uint32_t &iSbLen);
-
-void UserDeletePrcsdUsrCmd(PrcsdUsrCmd * pCommand);
 //---------------------------------------------------------------------------
 
 #endif

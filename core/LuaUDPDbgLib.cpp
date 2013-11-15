@@ -53,7 +53,7 @@ static int Reg(lua_State * L) {
         return 1;
     }
 
-	Script * cur = ScriptManager->FindScript(L);
+	Script * cur = clsScriptManager::mPtr->FindScript(L);
 	if(cur == NULL || cur->bRegUDP == true) {
         lua_settop(L, 0);
 		lua_pushnil(L);
@@ -69,7 +69,7 @@ static int Reg(lua_State * L) {
         return 1;
     }
 
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	uint16_t usPort = (uint16_t)lua_tonumber(L, 2);
 #else
     uint16_t usPort = (uint16_t)lua_tounsigned(L, 2);
@@ -77,7 +77,7 @@ static int Reg(lua_State * L) {
 
     bool bAllData = lua_toboolean(L, 3) == 0 ? false : true;
 
-    if(UdpDebug->New(sIP, usPort, bAllData, cur->sName) == false) {
+    if(clsUdpDebug::mPtr->New(sIP, usPort, bAllData, cur->sName) == false) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -98,13 +98,13 @@ static int Unreg(lua_State * L) {
         return 0;
     }
 
-	Script * cur = ScriptManager->FindScript(L);
+	Script * cur = clsScriptManager::mPtr->FindScript(L);
 	if(cur == NULL || cur->bRegUDP == false) {
         lua_settop(L, 0);
         return 0;
     }
 
-    UdpDebug->Remove(cur->sName);
+    clsUdpDebug::mPtr->Remove(cur->sName);
 
     cur->bRegUDP = false;
 
@@ -137,15 +137,15 @@ static int Send(lua_State * L) {
         return 1;
     }
 
-	Script * cur = ScriptManager->FindScript(L);
+	Script * cur = clsScriptManager::mPtr->FindScript(L);
 	if(cur == NULL || cur->bRegUDP == false) {
-        UdpDebug->Broadcast(sMsg, szLen);
+        clsUdpDebug::mPtr->Broadcast(sMsg, szLen);
         lua_settop(L, 0);
         lua_pushboolean(L, 1);
         return 1;
     }
 
-    UdpDebug->Send(cur->sName, sMsg, szLen);
+    clsUdpDebug::mPtr->Send(cur->sName, sMsg, szLen);
 
     lua_pushboolean(L, 1);
     return 1;
@@ -160,13 +160,13 @@ static const luaL_Reg udpdbg[] = {
 };
 //---------------------------------------------------------------------------
 
-#if LUA_VERSION_NUM == 501
-void RegUDPDbg(lua_State * L) {
-    luaL_register(L, "UDPDbg", udpdbg);
-#else
+#if LUA_VERSION_NUM > 501
 int RegUDPDbg(lua_State * L) {
     luaL_newlib(L, udpdbg);
     return 1;
+#else
+void RegUDPDbg(lua_State * L) {
+    luaL_register(L, "UDPDbg", udpdbg);
 #endif
 }
 //---------------------------------------------------------------------------

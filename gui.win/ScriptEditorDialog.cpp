@@ -30,6 +30,7 @@
 #include "../core/UdpDebug.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #pragma hdrstop
@@ -54,7 +55,7 @@ static LRESULT CALLBACK MultiRichEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
         return 0;
     }
 
-    return ::CallWindowProc(wpOldMultiRichEditProc, hWnd, uMsg, wParam, lParam);
+    return ::CallWindowProc(clsGuiSettingManager::wpOldMultiRichEditProc, hWnd, uMsg, wParam, lParam);
 }
 //---------------------------------------------------------------------------
 
@@ -85,12 +86,12 @@ LRESULT ScriptEditorDialog::ScriptEditorDialogProc(UINT uMsg, WPARAM wParam, LPA
             RECT rcParent;
             ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
-            ::SetWindowPos(hWndWindowItems[BTN_SAVE_SCRIPT], NULL, (rcParent.right / 3) * 2, rcParent.bottom - iEditHeight - 2,
-                rcParent.right - ((rcParent.right / 3) * 2) - 2, iEditHeight, SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[BTN_CHECK_SYNTAX], NULL, (rcParent.right / 3) + 1, rcParent.bottom - iEditHeight - 2,
-                (rcParent.right / 3) - 2, iEditHeight, SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[BTN_LOAD_SCRIPT], NULL, 2, rcParent.bottom - iEditHeight - 2, (rcParent.right / 3) - 2, iEditHeight, SWP_NOZORDER);
-            ::SetWindowPos(hWndWindowItems[REDT_SCRIPT], NULL, 0, 0, rcParent.right - ScaleGui(40), rcParent.bottom - iEditHeight - 4, SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[BTN_SAVE_SCRIPT], NULL, (rcParent.right / 3) * 2, rcParent.bottom - clsGuiSettingManager::iEditHeight - 2,
+                rcParent.right - ((rcParent.right / 3) * 2) - 2, clsGuiSettingManager::iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[BTN_CHECK_SYNTAX], NULL, (rcParent.right / 3) + 1, rcParent.bottom - clsGuiSettingManager::iEditHeight - 2,
+                (rcParent.right / 3) - 2, clsGuiSettingManager::iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[BTN_LOAD_SCRIPT], NULL, 2, rcParent.bottom - clsGuiSettingManager::iEditHeight - 2, (rcParent.right / 3) - 2, clsGuiSettingManager::iEditHeight, SWP_NOZORDER);
+            ::SetWindowPos(hWndWindowItems[REDT_SCRIPT], NULL, 0, 0, rcParent.right - ScaleGui(40), rcParent.bottom - clsGuiSettingManager::iEditHeight - 4, SWP_NOMOVE | SWP_NOZORDER);
 
             return 0;
         }
@@ -141,7 +142,7 @@ LRESULT ScriptEditorDialog::ScriptEditorDialogProc(UINT uMsg, WPARAM wParam, LPA
         }
         case WM_CLOSE:
             ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
-            g_hWndActiveDialog = NULL;
+            clsServerManager::hWndActiveDialog = NULL;
             break;
         case WM_NCDESTROY:
             delete this;
@@ -166,7 +167,7 @@ void ScriptEditorDialog::DoModal(HWND hWndParent) {
         m_wc.lpfnWndProc = ::DefWindowProc;
         m_wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
         m_wc.lpszClassName = "PtokaX_ScriptEditorDialog";
-        m_wc.hInstance = g_hInstance;
+        m_wc.hInstance = clsServerManager::hInstance;
         m_wc.hCursor = ::LoadCursor(m_wc.hInstance, IDC_ARROW);
         m_wc.style = CS_HREDRAW | CS_VREDRAW;
 
@@ -179,15 +180,15 @@ void ScriptEditorDialog::DoModal(HWND hWndParent) {
     int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(443) / 2);
     int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(454) / 2);
 
-    hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomScriptEditorDialog), LanguageManager->sTexts[LAN_SCRIPT_EDITOR],
+    hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomScriptEditorDialog), clsLanguageManager::mPtr->sTexts[LAN_SCRIPT_EDITOR],
         WS_POPUP | WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(443), ScaleGui(454),
-        hWndParent, NULL, g_hInstance, NULL);
+        hWndParent, NULL, clsServerManager::hInstance, NULL);
 
     if(hWndWindowItems[WINDOW_HANDLE] == NULL) {
         return;
     }
 
-    g_hWndActiveDialog = hWndWindowItems[WINDOW_HANDLE];
+    clsServerManager::hWndActiveDialog = hWndWindowItems[WINDOW_HANDLE];
 
     ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_USERDATA, (LONG_PTR)this);
     ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_WNDPROC, (LONG_PTR)StaticScriptEditorDialogProc);
@@ -195,37 +196,37 @@ void ScriptEditorDialog::DoModal(HWND hWndParent) {
     ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
     hWndWindowItems[REDT_SCRIPT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, /*MSFTEDIT_CLASS*/RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_HSCROLL | WS_VSCROLL | ES_AUTOVSCROLL | ES_MULTILINE |
-        ES_WANTRETURN, ScaleGui(40), 0, rcParent.right - ScaleGui(40), rcParent.bottom - iEditHeight - 4, hWndWindowItems[WINDOW_HANDLE], (HMENU)(REDT_SCRIPT+100), g_hInstance, NULL);
+        ES_WANTRETURN, ScaleGui(40), 0, rcParent.right - ScaleGui(40), rcParent.bottom - clsGuiSettingManager::iEditHeight - 4, hWndWindowItems[WINDOW_HANDLE], (HMENU)(REDT_SCRIPT+100), clsServerManager::hInstance, NULL);
     ::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_EXLIMITTEXT, 0, (LPARAM)16777216);
     ::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_AUTOURLDETECT, TRUE, 0);
     ::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_SETEVENTMASK, 0, (LPARAM)::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_GETEVENTMASK, 0, 0) | ENM_LINK);
 
-    hWndWindowItems[BTN_LOAD_SCRIPT] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_LOAD_SCRIPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        2, rcParent.bottom - iEditHeight - 2, (rcParent.right / 3) - 2, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)(BTN_LOAD_SCRIPT+100), g_hInstance, NULL);
+    hWndWindowItems[BTN_LOAD_SCRIPT] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_LOAD_SCRIPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+        2, rcParent.bottom - clsGuiSettingManager::iEditHeight - 2, (rcParent.right / 3) - 2, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)(BTN_LOAD_SCRIPT+100), clsServerManager::hInstance, NULL);
 
     {
         DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON;
-        if(SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == false || bServerRunning == false) {
+        if(clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_SCRIPTING] == false || clsServerManager::bServerRunning == false) {
             dwStyle |= WS_DISABLED;
         }
 
-        hWndWindowItems[BTN_CHECK_SYNTAX] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_CHECK_SYNTAX], dwStyle,
-            (rcParent.right / 3) + 1, rcParent.bottom - iEditHeight - 2, (rcParent.right / 3) - 2, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)BTN_CHECK_SYNTAX, g_hInstance, NULL);
+        hWndWindowItems[BTN_CHECK_SYNTAX] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_CHECK_SYNTAX], dwStyle,
+            (rcParent.right / 3) + 1, rcParent.bottom - clsGuiSettingManager::iEditHeight - 2, (rcParent.right / 3) - 2, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)BTN_CHECK_SYNTAX, clsServerManager::hInstance, NULL);
     }
 
-    hWndWindowItems[BTN_SAVE_SCRIPT] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_SAVE_SCRIPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        (rcParent.right / 3) * 2, rcParent.bottom - iEditHeight - 2, rcParent.right - ((rcParent.right / 3) * 2) - 2, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)BTN_SAVE_SCRIPT,
-        g_hInstance, NULL);
+    hWndWindowItems[BTN_SAVE_SCRIPT] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_SAVE_SCRIPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+        (rcParent.right / 3) * 2, rcParent.bottom - clsGuiSettingManager::iEditHeight - 2, rcParent.right - ((rcParent.right / 3) * 2) - 2, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)BTN_SAVE_SCRIPT,
+        clsServerManager::hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
         if(hWndWindowItems[ui8i] == NULL) {
             return;
         }
 
-        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)clsGuiSettingManager::hFont, MAKELPARAM(TRUE, 0));
     }
 
-    wpOldMultiRichEditProc = (WNDPROC)::SetWindowLongPtr(hWndWindowItems[REDT_SCRIPT], GWLP_WNDPROC, (LONG_PTR)MultiRichEditProc);
+    clsGuiSettingManager::wpOldMultiRichEditProc = (WNDPROC)::SetWindowLongPtr(hWndWindowItems[REDT_SCRIPT], GWLP_WNDPROC, (LONG_PTR)MultiRichEditProc);
 
     ::EnableWindow(hWndParent, FALSE);
 
@@ -237,8 +238,8 @@ void ScriptEditorDialog::LoadScript(char * sScript) {
     FILE * pFile = fopen(sScript, "rb");
 
     if(pFile == NULL) {
-        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(LanguageManager->sTexts[LAN_FAILED_TO_OPEN], (size_t)LanguageManager->ui16TextsLens[LAN_FAILED_TO_OPEN]) + ": "+ sScript).c_str(),
-            LanguageManager->sTexts[LAN_ERROR], MB_OK);
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(clsLanguageManager::mPtr->sTexts[LAN_FAILED_TO_OPEN], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_FAILED_TO_OPEN]) + ": "+ sScript).c_str(),
+            clsLanguageManager::mPtr->sTexts[LAN_ERROR], MB_OK);
         return;
     }
 
@@ -251,8 +252,8 @@ void ScriptEditorDialog::LoadScript(char * sScript) {
     if(sFile == NULL) {
         fclose(pFile);
 
-        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(LanguageManager->sTexts[LAN_FAILED_TO_OPEN], (size_t)LanguageManager->ui16TextsLens[LAN_FAILED_TO_OPEN]) + ": "+ sScript).c_str(),
-            LanguageManager->sTexts[LAN_ERROR], MB_OK);
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(clsLanguageManager::mPtr->sTexts[LAN_FAILED_TO_OPEN], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_FAILED_TO_OPEN]) + ": "+ sScript).c_str(),
+            clsLanguageManager::mPtr->sTexts[LAN_ERROR], MB_OK);
 
         return;
     }
@@ -308,7 +309,7 @@ void ScriptEditorDialog::OnUpdate() {
     int iFirstCharacterOnLastLine = (long)::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_CHARFROMPOS, 0, (LPARAM)&ptl);
     int iLastVisibleLine = (long)::SendMessage(hWndWindowItems[REDT_SCRIPT], EM_EXLINEFROMCHAR, 0, iFirstCharacterOnLastLine);
 
-    HGDIOBJ hOldObj = ::SelectObject(hDC, hFont);
+    HGDIOBJ hOldObj = ::SelectObject(hDC, clsGuiSettingManager::hFont);
 
     SIZE sz = { 0 };
     ::GetTextExtentPoint32(hDC, "1", 1, &sz);
@@ -350,7 +351,7 @@ void ScriptEditorDialog::OnLoadScript() {
     OpenFileName.nFilterIndex = 1;
     OpenFileName.lpstrFile = buf;
     OpenFileName.nMaxFile = MAX_PATH;
-    OpenFileName.lpstrInitialDir = SCRIPT_PATH.c_str();
+    OpenFileName.lpstrInitialDir = clsServerManager::sScriptPath.c_str();
     OpenFileName.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;//OFN_OVERWRITEPROMPT
     OpenFileName.lpstrDefExt = "lua";
 
@@ -366,7 +367,7 @@ void ScriptEditorDialog::OnCheckSyntax() {
     char * sBuf = (char *)malloc(iAllocLen+1);
 
     if(sBuf == NULL) {
-        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_FAILED_TO_CHECK_SYNTAX], LanguageManager->sTexts[LAN_ERROR], MB_OK);
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_FAILED_TO_CHECK_SYNTAX], clsLanguageManager::mPtr->sTexts[LAN_ERROR], MB_OK);
         return;
     }
 
@@ -377,24 +378,14 @@ void ScriptEditorDialog::OnCheckSyntax() {
     if(L == NULL) {
 		free(sBuf);
 
-		::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_FAILED_TO_CHECK_SYNTAX], LanguageManager->sTexts[LAN_ERROR], MB_OK);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_FAILED_TO_CHECK_SYNTAX], clsLanguageManager::mPtr->sTexts[LAN_ERROR], MB_OK);
         return;
     }
 
 	luaL_openlibs(L);
 
-    if(bServerRunning == true) {
-#if LUA_VERSION_NUM == 501
-	   RegCore(L);
-	   RegSetMan(L);
-	   RegRegMan(L);
-	   RegBanMan(L);
-	   RegProfMan(L);
-	   RegTmrMan(L);
-	   RegUDPDbg(L);
-	   RegScriptMan(L);
-	   RegIP2Country(L);
-#else
+    if(clsServerManager::bServerRunning == true) {
+#if LUA_VERSION_NUM > 501
         luaL_requiref(L, "Core", RegCore, 1);
         lua_pop(L, 1);
 
@@ -421,23 +412,33 @@ void ScriptEditorDialog::OnCheckSyntax() {
 
         luaL_requiref(L, "IP2Country", RegIP2Country, 1);
         lua_pop(L, 1);
+#else
+        RegCore(L);
+        RegSetMan(L);
+        RegRegMan(L);
+        RegBanMan(L);
+        RegProfMan(L);
+        RegTmrMan(L);
+        RegUDPDbg(L);
+        RegScriptMan(L);
+        RegIP2Country(L);
 #endif
     }
 
 	if(luaL_dostring(L, sBuf) == 0) {
-		::MessageBox(hWndWindowItems[WINDOW_HANDLE], LanguageManager->sTexts[LAN_NO_SYNERR_IN_SCRIPT], sTitle.c_str(), MB_OK);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_NO_SYNERR_IN_SCRIPT], clsServerManager::sTitle.c_str(), MB_OK);
 		lua_close(L);
 	} else {
 		size_t szLen = 0;
 		char * stmp = (char*)lua_tolstring(L, -1, &szLen);
 
-        string sTmp(LanguageManager->sTexts[LAN_SYNTAX], (size_t)LanguageManager->ui16TextsLens[LAN_SYNTAX]);
+        string sTmp(clsLanguageManager::mPtr->sTexts[LAN_SYNTAX], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SYNTAX]);
         sTmp += " ";
         sTmp += stmp;
 
-        RichEditAppendText(pMainWindowPageScripts->hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS], sTmp.c_str());
+        RichEditAppendText(clsMainWindowPageScripts::mPtr->hWndPageItems[clsMainWindowPageScripts::REDT_SCRIPTS_ERRORS], sTmp.c_str());
 
-        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], sTmp.c_str(), LanguageManager->sTexts[LAN_ERROR], MB_OK);
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], sTmp.c_str(), clsLanguageManager::mPtr->sTexts[LAN_ERROR], MB_OK);
 
 		lua_close(L);
 	}
@@ -462,7 +463,7 @@ void ScriptEditorDialog::OnSaveScript() {
     OpenFileName.nFilterIndex = 1;
     OpenFileName.lpstrFile = buf;
     OpenFileName.nMaxFile = MAX_PATH;
-    OpenFileName.lpstrInitialDir = SCRIPT_PATH.c_str();
+    OpenFileName.lpstrInitialDir = clsServerManager::sScriptPath.c_str();
     OpenFileName.Flags = OFN_OVERWRITEPROMPT;
     OpenFileName.lpstrDefExt = "lua";
 
@@ -475,8 +476,8 @@ void ScriptEditorDialog::OnSaveScript() {
     char * sBuf = (char *)malloc(iAllocLen+1);
 
     if(sBuf == NULL) {
-        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(LanguageManager->sTexts[LAN_FAILED_TO_SAVE], (size_t)LanguageManager->ui16TextsLens[LAN_FAILED_TO_SAVE]) + ": "+ buf).c_str(),
-            LanguageManager->sTexts[LAN_ERROR], MB_OK);
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(clsLanguageManager::mPtr->sTexts[LAN_FAILED_TO_SAVE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_FAILED_TO_SAVE]) + ": "+ buf).c_str(),
+            clsLanguageManager::mPtr->sTexts[LAN_ERROR], MB_OK);
         return;
     }
 
@@ -485,8 +486,8 @@ void ScriptEditorDialog::OnSaveScript() {
     FILE * pFile = fopen(buf, "wb");
 
     if(pFile == NULL) {
-        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(LanguageManager->sTexts[LAN_FAILED_TO_SAVE], (size_t)LanguageManager->ui16TextsLens[LAN_FAILED_TO_SAVE]) + ": "+ buf).c_str(),
-            LanguageManager->sTexts[LAN_ERROR], MB_OK);
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(clsLanguageManager::mPtr->sTexts[LAN_FAILED_TO_SAVE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_FAILED_TO_SAVE]) + ": "+ buf).c_str(),
+            clsLanguageManager::mPtr->sTexts[LAN_ERROR], MB_OK);
         free(sBuf);
         return;
     }

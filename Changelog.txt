@@ -8,6 +8,7 @@ PtokaX DC hub software - PPK (c) 2006/2012
 Added: White space characters (ascii chars below 32) are not allowed in nicks anymore.
 Added: Option to store passwords for registered users as hashes.
 Added: Registered users autosave after every 100 regs changes and every 15 minutes when regs change.
+Added: AddTimer(iTimerInterval, fFunction) to Lua api.
 Fixed: IpToCountry for IPv4 ignored first and last ip in country range (thx Alexey and alex82 for report).
 Fixed: Crash in windows version when script send some global data as reaction to chat without blocking it (thx Alexey for report).
 Fixed: Wrong chat lines order when multiple messages was received in one loop and script send global data reply for one of them.

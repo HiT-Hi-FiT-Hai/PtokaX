@@ -25,32 +25,34 @@
 #include "UpdateDialog.h"
 //---------------------------------------------------------------------------
 #include "../core/LanguageManager.h"
+#include "../core/ServerManager.h"
 //---------------------------------------------------------------------------
+#include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #pragma hdrstop
 //---------------------------------------------------------------------------
-UpdateDialog * pUpdateDialog = NULL;
+clsUpdateDialog * clsUpdateDialog::mPtr = NULL;
 //---------------------------------------------------------------------------
 static ATOM atomUpdateDialog = 0;
 //---------------------------------------------------------------------------
 
-UpdateDialog::UpdateDialog() {
+clsUpdateDialog::clsUpdateDialog() {
     memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
 }
 //---------------------------------------------------------------------------
 
-UpdateDialog::~UpdateDialog() {
-    pUpdateDialog = NULL;
+clsUpdateDialog::~clsUpdateDialog() {
+    clsUpdateDialog::mPtr = NULL;
 }
 //---------------------------------------------------------------------------
 
-LRESULT CALLBACK UpdateDialog::StaticUpdateDialogProc(HWND /*hWnd*/, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	return pUpdateDialog->UpdateDialogProc(uMsg, wParam, lParam);
+LRESULT CALLBACK clsUpdateDialog::StaticUpdateDialogProc(HWND /*hWnd*/, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+	return clsUpdateDialog::mPtr->UpdateDialogProc(uMsg, wParam, lParam);
 }
 //------------------------------------------------------------------------------
 
-LRESULT UpdateDialog::UpdateDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT clsUpdateDialog::UpdateDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch(uMsg) {
         case WM_NOTIFY:
             if(((LPNMHDR)lParam)->hwndFrom == hWndWindowItems[REDT_UPDATE] && ((LPNMHDR)lParam)->code == EN_LINK) {
@@ -62,7 +64,7 @@ LRESULT UpdateDialog::UpdateDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) 
             break;
         case WM_CLOSE:
             ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
-            g_hWndActiveDialog = NULL;
+            clsServerManager::hWndActiveDialog = NULL;
             break;
         case WM_NCDESTROY:
             delete this;
@@ -85,7 +87,7 @@ LRESULT UpdateDialog::UpdateDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) 
 }
 //------------------------------------------------------------------------------
 
-void UpdateDialog::DoModal(HWND hWndParent) {
+void clsUpdateDialog::DoModal(HWND hWndParent) {
     if(atomUpdateDialog == 0) {
         WNDCLASSEX m_wc;
         memset(&m_wc, 0, sizeof(WNDCLASSEX));
@@ -93,7 +95,7 @@ void UpdateDialog::DoModal(HWND hWndParent) {
         m_wc.lpfnWndProc = ::DefWindowProc;
         m_wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
         m_wc.lpszClassName = "PtokaX_UpdateDialog";
-        m_wc.hInstance = g_hInstance;
+        m_wc.hInstance = clsServerManager::hInstance;
         m_wc.hCursor = ::LoadCursor(m_wc.hInstance, IDC_ARROW);
         m_wc.style = CS_HREDRAW | CS_VREDRAW;
 
@@ -106,26 +108,26 @@ void UpdateDialog::DoModal(HWND hWndParent) {
     int iX = (rcParent.left + (((rcParent.right-rcParent.left))/2)) - (ScaleGui(500) / 2);
     int iY = (rcParent.top + ((rcParent.bottom-rcParent.top)/2)) - (ScaleGui(460) / 2);
 
-    hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomUpdateDialog), LanguageManager->sTexts[LAN_CHECKING_FOR_UPDATE],
+    hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomUpdateDialog), clsLanguageManager::mPtr->sTexts[LAN_CHECKING_FOR_UPDATE],
         WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, ScaleGui(500), ScaleGui(460),
-        hWndParent, NULL, g_hInstance, NULL);
+        hWndParent, NULL, clsServerManager::hInstance, NULL);
 
     if(hWndWindowItems[WINDOW_HANDLE] == NULL) {
         return;
     }
 
-    g_hWndActiveDialog = hWndWindowItems[WINDOW_HANDLE];
+    clsServerManager::hWndActiveDialog = hWndWindowItems[WINDOW_HANDLE];
 
     ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_WNDPROC, (LONG_PTR)StaticUpdateDialogProc);
 
     ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
     hWndWindowItems[REDT_UPDATE] = ::CreateWindowEx(WS_EX_CLIENTEDGE, /*MSFTEDIT_CLASS*/RICHEDIT_CLASS, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_READONLY,
-        5, 5, rcParent.right - 10, rcParent.bottom - 10, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
+        5, 5, rcParent.right - 10, rcParent.bottom - 10, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndWindowItems[REDT_UPDATE], EM_SETBKGNDCOLOR, 0, ::GetSysColor(COLOR_3DFACE));
     ::SendMessage(hWndWindowItems[REDT_UPDATE], EM_AUTOURLDETECT, TRUE, 0);
     ::SendMessage(hWndWindowItems[REDT_UPDATE], EM_SETEVENTMASK, 0, (LPARAM)::SendMessage(hWndWindowItems[REDT_UPDATE], EM_GETEVENTMASK, 0, 0) | ENM_LINK);
-    ::SendMessage(hWndWindowItems[REDT_UPDATE], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
+    ::SendMessage(hWndWindowItems[REDT_UPDATE], WM_SETFONT, (WPARAM)clsGuiSettingManager::hFont, MAKELPARAM(TRUE, 0));
 
     ::EnableWindow(hWndParent, FALSE);
 
@@ -133,11 +135,11 @@ void UpdateDialog::DoModal(HWND hWndParent) {
 }
 //---------------------------------------------------------------------------
 
-void UpdateDialog::Message(char * sData) {
+void clsUpdateDialog::Message(char * sData) {
     RichEditAppendText(hWndWindowItems[REDT_UPDATE], sData);
 }
 //---------------------------------------------------------------------------
-bool UpdateDialog::ParseData(char * sData, HWND hWndParent) {
+bool clsUpdateDialog::ParseData(char * sData, HWND hWndParent) {
     char * sVersion = NULL;
     char * sBuildNumber = NULL;
     char * sReleaseDate = NULL;
@@ -188,7 +190,7 @@ bool UpdateDialog::ParseData(char * sData, HWND hWndParent) {
     }
 
     if(sVersion == NULL || sBuildNumber == NULL || sReleaseDate == NULL || sChanges == NULL) {
-        RichEditAppendText(hWndWindowItems[REDT_UPDATE], LanguageManager->sTexts[LAN_UPDATE_CHECK_FAILED]);
+        RichEditAppendText(hWndWindowItems[REDT_UPDATE], clsLanguageManager::mPtr->sTexts[LAN_UPDATE_CHECK_FAILED]);
         return false;
     }
 
@@ -196,8 +198,8 @@ bool UpdateDialog::ParseData(char * sData, HWND hWndParent) {
     uint64_t ui64NewBuildNumber = _strtoui64(sBuildNumber, NULL, 10);
 
     if(ui64NewBuildNumber > ui64BuildNumber) {
-        string sMsg = string(LanguageManager->sTexts[LAN_NEW_VERSION], LanguageManager->ui16TextsLens[LAN_NEW_VERSION]) + " " + sVersion + " [build: " + sBuildNumber + "] " +
-            LanguageManager->sTexts[LAN_RELEASED_ON] + " " + sReleaseDate + " " + LanguageManager->sTexts[LAN_IS_AVAILABLE] + ".\r\n\r\n" + LanguageManager->sTexts[LAN_CHANGES] + ":\r\n" +
+        string sMsg = string(clsLanguageManager::mPtr->sTexts[LAN_NEW_VERSION], clsLanguageManager::mPtr->ui16TextsLens[LAN_NEW_VERSION]) + " " + sVersion + " [build: " + sBuildNumber + "] " +
+            clsLanguageManager::mPtr->sTexts[LAN_RELEASED_ON] + " " + sReleaseDate + " " + clsLanguageManager::mPtr->sTexts[LAN_IS_AVAILABLE] + ".\r\n\r\n" + clsLanguageManager::mPtr->sTexts[LAN_CHANGES] + ":\r\n" +
             sChanges;
 
         if(hWndWindowItems[WINDOW_HANDLE] == NULL) {
@@ -211,7 +213,7 @@ bool UpdateDialog::ParseData(char * sData, HWND hWndParent) {
     }
 
     if(hWndWindowItems[WINDOW_HANDLE] != NULL) {
-        RichEditAppendText(hWndWindowItems[REDT_UPDATE], LanguageManager->sTexts[LAN_SORRY_NO_NEW_VERSION_AVAILABLE]);
+        RichEditAppendText(hWndWindowItems[REDT_UPDATE], clsLanguageManager::mPtr->sTexts[LAN_SORRY_NO_NEW_VERSION_AVAILABLE]);
     }
 
     return false;

@@ -29,21 +29,21 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-hashMan *hashManager = NULL;
+clsHashManager * clsHashManager::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-hashMan::hashMan() {
+clsHashManager::clsHashManager() {
     for(uint32_t ui32i = 0; ui32i < 65536; ui32i++) {
         nicktable[ui32i] = NULL;
         iptable[ui32i] = NULL;
     }
 
-    //Memo("hashManager created");
+    //Memo("clsHashManager created");
 }
 //---------------------------------------------------------------------------
 
-hashMan::~hashMan() {
-    //Memo("hashManager destroyed");
+clsHashManager::~clsHashManager() {
+    //Memo("clsHashManager destroyed");
     for(uint32_t ui32i = 0; ui32i < 65536; ui32i++) {
 		IpTableItem * next = iptable[ui32i];
         
@@ -57,7 +57,7 @@ hashMan::~hashMan() {
 }
 //---------------------------------------------------------------------------
 
-bool hashMan::Add(User * u) {
+bool clsHashManager::Add(User * u) {
     uint16_t ui16dx = 0;
     memcpy(&ui16dx, &u->ui32NickHash, sizeof(uint16_t));
 
@@ -73,9 +73,9 @@ bool hashMan::Add(User * u) {
 
         if(iptable[u->ui16IpTableIdx] == NULL) {
             u->ui32BoolBits |= User::BIT_ERROR;
-            UserClose(u);
+            u->Close();
 
-            AppendDebugLog("%s - [MEM] Cannot allocate IpTableItem in hashMan::Add\n", 0);
+            AppendDebugLog("%s - [MEM] Cannot allocate IpTableItem in clsHashManager::Add\n", 0);
             return false;
         }
 
@@ -108,9 +108,9 @@ bool hashMan::Add(User * u) {
 
     if(cur == NULL) {
         u->ui32BoolBits |= User::BIT_ERROR;
-        UserClose(u);
+        u->Close();
 
-		AppendDebugLog("%s - [MEM] Cannot allocate IpTableItem2 in hashMan::Add\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate IpTableItem2 in clsHashManager::Add\n", 0);
 		return false;
     }
 
@@ -127,7 +127,7 @@ bool hashMan::Add(User * u) {
 }
 //---------------------------------------------------------------------------
 
-void hashMan::Remove(User * u) {
+void clsHashManager::Remove(User * u) {
     if(u->hashtableprev == NULL) {
         uint16_t ui16dx = 0;
         memcpy(&ui16dx, &u->ui32NickHash, sizeof(uint16_t));
@@ -210,7 +210,7 @@ void hashMan::Remove(User * u) {
 }
 //---------------------------------------------------------------------------
 
-User * hashMan::FindUser(char * sNick, const size_t &szNickLen) {
+User * clsHashManager::FindUser(char * sNick, const size_t &szNickLen) {
     uint32_t ui32Hash = HashNick(sNick, szNickLen);
 
     uint16_t ui16dx = 0;
@@ -236,7 +236,7 @@ User * hashMan::FindUser(char * sNick, const size_t &szNickLen) {
 }
 //---------------------------------------------------------------------------
 
-User * hashMan::FindUser(User * u) {
+User * clsHashManager::FindUser(User * u) {
     uint16_t ui16dx = 0;
     memcpy(&ui16dx, &u->ui32NickHash, sizeof(uint16_t));
 
@@ -260,7 +260,7 @@ User * hashMan::FindUser(User * u) {
 }
 //---------------------------------------------------------------------------
 
-User * hashMan::FindUser(const uint8_t * ui128IpHash) {
+User * clsHashManager::FindUser(const uint8_t * ui128IpHash) {
     uint16_t ui16IpTableIdx = 0;
 
     if(ui128IpHash[10] == 255 && ui128IpHash[11] == 255 && memcmp(ui128IpHash, "\0\0\0\0\0\0\0\0\0\0", 10) == 0) {
@@ -284,7 +284,7 @@ User * hashMan::FindUser(const uint8_t * ui128IpHash) {
 }
 //---------------------------------------------------------------------------
 
-uint32_t hashMan::GetUserIpCount(User * u) const {
+uint32_t clsHashManager::GetUserIpCount(User * u) const {
 	IpTableItem * next = iptable[u->ui16IpTableIdx];
 
 	while(next != NULL) {

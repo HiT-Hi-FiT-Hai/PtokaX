@@ -34,15 +34,15 @@
 	#pragma hdrstop
 #endif
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-GlobalDataQueue * g_GlobalDataQueue = NULL;
+clsGlobalDataQueue * clsGlobalDataQueue::mPtr = NULL;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-GlobalDataQueue::GlobalDataQueue() {
+clsGlobalDataQueue::clsGlobalDataQueue() {
     msg[0] = '\0';
 
     // OpList buffer
 #ifdef _WIN32
-    OpListQueue.sBuffer = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, 256);
+    OpListQueue.sBuffer = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, 256);
 #else
 	OpListQueue.sBuffer = (char *)calloc(256, 1);
 #endif
@@ -55,7 +55,7 @@ GlobalDataQueue::GlobalDataQueue() {
     
     // UserIP buffer
 #ifdef _WIN32
-    UserIPQueue.sBuffer = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, 256);
+    UserIPQueue.sBuffer = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, 256);
 #else
 	UserIPQueue.sBuffer = (char *)calloc(256, 1);
 #endif
@@ -82,8 +82,8 @@ GlobalDataQueue::GlobalDataQueue() {
         GlobalQueues[ui8i].szZsize = 255;
 
 #ifdef _WIN32
-        GlobalQueues[ui8i].sBuffer = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, 256);
-        GlobalQueues[ui8i].sZbuffer = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, 256);
+        GlobalQueues[ui8i].sBuffer = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, 256);
+        GlobalQueues[ui8i].sZbuffer = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, 256);
 #else
         GlobalQueues[ui8i].sBuffer = (char *)calloc(256, 1);
         GlobalQueues[ui8i].sZbuffer = (char *)calloc(256, 1);
@@ -100,11 +100,11 @@ GlobalDataQueue::GlobalDataQueue() {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-GlobalDataQueue::~GlobalDataQueue() {
+clsGlobalDataQueue::~clsGlobalDataQueue() {
 #ifdef _WIN32
     if(OpListQueue.sBuffer != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)OpListQueue.sBuffer) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate OpListQueue.sBuffer in globalqueue::~globalqueue\n", 0);
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)OpListQueue.sBuffer) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate OpListQueue.sBuffer in clsGlobalDataQueue::~clsGlobalDataQueue\n", 0);
         }
     }
 #else
@@ -113,8 +113,8 @@ GlobalDataQueue::~GlobalDataQueue() {
 
 #ifdef _WIN32
     if(UserIPQueue.sBuffer != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)UserIPQueue.sBuffer) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate UserIPQueue.sBuffer in globalqueue::~globalqueue\n", 0);
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)UserIPQueue.sBuffer) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate UserIPQueue.sBuffer in clsGlobalDataQueue::~clsGlobalDataQueue\n", 0);
         }
     }
 #else
@@ -129,8 +129,8 @@ GlobalDataQueue::~GlobalDataQueue() {
 
 #ifdef _WIN32
             if(pCur->sData != NULL) {
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sData) == 0) {
-					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sData in globalqueue::~globalqueue\n", 0);
+                if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sData) == 0) {
+					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sData in clsGlobalDataQueue::~clsGlobalDataQueue\n", 0);
                 }
             }
 #else
@@ -148,8 +148,8 @@ GlobalDataQueue::~GlobalDataQueue() {
 
 #ifdef _WIN32
             if(pCur->sData != NULL) {
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sData) == 0) {
-					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sData in globalqueue::~globalqueue\n", 0);
+                if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sData) == 0) {
+					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sData in clsGlobalDataQueue::~clsGlobalDataQueue\n", 0);
                 }
             }
 #else
@@ -167,13 +167,13 @@ GlobalDataQueue::~GlobalDataQueue() {
 
 #ifdef _WIN32
             if(pCur->sCommand1 != NULL) {
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sCommand1) == 0) {
-					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sCommand1 in globalqueue::~globalqueue\n", 0);
+                if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sCommand1) == 0) {
+					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sCommand1 in clsGlobalDataQueue::~clsGlobalDataQueue\n", 0);
                 }
             }
             if(pCur->sCommand2 != NULL) {
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sCommand2) == 0) {
-					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sCommand2 in globalqueue::~globalqueue\n", 0);
+                if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sCommand2) == 0) {
+					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sCommand2 in clsGlobalDataQueue::~clsGlobalDataQueue\n", 0);
                 }
             }
 #else
@@ -192,13 +192,13 @@ GlobalDataQueue::~GlobalDataQueue() {
 
 #ifdef _WIN32
             if(pCur->sCommand1 != NULL) {
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sCommand1) == 0) {
-					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sCommand1 in globalqueue::~globalqueue\n", 0);
+                if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sCommand1) == 0) {
+					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sCommand1 in clsGlobalDataQueue::~clsGlobalDataQueue\n", 0);
                 }
             }
             if(pCur->sCommand2 != NULL) {
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sCommand2) == 0) {
-					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sCommand2 in globalqueue::~globalqueue\n", 0);
+                if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sCommand2) == 0) {
+					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sCommand2 in clsGlobalDataQueue::~clsGlobalDataQueue\n", 0);
                 }
             }
 #else
@@ -212,14 +212,14 @@ GlobalDataQueue::~GlobalDataQueue() {
     for(uint8_t ui8i = 0; ui8i < 144; ui8i++) {
 #ifdef _WIN32
         if(GlobalQueues[ui8i].sBuffer != NULL) {
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)GlobalQueues[ui8i].sBuffer) == 0) {
-				AppendDebugLog("%s - [MEM] Cannot deallocate GlobalQueues[ui8i].sBuffer in globalqueue::~globalqueue\n", 0);
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)GlobalQueues[ui8i].sBuffer) == 0) {
+				AppendDebugLog("%s - [MEM] Cannot deallocate GlobalQueues[ui8i].sBuffer in clsGlobalDataQueue::~clsGlobalDataQueue\n", 0);
             }
         }
 
         if(GlobalQueues[ui8i].sZbuffer != NULL) {
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)GlobalQueues[ui8i].sZbuffer) == 0) {
-				AppendDebugLog("%s - [MEM] Cannot deallocate GlobalQueues[ui8i].sZbuffer in globalqueue::~globalqueue\n", 0);
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)GlobalQueues[ui8i].sZbuffer) == 0) {
+				AppendDebugLog("%s - [MEM] Cannot deallocate GlobalQueues[ui8i].sZbuffer in clsGlobalDataQueue::~clsGlobalDataQueue\n", 0);
             }
         }
 #else
@@ -230,22 +230,22 @@ GlobalDataQueue::~GlobalDataQueue() {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GlobalDataQueue::AddQueueItem(char * sCommand1, const size_t &szLen1, char * sCommand2, const size_t &szLen2, const uint8_t &ui8CmdType) {
+void clsGlobalDataQueue::AddQueueItem(char * sCommand1, const size_t &szLen1, char * sCommand2, const size_t &szLen2, const uint8_t &ui8CmdType) {
     QueueItem * pNewItem = new QueueItem();
     if(pNewItem == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem in globalqueue::GlobalDataQueue::AddQueueItem\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem in clsGlobalDataQueue::AddQueueItem\n", 0);
     	return;
     }
 
 #ifdef _WIN32
-    pNewItem->sCommand1 = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen1+1);
+    pNewItem->sCommand1 = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szLen1+1);
 #else
 	pNewItem->sCommand1 = (char *)malloc(szLen1+1);
 #endif
     if(pNewItem->sCommand1 == NULL) {
         delete pNewItem;
 
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pNewItem->sCommand1 in GlobalDataQueue::AddQueueItem\n", (uint64_t)(szLen1+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pNewItem->sCommand1 in clsGlobalDataQueue::AddQueueItem\n", (uint64_t)(szLen1+1));
 
         return;
     }
@@ -257,21 +257,21 @@ void GlobalDataQueue::AddQueueItem(char * sCommand1, const size_t &szLen1, char 
 
     if(sCommand2 != NULL) {
 #ifdef _WIN32
-        pNewItem->sCommand2 = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen2+1);
+        pNewItem->sCommand2 = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szLen2+1);
 #else
         pNewItem->sCommand2 = (char *)malloc(szLen2+1);
 #endif
         if(pNewItem->sCommand2 == NULL) {
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pNewItem->sCommand1) == 0) {
-				AppendDebugLog("%s - [MEM] Cannot deallocate pNewItem->sCommand1 in GlobalDataQueue::AddQueueItem\n", 0);
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pNewItem->sCommand1) == 0) {
+				AppendDebugLog("%s - [MEM] Cannot deallocate pNewItem->sCommand1 in clsGlobalDataQueue::AddQueueItem\n", 0);
             }
 #else
             free(pNewItem->sCommand1);
 #endif
             delete pNewItem;
 
-            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pNewItem->sCommand2 in GlobalDataQueue::AddQueueItem\n", (uint64_t)(szLen2+1));
+            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pNewItem->sCommand2 in clsGlobalDataQueue::AddQueueItem\n", (uint64_t)(szLen2+1));
 
             return;
         }
@@ -300,24 +300,24 @@ void GlobalDataQueue::AddQueueItem(char * sCommand1, const size_t &szLen1, char 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // appends data to the OpListQueue
-void GlobalDataQueue::OpListStore(char * sNick) {
+void clsGlobalDataQueue::OpListStore(char * sNick) {
     if(OpListQueue.szLen == 0) {
         OpListQueue.szLen = sprintf(OpListQueue.sBuffer, "$OpList %s$$|", sNick);
     } else {
         int iDataLen = sprintf(msg, "%s$$|", sNick);
-        if(CheckSprintf(iDataLen, 128, "globalqueue::OpListStore2") == true) {
+        if(CheckSprintf(iDataLen, 128, "clsGlobalDataQueue::OpListStore2") == true) {
             if(OpListQueue.szSize < OpListQueue.szLen+iDataLen) {
                 size_t szAllignLen = Allign256(OpListQueue.szLen+iDataLen);
                 char * pOldBuf = OpListQueue.sBuffer;
 #ifdef _WIN32
-                OpListQueue.sBuffer = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szAllignLen);
+                OpListQueue.sBuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szAllignLen);
 #else
 				OpListQueue.sBuffer = (char *)realloc(pOldBuf, szAllignLen);
 #endif
                 if(OpListQueue.sBuffer == NULL) {
                     OpListQueue.sBuffer = pOldBuf;
 
-                    AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::OpListStore\n", (uint64_t)szAllignLen);
+                    AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsGlobalDataQueue::OpListStore\n", (uint64_t)szAllignLen);
 
                     return;
                 }
@@ -332,13 +332,13 @@ void GlobalDataQueue::OpListStore(char * sNick) {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // appends data to the UserIPQueue
-void GlobalDataQueue::UserIPStore(User * pUser) {
+void clsGlobalDataQueue::UserIPStore(User * pUser) {
     if(UserIPQueue.szLen == 0) {
         UserIPQueue.szLen = sprintf(UserIPQueue.sBuffer, "$UserIP %s %s|", pUser->sNick, pUser->sIP);
         UserIPQueue.bHaveDollars = false;
     } else {
         int iDataLen = sprintf(msg, "%s %s$$|", pUser->sNick, pUser->sIP);
-        if(CheckSprintf(iDataLen, 128, "globalqueue::UserIPStore") == true) {
+        if(CheckSprintf(iDataLen, 128, "clsGlobalDataQueue::UserIPStore") == true) {
             if(UserIPQueue.bHaveDollars == false) {
                 UserIPQueue.sBuffer[UserIPQueue.szLen-1] = '$';
                 UserIPQueue.sBuffer[UserIPQueue.szLen] = '$';
@@ -349,14 +349,14 @@ void GlobalDataQueue::UserIPStore(User * pUser) {
                 size_t szAllignLen = Allign256(UserIPQueue.szLen+iDataLen);
                 char * pOldBuf = UserIPQueue.sBuffer;
 #ifdef _WIN32
-                UserIPQueue.sBuffer = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szAllignLen);
+                UserIPQueue.sBuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szAllignLen);
 #else
 				UserIPQueue.sBuffer = (char *)realloc(pOldBuf, szAllignLen);
 #endif
                 if(UserIPQueue.sBuffer == NULL) {
                     UserIPQueue.sBuffer = pOldBuf;
 
-					AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::UserIPStore\n", (uint64_t)szAllignLen);
+					AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsGlobalDataQueue::UserIPStore\n", (uint64_t)szAllignLen);
 
                     return;
                 }
@@ -370,7 +370,7 @@ void GlobalDataQueue::UserIPStore(User * pUser) {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GlobalDataQueue::PrepareQueueItems() {
+void clsGlobalDataQueue::PrepareQueueItems() {
     pQueueItems = pNewQueueItems[0];
 
     pNewQueueItems[0] = NULL;
@@ -383,7 +383,7 @@ void GlobalDataQueue::PrepareQueueItems() {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GlobalDataQueue::ClearQueues() {
+void clsGlobalDataQueue::ClearQueues() {
     if(pCreatedGlobalQueues != NULL) {
         GlobalQueue * pNext = pCreatedGlobalQueues;
 
@@ -416,13 +416,13 @@ void GlobalDataQueue::ClearQueues() {
 
 #ifdef _WIN32
             if(pCur->sCommand1 != NULL) {
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sCommand1) == 0) {
-					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sCommand1 in globalqueue::ClearQueues\n", 0);
+                if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sCommand1) == 0) {
+					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sCommand1 in clsGlobalDataQueue::ClearQueues\n", 0);
                 }
             }
             if(pCur->sCommand2 != NULL) {
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sCommand2) == 0) {
-					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sCommand2 in globalqueue::ClearQueues\n", 0);
+                if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sCommand2) == 0) {
+					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sCommand2 in clsGlobalDataQueue::ClearQueues\n", 0);
                 }
             }
 #else
@@ -444,8 +444,8 @@ void GlobalDataQueue::ClearQueues() {
 
 #ifdef _WIN32
             if(pCur->sData != NULL) {
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sData) == 0) {
-					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sData in globalqueue::ClearQueues\n", 0);
+                if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sData) == 0) {
+					AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sData in clsGlobalDataQueue::ClearQueues\n", 0);
                 }
             }
 #else
@@ -459,11 +459,11 @@ void GlobalDataQueue::ClearQueues() {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GlobalDataQueue::ProcessQueues(User * pUser) {
+void clsGlobalDataQueue::ProcessQueues(User * pUser) {
     uint32_t ui32QueueType = 0; // short myinfos
     uint16_t ui16QueueBits = 0;
 
-    if(SettingManager->ui8FullMyINFOOption == 1 && ProfileMan->IsAllowed(pUser, ProfileManager::SENDFULLMYINFOS)) {
+    if(clsSettingManager::mPtr->ui8FullMyINFOOption == 1 && clsProfileManager::mPtr->IsAllowed(pUser, clsProfileManager::SENDFULLMYINFOS)) {
         ui32QueueType = 1; // full myinfos
         ui16QueueBits |= BIT_LONG_MYINFO;
     }
@@ -519,7 +519,7 @@ void GlobalDataQueue::ProcessQueues(User * pUser) {
     }
 
     if(pUser->iProfile != -1 && ((pUser->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true &&
-        ProfileMan->IsAllowed(pUser, ProfileManager::SENDALLUSERIP) == true) {
+        clsProfileManager::mPtr->IsAllowed(pUser, clsProfileManager::SENDALLUSERIP) == true) {
         ui32QueueType += 56; // send userips
         ui16QueueBits |= BIT_USERIP;
     }
@@ -636,14 +636,14 @@ void GlobalDataQueue::ProcessQueues(User * pUser) {
     }
 
     if(GlobalQueues[ui32QueueType].szLen == 0) {
-        if(ui8SrCntr == 0) {
+        if(clsServerManager::ui8SrCntr == 0) {
             if(pUser->cmdActive6Search != NULL) {
-				UserDeletePrcsdUsrCmd(pUser->cmdActive6Search);
+				User::DeletePrcsdUsrCmd(pUser->cmdActive6Search);
                 pUser->cmdActive6Search = NULL;
             }
 
             if(pUser->cmdActive4Search != NULL) {
-				UserDeletePrcsdUsrCmd(pUser->cmdActive4Search);
+				User::DeletePrcsdUsrCmd(pUser->cmdActive4Search);
                 pUser->cmdActive4Search = NULL;
             }
         }
@@ -651,7 +651,7 @@ void GlobalDataQueue::ProcessQueues(User * pUser) {
         return;
     }
 
-    if(ui8SrCntr == 0) {
+    if(clsServerManager::ui8SrCntr == 0) {
 		PrcsdUsrCmd * cmdActiveSearch = NULL;
 
 		if((pUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
@@ -659,7 +659,7 @@ void GlobalDataQueue::ProcessQueues(User * pUser) {
 			pUser->cmdActive6Search = NULL;
 
 			if(pUser->cmdActive4Search != NULL) {
-				UserDeletePrcsdUsrCmd(pUser->cmdActive4Search);
+				User::DeletePrcsdUsrCmd(pUser->cmdActive4Search);
 				pUser->cmdActive4Search = NULL;
 			}
 		} else {
@@ -669,36 +669,36 @@ void GlobalDataQueue::ProcessQueues(User * pUser) {
 
 		if(cmdActiveSearch != NULL) {
 			if(pUser->ui64SharedSize == 0) {
-				UserDeletePrcsdUsrCmd(cmdActiveSearch);
+				User::DeletePrcsdUsrCmd(cmdActiveSearch);
 			} else {
 				if(((pUser->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == true) {
 					if(GlobalQueues[ui32QueueType].bZlined == false) {
 						GlobalQueues[ui32QueueType].bZlined = true;
-						GlobalQueues[ui32QueueType].sZbuffer = ZlibUtility->CreateZPipe(GlobalQueues[ui32QueueType].sBuffer, GlobalQueues[ui32QueueType].szLen,
+						GlobalQueues[ui32QueueType].sZbuffer = clsZlibUtility::mPtr->CreateZPipe(GlobalQueues[ui32QueueType].sBuffer, GlobalQueues[ui32QueueType].szLen,
 							GlobalQueues[ui32QueueType].sZbuffer, GlobalQueues[ui32QueueType].szZlen, GlobalQueues[ui32QueueType].szZsize);
 					}
 
 					if(GlobalQueues[ui32QueueType].szZlen != 0 && (GlobalQueues[ui32QueueType].szZlen <= (GlobalQueues[ui32QueueType].szLen-cmdActiveSearch->iLen))) {
-						UserPutInSendBuf(pUser, GlobalQueues[ui32QueueType].sZbuffer, GlobalQueues[ui32QueueType].szZlen);
-						ui64BytesSentSaved += (GlobalQueues[ui32QueueType].szLen - GlobalQueues[ui32QueueType].szZlen);
+						pUser->PutInSendBuf(GlobalQueues[ui32QueueType].sZbuffer, GlobalQueues[ui32QueueType].szZlen);
+						clsServerManager::ui64BytesSentSaved += (GlobalQueues[ui32QueueType].szLen - GlobalQueues[ui32QueueType].szZlen);
 
-						UserDeletePrcsdUsrCmd(cmdActiveSearch);
+						User::DeletePrcsdUsrCmd(cmdActiveSearch);
 
 						return;
 					}
 				}
 
 				uint32_t ui32SbLen = pUser->sbdatalen;
-				UserPutInSendBuf(pUser, GlobalQueues[ui32QueueType].sBuffer, GlobalQueues[ui32QueueType].szLen);
+				pUser->PutInSendBuf(GlobalQueues[ui32QueueType].sBuffer, GlobalQueues[ui32QueueType].szLen);
 
 				// PPK ... check if adding of searchs not cause buffer overflow !
 				if(pUser->sbdatalen <= ui32SbLen) {
 					ui32SbLen = 0;
 				}
 
-				UserRemFromSendBuf(pUser, cmdActiveSearch->sCommand, cmdActiveSearch->iLen, ui32SbLen);
+				pUser->RemFromSendBuf(cmdActiveSearch->sCommand, cmdActiveSearch->iLen, ui32SbLen);
 
-				UserDeletePrcsdUsrCmd(cmdActiveSearch);
+				User::DeletePrcsdUsrCmd(cmdActiveSearch);
 
 				return;
 			}
@@ -708,23 +708,23 @@ void GlobalDataQueue::ProcessQueues(User * pUser) {
     if(((pUser->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == true) {
         if(GlobalQueues[ui32QueueType].bZlined == false) {
             GlobalQueues[ui32QueueType].bZlined = true;
-            GlobalQueues[ui32QueueType].sZbuffer = ZlibUtility->CreateZPipe(GlobalQueues[ui32QueueType].sBuffer, GlobalQueues[ui32QueueType].szLen, GlobalQueues[ui32QueueType].sZbuffer,
+            GlobalQueues[ui32QueueType].sZbuffer = clsZlibUtility::mPtr->CreateZPipe(GlobalQueues[ui32QueueType].sBuffer, GlobalQueues[ui32QueueType].szLen, GlobalQueues[ui32QueueType].sZbuffer,
                 GlobalQueues[ui32QueueType].szZlen, GlobalQueues[ui32QueueType].szZsize);
         }
 
         if(GlobalQueues[ui32QueueType].szZlen != 0) {
-            UserPutInSendBuf(pUser, GlobalQueues[ui32QueueType].sZbuffer, GlobalQueues[ui32QueueType].szZlen);
-            ui64BytesSentSaved += (GlobalQueues[ui32QueueType].szLen - GlobalQueues[ui32QueueType].szZlen);
+            pUser->PutInSendBuf(GlobalQueues[ui32QueueType].sZbuffer, GlobalQueues[ui32QueueType].szZlen);
+            clsServerManager::ui64BytesSentSaved += (GlobalQueues[ui32QueueType].szLen - GlobalQueues[ui32QueueType].szZlen);
 
             return;
         }
     } 
 
-    UserPutInSendBuf(pUser, GlobalQueues[ui32QueueType].sBuffer, GlobalQueues[ui32QueueType].szLen);
+    pUser->PutInSendBuf(GlobalQueues[ui32QueueType].sBuffer, GlobalQueues[ui32QueueType].szLen);
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GlobalDataQueue::ProcessSingleItems(User * u) const {
+void clsGlobalDataQueue::ProcessSingleItems(User * u) const {
     size_t szLen = 0;
 
     SingleDataItem * pNext = pSingleItems;
@@ -737,90 +737,90 @@ void GlobalDataQueue::ProcessSingleItems(User * u) const {
             switch(pCur->ui8Type) {
                 case SI_PM2ALL: { // send PM to ALL
                     size_t szWanted = szLen+pCur->szDataLen+u->ui8NickLen+13;
-                    if(g_szBufferSize < szWanted) {
+                    if(clsServerManager::szGlobalBufferSize < szWanted) {
                         if(CheckAndResizeGlobalBuffer(szWanted) == false) {
-							AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems\n", (uint64_t)Allign128K(szWanted));
+							AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsGlobalDataQueue::ProcessSingleItems\n", (uint64_t)Allign128K(szWanted));
                             break;
                         }
                     }
-                    int iret = sprintf(g_sBuffer+szLen, "$To: %s From: ", u->sNick);
+                    int iret = sprintf(clsServerManager::sGlobalBuffer+szLen, "$To: %s From: ", u->sNick);
                     szLen += iret;
-                    CheckSprintf1(iret, szLen, g_szBufferSize, "globalqueue::ProcessSingleItems1");
+                    CheckSprintf1(iret, szLen, clsServerManager::szGlobalBufferSize, "clsGlobalDataQueue::ProcessSingleItems1");
 
-                    memcpy(g_sBuffer+szLen, pCur->sData, pCur->szDataLen);
+                    memcpy(clsServerManager::sGlobalBuffer+szLen, pCur->sData, pCur->szDataLen);
                     szLen += pCur->szDataLen;
-                    g_sBuffer[szLen] = '\0';
+                    clsServerManager::sGlobalBuffer[szLen] = '\0';
 
                     break;
                 }
                 case SI_PM2OPS: { // send PM only to operators
                     if(((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                         size_t szWanted = szLen+pCur->szDataLen+u->ui8NickLen+13;
-                        if(g_szBufferSize < szWanted) {
+                        if(clsServerManager::szGlobalBufferSize < szWanted) {
                             if(CheckAndResizeGlobalBuffer(szWanted) == false) {
-								AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems1\n", (uint64_t)Allign128K(szWanted));
+								AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsGlobalDataQueue::ProcessSingleItems1\n", (uint64_t)Allign128K(szWanted));
 								break;
                             }
                         }
-                        int iret = sprintf(g_sBuffer+szLen, "$To: %s From: ", u->sNick);
+                        int iret = sprintf(clsServerManager::sGlobalBuffer+szLen, "$To: %s From: ", u->sNick);
                         szLen += iret;
-                        CheckSprintf1(iret, szLen, g_szBufferSize, "globalqueue::ProcessSingleItems2");
+                        CheckSprintf1(iret, szLen, clsServerManager::szGlobalBufferSize, "clsGlobalDataQueue::ProcessSingleItems2");
 
-                        memcpy(g_sBuffer+szLen, pCur->sData, pCur->szDataLen);
+                        memcpy(clsServerManager::sGlobalBuffer+szLen, pCur->sData, pCur->szDataLen);
                         szLen += pCur->szDataLen;
-                        g_sBuffer[szLen] = '\0';
+                        clsServerManager::sGlobalBuffer[szLen] = '\0';
                     }
                     break;
                 }
                 case SI_OPCHAT: { // send OpChat only to allowed users...
-                    if(ProfileMan->IsAllowed(u, ProfileManager::ALLOWEDOPCHAT) == true) {
+                    if(clsProfileManager::mPtr->IsAllowed(u, clsProfileManager::ALLOWEDOPCHAT) == true) {
                         size_t szWanted = szLen+pCur->szDataLen+u->ui8NickLen+13;
-                        if(g_szBufferSize < szWanted) {
+                        if(clsServerManager::szGlobalBufferSize < szWanted) {
                             if(CheckAndResizeGlobalBuffer(szWanted) == false) {
-								AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems2\n", (uint64_t)Allign128K(szWanted));
+								AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsGlobalDataQueue::ProcessSingleItems2\n", (uint64_t)Allign128K(szWanted));
                                 break;
                             }
                         }
-                        int iret = sprintf(g_sBuffer+szLen, "$To: %s From: ", u->sNick);
+                        int iret = sprintf(clsServerManager::sGlobalBuffer+szLen, "$To: %s From: ", u->sNick);
                         szLen += iret;
-                        CheckSprintf1(iret, szLen, g_szBufferSize, "globalqueue::ProcessSingleItems3");
+                        CheckSprintf1(iret, szLen, clsServerManager::szGlobalBufferSize, "clsGlobalDataQueue::ProcessSingleItems3");
 
-                        memcpy(g_sBuffer+szLen, pCur->sData, pCur->szDataLen);
+                        memcpy(clsServerManager::sGlobalBuffer+szLen, pCur->sData, pCur->szDataLen);
                         szLen += pCur->szDataLen;
-                        g_sBuffer[szLen] = '\0';
+                        clsServerManager::sGlobalBuffer[szLen] = '\0';
                     }
                     break;
                 }
                 case SI_TOPROFILE: { // send data only to given profile...
                     if(u->iProfile == pCur->i32Profile) {
                         size_t szWanted = szLen+pCur->szDataLen;
-                        if(g_szBufferSize < szWanted) {
+                        if(clsServerManager::szGlobalBufferSize < szWanted) {
                             if(CheckAndResizeGlobalBuffer(szWanted) == false) {
-								AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems3\n", (uint64_t)Allign128K(szWanted));
+								AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsGlobalDataQueue::ProcessSingleItems3\n", (uint64_t)Allign128K(szWanted));
                                 break;
                             }
                         }
-                        memcpy(g_sBuffer+szLen, pCur->sData, pCur->szDataLen);
+                        memcpy(clsServerManager::sGlobalBuffer+szLen, pCur->sData, pCur->szDataLen);
                         szLen += pCur->szDataLen;
-                        g_sBuffer[szLen] = '\0';
+                        clsServerManager::sGlobalBuffer[szLen] = '\0';
                     }
                     break;
                 }
                 case SI_PM2PROFILE: { // send pm only to given profile...
                     if(u->iProfile == pCur->i32Profile) {
                         size_t szWanted = szLen+pCur->szDataLen+u->ui8NickLen+13;
-                        if(g_szBufferSize < szWanted) {
+                        if(clsServerManager::szGlobalBufferSize < szWanted) {
                             if(CheckAndResizeGlobalBuffer(szWanted) == false) {
-								AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in globalqueue::ProcessSingleItems4\n", (uint64_t)Allign128K(szWanted));
+								AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsGlobalDataQueue::ProcessSingleItems4\n", (uint64_t)Allign128K(szWanted));
                                 break;
                             }
                         }
-                        int iret = sprintf(g_sBuffer+szLen, "$To: %s From: ", u->sNick);
+                        int iret = sprintf(clsServerManager::sGlobalBuffer+szLen, "$To: %s From: ", u->sNick);
                         szLen += iret;
-                        CheckSprintf1(iret, szLen, g_szBufferSize, "globalqueue::ProcessSingleItems4");
-                        memcpy(g_sBuffer+szLen, pCur->sData, pCur->szDataLen);
+                        CheckSprintf1(iret, szLen, clsServerManager::szGlobalBufferSize, "clsGlobalDataQueue::ProcessSingleItems4");
+                        memcpy(clsServerManager::sGlobalBuffer+szLen, pCur->sData, pCur->szDataLen);
                         szLen += pCur->szDataLen;
-                        g_sBuffer[szLen] = '\0';
+                        clsServerManager::sGlobalBuffer[szLen] = '\0';
                     }
                     break;
                 }
@@ -831,30 +831,30 @@ void GlobalDataQueue::ProcessSingleItems(User * u) const {
     }
 
     if(szLen != 0) {
-        UserSendCharDelayed(u, g_sBuffer, szLen);
+        u->SendCharDelayed(clsServerManager::sGlobalBuffer, szLen);
     }
 
     ReduceGlobalBuffer();
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GlobalDataQueue::SingleItemStore(char * sData, const size_t &szDataLen, User * pFromUser, const int32_t &i32Profile, const uint8_t &ui8Type) {
+void clsGlobalDataQueue::SingleItemStore(char * sData, const size_t &szDataLen, User * pFromUser, const int32_t &i32Profile, const uint8_t &ui8Type) {
     SingleDataItem * pNewItem = new SingleDataItem();
     if(pNewItem == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem in globalqueue::SingleItemStore\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem in clsGlobalDataQueue::SingleItemStore\n", 0);
     	return;
     }
 
     if(sData != NULL) {
 #ifdef _WIN32
-        pNewItem->sData = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szDataLen+1);
+        pNewItem->sData = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szDataLen+1);
 #else
 		pNewItem->sData = (char *)malloc(szDataLen+1);
 #endif
         if(pNewItem->sData == NULL) {
             delete pNewItem;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in globalqueue::SingleItemStore\n", (uint64_t)(szDataLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in clsGlobalDataQueue::SingleItemStore\n", (uint64_t)(szDataLen+1));
 
             return;
         }
@@ -887,7 +887,7 @@ void GlobalDataQueue::SingleItemStore(char * sData, const size_t &szDataLen, Use
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GlobalDataQueue::SendFinalQueue() {
+void clsGlobalDataQueue::SendFinalQueue() {
     if(pQueueItems != NULL) {
         QueueItem * pNext = pQueueItems;
 
@@ -930,37 +930,37 @@ void GlobalDataQueue::SendFinalQueue() {
         return;
     }
 
-    GlobalQueues[0].sZbuffer = ZlibUtility->CreateZPipe(GlobalQueues[0].sBuffer, GlobalQueues[0].szLen, GlobalQueues[0].sZbuffer, GlobalQueues[0].szZlen, GlobalQueues[0].szZsize);
+    GlobalQueues[0].sZbuffer = clsZlibUtility::mPtr->CreateZPipe(GlobalQueues[0].sBuffer, GlobalQueues[0].szLen, GlobalQueues[0].sZbuffer, GlobalQueues[0].szZlen, GlobalQueues[0].szZsize);
 
-	User * pNext = colUsers->llist;
+	User * pNext = clsUsers::mPtr->llist;
     while(pNext != NULL) {
         User * pCur = pNext;
         pNext = pCur->next;
 
         if(GlobalQueues[0].szZlen != 0) {
-            UserPutInSendBuf(pCur, GlobalQueues[0].sZbuffer, GlobalQueues[0].szZlen);
-            ui64BytesSentSaved += (GlobalQueues[0].szLen - GlobalQueues[0].szZlen);
+            pCur->PutInSendBuf(GlobalQueues[0].sZbuffer, GlobalQueues[0].szZlen);
+            clsServerManager::ui64BytesSentSaved += (GlobalQueues[0].szLen - GlobalQueues[0].szZlen);
         } else {
-            UserPutInSendBuf(pCur, GlobalQueues[0].sBuffer, GlobalQueues[0].szLen);
+            pCur->PutInSendBuf(GlobalQueues[0].sBuffer, GlobalQueues[0].szLen);
         }
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GlobalDataQueue::AddDataToQueue(GlobalQueue &pQueue, char * sData, const size_t &szLen) {
+void clsGlobalDataQueue::AddDataToQueue(GlobalQueue &pQueue, char * sData, const size_t &szLen) {
     if(pQueue.szSize < (pQueue.szLen + szLen)) {
         size_t szAllignLen = Allign256(pQueue.szLen + szLen);
         char * pOldBuf = pQueue.sBuffer;
 
 #ifdef _WIN32
-        pQueue.sBuffer = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szAllignLen);
+        pQueue.sBuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szAllignLen);
 #else
 		pQueue.sBuffer = (char *)realloc(pOldBuf, szAllignLen);
 #endif
         if(pQueue.sBuffer == NULL) {
             pQueue.sBuffer = pOldBuf;
 
-            AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in GlobalDataQueue::AddDataToQueue\n", (uint64_t)szAllignLen);
+            AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsGlobalDataQueue::AddDataToQueue\n", (uint64_t)szAllignLen);
             return;
         }
 
@@ -973,20 +973,20 @@ void GlobalDataQueue::AddDataToQueue(GlobalQueue &pQueue, char * sData, const si
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void * GlobalDataQueue::GetLastQueueItem() {
+void * clsGlobalDataQueue::GetLastQueueItem() {
     return pNewQueueItems[1];
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void * GlobalDataQueue::GetFirstQueueItem() {
+void * clsGlobalDataQueue::GetFirstQueueItem() {
     return pNewQueueItems[0];
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void * GlobalDataQueue::InsertBlankQueueItem(void * pAfterItem, const uint8_t &ui8CmdType) {
+void * clsGlobalDataQueue::InsertBlankQueueItem(void * pAfterItem, const uint8_t &ui8CmdType) {
     QueueItem * pNewItem = new QueueItem();
     if(pNewItem == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem in GlobalDataQueue::InsertBlankQueueItem\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem in clsGlobalDataQueue::InsertBlankQueueItem\n", 0);
     	return NULL;
     }
 
@@ -1035,14 +1035,14 @@ void * GlobalDataQueue::InsertBlankQueueItem(void * pAfterItem, const uint8_t &u
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GlobalDataQueue::FillBlankQueueItem(char * sCommand, const size_t &szLen, void * pQueueItem) {
+void clsGlobalDataQueue::FillBlankQueueItem(char * sCommand, const size_t &szLen, void * pQueueItem) {
 #ifdef _WIN32
-    ((QueueItem *)pQueueItem)->sCommand1 = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
+    ((QueueItem *)pQueueItem)->sCommand1 = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
 #else
 	((QueueItem *)pQueueItem)->sCommand1 = (char *)malloc(szLen+1);
 #endif
     if(((QueueItem *)pQueueItem)->sCommand1 == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pNewItem->sCommand1 in GlobalDataQueue::FillBlankQueueItem\n", (uint64_t)(szLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pNewItem->sCommand1 in clsGlobalDataQueue::FillBlankQueueItem\n", (uint64_t)(szLen+1));
 
         return;
     }

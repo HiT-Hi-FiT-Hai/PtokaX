@@ -52,7 +52,7 @@
 //---------------------------------------------------------------------------
 #define WM_TRAYICON (WM_USER+10)
 //---------------------------------------------------------------------------
-MainWindow * pMainWindow = NULL;
+clsMainWindow * clsMainWindow::mPtr = NULL;
 //---------------------------------------------------------------------------
 static uint64_t (*GetActualTick)();
 //---------------------------------------------------------------------------
@@ -71,77 +71,20 @@ uint64_t PXGetTickCount64() {
 }
 //---------------------------------------------------------------------------
 
-MainWindow::MainWindow() {
-    g_GuiSettingManager = new GuiSettingManager();
-
-    if(g_GuiSettingManager == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate g_GuiSettingManager in MainWindow::MainWindow\n", 0);
-        exit(EXIT_FAILURE);
-    }
-
-	INITCOMMONCONTROLSEX iccx = { sizeof(INITCOMMONCONTROLSEX), ICC_BAR_CLASSES | ICC_COOL_CLASSES | ICC_DATE_CLASSES | ICC_LINK_CLASS | ICC_LISTVIEW_CLASSES |
-        ICC_STANDARD_CLASSES | ICC_TAB_CLASSES | ICC_TREEVIEW_CLASSES | ICC_UPDOWN_CLASS };
-	InitCommonControlsEx(&iccx);
-
+clsMainWindow::clsMainWindow() {
     m_hWnd = NULL;
 
     memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
-
     memset(&MainWindowPages, 0, (sizeof(MainWindowPages) / sizeof(MainWindowPages[0])) * sizeof(MainWindowPage *));
 
-    MainWindowPages[0] = new MainWindowPageStats();
-    MainWindowPages[1] = new MainWindowPageUsersChat();
-    MainWindowPages[2] = new MainWindowPageScripts();
-
-    for(uint8_t ui8i = 0; ui8i < 3; ui8i++) {
-        if(MainWindowPages[ui8i] == NULL) {
-            AppendDebugLog("%s - [MEM] Cannot allocate MainWindowPage[%" PRIu64 "] in MainWindow::MainWindow\n", (uint64_t)ui8i);
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    uiTaskBarCreated = ::RegisterWindowMessage("TaskbarCreated");
+    uiTaskBarCreated = 0;
 
     ui64LastTrayMouseMove = 0;
-
-	NONCLIENTMETRICS NCM = { 0 };
-	NCM.cbSize = sizeof(NONCLIENTMETRICS);
-
-    OSVERSIONINFOEX ver;
-	memset(&ver, 0, sizeof(OSVERSIONINFOEX));
-	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-
-    if(::GetVersionEx((OSVERSIONINFO*)&ver) != 0 && ver.dwPlatformId == VER_PLATFORM_WIN32_NT && ver.dwMajorVersion < 6) {
-        NCM.cbSize -= sizeof(int);
-    }
-
-	::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), &NCM, 0);
-
-    if(NCM.lfMessageFont.lfHeight > 0) {
-        fScaleFactor = (float)(NCM.lfMessageFont.lfHeight / 12.0);
-    } else if(NCM.lfMessageFont.lfHeight < 0) {
-        fScaleFactor = float(NCM.lfMessageFont.lfHeight / -12.0);
-    }
-
-    hFont = ::CreateFontIndirect(&NCM.lfMessageFont);
-
-    hArrowCursor = (HCURSOR)::LoadImage(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED | LR_DEFAULTSIZE);
-    hVerticalCursor = (HCURSOR)::LoadImage(NULL, IDC_SIZEWE, IMAGE_CURSOR, 0, 0, LR_SHARED | LR_DEFAULTSIZE);
-
-	if(::GetVersionEx((OSVERSIONINFO*)&ver) != 0 && ver.dwPlatformId == VER_PLATFORM_WIN32_NT && ver.dwMajorVersion >= 6) {
-        pGTC64 = (GTC64)::GetProcAddress(::GetModuleHandle("kernel32.dll"), "GetTickCount64");
-        if(pGTC64 != NULL) {
-            GetActualTick = PXGetTickCount64;
-            return;
-        }
-    }
-
-    GetActualTick = PXGetTickCount;
 }
 //---------------------------------------------------------------------------
 
-MainWindow::~MainWindow() {
-    delete g_GuiSettingManager;
+clsMainWindow::~clsMainWindow() {
+    delete clsGuiSettingManager::mPtr;
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(MainWindowPages) / sizeof(MainWindowPages[0])); ui8i++) {
         if(MainWindowPages[ui8i] != NULL) {
@@ -155,63 +98,63 @@ MainWindow::~MainWindow() {
     nid.hWnd = m_hWnd;
     nid.uID = 0;
     ::Shell_NotifyIcon(NIM_DELETE, &nid);
-    ::DeleteObject(hFont);
+    ::DeleteObject(clsGuiSettingManager::hFont);
 }
 //---------------------------------------------------------------------------
 
-LRESULT CALLBACK MainWindow::StaticMainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK clsMainWindow::StaticMainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	if(uMsg == WM_NCCREATE) {
-        ::SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pMainWindow);
-		pMainWindow->m_hWnd = hWnd;
+        ::SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)clsMainWindow::mPtr);
+		clsMainWindow::mPtr->m_hWnd = hWnd;
 	} else {
         if(::GetWindowLongPtr(hWnd, GWLP_USERDATA) == NULL) {
             return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
         }
     }
 
-	return pMainWindow->MainWindowProc(uMsg, wParam, lParam);
+	return clsMainWindow::mPtr->MainWindowProc(uMsg, wParam, lParam);
 }
 //------------------------------------------------------------------------------
 
-LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch(uMsg) {
         case WM_CREATE: {
             {
                 HWND hCombo = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VSCROLL | CBS_DROPDOWNLIST, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, m_hWnd, NULL,
-                    g_hInstance, NULL);
+                    clsServerManager::hInstance, NULL);
 
                 if(hCombo != NULL) {
-                    ::SendMessage(hCombo, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
+                    ::SendMessage(hCombo, WM_SETFONT, (WPARAM)clsGuiSettingManager::hFont, MAKELPARAM(TRUE, 0));
 
-                    iGroupBoxMargin = (int)::SendMessage(hCombo, CB_GETITEMHEIGHT, (WPARAM)-1, 0);
-                    iEditHeight = iGroupBoxMargin + (::GetSystemMetrics(SM_CXFIXEDFRAME) * 2);
-                    iTextHeight = iGroupBoxMargin - 2;
-                    iCheckHeight = max(iTextHeight - 2, ::GetSystemMetrics(SM_CYSMICON));
+                    clsGuiSettingManager::iGroupBoxMargin = (int)::SendMessage(hCombo, CB_GETITEMHEIGHT, (WPARAM)-1, 0);
+                    clsGuiSettingManager::iEditHeight = clsGuiSettingManager::iGroupBoxMargin + (::GetSystemMetrics(SM_CXFIXEDFRAME) * 2);
+                    clsGuiSettingManager::iTextHeight = clsGuiSettingManager::iGroupBoxMargin - 2;
+                    clsGuiSettingManager::iCheckHeight = max(clsGuiSettingManager::iTextHeight - 2, ::GetSystemMetrics(SM_CYSMICON));
 
                     ::DestroyWindow(hCombo);
                 }
 
                 HWND hUpDown = ::CreateWindowEx(0, UPDOWN_CLASS, "", WS_CHILD | UDS_ARROWKEYS | UDS_NOTHOUSANDS | UDS_SETBUDDYINT,
-                    CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, iEditHeight, m_hWnd, NULL, g_hInstance, NULL);
+                    CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, clsGuiSettingManager::iEditHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
                 if(hUpDown != NULL) {
                     RECT rcUpDown;
                     ::GetWindowRect(hUpDown, &rcUpDown);
 
-                    iUpDownWidth = rcUpDown.right - rcUpDown.left;
+                    clsGuiSettingManager::iUpDownWidth = rcUpDown.right - rcUpDown.left;
 
                     ::DestroyWindow(hUpDown);
                 }
 
-                iOneLineGB = iGroupBoxMargin + iEditHeight + 8;
-                iOneLineOneChecksGB = iGroupBoxMargin + iCheckHeight + iEditHeight + 12;
-                iOneLineTwoChecksGB = iGroupBoxMargin + (2 * iCheckHeight) + iEditHeight + 15;
+                clsGuiSettingManager::iOneLineGB = clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 8;
+                clsGuiSettingManager::iOneLineOneChecksGB = clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + clsGuiSettingManager::iEditHeight + 12;
+                clsGuiSettingManager::iOneLineTwoChecksGB = clsGuiSettingManager::iGroupBoxMargin + (2 * clsGuiSettingManager::iCheckHeight) + clsGuiSettingManager::iEditHeight + 15;
 
-                SettingPage::iOneCheckGB = iGroupBoxMargin + iCheckHeight + 8;
-                SettingPage::iTwoChecksGB = iGroupBoxMargin + (2 * iCheckHeight) + 3 + 8;
-                SettingPage::iOneLineTwoGroupGB = iGroupBoxMargin + iEditHeight + (2 * iOneLineGB) + 7;
-                SettingPage::iTwoLineGB = iGroupBoxMargin  + (2 * iEditHeight) + 13;
-                SettingPage::iThreeLineGB = iGroupBoxMargin + (3 * iEditHeight) + 18;
+                SettingPage::iOneCheckGB = clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + 8;
+                SettingPage::iTwoChecksGB = clsGuiSettingManager::iGroupBoxMargin + (2 * clsGuiSettingManager::iCheckHeight) + 3 + 8;
+                SettingPage::iOneLineTwoGroupGB = clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + (2 * clsGuiSettingManager::iOneLineGB) + 7;
+                SettingPage::iTwoLineGB = clsGuiSettingManager::iGroupBoxMargin  + (2 * clsGuiSettingManager::iEditHeight) + 13;
+                SettingPage::iThreeLineGB = clsGuiSettingManager::iGroupBoxMargin + (3 * clsGuiSettingManager::iEditHeight) + 18;
             }
 
             RECT rcMain;
@@ -226,8 +169,8 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 dwTabsStyle |= TCS_HOTTRACK;
             }
 
-            hWndWindowItems[TC_TABS] = ::CreateWindowEx(0, WC_TABCONTROL, "", dwTabsStyle, 0, 0, rcMain.right, iEditHeight, m_hWnd, NULL, g_hInstance, NULL);
-            ::SendMessage(hWndWindowItems[TC_TABS], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
+            hWndWindowItems[TC_TABS] = ::CreateWindowEx(0, WC_TABCONTROL, "", dwTabsStyle, 0, 0, rcMain.right, clsGuiSettingManager::iEditHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+            ::SendMessage(hWndWindowItems[TC_TABS], WM_SETFONT, (WPARAM)clsGuiSettingManager::hFont, MAKELPARAM(TRUE, 0));
 
             TCITEM tcItem = { 0 };
             tcItem.mask = TCIF_TEXT | TCIF_PARAM;
@@ -235,7 +178,7 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             for(uint8_t ui8i = 0; ui8i < (sizeof(MainWindowPages) / sizeof(MainWindowPages[0])); ui8i++) {
                 if(MainWindowPages[ui8i] != NULL) {
                     if(MainWindowPages[ui8i]->CreateMainWindowPage(m_hWnd) == false) {
-                        ::MessageBox(m_hWnd, "Main window creation failed!", sTitle.c_str(), MB_OK);
+                        ::MessageBox(m_hWnd, "Main window creation failed!", clsServerManager::sTitle.c_str(), MB_OK);
                     }
 
                     tcItem.pszText = MainWindowPages[ui8i]->GetPageName();
@@ -243,11 +186,11 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     ::SendMessage(hWndWindowItems[TC_TABS], TCM_INSERTITEM, ui8i, (LPARAM)&tcItem);
                 }
 
-                if(ui8i == 0 && g_GuiSettingManager->iIntegers[GUISETINT_MAIN_WINDOW_HEIGHT] == g_GuiSettingManager->GetDefaultInteger(GUISETINT_MAIN_WINDOW_HEIGHT)) {
+                if(ui8i == 0 && clsGuiSettingManager::mPtr->iIntegers[GUISETINT_MAIN_WINDOW_HEIGHT] == clsGuiSettingManager::mPtr->GetDefaultInteger(GUISETINT_MAIN_WINDOW_HEIGHT)) {
                     RECT rcPage = { 0 };
                     ::GetWindowRect(MainWindowPages[0]->m_hWnd, &rcPage);
 
-                    int iDiff = (rcMain.bottom) - (rcPage.bottom-rcPage.top) - (iEditHeight + 1);
+                    int iDiff = (rcMain.bottom) - (rcPage.bottom-rcPage.top) - (clsGuiSettingManager::iEditHeight + 1);
 
                     ::GetWindowRect(m_hWnd, &rcMain);
 
@@ -257,39 +200,39 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 }
             }
 
-            wpOldTabsProc = (WNDPROC)::SetWindowLongPtr(hWndWindowItems[TC_TABS], GWLP_WNDPROC, (LONG_PTR)TabsProc);
+            clsGuiSettingManager::wpOldTabsProc = (WNDPROC)::SetWindowLongPtr(hWndWindowItems[TC_TABS], GWLP_WNDPROC, (LONG_PTR)TabsProc);
 
-            if(SettingManager->bBools[SETBOOL_CHECK_NEW_RELEASES] == true) {
+            if(clsSettingManager::mPtr->bBools[SETBOOL_CHECK_NEW_RELEASES] == true) {
                 // Create update check thread
-                pUpdateCheckThread = new UpdateCheckThread();
-                if(pUpdateCheckThread == NULL) {
-                    AppendDebugLog("%s - [MEM] Cannot allocate UpdateCheckThread in MainWindow::MainWindowProc::WM_CREATE\n", 0);
+                clsUpdateCheckThread::mPtr = new clsUpdateCheckThread();
+                if(clsUpdateCheckThread::mPtr == NULL) {
+                    AppendDebugLog("%s - [MEM] Cannot allocate clsUpdateCheckThread::mPtr in MainWindow::MainWindowProc::WM_CREATE\n", 0);
                     exit(EXIT_FAILURE);
                 }
 
                 // Start the update check thread
-                pUpdateCheckThread->Resume();
+                clsUpdateCheckThread::mPtr->Resume();
             }
 
             return 0;
         }
         case WM_CLOSE:
-            if(::MessageBox(m_hWnd, (string(LanguageManager->sTexts[LAN_ARE_YOU_SURE], (size_t)LanguageManager->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(),
-                sTitle.c_str(), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDYES) {
-                bIsClose = true;
+            if(::MessageBox(m_hWnd, (string(clsLanguageManager::mPtr->sTexts[LAN_ARE_YOU_SURE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(),
+                clsServerManager::sTitle.c_str(), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDYES) {
+                clsServerManager::bIsClose = true;
 
                 RECT rcMain;
                 ::GetWindowRect(m_hWnd, &rcMain);
 
-                g_GuiSettingManager->SetInteger(GUISETINT_MAIN_WINDOW_WIDTH, rcMain.right - rcMain.left);
-                g_GuiSettingManager->SetInteger(GUISETINT_MAIN_WINDOW_HEIGHT, rcMain.bottom - rcMain.top);
+                clsGuiSettingManager::mPtr->SetInteger(GUISETINT_MAIN_WINDOW_WIDTH, rcMain.right - rcMain.left);
+                clsGuiSettingManager::mPtr->SetInteger(GUISETINT_MAIN_WINDOW_HEIGHT, rcMain.bottom - rcMain.top);
 
                 // stop server if running and save settings
-                if(bServerRunning == true) {
-                    ServerStop();
+                if(clsServerManager::bServerRunning == true) {
+                    clsServerManager::Stop();
                     return 0;
                 } else {
-                    ServerFinalClose();
+                    clsServerManager::FinalClose();
                 }
 
                 break;
@@ -310,15 +253,15 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     nid.hWnd = m_hWnd;
                     nid.uID = 0;
                     nid.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE;
-                    nid.hIcon = (HICON)::LoadImage(g_hInstance, MAKEINTRESOURCE(IDR_MAINICONSMALL), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR | LR_SHARED);
+                    nid.hIcon = (HICON)::LoadImage(clsServerManager::hInstance, MAKEINTRESOURCE(IDR_MAINICONSMALL), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR | LR_SHARED);
                     nid.uCallbackMessage = WM_TRAYICON;
 
 					char msg[256];
 					int iret = 0;
-                    if(bServerRunning == false) {
+                    if(clsServerManager::bServerRunning == false) {
 						msg[0] = '\0';
                     } else {
-                        iret = sprintf(msg, " (%s: %u)", LanguageManager->sTexts[LAN_USERS], ui32Logged);
+                        iret = sprintf(msg, " (%s: %u)", clsLanguageManager::mPtr->sTexts[LAN_USERS], clsServerManager::ui32Logged);
                         if(CheckSprintf(iret, 256, "MainWindow::MainWindowProc") == false) {
                             return 0;
                         }
@@ -326,19 +269,19 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 					size_t szSize = sizeof(nid.szTip);
 
-					if(szSize < (size_t)(SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iret+10)) {
+					if(szSize < (size_t)(clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+iret+10)) {
 						nid.szTip[szSize] = '\0';
 						memcpy(nid.szTip+(szSize-(iret+1)), msg, iret);
 						nid.szTip[szSize-(iret+2)] = '.';
 						nid.szTip[szSize-(iret+3)] = '.';
 						nid.szTip[szSize-(iret+4)] = '.';
-						memcpy(nid.szTip+9, SettingManager->sTexts[SETTXT_HUB_NAME], szSize-(iret+13));
+						memcpy(nid.szTip+9, clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], szSize-(iret+13));
 						memcpy(nid.szTip, "PtokaX - ", 9);
 					} else {
 						memcpy(nid.szTip, "PtokaX - ", 9);
-						memcpy(nid.szTip+9, SettingManager->sTexts[SETTXT_HUB_NAME], SettingManager->ui16TextsLens[SETTXT_HUB_NAME]);
-						memcpy(nid.szTip+9+SettingManager->ui16TextsLens[SETTXT_HUB_NAME], msg, iret);
-						nid.szTip[9+SettingManager->ui16TextsLens[SETTXT_HUB_NAME]+iret] = '\0';
+						memcpy(nid.szTip+9, clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]);
+						memcpy(nid.szTip+9+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME], msg, iret);
+						nid.szTip[9+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+iret] = '\0';
                     }
                     ::Shell_NotifyIcon(NIM_MODIFY, &nid);
 				}
@@ -349,20 +292,20 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
             return 0;
         case WM_SIZE:
-            if(wParam == SIZE_MINIMIZED && SettingManager->bBools[SETBOOL_ENABLE_TRAY_ICON] == true) {
+            if(wParam == SIZE_MINIMIZED && clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_TRAY_ICON] == true) {
                 ::ShowWindow(m_hWnd, SW_HIDE);
             } else {
                 RECT rc;
-                ::SetRect(&rc, 0, 0, GET_X_LPARAM(lParam), iEditHeight);
+                ::SetRect(&rc, 0, 0, GET_X_LPARAM(lParam), clsGuiSettingManager::iEditHeight);
                 ::SendMessage(hWndWindowItems[TC_TABS], TCM_ADJUSTRECT, FALSE, (LPARAM)&rc);
 
                 HDWP hdwp = ::BeginDeferWindowPos(3);
 
-                ::DeferWindowPos(hdwp, hWndWindowItems[TC_TABS], NULL, 0, 0, GET_X_LPARAM(lParam), iEditHeight, SWP_NOMOVE | SWP_NOZORDER);
+                ::DeferWindowPos(hdwp, hWndWindowItems[TC_TABS], NULL, 0, 0, GET_X_LPARAM(lParam), clsGuiSettingManager::iEditHeight, SWP_NOMOVE | SWP_NOZORDER);
 
                 for(uint8_t ui8i = 0; ui8i < (sizeof(MainWindowPages) / sizeof(MainWindowPages[0])); ui8i++) {
                     if(MainWindowPages[ui8i] != NULL) {
-                        ::DeferWindowPos(hdwp, MainWindowPages[ui8i]->m_hWnd, NULL, 0, iEditHeight + 1, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) - (iEditHeight + 1),
+                        ::DeferWindowPos(hdwp, MainWindowPages[ui8i]->m_hWnd, NULL, 0, clsGuiSettingManager::iEditHeight + 1, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) - (clsGuiSettingManager::iEditHeight + 1),
                             SWP_NOMOVE | SWP_NOZORDER);
                     }
                 }
@@ -373,8 +316,8 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             return 0;
         case WM_GETMINMAXINFO: {
             MINMAXINFO *mminfo = (MINMAXINFO*)lParam;
-            mminfo->ptMinTrackSize.x = ScaleGui(g_GuiSettingManager->GetDefaultInteger(GUISETINT_MAIN_WINDOW_WIDTH));
-            mminfo->ptMinTrackSize.y = ScaleGui(g_GuiSettingManager->GetDefaultInteger(GUISETINT_MAIN_WINDOW_HEIGHT));
+            mminfo->ptMinTrackSize.x = ScaleGui(clsGuiSettingManager::mPtr->GetDefaultInteger(GUISETINT_MAIN_WINDOW_WIDTH));
+            mminfo->ptMinTrackSize.y = ScaleGui(clsGuiSettingManager::mPtr->GetDefaultInteger(GUISETINT_MAIN_WINDOW_HEIGHT));
 
             return 0;
         }
@@ -400,7 +343,7 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                         }
 
                         if(tcItem.lParam == NULL) {
-                            ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
+                            ::MessageBox(m_hWnd, "Not implemented!", clsServerManager::sTitle.c_str(), MB_OK);
                         }
 
                         MainWindowPage * curMainWindowPage = (MainWindowPage *)tcItem.lParam;
@@ -423,46 +366,46 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     ::PostMessage(m_hWnd, WM_CLOSE, 0, 0);
                     return 0;
                 case IDC_SETTINGS: {
-                    pSettingDialog = new SettingDialog();
+                    clsSettingDialog::mPtr = new clsSettingDialog();
 
-                    if(pSettingDialog != NULL) {
-                        pSettingDialog->DoModal(m_hWnd);
+                    if(clsSettingDialog::mPtr != NULL) {
+                        clsSettingDialog::mPtr->DoModal(m_hWnd);
                     }
 
                     return 0;
                 }
                 case IDC_REG_USERS: {
-                    pRegisteredUsersDialog = new RegisteredUsersDialog();
+                    clsRegisteredUsersDialog::mPtr = new clsRegisteredUsersDialog();
 
-                    if(pRegisteredUsersDialog != NULL) {
-                        pRegisteredUsersDialog->DoModal(m_hWnd);
+                    if(clsRegisteredUsersDialog::mPtr != NULL) {
+                        clsRegisteredUsersDialog::mPtr->DoModal(m_hWnd);
                     }
 
                     return 0;
                 }
                 case IDC_PROFILES: {
-                    pProfilesDialog = new ProfilesDialog();
+                    clsProfilesDialog::mPtr = new clsProfilesDialog();
 
-                    if(pProfilesDialog != NULL) {
-                        pProfilesDialog->DoModal(m_hWnd);
+                    if(clsProfilesDialog::mPtr != NULL) {
+                        clsProfilesDialog::mPtr->DoModal(m_hWnd);
                     }
 
                     return 0;
                 }
                 case IDC_BANS: {
-                    pBansDialog = new BansDialog();
+                    clsBansDialog::mPtr = new clsBansDialog();
 
-                    if(pBansDialog != NULL) {
-                        pBansDialog->DoModal(m_hWnd);
+                    if(clsBansDialog::mPtr != NULL) {
+                        clsBansDialog::mPtr->DoModal(m_hWnd);
                     }
 
                     return 0;
 				}
                 case IDC_RANGE_BANS: {
-                    pRangeBansDialog = new RangeBansDialog();
+                    clsRangeBansDialog::mPtr = new clsRangeBansDialog();
 
-                    if(pRangeBansDialog != NULL) {
-                        pRangeBansDialog->DoModal(m_hWnd);
+                    if(clsRangeBansDialog::mPtr != NULL) {
+                        clsRangeBansDialog::mPtr->DoModal(m_hWnd);
                     }
 
                     return 0;
@@ -486,67 +429,67 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     ::ShellExecute(NULL, NULL, "http://wiki.PtokaX.org", NULL, NULL, SW_SHOWNORMAL);
                     return 0;
                 case IDC_UPDATE_CHECK: {
-                    pUpdateDialog = new UpdateDialog();
+                    clsUpdateDialog::mPtr = new clsUpdateDialog();
 
-                    if(pUpdateDialog != NULL) {
-                        pUpdateDialog->DoModal(m_hWnd);
+                    if(clsUpdateDialog::mPtr != NULL) {
+                        clsUpdateDialog::mPtr->DoModal(m_hWnd);
 
                         // First destroy old update check thread if any
-                        if(pUpdateCheckThread != NULL) {
-                            pUpdateCheckThread->Close();
-                            pUpdateCheckThread->WaitFor();
+                        if(clsUpdateCheckThread::mPtr != NULL) {
+                            clsUpdateCheckThread::mPtr->Close();
+                            clsUpdateCheckThread::mPtr->WaitFor();
 
-                            delete pUpdateCheckThread;
-                            pUpdateCheckThread = NULL;
+                            delete clsUpdateCheckThread::mPtr;
+                            clsUpdateCheckThread::mPtr = NULL;
                         }
 
                         // Create update check thread
-                        pUpdateCheckThread = new UpdateCheckThread();
-                        if(pUpdateCheckThread == NULL) {
-                            AppendDebugLog("%s - [MEM] Cannot allocate UpdateCheckThread in MainWindow::MainWindowProc::IDC_UPDATE_CHECK\n", 0);
+                        clsUpdateCheckThread::mPtr = new clsUpdateCheckThread();
+                        if(clsUpdateCheckThread::mPtr == NULL) {
+                            AppendDebugLog("%s - [MEM] Cannot allocate clsUpdateCheckThread::mPtr in MainWindow::MainWindowProc::IDC_UPDATE_CHECK\n", 0);
                             exit(EXIT_FAILURE);
                         }
 
                         // Start the update check thread
-                        pUpdateCheckThread->Resume();
+                        clsUpdateCheckThread::mPtr->Resume();
                     }
 
                     return 0;
                 }
                 case IDC_SAVE_SETTINGS:
-                    hashBanManager->Save(true);
-                    ProfileMan->SaveProfiles();
-                    hashRegManager->Save();
-                    ScriptManager->SaveScripts();
-                    SettingManager->Save();
+                    clsBanManager::mPtr->Save(true);
+                    clsProfileManager::mPtr->SaveProfiles();
+                    clsRegManager::mPtr->Save();
+                    clsScriptManager::mPtr->SaveScripts();
+                    clsSettingManager::mPtr->Save();
 
-                    ::MessageBox(m_hWnd, LanguageManager->sTexts[LAN_SETTINGS_SAVED], sTitle.c_str(), MB_OK | MB_ICONINFORMATION);
+                    ::MessageBox(m_hWnd, clsLanguageManager::mPtr->sTexts[LAN_SETTINGS_SAVED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONINFORMATION);
                     return 0;
                 case IDC_RELOAD_TXTS:
-                    TextFileManager->RefreshTextFiles();
+                    clsTextFilesManager::mPtr->RefreshTextFiles();
 
                     ::MessageBox(m_hWnd,
-                        (string(LanguageManager->sTexts[LAN_TXT_FILES_RELOADED], (size_t)LanguageManager->ui16TextsLens[LAN_TXT_FILES_RELOADED])+".").c_str(),
-                            sTitle.c_str(), MB_OK | MB_ICONINFORMATION);
+                        (string(clsLanguageManager::mPtr->sTexts[LAN_TXT_FILES_RELOADED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_TXT_FILES_RELOADED])+".").c_str(),
+                            clsServerManager::sTitle.c_str(), MB_OK | MB_ICONINFORMATION);
 
                     return 0;
             }
 
             break;
         case WM_QUERYENDSESSION:
-            hashBanManager->Save(true);
-            ProfileMan->SaveProfiles();
-            hashRegManager->Save();
-            ScriptManager->SaveScripts();
-            SettingManager->Save();
+            clsBanManager::mPtr->Save(true);
+            clsProfileManager::mPtr->SaveProfiles();
+            clsRegManager::mPtr->Save();
+            clsScriptManager::mPtr->SaveScripts();
+            clsSettingManager::mPtr->Save();
 
             AppendLog("Serving stopped (Windows shutdown).");
 
             return TRUE;
         case WM_UPDATE_CHECK_MSG: {
             char * sMsg = (char *)lParam;
-            if(pUpdateDialog != NULL) {
-                pUpdateDialog->Message(sMsg);
+            if(clsUpdateDialog::mPtr != NULL) {
+                clsUpdateDialog::mPtr->Message(sMsg);
             }
 
             free(sMsg);
@@ -556,16 +499,16 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         case WM_UPDATE_CHECK_DATA: {
             char * sMsg = (char *)lParam;
 
-            if(pUpdateDialog == NULL) {
-                pUpdateDialog = new UpdateDialog();
+            if(clsUpdateDialog::mPtr == NULL) {
+                clsUpdateDialog::mPtr = new clsUpdateDialog();
 
-                if(pUpdateDialog != NULL) {
-                    if(pUpdateDialog->ParseData(sMsg, m_hWnd) == false) {
-                        delete pUpdateDialog;
+                if(clsUpdateDialog::mPtr != NULL) {
+                    if(clsUpdateDialog::mPtr->ParseData(sMsg, m_hWnd) == false) {
+                        delete clsUpdateDialog::mPtr;
                     }
                 }
             } else {
-                pUpdateDialog->ParseData(sMsg, m_hWnd);
+                clsUpdateDialog::mPtr->ParseData(sMsg, m_hWnd);
             }
 
             free(sMsg);
@@ -573,12 +516,12 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             return 0;
         }
         case WM_UPDATE_CHECK_TERMINATE:
-            if(pUpdateCheckThread != NULL) {
-                pUpdateCheckThread->Close();
-                pUpdateCheckThread->WaitFor();
+            if(clsUpdateCheckThread::mPtr != NULL) {
+                clsUpdateCheckThread::mPtr->Close();
+                clsUpdateCheckThread::mPtr->WaitFor();
 
-                delete pUpdateCheckThread;
-                pUpdateCheckThread = NULL;
+                delete clsUpdateCheckThread::mPtr;
+                clsUpdateCheckThread::mPtr = NULL;
             }
 
             return 0;
@@ -596,47 +539,95 @@ LRESULT MainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 }
 //------------------------------------------------------------------------------
 
-HWND MainWindow::CreateEx() {
+HWND clsMainWindow::CreateEx() {
+    clsGuiSettingManager::mPtr = new clsGuiSettingManager();
+
+    if(clsGuiSettingManager::mPtr == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate clsGuiSettingManager::mPtr in clsMainWindow::clsMainWindow\n", 0);
+        exit(EXIT_FAILURE);
+    }
+
+	INITCOMMONCONTROLSEX iccx = { sizeof(INITCOMMONCONTROLSEX), ICC_BAR_CLASSES | ICC_COOL_CLASSES | ICC_DATE_CLASSES | ICC_LINK_CLASS | ICC_LISTVIEW_CLASSES |
+        ICC_STANDARD_CLASSES | ICC_TAB_CLASSES | ICC_TREEVIEW_CLASSES | ICC_UPDOWN_CLASS };
+	InitCommonControlsEx(&iccx);
+
+    MainWindowPages[0] = new MainWindowPageStats();
+    MainWindowPages[1] = new clsMainWindowPageUsersChat();
+    MainWindowPages[2] = new clsMainWindowPageScripts();
+
+    for(uint8_t ui8i = 0; ui8i < 3; ui8i++) {
+        if(MainWindowPages[ui8i] == NULL) {
+            AppendDebugLog("%s - [MEM] Cannot allocate MainWindowPage[%" PRIu64 "] in clsMainWindow::clsMainWindow\n", (uint64_t)ui8i);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    uiTaskBarCreated = ::RegisterWindowMessage("TaskbarCreated");
+
+	NONCLIENTMETRICS NCM = { 0 };
+	NCM.cbSize = sizeof(NONCLIENTMETRICS);
+
+    OSVERSIONINFOEX ver;
+	memset(&ver, 0, sizeof(OSVERSIONINFOEX));
+	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+
+    if(::GetVersionEx((OSVERSIONINFO*)&ver) != 0 && ver.dwPlatformId == VER_PLATFORM_WIN32_NT && ver.dwMajorVersion < 6) {
+        NCM.cbSize -= sizeof(int);
+    }
+
+	::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), &NCM, 0);
+
+    if(NCM.lfMessageFont.lfHeight > 0) {
+        clsGuiSettingManager::fScaleFactor = (float)(NCM.lfMessageFont.lfHeight / 12.0);
+    } else if(NCM.lfMessageFont.lfHeight < 0) {
+        clsGuiSettingManager::fScaleFactor = float(NCM.lfMessageFont.lfHeight / -12.0);
+    }
+
+    clsGuiSettingManager::hFont = ::CreateFontIndirect(&NCM.lfMessageFont);
+
+    clsGuiSettingManager::hArrowCursor = (HCURSOR)::LoadImage(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED | LR_DEFAULTSIZE);
+    clsGuiSettingManager::hVerticalCursor = (HCURSOR)::LoadImage(NULL, IDC_SIZEWE, IMAGE_CURSOR, 0, 0, LR_SHARED | LR_DEFAULTSIZE);
+
     HMENU hMainMenu = ::CreateMenu();
 
     HMENU hFileMenu = ::CreatePopupMenu();
-    ::AppendMenu(hFileMenu, MF_STRING, IDC_RELOAD_TXTS, (string(LanguageManager->sTexts[LAN_RELOAD_TEXT_FILES], (size_t)LanguageManager->ui16TextsLens[LAN_RELOAD_TEXT_FILES]) + "...").c_str());
+    ::AppendMenu(hFileMenu, MF_STRING, IDC_RELOAD_TXTS, (string(clsLanguageManager::mPtr->sTexts[LAN_RELOAD_TEXT_FILES], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RELOAD_TEXT_FILES]) + "...").c_str());
     ::AppendMenu(hFileMenu, MF_SEPARATOR, 0, 0);
-    ::AppendMenu(hFileMenu, MF_STRING, IDC_SETTINGS, (string(LanguageManager->sTexts[LAN_MENU_SETTINGS], (size_t)LanguageManager->ui16TextsLens[LAN_MENU_SETTINGS]) + "...").c_str());
-    ::AppendMenu(hFileMenu, MF_STRING, IDC_SAVE_SETTINGS, (string(LanguageManager->sTexts[LAN_SAVE_SETTINGS], (size_t)LanguageManager->ui16TextsLens[LAN_SAVE_SETTINGS]) + "...").c_str());
+    ::AppendMenu(hFileMenu, MF_STRING, IDC_SETTINGS, (string(clsLanguageManager::mPtr->sTexts[LAN_MENU_SETTINGS], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_MENU_SETTINGS]) + "...").c_str());
+    ::AppendMenu(hFileMenu, MF_STRING, IDC_SAVE_SETTINGS, (string(clsLanguageManager::mPtr->sTexts[LAN_SAVE_SETTINGS], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SAVE_SETTINGS]) + "...").c_str());
     ::AppendMenu(hFileMenu, MF_SEPARATOR, 0, 0);
-    ::AppendMenu(hFileMenu, MF_STRING, IDC_EXIT, LanguageManager->sTexts[LAN_EXIT]);
+    ::AppendMenu(hFileMenu, MF_STRING, IDC_EXIT, clsLanguageManager::mPtr->sTexts[LAN_EXIT]);
 
-    ::AppendMenu(hMainMenu, MF_POPUP, (UINT_PTR)hFileMenu, LanguageManager->sTexts[LAN_FILE]);
+    ::AppendMenu(hMainMenu, MF_POPUP, (UINT_PTR)hFileMenu, clsLanguageManager::mPtr->sTexts[LAN_FILE]);
 
     HMENU hViewMenu = ::CreatePopupMenu();
-    ::AppendMenu(hViewMenu, MF_STRING, IDC_REG_USERS, LanguageManager->sTexts[LAN_REG_USERS]);
+    ::AppendMenu(hViewMenu, MF_STRING, IDC_REG_USERS, clsLanguageManager::mPtr->sTexts[LAN_REG_USERS]);
     ::AppendMenu(hViewMenu, MF_SEPARATOR, 0, 0);
-    ::AppendMenu(hViewMenu, MF_STRING, IDC_PROFILES, LanguageManager->sTexts[LAN_PROFILES]);
+    ::AppendMenu(hViewMenu, MF_STRING, IDC_PROFILES, clsLanguageManager::mPtr->sTexts[LAN_PROFILES]);
     ::AppendMenu(hViewMenu, MF_SEPARATOR, 0, 0);
-    ::AppendMenu(hViewMenu, MF_STRING, IDC_BANS, LanguageManager->sTexts[LAN_BANS]);
-    ::AppendMenu(hViewMenu, MF_STRING, IDC_RANGE_BANS, LanguageManager->sTexts[LAN_RANGE_BANS]);
+    ::AppendMenu(hViewMenu, MF_STRING, IDC_BANS, clsLanguageManager::mPtr->sTexts[LAN_BANS]);
+    ::AppendMenu(hViewMenu, MF_STRING, IDC_RANGE_BANS, clsLanguageManager::mPtr->sTexts[LAN_RANGE_BANS]);
 
-    ::AppendMenu(hMainMenu, MF_POPUP, (UINT_PTR)hViewMenu, LanguageManager->sTexts[LAN_VIEW]);
+    ::AppendMenu(hMainMenu, MF_POPUP, (UINT_PTR)hViewMenu, clsLanguageManager::mPtr->sTexts[LAN_VIEW]);
 
     HMENU hHelpMenu = ::CreatePopupMenu();
-    ::AppendMenu(hHelpMenu, MF_STRING, IDC_UPDATE_CHECK, (string(LanguageManager->sTexts[LAN_CHECK_FOR_UPDATE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_FOR_UPDATE]) + "...").c_str());
+    ::AppendMenu(hHelpMenu, MF_STRING, IDC_UPDATE_CHECK, (string(clsLanguageManager::mPtr->sTexts[LAN_CHECK_FOR_UPDATE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_CHECK_FOR_UPDATE]) + "...").c_str());
     ::AppendMenu(hHelpMenu, MF_SEPARATOR, 0, 0);
-    ::AppendMenu(hHelpMenu, MF_STRING, IDC_HOMEPAGE, (string("PtokaX ") +LanguageManager->sTexts[LAN_WEBSITE]).c_str());
-    ::AppendMenu(hHelpMenu, MF_STRING, IDC_FORUM, (string("PtokaX ") +LanguageManager->sTexts[LAN_FORUM]).c_str());
-    ::AppendMenu(hHelpMenu, MF_STRING, IDC_WIKI, (string("PtokaX ") +LanguageManager->sTexts[LAN_WIKI]).c_str());
+    ::AppendMenu(hHelpMenu, MF_STRING, IDC_HOMEPAGE, (string("PtokaX ") +clsLanguageManager::mPtr->sTexts[LAN_WEBSITE]).c_str());
+    ::AppendMenu(hHelpMenu, MF_STRING, IDC_FORUM, (string("PtokaX ") +clsLanguageManager::mPtr->sTexts[LAN_FORUM]).c_str());
+    ::AppendMenu(hHelpMenu, MF_STRING, IDC_WIKI, (string("PtokaX ") +clsLanguageManager::mPtr->sTexts[LAN_WIKI]).c_str());
     ::AppendMenu(hHelpMenu, MF_SEPARATOR, 0, 0);
-    ::AppendMenu(hHelpMenu, MF_STRING, IDC_ABOUT, (string(LanguageManager->sTexts[LAN_MENU_ABOUT], (size_t)LanguageManager->ui16TextsLens[LAN_MENU_ABOUT]) + " PtokaX").c_str());
+    ::AppendMenu(hHelpMenu, MF_STRING, IDC_ABOUT, (string(clsLanguageManager::mPtr->sTexts[LAN_MENU_ABOUT], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_MENU_ABOUT]) + " PtokaX").c_str());
 
-    ::AppendMenu(hMainMenu, MF_POPUP, (UINT_PTR)hHelpMenu, LanguageManager->sTexts[LAN_HELP]);
+    ::AppendMenu(hMainMenu, MF_POPUP, (UINT_PTR)hHelpMenu, clsLanguageManager::mPtr->sTexts[LAN_HELP]);
 
     WNDCLASSEX m_wc;
     memset(&m_wc, 0, sizeof(WNDCLASSEX));
     m_wc.cbSize = sizeof(WNDCLASSEX);
     m_wc.lpfnWndProc = StaticMainWindowProc;
     m_wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
-    m_wc.lpszClassName = sTitle.c_str();
-    m_wc.hInstance = g_hInstance;
+    m_wc.lpszClassName = clsServerManager::sTitle.c_str();
+    m_wc.hInstance = clsServerManager::hInstance;
 	m_wc.hCursor = ::LoadCursor(m_wc.hInstance, IDC_ARROW);
 	m_wc.style = CS_HREDRAW | CS_VREDRAW;
 	m_wc.hIcon = (HICON)::LoadImage(m_wc.hInstance, MAKEINTRESOURCE(IDR_MAINICON), IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR | LR_SHARED);
@@ -645,27 +636,37 @@ HWND MainWindow::CreateEx() {
 	ATOM atom = ::RegisterClassEx(&m_wc);
 
     m_hWnd = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE, MAKEINTATOM(atom),
-        (string(SettingManager->sTexts[SETTXT_HUB_NAME], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME]) + " | " + sTitle).c_str(),
+        (string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]) + " | " + clsServerManager::sTitle).c_str(),
         WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
         CW_USEDEFAULT, CW_USEDEFAULT, ScaleGuiDefaultsOnly(GUISETINT_MAIN_WINDOW_WIDTH), ScaleGuiDefaultsOnly(GUISETINT_MAIN_WINDOW_HEIGHT),
-        NULL, hMainMenu, g_hInstance, NULL);
+        NULL, hMainMenu, clsServerManager::hInstance, NULL);
+
+	if(::GetVersionEx((OSVERSIONINFO*)&ver) != 0 && ver.dwPlatformId == VER_PLATFORM_WIN32_NT && ver.dwMajorVersion >= 6) {
+        pGTC64 = (GTC64)::GetProcAddress(::GetModuleHandle("kernel32.dll"), "GetTickCount64");
+        if(pGTC64 != NULL) {
+            GetActualTick = PXGetTickCount64;
+            return m_hWnd;
+        }
+    }
+
+    GetActualTick = PXGetTickCount;
 
 	return m_hWnd;
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::UpdateSysTray() const {
-    if(bCmdNoTray == false) {
+void clsMainWindow::UpdateSysTray() const {
+    if(clsServerManager::bCmdNoTray == false) {
         NOTIFYICONDATA nid;
         memset(&nid, 0, sizeof(NOTIFYICONDATA));
         nid.cbSize = sizeof(NOTIFYICONDATA);
         nid.hWnd = m_hWnd;
         nid.uID = 0;
         nid.uFlags = NIF_ICON | NIF_MESSAGE;
-        nid.hIcon = (HICON)::LoadImage(g_hInstance, MAKEINTRESOURCE(IDR_MAINICONSMALL), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR | LR_SHARED);
+        nid.hIcon = (HICON)::LoadImage(clsServerManager::hInstance, MAKEINTRESOURCE(IDR_MAINICONSMALL), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR | LR_SHARED);
         nid.uCallbackMessage = WM_TRAYICON;
 
-        if(SettingManager->bBools[SETBOOL_ENABLE_TRAY_ICON] == true) {
+        if(clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_TRAY_ICON] == true) {
             ::Shell_NotifyIcon(NIM_ADD, &nid);
         } else {
             ::Shell_NotifyIcon(NIM_DELETE, &nid);
@@ -674,33 +675,33 @@ void MainWindow::UpdateSysTray() const {
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::UpdateStats() const {
-    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_JOINS_VALUE], string(ui32Joins).c_str());
-    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_PARTS_VALUE], string(ui32Parts).c_str());
-    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_ACTIVE_VALUE], string(ui32Joins - ui32Parts).c_str());
-    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_ONLINE_VALUE], string(ui32Logged).c_str());
-    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_PEAK_VALUE], string(ui32Peak).c_str());
+void clsMainWindow::UpdateStats() const {
+    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_JOINS_VALUE], string(clsServerManager::ui32Joins).c_str());
+    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_PARTS_VALUE], string(clsServerManager::ui32Parts).c_str());
+    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_ACTIVE_VALUE], string(clsServerManager::ui32Joins - clsServerManager::ui32Parts).c_str());
+    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_ONLINE_VALUE], string(clsServerManager::ui32Logged).c_str());
+    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_PEAK_VALUE], string(clsServerManager::ui32Peak).c_str());
 
     char msg[256];
 
-	int imsglen = sprintf(msg, "%s (%s)", formatBytes(ui64BytesRead), formatBytesPerSecond(iActualBytesRead));
-    if(CheckSprintf(imsglen, 256, "MainWindow::UpdateStats") == true) {
+	int imsglen = sprintf(msg, "%s (%s)", formatBytes(clsServerManager::ui64BytesRead), formatBytesPerSecond(clsServerManager::ui32ActualBytesRead));
+    if(CheckSprintf(imsglen, 256, "clsMainWindow::UpdateStats") == true) {
         ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_RECEIVED_VALUE], msg);
 	}
 
-	imsglen = sprintf(msg, "%s (%s)", formatBytes(ui64BytesSent), formatBytesPerSecond(iActualBytesSent));
-    if(CheckSprintf(imsglen, 256, "MainWindow::UpdateStats1") == true) {
+	imsglen = sprintf(msg, "%s (%s)", formatBytes(clsServerManager::ui64BytesSent), formatBytesPerSecond(clsServerManager::ui32ActualBytesSent));
+    if(CheckSprintf(imsglen, 256, "clsMainWindow::UpdateStats1") == true) {
 		::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_SENT_VALUE], msg);
 	}
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::UpdateTitleBar() {
-    ::SetWindowText(m_hWnd, (string(SettingManager->sTexts[SETTXT_HUB_NAME], (size_t)SettingManager->ui16TextsLens[SETTXT_HUB_NAME]) + " | " + sTitle).c_str());
+void clsMainWindow::UpdateTitleBar() {
+    ::SetWindowText(m_hWnd, (string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]) + " | " + clsServerManager::sTitle).c_str());
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::UpdateLanguage() {
+void clsMainWindow::UpdateLanguage() {
     for(uint8_t ui8i = 0; ui8i < (sizeof(MainWindowPages) / sizeof(MainWindowPages[0])); ui8i++) {
         if(MainWindowPages[ui8i] != NULL) {
             MainWindowPages[ui8i]->UpdateLanguage();
@@ -715,70 +716,70 @@ void MainWindow::UpdateLanguage() {
 
     HMENU hMenu = ::GetMenu(m_hWnd);
 
-    ::ModifyMenu(hMenu, 0, MF_BYPOSITION, 0, LanguageManager->sTexts[LAN_FILE]);
-    ::ModifyMenu(hMenu, 1, MF_BYPOSITION, 0, LanguageManager->sTexts[LAN_VIEW]);
-    ::ModifyMenu(hMenu, 2, MF_BYPOSITION, 0, LanguageManager->sTexts[LAN_HELP]);
+    ::ModifyMenu(hMenu, 0, MF_BYPOSITION, 0, clsLanguageManager::mPtr->sTexts[LAN_FILE]);
+    ::ModifyMenu(hMenu, 1, MF_BYPOSITION, 0, clsLanguageManager::mPtr->sTexts[LAN_VIEW]);
+    ::ModifyMenu(hMenu, 2, MF_BYPOSITION, 0, clsLanguageManager::mPtr->sTexts[LAN_HELP]);
 
-    ::ModifyMenu(hMenu, IDC_EXIT, MF_BYCOMMAND, IDC_EXIT, LanguageManager->sTexts[LAN_EXIT]);
-    ::ModifyMenu(hMenu, IDC_REG_USERS, MF_BYCOMMAND, IDC_REG_USERS, LanguageManager->sTexts[LAN_REG_USERS]);
-    ::ModifyMenu(hMenu, IDC_PROFILES, MF_BYCOMMAND, IDC_PROFILES, LanguageManager->sTexts[LAN_PROFILES]);
-    ::ModifyMenu(hMenu, IDC_BANS, MF_BYCOMMAND, IDC_BANS, LanguageManager->sTexts[LAN_BANS]);
-    ::ModifyMenu(hMenu, IDC_RANGE_BANS, MF_BYCOMMAND, IDC_RANGE_BANS, LanguageManager->sTexts[LAN_RANGE_BANS]);
+    ::ModifyMenu(hMenu, IDC_EXIT, MF_BYCOMMAND, IDC_EXIT, clsLanguageManager::mPtr->sTexts[LAN_EXIT]);
+    ::ModifyMenu(hMenu, IDC_REG_USERS, MF_BYCOMMAND, IDC_REG_USERS, clsLanguageManager::mPtr->sTexts[LAN_REG_USERS]);
+    ::ModifyMenu(hMenu, IDC_PROFILES, MF_BYCOMMAND, IDC_PROFILES, clsLanguageManager::mPtr->sTexts[LAN_PROFILES]);
+    ::ModifyMenu(hMenu, IDC_BANS, MF_BYCOMMAND, IDC_BANS, clsLanguageManager::mPtr->sTexts[LAN_BANS]);
+    ::ModifyMenu(hMenu, IDC_RANGE_BANS, MF_BYCOMMAND, IDC_RANGE_BANS, clsLanguageManager::mPtr->sTexts[LAN_RANGE_BANS]);
 
-    ::ModifyMenu(hMenu, IDC_HOMEPAGE, MF_BYCOMMAND, IDC_HOMEPAGE, (string("PtokaX ") +LanguageManager->sTexts[LAN_WEBSITE]).c_str());
-    ::ModifyMenu(hMenu, IDC_FORUM, MF_BYCOMMAND, IDC_FORUM, (string("PtokaX ") +LanguageManager->sTexts[LAN_FORUM]).c_str());
-    ::ModifyMenu(hMenu, IDC_WIKI, MF_BYCOMMAND, IDC_WIKI, (string("PtokaX ") +LanguageManager->sTexts[LAN_WIKI]).c_str());
+    ::ModifyMenu(hMenu, IDC_HOMEPAGE, MF_BYCOMMAND, IDC_HOMEPAGE, (string("PtokaX ") +clsLanguageManager::mPtr->sTexts[LAN_WEBSITE]).c_str());
+    ::ModifyMenu(hMenu, IDC_FORUM, MF_BYCOMMAND, IDC_FORUM, (string("PtokaX ") +clsLanguageManager::mPtr->sTexts[LAN_FORUM]).c_str());
+    ::ModifyMenu(hMenu, IDC_WIKI, MF_BYCOMMAND, IDC_WIKI, (string("PtokaX ") +clsLanguageManager::mPtr->sTexts[LAN_WIKI]).c_str());
 
     ::ModifyMenu(hMenu, IDC_ABOUT, MF_BYCOMMAND, IDC_ABOUT,
-        (string(LanguageManager->sTexts[LAN_MENU_ABOUT], (size_t)LanguageManager->ui16TextsLens[LAN_MENU_ABOUT]) + " PtokaX").c_str());
+        (string(clsLanguageManager::mPtr->sTexts[LAN_MENU_ABOUT], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_MENU_ABOUT]) + " PtokaX").c_str());
 
     ::ModifyMenu(hMenu, IDC_UPDATE_CHECK, MF_BYCOMMAND, IDC_UPDATE_CHECK,
-        (string(LanguageManager->sTexts[LAN_CHECK_FOR_UPDATE], (size_t)LanguageManager->ui16TextsLens[LAN_CHECK_FOR_UPDATE]) + "...").c_str());
+        (string(clsLanguageManager::mPtr->sTexts[LAN_CHECK_FOR_UPDATE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_CHECK_FOR_UPDATE]) + "...").c_str());
     ::ModifyMenu(hMenu, IDC_RELOAD_TXTS, MF_BYCOMMAND, IDC_RELOAD_TXTS,
-        (string(LanguageManager->sTexts[LAN_RELOAD_TEXT_FILES], (size_t)LanguageManager->ui16TextsLens[LAN_RELOAD_TEXT_FILES]) + "...").c_str());
+        (string(clsLanguageManager::mPtr->sTexts[LAN_RELOAD_TEXT_FILES], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RELOAD_TEXT_FILES]) + "...").c_str());
     ::ModifyMenu(hMenu, IDC_SETTINGS, MF_BYCOMMAND, IDC_SETTINGS,
-        (string(LanguageManager->sTexts[LAN_MENU_SETTINGS], (size_t)LanguageManager->ui16TextsLens[LAN_MENU_SETTINGS]) + "...").c_str());
+        (string(clsLanguageManager::mPtr->sTexts[LAN_MENU_SETTINGS], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_MENU_SETTINGS]) + "...").c_str());
     ::ModifyMenu(hMenu, IDC_SAVE_SETTINGS, MF_BYCOMMAND, IDC_SAVE_SETTINGS,
-        (string(LanguageManager->sTexts[LAN_SAVE_SETTINGS], (size_t)LanguageManager->ui16TextsLens[LAN_SAVE_SETTINGS]) + "...").c_str());
+        (string(clsLanguageManager::mPtr->sTexts[LAN_SAVE_SETTINGS], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SAVE_SETTINGS]) + "...").c_str());
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::EnableStartButton(const BOOL &bEnable) const {
+void clsMainWindow::EnableStartButton(const BOOL &bEnable) const {
     ::EnableWindow(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::BTN_START_STOP], bEnable);
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::SetStartButtonText(const char * sText) const {
+void clsMainWindow::SetStartButtonText(const char * sText) const {
     ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::BTN_START_STOP], sText);
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::SetStatusValue(const char * sText) const {
+void clsMainWindow::SetStatusValue(const char * sText) const {
     ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_STATUS_VALUE], sText);
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::EnableGuiItems(const BOOL &bEnable) const {
+void clsMainWindow::EnableGuiItems(const BOOL &bEnable) const {
     for(uint8_t ui8i = 2; ui8i < 20; ui8i++) {
         ::EnableWindow(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[ui8i], bEnable);
     }
 
-    if(bEnable == FALSE || ::SendMessage(((MainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[MainWindowPageUsersChat::BTN_AUTO_UPDATE_USERLIST], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-        ::EnableWindow(((MainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[MainWindowPageUsersChat::BTN_UPDATE_USERS], FALSE);
+    if(bEnable == FALSE || ::SendMessage(((clsMainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[clsMainWindowPageUsersChat::BTN_AUTO_UPDATE_USERLIST], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+        ::EnableWindow(((clsMainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[clsMainWindowPageUsersChat::BTN_UPDATE_USERS], FALSE);
     } else {
-        ::EnableWindow(((MainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[MainWindowPageUsersChat::BTN_UPDATE_USERS], TRUE);
+        ::EnableWindow(((clsMainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[clsMainWindowPageUsersChat::BTN_UPDATE_USERS], TRUE);
     }
 
     if(bEnable == FALSE) {
-        ::SendMessage(((MainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[MainWindowPageUsersChat::LV_USERS], LVM_DELETEALLITEMS, 0, 0);
-        ((MainWindowPageScripts *)MainWindowPages[1])->ClearMemUsageAll();
+        ::SendMessage(((clsMainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[clsMainWindowPageUsersChat::LV_USERS], LVM_DELETEALLITEMS, 0, 0);
+        ((clsMainWindowPageScripts *)MainWindowPages[1])->ClearMemUsageAll();
     }
 
-    ::EnableWindow(((MainWindowPageScripts *)MainWindowPages[2])->hWndPageItems[MainWindowPageScripts::BTN_RESTART_SCRIPTS], bEnable);
+    ::EnableWindow(((clsMainWindowPageScripts *)MainWindowPages[2])->hWndPageItems[clsMainWindowPageScripts::BTN_RESTART_SCRIPTS], bEnable);
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::OnSelChanged() {
+void clsMainWindow::OnSelChanged() {
     int iPage = (int)::SendMessage(hWndWindowItems[TC_TABS], TCM_GETCURSEL, 0, 0);
 
     if(iPage == -1) {
@@ -793,14 +794,14 @@ void MainWindow::OnSelChanged() {
     }
 
     if(tcItem.lParam == NULL) {
-        ::MessageBox(m_hWnd, "Not implemented!", sTitle.c_str(), MB_OK);
+        ::MessageBox(m_hWnd, "Not implemented!", clsServerManager::sTitle.c_str(), MB_OK);
     }
 
     ::BringWindowToTop(((MainWindowPage *)tcItem.lParam)->m_hWnd);
 }
 //---------------------------------------------------------------------------
 
-void MainWindow::SaveGuiSettings() {
-    g_GuiSettingManager->Save();
+void clsMainWindow::SaveGuiSettings() {
+    clsGuiSettingManager::mPtr->Save();
 };
 //---------------------------------------------------------------------------

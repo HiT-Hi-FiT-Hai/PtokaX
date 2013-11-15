@@ -31,7 +31,8 @@
 //---------------------------------------------------------------------------
 #include "UDPThread.h"
 //---------------------------------------------------------------------------
-UDPThread *g_pUDPThread6 = NULL, *g_pUDPThread4 = NULL;
+UDPThread * UDPThread::mPtrIPv4 = NULL;
+UDPThread * UDPThread::mPtrIPv6 = NULL;
 //---------------------------------------------------------------------------
 
 UDPThread::UDPThread() {
@@ -75,19 +76,19 @@ bool UDPThread::Listen(const int &iAddressFamily) {
 
     if(iAddressFamily == AF_INET6) {
         ((struct sockaddr_in6 *)&sas)->sin6_family = AF_INET6;
-        ((struct sockaddr_in6 *)&sas)->sin6_port = htons((unsigned short)atoi(SettingManager->sTexts[SETTXT_UDP_PORT]));
+        ((struct sockaddr_in6 *)&sas)->sin6_port = htons((unsigned short)atoi(clsSettingManager::mPtr->sTexts[SETTXT_UDP_PORT]));
         sas_len = sizeof(struct sockaddr_in6);
 
-        if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP6[0] != '\0') {
+        if(clsSettingManager::mPtr->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && clsServerManager::sHubIP6[0] != '\0') {
 #ifdef _WIN32
-            win_inet_pton(sHubIP6, &((struct sockaddr_in6 *)&sas)->sin6_addr);
+            win_inet_pton(clsServerManager::sHubIP6, &((struct sockaddr_in6 *)&sas)->sin6_addr);
 #else
-            inet_pton(AF_INET6, sHubIP6, &((struct sockaddr_in6 *)&sas)->sin6_addr);
+            inet_pton(AF_INET6, clsServerManager::sHubIP6, &((struct sockaddr_in6 *)&sas)->sin6_addr);
 #endif
         } else {
             ((struct sockaddr_in6 *)&sas)->sin6_addr = in6addr_any;
 
-            if(iAddressFamily == AF_INET6 && bIPv6DualStack == true) {
+            if(iAddressFamily == AF_INET6 && clsServerManager::bIPv6DualStack == true) {
 #ifdef _WIN32
                 DWORD dwIPv6 = 0;
                 setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&dwIPv6, sizeof(dwIPv6));
@@ -99,11 +100,11 @@ bool UDPThread::Listen(const int &iAddressFamily) {
         }
     } else {
         ((struct sockaddr_in *)&sas)->sin_family = AF_INET;
-        ((struct sockaddr_in *)&sas)->sin_port = htons((unsigned short)atoi(SettingManager->sTexts[SETTXT_UDP_PORT]));
+        ((struct sockaddr_in *)&sas)->sin_port = htons((unsigned short)atoi(clsSettingManager::mPtr->sTexts[SETTXT_UDP_PORT]));
         sas_len = sizeof(struct sockaddr_in);
 
-        if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && sHubIP[0] != '\0') {
-            ((struct sockaddr_in *)&sas)->sin_addr.s_addr = inet_addr(sHubIP);
+        if(clsSettingManager::mPtr->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true && clsServerManager::sHubIP[0] != '\0') {
+            ((struct sockaddr_in *)&sas)->sin_addr.s_addr = inet_addr(clsServerManager::sHubIP);
         } else {
             ((struct sockaddr_in *)&sas)->sin_addr.s_addr = INADDR_ANY;
         }
@@ -179,7 +180,7 @@ void UDPThread::Run() {
 		rcvbuf[len] = '\0';
 
 		// added ip check, we don't want fake $SR causing kick of innocent user...
-        eventqueue->AddThread(eventq::EVENT_UDP_SR, rcvbuf, &sas);
+        clsEventQueue::mPtr->AddThread(clsEventQueue::EVENT_UDP_SR, rcvbuf, &sas);
     }
 }
 //---------------------------------------------------------------------------

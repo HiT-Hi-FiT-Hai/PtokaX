@@ -40,8 +40,8 @@ struct BanItem {
     uint8_t ui8Bits;
     char sIp[46];
 
-    BanItem(void);
-    ~BanItem(void);
+    BanItem();
+    ~BanItem();
 }; 
 //---------------------------------------------------------------------------
 
@@ -58,12 +58,12 @@ struct RangeBanItem {
 
     char sIpFrom[46], sIpTo[46] ;
 
-    RangeBanItem(void);
-    ~RangeBanItem(void);
+    RangeBanItem();
+    ~RangeBanItem();
 };
 //---------------------------------------------------------------------------
 
-class hashBanMan {
+class clsBanManager {
 private:
     struct IpTableItem {
         IpTableItem *prev, *next;
@@ -75,6 +75,8 @@ private:
     BanItem *nicktable[65536];
     IpTableItem *iptable[65536];
 public:
+    static clsBanManager * mPtr;
+
     BanItem *TempBanListS, *TempBanListE;
     BanItem *PermBanListS, *PermBanListE;
     RangeBanItem *RangeBanListS, *RangeBanListE;
@@ -87,8 +89,8 @@ public:
         NICK        = 0x10
     };
 
-    hashBanMan(void);
-    ~hashBanMan(void);
+    clsBanManager(void);
+    ~clsBanManager(void);
 
 
     bool Add(BanItem * Ban);
@@ -163,9 +165,6 @@ public:
     bool RangeUnban(const uint8_t * ui128FromIpHash, const uint8_t * ui128ToIpHash);
     bool RangeUnban(const uint8_t * ui128FromIpHash, const uint8_t * ui128ToIpHash, unsigned char cType);
 };
-
-//--------------------------------------------------------------------------- 
-extern hashBanMan *hashBanManager;
 //---------------------------------------------------------------------------
 
 #endif

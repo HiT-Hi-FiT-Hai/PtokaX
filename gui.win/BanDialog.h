@@ -24,7 +24,7 @@
 struct BanItem;
 //------------------------------------------------------------------------------
 
-class BanDialog {
+class clsBanDialog {
 public:
     HWND hWndWindowItems[20];
 
@@ -51,8 +51,8 @@ public:
         BTN_DISCARD
     };
 
-    BanDialog();
-    ~BanDialog();
+    clsBanDialog();
+    ~clsBanDialog();
 
     static LRESULT CALLBACK StaticBanDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -65,8 +65,6 @@ private:
 
     bool OnAccept();
 };
-//------------------------------------------------------------------------------
-extern BanDialog * pBanDialog;
 //------------------------------------------------------------------------------
 
 #endif

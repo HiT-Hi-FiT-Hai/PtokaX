@@ -29,7 +29,7 @@ static const uint32_t ZLISTSIZE = 1024*16;
 static const uint32_t ZMYINFOLISTSIZE = 1024*128;
 //---------------------------------------------------------------------------
 
-class classUsers {
+class clsUsers {
 private:
     struct RecTime {
         uint64_t ui64DisConnTick;
@@ -51,6 +51,8 @@ private:
 
 	char msg[1024];
 public:
+    static clsUsers * mPtr;
+
     uint32_t myInfosLen, myInfosSize, iZMyInfosLen, iZMyInfosSize;
     uint32_t myInfosTagLen, myInfosTagSize, iZMyInfosTagLen, iZMyInfosTagSize;
     uint32_t nickListLen, nickListSize, iZNickListLen, iZNickListSize;
@@ -64,8 +66,8 @@ public:
     
     uint16_t ui16ActSearchs, ui16PasSearchs;
 
-    classUsers();
-    ~classUsers();
+    clsUsers();
+    ~clsUsers();
 
     void DisconnectAll();
     void AddUser(User * u);
@@ -87,9 +89,6 @@ public:
 	void Add2RecTimes(User * curUser);
 	bool CheckRecTime(User * curUser);
 };
-
-//---------------------------------------------------------------------------
-extern classUsers *colUsers;
 //---------------------------------------------------------------------------
 
 #endif

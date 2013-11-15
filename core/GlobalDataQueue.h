@@ -24,7 +24,7 @@
 struct User;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-class GlobalDataQueue {
+class clsGlobalDataQueue {
 private:
     struct QueueItem {
         size_t szLen1, szLen2;
@@ -74,6 +74,8 @@ private:
 
     static void AddDataToQueue(GlobalQueue &pQueue, char * sData, const size_t &szLen);
 public:
+    static clsGlobalDataQueue * mPtr;
+
     enum {
         CMD_HUBNAME,
         CMD_CHAT,
@@ -118,8 +120,8 @@ public:
     QueueItem * pQueueItems;
     SingleDataItem * pSingleItems;
 
-    GlobalDataQueue();
-    ~GlobalDataQueue();
+    clsGlobalDataQueue();
+    ~clsGlobalDataQueue();
 
     void AddQueueItem(char * sCommand1, const size_t &szLen1, char * sCommand2, const size_t &szLen2, const uint8_t &ui8CmdType);
     void OpListStore(char * sNick);
@@ -135,9 +137,6 @@ public:
     void * InsertBlankQueueItem(void * pAfterItem, const uint8_t &ui8CmdType);
     void FillBlankQueueItem(char * sCommand, const size_t &szLen, void * pQueueItem);
 };
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-extern GlobalDataQueue * g_GlobalDataQueue;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #endif

@@ -50,10 +50,10 @@ static const char* sMin = "[min]";
 static const char* sMax = "[max]";
 static const char * sHubSec = "Hub-Security";
 //---------------------------------------------------------------------------
-SetMan *SettingManager = NULL;
+clsSettingManager * clsSettingManager::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-SetMan::SetMan(void) {
+clsSettingManager::clsSettingManager(void) {
     bUpdateLocked = true;
 
 #ifdef _WIN32
@@ -109,13 +109,13 @@ SetMan::SetMan(void) {
 }
 //---------------------------------------------------------------------------
 
-SetMan::~SetMan(void) {
+clsSettingManager::~clsSettingManager(void) {
     Save();
 
     if(sMOTD != NULL) {
 #ifdef _WIN32
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMOTD) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sMOTD in SetMan::~SetMan\n", 0);
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMOTD) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate sMOTD in clsSettingManager::~clsSettingManager\n", 0);
         }
 #else
 		free(sMOTD);
@@ -130,8 +130,8 @@ SetMan::~SetMan(void) {
         }
 
 #ifdef _WIN32
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sTexts[szi]) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sTexts[%" PRIu64 "] in SetMan::~SetMan\n", (uint64_t)szi);
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sTexts[szi]) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate sTexts[%" PRIu64 "] in clsSettingManager::~clsSettingManager\n", (uint64_t)szi);
         }
 #else
 		free(sTexts[szi]);
@@ -144,8 +144,8 @@ SetMan::~SetMan(void) {
         }
 
 #ifdef _WIN32
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[szi]) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sPreTexts[%" PRIu64 "] in SetMan::~SetMan\n", (uint64_t)szi);
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[szi]) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate sPreTexts[%" PRIu64 "] in clsSettingManager::~clsSettingManager\n", (uint64_t)szi);
         }
 #else
 		free(sPreTexts[szi]);
@@ -160,14 +160,14 @@ SetMan::~SetMan(void) {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::CreateDefaultMOTD() {
+void clsSettingManager::CreateDefaultMOTD() {
 #ifdef _WIN32
-    sMOTD = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, 18);
+    sMOTD = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, 18);
 #else
 	sMOTD = (char *)malloc(18);
 #endif
     if(sMOTD == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate 18 bytes for sMOTD in SetMan::CreateDefaultMOTD\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate 18 bytes for sMOTD in clsSettingManager::CreateDefaultMOTD\n", 0);
         exit(EXIT_FAILURE);
     }
     memcpy(sMOTD, "Welcome to PtokaX", 17);
@@ -176,11 +176,11 @@ void SetMan::CreateDefaultMOTD() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::LoadMOTD() {
+void clsSettingManager::LoadMOTD() {
     if(sMOTD != NULL) {
 #ifdef _WIN32
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMOTD) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sMOTD in SetMan::LoadMOTD\n", 0);
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMOTD) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate sMOTD in clsSettingManager::LoadMOTD\n", 0);
         }
 #else
 		free(sMOTD);
@@ -190,9 +190,9 @@ void SetMan::LoadMOTD() {
     }
 
 #ifdef _WIN32
-	FILE *fr = fopen((PATH + "\\cfg\\Motd.txt").c_str(), "rb");
+	FILE *fr = fopen((clsServerManager::sPath + "\\cfg\\Motd.txt").c_str(), "rb");
 #else
-	FILE *fr = fopen((PATH + "/cfg/Motd.txt").c_str(), "rb");
+	FILE *fr = fopen((clsServerManager::sPath + "/cfg/Motd.txt").c_str(), "rb");
 #endif
     if(fr != NULL) {
         fseek(fr, 0, SEEK_END);
@@ -203,12 +203,12 @@ void SetMan::LoadMOTD() {
 
             // allocate memory for sMOTD
 #ifdef _WIN32
-            sMOTD = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui16MOTDLen+1);
+            sMOTD = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, ui16MOTDLen+1);
 #else
 			sMOTD = (char *)malloc(ui16MOTDLen+1);
 #endif
             if(sMOTD == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMOTD in SetMan::LoadMOTD\n", (uint64_t)(ui16MOTDLen+1));
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMOTD in clsSettingManager::LoadMOTD\n", (uint64_t)(ui16MOTDLen+1));
                 exit(EXIT_FAILURE);
             }
 
@@ -217,8 +217,8 @@ void SetMan::LoadMOTD() {
                 sMOTD[ui16MOTDLen] = '\0';
             } else {
 #ifdef _WIN32
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMOTD) == 0) {
-					AppendDebugLog("%s - [MEM] Cannot deallocate sMOTD in SetMan::LoadMOTD\n", 0);
+                if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMOTD) == 0) {
+					AppendDebugLog("%s - [MEM] Cannot deallocate sMOTD in clsSettingManager::LoadMOTD\n", 0);
                 }
 #else
 				free(sMOTD);
@@ -240,11 +240,11 @@ void SetMan::LoadMOTD() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::SaveMOTD() {
+void clsSettingManager::SaveMOTD() {
 #ifdef _WIN32
-    FILE *fw = fopen((PATH + "\\cfg\\Motd.txt").c_str(), "wb");
+    FILE *fw = fopen((clsServerManager::sPath + "\\cfg\\Motd.txt").c_str(), "wb");
 #else
-	FILE *fw = fopen((PATH + "/cfg/Motd.txt").c_str(), "wb");
+	FILE *fw = fopen((clsServerManager::sPath + "/cfg/Motd.txt").c_str(), "wb");
 #endif
     if(fw != NULL) {
         if(ui16MOTDLen != 0) {
@@ -255,7 +255,7 @@ void SetMan::SaveMOTD() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::CheckMOTD() {
+void clsSettingManager::CheckMOTD() {
     for(uint16_t ui16i = 0; ui16i < ui16MOTDLen; ui16i++) {
         if(sMOTD[ui16i] == '|') {
             sMOTD[ui16i] = '0';
@@ -264,16 +264,16 @@ void SetMan::CheckMOTD() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::Load() {
+void clsSettingManager::Load() {
     bUpdateLocked = true;
 
     // Load MOTD
     LoadMOTD();
 
 #ifdef _WIN32
-    TiXmlDocument doc((PATH + "\\cfg\\Settings.xml").c_str());
+    TiXmlDocument doc((clsServerManager::sPath + "\\cfg\\Settings.xml").c_str());
 #else
-	TiXmlDocument doc((PATH + "/cfg/Settings.xml").c_str());
+	TiXmlDocument doc((clsServerManager::sPath + "/cfg/Settings.xml").c_str());
 #endif
     if(doc.LoadFile()) {
         TiXmlHandle cfg(&doc);
@@ -368,13 +368,13 @@ void SetMan::Load() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::Save() {
+void clsSettingManager::Save() {
     SaveMOTD();
 
 #ifdef _WIN32
-    TiXmlDocument doc((PATH + "\\cfg\\Settings.xml").c_str());
+    TiXmlDocument doc((clsServerManager::sPath + "\\cfg\\Settings.xml").c_str());
 #else
-	TiXmlDocument doc((PATH + "/cfg/Settings.xml").c_str());
+	TiXmlDocument doc((clsServerManager::sPath + "/cfg/Settings.xml").c_str());
 #endif
     doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
     TiXmlElement settings("PtokaX");
@@ -435,7 +435,7 @@ void SetMan::Save() {
 }
 //---------------------------------------------------------------------------
 
-bool SetMan::GetBool(const size_t &szBoolId) {
+bool clsSettingManager::GetBool(const size_t &szBoolId) {
 #ifdef _WIN32
     EnterCriticalSection(&csSetting);
 #else
@@ -453,7 +453,7 @@ bool SetMan::GetBool(const size_t &szBoolId) {
     return bValue;
 }
 //---------------------------------------------------------------------------
-uint16_t SetMan::GetFirstPort() {
+uint16_t clsSettingManager::GetFirstPort() {
 #ifdef _WIN32
     EnterCriticalSection(&csSetting);
 #else
@@ -472,7 +472,7 @@ uint16_t SetMan::GetFirstPort() {
 }
 //---------------------------------------------------------------------------
 
-int16_t SetMan::GetShort(const size_t &szShortId) {
+int16_t clsSettingManager::GetShort(const size_t &szShortId) {
 #ifdef _WIN32
     EnterCriticalSection(&csSetting);
 #else
@@ -491,7 +491,7 @@ int16_t SetMan::GetShort(const size_t &szShortId) {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::GetText(const size_t &szTxtId, char * sMsg) {
+void clsSettingManager::GetText(const size_t &szTxtId, char * sMsg) {
 #ifdef _WIN32
     EnterCriticalSection(&csSetting);
 #else
@@ -510,7 +510,7 @@ void SetMan::GetText(const size_t &szTxtId, char * sMsg) {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::SetBool(const size_t &szBoolId, const bool &bValue) {
+void clsSettingManager::SetBool(const size_t &szBoolId, const bool &bValue) {
     if(bBools[szBoolId] == bValue) {
         return;
     }
@@ -586,20 +586,20 @@ void SetMan::SetBool(const size_t &szBoolId, const bool &bValue) {
             break;
         case SETBOOL_ENABLE_TEXT_FILES:
             if(bValue == true && bUpdateLocked == false) {
-                TextFileManager->RefreshTextFiles();
+                clsTextFilesManager::mPtr->RefreshTextFiles();
             }
             break;
 #ifdef _BUILD_GUI
 		case SETBOOL_ENABLE_TRAY_ICON:
 	        if(bUpdateLocked == false) {
-                pMainWindow->UpdateSysTray();
+                clsMainWindow::mPtr->UpdateSysTray();
 			}
 
             break;
 #endif
         case SETBOOL_AUTO_REG:
             if(bUpdateLocked == false) {
-				ServerUpdateAutoRegState();
+				clsServerManager::UpdateAutoRegState();
             }
             break;
         case SETBOOL_ENABLE_SCRIPTING:
@@ -611,7 +611,7 @@ void SetMan::SetBool(const size_t &szBoolId, const bool &bValue) {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::SetMOTD(char * sTxt, const size_t &szLen) {
+void clsSettingManager::SetMOTD(char * sTxt, const size_t &szLen) {
     if(ui16MOTDLen == (uint16_t)szLen &&
         (sMOTD != NULL && strcmp(sMOTD, sTxt) == 0)) {
         return;
@@ -620,8 +620,8 @@ void SetMan::SetMOTD(char * sTxt, const size_t &szLen) {
     if(szLen == 0) {
         if(sMOTD != NULL) {
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMOTD) == 0) {
-                AppendDebugLog("%s - [MEM] Cannot deallocate sMOTD in SetMan::SetMOTD\n", 0);
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMOTD) == 0) {
+                AppendDebugLog("%s - [MEM] Cannot deallocate sMOTD in clsSettingManager::SetMOTD\n", 0);
             }
 #else
             free(sMOTD);
@@ -638,9 +638,9 @@ void SetMan::SetMOTD(char * sTxt, const size_t &szLen) {
         // (re)allocate memory for sMOTD
 #ifdef _WIN32
         if(sMOTD == NULL) {
-            sMOTD = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui16MOTDLen+1);
+            sMOTD = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, ui16MOTDLen+1);
         } else {
-            sMOTD = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldMOTD, ui16MOTDLen+1);
+            sMOTD = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldMOTD, ui16MOTDLen+1);
         }
 #else
         sMOTD = (char *)realloc(sOldMOTD, ui16MOTDLen+1);
@@ -649,7 +649,7 @@ void SetMan::SetMOTD(char * sTxt, const size_t &szLen) {
             sMOTD = sOldMOTD;
             ui16MOTDLen = ui16OldMOTDLen;
 
-            AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::SetMOTD for sMOTD\n", (uint64_t)(ui16MOTDLen+1));
+            AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::SetMOTD for sMOTD\n", (uint64_t)(ui16MOTDLen+1));
 
             return;
         }
@@ -662,7 +662,7 @@ void SetMan::SetMOTD(char * sTxt, const size_t &szLen) {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::SetShort(const size_t &szShortId, const int16_t &iValue) {
+void clsSettingManager::SetShort(const size_t &szShortId, const int16_t &iValue) {
     if(iValue < 0 || iShorts[szShortId] == iValue) {
         return;
     }
@@ -902,17 +902,17 @@ void SetMan::SetShort(const size_t &szShortId, const int16_t &iValue) {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::SetText(const size_t &szTxtId, char * sTxt) {
+void clsSettingManager::SetText(const size_t &szTxtId, char * sTxt) {
     SetText(szTxtId, sTxt, strlen(sTxt));
 }
 //---------------------------------------------------------------------------
 
-void SetMan::SetText(const size_t &szTxtId, const char * sTxt) {
+void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt) {
     SetText(szTxtId, (char *)sTxt, strlen(sTxt));
 }
 //---------------------------------------------------------------------------
 
-void SetMan::SetText(const size_t &szTxtId, const char * sTxt, const size_t &szLen) {
+void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const size_t &szLen) {
     if((ui16TextsLens[szTxtId] == (uint16_t)szLen &&
         (sTexts[szTxtId] != NULL && strcmp(sTexts[szTxtId], sTxt) == 0)) ||
         strchr(sTxt, '|') != NULL) {
@@ -937,8 +937,8 @@ void SetMan::SetText(const size_t &szTxtId, const char * sTxt, const size_t &szL
             if(strchr(sTxt, '$') != NULL || strchr(sTxt, ' ') != NULL || szLen == 0 || szLen > 64) {
                 return;
             }
-            if(ServersS != NULL && bBotsSameNick == false) {
-                ResNickManager->DelReservedNick(sTexts[SETTXT_BOT_NICK]);
+            if(clsServerManager::ServersS != NULL && bBotsSameNick == false) {
+                clsReservedNicksManager::mPtr->DelReservedNick(sTexts[SETTXT_BOT_NICK]);
             }
             if(bBools[SETBOOL_REG_BOT] == true) {
                 DisableBot();
@@ -948,8 +948,8 @@ void SetMan::SetText(const size_t &szTxtId, const char * sTxt, const size_t &szL
             if(strchr(sTxt, '$') != NULL || strchr(sTxt, ' ') != NULL || szLen == 0 || szLen > 64) {
                 return;
             }
-            if(ServersS != NULL && bBotsSameNick == false) {
-                ResNickManager->DelReservedNick(sTexts[SETTXT_OP_CHAT_NICK]);
+            if(clsServerManager::ServersS != NULL && bBotsSameNick == false) {
+                clsReservedNicksManager::mPtr->DelReservedNick(sTexts[SETTXT_OP_CHAT_NICK]);
             }
             if(bBools[SETBOOL_REG_OP_CHAT] == true) {
                 DisableOpChat();
@@ -1022,9 +1022,9 @@ void SetMan::SetText(const size_t &szTxtId, const char * sTxt, const size_t &szL
             break;
         case SETTXT_LANGUAGE:
 #ifdef _WIN32
-            if(szLen != 0 && FileExist((PATH+"\\language\\"+string(sTxt, szLen)+".xml").c_str()) == false) {
+            if(szLen != 0 && FileExist((clsServerManager::sPath+"\\language\\"+string(sTxt, szLen)+".xml").c_str()) == false) {
 #else
-			if(szLen != 0 && FileExist((PATH+"/language/"+string(sTxt, szLen)+".xml").c_str()) == false) {
+			if(szLen != 0 && FileExist((clsServerManager::sPath+"/language/"+string(sTxt, szLen)+".xml").c_str()) == false) {
 #endif
                 return;
             }
@@ -1047,8 +1047,8 @@ void SetMan::SetText(const size_t &szTxtId, const char * sTxt, const size_t &szL
     if(szLen == 0) {
         if(sTexts[szTxtId] != NULL) {
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sTexts[szTxtId]) == 0) {
-                AppendDebugLog("%s - [MEM] Cannot deallocate sTexts[%" PRIu64 "] in SetMan::SetText\n", (uint64_t)(szTxtId));
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sTexts[szTxtId]) == 0) {
+                AppendDebugLog("%s - [MEM] Cannot deallocate sTexts[%" PRIu64 "] in clsSettingManager::SetText\n", (uint64_t)(szTxtId));
             }
 #else
             free(sTexts[szTxtId]);
@@ -1060,9 +1060,9 @@ void SetMan::SetText(const size_t &szTxtId, const char * sTxt, const size_t &szL
         char * sOldText = sTexts[szTxtId];
 #ifdef _WIN32
         if(sTexts[szTxtId] == NULL) {
-            sTexts[szTxtId] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
+            sTexts[szTxtId] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
         } else {
-            sTexts[szTxtId] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldText, szLen+1);
+            sTexts[szTxtId] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldText, szLen+1);
         }
 #else
 		sTexts[szTxtId] = (char *)realloc(sOldText, szLen+1);
@@ -1070,7 +1070,7 @@ void SetMan::SetText(const size_t &szTxtId, const char * sTxt, const size_t &szL
         if(sTexts[szTxtId] == NULL) {
             sTexts[szTxtId] = sOldText;
 
-			AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::SetText\n", (uint64_t)(szLen+1));
+			AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::SetText\n", (uint64_t)(szLen+1));
 
             if(szTxtId == SETTXT_HUB_NAME || szTxtId == SETTXT_HUB_ADDRESS || szTxtId == SETTXT_HUB_DESCRIPTION) {
 #ifdef _WIN32
@@ -1110,8 +1110,8 @@ void SetMan::SetText(const size_t &szTxtId, const char * sTxt, const size_t &szL
             UpdateNickLimitMessage();
             UpdateBotsSameNick();
 
-            if(ServersS != NULL && bBotsSameNick == false) {
-                ResNickManager->AddReservedNick(sTexts[SETTXT_BOT_NICK]);
+            if(clsServerManager::ServersS != NULL && bBotsSameNick == false) {
+                clsReservedNicksManager::mPtr->AddReservedNick(sTexts[SETTXT_BOT_NICK]);
             }
 
             UpdateBot();
@@ -1123,8 +1123,8 @@ void SetMan::SetText(const size_t &szTxtId, const char * sTxt, const size_t &szL
             break;
         case SETTXT_OP_CHAT_NICK:
             UpdateBotsSameNick();
-            if(ServersS != NULL && bBotsSameNick == false) {
-                ResNickManager->AddReservedNick(sTexts[SETTXT_OP_CHAT_NICK]);
+            if(clsServerManager::ServersS != NULL && bBotsSameNick == false) {
+                clsReservedNicksManager::mPtr->AddReservedNick(sTexts[SETTXT_OP_CHAT_NICK]);
             }
             UpdateOpChat();
             break;
@@ -1132,7 +1132,7 @@ void SetMan::SetText(const size_t &szTxtId, const char * sTxt, const size_t &szL
 		case SETTXT_HUB_NAME:
 #ifdef _BUILD_GUI
 			if(bUpdateLocked == false) {
-                pMainWindow->UpdateTitleBar();
+                clsMainWindow::mPtr->UpdateTitleBar();
 			}
 #endif
             UpdateHubNameWelcome();
@@ -1215,12 +1215,12 @@ void SetMan::SetText(const size_t &szTxtId, const char * sTxt, const size_t &szL
 }
 //---------------------------------------------------------------------------
 
-void SetMan::SetText(const size_t &szTxtId, const string & sTxt) {
+void clsSettingManager::SetText(const size_t &szTxtId, const string & sTxt) {
     SetText(szTxtId, sTxt.c_str(), sTxt.size());
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateAll() {
+void clsSettingManager::UpdateAll() {
 	ui8FullMyINFOOption = (uint8_t)iShorts[SETSHORT_FULL_MYINFO_OPTION];
 
     UpdateHubSec();
@@ -1244,52 +1244,52 @@ void SetMan::UpdateAll() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateHubSec() {
+void clsSettingManager::UpdateHubSec() {
     if(bUpdateLocked == true) {
         return;
     }
 
     if(bBools[SETBOOL_USE_BOT_NICK_AS_HUB_SEC] == true) {
-        char * sOldHubSec = sPreTexts[SetMan::SETPRETXT_HUB_SEC];
+        char * sOldHubSec = sPreTexts[SETPRETXT_HUB_SEC];
 
 #ifdef _WIN32
-        if(sPreTexts[SetMan::SETPRETXT_HUB_SEC] == NULL || sPreTexts[SetMan::SETPRETXT_HUB_SEC] == sHubSec) {
-            sPreTexts[SetMan::SETPRETXT_HUB_SEC] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, ui16TextsLens[SETTXT_BOT_NICK]+1);
+        if(sPreTexts[SETPRETXT_HUB_SEC] == NULL || sPreTexts[SETPRETXT_HUB_SEC] == sHubSec) {
+            sPreTexts[SETPRETXT_HUB_SEC] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, ui16TextsLens[SETTXT_BOT_NICK]+1);
         } else {
-            sPreTexts[SetMan::SETPRETXT_HUB_SEC] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldHubSec, ui16TextsLens[SETTXT_BOT_NICK]+1);
+            sPreTexts[SETPRETXT_HUB_SEC] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldHubSec, ui16TextsLens[SETTXT_BOT_NICK]+1);
         }
 #else
-		sPreTexts[SetMan::SETPRETXT_HUB_SEC] = (char *)realloc(sOldHubSec == sHubSec ? NULL : sOldHubSec, ui16TextsLens[SETTXT_BOT_NICK]+1);
+		sPreTexts[SETPRETXT_HUB_SEC] = (char *)realloc(sOldHubSec == sHubSec ? NULL : sOldHubSec, ui16TextsLens[SETTXT_BOT_NICK]+1);
 #endif
-        if(sPreTexts[SetMan::SETPRETXT_HUB_SEC] == NULL) {
-            sPreTexts[SetMan::SETPRETXT_HUB_SEC] = sOldHubSec;
+        if(sPreTexts[SETPRETXT_HUB_SEC] == NULL) {
+            sPreTexts[SETPRETXT_HUB_SEC] = sOldHubSec;
 
-			AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateHubSec\n", (uint64_t)(ui16TextsLens[SETTXT_BOT_NICK]+1));
+			AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateHubSec\n", (uint64_t)(ui16TextsLens[SETTXT_BOT_NICK]+1));
 
             return;
         }
 
-        memcpy(sPreTexts[SetMan::SETPRETXT_HUB_SEC], sTexts[SETTXT_BOT_NICK], ui16TextsLens[SETTXT_BOT_NICK]);
-        ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC] = ui16TextsLens[SETTXT_BOT_NICK];
-        sPreTexts[SetMan::SETPRETXT_HUB_SEC][ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC]] = '\0';
+        memcpy(sPreTexts[SETPRETXT_HUB_SEC], sTexts[SETTXT_BOT_NICK], ui16TextsLens[SETTXT_BOT_NICK]);
+        ui16PreTextsLens[SETPRETXT_HUB_SEC] = ui16TextsLens[SETTXT_BOT_NICK];
+        sPreTexts[SETPRETXT_HUB_SEC][ui16PreTextsLens[SETPRETXT_HUB_SEC]] = '\0';
     } else {
-        if(sPreTexts[SetMan::SETPRETXT_HUB_SEC] != sHubSec) {
+        if(sPreTexts[SETPRETXT_HUB_SEC] != sHubSec) {
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SetMan::SETPRETXT_HUB_SEC]) == 0) {
-				AppendDebugLog("%s - [MEM] Cannot deallocate memory in SetMan::UpdateHubSec\n", 0);
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_HUB_SEC]) == 0) {
+				AppendDebugLog("%s - [MEM] Cannot deallocate memory in clsSettingManager::UpdateHubSec\n", 0);
             }
 #else
-			free(sPreTexts[SetMan::SETPRETXT_HUB_SEC]);
+			free(sPreTexts[SETPRETXT_HUB_SEC]);
 #endif
         }
 
-        sPreTexts[SetMan::SETPRETXT_HUB_SEC] = (char *)sHubSec;
-        ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC] = 12;
+        sPreTexts[SETPRETXT_HUB_SEC] = (char *)sHubSec;
+        ui16PreTextsLens[SETPRETXT_HUB_SEC] = 12;
     }
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateMOTD() {
+void clsSettingManager::UpdateMOTD() {
     if(bUpdateLocked == true) {
         return;
     }
@@ -1297,8 +1297,8 @@ void SetMan::UpdateMOTD() {
     if(bBools[SETBOOL_DISABLE_MOTD] == true || sMOTD == NULL) {
         if(sPreTexts[SETPRETXT_MOTD] != NULL) {
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_MOTD]) == 0) {
-                AppendDebugLog("%s - [MEM] Cannot deallocate memory in SetMan::UpdateMOTD\n", 0);
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_MOTD]) == 0) {
+                AppendDebugLog("%s - [MEM] Cannot deallocate memory in clsSettingManager::UpdateMOTD\n", 0);
             }
 #else
             free(sPreTexts[SETPRETXT_MOTD]);
@@ -1311,16 +1311,16 @@ void SetMan::UpdateMOTD() {
     }
 
     size_t szNeededMem = (bBools[SETBOOL_MOTD_AS_PM] == true ?
-        ((2*(ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC]))+ui16MOTDLen+21) :
-        (ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC]+ui16MOTDLen+5));
+        ((2*(ui16PreTextsLens[SETPRETXT_HUB_SEC]))+ui16MOTDLen+21) :
+        (ui16PreTextsLens[SETPRETXT_HUB_SEC]+ui16MOTDLen+5));
 
     char * sOldMotd = sPreTexts[SETPRETXT_MOTD];
 
 #ifdef _WIN32
     if(sPreTexts[SETPRETXT_MOTD] == NULL) {
-        sPreTexts[SETPRETXT_MOTD] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
+        sPreTexts[SETPRETXT_MOTD] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
     } else {
-        sPreTexts[SETPRETXT_MOTD] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldMotd, szNeededMem);
+        sPreTexts[SETPRETXT_MOTD] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldMotd, szNeededMem);
     }
 #else
 	sPreTexts[SETPRETXT_MOTD] = (char *)realloc(sOldMotd, szNeededMem);
@@ -1328,7 +1328,7 @@ void SetMan::UpdateMOTD() {
     if(sPreTexts[SETPRETXT_MOTD] == NULL) {
         sPreTexts[SETPRETXT_MOTD] = sOldMotd;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateMOTD\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateMOTD\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -1336,12 +1336,12 @@ void SetMan::UpdateMOTD() {
     int imsgLen = 0;
 
     if(bBools[SETBOOL_MOTD_AS_PM] == true) {
-        imsgLen = sprintf(sPreTexts[SETPRETXT_MOTD], "$To: %%s From: %s $<%s> %s|", sPreTexts[SetMan::SETPRETXT_HUB_SEC], sPreTexts[SetMan::SETPRETXT_HUB_SEC], sMOTD);
+        imsgLen = sprintf(sPreTexts[SETPRETXT_MOTD], "$To: %%s From: %s $<%s> %s|", sPreTexts[SETPRETXT_HUB_SEC], sPreTexts[SETPRETXT_HUB_SEC], sMOTD);
     } else {
-        imsgLen = sprintf(sPreTexts[SETPRETXT_MOTD], "<%s> %s|", sPreTexts[SetMan::SETPRETXT_HUB_SEC], sMOTD);
+        imsgLen = sprintf(sPreTexts[SETPRETXT_MOTD], "<%s> %s|", sPreTexts[SETPRETXT_HUB_SEC], sMOTD);
     }
 
-    if(CheckSprintf(imsgLen, szNeededMem, "SetMan::UpdateMOTD") == false) {
+    if(CheckSprintf(imsgLen, szNeededMem, "clsSettingManager::UpdateMOTD") == false) {
         exit(EXIT_FAILURE);
     }
 
@@ -1349,13 +1349,13 @@ void SetMan::UpdateMOTD() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateHubNameWelcome() {
+void clsSettingManager::UpdateHubNameWelcome() {
     if(bUpdateLocked == true) {
         return;
     }
 
-    size_t szNeededMem = 19 + ui16TextsLens[SETTXT_HUB_NAME] + ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC] + LanguageManager->ui16TextsLens[LAN_THIS_HUB_IS_RUNNING] + sTitle.size() +
-        LanguageManager->ui16TextsLens[LAN_UPTIME];
+    size_t szNeededMem = 19 + ui16TextsLens[SETTXT_HUB_NAME] + ui16PreTextsLens[SETPRETXT_HUB_SEC] + clsLanguageManager::mPtr->ui16TextsLens[LAN_THIS_HUB_IS_RUNNING] + clsServerManager::sTitle.size() +
+        clsLanguageManager::mPtr->ui16TextsLens[LAN_UPTIME];
 
     if(sTexts[SETTXT_HUB_TOPIC] != NULL) {
         szNeededMem += ui16TextsLens[SETTXT_HUB_TOPIC] + 3;
@@ -1369,9 +1369,9 @@ void SetMan::UpdateHubNameWelcome() {
 
 #ifdef _WIN32
     if(sPreTexts[SETPRETXT_HUB_NAME_WLCM] == NULL) {
-        sPreTexts[SETPRETXT_HUB_NAME_WLCM] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
+        sPreTexts[SETPRETXT_HUB_NAME_WLCM] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
     } else {
-        sPreTexts[SETPRETXT_HUB_NAME_WLCM] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldWelcome, szNeededMem);
+        sPreTexts[SETPRETXT_HUB_NAME_WLCM] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldWelcome, szNeededMem);
     }
 #else
 	sPreTexts[SETPRETXT_HUB_NAME_WLCM] = (char *)realloc(sOldWelcome, szNeededMem);
@@ -1379,7 +1379,7 @@ void SetMan::UpdateHubNameWelcome() {
     if(sPreTexts[SETPRETXT_HUB_NAME_WLCM] == NULL) {
         sPreTexts[SETPRETXT_HUB_NAME_WLCM] = sOldWelcome;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateHubNameWelcome\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateHubNameWelcome\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -1391,17 +1391,17 @@ void SetMan::UpdateHubNameWelcome() {
 #ifdef _PtokaX_TESTING_
             " [build " BUILD_NUMBER "]"
 #endif
-            " (%s: ", sTexts[SETTXT_HUB_NAME], sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_THIS_HUB_IS_RUNNING], sTitle.c_str(), LanguageManager->sTexts[LAN_UPTIME]);
+            " (%s: ", sTexts[SETTXT_HUB_NAME], sPreTexts[SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THIS_HUB_IS_RUNNING], clsServerManager::sTitle.c_str(), clsLanguageManager::mPtr->sTexts[LAN_UPTIME]);
     } else {
         iMsgLen =  sprintf(sPreTexts[SETPRETXT_HUB_NAME_WLCM], "$HubName %s - %s|<%s> %s %s"
 #ifdef _PtokaX_TESTING_
             " [build " BUILD_NUMBER "]"
 #endif
-            " (%s: ", sTexts[SETTXT_HUB_NAME], sTexts[SETTXT_HUB_TOPIC], sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_THIS_HUB_IS_RUNNING], sTitle.c_str(),
-            LanguageManager->sTexts[LAN_UPTIME]);
+            " (%s: ", sTexts[SETTXT_HUB_NAME], sTexts[SETTXT_HUB_TOPIC], sPreTexts[SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THIS_HUB_IS_RUNNING], clsServerManager::sTitle.c_str(),
+            clsLanguageManager::mPtr->sTexts[LAN_UPTIME]);
     }
     
-    if(CheckSprintf(iMsgLen, szNeededMem, "SetMan::UpdateHubNameWelcome") == false) {
+    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateHubNameWelcome") == false) {
         exit(EXIT_FAILURE);
     }
 
@@ -1409,7 +1409,7 @@ void SetMan::UpdateHubNameWelcome() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateHubName() {
+void clsSettingManager::UpdateHubName() {
     if(bUpdateLocked == true) {
         return;
     }
@@ -1424,9 +1424,9 @@ void SetMan::UpdateHubName() {
 
 #ifdef _WIN32
     if(sPreTexts[SETPRETXT_HUB_NAME] == NULL) {
-        sPreTexts[SETPRETXT_HUB_NAME] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
+        sPreTexts[SETPRETXT_HUB_NAME] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
     } else {
-        sPreTexts[SETPRETXT_HUB_NAME] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldHubName, szNeededMem);
+        sPreTexts[SETPRETXT_HUB_NAME] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldHubName, szNeededMem);
     }
 #else
 	sPreTexts[SETPRETXT_HUB_NAME] = (char *)realloc(sOldHubName, szNeededMem);
@@ -1434,7 +1434,7 @@ void SetMan::UpdateHubName() {
     if(sPreTexts[SETPRETXT_HUB_NAME] == NULL) {
         sPreTexts[SETPRETXT_HUB_NAME] = sOldHubName;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateHubName\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateHubName\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -1447,19 +1447,19 @@ void SetMan::UpdateHubName() {
         iMsgLen = sprintf(sPreTexts[SETPRETXT_HUB_NAME], "$HubName %s - %s|", sTexts[SETTXT_HUB_NAME], sTexts[SETTXT_HUB_TOPIC]);
     }
 
-    if(CheckSprintf(iMsgLen, szNeededMem, "SetMan::UpdateHubName") == false) {
+    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateHubName") == false) {
         exit(EXIT_FAILURE);
     }
 
     ui16PreTextsLens[SETPRETXT_HUB_NAME] = (uint16_t)iMsgLen;
 
-	if(bServerRunning == true) {
-        g_GlobalDataQueue->AddQueueItem(sPreTexts[SetMan::SETPRETXT_HUB_NAME], ui16PreTextsLens[SetMan::SETPRETXT_HUB_NAME], NULL, 0, GlobalDataQueue::CMD_HUBNAME);
+	if(clsServerManager::bServerRunning == true) {
+        clsGlobalDataQueue::mPtr->AddQueueItem(sPreTexts[SETPRETXT_HUB_NAME], ui16PreTextsLens[SETPRETXT_HUB_NAME], NULL, 0, clsGlobalDataQueue::CMD_HUBNAME);
     }
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateRedirectAddress() {
+void clsSettingManager::UpdateRedirectAddress() {
     if(bUpdateLocked == true) {
         return;
     }
@@ -1467,8 +1467,8 @@ void SetMan::UpdateRedirectAddress() {
     if(sTexts[SETTXT_REDIRECT_ADDRESS] == NULL) {
         if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_REDIRECT_ADDRESS]) == 0) {
-                AppendDebugLog("%s - [MEM] Cannot deallocate memory in SetMan::UpdateRedirectAddress\n", 0);
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_REDIRECT_ADDRESS]) == 0) {
+                AppendDebugLog("%s - [MEM] Cannot deallocate memory in clsSettingManager::UpdateRedirectAddress\n", 0);
             }
 #else
             free(sPreTexts[SETPRETXT_REDIRECT_ADDRESS]);
@@ -1486,9 +1486,9 @@ void SetMan::UpdateRedirectAddress() {
 
 #ifdef _WIN32
     if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] == NULL) {
-        sPreTexts[SETPRETXT_REDIRECT_ADDRESS] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededLen);
+        sPreTexts[SETPRETXT_REDIRECT_ADDRESS] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededLen);
     } else {
-        sPreTexts[SETPRETXT_REDIRECT_ADDRESS] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldRedirAddr, szNeededLen);
+        sPreTexts[SETPRETXT_REDIRECT_ADDRESS] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldRedirAddr, szNeededLen);
     }
 #else
 	sPreTexts[SETPRETXT_REDIRECT_ADDRESS] = (char *)realloc(sOldRedirAddr, szNeededLen);
@@ -1496,25 +1496,25 @@ void SetMan::UpdateRedirectAddress() {
     if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] == NULL) {
         sPreTexts[SETPRETXT_REDIRECT_ADDRESS] = sOldRedirAddr;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateRedirectAddress\n", (uint64_t)szNeededLen);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateRedirectAddress\n", (uint64_t)szNeededLen);
 
         return;
     }
 
     int iMsgLen = sprintf(sPreTexts[SETPRETXT_REDIRECT_ADDRESS], "$ForceMove %s|", sTexts[SETTXT_REDIRECT_ADDRESS]);
-    if(CheckSprintf(iMsgLen, szNeededLen, "SetMan::UpdateRedirectAddress") == false) {
+    if(CheckSprintf(iMsgLen, szNeededLen, "clsSettingManager::UpdateRedirectAddress") == false) {
         exit(EXIT_FAILURE);
     }
     ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS] = (uint16_t)iMsgLen;
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateRegOnlyMessage() {
+void clsSettingManager::UpdateRegOnlyMessage() {
     if(bUpdateLocked == true) {
         return;
     }
 
-    size_t szNeededMem = 5 + ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_REG_ONLY_MSG];
+    size_t szNeededMem = 5 + ui16PreTextsLens[SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_REG_ONLY_MSG];
 
     if(bBools[SETBOOL_REG_ONLY_REDIR] == true) {
         if(sTexts[SETTXT_REG_ONLY_REDIR_ADDRESS] != NULL) {
@@ -1528,9 +1528,9 @@ void SetMan::UpdateRegOnlyMessage() {
 
 #ifdef _WIN32
     if(sPreTexts[SETPRETXT_REG_ONLY_MSG] == NULL) {
-        sPreTexts[SETPRETXT_REG_ONLY_MSG] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
+        sPreTexts[SETPRETXT_REG_ONLY_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
     } else {
-        sPreTexts[SETPRETXT_REG_ONLY_MSG] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldRegOnlyMsg, szNeededMem);
+        sPreTexts[SETPRETXT_REG_ONLY_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldRegOnlyMsg, szNeededMem);
     }
 #else
 	sPreTexts[SETPRETXT_REG_ONLY_MSG] = (char *)realloc(sOldRegOnlyMsg, szNeededMem);
@@ -1538,13 +1538,13 @@ void SetMan::UpdateRegOnlyMessage() {
     if(sPreTexts[SETPRETXT_REG_ONLY_MSG] == NULL) {
         sPreTexts[SETPRETXT_REG_ONLY_MSG] = sOldRegOnlyMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateRegOnlyMessage\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateRegOnlyMessage\n", (uint64_t)szNeededMem);
 
         return;
     }
 
-    int iMsgLen = sprintf(sPreTexts[SETPRETXT_REG_ONLY_MSG], "<%s> %s|", sPreTexts[SetMan::SETPRETXT_HUB_SEC], sTexts[SETTXT_REG_ONLY_MSG]);
-    if(CheckSprintf(iMsgLen, szNeededMem, "SetMan::UpdateRegOnlyMessage") == false) {
+    int iMsgLen = sprintf(sPreTexts[SETPRETXT_REG_ONLY_MSG], "<%s> %s|", sPreTexts[SETPRETXT_HUB_SEC], sTexts[SETTXT_REG_ONLY_MSG]);
+    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateRegOnlyMessage") == false) {
         exit(EXIT_FAILURE);
     }
 
@@ -1552,7 +1552,7 @@ void SetMan::UpdateRegOnlyMessage() {
         if(sTexts[SETTXT_REG_ONLY_REDIR_ADDRESS] != NULL) {
             int iRet = sprintf(sPreTexts[SETPRETXT_REG_ONLY_MSG]+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_REG_ONLY_REDIR_ADDRESS]);
             iMsgLen += iRet;
-            if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "SetMan::UpdateRegOnlyMessage1") == false) {
+            if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateRegOnlyMessage1") == false) {
                 exit(EXIT_FAILURE);
             }
         } else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
@@ -1566,12 +1566,12 @@ void SetMan::UpdateRegOnlyMessage() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateShareLimitMessage() {
+void clsSettingManager::UpdateShareLimitMessage() {
     if(bUpdateLocked == true) {
         return;
     }
 
-    size_t szNeededMem = 9 + ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_SHARE_LIMIT_MSG];
+    size_t szNeededMem = 9 + ui16PreTextsLens[SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_SHARE_LIMIT_MSG];
 
     if(bBools[SETBOOL_SHARE_LIMIT_REDIR] == true) {
         if(sTexts[SETTXT_SHARE_LIMIT_REDIR_ADDRESS] != NULL) {
@@ -1585,9 +1585,9 @@ void SetMan::UpdateShareLimitMessage() {
 
 #ifdef _WIN32
     if(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] == NULL) {
-        sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
+        sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
     } else {
-        sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldShareLimitMsg, szNeededMem);
+        sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldShareLimitMsg, szNeededMem);
     }
 #else
 	sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] = (char *)realloc(sOldShareLimitMsg, szNeededMem);
@@ -1595,13 +1595,13 @@ void SetMan::UpdateShareLimitMessage() {
     if(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] == NULL) {
         sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] = sOldShareLimitMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateShareLimitMessage\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateShareLimitMessage\n", (uint64_t)szNeededMem);
 
         return;
     }
 
-    int iMsgLen = sprintf(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG], "<%s> ", sPreTexts[SetMan::SETPRETXT_HUB_SEC]);
-    if(CheckSprintf(iMsgLen, szNeededMem, "SetMan::UpdateShareLimitMessage0") == false) {
+    int iMsgLen = sprintf(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG], "<%s> ", sPreTexts[SETPRETXT_HUB_SEC]);
+    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateShareLimitMessage0") == false) {
         exit(EXIT_FAILURE);
     }
     
@@ -1613,7 +1613,7 @@ void SetMan::UpdateShareLimitMessage() {
                 if(ui64MinShare != 0) {
                     int iRet = sprintf(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG]+iMsgLen, "%hd %s", iShorts[SETSHORT_MIN_SHARE_LIMIT], units[iShorts[SETSHORT_MIN_SHARE_UNITS]]);
                     iMsgLen += iRet;
-                    if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "SetMan::UpdateShareLimitMessage") == false) {
+                    if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateShareLimitMessage") == false) {
                         exit(EXIT_FAILURE);
                     }
                 } else {
@@ -1626,7 +1626,7 @@ void SetMan::UpdateShareLimitMessage() {
                 if(ui64MaxShare != 0) {
                     int iRet = sprintf(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG]+iMsgLen, "%hd %s", iShorts[SETSHORT_MAX_SHARE_LIMIT], units[iShorts[SETSHORT_MAX_SHARE_UNITS]]);
                     iMsgLen += iRet;
-                    if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "SetMan::UpdateShareLimitMessage1") == false) {
+                    if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateShareLimitMessage1") == false) {
                         exit(EXIT_FAILURE);
                     }
                 } else {
@@ -1649,7 +1649,7 @@ void SetMan::UpdateShareLimitMessage() {
         if(sTexts[SETTXT_SHARE_LIMIT_REDIR_ADDRESS] != NULL) {
         	int iRet = sprintf(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG]+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_SHARE_LIMIT_REDIR_ADDRESS]);
         	iMsgLen += iRet;
-        	if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "SetMan::UpdateShareLimitMessage6") == false) {
+        	if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateShareLimitMessage6") == false) {
                 exit(EXIT_FAILURE);
             }
         }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
@@ -1663,12 +1663,12 @@ void SetMan::UpdateShareLimitMessage() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateSlotsLimitMessage() {
+void clsSettingManager::UpdateSlotsLimitMessage() {
     if(bUpdateLocked == true) {
         return;
     }
 
-    size_t szNeededMem = 8 + ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_SLOTS_LIMIT_MSG];
+    size_t szNeededMem = 8 + ui16PreTextsLens[SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_SLOTS_LIMIT_MSG];
 
     if(bBools[SETBOOL_SLOTS_LIMIT_REDIR] == true) {
         if(sTexts[SETTXT_SLOTS_LIMIT_REDIR_ADDRESS] != NULL) {
@@ -1682,9 +1682,9 @@ void SetMan::UpdateSlotsLimitMessage() {
 
 #ifdef _WIN32
     if(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] == NULL) {
-        sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
+        sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
     } else {
-        sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldSlotsLimitMsg, szNeededMem);
+        sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldSlotsLimitMsg, szNeededMem);
     }
 #else
 	sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] = (char *)realloc(sOldSlotsLimitMsg, szNeededMem);
@@ -1692,13 +1692,13 @@ void SetMan::UpdateSlotsLimitMessage() {
     if(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] == NULL) {
         sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] = sOldSlotsLimitMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateSlotsLimitMessage\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateSlotsLimitMessage\n", (uint64_t)szNeededMem);
 
         return;
     }
 
-    int iMsgLen = sprintf(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG], "<%s> ", sPreTexts[SetMan::SETPRETXT_HUB_SEC]);
-    if(CheckSprintf(iMsgLen, szNeededMem, "SetMan::UpdateSlotsLimitMessage0") == false) {
+    int iMsgLen = sprintf(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG], "<%s> ", sPreTexts[SETPRETXT_HUB_SEC]);
+    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateSlotsLimitMessage0") == false) {
         exit(EXIT_FAILURE);
     }
 
@@ -1707,7 +1707,7 @@ void SetMan::UpdateSlotsLimitMessage() {
             if(strncmp(sTexts[SETTXT_SLOTS_LIMIT_MSG]+ui16i+1, sMin, 5) == 0) {
                 int iRet = sprintf(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG]+iMsgLen, "%hd", iShorts[SETSHORT_MIN_SLOTS_LIMIT]);
                 iMsgLen += iRet;
-                if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "SetMan::UpdateSlotsLimitMessage") == false) {
+                if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateSlotsLimitMessage") == false) {
                     exit(EXIT_FAILURE);
                 }
 
@@ -1717,7 +1717,7 @@ void SetMan::UpdateSlotsLimitMessage() {
                 if(iShorts[SETSHORT_MAX_SLOTS_LIMIT] != 0) {
                     int iRet = sprintf(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG]+iMsgLen, "%hd", iShorts[SETSHORT_MAX_SLOTS_LIMIT]);
                     iMsgLen += iRet;
-                    if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "SetMan::UpdateSlotsLimitMessage1") == false) {
+                    if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateSlotsLimitMessage1") == false) {
                         exit(EXIT_FAILURE);
                     }
                 } else {
@@ -1740,7 +1740,7 @@ void SetMan::UpdateSlotsLimitMessage() {
         if(sTexts[SETTXT_SLOTS_LIMIT_REDIR_ADDRESS] != NULL) {
         	int iRet = sprintf(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG]+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_SLOTS_LIMIT_REDIR_ADDRESS]);
             iMsgLen += iRet;
-            if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "SetMan::UpdateSlotsLimitMessage2") == false) {
+            if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateSlotsLimitMessage2") == false) {
                 exit(EXIT_FAILURE);
             }
         }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
@@ -1754,12 +1754,12 @@ void SetMan::UpdateSlotsLimitMessage() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateHubSlotRatioMessage() {
+void clsSettingManager::UpdateHubSlotRatioMessage() {
     if(bUpdateLocked == true) {
         return;
     }
 
-    size_t szNeededMem = 5 + ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_HUB_SLOT_RATIO_MSG];
+    size_t szNeededMem = 5 + ui16PreTextsLens[SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_HUB_SLOT_RATIO_MSG];
 
     if(bBools[SETBOOL_HUB_SLOT_RATIO_REDIR] == true) {
         if(sTexts[SETTXT_HUB_SLOT_RATIO_REDIR_ADDRESS] != NULL) {
@@ -1773,9 +1773,9 @@ void SetMan::UpdateHubSlotRatioMessage() {
 
 #ifdef _WIN32
     if(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] == NULL) {
-        sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
+        sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
     } else {
-        sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldHubSlotLimitMsg, szNeededMem);
+        sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldHubSlotLimitMsg, szNeededMem);
     }
 #else
 	sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] = (char *)realloc(sOldHubSlotLimitMsg, szNeededMem);
@@ -1783,13 +1783,13 @@ void SetMan::UpdateHubSlotRatioMessage() {
     if(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] == NULL) {
         sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] = sOldHubSlotLimitMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateHubSlotRatioMessage\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateHubSlotRatioMessage\n", (uint64_t)szNeededMem);
 
         return;
     }
 
-    int iMsgLen = sprintf(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG], "<%s> ", sPreTexts[SetMan::SETPRETXT_HUB_SEC]);
-    if(CheckSprintf(iMsgLen, szNeededMem, "SetMan::UpdateHubSlotRatioMessage0") == false) {
+    int iMsgLen = sprintf(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG], "<%s> ", sPreTexts[SETPRETXT_HUB_SEC]);
+    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateHubSlotRatioMessage0") == false) {
         exit(EXIT_FAILURE);
     }
 
@@ -1801,7 +1801,7 @@ void SetMan::UpdateHubSlotRatioMessage() {
             if(strncmp(sTexts[SETTXT_HUB_SLOT_RATIO_MSG]+ui16i+1, sHubs, 6) == 0) {
                 int iRet = sprintf(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG]+iMsgLen, "%hd", iShorts[SETSHORT_HUB_SLOT_RATIO_HUBS]);
                 iMsgLen += iRet;
-                if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "SetMan::UpdateHubSlotRatioMessage") == false) {
+                if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateHubSlotRatioMessage") == false) {
                     exit(EXIT_FAILURE);
                 }
                 ui16i += (uint16_t)6;
@@ -1809,7 +1809,7 @@ void SetMan::UpdateHubSlotRatioMessage() {
             } else if(strncmp(sTexts[SETTXT_HUB_SLOT_RATIO_MSG]+ui16i+1, sSlots, 7) == 0) {
                 int iRet = sprintf(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG]+iMsgLen, "%hd", iShorts[SETSHORT_HUB_SLOT_RATIO_SLOTS]);
                 iMsgLen += iRet;
-                if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "SetMan::UpdateHubSlotRatioMessage1") == false) {
+                if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateHubSlotRatioMessage1") == false) {
                     exit(EXIT_FAILURE);
                 }
                 ui16i += (uint16_t)7;
@@ -1828,7 +1828,7 @@ void SetMan::UpdateHubSlotRatioMessage() {
         if(sTexts[SETTXT_HUB_SLOT_RATIO_REDIR_ADDRESS] != NULL) {
         	int iRet = sprintf(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG]+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_HUB_SLOT_RATIO_REDIR_ADDRESS]);
             iMsgLen += iRet;
-            if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "SetMan::UpdateHubSlotRatioMessage2") == false) {
+            if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateHubSlotRatioMessage2") == false) {
                 exit(EXIT_FAILURE);
             }
         }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
@@ -1842,12 +1842,12 @@ void SetMan::UpdateHubSlotRatioMessage() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateMaxHubsLimitMessage() {
+void clsSettingManager::UpdateMaxHubsLimitMessage() {
     if(bUpdateLocked == true) {
         return;
     }
 
-    size_t szNeededMem = 5 + ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_MAX_HUBS_LIMIT_MSG];
+    size_t szNeededMem = 5 + ui16PreTextsLens[SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_MAX_HUBS_LIMIT_MSG];
 
     if(bBools[SETBOOL_MAX_HUBS_LIMIT_REDIR] == true) {
         if(sTexts[SETTXT_MAX_HUBS_LIMIT_REDIR_ADDRESS] != NULL) {
@@ -1861,9 +1861,9 @@ void SetMan::UpdateMaxHubsLimitMessage() {
 
 #ifdef _WIN32
     if(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] == NULL) {
-        sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
+        sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
     } else {
-        sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldHubLimitMsg, szNeededMem);
+        sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldHubLimitMsg, szNeededMem);
     }
 #else
 	sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] = (char *)realloc(sOldHubLimitMsg, szNeededMem);
@@ -1871,13 +1871,13 @@ void SetMan::UpdateMaxHubsLimitMessage() {
     if(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] == NULL) {
         sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] = sOldHubLimitMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateMaxHubsLimitMessage\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateMaxHubsLimitMessage\n", (uint64_t)szNeededMem);
 
         return;
     }
 
-    int iMsgLen = sprintf(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG], "<%s> ", sPreTexts[SetMan::SETPRETXT_HUB_SEC]);
-    if(CheckSprintf(iMsgLen, szNeededMem, "SetMan::UpdateMaxHubsLimitMessage") == false) {
+    int iMsgLen = sprintf(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG], "<%s> ", sPreTexts[SETPRETXT_HUB_SEC]);
+    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateMaxHubsLimitMessage") == false) {
         exit(EXIT_FAILURE);
     }
 
@@ -1894,7 +1894,7 @@ void SetMan::UpdateMaxHubsLimitMessage() {
 
         int iRet = sprintf(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG]+iMsgLen, "%hd", iShorts[SETSHORT_MAX_HUBS_LIMIT]);
         iMsgLen += iRet;
-        if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "SetMan::UpdateMaxHubsLimitMessage") == false) {
+        if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateMaxHubsLimitMessage") == false) {
             exit(EXIT_FAILURE);
         }
 
@@ -1915,7 +1915,7 @@ void SetMan::UpdateMaxHubsLimitMessage() {
         if(sTexts[SETTXT_MAX_HUBS_LIMIT_REDIR_ADDRESS] != NULL) {
         	int iRet = sprintf(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG]+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_MAX_HUBS_LIMIT_REDIR_ADDRESS]);
             iMsgLen += iRet;
-            if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "SetMan::UpdateMaxHubsLimitMessage1") == false) {
+            if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateMaxHubsLimitMessage1") == false) {
                 exit(EXIT_FAILURE);
             }
         }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
@@ -1929,7 +1929,7 @@ void SetMan::UpdateMaxHubsLimitMessage() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateNoTagMessage() {
+void clsSettingManager::UpdateNoTagMessage() {
     if(bUpdateLocked == true) {
         return;
     }
@@ -1937,8 +1937,8 @@ void SetMan::UpdateNoTagMessage() {
     if(iShorts[SETSHORT_NO_TAG_OPTION] == 0) {
         if(sPreTexts[SETPRETXT_NO_TAG_MSG] != NULL) {
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_NO_TAG_MSG]) == 0) {
-                AppendDebugLog("%s - [MEM] Cannot deallocate memory in SetMan::UpdateNoTagMessage\n", 0);
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_NO_TAG_MSG]) == 0) {
+                AppendDebugLog("%s - [MEM] Cannot deallocate memory in clsSettingManager::UpdateNoTagMessage\n", 0);
             }
 #else
             free(sPreTexts[SETPRETXT_NO_TAG_MSG]);
@@ -1950,7 +1950,7 @@ void SetMan::UpdateNoTagMessage() {
         return;
     }
 
-    size_t szNeededMem = 5 + ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_NO_TAG_MSG];
+    size_t szNeededMem = 5 + ui16PreTextsLens[SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_NO_TAG_MSG];
 
     if(iShorts[SETSHORT_NO_TAG_OPTION] == 2) {
         if(sTexts[SETTXT_NO_TAG_REDIR_ADDRESS] != NULL) {
@@ -1964,9 +1964,9 @@ void SetMan::UpdateNoTagMessage() {
 
 #ifdef _WIN32
     if(sPreTexts[SETPRETXT_NO_TAG_MSG] == NULL) {
-        sPreTexts[SETPRETXT_NO_TAG_MSG] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
+        sPreTexts[SETPRETXT_NO_TAG_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
     } else {
-        sPreTexts[SETPRETXT_NO_TAG_MSG] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldNoTagMsg, szNeededMem);
+        sPreTexts[SETPRETXT_NO_TAG_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldNoTagMsg, szNeededMem);
     }
 #else
 	sPreTexts[SETPRETXT_NO_TAG_MSG] = (char *)realloc(sOldNoTagMsg, szNeededMem);
@@ -1974,13 +1974,13 @@ void SetMan::UpdateNoTagMessage() {
     if(sPreTexts[SETPRETXT_NO_TAG_MSG] == NULL) {
         sPreTexts[SETPRETXT_NO_TAG_MSG] = sOldNoTagMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateNoTagMessage\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateNoTagMessage\n", (uint64_t)szNeededMem);
 
         return;
     }
 
-    int iMsgLen = sprintf(sPreTexts[SETPRETXT_NO_TAG_MSG], "<%s> %s|", sPreTexts[SetMan::SETPRETXT_HUB_SEC], sTexts[SETTXT_NO_TAG_MSG]);
-    if(CheckSprintf(iMsgLen, szNeededMem, "SetMan::UpdateNoTagMessage") == false) {
+    int iMsgLen = sprintf(sPreTexts[SETPRETXT_NO_TAG_MSG], "<%s> %s|", sPreTexts[SETPRETXT_HUB_SEC], sTexts[SETTXT_NO_TAG_MSG]);
+    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateNoTagMessage") == false) {
         exit(EXIT_FAILURE);
     }
 
@@ -1988,7 +1988,7 @@ void SetMan::UpdateNoTagMessage() {
         if(sTexts[SETTXT_NO_TAG_REDIR_ADDRESS] != NULL) {
            	int iRet = sprintf(sPreTexts[SETPRETXT_NO_TAG_MSG]+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_NO_TAG_REDIR_ADDRESS]);
             iMsgLen += iRet;
-            if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "SetMan::UpdateNoTagMessage1") == false) {
+            if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateNoTagMessage1") == false) {
                 exit(EXIT_FAILURE);
             }
         }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
@@ -2002,7 +2002,7 @@ void SetMan::UpdateNoTagMessage() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateTempBanRedirAddress() {
+void clsSettingManager::UpdateTempBanRedirAddress() {
     if(bUpdateLocked == true) {
         return;
     }
@@ -2016,8 +2016,8 @@ void SetMan::UpdateTempBanRedirAddress() {
     } else {
         if(sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS] != NULL) {
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS]) == 0) {
-                AppendDebugLog("%s - [MEM] Cannot deallocate memory in SetMan::UpdateTempBanRedirAddress\n", 0);
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS]) == 0) {
+                AppendDebugLog("%s - [MEM] Cannot deallocate memory in clsSettingManager::UpdateTempBanRedirAddress\n", 0);
             }
 #else
             free(sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS]);
@@ -2033,9 +2033,9 @@ void SetMan::UpdateTempBanRedirAddress() {
 
 #ifdef _WIN32
     if(sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS] == NULL) {
-        sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
+        sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
     } else {
-        sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldTempBanRedirMsg, szNeededMem);
+        sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldTempBanRedirMsg, szNeededMem);
     }
 #else
 	sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS] = (char *)realloc(sOldTempBanRedirMsg, szNeededMem);
@@ -2043,7 +2043,7 @@ void SetMan::UpdateTempBanRedirAddress() {
     if(sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS] == NULL) {
         sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS] = sOldTempBanRedirMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateTempBanRedirAddress\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateTempBanRedirAddress\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -2052,7 +2052,7 @@ void SetMan::UpdateTempBanRedirAddress() {
 
     if(sTexts[SETTXT_TEMP_BAN_REDIR_ADDRESS] != NULL) {
         iMsgLen = sprintf(sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS], "$ForceMove %s|", sTexts[SETTXT_TEMP_BAN_REDIR_ADDRESS]);
-        if(CheckSprintf(iMsgLen, szNeededMem, "SetMan::UpdateTempBanRedirAddress") == false) {
+        if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateTempBanRedirAddress") == false) {
             exit(EXIT_FAILURE);
         }
     } else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
@@ -2065,7 +2065,7 @@ void SetMan::UpdateTempBanRedirAddress() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdatePermBanRedirAddress() {
+void clsSettingManager::UpdatePermBanRedirAddress() {
     if(bUpdateLocked == true) {
         return;
     }
@@ -2079,8 +2079,8 @@ void SetMan::UpdatePermBanRedirAddress() {
     } else {
         if(sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS] != NULL) {
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS]) == 0) {
-                AppendDebugLog("%s - [MEM] Cannot deallocate memory in SetMan::UpdatePermBanRedirAddress\n", 0);
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS]) == 0) {
+                AppendDebugLog("%s - [MEM] Cannot deallocate memory in clsSettingManager::UpdatePermBanRedirAddress\n", 0);
             }
 #else
             free(sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS]);
@@ -2096,9 +2096,9 @@ void SetMan::UpdatePermBanRedirAddress() {
 
 #ifdef _WIN32
     if(sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS] == NULL) {
-        sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
+        sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
     } else {
-        sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldPermBanRedirMsg, szNeededMem);
+        sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldPermBanRedirMsg, szNeededMem);
     }
 #else
 	sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS] = (char *)realloc(sOldPermBanRedirMsg, szNeededMem);
@@ -2106,7 +2106,7 @@ void SetMan::UpdatePermBanRedirAddress() {
     if(sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS] == NULL) {
         sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS] = sOldPermBanRedirMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdatePermBanRedirAddress\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdatePermBanRedirAddress\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -2115,7 +2115,7 @@ void SetMan::UpdatePermBanRedirAddress() {
 
     if(sTexts[SETTXT_PERM_BAN_REDIR_ADDRESS] != NULL) {
         iMsgLen = sprintf(sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS], "$ForceMove %s|", sTexts[SETTXT_PERM_BAN_REDIR_ADDRESS]);
-        if(CheckSprintf(iMsgLen, szNeededMem, "SetMan::UpdatePermBanRedirAddress") == false) {
+        if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdatePermBanRedirAddress") == false) {
             exit(EXIT_FAILURE);
         }
     } else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
@@ -2128,12 +2128,12 @@ void SetMan::UpdatePermBanRedirAddress() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateNickLimitMessage() {
+void clsSettingManager::UpdateNickLimitMessage() {
     if(bUpdateLocked == true) {
         return;
     }
 
-    size_t szNeededMem = 8 + ui16PreTextsLens[SetMan::SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_NICK_LIMIT_MSG];
+    size_t szNeededMem = 8 + ui16PreTextsLens[SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_NICK_LIMIT_MSG];
 
     if(bBools[SETBOOL_NICK_LIMIT_REDIR] == true) {
         if(sTexts[SETTXT_NICK_LIMIT_REDIR_ADDRESS] != NULL) {
@@ -2147,9 +2147,9 @@ void SetMan::UpdateNickLimitMessage() {
 
 #ifdef _WIN32
     if(sPreTexts[SETPRETXT_NICK_LIMIT_MSG] == NULL) {
-        sPreTexts[SETPRETXT_NICK_LIMIT_MSG] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
+        sPreTexts[SETPRETXT_NICK_LIMIT_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
     } else {
-        sPreTexts[SETPRETXT_NICK_LIMIT_MSG] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldNickLimitMsg, szNeededMem);
+        sPreTexts[SETPRETXT_NICK_LIMIT_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldNickLimitMsg, szNeededMem);
     }
 #else
 	sPreTexts[SETPRETXT_NICK_LIMIT_MSG] = (char *)realloc(sOldNickLimitMsg, szNeededMem);
@@ -2157,13 +2157,13 @@ void SetMan::UpdateNickLimitMessage() {
     if(sPreTexts[SETPRETXT_NICK_LIMIT_MSG] == NULL) {
         sPreTexts[SETPRETXT_NICK_LIMIT_MSG] = sOldNickLimitMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateNickLimitMessage\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateNickLimitMessage\n", (uint64_t)szNeededMem);
 
         return;
     }
 
-    int iMsgLen = sprintf(sPreTexts[SETPRETXT_NICK_LIMIT_MSG], "<%s> ", sPreTexts[SetMan::SETPRETXT_HUB_SEC]);
-    if(CheckSprintf(iMsgLen, szNeededMem, "SetMan::UpdateNickLimitMessage0") == false) {
+    int iMsgLen = sprintf(sPreTexts[SETPRETXT_NICK_LIMIT_MSG], "<%s> ", sPreTexts[SETPRETXT_HUB_SEC]);
+    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateNickLimitMessage0") == false) {
         exit(EXIT_FAILURE);
     }
 
@@ -2172,7 +2172,7 @@ void SetMan::UpdateNickLimitMessage() {
             if(strncmp(sTexts[SETTXT_NICK_LIMIT_MSG]+ui16i+1, sMin, 5) == 0) {
                 int iRet = sprintf(sPreTexts[SETPRETXT_NICK_LIMIT_MSG]+iMsgLen, "%hd", iShorts[SETSHORT_MIN_NICK_LEN]);
                 iMsgLen += iRet;
-                if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "SetMan::UpdateNickLimitMessage") == false) {
+                if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateNickLimitMessage") == false) {
                     exit(EXIT_FAILURE);
                 }
 
@@ -2182,7 +2182,7 @@ void SetMan::UpdateNickLimitMessage() {
                 if(iShorts[SETSHORT_MAX_NICK_LEN] != 0) {
                     int iRet = sprintf(sPreTexts[SETPRETXT_NICK_LIMIT_MSG]+iMsgLen, "%hd", iShorts[SETSHORT_MAX_NICK_LEN]);
                     iMsgLen += iRet;
-                    if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "SetMan::UpdateNickLimitMessage1") == false) {
+                    if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateNickLimitMessage1") == false) {
                         exit(EXIT_FAILURE);
                     }
                 } else {
@@ -2205,7 +2205,7 @@ void SetMan::UpdateNickLimitMessage() {
         if(sTexts[SETTXT_NICK_LIMIT_REDIR_ADDRESS] != NULL) {
             int iRet = sprintf(sPreTexts[SETPRETXT_NICK_LIMIT_MSG]+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_NICK_LIMIT_REDIR_ADDRESS]);
             iMsgLen += iRet;
-            if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "SetMan::UpdateNickLimitMessage2") == false) {
+            if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateNickLimitMessage2") == false) {
                 exit(EXIT_FAILURE);
             }
         }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
@@ -2219,7 +2219,7 @@ void SetMan::UpdateNickLimitMessage() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateMinShare() {
+void clsSettingManager::UpdateMinShare() {
     if(bUpdateLocked == true) {
         return;
     }
@@ -2228,7 +2228,7 @@ void SetMan::UpdateMinShare() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateMaxShare() {
+void clsSettingManager::UpdateMaxShare() {
     if(bUpdateLocked == true) {
         return;
     }
@@ -2237,7 +2237,7 @@ void SetMan::UpdateMaxShare() {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateTCPPorts() {
+void clsSettingManager::UpdateTCPPorts() {
     if(bUpdateLocked == true) {
         return;
     }
@@ -2284,15 +2284,15 @@ void SetMan::UpdateTCPPorts() {
         ui8ActualPort++;
     }
 
-	if(bServerRunning == false) {
+	if(clsServerManager::bServerRunning == false) {
         return;
     }
 
-	ServerUpdateServers();
+	clsServerManager::UpdateServers();
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateBotsSameNick() {
+void clsSettingManager::UpdateBotsSameNick() {
     if(bUpdateLocked == true) {
         return;
     }
@@ -2305,22 +2305,22 @@ void SetMan::UpdateBotsSameNick() {
     }
 }
 //---------------------------------------------------------------------------
-void SetMan::UpdateLanguage() {
+void clsSettingManager::UpdateLanguage() {
     if(bUpdateLocked == true) {
         return;
     }
 
-    LanguageManager->LoadLanguage();
+    clsLanguageManager::mPtr->Load();
 
     UpdateHubNameWelcome();
 
 #ifdef _BUILD_GUI
-    pMainWindow->UpdateLanguage();
+    clsMainWindow::mPtr->UpdateLanguage();
 #endif
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateBot(const bool &bNickChanged/* = true*/) {
+void clsSettingManager::UpdateBot(const bool &bNickChanged/* = true*/) {
     if(bUpdateLocked == true) {
         return;
 	}
@@ -2328,8 +2328,8 @@ void SetMan::UpdateBot(const bool &bNickChanged/* = true*/) {
     if(bBools[SETBOOL_REG_BOT] == false) {
         if(sPreTexts[SETPRETXT_HUB_BOT_MYINFO] != NULL) {
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_HUB_BOT_MYINFO]) == 0) {
-                AppendDebugLog("%s - [MEM] Cannot deallocate memory in SetMan::UpdateBot\n", 0);
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_HUB_BOT_MYINFO]) == 0) {
+                AppendDebugLog("%s - [MEM] Cannot deallocate memory in clsSettingManager::UpdateBot\n", 0);
             }
 #else
             free(sPreTexts[SETPRETXT_HUB_BOT_MYINFO]);
@@ -2347,9 +2347,9 @@ void SetMan::UpdateBot(const bool &bNickChanged/* = true*/) {
 
 #ifdef _WIN32
     if(sPreTexts[SETPRETXT_HUB_BOT_MYINFO] == NULL) {
-        sPreTexts[SETPRETXT_HUB_BOT_MYINFO] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
+        sPreTexts[SETPRETXT_HUB_BOT_MYINFO] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
     } else {
-        sPreTexts[SETPRETXT_HUB_BOT_MYINFO] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldHubBotMyinfoMsg, szNeededMem);
+        sPreTexts[SETPRETXT_HUB_BOT_MYINFO] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldHubBotMyinfoMsg, szNeededMem);
     }
 #else
 	sPreTexts[SETPRETXT_HUB_BOT_MYINFO] = (char *)realloc(sOldHubBotMyinfoMsg, szNeededMem);
@@ -2357,7 +2357,7 @@ void SetMan::UpdateBot(const bool &bNickChanged/* = true*/) {
     if(sPreTexts[SETPRETXT_HUB_BOT_MYINFO] == NULL) {
         sPreTexts[SETPRETXT_HUB_BOT_MYINFO] = sOldHubBotMyinfoMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateBot\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateBot\n", (uint64_t)szNeededMem);
 
         return;
     }
@@ -2365,80 +2365,80 @@ void SetMan::UpdateBot(const bool &bNickChanged/* = true*/) {
     int iMsgLen = sprintf(sPreTexts[SETPRETXT_HUB_BOT_MYINFO], "$MyINFO $ALL %s %s$ $$%s$$|", sTexts[SETTXT_BOT_NICK],
         sTexts[SETTXT_BOT_DESCRIPTION] != NULL ? sTexts[SETTXT_BOT_DESCRIPTION] : "",
         sTexts[SETTXT_BOT_EMAIL] != NULL ? sTexts[SETTXT_BOT_EMAIL] : "");
-    if(CheckSprintf(iMsgLen, szNeededMem, "SetMan::UpdateBot") == false) {
+    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateBot") == false) {
         exit(EXIT_FAILURE);
     }
 
     ui16PreTextsLens[SETPRETXT_HUB_BOT_MYINFO] = (uint16_t)iMsgLen;
     sPreTexts[SETPRETXT_HUB_BOT_MYINFO][iMsgLen] = '\0';
 
-    if(ServersS == NULL) {
+    if(clsServerManager::ServersS == NULL) {
         return;
     }
 
-    if(bNickChanged == true && (bBotsSameNick == false || ServersS->bActive == false)) {
-        colUsers->AddBot2NickList(sTexts[SETTXT_BOT_NICK], (size_t)ui16TextsLens[SETTXT_BOT_NICK], true);
+    if(bNickChanged == true && (bBotsSameNick == false || clsServerManager::ServersS->bActive == false)) {
+        clsUsers::mPtr->AddBot2NickList(sTexts[SETTXT_BOT_NICK], (size_t)ui16TextsLens[SETTXT_BOT_NICK], true);
     }
 
-    colUsers->AddBot2MyInfos(sPreTexts[SETPRETXT_HUB_BOT_MYINFO]);
+    clsUsers::mPtr->AddBot2MyInfos(sPreTexts[SETPRETXT_HUB_BOT_MYINFO]);
 
-    if(ServersS->bActive == false) {
+    if(clsServerManager::ServersS->bActive == false) {
         return;
     }
 
     if(bNickChanged == true && bBotsSameNick == false) {
         char sMsg[128];
         iMsgLen = sprintf(sMsg, "$Hello %s|", sTexts[SETTXT_BOT_NICK]);
-        if(CheckSprintf(iMsgLen, 128, "SetMan::UpdateBot1") == true) {
-            g_GlobalDataQueue->AddQueueItem(sMsg, iMsgLen, NULL, 0, GlobalDataQueue::CMD_HELLO);
+        if(CheckSprintf(iMsgLen, 128, "clsSettingManager::UpdateBot1") == true) {
+            clsGlobalDataQueue::mPtr->AddQueueItem(sMsg, iMsgLen, NULL, 0, clsGlobalDataQueue::CMD_HELLO);
         }
     }
 
-    g_GlobalDataQueue->AddQueueItem(sPreTexts[SETPRETXT_HUB_BOT_MYINFO], ui16PreTextsLens[SETPRETXT_HUB_BOT_MYINFO],
-        sPreTexts[SETPRETXT_HUB_BOT_MYINFO], ui16PreTextsLens[SETPRETXT_HUB_BOT_MYINFO], GlobalDataQueue::CMD_MYINFO);
+    clsGlobalDataQueue::mPtr->AddQueueItem(sPreTexts[SETPRETXT_HUB_BOT_MYINFO], ui16PreTextsLens[SETPRETXT_HUB_BOT_MYINFO],
+        sPreTexts[SETPRETXT_HUB_BOT_MYINFO], ui16PreTextsLens[SETPRETXT_HUB_BOT_MYINFO], clsGlobalDataQueue::CMD_MYINFO);
 
     if(bNickChanged == true && bBotsSameNick == false) {
-        g_GlobalDataQueue->OpListStore(sTexts[SETTXT_BOT_NICK]);
+        clsGlobalDataQueue::mPtr->OpListStore(sTexts[SETTXT_BOT_NICK]);
     }
 }
 //---------------------------------------------------------------------------
 
-void SetMan::DisableBot(const bool &bNickChanged/* = true*/, const bool &bRemoveMyINFO/* = true*/) {
-	if(bUpdateLocked == true || bServerRunning == false) {
+void clsSettingManager::DisableBot(const bool &bNickChanged/* = true*/, const bool &bRemoveMyINFO/* = true*/) {
+	if(bUpdateLocked == true || clsServerManager::bServerRunning == false) {
         return;
     }
 
     if(bNickChanged == true) {
         if(bBotsSameNick == false) {
-            colUsers->DelFromNickList(sTexts[SETTXT_BOT_NICK], true);
+            clsUsers::mPtr->DelFromNickList(sTexts[SETTXT_BOT_NICK], true);
         }
 
         char sMsg[128];
         int iMsgLen = sprintf(sMsg, "$Quit %s|", sTexts[SETTXT_BOT_NICK]);
-        if(CheckSprintf(iMsgLen, 128, "SetMan::DisableBot") == true) {
+        if(CheckSprintf(iMsgLen, 128, "clsSettingManager::DisableBot") == true) {
             if(bBotsSameNick == true) {
                 // PPK ... send Quit only to users without opchat permission...
-                User *next = colUsers->llist;
+                User *next = clsUsers::mPtr->llist;
                 while(next != NULL) {
                     User *curUser = next;
                     next = curUser->next;
-                    if(curUser->ui8State == User::STATE_ADDED && ProfileMan->IsAllowed(curUser, ProfileManager::ALLOWEDOPCHAT) == false) {
-                        UserSendCharDelayed(curUser, sMsg, iMsgLen);
+                    if(curUser->ui8State == User::STATE_ADDED && clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::ALLOWEDOPCHAT) == false) {
+                        curUser->SendCharDelayed(sMsg, iMsgLen);
                     }
                 }
             } else {
-                g_GlobalDataQueue->AddQueueItem(sMsg, iMsgLen, NULL, 0, GlobalDataQueue::CMD_QUIT);
+                clsGlobalDataQueue::mPtr->AddQueueItem(sMsg, iMsgLen, NULL, 0, clsGlobalDataQueue::CMD_QUIT);
             }
         }
     }
 
     if(sPreTexts[SETPRETXT_HUB_BOT_MYINFO] != NULL && bBotsSameNick == false && bRemoveMyINFO == true) {
-        colUsers->DelBotFromMyInfos(sPreTexts[SETPRETXT_HUB_BOT_MYINFO]);
+        clsUsers::mPtr->DelBotFromMyInfos(sPreTexts[SETPRETXT_HUB_BOT_MYINFO]);
     }
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateOpChat(const bool &bNickChanged/* = true*/) {
+void clsSettingManager::UpdateOpChat(const bool &bNickChanged/* = true*/) {
     if(bUpdateLocked == true) {
         return;
     }
@@ -2446,8 +2446,8 @@ void SetMan::UpdateOpChat(const bool &bNickChanged/* = true*/) {
     if(bBools[SETBOOL_REG_OP_CHAT] == false) {
         if(sPreTexts[SETPRETXT_OP_CHAT_HELLO] != NULL) {
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_OP_CHAT_HELLO]) == 0) {
-				AppendDebugLog("%s - [MEM] Cannot deallocate memory in SetMan::UpdateOpChat\n", 0);
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_OP_CHAT_HELLO]) == 0) {
+				AppendDebugLog("%s - [MEM] Cannot deallocate memory in clsSettingManager::UpdateOpChat\n", 0);
             }
 #else
 			free(sPreTexts[SETPRETXT_OP_CHAT_HELLO]);
@@ -2458,8 +2458,8 @@ void SetMan::UpdateOpChat(const bool &bNickChanged/* = true*/) {
 
         if(sPreTexts[SETPRETXT_OP_CHAT_MYINFO] != NULL) {
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_OP_CHAT_MYINFO]) == 0) {
-                AppendDebugLog("%s - [MEM] Cannot deallocate memory in SetMan::UpdateOpChat1\n", 0);
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_OP_CHAT_MYINFO]) == 0) {
+                AppendDebugLog("%s - [MEM] Cannot deallocate memory in clsSettingManager::UpdateOpChat1\n", 0);
             }
 #else
             free(sPreTexts[SETPRETXT_OP_CHAT_MYINFO]);
@@ -2477,9 +2477,9 @@ void SetMan::UpdateOpChat(const bool &bNickChanged/* = true*/) {
 
 #ifdef _WIN32
     if(sPreTexts[SETPRETXT_OP_CHAT_HELLO] == NULL) {
-        sPreTexts[SETPRETXT_OP_CHAT_HELLO] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
+        sPreTexts[SETPRETXT_OP_CHAT_HELLO] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
     } else {
-        sPreTexts[SETPRETXT_OP_CHAT_HELLO] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldOpChatHelloMsg, szNeededMem);
+        sPreTexts[SETPRETXT_OP_CHAT_HELLO] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldOpChatHelloMsg, szNeededMem);
     }
 #else
 	sPreTexts[SETPRETXT_OP_CHAT_HELLO] = (char *)realloc(sOldOpChatHelloMsg, szNeededMem);
@@ -2487,13 +2487,13 @@ void SetMan::UpdateOpChat(const bool &bNickChanged/* = true*/) {
     if(sPreTexts[SETPRETXT_OP_CHAT_HELLO] == NULL) {
         sPreTexts[SETPRETXT_OP_CHAT_HELLO] = sOldOpChatHelloMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateOpChat\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateOpChat\n", (uint64_t)szNeededMem);
 
         return;
     }
 
-    int iMsgLen = sprintf(sPreTexts[SETPRETXT_OP_CHAT_HELLO], "$Hello %s|", SettingManager->sTexts[SETTXT_OP_CHAT_NICK]);
-    if(CheckSprintf(iMsgLen, szNeededMem, "SetMan::UpdateOpChat") == false) {
+    int iMsgLen = sprintf(sPreTexts[SETPRETXT_OP_CHAT_HELLO], "$Hello %s|", sTexts[SETTXT_OP_CHAT_NICK]);
+    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateOpChat") == false) {
         exit(EXIT_FAILURE);
     }
 
@@ -2506,9 +2506,9 @@ void SetMan::UpdateOpChat(const bool &bNickChanged/* = true*/) {
 
 #ifdef _WIN32
     if(sPreTexts[SETPRETXT_OP_CHAT_MYINFO] == NULL) {
-        sPreTexts[SETPRETXT_OP_CHAT_MYINFO] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
+        sPreTexts[SETPRETXT_OP_CHAT_MYINFO] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
     } else {
-        sPreTexts[SETPRETXT_OP_CHAT_MYINFO] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldOpChatMyInfoMsg, szNeededMem);
+        sPreTexts[SETPRETXT_OP_CHAT_MYINFO] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldOpChatMyInfoMsg, szNeededMem);
     }
 #else
 	sPreTexts[SETPRETXT_OP_CHAT_MYINFO] = (char *)realloc(sOldOpChatMyInfoMsg, szNeededMem);
@@ -2516,7 +2516,7 @@ void SetMan::UpdateOpChat(const bool &bNickChanged/* = true*/) {
     if(sPreTexts[SETPRETXT_OP_CHAT_MYINFO] == NULL) {
         sPreTexts[SETPRETXT_OP_CHAT_MYINFO] = sOldOpChatMyInfoMsg;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in SetMan::UpdateOpChat1\n", (uint64_t)szNeededMem);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateOpChat1\n", (uint64_t)szNeededMem);
 
 		if(sPreTexts[SETPRETXT_OP_CHAT_MYINFO] == NULL) {
             exit(EXIT_FAILURE);
@@ -2527,37 +2527,35 @@ void SetMan::UpdateOpChat(const bool &bNickChanged/* = true*/) {
     iMsgLen = sprintf(sPreTexts[SETPRETXT_OP_CHAT_MYINFO], "$MyINFO $ALL %s %s$ $$%s$$|", sTexts[SETTXT_OP_CHAT_NICK],
         sTexts[SETTXT_OP_CHAT_DESCRIPTION] != NULL ? sTexts[SETTXT_OP_CHAT_DESCRIPTION] : "", 
         sTexts[SETTXT_OP_CHAT_EMAIL] != NULL ? sTexts[SETTXT_OP_CHAT_EMAIL] : "");
-    if(CheckSprintf(iMsgLen, szNeededMem, "SetMan::UpdateOpChat1") == false) {
+    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateOpChat1") == false) {
         exit(EXIT_FAILURE);
     }
 
     ui16PreTextsLens[SETPRETXT_OP_CHAT_MYINFO] = (uint16_t)iMsgLen;
     sPreTexts[SETPRETXT_OP_CHAT_MYINFO][iMsgLen] = '\0';
 
-	if(bServerRunning == false) {
+	if(clsServerManager::bServerRunning == false) {
         return;
     }
 
     if(bBotsSameNick == false) {
         char sMsg[128];
         iMsgLen = sprintf(sMsg, "$OpList %s$$|", sTexts[SETTXT_OP_CHAT_NICK]);
-        if(CheckSprintf(iMsgLen, 128, "SetMan::UpdateOpChat2") == false) {
+        if(CheckSprintf(iMsgLen, 128, "clsSettingManager::UpdateOpChat2") == false) {
             exit(EXIT_FAILURE);
         }
 
-        User *next = colUsers->llist;
+        User *next = clsUsers::mPtr->llist;
         while(next != NULL) {
             User *curUser = next;
             next = curUser->next;
-            if(curUser->ui8State == User::STATE_ADDED && ProfileMan->IsAllowed(curUser, ProfileManager::ALLOWEDOPCHAT) == true) {
+            if(curUser->ui8State == User::STATE_ADDED && clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::ALLOWEDOPCHAT) == true) {
                 if(bNickChanged == true && (((curUser->ui32SupportBits & User::SUPPORTBIT_NOHELLO) == User::SUPPORTBIT_NOHELLO) == false)) {
-                    UserSendCharDelayed(curUser, SettingManager->sPreTexts[SETPRETXT_OP_CHAT_HELLO], 
-                        SettingManager->ui16PreTextsLens[SETPRETXT_OP_CHAT_HELLO]);
+                    curUser->SendCharDelayed(sPreTexts[SETPRETXT_OP_CHAT_HELLO], ui16PreTextsLens[SETPRETXT_OP_CHAT_HELLO]);
                 }
-                UserSendCharDelayed(curUser, SettingManager->sPreTexts[SETPRETXT_OP_CHAT_MYINFO], 
-                    SettingManager->ui16PreTextsLens[SETPRETXT_OP_CHAT_MYINFO]);
+                curUser->SendCharDelayed(sPreTexts[SETPRETXT_OP_CHAT_MYINFO], ui16PreTextsLens[SETPRETXT_OP_CHAT_MYINFO]);
                 if(bNickChanged == true) {
-                    UserSendCharDelayed(curUser, sMsg, iMsgLen);
+                    curUser->SendCharDelayed(sMsg, iMsgLen);
                 }    
             }
         }
@@ -2565,23 +2563,23 @@ void SetMan::UpdateOpChat(const bool &bNickChanged/* = true*/) {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::DisableOpChat(const bool &bNickChanged/* = true*/) {
-    if(bUpdateLocked == true || ServersS == NULL || bBotsSameNick == true) {
+void clsSettingManager::DisableOpChat(const bool &bNickChanged/* = true*/) {
+    if(bUpdateLocked == true || clsServerManager::ServersS == NULL || bBotsSameNick == true) {
         return;
     }
 
     if(bNickChanged == true) {
-        colUsers->DelFromNickList(sTexts[SETTXT_OP_CHAT_NICK], true);
+        clsUsers::mPtr->DelFromNickList(sTexts[SETTXT_OP_CHAT_NICK], true);
 
         char msg[128];
         int iMsgLen = sprintf(msg, "$Quit %s|", sTexts[SETTXT_OP_CHAT_NICK]);
-        if(CheckSprintf(iMsgLen, 128, "SetMan::DisableOpChat") == true) {
-            User *next = colUsers->llist;
+        if(CheckSprintf(iMsgLen, 128, "clsSettingManager::DisableOpChat") == true) {
+            User *next = clsUsers::mPtr->llist;
             while(next != NULL) {
                 User *curUser = next;
                 next = curUser->next;
-                if(curUser->ui8State == User::STATE_ADDED && ProfileMan->IsAllowed(curUser, ProfileManager::ALLOWEDOPCHAT) == true) {
-                    UserSendCharDelayed(curUser, msg, iMsgLen);
+                if(curUser->ui8State == User::STATE_ADDED && clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::ALLOWEDOPCHAT) == true) {
+                    curUser->SendCharDelayed(msg, iMsgLen);
                 }
             }
         }
@@ -2589,42 +2587,42 @@ void SetMan::DisableOpChat(const bool &bNickChanged/* = true*/) {
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateUDPPort() {
-	if(bUpdateLocked == true || bServerRunning == false) {
+void clsSettingManager::UpdateUDPPort() {
+	if(bUpdateLocked == true || clsServerManager::bServerRunning == false) {
         return;
     }
 
-    UDPThread::Destroy(g_pUDPThread6);
-    g_pUDPThread6 = NULL;
+    UDPThread::Destroy(UDPThread::mPtrIPv6);
+    UDPThread::mPtrIPv6 = NULL;
 
-    UDPThread::Destroy(g_pUDPThread4);
-    g_pUDPThread4 = NULL;
+    UDPThread::Destroy(UDPThread::mPtrIPv4);
+    UDPThread::mPtrIPv4 = NULL;
 
     if((uint16_t)atoi(sTexts[SETTXT_UDP_PORT]) != 0) {
-        if(SettingManager->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true || (bUseIPv6 == true && bIPv6DualStack == false)) {
-            if(bUseIPv6 == true) {
-                g_pUDPThread6 = UDPThread::Create(AF_INET6);
+        if(bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true || (clsServerManager::bUseIPv6 == true && clsServerManager::bIPv6DualStack == false)) {
+            if(clsServerManager::bUseIPv6 == true) {
+                UDPThread::mPtrIPv6 = UDPThread::Create(AF_INET6);
             }
 
-            g_pUDPThread4 = UDPThread::Create(AF_INET);
+            UDPThread::mPtrIPv4 = UDPThread::Create(AF_INET);
         } else {
-            g_pUDPThread6 = UDPThread::Create(bUseIPv6 == true ? AF_INET6 : AF_INET);
+            UDPThread::mPtrIPv6 = UDPThread::Create(clsServerManager::bUseIPv6 == true ? AF_INET6 : AF_INET);
         }
     }
 }
 //---------------------------------------------------------------------------
 
-void SetMan::UpdateScripting() const {
-    if(bUpdateLocked == true || bServerRunning == false) {
+void clsSettingManager::UpdateScripting() const {
+    if(bUpdateLocked == true || clsServerManager::bServerRunning == false) {
         return;
     }
 
     if(bBools[SETBOOL_ENABLE_SCRIPTING] == true) {
-		ScriptManager->Start();
-		ScriptManager->OnStartup();
+		clsScriptManager::mPtr->Start();
+		clsScriptManager::mPtr->OnStartup();
     } else {
-		ScriptManager->OnExit(true);
-		ScriptManager->Stop();
+		clsScriptManager::mPtr->OnExit(true);
+		clsScriptManager::mPtr->Stop();
     }
 }
 //---------------------------------------------------------------------------

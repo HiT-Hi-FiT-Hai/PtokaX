@@ -22,6 +22,7 @@
 //---------------------------------------------------------------------------
 #include "ZlibUtility.h"
 //---------------------------------------------------------------------------
+#include "ServerManager.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
 #ifdef _WIN32
@@ -33,13 +34,13 @@
 static const uint32_t ZBUFFERLEN = 131072;
 static const uint32_t ZMINLEN = 100;
 //---------------------------------------------------------------------------
-clsZlibUtility * ZlibUtility = NULL;
+clsZlibUtility * clsZlibUtility::mPtr = NULL;
 //---------------------------------------------------------------------------
 
 clsZlibUtility::clsZlibUtility() {
 	// allocate buffer for zlib
 #ifdef _WIN32
-	sZbuffer = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ZBUFFERLEN);
+	sZbuffer = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ZBUFFERLEN);
 #else
 	sZbuffer = (char *)calloc(ZBUFFERLEN, 1);
 #endif
@@ -55,7 +56,7 @@ clsZlibUtility::clsZlibUtility() {
 clsZlibUtility::~clsZlibUtility() {
 #ifdef _WIN32
     if(sZbuffer != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZbuffer) == 0) {
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZbuffer) == 0) {
 			AppendDebugLog("%s - [MEM] Cannot deallocate sZbuffer in clsZlibUtility::~clsZlibUtility\n", 0);
         }
     }
@@ -74,7 +75,7 @@ char * clsZlibUtility::CreateZPipe(const char *sInData, const size_t &szInDataSi
 
         char * pOldBuf = sZbuffer;
 #ifdef _WIN32
-        sZbuffer = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szZbufferSize);
+        sZbuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szZbufferSize);
 #else
 		sZbuffer = (char *)realloc(pOldBuf, szZbufferSize);
 #endif
@@ -140,7 +141,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const size_t &szInDataSize, ch
 
         char * pOldBuf = sZbuffer;
 #ifdef _WIN32
-        sZbuffer = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szZbufferSize);
+        sZbuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szZbufferSize);
 #else
 		sZbuffer = (char *)realloc(pOldBuf, szZbufferSize);
 #endif
@@ -196,7 +197,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const size_t &szInDataSize, ch
         szOutDataSize = Allign1024(szOutDataLen)-1;
         char * pOldBuf = sOutData;
 #ifdef _WIN32
-        sOutData = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szOutDataSize+1);
+        sOutData = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szOutDataSize+1);
 #else
 		sOutData = (char *)realloc(pOldBuf, szOutDataSize+1);
 #endif
@@ -229,7 +230,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &uiInDataSi
 
         char * pOldBuf = sZbuffer;
 #ifdef _WIN32
-        sZbuffer = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szZbufferSize);
+        sZbuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szZbufferSize);
 #else
 		sZbuffer = (char *)realloc(pOldBuf, szZbufferSize);
 #endif
@@ -286,7 +287,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &uiInDataSi
 
         char * pOldBuf = sOutData;
 #ifdef _WIN32
-        sOutData = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, uiOutDataSize);
+        sOutData = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, uiOutDataSize);
 #else
 		sOutData = (char *)realloc(pOldBuf, uiOutDataSize);
 #endif

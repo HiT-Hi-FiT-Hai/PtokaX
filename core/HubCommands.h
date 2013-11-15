@@ -24,33 +24,27 @@
 struct User;
 //---------------------------------------------------------------------------
 
-class HubCommands {
+class clsHubCommands {
 private:
-    char msg[1024];
+    static char msg[1024];
 
-    bool Ban(User * curUser, char * sCommand, bool fromPM, bool bFull);
-    bool BanIp(User * curUser, char * sCommand, bool fromPM, bool bFull);
-    bool NickBan(User * curUser, char * sNick, char * sReason, bool bFromPM);
-    bool TempBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
-    bool TempBanIp(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
-    bool TempNickBan(User * curUser, char * sNick, char * sTime, const size_t &szTimeLen, char * sReason, bool bFromPM);
-    bool RangeBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
-    bool RangeTempBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
-    bool RangeUnban(User * curUser, char * sCommand, bool fromPM);
-    bool RangeUnban(User * curUser, char * sCommand, bool fromPM, unsigned char cType);
+    static bool Ban(User * curUser, char * sCommand, bool fromPM, bool bFull);
+    static bool BanIp(User * curUser, char * sCommand, bool fromPM, bool bFull);
+    static bool NickBan(User * curUser, char * sNick, char * sReason, bool bFromPM);
+    static bool TempBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
+    static bool TempBanIp(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
+    static bool TempNickBan(User * curUser, char * sNick, char * sTime, const size_t &szTimeLen, char * sReason, bool bFromPM);
+    static bool RangeBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
+    static bool RangeTempBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
+    static bool RangeUnban(User * curUser, char * sCommand, bool fromPM);
+    static bool RangeUnban(User * curUser, char * sCommand, bool fromPM, unsigned char cType);
 
-    void SendNoPermission(User * user, const bool &fromPM);
-    int CheckFromPm(User * curUser, const bool &fromPM);
+    static void SendNoPermission(User * user, const bool &fromPM);
+    static int CheckFromPm(User * curUser, const bool &fromPM);
     static void UncountDeflood(User * curUser, const bool &fromPM);
 public:
-	HubCommands();
-    ~HubCommands();
-
-    bool DoCommand(User * curUser, char * sCommand, const size_t &szCmdLen, bool fromPM = false);
+    static bool DoCommand(User * curUser, char * sCommand, const size_t &szCmdLen, bool fromPM = false);
 };
-
-//---------------------------------------------------------------------------
-extern HubCommands *HubCmds;
 //---------------------------------------------------------------------------
 
 #endif

@@ -24,8 +24,10 @@
 struct BanItem;
 //------------------------------------------------------------------------------
 
-class BansDialog {
+class clsBansDialog {
 public:
+    static clsBansDialog * mPtr;
+
     HWND hWndWindowItems[8];
 
     enum enmWindowItems {
@@ -39,8 +41,8 @@ public:
         BTN_CLEAR_PERM_BANS
     };
 
-    BansDialog();
-    ~BansDialog();
+    clsBansDialog();
+    ~clsBansDialog();
 
     static LRESULT CALLBACK StaticBansDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
     static int CompareBans(const void * pItem, const void * pOtherItem);
@@ -66,8 +68,6 @@ private:
     bool FilterBan(const BanItem * pBan);
     void ChangeBan();
 };
-//------------------------------------------------------------------------------
-extern BansDialog * pBansDialog;
 //------------------------------------------------------------------------------
 
 #endif

@@ -31,6 +31,7 @@
 #include "LanguageManager.h"
 #include "LuaScriptManager.h"
 #include "ProfileManager.h"
+#include "ServerManager.h"
 #include "SettingManager.h"
 #include "User.h"
 #include "utility.h"
@@ -59,7 +60,7 @@ static void PushReg(lua_State * L, RegUser * r) {
     lua_rawset(L, i);
             
     lua_pushliteral(L, "iProfile");
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, r->ui16Profile);
 #else
     lua_pushunsigned(L, r->ui16Profile);
@@ -75,7 +76,7 @@ static int Save(lua_State * L) {
         return 0;
     }
 
-	hashRegManager->Save();
+	clsRegManager::mPtr->Save();
 
     return 0;
 }
@@ -96,7 +97,7 @@ static int GetRegsByProfile(lua_State * L) {
         return 1;
     }
 
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
 #else
     uint16_t iProfile = (uint16_t)lua_tounsigned(L, 1);
@@ -107,14 +108,14 @@ static int GetRegsByProfile(lua_State * L) {
     lua_newtable(L);
     int t = lua_gettop(L), i = 0;
 
-	RegUser *next = hashRegManager->RegListS;
+	RegUser *next = clsRegManager::mPtr->RegListS;
         
     while(next != NULL) {
         RegUser *cur = next;
         next = cur->next;
         
 		if(cur->ui16Profile == iProfile) {
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 			lua_pushnumber(L, ++i);
 #else
             lua_pushunsigned(L, ++i);
@@ -143,14 +144,14 @@ static int GetRegsByOpStatus(lua_State * L, const bool &bOperator) {
     lua_newtable(L);
     int t = lua_gettop(L), i = 0;
 
-    RegUser *next = hashRegManager->RegListS;
+    RegUser *next = clsRegManager::mPtr->RegListS;
 
     while(next != NULL) {
         RegUser *curReg = next;
 		next = curReg->next;
 
-        if(ProfileMan->IsProfileAllowed(curReg->ui16Profile, ProfileManager::HASKEYICON) == bOperator) {
-#if LUA_VERSION_NUM == 501
+        if(clsProfileManager::mPtr->IsProfileAllowed(curReg->ui16Profile, clsProfileManager::HASKEYICON) == bOperator) {
+#if LUA_VERSION_NUM < 503
 			lua_pushnumber(L, ++i);
 #else
             lua_pushunsigned(L, ++i);
@@ -198,7 +199,7 @@ static int GetReg(lua_State * L) {
         return 1;
     }
 
-    RegUser * r = hashRegManager->Find(sNick, szLen);
+    RegUser * r = clsRegManager::mPtr->Find(sNick, szLen);
 
     lua_settop(L, 0);
 
@@ -224,13 +225,13 @@ static int GetRegs(lua_State * L) {
     lua_newtable(L);
     int t = lua_gettop(L), i = 0;
 
-    RegUser *next = hashRegManager->RegListS;
+    RegUser *next = clsRegManager::mPtr->RegListS;
 
     while(next != NULL) {
         RegUser *curReg = next;
 		next = curReg->next;
 
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 		lua_pushnumber(L, ++i);
 #else
         lua_pushunsigned(L, ++i);
@@ -260,19 +261,19 @@ static int AddReg(lua_State * L) {
         char *sNick = (char *)lua_tolstring(L, 1, &szNickLen);
         char *sPass = (char *)lua_tolstring(L, 2, &szPassLen);
 
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 		uint16_t i16Profile = (uint16_t)lua_tonumber(L, 3);
 #else
         uint16_t i16Profile = (uint16_t)lua_tounsigned(L, 3);
 #endif
 
-        if(i16Profile > ProfileMan->iProfileCount-1 || szNickLen == 0 || szNickLen > 64 || szPassLen == 0 || szPassLen > 64 || strpbrk(sNick, " $|") != NULL || strchr(sPass, '|') != NULL) {
+        if(i16Profile > clsProfileManager::mPtr->iProfileCount-1 || szNickLen == 0 || szNickLen > 64 || szPassLen == 0 || szPassLen > 64 || strpbrk(sNick, " $|") != NULL || strchr(sPass, '|') != NULL) {
             lua_settop(L, 0);
             lua_pushnil(L);
             return 1;
         }
 
-        bool bAdded = hashRegManager->AddNew(sNick, sPass, i16Profile);
+        bool bAdded = clsRegManager::mPtr->AddNew(sNick, sPass, i16Profile);
 
         lua_settop(L, 0);
 
@@ -295,26 +296,26 @@ static int AddReg(lua_State * L) {
         size_t szNickLen;
         char *sNick = (char *)lua_tolstring(L, 1, &szNickLen);
 
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 		uint16_t ui16Profile = (uint16_t)lua_tonumber(L, 2);
 #else
         uint16_t ui16Profile = (uint16_t)lua_tounsigned(L, 2);
 #endif
 
-        if(ui16Profile > ProfileMan->iProfileCount-1 || szNickLen == 0 || szNickLen > 64 || strpbrk(sNick, " $|") != NULL) {
+        if(ui16Profile > clsProfileManager::mPtr->iProfileCount-1 || szNickLen == 0 || szNickLen > 64 || strpbrk(sNick, " $|") != NULL) {
             lua_settop(L, 0);
             lua_pushnil(L);
             return 1;
         }
 
         // check if user is registered
-        if(hashRegManager->Find(sNick, szNickLen) != NULL) {
+        if(clsRegManager::mPtr->Find(sNick, szNickLen) != NULL) {
             lua_settop(L, 0);
             lua_pushnil(L);
             return 1;
         }
 
-        User * pUser = hashManager->FindUser(sNick, szNickLen);
+        User * pUser = clsHashManager::mPtr->FindUser(sNick, szNickLen);
         if(pUser == NULL) {
             lua_settop(L, 0);
             lua_pushnil(L);
@@ -325,7 +326,7 @@ static int AddReg(lua_State * L) {
             pUser->uLogInOut = new LoginLogout();
             if(pUser->uLogInOut == NULL) {
                 pUser->ui32BoolBits |= User::BIT_ERROR;
-                UserClose(pUser);
+                pUser->Close();
 
                 AppendDebugLog("%s - [MEM] Cannot allocate new pUser->uLogInOut in RegMan.AddReg\n", 0);
                 lua_settop(L, 0);
@@ -334,12 +335,12 @@ static int AddReg(lua_State * L) {
             }
         }
 
-        UserSetBuffer(pUser, ProfileMan->ProfilesTable[ui16Profile]->sName);
+        pUser->SetBuffer(clsProfileManager::mPtr->ProfilesTable[ui16Profile]->sName);
         pUser->ui32BoolBits |= User::BIT_WAITING_FOR_PASS;
 
-        int iMsgLen = sprintf(g_sBuffer, "<%s> %s.|$GetPass|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_YOU_WERE_REGISTERED_PLEASE_ENTER_YOUR_PASSWORD]);
-        if(CheckSprintf(iMsgLen, g_szBufferSize, "RegMan.AddReg1") == true) {
-            UserSendCharDelayed(pUser, g_sBuffer, iMsgLen);
+        int iMsgLen = sprintf(clsServerManager::sGlobalBuffer, "<%s> %s.|$GetPass|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_WERE_REGISTERED_PLEASE_ENTER_YOUR_PASSWORD]);
+        if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "RegMan.AddReg1") == true) {
+            pUser->SendCharDelayed(clsServerManager::sGlobalBuffer, iMsgLen);
         }
 
         lua_settop(L, 0);
@@ -378,7 +379,7 @@ static int DelReg(lua_State * L) {
         return 1;
     }
 
-	RegUser *reg = hashRegManager->Find(sNick, szNickLen);
+	RegUser *reg = clsRegManager::mPtr->Find(sNick, szNickLen);
 
     lua_settop(L, 0);
 
@@ -387,7 +388,7 @@ static int DelReg(lua_State * L) {
         return 1;
     }
 
-    hashRegManager->Delete(reg);
+    clsRegManager::mPtr->Delete(reg);
 
     lua_pushboolean(L, 1);
     return 1;
@@ -428,19 +429,19 @@ static int ChangeReg(lua_State * L) {
         return 1;
     }
 
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	uint16_t i16Profile = (uint16_t)lua_tonumber(L, 3);
 #else
 	uint16_t i16Profile = (uint16_t)lua_tounsigned(L, 3);
 #endif
 
-	if(i16Profile > ProfileMan->iProfileCount-1 || szNickLen == 0 || szNickLen > 64 || strpbrk(sNick, " $|") != NULL) {
+	if(i16Profile > clsProfileManager::mPtr->iProfileCount-1 || szNickLen == 0 || szNickLen > 64 || strpbrk(sNick, " $|") != NULL) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
     }
 
-	RegUser *reg = hashRegManager->Find(sNick, szNickLen);
+	RegUser *reg = clsRegManager::mPtr->Find(sNick, szNickLen);
 
     if(reg == NULL) {
 		lua_settop(L, 0);
@@ -448,7 +449,7 @@ static int ChangeReg(lua_State * L) {
         return 1;
     }
 
-    hashRegManager->ChangeReg(reg, sPass, i16Profile);
+    clsRegManager::mPtr->ChangeReg(reg, sPass, i16Profile);
 
     lua_settop(L, 0);
 
@@ -476,7 +477,7 @@ static int ClrRegBadPass(lua_State * L) {
     char * sNick = (char*)lua_tolstring(L, 1, &szNickLen);
 
     if(szNickLen != 0) {
-        RegUser *Reg = hashRegManager->Find(sNick, szNickLen);
+        RegUser *Reg = clsRegManager::mPtr->Find(sNick, szNickLen);
         if(Reg != NULL) {
             Reg->ui8BadPassCount = 0;
         } else {
@@ -508,13 +509,13 @@ static const luaL_Reg regman[] = {
 };
 //---------------------------------------------------------------------------
 
-#if LUA_VERSION_NUM == 501
-void RegRegMan(lua_State * L) {
-    luaL_register(L, "RegMan", regman);
-#else
+#if LUA_VERSION_NUM > 501
 int RegRegMan(lua_State * L) {
     luaL_newlib(L, regman);
     return 1;
+#else
+void RegRegMan(lua_State * L) {
+    luaL_register(L, "RegMan", regman);
 #endif
 }
 //---------------------------------------------------------------------------

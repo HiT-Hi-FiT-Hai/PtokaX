@@ -24,7 +24,7 @@
 struct RangeBanItem;
 //------------------------------------------------------------------------------
 
-class RangeBanDialog {
+class clsRangeBanDialog {
 public:
     HWND hWndWindowItems[17];
 
@@ -48,8 +48,8 @@ public:
         BTN_DISCARD
     };
 
-    RangeBanDialog();
-    ~RangeBanDialog();
+    clsRangeBanDialog();
+    ~clsRangeBanDialog();
 
     static LRESULT CALLBACK StaticRangeBanDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -62,8 +62,6 @@ private:
 
     bool OnAccept();
 };
-//------------------------------------------------------------------------------
-extern RangeBanDialog * pRangeBanDialog;
 //------------------------------------------------------------------------------
 
 #endif

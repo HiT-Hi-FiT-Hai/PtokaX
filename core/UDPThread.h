@@ -40,6 +40,9 @@ private:
 
 	char rcvbuf[4096];
 public:
+    static UDPThread * mPtrIPv4;
+    static UDPThread * mPtrIPv6;
+
 	UDPThread();
 	~UDPThread();
 
@@ -52,8 +55,6 @@ public:
     static UDPThread * Create(const int &iAddressFamily);
     static void Destroy(UDPThread * pUDPThread);
 };
-//---------------------------------------------------------------------------
-extern UDPThread *g_pUDPThread6, *g_pUDPThread4;
 //---------------------------------------------------------------------------
 
 #endif

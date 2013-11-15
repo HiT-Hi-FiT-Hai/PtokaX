@@ -43,10 +43,10 @@
     #include "../gui.win/MainWindowPageUsersChat.h"
 #endif
 //---------------------------------------------------------------------------
-eventq *eventqueue = NULL;
+clsEventQueue * clsEventQueue::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-eventq::eventq() {
+clsEventQueue::clsEventQueue() {
 #ifdef _WIN32
     InitializeCriticalSection(&csEventQueue);
 #else
@@ -61,7 +61,7 @@ eventq::eventq() {
 }
 //---------------------------------------------------------------------------
 
-eventq::~eventq() {
+clsEventQueue::~clsEventQueue() {
     event * next = NormalS;
 
     while(next != NULL) {
@@ -70,8 +70,8 @@ eventq::~eventq() {
 
 #ifdef _WIN32
         if(cur->sMsg != NULL) {
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sMsg) == 0) {
-				AppendDebugLog("%s - [MEM] Cannot deallocate cur->sMsg in eventq::~eventq\n", 0);
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sMsg) == 0) {
+				AppendDebugLog("%s - [MEM] Cannot deallocate cur->sMsg in clsEventQueue::~clsEventQueue\n", 0);
             }
         }
 #else
@@ -100,7 +100,7 @@ eventq::~eventq() {
 }
 //---------------------------------------------------------------------------
 
-void eventq::AddNormal(uint8_t ui8Id, char * sMsg) {
+void clsEventQueue::AddNormal(uint8_t ui8Id, char * sMsg) {
 	if(ui8Id != EVENT_RSTSCRIPT && ui8Id != EVENT_STOPSCRIPT) {
 		event * next = NormalS;
 
@@ -117,21 +117,21 @@ void eventq::AddNormal(uint8_t ui8Id, char * sMsg) {
     event * pNewEvent = new event();
 
 	if(pNewEvent == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewEvent in eventq::AddNormal\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewEvent in clsEventQueue::AddNormal\n", 0);
         return;
     }
 
     if(sMsg != NULL) {
         size_t szLen = strlen(sMsg);
 #ifdef _WIN32
-		pNewEvent->sMsg = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
+		pNewEvent->sMsg = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
 #else
 		pNewEvent->sMsg = (char *)malloc(szLen+1);
 #endif
 		if(pNewEvent->sMsg == NULL) {
             delete pNewEvent;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pNewEvent->sMsg in eventq::AddNormal\n", (uint64_t)(szLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pNewEvent->sMsg in clsEventQueue::AddNormal\n", (uint64_t)(szLen+1));
 
             return;
         }
@@ -157,11 +157,11 @@ void eventq::AddNormal(uint8_t ui8Id, char * sMsg) {
 }
 //---------------------------------------------------------------------------
 
-void eventq::AddThread(uint8_t ui8Id, char * sMsg, const sockaddr_storage * sas/* = NULL*/) {
+void clsEventQueue::AddThread(uint8_t ui8Id, char * sMsg, const sockaddr_storage * sas/* = NULL*/) {
 	event * pNewEvent = new event();
 
 	if(pNewEvent == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewEvent in eventq::AddThread\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewEvent in clsEventQueue::AddThread\n", 0);
         return;
     }
 
@@ -171,7 +171,7 @@ void eventq::AddThread(uint8_t ui8Id, char * sMsg, const sockaddr_storage * sas/
 		if(pNewEvent->sMsg == NULL) {
             delete pNewEvent;
 
-			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pNewEvent->sMsg in eventq::AddThread\n", (uint64_t)(szLen+1));
+			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pNewEvent->sMsg in clsEventQueue::AddThread\n", (uint64_t)(szLen+1));
 
             return;
         }
@@ -222,7 +222,7 @@ void eventq::AddThread(uint8_t ui8Id, char * sMsg, const sockaddr_storage * sas/
 }
 //---------------------------------------------------------------------------
 
-void eventq::ProcessEvents() {
+void clsEventQueue::ProcessEvents() {
 	event * next = NormalS;
 
 	NormalS = NULL;
@@ -234,49 +234,49 @@ void eventq::ProcessEvents() {
 
         switch(cur->ui8Id) {
 			case EVENT_RESTART:
-				bIsRestart = true;
-				ServerStop();
+				clsServerManager::bIsRestart = true;
+				clsServerManager::Stop();
                 break;
 			case EVENT_RSTSCRIPTS:
-                ScriptManager->Restart();
+                clsScriptManager::mPtr->Restart();
                 break;
             case EVENT_RSTSCRIPT: {
-            	Script * curScript = ScriptManager->FindScript(cur->sMsg);
+            	Script * curScript = clsScriptManager::mPtr->FindScript(cur->sMsg);
                 if(curScript == NULL || curScript->bEnabled == false || curScript->LUA == NULL) {
                     return;
                 }
 
-                ScriptManager->StopScript(curScript, false);
+                clsScriptManager::mPtr->StopScript(curScript, false);
 
-				ScriptManager->StartScript(curScript, false);
+				clsScriptManager::mPtr->StartScript(curScript, false);
 
                 break;
             }
 			case EVENT_STOPSCRIPT: {
-				Script * curScript = ScriptManager->FindScript(cur->sMsg);
+				Script * curScript = clsScriptManager::mPtr->FindScript(cur->sMsg);
             	if(curScript == NULL || curScript->bEnabled == false || curScript->LUA == NULL) {
                     return;
                 }
 
-				ScriptManager->StopScript(curScript, true);
+				clsScriptManager::mPtr->StopScript(curScript, true);
 
                 break;
             }
 			case EVENT_STOP_SCRIPTING:
-                if(SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] == true) {
-                    SettingManager->bBools[SETBOOL_ENABLE_SCRIPTING] = false;
-                    ScriptManager->OnExit(true);
-                    ScriptManager->Stop();
+                if(clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_SCRIPTING] == true) {
+                    clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_SCRIPTING] = false;
+                    clsScriptManager::mPtr->OnExit(true);
+                    clsScriptManager::mPtr->Stop();
                 }
 
                 break;
 			case EVENT_SHUTDOWN:
-                if(bIsClose == true) {
+                if(clsServerManager::bIsClose == true) {
                     break;
                 }
 
-                bIsClose = true;
-                ServerStop();
+                clsServerManager::bIsClose = true;
+                clsServerManager::Stop();
 
                 break;
             default:
@@ -285,8 +285,8 @@ void eventq::ProcessEvents() {
 
 #ifdef _WIN32
         if(cur->sMsg != NULL) {
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sMsg) == 0) {
-				AppendDebugLog("%s - [MEM] Cannot deallocate cur->sMsg in eventq::ProcessEvents\n", 0);
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sMsg) == 0) {
+				AppendDebugLog("%s - [MEM] Cannot deallocate cur->sMsg in clsEventQueue::ProcessEvents\n", 0);
             }
         }
 #else
@@ -319,14 +319,14 @@ void eventq::ProcessEvents() {
 
         switch(cur->ui8Id) {
             case EVENT_REGSOCK_MSG:
-                UdpDebug->Broadcast(cur->sMsg);
+                clsUdpDebug::mPtr->Broadcast(cur->sMsg);
                 break;
             case EVENT_SRVTHREAD_MSG:
-                UdpDebug->Broadcast(cur->sMsg);
+                clsUdpDebug::mPtr->Broadcast(cur->sMsg);
                 break;
             case EVENT_UDP_SR: {
                 size_t szMsgLen = strlen(cur->sMsg);
-                ui64BytesRead += (uint64_t)szMsgLen;
+                clsServerManager::ui64BytesRead += (uint64_t)szMsgLen;
 
                 char *temp = strchr(cur->sMsg+4, ' ');
                 if(temp == NULL) {
@@ -338,10 +338,10 @@ void eventq::ProcessEvents() {
                     break;
                 }
 
-				// terminate nick, needed for strcasecmp in hashmanager
+				// terminate nick, needed for strcasecmp in clsHashManager
                 temp[0] = '\0';
 
-                User *u = hashManager->FindUser(cur->sMsg+4, szLen);
+                User *u = clsHashManager::mPtr->FindUser(cur->sMsg+4, szLen);
                 if(u == NULL) {
                     break;
                 }
@@ -354,20 +354,20 @@ void eventq::ProcessEvents() {
                 }
 
 #ifdef _BUILD_GUI
-    if(::SendMessage(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+    if(::SendMessage(clsMainWindowPageUsersChat::mPtr->hWndPageItems[clsMainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
         char msg[128];
         int imsglen = sprintf(msg, "UDP > %s (%s) > ", u->sNick, u->sIP);
-        if(CheckSprintf(imsglen, 128, "eventq::ProcessEvents") == true) {
-            RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], (string(msg, imsglen)+cur->sMsg).c_str());
+        if(CheckSprintf(imsglen, 128, "clsEventQueue::ProcessEvents") == true) {
+            RichEditAppendText(clsMainWindowPageUsersChat::mPtr->hWndPageItems[clsMainWindowPageUsersChat::REDT_CHAT], (string(msg, imsglen)+cur->sMsg).c_str());
         }
     }
 #endif
 
-                DcCommands->SRFromUDP(u, cur->sMsg, szMsgLen);
+                clsDcCommands::mPtr->SRFromUDP(u, cur->sMsg, szMsgLen);
                 break;
             }
 			case EVENT_SHUTDOWN:
-                if(bIsClose == true) {
+                if(clsServerManager::bIsClose == true) {
                     break;
                 }
 
@@ -375,8 +375,8 @@ void eventq::ProcessEvents() {
                     AppendLog(cur->sMsg);
                 }
 
-                bIsClose = true;
-                ServerStop();
+                clsServerManager::bIsClose = true;
+                clsServerManager::Stop();
 
                 break;
             default:

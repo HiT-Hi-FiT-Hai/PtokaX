@@ -22,7 +22,7 @@
 #define RegThreadH
 //---------------------------------------------------------------------------
 
-class RegThread {
+class clsRegisterThread {
 private:
     struct RegSocket {
         RegSocket();
@@ -65,10 +65,12 @@ private:
     bool Send(RegSocket * Sock);
     void RemoveSock(RegSocket * Sock);
 public:
+    static clsRegisterThread * mPtr;
+
     uint32_t iBytesRead, iBytesSent;
 
-	RegThread();
-	~RegThread();
+	clsRegisterThread();
+	~clsRegisterThread();
 
 	void Setup(char * sAddresses, const uint16_t &ui16AddrsLen);
 	void Resume();
@@ -76,9 +78,6 @@ public:
 	void Close();
 	void WaitFor();
 };
-
-//---------------------------------------------------------------------------
-extern RegThread *RegisterThread;
 //---------------------------------------------------------------------------
 
 #endif

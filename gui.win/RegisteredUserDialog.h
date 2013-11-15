@@ -24,8 +24,10 @@
 struct RegUser;
 //------------------------------------------------------------------------------
 
-class RegisteredUserDialog {
+class clsRegisteredUserDialog {
 public:
+    static clsRegisteredUserDialog * mPtr;
+
     HWND hWndWindowItems[9];
 
     enum enmWindowItems {
@@ -40,8 +42,8 @@ public:
         BTN_DISCARD
     };
 
-    RegisteredUserDialog();
-    ~RegisteredUserDialog();
+    clsRegisteredUserDialog();
+    ~clsRegisteredUserDialog();
 
     static LRESULT CALLBACK StaticRegisteredUserDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -56,8 +58,6 @@ private:
 
     bool OnAccept();
 };
-//------------------------------------------------------------------------------
-extern RegisteredUserDialog * pRegisteredUserDialog;
 //------------------------------------------------------------------------------
 
 #endif

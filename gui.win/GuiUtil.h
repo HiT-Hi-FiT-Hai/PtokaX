@@ -21,25 +21,6 @@
 #ifndef GuiUtilH
 #define GuiUtilH
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-extern float fScaleFactor;
-extern int iGroupBoxMargin;
-extern int iCheckHeight;
-extern int iEditHeight;
-extern int iTextHeight;
-extern int iUpDownWidth;
-extern int iOneLineGB;
-extern int iOneLineOneChecksGB;
-extern int iOneLineTwoChecksGB;
-extern HFONT hFont;
-extern HCURSOR hArrowCursor;
-extern HCURSOR hVerticalCursor;
-extern WNDPROC wpOldButtonProc;
-extern WNDPROC wpOldEditProc;
-extern WNDPROC wpOldListViewProc;
-extern WNDPROC wpOldMultiRichEditProc;
-extern WNDPROC wpOldTabsProc;
-extern WNDPROC wpOldTreeProc;
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int ScaleGui(const int &iValue);
 int ScaleGuiDefaultsOnly(const int &iValue);

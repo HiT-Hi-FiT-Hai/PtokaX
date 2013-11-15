@@ -42,20 +42,11 @@
 static const int MAX_PAT_SIZE = 64;
 static const int MAX_ALPHABET_SIZE = 255;
 //---------------------------------------------------------------------------
-string PATH = "", SCRIPT_PATH = "", sTitle = "";
-size_t g_szBufferSize = 0;
-char * g_sBuffer = NULL;
-bool bCmdAutoStart = false, bCmdNoAutoStart = false, bCmdNoTray = false, bUseIPv4 = true, bUseIPv6 = true, bIPv6DualStack = false;
-#ifdef _WIN32
-	HANDLE hConsole = NULL, hLuaHeap = NULL, hPtokaXHeap = NULL, hRecvHeap = NULL, hSendHeap = NULL;
-	string PATH_LUA = "", sOs = "";
-#endif
-//---------------------------------------------------------------------------
 
 #ifdef _WIN32
 void Cout(const string &msg) {
-	if(hConsole != NULL) {
-		WriteConsole(hConsole, (msg+"\n").c_str(), (DWORD)msg.size()+1, 0, 0);
+	if(clsServerManager::hConsole != NULL) {
+		WriteConsole(clsServerManager::hConsole, (msg+"\n").c_str(), (DWORD)msg.size()+1, 0, 0);
     }
 }
 #else
@@ -358,7 +349,7 @@ char * formatTime(uint64_t rest) {
 	rest -= n*525600;
 
 	if(n != 0) {
-		int iLen = sprintf(buf, "%" PRIu64 " %s", n, n > 1 ? LanguageManager->sTexts[LAN_YEARS_LWR] : LanguageManager->sTexts[LAN_YEAR_LWR]);
+		int iLen = sprintf(buf, "%" PRIu64 " %s", n, n > 1 ? clsLanguageManager::mPtr->sTexts[LAN_YEARS_LWR] : clsLanguageManager::mPtr->sTexts[LAN_YEAR_LWR]);
 		if(CheckSprintf(iLen, 128, "formatTime1") == false) {
             time[0] = '\0';
             return time;
@@ -371,7 +362,7 @@ char * formatTime(uint64_t rest) {
 	rest -= n*43200;
 
 	if(n != 0) {       
-		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_MONTHS_LWR] : LanguageManager->sTexts[LAN_MONTH_LWR]);
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? clsLanguageManager::mPtr->sTexts[LAN_MONTHS_LWR] : clsLanguageManager::mPtr->sTexts[LAN_MONTH_LWR]);
 		if(CheckSprintf(iLen, 128, "formatTime3") == false) {
             time[0] = '\0';
             return time;
@@ -385,7 +376,7 @@ char * formatTime(uint64_t rest) {
 	rest -= n*1440;
 
 	if(n != 0) {       
-		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_DAYS_LWR] : LanguageManager->sTexts[LAN_DAY_LWR]);
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? clsLanguageManager::mPtr->sTexts[LAN_DAYS_LWR] : clsLanguageManager::mPtr->sTexts[LAN_DAY_LWR]);
 		if(CheckSprintf(iLen, 128, "formatTime5") == false) {
             time[0] = '\0';
             return time;
@@ -399,7 +390,7 @@ char * formatTime(uint64_t rest) {
 	rest -= n*60;
 
 	if(n != 0) {	
-		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_HOURS_LWR] : LanguageManager->sTexts[LAN_HOUR_LWR]);
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? clsLanguageManager::mPtr->sTexts[LAN_HOURS_LWR] : clsLanguageManager::mPtr->sTexts[LAN_HOUR_LWR]);
 		if(CheckSprintf(iLen, 128, "formatTime7") == false) {
             time[0] = '\0';
             return time;
@@ -410,7 +401,7 @@ char * formatTime(uint64_t rest) {
 	}
 
 	if(rest != 0) {
-		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", rest, LanguageManager->sTexts[LAN_MIN_LWR]);
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", rest, clsLanguageManager::mPtr->sTexts[LAN_MIN_LWR]);
 		if(CheckSprintf(iLen, 128, "formatTime9") == false) {
             time[0] = '\0';
             return time;
@@ -432,7 +423,7 @@ char * formatSecTime(uint64_t rest) {
 	rest -= n*31536000;
 
 	if(n != 0) {
-		int iLen = sprintf(buf, "%" PRIu64 " %s", n, n > 1 ? LanguageManager->sTexts[LAN_YEARS_LWR] : LanguageManager->sTexts[LAN_YEAR_LWR]);
+		int iLen = sprintf(buf, "%" PRIu64 " %s", n, n > 1 ? clsLanguageManager::mPtr->sTexts[LAN_YEARS_LWR] : clsLanguageManager::mPtr->sTexts[LAN_YEAR_LWR]);
 		if(CheckSprintf(iLen, 128, "formatSecTime1") == false) {
             time[0] = '\0';
             return time;
@@ -446,7 +437,7 @@ char * formatSecTime(uint64_t rest) {
 	rest -= n*2592000;
 
 	if(n != 0) {
-		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_MONTHS_LWR] : LanguageManager->sTexts[LAN_MONTH_LWR]);
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? clsLanguageManager::mPtr->sTexts[LAN_MONTHS_LWR] : clsLanguageManager::mPtr->sTexts[LAN_MONTH_LWR]);
 		if(CheckSprintf(iLen, 128, "formatSecTime3") == false) {
             time[0] = '\0';
             return time;
@@ -460,7 +451,7 @@ char * formatSecTime(uint64_t rest) {
 	rest -= n*86400;
 
 	if(n != 0) {
-		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_DAYS_LWR] : LanguageManager->sTexts[LAN_DAY_LWR]);
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? clsLanguageManager::mPtr->sTexts[LAN_DAYS_LWR] : clsLanguageManager::mPtr->sTexts[LAN_DAY_LWR]);
 		if(CheckSprintf(iLen, 128, "formatSecTime5") == false) {
             time[0] = '\0';
             return time;
@@ -474,7 +465,7 @@ char * formatSecTime(uint64_t rest) {
 	rest -= n*3600;
 
 	if(n != 0) {
-		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? LanguageManager->sTexts[LAN_HOURS_LWR] : LanguageManager->sTexts[LAN_HOUR_LWR]);
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, n > 1 ? clsLanguageManager::mPtr->sTexts[LAN_HOURS_LWR] : clsLanguageManager::mPtr->sTexts[LAN_HOUR_LWR]);
 		if(CheckSprintf(iLen, 128, "formatSecTime7") == false) {
             time[0] = '\0';
             return time;
@@ -488,7 +479,7 @@ char * formatSecTime(uint64_t rest) {
 	rest -= n*60;
 
 	if(n != 0) {
-		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, LanguageManager->sTexts[LAN_MIN_LWR]);
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", n, clsLanguageManager::mPtr->sTexts[LAN_MIN_LWR]);
 		if(CheckSprintf(iLen, 128, "formatSecTime9") == false) {
             time[0] = '\0';
             return time;
@@ -499,7 +490,7 @@ char * formatSecTime(uint64_t rest) {
 	}
 
 	if(rest != 0) {
-		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", rest, LanguageManager->sTexts[LAN_SEC_LWR]);
+		int iLen = sprintf(buf, "%s%" PRIu64 " %s", i > 0 ? " " : "", rest, clsLanguageManager::mPtr->sTexts[LAN_SEC_LWR]);
 		if(CheckSprintf(iLen, 128, "formatSecTime10") == false) {
             time[0] = '\0';
             return time;
@@ -555,7 +546,7 @@ char* stristr2(const char *str1, const char *str2) {
 // false - no ip
 // true - valid ip
 bool isIP(char * sIP) {
-    if(bUseIPv6 == true && strchr(sIP, '.') == NULL) {
+    if(clsServerManager::bUseIPv6 == true && strchr(sIP, '.') == NULL) {
         uint8_t ui128IpHash[16];
 #ifdef _WIN32
         if(win_inet_pton(sIP, ui128IpHash) != 1) {
@@ -591,7 +582,7 @@ uint32_t HashNick(const char * sNick, const size_t &szNickLen) {
 //---------------------------------------------------------------------------
 
 bool HashIP(const char * sIP, uint8_t * ui128IpHash) {
-    if(bUseIPv6 == true && strchr(sIP, '.') == NULL) {
+    if(clsServerManager::bUseIPv6 == true && strchr(sIP, '.') == NULL) {
 #ifdef _WIN32
         if(win_inet_pton(sIP, ui128IpHash) != 1) {
 #else
@@ -640,15 +631,15 @@ uint16_t GetIpTableIdx(const uint8_t * ui128IpHash) {
 char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_time) {
     static char banmsg[2048], banmsg1[512];
 
-    if(((Ban->ui8Bits & hashBanMan::PERM) == hashBanMan::PERM) == true) {
-        iMsgLen = sprintf(banmsg, "<%s> %s.", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SORRY_PERM_BANNED]);
+    if(((Ban->ui8Bits & clsBanManager::PERM) == clsBanManager::PERM) == true) {
+        iMsgLen = sprintf(banmsg, "<%s> %s.", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_PERM_BANNED]);
         if(CheckSprintf(iMsgLen, 2048, "GenerateBanMessage1") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
             return banmsg;
         }
     } else {
-        iMsgLen = sprintf(banmsg, "<%s> %s: %s", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SORRY_TEMP_BANNED], 
+        iMsgLen = sprintf(banmsg, "<%s> %s: %s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_TEMP_BANNED],
             formatSecTime(Ban->tempbanexpire-acc_time));
         if(CheckSprintf(iMsgLen, 2048, "GenerateBanMessage2") == false) {
             banmsg[0] = '\0';
@@ -657,8 +648,8 @@ char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_tim
         }
     }
 
-    if(SettingManager->bBools[SETBOOL_BAN_MSG_SHOW_IP] == true && Ban->sIp[0] != '\0') {
-        int iLen = sprintf(banmsg1, "\n%s: %s", LanguageManager->sTexts[LAN_IP], Ban->sIp);
+    if(clsSettingManager::mPtr->bBools[SETBOOL_BAN_MSG_SHOW_IP] == true && Ban->sIp[0] != '\0') {
+        int iLen = sprintf(banmsg1, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_IP], Ban->sIp);
         if(CheckSprintf(iLen, 512, "GenerateBanMessage3") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -668,8 +659,8 @@ char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_tim
         strcat(banmsg, banmsg1);
     }
 
-    if(SettingManager->bBools[SETBOOL_BAN_MSG_SHOW_NICK] == true && Ban->sNick != NULL) {
-        int iLen = sprintf(banmsg1, "\n%s: %s", LanguageManager->sTexts[LAN_NICK], Ban->sNick);
+    if(clsSettingManager::mPtr->bBools[SETBOOL_BAN_MSG_SHOW_NICK] == true && Ban->sNick != NULL) {
+        int iLen = sprintf(banmsg1, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_NICK], Ban->sNick);
         if(CheckSprintf(iLen, 512, "GenerateBanMessage4") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -679,8 +670,8 @@ char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_tim
         strcat(banmsg, banmsg1);
     }
 
-    if(SettingManager->bBools[SETBOOL_BAN_MSG_SHOW_REASON] == true && Ban->sReason != NULL) {
-        int iLen = sprintf(banmsg1, "\n%s: %s", LanguageManager->sTexts[LAN_REASON], Ban->sReason);
+    if(clsSettingManager::mPtr->bBools[SETBOOL_BAN_MSG_SHOW_REASON] == true && Ban->sReason != NULL) {
+        int iLen = sprintf(banmsg1, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_REASON], Ban->sReason);
         if(CheckSprintf(iLen, 512, "GenerateBanMessage5") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -690,8 +681,8 @@ char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_tim
         strcat(banmsg, banmsg1);
     }
 
-    if(SettingManager->bBools[SETBOOL_BAN_MSG_SHOW_BY] == true && Ban->sBy != NULL) {
-        int iLen = sprintf(banmsg1, "\n%s: %s", LanguageManager->sTexts[LAN_BANNED_BY], Ban->sBy);
+    if(clsSettingManager::mPtr->bBools[SETBOOL_BAN_MSG_SHOW_BY] == true && Ban->sBy != NULL) {
+        int iLen = sprintf(banmsg1, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_BANNED_BY], Ban->sBy);
         if(CheckSprintf(iLen, 512, "GenerateBanMessage6") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -701,8 +692,8 @@ char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_tim
         strcat(banmsg, banmsg1);
     }
 
-    if(SettingManager->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG] != NULL) {
-        int iLen = sprintf(banmsg1, "\n%s|", SettingManager->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG]);
+    if(clsSettingManager::mPtr->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG] != NULL) {
+        int iLen = sprintf(banmsg1, "\n%s|", clsSettingManager::mPtr->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG]);
         if(CheckSprintf(iLen, 512, "GenerateBanMessage7") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -716,15 +707,15 @@ char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_tim
         banmsg[iMsgLen] = '\0';
     }
 
-    if(((Ban->ui8Bits & hashBanMan::PERM) == hashBanMan::PERM) == true) {
-        if(SettingManager->bBools[SETBOOL_PERM_BAN_REDIR] == true) {
-            iMsgLen += (int)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_PERM_BAN_REDIR_ADDRESS];
-            strcat(banmsg, SettingManager->sPreTexts[SetMan::SETPRETXT_PERM_BAN_REDIR_ADDRESS]);
+    if(((Ban->ui8Bits & clsBanManager::PERM) == clsBanManager::PERM) == true) {
+        if(clsSettingManager::mPtr->bBools[SETBOOL_PERM_BAN_REDIR] == true) {
+            iMsgLen += (int)clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_PERM_BAN_REDIR_ADDRESS];
+            strcat(banmsg, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_PERM_BAN_REDIR_ADDRESS]);
         }
     } else {
-        if(SettingManager->bBools[SETBOOL_TEMP_BAN_REDIR] == true && SettingManager->sPreTexts[SetMan::SETPRETXT_TEMP_BAN_REDIR_ADDRESS] != NULL) {
-            iMsgLen += (int)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_TEMP_BAN_REDIR_ADDRESS];
-            strcat(banmsg, SettingManager->sPreTexts[SetMan::SETPRETXT_TEMP_BAN_REDIR_ADDRESS]);
+        if(clsSettingManager::mPtr->bBools[SETBOOL_TEMP_BAN_REDIR] == true && clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_TEMP_BAN_REDIR_ADDRESS] != NULL) {
+            iMsgLen += (int)clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_TEMP_BAN_REDIR_ADDRESS];
+            strcat(banmsg, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_TEMP_BAN_REDIR_ADDRESS]);
         }
     }
 
@@ -735,15 +726,15 @@ char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_tim
 char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const time_t &acc_time) {
     static char banmsg[2048], banmsg1[512];
 
-    if(((RangeBan->ui8Bits & hashBanMan::PERM) == hashBanMan::PERM) == true) {
-        iMsgLen = sprintf(banmsg, "<%s> %s.", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SORRY_PERM_BANNED]);
+    if(((RangeBan->ui8Bits & clsBanManager::PERM) == clsBanManager::PERM) == true) {
+        iMsgLen = sprintf(banmsg, "<%s> %s.", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_PERM_BANNED]);
         if(CheckSprintf(iMsgLen, 2048, "GenerateRangeBanMessage1") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
             return banmsg;
         }
     } else {
-        iMsgLen = sprintf(banmsg, "<%s> %s: %s", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_SORRY_TEMP_BANNED],
+        iMsgLen = sprintf(banmsg, "<%s> %s: %s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_TEMP_BANNED],
             formatSecTime(RangeBan->tempbanexpire-acc_time));
         if(CheckSprintf(iMsgLen, 2048, "GenerateRangeBanMessage2") == false) {
             banmsg[0] = '\0';
@@ -752,8 +743,8 @@ char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const 
         }
     }
 
-    if(SettingManager->bBools[SETBOOL_BAN_MSG_SHOW_RANGE] == true) {
-        int iLen = sprintf(banmsg1, "\n%s: %s-%s", LanguageManager->sTexts[LAN_RANGE], RangeBan->sIpFrom, RangeBan->sIpTo);
+    if(clsSettingManager::mPtr->bBools[SETBOOL_BAN_MSG_SHOW_RANGE] == true) {
+        int iLen = sprintf(banmsg1, "\n%s: %s-%s", clsLanguageManager::mPtr->sTexts[LAN_RANGE], RangeBan->sIpFrom, RangeBan->sIpTo);
         if(CheckSprintf(iLen, 512, "GenerateRangeBanMessage3") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -763,8 +754,8 @@ char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const 
         strcat(banmsg, banmsg1);
     }
 
-    if(SettingManager->bBools[SETBOOL_BAN_MSG_SHOW_REASON] == true && RangeBan->sReason != NULL) {
-        int iLen = sprintf(banmsg1, "\n%s: %s", LanguageManager->sTexts[LAN_REASON], RangeBan->sReason);
+    if(clsSettingManager::mPtr->bBools[SETBOOL_BAN_MSG_SHOW_REASON] == true && RangeBan->sReason != NULL) {
+        int iLen = sprintf(banmsg1, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_REASON], RangeBan->sReason);
         if(CheckSprintf(iLen, 512, "GenerateRangeBanMessage4") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -774,8 +765,8 @@ char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const 
         strcat(banmsg, banmsg1);
     }
 
-    if(SettingManager->bBools[SETBOOL_BAN_MSG_SHOW_BY] == true && RangeBan->sBy != NULL) {
-        int iLen = sprintf(banmsg1, "\n%s: %s", LanguageManager->sTexts[LAN_BANNED_BY], RangeBan->sBy);
+    if(clsSettingManager::mPtr->bBools[SETBOOL_BAN_MSG_SHOW_BY] == true && RangeBan->sBy != NULL) {
+        int iLen = sprintf(banmsg1, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_BANNED_BY], RangeBan->sBy);
         if(CheckSprintf(iLen, 512, "GenerateRangeBanMessage5") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -785,8 +776,8 @@ char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const 
         strcat(banmsg, banmsg1);
     }
 
-    if(SettingManager->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG] != NULL) {
-        int iLen = sprintf(banmsg1, "\n%s|", SettingManager->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG]);
+    if(clsSettingManager::mPtr->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG] != NULL) {
+        int iLen = sprintf(banmsg1, "\n%s|", clsSettingManager::mPtr->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG]);
         if(CheckSprintf(iLen, 512, "GenerateRangeBanMessage6") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -800,15 +791,15 @@ char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const 
         banmsg[iMsgLen] = '\0';
     }
 
-    if(((RangeBan->ui8Bits & hashBanMan::PERM) == hashBanMan::PERM) == true) {
-        if(SettingManager->bBools[SETBOOL_PERM_BAN_REDIR] == true) {
-            iMsgLen += (int)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_PERM_BAN_REDIR_ADDRESS];
-            strcat(banmsg, SettingManager->sPreTexts[SetMan::SETPRETXT_PERM_BAN_REDIR_ADDRESS]);
+    if(((RangeBan->ui8Bits & clsBanManager::PERM) == clsBanManager::PERM) == true) {
+        if(clsSettingManager::mPtr->bBools[SETBOOL_PERM_BAN_REDIR] == true) {
+            iMsgLen += (int)clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_PERM_BAN_REDIR_ADDRESS];
+            strcat(banmsg, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_PERM_BAN_REDIR_ADDRESS]);
         }
     } else {
-        if(SettingManager->bBools[SETBOOL_TEMP_BAN_REDIR] == true && SettingManager->sPreTexts[SetMan::SETPRETXT_TEMP_BAN_REDIR_ADDRESS] != NULL) {
-            iMsgLen += (int)SettingManager->ui16PreTextsLens[SetMan::SETPRETXT_TEMP_BAN_REDIR_ADDRESS];
-            strcat(banmsg, SettingManager->sPreTexts[SetMan::SETPRETXT_TEMP_BAN_REDIR_ADDRESS]);
+        if(clsSettingManager::mPtr->bBools[SETBOOL_TEMP_BAN_REDIR] == true && clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_TEMP_BAN_REDIR_ADDRESS] != NULL) {
+            iMsgLen += (int)clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_TEMP_BAN_REDIR_ADDRESS];
+            strcat(banmsg, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_TEMP_BAN_REDIR_ADDRESS]);
         }
     }
     return banmsg;
@@ -864,9 +855,9 @@ bool HaveOnlyNumbers(char *sData, const uint16_t &ui16Len) {
 //---------------------------------------------------------------------------
 
 int GetWlcmMsg(char * sWlcmMsg) {
-	int iLen =  sprintf(sWlcmMsg, "%s%" PRIu64 " %s, %" PRIu64 " %s, %" PRIu64 " %s / %s: %u)|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_NAME_WLCM],
-        iDays, LanguageManager->sTexts[LAN_DAYS_LWR], iHours, LanguageManager->sTexts[LAN_HOURS_LWR], iMins, LanguageManager->sTexts[LAN_MINUTES_LWR],
-        LanguageManager->sTexts[LAN_USERS], ui32Logged);
+	int iLen =  sprintf(sWlcmMsg, "%s%" PRIu64 " %s, %" PRIu64 " %s, %" PRIu64 " %s / %s: %u)|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_NAME_WLCM],
+        clsServerManager::ui64Days, clsLanguageManager::mPtr->sTexts[LAN_DAYS_LWR], clsServerManager::ui64Hours, clsLanguageManager::mPtr->sTexts[LAN_HOURS_LWR], clsServerManager::ui64Mins, clsLanguageManager::mPtr->sTexts[LAN_MINUTES_LWR],
+        clsLanguageManager::mPtr->sTexts[LAN_USERS], clsServerManager::ui32Logged);
     if(CheckSprintf(iLen, 1024, "GetWlcmMsg2") == false) {
         sWlcmMsg[0] = '\0';
         return 0;
@@ -935,15 +926,15 @@ void AppendLog(const string & sData, const bool &bScript/* == false*/) {
 
 	if(bScript == false) {
 #ifdef _WIN32
-        fw = fopen((PATH + "\\logs\\system.log").c_str(), "a");
+        fw = fopen((clsServerManager::sPath + "\\logs\\system.log").c_str(), "a");
 #else
-		fw = fopen((PATH + "/logs/system.log").c_str(), "a");
+		fw = fopen((clsServerManager::sPath + "/logs/system.log").c_str(), "a");
 #endif
     } else {
 #ifdef _WIN32
-        fw = fopen((PATH + "\\logs\\script.log").c_str(), "a");
+        fw = fopen((clsServerManager::sPath + "\\logs\\script.log").c_str(), "a");
 #else
-		fw = fopen((PATH + "/logs/script.log").c_str(), "a");
+		fw = fopen((clsServerManager::sPath + "/logs/script.log").c_str(), "a");
 #endif
     }
 
@@ -962,16 +953,16 @@ void AppendLog(const string & sData, const bool &bScript/* == false*/) {
 	   fclose(fw);
 	}
 
-    if(UdpDebug != NULL && bScript == false) {
+    if(clsUdpDebug::mPtr != NULL && bScript == false) {
         if(sData.size() < 1000) {
             static char msg[1024];
             int imsgLen = sprintf(msg, "[LOG] %s", sData.c_str());
             if(CheckSprintf(imsgLen, 1024, "AppendLog1") == true) {
-                UdpDebug->Broadcast(msg, imsgLen);
+                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
             }
         } else {
 #ifdef _WIN32
-            char * sMSG = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, sData.size()+64);
+            char * sMSG = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, sData.size()+64);
 #else
 			char * sMSG = (char *)malloc(sData.size()+64);
 #endif
@@ -982,11 +973,11 @@ void AppendLog(const string & sData, const bool &bScript/* == false*/) {
 
             int imsgLen = sprintf(sMSG, "[LOG] %s", sData.c_str());
             if(CheckSprintf(imsgLen, sData.size()+64, "AppendLog2") == true) {
-                UdpDebug->Broadcast(sMSG, imsgLen);
+                clsUdpDebug::mPtr->Broadcast(sMSG, imsgLen);
             }
 
 #ifdef _WIN32
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMSG) == 0) {
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMSG) == 0) {
     			AppendDebugLog("%s - [MEM] Cannot deallocate MSG in AppendLog\n", 0);
             }
 #else
@@ -999,9 +990,9 @@ void AppendLog(const string & sData, const bool &bScript/* == false*/) {
 
 void AppendDebugLog(const char * sData, const uint64_t ui64Value) {
 #ifdef _WIN32
-	FILE * fw = fopen((PATH + "\\logs\\debug.log").c_str(), "a");
+	FILE * fw = fopen((clsServerManager::sPath + "\\logs\\debug.log").c_str(), "a");
 #else
-	FILE * fw = fopen((PATH + "/logs/debug.log").c_str(), "a");
+	FILE * fw = fopen((clsServerManager::sPath + "/logs/debug.log").c_str(), "a");
 #endif
 
 	if(fw == NULL) {
@@ -1059,7 +1050,7 @@ void AppendDebugLog(const char * sData, const uint64_t ui64Value) {
 
 #ifdef _BUILD_GUI
 	void Memo(const string &sMessage) {
-        RichEditAppendText(pMainWindowPageUsersChat->hWndPageItems[MainWindowPageUsersChat::REDT_CHAT], sMessage.c_str());
+        RichEditAppendText(clsMainWindowPageUsersChat::mPtr->hWndPageItems[clsMainWindowPageUsersChat::REDT_CHAT], sMessage.c_str());
     }
 #else
 	void Memo(const string &/*sMessage*/) {
@@ -1105,33 +1096,33 @@ bool DirExist(char * sPath) {
 		ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 
 		if(::GetVersionEx((OSVERSIONINFO*)&ver) == 0) {
-			sOs = "Windows (unknown version)";
+			clsServerManager::sOS = "Windows (unknown version)";
 
 			return;
 		}
 
 		if(ver.dwPlatformId != VER_PLATFORM_WIN32_NT) {
-			sOs = "Windows 9x/ME";
+			clsServerManager::sOS = "Windows 9x/ME";
 	    } else if(ver.dwMajorVersion == 6) {
             if(ver.dwMinorVersion == 2) {
-                sOs = "Windows 8";
+                clsServerManager::sOS = "Windows 8";
             } else if(ver.dwMinorVersion == 1) {
 	           if(ver.wProductType == VER_NT_WORKSTATION) {
-	               sOs = "Windows 7";
+	               clsServerManager::sOS = "Windows 7";
 	           } else {
-	               sOs = "Windows 2008 R2";
+	               clsServerManager::sOS = "Windows 2008 R2";
 	           }
             } else {
 	           if(ver.wProductType == VER_NT_WORKSTATION) {
-	               sOs = "Windows Vista";
+	               clsServerManager::sOS = "Windows Vista";
 	           } else {
-	               sOs = "Windows 2008";
+	               clsServerManager::sOS = "Windows 2008";
 	           }
             }
 		} else if(ver.dwMajorVersion == 5) {
 	        if(ver.dwMinorVersion == 2) {
                 if(ver.wProductType != VER_NT_WORKSTATION) {
-				    sOs = "Windows 2003";
+				    clsServerManager::sOS = "Windows 2003";
 				    return;
                 } else if(ver.wProductType == VER_NT_WORKSTATION) {
                     SYSTEM_INFO si;
@@ -1146,20 +1137,20 @@ bool DirExist(char * sPath) {
                     }
 
                     if(si.wProcessorArchitecture==PROCESSOR_ARCHITECTURE_AMD64) {
-                        sOs = "Windows XP x64";
+                        clsServerManager::sOS = "Windows XP x64";
                         return;
                     }
                 }
 
                 // should not happen, but for sure...
-                sOs = "Windows 2003/XP64";
+                clsServerManager::sOS = "Windows 2003/XP64";
 			} else if(ver.dwMinorVersion == 1) {
-				sOs = "Windows XP";
+				clsServerManager::sOS = "Windows XP";
 			} else if(ver.dwMinorVersion == 0) {
-				sOs = "Windows 2000";
+				clsServerManager::sOS = "Windows 2000";
 			}
 		} else if(ver.dwMajorVersion == 4) {
-			sOs = "Windows NT4";
+			clsServerManager::sOS = "Windows NT4";
 		}
 	}
 //---------------------------------------------------------------------------
@@ -1167,15 +1158,15 @@ bool DirExist(char * sPath) {
     void * LuaAlocator(void * /*pOld*/, void * pData, size_t /*szOldSize*/, size_t szNewSize) {
         if(szNewSize == 0) {
             if(pData != NULL) {
-                ::HeapFree(hLuaHeap, 0, pData);
+                ::HeapFree(clsServerManager::hLuaHeap, 0, pData);
             }
 
             return NULL;
         } else {
             if(pData != NULL) {
-                return ::HeapReAlloc(hLuaHeap, 0, pData, szNewSize);
+                return ::HeapReAlloc(clsServerManager::hLuaHeap, 0, pData, szNewSize);
             } else  {
-                return ::HeapAlloc(hLuaHeap, 0, szNewSize);
+                return ::HeapAlloc(clsServerManager::hLuaHeap, 0, szNewSize);
             }
         }
     }
@@ -1202,7 +1193,7 @@ void CheckForIPv4() {
     if(sock == -1) {
         if(errno == EAFNOSUPPORT) {
 #endif
-            bUseIPv4 = false;
+            clsServerManager::bUseIPv4 = false;
             return;
         }
     }
@@ -1227,7 +1218,7 @@ void CheckForIPv6() {
     if(sock == -1) {
         if(errno == EAFNOSUPPORT) {
 #endif
-            bUseIPv6 = false;
+            clsServerManager::bUseIPv6 = false;
             return;
         }
     }
@@ -1239,7 +1230,7 @@ void CheckForIPv6() {
     int iIPv6 = 0;
     if(setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &iIPv6, sizeof(iIPv6)) != -1) {
 #endif
-        bIPv6DualStack = true;
+        clsServerManager::bIPv6DualStack = true;
     }
 
 #ifdef _WIN32
@@ -1357,14 +1348,14 @@ bool GetMacAddress(const char * sIP, char * sMac) {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void CreateGlobalBuffer() {
-    g_szBufferSize = 131072;
+    clsServerManager::szGlobalBufferSize = 131072;
 #ifdef _WIN32
-    g_sBuffer = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, g_szBufferSize);
+    clsServerManager::sGlobalBuffer = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, clsServerManager::szGlobalBufferSize);
 #else
-    g_sBuffer = (char *)calloc(g_szBufferSize, 1);
+    clsServerManager::sGlobalBuffer = (char *)calloc(clsServerManager::szGlobalBufferSize, 1);
 #endif
-    if(g_sBuffer == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot create g_sBuffer\n", 0);
+    if(clsServerManager::sGlobalBuffer == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot create clsServerManager::sGlobalBuffer\n", 0);
 		exit(EXIT_FAILURE);
     }
 }
@@ -1372,38 +1363,38 @@ void CreateGlobalBuffer() {
 
 void DeleteGlobalBuffer() {
 #ifdef _WIN32
-    if(g_sBuffer != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)g_sBuffer) == 0) {
-            AppendDebugLog("%s - [MEM] Cannot deallocate g_sBuffer\n", 0);
+    if(clsServerManager::sGlobalBuffer != NULL) {
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)clsServerManager::sGlobalBuffer) == 0) {
+            AppendDebugLog("%s - [MEM] Cannot deallocate clsServerManager::sGlobalBuffer\n", 0);
         }
     }
 #else
-	free(g_sBuffer);
+	free(clsServerManager::sGlobalBuffer);
 #endif
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 bool CheckAndResizeGlobalBuffer(const size_t &szWantedSize) {
-    if(g_szBufferSize >= szWantedSize) {
+    if(clsServerManager::szGlobalBufferSize >= szWantedSize) {
         return true;
     }
 
-    size_t szOldSize = g_szBufferSize;
-    char * sOldBuf = g_sBuffer;
+    size_t szOldSize = clsServerManager::szGlobalBufferSize;
+    char * sOldBuf = clsServerManager::sGlobalBuffer;
 
-    g_szBufferSize = Allign128K(szWantedSize);
+    clsServerManager::szGlobalBufferSize = Allign128K(szWantedSize);
 
 #ifdef _WIN32
-    g_sBuffer = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldBuf, g_szBufferSize);
+    clsServerManager::sGlobalBuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldBuf, clsServerManager::szGlobalBufferSize);
 #else
-    g_sBuffer = (char *)realloc(sOldBuf, g_szBufferSize);
+    clsServerManager::sGlobalBuffer = (char *)realloc(sOldBuf, clsServerManager::szGlobalBufferSize);
 #endif
-    if(g_sBuffer == NULL) {
-        g_sBuffer = sOldBuf;
+    if(clsServerManager::sGlobalBuffer == NULL) {
+        clsServerManager::sGlobalBuffer = sOldBuf;
 
-		AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in CheckAndResizeGlobalBuffer for g_sBuffer\n", (uint64_t)g_szBufferSize);
+		AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in CheckAndResizeGlobalBuffer for clsServerManager::sGlobalBuffer\n", (uint64_t)clsServerManager::szGlobalBufferSize);
 
-        g_szBufferSize = szOldSize;
+        clsServerManager::szGlobalBufferSize = szOldSize;
         return false;
 	}
 
@@ -1412,26 +1403,26 @@ bool CheckAndResizeGlobalBuffer(const size_t &szWantedSize) {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void ReduceGlobalBuffer() {
-    if(g_szBufferSize == 131072) {
+    if(clsServerManager::szGlobalBufferSize == 131072) {
         return;
     }
 
-    size_t szOldSize = g_szBufferSize;
-    char * sOldBuf = g_sBuffer;
+    size_t szOldSize = clsServerManager::szGlobalBufferSize;
+    char * sOldBuf = clsServerManager::sGlobalBuffer;
 
-    g_szBufferSize = 131072;
+    clsServerManager::szGlobalBufferSize = 131072;
 
 #ifdef _WIN32
-    g_sBuffer = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldBuf, g_szBufferSize);
+    clsServerManager::sGlobalBuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldBuf, clsServerManager::szGlobalBufferSize);
 #else
-    g_sBuffer = (char *)realloc(sOldBuf, g_szBufferSize);
+    clsServerManager::sGlobalBuffer = (char *)realloc(sOldBuf, clsServerManager::szGlobalBufferSize);
 #endif
-    if(g_sBuffer == NULL) {
-        g_sBuffer = sOldBuf;
+    if(clsServerManager::sGlobalBuffer == NULL) {
+        clsServerManager::sGlobalBuffer = sOldBuf;
 
-		AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in ReduceGlobalBuffer for g_sBuffer\n", (uint64_t)g_szBufferSize);
+		AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in ReduceGlobalBuffer for clsServerManager::sGlobalBuffer\n", (uint64_t)clsServerManager::szGlobalBufferSize);
 
-        g_szBufferSize = szOldSize;
+        clsServerManager::szGlobalBufferSize = szOldSize;
         return;
 	}
 }

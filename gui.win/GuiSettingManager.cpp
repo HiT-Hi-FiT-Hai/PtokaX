@@ -24,16 +24,35 @@
 #include "GuiSettingDefaults.h"
 #include "GuiSettingManager.h"
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "../core/utility.h"
+#include "../core/ServerManager.h"
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #pragma hdrstop
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "../core/PXBReader.h"
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-GuiSettingManager * g_GuiSettingManager = NULL;
+clsGuiSettingManager * clsGuiSettingManager::mPtr = NULL;
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+float clsGuiSettingManager::fScaleFactor = 1.0;
+int clsGuiSettingManager::iGroupBoxMargin = 17;
+int clsGuiSettingManager::iCheckHeight = 16;
+int clsGuiSettingManager::iEditHeight = 23;
+int clsGuiSettingManager::iTextHeight = 15;
+int clsGuiSettingManager::iUpDownWidth = 17;
+int clsGuiSettingManager::iOneLineGB = 17 + 23 + 8;
+int clsGuiSettingManager::iOneLineOneChecksGB = 17 + 16 + 23 + 12;
+int clsGuiSettingManager::iOneLineTwoChecksGB = 17 + (2 * 16) + 23 + 15;
+HFONT clsGuiSettingManager::hFont = NULL;
+HCURSOR clsGuiSettingManager::hArrowCursor = NULL;
+HCURSOR clsGuiSettingManager::hVerticalCursor = NULL;
+WNDPROC clsGuiSettingManager::wpOldButtonProc = NULL;
+WNDPROC clsGuiSettingManager::wpOldEditProc = NULL;
+WNDPROC clsGuiSettingManager::wpOldListViewProc = NULL;
+WNDPROC clsGuiSettingManager::wpOldMultiRichEditProc = NULL;
+WNDPROC clsGuiSettingManager::wpOldTabsProc = NULL;
+WNDPROC clsGuiSettingManager::wpOldTreeProc = NULL;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-GuiSettingManager::GuiSettingManager(void) {
+clsGuiSettingManager::clsGuiSettingManager(void) {
     // Read default bools
     for(size_t szi = 0; szi < GUISETBOOL_IDS_END; szi++) {
         SetBool(szi, GuiSetBoolDef[szi]);
@@ -49,15 +68,15 @@ GuiSettingManager::GuiSettingManager(void) {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-GuiSettingManager::~GuiSettingManager(void) {
+clsGuiSettingManager::~clsGuiSettingManager(void) {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GuiSettingManager::Load() {
+void clsGuiSettingManager::Load() {
     PXBReader pxbSetting;
 
     // Open setting file
-    if(pxbSetting.OpenFileRead((PATH + "\\cfg\\GuiSettigs.pxb").c_str()) == false) {
+    if(pxbSetting.OpenFileRead((clsServerManager::sPath + "\\cfg\\GuiSettigs.pxb").c_str()) == false) {
         return;
     }
 
@@ -105,11 +124,11 @@ void GuiSettingManager::Load() {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GuiSettingManager::Save() const {
+void clsGuiSettingManager::Save() const {
     PXBReader pxbSetting;
 
     // Open setting file
-    if(pxbSetting.OpenFileSave((PATH + "\\cfg\\GuiSettigs.pxb").c_str()) == false) {
+    if(pxbSetting.OpenFileSave((clsServerManager::sPath + "\\cfg\\GuiSettigs.pxb").c_str()) == false) {
         return;
     }
 
@@ -178,17 +197,17 @@ void GuiSettingManager::Save() const {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-bool GuiSettingManager::GetDefaultBool(const size_t &szBoolId) {
+bool clsGuiSettingManager::GetDefaultBool(const size_t &szBoolId) {
     return GuiSetBoolDef[szBoolId];
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-int32_t GuiSettingManager::GetDefaultInteger(const size_t &szIntegerId) {
+int32_t clsGuiSettingManager::GetDefaultInteger(const size_t &szIntegerId) {
     return GuiSetIntegerDef[szIntegerId];;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GuiSettingManager::SetBool(const size_t &szBoolId, const bool &bValue) {
+void clsGuiSettingManager::SetBool(const size_t &szBoolId, const bool &bValue) {
     if(bBools[szBoolId] == bValue) {
         return;
     }
@@ -197,7 +216,7 @@ void GuiSettingManager::SetBool(const size_t &szBoolId, const bool &bValue) {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void GuiSettingManager::SetInteger(const size_t &szIntegerId, const int32_t &i32Value) {
+void clsGuiSettingManager::SetInteger(const size_t &szIntegerId, const int32_t &i32Value) {
     if(i32Value < 0 || iIntegers[szIntegerId] == i32Value) {
         return;
     }

@@ -22,7 +22,7 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "PXBReader.h"
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "../core/utility.h"
+#include "../core/ServerManager.h"
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
@@ -76,11 +76,11 @@ bool PXBReader::OpenFileRead(const char * sFilename) {
         bFullRead = true;
     }
 
-    if(fread(g_sBuffer, 1, szRemainingSize, pFile) != szRemainingSize) {
+    if(fread(clsServerManager::sGlobalBuffer, 1, szRemainingSize, pFile) != szRemainingSize) {
         return false;
     }
 
-    sActualPosition = g_sBuffer;
+    sActualPosition = clsServerManager::sGlobalBuffer;
 
     return true;
 }
@@ -97,15 +97,15 @@ bool PXBReader::ReadNextItem(const uint16_t * sExpectedIdentificators, const uin
         if(bFullRead == true) {
             return false;
         } else { // read next part of file
-            memmove(g_sBuffer, sActualPosition, szRemainingSize);
+            memmove(clsServerManager::sGlobalBuffer, sActualPosition, szRemainingSize);
 
-            size_t szReadSize = fread(g_sBuffer + szRemainingSize, 1, 131072 - szRemainingSize, pFile);
+            size_t szReadSize = fread(clsServerManager::sGlobalBuffer + szRemainingSize, 1, 131072 - szRemainingSize, pFile);
 
             if(szReadSize != (131072 - szRemainingSize)) {
                 bFullRead = true;
             }
 
-            sActualPosition = g_sBuffer;
+            sActualPosition = clsServerManager::sGlobalBuffer;
             szRemainingSize += szReadSize;
 
             if(ui32ItemSize > szRemainingSize) {
@@ -167,7 +167,7 @@ bool PXBReader::OpenFileSave(const char * sFilename) {
 
     szRemainingSize = 131072;
 
-    sActualPosition = g_sBuffer;
+    sActualPosition = clsServerManager::sGlobalBuffer;
 
     return true;
 }
@@ -177,8 +177,8 @@ bool PXBReader::WriteNextItem(const uint32_t &ui32Length, const uint8_t &ui8SubI
     uint32_t ui32ItemLength = ui32Length + 4 + (4 * ui8SubItems);
 
     if(ui32ItemLength > szRemainingSize) {
-        fwrite(g_sBuffer, 1, sActualPosition-g_sBuffer, pFile);
-        sActualPosition = g_sBuffer;
+        fwrite(clsServerManager::sGlobalBuffer, 1, sActualPosition-clsServerManager::sGlobalBuffer, pFile);
+        sActualPosition = clsServerManager::sGlobalBuffer;
         szRemainingSize = 131072;
     }
 
@@ -218,8 +218,8 @@ bool PXBReader::WriteNextItem(const uint32_t &ui32Length, const uint8_t &ui8SubI
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void PXBReader::WriteRemaining() {
-    if((sActualPosition-g_sBuffer) > 0) {
-        fwrite(g_sBuffer, 1, sActualPosition-g_sBuffer, pFile);
+    if((sActualPosition-clsServerManager::sGlobalBuffer) > 0) {
+        fwrite(clsServerManager::sGlobalBuffer, 1, sActualPosition-clsServerManager::sGlobalBuffer, pFile);
     }
 
     fclose(pFile);

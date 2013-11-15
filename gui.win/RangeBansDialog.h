@@ -24,8 +24,10 @@
 struct RangeBanItem;
 //------------------------------------------------------------------------------
 
-class RangeBansDialog {
+class clsRangeBansDialog {
 public:
+    static clsRangeBansDialog * mPtr;
+
     HWND hWndWindowItems[8];
 
     enum enmWindowItems {
@@ -39,8 +41,8 @@ public:
         BTN_CLEAR_RANGE_PERM_BANS
     };
 
-    RangeBansDialog();
-    ~RangeBansDialog();
+    clsRangeBansDialog();
+    ~clsRangeBansDialog();
 
     static LRESULT CALLBACK StaticRangeBansDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
     static int CompareRangeBans(const void * pItem, const void * pOtherItem);
@@ -66,8 +68,6 @@ private:
     bool FilterRangeBan(const RangeBanItem * pRangeBan);
     void ChangeRangeBan();
 };
-//------------------------------------------------------------------------------
-extern RangeBansDialog * pRangeBansDialog;
 //------------------------------------------------------------------------------
 
 #endif

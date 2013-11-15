@@ -42,9 +42,9 @@ static int Save(lua_State * L) {
         return 0;
     }
 
-    ScriptManager->SaveScripts();
+    clsScriptManager::mPtr->SaveScripts();
 
-	SettingManager->Save();
+	clsSettingManager::mPtr->Save();
 
     return 0;
 }
@@ -58,8 +58,8 @@ static int GetMOTD(lua_State * L) {
         return 0;
     }
 
-	if(SettingManager->sMOTD != NULL) {
-        lua_pushlstring(L, SettingManager->sMOTD, (size_t)SettingManager->ui16MOTDLen);
+	if(clsSettingManager::mPtr->sMOTD != NULL) {
+        lua_pushlstring(L, clsSettingManager::mPtr->sMOTD, (size_t)clsSettingManager::mPtr->ui16MOTDLen);
     } else {
         lua_pushnil(L);
     }
@@ -84,9 +84,9 @@ static int SetMOTD(lua_State * L) {
     size_t szLen = 0;
     char * sTxt = (char *)lua_tolstring(L, 1, &szLen);
 
-	SettingManager->SetMOTD(sTxt, szLen);
+	clsSettingManager::mPtr->SetMOTD(sTxt, szLen);
 
-	SettingManager->UpdateMOTD();
+	clsSettingManager::mPtr->UpdateMOTD();
 
     lua_settop(L, 0);
     return 0;
@@ -108,7 +108,7 @@ static int GetBool(lua_State * L) {
         return 1;
     }
 
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	size_t szId = (size_t)lua_tonumber(L, 1);
 #else
     size_t szId = (size_t)lua_tounsigned(L, 1);
@@ -122,7 +122,7 @@ static int GetBool(lua_State * L) {
         return 1;
     }  
 
-    SettingManager->bBools[szId] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
+    clsSettingManager::mPtr->bBools[szId] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
 
     return 1;
 }
@@ -142,7 +142,7 @@ static int SetBool(lua_State * L) {
         return 0;
     }
 
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	size_t szId = (size_t)lua_tonumber(L, 1);
 #else
     size_t szId = (size_t)lua_tounsigned(L, 1);
@@ -158,15 +158,15 @@ static int SetBool(lua_State * L) {
     }  
 
     if(szId == SETBOOL_ENABLE_SCRIPTING && bValue == false) {
-        eventqueue->AddNormal(eventq::EVENT_STOP_SCRIPTING, NULL);
+        clsEventQueue::mPtr->AddNormal(clsEventQueue::EVENT_STOP_SCRIPTING, NULL);
         return 0;
     }
 
     if(szId == SETBOOL_HASH_PASSWORDS && bValue == true) {
-        hashRegManager->HashPasswords();
+        clsRegManager::mPtr->HashPasswords();
     }
 
-    SettingManager->SetBool(szId, bValue);
+    clsSettingManager::mPtr->SetBool(szId, bValue);
 
     return 0;
 }
@@ -187,7 +187,7 @@ static int GetNumber(lua_State * L) {
         return 1;
     }
 
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	size_t szId = (size_t)lua_tonumber(L, 1);
 #else
     size_t szId = (size_t)lua_tounsigned(L, 1);
@@ -201,7 +201,7 @@ static int GetNumber(lua_State * L) {
         return 1;
     }  
 
-    lua_pushinteger(L, SettingManager->iShorts[szId]);
+    lua_pushinteger(L, clsSettingManager::mPtr->iShorts[szId]);
 
     return 1;
 }
@@ -221,7 +221,7 @@ static int SetNumber(lua_State * L) {
         return 0;
     }
 
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	size_t szId = (size_t)lua_tonumber(L, 1);
 #else
     size_t szId = (size_t)lua_tounsigned(L, 1);
@@ -236,7 +236,7 @@ static int SetNumber(lua_State * L) {
         return 0;
     }  
 
-    SettingManager->SetShort(szId, iValue);
+    clsSettingManager::mPtr->SetShort(szId, iValue);
 
     return 0;
 }
@@ -257,7 +257,7 @@ static int GetString(lua_State * L) {
         return 1;
     }
 
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	size_t szId = (size_t)lua_tonumber(L, 1);
 #else
     size_t szId = (size_t)lua_tounsigned(L, 1);
@@ -271,8 +271,8 @@ static int GetString(lua_State * L) {
         return 1;
     }  
 
-    if(SettingManager->sTexts[szId] != NULL) {
-        lua_pushlstring(L, SettingManager->sTexts[szId], (size_t)SettingManager->ui16TextsLens[szId]);
+    if(clsSettingManager::mPtr->sTexts[szId] != NULL) {
+        lua_pushlstring(L, clsSettingManager::mPtr->sTexts[szId], (size_t)clsSettingManager::mPtr->ui16TextsLens[szId]);
     } else {
         lua_pushnil(L);
     }
@@ -295,7 +295,7 @@ static int SetString(lua_State * L) {
         return 0;
     }
 
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM < 503
 	size_t szId = (size_t)lua_tonumber(L, 1);
 #else
     size_t szId = (size_t)lua_tounsigned(L, 1);
@@ -310,7 +310,7 @@ static int SetString(lua_State * L) {
     size_t szLen;
     char * sValue = (char *)lua_tolstring(L, 2, &szLen);
 
-    SettingManager->SetText(szId, sValue, szLen);
+    clsSettingManager::mPtr->SetText(szId, sValue, szLen);
 
     lua_settop(L, 0);
     return 0;
@@ -325,10 +325,10 @@ static int GetMinShare(lua_State * L) {
         return 0;
     }
 
-#if LUA_VERSION_NUM == 501
-	lua_pushnumber(L, (double)SettingManager->ui64MinShare);
+#if LUA_VERSION_NUM < 503
+	lua_pushnumber(L, (double)clsSettingManager::mPtr->ui64MinShare);
 #else
-    lua_pushunsigned(L, SettingManager->ui64MinShare);
+    lua_pushunsigned(L, clsSettingManager::mPtr->ui64MinShare);
 #endif
 
     return 1;
@@ -346,17 +346,17 @@ static int SetMinShare(lua_State * L) {
             return 0;
         }
 
-		SettingManager->bUpdateLocked = true;
+		clsSettingManager::mPtr->bUpdateLocked = true;
 
-#if LUA_VERSION_NUM == 501
-		SettingManager->SetShort(SETSHORT_MIN_SHARE_LIMIT, (int16_t)lua_tonumber(L, 1));
-		SettingManager->SetShort(SETSHORT_MIN_SHARE_UNITS, (int16_t)lua_tonumber(L, 2));
+#if LUA_VERSION_NUM < 503
+		clsSettingManager::mPtr->SetShort(SETSHORT_MIN_SHARE_LIMIT, (int16_t)lua_tonumber(L, 1));
+		clsSettingManager::mPtr->SetShort(SETSHORT_MIN_SHARE_UNITS, (int16_t)lua_tonumber(L, 2));
 #else
-        SettingManager->SetShort(SETSHORT_MIN_SHARE_LIMIT, (int16_t)lua_tounsigned(L, 1));
-		SettingManager->SetShort(SETSHORT_MIN_SHARE_UNITS, (int16_t)lua_tounsigned(L, 2));
+        clsSettingManager::mPtr->SetShort(SETSHORT_MIN_SHARE_LIMIT, (int16_t)lua_tounsigned(L, 1));
+		clsSettingManager::mPtr->SetShort(SETSHORT_MIN_SHARE_UNITS, (int16_t)lua_tounsigned(L, 2));
 #endif
 
-		SettingManager->bUpdateLocked = false;
+		clsSettingManager::mPtr->bUpdateLocked = false;
     } else if(n == 1) {
         if(lua_type(L, 1) != LUA_TNUMBER) {
             luaL_checktype(L, 1, LUA_TNUMBER);
@@ -370,20 +370,20 @@ static int SetMinShare(lua_State * L) {
 			dBytes /= 1024;
 		}
 
-		SettingManager->bUpdateLocked = true;
+		clsSettingManager::mPtr->bUpdateLocked = true;
 
-        SettingManager->SetShort(SETSHORT_MIN_SHARE_LIMIT, (int16_t)dBytes);
-		SettingManager->SetShort(SETSHORT_MIN_SHARE_UNITS, iter);
+        clsSettingManager::mPtr->SetShort(SETSHORT_MIN_SHARE_LIMIT, (int16_t)dBytes);
+		clsSettingManager::mPtr->SetShort(SETSHORT_MIN_SHARE_UNITS, iter);
 
-		SettingManager->bUpdateLocked = false;
+		clsSettingManager::mPtr->bUpdateLocked = false;
     } else {
         luaL_error(L, "bad argument count to 'SetMinShare' (1 or 2 expected, got %d)", lua_gettop(L));
         lua_settop(L, 0);
         return 0;
     }
 
-	SettingManager->UpdateMinShare();
-	SettingManager->UpdateShareLimitMessage();
+	clsSettingManager::mPtr->UpdateMinShare();
+	clsSettingManager::mPtr->UpdateShareLimitMessage();
 
     lua_settop(L, 0);
     return 0;
@@ -398,10 +398,10 @@ static int GetMaxShare(lua_State * L) {
         return 0;
     }
 
-#if LUA_VERSION_NUM == 501
-	lua_pushnumber(L, (double)SettingManager->ui64MaxShare);
+#if LUA_VERSION_NUM < 503
+	lua_pushnumber(L, (double)clsSettingManager::mPtr->ui64MaxShare);
 #else
-    lua_pushunsigned(L, SettingManager->ui64MaxShare);
+    lua_pushunsigned(L, clsSettingManager::mPtr->ui64MaxShare);
 #endif
 
     return 1;
@@ -419,17 +419,17 @@ static int SetMaxShare(lua_State * L) {
             return 0;
         }
 
-		SettingManager->bUpdateLocked = true;
+		clsSettingManager::mPtr->bUpdateLocked = true;
 
-#if LUA_VERSION_NUM == 501
-		SettingManager->SetShort(SETSHORT_MAX_SHARE_LIMIT, (int16_t)lua_tonumber(L, 1));
-		SettingManager->SetShort(SETSHORT_MAX_SHARE_UNITS, (int16_t)lua_tonumber(L, 2));
+#if LUA_VERSION_NUM < 503
+		clsSettingManager::mPtr->SetShort(SETSHORT_MAX_SHARE_LIMIT, (int16_t)lua_tonumber(L, 1));
+		clsSettingManager::mPtr->SetShort(SETSHORT_MAX_SHARE_UNITS, (int16_t)lua_tonumber(L, 2));
 #else
-        SettingManager->SetShort(SETSHORT_MAX_SHARE_LIMIT, (int16_t)lua_tounsigned(L, 1));
-		SettingManager->SetShort(SETSHORT_MAX_SHARE_UNITS, (int16_t)lua_tounsigned(L, 2));
+        clsSettingManager::mPtr->SetShort(SETSHORT_MAX_SHARE_LIMIT, (int16_t)lua_tounsigned(L, 1));
+		clsSettingManager::mPtr->SetShort(SETSHORT_MAX_SHARE_UNITS, (int16_t)lua_tounsigned(L, 2));
 #endif
 
-		SettingManager->bUpdateLocked = false;
+		clsSettingManager::mPtr->bUpdateLocked = false;
     } else if(n == 1) {
         if(lua_type(L, 1) != LUA_TNUMBER) {
             luaL_checktype(L, 1, LUA_TNUMBER);
@@ -443,20 +443,20 @@ static int SetMaxShare(lua_State * L) {
 			dBytes /= 1024;
 		}
 
-		SettingManager->bUpdateLocked = true;
+		clsSettingManager::mPtr->bUpdateLocked = true;
 
-		SettingManager->SetShort(SETSHORT_MAX_SHARE_LIMIT, (int16_t)dBytes);
-		SettingManager->SetShort(SETSHORT_MAX_SHARE_UNITS, iter);
+		clsSettingManager::mPtr->SetShort(SETSHORT_MAX_SHARE_LIMIT, (int16_t)dBytes);
+		clsSettingManager::mPtr->SetShort(SETSHORT_MAX_SHARE_UNITS, iter);
 
-		SettingManager->bUpdateLocked = false;
+		clsSettingManager::mPtr->bUpdateLocked = false;
     } else {
         luaL_error(L, "bad argument count to 'SetMaxShare' (1 or 2 expected, got %d)", lua_gettop(L));
         lua_settop(L, 0);
         return 0;
     }
 
-	SettingManager->UpdateMaxShare();
-	SettingManager->UpdateShareLimitMessage();
+	clsSettingManager::mPtr->UpdateMaxShare();
+	clsSettingManager::mPtr->UpdateShareLimitMessage();
 
     lua_settop(L, 0);
     return 0;
@@ -477,19 +477,19 @@ static int SetHubSlotRatio(lua_State * L) {
         return 0;
     }
 
-	SettingManager->bUpdateLocked = true;
+	clsSettingManager::mPtr->bUpdateLocked = true;
 
-#if LUA_VERSION_NUM == 501
-		SettingManager->SetShort(SETSHORT_HUB_SLOT_RATIO_HUBS, (int16_t)lua_tonumber(L, 1));
-		SettingManager->SetShort(SETSHORT_HUB_SLOT_RATIO_SLOTS, (int16_t)lua_tonumber(L, 2));
+#if LUA_VERSION_NUM < 503
+		clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_HUBS, (int16_t)lua_tonumber(L, 1));
+		clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_SLOTS, (int16_t)lua_tonumber(L, 2));
 #else
-    SettingManager->SetShort(SETSHORT_HUB_SLOT_RATIO_HUBS, (int16_t)lua_tounsigned(L, 1));
-	SettingManager->SetShort(SETSHORT_HUB_SLOT_RATIO_SLOTS, (int16_t)lua_tounsigned(L, 2));
+    clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_HUBS, (int16_t)lua_tounsigned(L, 1));
+	clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_SLOTS, (int16_t)lua_tounsigned(L, 2));
 #endif
 
-	SettingManager->bUpdateLocked = false;
+	clsSettingManager::mPtr->bUpdateLocked = false;
 
-	SettingManager->UpdateHubSlotRatioMessage();
+	clsSettingManager::mPtr->UpdateHubSlotRatioMessage();
 
     lua_settop(L, 0);
     return 0;
@@ -508,34 +508,34 @@ static int GetOpChat(lua_State * L) {
 	int i = lua_gettop(L);
 
 	lua_pushliteral(L, "sNick");
-    if(SettingManager->sTexts[SETTXT_OP_CHAT_NICK] == NULL) {
+    if(clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK] == NULL) {
 		lua_pushnil(L);
 	} else {
-        lua_pushlstring(L, SettingManager->sTexts[SETTXT_OP_CHAT_NICK], 
-        (size_t)SettingManager->ui16TextsLens[SETTXT_OP_CHAT_NICK]);
+        lua_pushlstring(L, clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK],
+        (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_OP_CHAT_NICK]);
 	}
 	lua_rawset(L, i);
 
 	lua_pushliteral(L, "sDescription");
-    if(SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION] == NULL) {
+    if(clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_DESCRIPTION] == NULL) {
 		lua_pushnil(L);
 	} else {
-        lua_pushlstring(L, SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION], 
-        (size_t)SettingManager->ui16TextsLens[SETTXT_OP_CHAT_DESCRIPTION]);
+        lua_pushlstring(L, clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_DESCRIPTION],
+        (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_OP_CHAT_DESCRIPTION]);
 	}
 	lua_rawset(L, i);
 
 	lua_pushliteral(L, "sEmail");
-    if(SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL] == NULL) {
+    if(clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_EMAIL] == NULL) {
 		lua_pushnil(L);
 	} else {
-        lua_pushlstring(L, SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL], 
-        (size_t)SettingManager->ui16TextsLens[SETTXT_OP_CHAT_EMAIL]);
+        lua_pushlstring(L, clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_EMAIL],
+        (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_OP_CHAT_EMAIL]);
 	}
 	lua_rawset(L, i);
 
     lua_pushliteral(L, "bEnabled");
-    SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
+    clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, i);
 
     return 1;
@@ -567,57 +567,57 @@ static int SetOpChat(lua_State * L) {
 
     if(szNameLen == 0 || szNameLen > 64 || szDescrLen > 64 || szEmailLen > 64 ||
         strpbrk(NewBotName, " $|") != NULL || strpbrk(NewBotDescription, "$|") != NULL ||
-		strpbrk(NewBotEmail, "$|") != NULL || hashManager->FindUser(NewBotName, szNameLen) != NULL) {
+		strpbrk(NewBotEmail, "$|") != NULL || clsHashManager::mPtr->FindUser(NewBotName, szNameLen) != NULL) {
         lua_settop(L, 0);
         return 0;
     }
 
-    bool bBotHaveNewNick = (strcmp(SettingManager->sTexts[SETTXT_OP_CHAT_NICK], NewBotName) != 0);
+    bool bBotHaveNewNick = (strcmp(clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK], NewBotName) != 0);
     bool bEnableBot = (lua_toboolean(L, 1) == 0 ? false : true);
 
     bool bRegStateChange = false, bDescriptionChange = false, bEmailChange = false;
 
-    if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] != bEnableBot) {
+    if(clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] != bEnableBot) {
         bRegStateChange = true;
     }
 
-    if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true) {
-        SettingManager->DisableOpChat((bBotHaveNewNick == true || bEnableBot == false));
+    if(clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] == true) {
+        clsSettingManager::mPtr->DisableOpChat((bBotHaveNewNick == true || bEnableBot == false));
     }
 
-    SettingManager->bUpdateLocked = true;
+    clsSettingManager::mPtr->bUpdateLocked = true;
 
-    SettingManager->SetBool(SETBOOL_REG_OP_CHAT, bEnableBot);
+    clsSettingManager::mPtr->SetBool(SETBOOL_REG_OP_CHAT, bEnableBot);
 
     if(bBotHaveNewNick == true) {
-        SettingManager->SetText(SETTXT_OP_CHAT_NICK, NewBotName);
+        clsSettingManager::mPtr->SetText(SETTXT_OP_CHAT_NICK, NewBotName);
     }
 
-    if(SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION] == NULL ||
-        strcmp(SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION], NewBotDescription) != 0) {
-        if(szDescrLen != (size_t)(SettingManager->sTexts[SETTXT_OP_CHAT_DESCRIPTION] == NULL ? 0 : -1)) {
+    if(clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_DESCRIPTION] == NULL ||
+        strcmp(clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_DESCRIPTION], NewBotDescription) != 0) {
+        if(szDescrLen != (size_t)(clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_DESCRIPTION] == NULL ? 0 : -1)) {
             bDescriptionChange = true;
         }
 
-        SettingManager->SetText(SETTXT_OP_CHAT_DESCRIPTION, NewBotDescription);
+        clsSettingManager::mPtr->SetText(SETTXT_OP_CHAT_DESCRIPTION, NewBotDescription);
     }
 
-    if(SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL] == NULL || 
-        strcmp(SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL], NewBotEmail) != 0) {
-        if(szEmailLen != (size_t)(SettingManager->sTexts[SETTXT_OP_CHAT_EMAIL] == NULL ? 0 : -1)) {
+    if(clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_EMAIL] == NULL ||
+        strcmp(clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_EMAIL], NewBotEmail) != 0) {
+        if(szEmailLen != (size_t)(clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_EMAIL] == NULL ? 0 : -1)) {
             bEmailChange = true;
         }
 
-        SettingManager->SetText(SETTXT_OP_CHAT_EMAIL, NewBotEmail);
+        clsSettingManager::mPtr->SetText(SETTXT_OP_CHAT_EMAIL, NewBotEmail);
     }
 
-	SettingManager->bUpdateLocked = false;
+	clsSettingManager::mPtr->bUpdateLocked = false;
 
-    SettingManager->UpdateBotsSameNick();
+    clsSettingManager::mPtr->UpdateBotsSameNick();
 
-    if(SettingManager->bBools[SETBOOL_REG_OP_CHAT] == true &&
+    if(clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] == true &&
         (bRegStateChange == true || bBotHaveNewNick == true || bDescriptionChange == true || bEmailChange == true)) {
-        SettingManager->UpdateOpChat((bBotHaveNewNick == true || bRegStateChange == true));
+        clsSettingManager::mPtr->UpdateOpChat((bBotHaveNewNick == true || bRegStateChange == true));
     }
 
     lua_settop(L, 0);
@@ -637,38 +637,38 @@ static int GetHubBot(lua_State * L) {
 	int i = lua_gettop(L);
 
 	lua_pushliteral(L, "sNick");
-    if(SettingManager->sTexts[SETTXT_BOT_NICK] == NULL) {
+    if(clsSettingManager::mPtr->sTexts[SETTXT_BOT_NICK] == NULL) {
 		lua_pushnil(L);
 	} else {
-        lua_pushlstring(L, SettingManager->sTexts[SETTXT_BOT_NICK],
-        (size_t)SettingManager->ui16TextsLens[SETTXT_BOT_NICK]);
+        lua_pushlstring(L, clsSettingManager::mPtr->sTexts[SETTXT_BOT_NICK],
+        (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_BOT_NICK]);
 	}
 	lua_rawset(L, i);
 
 	lua_pushliteral(L, "sDescription");
-    if(SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] == NULL) {
+    if(clsSettingManager::mPtr->sTexts[SETTXT_BOT_DESCRIPTION] == NULL) {
 		lua_pushnil(L); 
 	} else {
-        lua_pushlstring(L, SettingManager->sTexts[SETTXT_BOT_DESCRIPTION], 
-        (size_t)SettingManager->ui16TextsLens[SETTXT_BOT_DESCRIPTION]);
+        lua_pushlstring(L, clsSettingManager::mPtr->sTexts[SETTXT_BOT_DESCRIPTION],
+        (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_BOT_DESCRIPTION]);
 	}
 	lua_rawset(L, i);
 
 	lua_pushliteral(L, "sEmail");
-    if(SettingManager->sTexts[SETTXT_BOT_EMAIL] == NULL) {
+    if(clsSettingManager::mPtr->sTexts[SETTXT_BOT_EMAIL] == NULL) {
 		lua_pushnil(L); 
 	} else {
-        lua_pushlstring(L, SettingManager->sTexts[SETTXT_BOT_EMAIL], 
-        (size_t)SettingManager->ui16TextsLens[SETTXT_BOT_EMAIL]);
+        lua_pushlstring(L, clsSettingManager::mPtr->sTexts[SETTXT_BOT_EMAIL],
+        (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_BOT_EMAIL]);
 	}
 	lua_rawset(L, i);
 
     lua_pushliteral(L, "bEnabled");
-    SettingManager->bBools[SETBOOL_REG_BOT] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
+    clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, i);
 
     lua_pushliteral(L, "bUsedAsHubSecAlias");
-    SettingManager->bBools[SETBOOL_USE_BOT_NICK_AS_HUB_SEC] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
+    clsSettingManager::mPtr->bBools[SETBOOL_USE_BOT_NICK_AS_HUB_SEC] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
     lua_rawset(L, i);
 
     return 1;
@@ -702,72 +702,72 @@ static int SetHubBot(lua_State * L) {
 
     if(szNameLen == 0 || szNameLen > 64 || szDescrLen > 64 || szEmailLen > 64 ||
         strpbrk(NewBotName, " $|") != NULL || strpbrk(NewBotDescription, "$|") != NULL ||
-        strpbrk(NewBotEmail, "$|") != NULL || hashManager->FindUser(NewBotName, szNameLen) != NULL) {
+        strpbrk(NewBotEmail, "$|") != NULL || clsHashManager::mPtr->FindUser(NewBotName, szNameLen) != NULL) {
         lua_settop(L, 0);
         return 0;
     }
 
-    bool bBotHaveNewNick = (strcmp(SettingManager->sTexts[SETTXT_BOT_NICK], NewBotName) != 0);
+    bool bBotHaveNewNick = (strcmp(clsSettingManager::mPtr->sTexts[SETTXT_BOT_NICK], NewBotName) != 0);
     bool bEnableBot = (lua_toboolean(L, 1) == 0 ? false : true);
 
     bool bRegStateChange = false, bDescriptionChange = false, bEmailChange = false;
 
-    if(SettingManager->bBools[SETBOOL_REG_BOT] != bEnableBot) {
+    if(clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] != bEnableBot) {
         bRegStateChange = true;
     }
 
-    SettingManager->bUpdateLocked = true;
+    clsSettingManager::mPtr->bUpdateLocked = true;
 
-    if(SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] == NULL ||
-        strcmp(SettingManager->sTexts[SETTXT_BOT_DESCRIPTION], NewBotDescription) != 0) {
-        if(szDescrLen != (size_t)(SettingManager->sTexts[SETTXT_BOT_DESCRIPTION] == NULL ? 0 : -1)) {
+    if(clsSettingManager::mPtr->sTexts[SETTXT_BOT_DESCRIPTION] == NULL ||
+        strcmp(clsSettingManager::mPtr->sTexts[SETTXT_BOT_DESCRIPTION], NewBotDescription) != 0) {
+        if(szDescrLen != (size_t)(clsSettingManager::mPtr->sTexts[SETTXT_BOT_DESCRIPTION] == NULL ? 0 : -1)) {
             bDescriptionChange = true;
         }
 
-        SettingManager->SetText(SETTXT_BOT_DESCRIPTION, NewBotDescription);
+        clsSettingManager::mPtr->SetText(SETTXT_BOT_DESCRIPTION, NewBotDescription);
     }
 
-    if(SettingManager->sTexts[SETTXT_BOT_EMAIL] == NULL ||
-        strcmp(SettingManager->sTexts[SETTXT_BOT_EMAIL], NewBotEmail) != 0) {
-        if(szEmailLen != (size_t)(SettingManager->sTexts[SETTXT_BOT_EMAIL] == NULL ? 0 : -1)) {
+    if(clsSettingManager::mPtr->sTexts[SETTXT_BOT_EMAIL] == NULL ||
+        strcmp(clsSettingManager::mPtr->sTexts[SETTXT_BOT_EMAIL], NewBotEmail) != 0) {
+        if(szEmailLen != (size_t)(clsSettingManager::mPtr->sTexts[SETTXT_BOT_EMAIL] == NULL ? 0 : -1)) {
             bEmailChange = true;
         }
 
-        SettingManager->SetText(SETTXT_BOT_EMAIL, NewBotEmail);
+        clsSettingManager::mPtr->SetText(SETTXT_BOT_EMAIL, NewBotEmail);
     }
 
-    SettingManager->SetBool(SETBOOL_USE_BOT_NICK_AS_HUB_SEC, (lua_toboolean(L, 5) == 0 ? false : true));
+    clsSettingManager::mPtr->SetBool(SETBOOL_USE_BOT_NICK_AS_HUB_SEC, (lua_toboolean(L, 5) == 0 ? false : true));
 
-    if(SettingManager->bBools[SETBOOL_REG_BOT] == true) {
-        SettingManager->bUpdateLocked = false;
-        SettingManager->DisableBot((bBotHaveNewNick == true || bEnableBot == false),
+    if(clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] == true) {
+        clsSettingManager::mPtr->bUpdateLocked = false;
+        clsSettingManager::mPtr->DisableBot((bBotHaveNewNick == true || bEnableBot == false),
             (bRegStateChange == true || bBotHaveNewNick == true || bDescriptionChange == true || bEmailChange == true) ? true : false);
-        SettingManager->bUpdateLocked = true;
+        clsSettingManager::mPtr->bUpdateLocked = true;
     }
 
-    SettingManager->SetBool(SETBOOL_REG_BOT, bEnableBot);
+    clsSettingManager::mPtr->SetBool(SETBOOL_REG_BOT, bEnableBot);
 
     if(bBotHaveNewNick == true) {
-        SettingManager->SetText(SETTXT_BOT_NICK, NewBotName);
+        clsSettingManager::mPtr->SetText(SETTXT_BOT_NICK, NewBotName);
     }
 
-    SettingManager->bUpdateLocked = false;
+    clsSettingManager::mPtr->bUpdateLocked = false;
 
-    SettingManager->UpdateHubSec();
-    SettingManager->UpdateMOTD();
-    SettingManager->UpdateHubNameWelcome();
-    SettingManager->UpdateRegOnlyMessage();
-    SettingManager->UpdateShareLimitMessage();
-    SettingManager->UpdateSlotsLimitMessage();
-    SettingManager->UpdateHubSlotRatioMessage();
-    SettingManager->UpdateMaxHubsLimitMessage();
-    SettingManager->UpdateNoTagMessage();
-    SettingManager->UpdateNickLimitMessage();
-    SettingManager->UpdateBotsSameNick();
+    clsSettingManager::mPtr->UpdateHubSec();
+    clsSettingManager::mPtr->UpdateMOTD();
+    clsSettingManager::mPtr->UpdateHubNameWelcome();
+    clsSettingManager::mPtr->UpdateRegOnlyMessage();
+    clsSettingManager::mPtr->UpdateShareLimitMessage();
+    clsSettingManager::mPtr->UpdateSlotsLimitMessage();
+    clsSettingManager::mPtr->UpdateHubSlotRatioMessage();
+    clsSettingManager::mPtr->UpdateMaxHubsLimitMessage();
+    clsSettingManager::mPtr->UpdateNoTagMessage();
+    clsSettingManager::mPtr->UpdateNickLimitMessage();
+    clsSettingManager::mPtr->UpdateBotsSameNick();
 
-    if(SettingManager->bBools[SETBOOL_REG_BOT] == true &&
+    if(clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] == true &&
         (bRegStateChange == true || bBotHaveNewNick == true || bDescriptionChange == true || bEmailChange == true)) {
-        SettingManager->UpdateBot((bBotHaveNewNick == true || bRegStateChange == true));
+        clsSettingManager::mPtr->UpdateBot((bBotHaveNewNick == true || bRegStateChange == true));
     }
 
     return 0;
@@ -797,13 +797,13 @@ static const luaL_Reg setman[] = {
 };
 //---------------------------------------------------------------------------
 
-#if LUA_VERSION_NUM == 501
-void RegSetMan(lua_State * L) {
-    luaL_register(L, "SetMan", setman);
-#else
+#if LUA_VERSION_NUM > 501
 int RegSetMan(lua_State * L) {
     luaL_newlib(L, setman);
     return 1;
+#else
+void RegSetMan(lua_State * L) {
+    luaL_register(L, "SetMan", setman);
 #endif
 }
 //---------------------------------------------------------------------------

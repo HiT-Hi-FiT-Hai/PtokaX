@@ -231,6 +231,7 @@ Save()															- Save profiles.
 TmrMan.
 -------------------
 AddTimer(iTimerInterval)				- Add new timer for script. nTimerInterval is in ms. Return nil when failed or uTimerId when success.
+AddTimer(iTimerInterval, fFunction)		- Add new timer for script. nTimerInterval is in ms. fFunction is Lua function called by this timer. Return nil when failed or uTimerId when success.
 AddTimer(iTimerInterval, sFunctionName)	- Add new timer for script. nTimerInterval is in ms. sFunctionName is name of function called by this timer. Return nil when failed or uTimerId when success.
 RemoveTimer(uTimerId)					- Remove timer with given ID from script.
 

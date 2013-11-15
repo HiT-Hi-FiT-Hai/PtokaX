@@ -23,50 +23,82 @@
 //---------------------------------------------------------------------------
 class ServerThread;
 //---------------------------------------------------------------------------
+
+class clsServerManager {
+public:
 #ifdef _WIN32
-    void ServerOnSecTimer();
-    void ServerOnRegTimer();
+    static void OnSecTimer();
+    static void OnRegTimer();
 #endif
-//---------------------------------------------------------------------------
-void ServerInitialize();
 
-void ServerFinalStop(const bool &bFromServiceLoop);
-void ServerResumeAccepts();
-void ServerSuspendAccepts(const uint32_t &iTime);
-void ServerUpdateAutoRegState();
+    static void Initialize();
 
-bool ServerStart();
-void ServerUpdateServers();
-void ServerStop();
-void ServerFinalClose();
-void ServerCreateServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber, const bool &bResume = false);
-//---------------------------------------------------------------------------
-extern double CpuUsage[60], cpuUsage;
-extern uint64_t ui64ActualTick, ui64TotalShare;
-extern uint64_t ui64BytesRead, ui64BytesSent, ui64BytesSentSaved;
-extern uint64_t iLastBytesRead, iLastBytesSent;
-extern uint32_t ui32Joins, ui32Parts, ui32Logged, ui32Peak;
+    static void FinalStop(const bool &bFromServiceLoop);
+    static void ResumeAccepts();
+    static void SuspendAccepts(const uint32_t &iTime);
+    static void UpdateAutoRegState();
+
+    static bool Start();
+    static void UpdateServers();
+    static void Stop();
+    static void FinalClose();
+    static void CreateServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber, const bool &bResume = false);
+
+    static string sPath, sScriptPath, sTitle;
+
+#ifdef _WIN32
+	static string sLuaPath, sOS;
+#endif
+
+    static size_t szGlobalBufferSize;
+
+    static char * sGlobalBuffer;
+
+#ifdef _WIN32
+	static HANDLE hConsole, hLuaHeap, hPtokaXHeap, hRecvHeap, hSendHeap;
+#endif
+
+    static double daCpuUsage[60], dCpuUsage;
+
+    static uint64_t ui64ActualTick, ui64TotalShare;
+    static uint64_t ui64BytesRead, ui64BytesSent, ui64BytesSentSaved;
+    static uint64_t ui64LastBytesRead, ui64LastBytesSent;
+    static uint64_t ui64Mins, ui64Hours, ui64Days;
+
 #ifndef _WIN32
-	extern uint32_t ui32CpuCount;
+    static uint32_t ui32CpuCount;
 #endif
-extern uint32_t UploadSpeed[60], DownloadSpeed[60];
-extern uint32_t iActualBytesRead, iActualBytesSent;
-extern uint32_t iAverageBytesRead, iAverageBytesSent;
-extern ServerThread *ServersS;
-extern time_t starttime;
-extern uint64_t iMins, iHours, iDays;
-extern bool bServerRunning, bServerTerminated, bIsRestart, bIsClose;
+
+    static uint32_t ui32Joins, ui32Parts, ui32Logged, ui32Peak;
+    static uint32_t ui32aUploadSpeed[60], ui32aDownloadSpeed[60];
+    static uint32_t ui32ActualBytesRead, ui32ActualBytesSent;
+    static uint32_t ui32AverageBytesRead, ui32AverageBytesSent;
+
+    static ServerThread * ServersS;
+
+    static time_t tStartTime;
+
+    static bool bServerRunning, bServerTerminated, bIsRestart, bIsClose;
+
 #ifdef _WIN32
-	extern UINT_PTR sectimer;
-    extern UINT_PTR regtimer;
+    static UINT_PTR sectimer;
+    static UINT_PTR regtimer;
 	#ifndef _BUILD_GUI
-	    extern bool bService;
+        static bool bService;
+    #else
+        static HINSTANCE hInstance;
+        static HWND hWndActiveDialog;
 	#endif
 #else
-	extern bool bDaemon;
+    static bool bDaemon;
 #endif
-extern char sHubIP[16], sHubIP6[46];
-extern uint8_t ui8SrCntr, ui8MinTick;
+
+    static bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bUseIPv4, bUseIPv6, bIPv6DualStack;
+
+    static char sHubIP[16], sHubIP6[46];
+
+    static uint8_t ui8SrCntr, ui8MinTick;
+};
 //--------------------------------------------------------------------------- 
 
 #endif

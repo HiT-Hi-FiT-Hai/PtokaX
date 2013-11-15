@@ -24,23 +24,23 @@
 #include "LanguageIds.h"
 //---------------------------------------------------------------------------
 
-class LangMan {
+class clsLanguageManager {
 private:
     // ...
 public:
+    static clsLanguageManager * mPtr;
+
     char * sTexts[LANG_IDS_END]; //LanguageManager->sTexts[]
     uint16_t ui16TextsLens[LANG_IDS_END]; //LanguageManager->ui16TextsLens[]
 
-    LangMan(void);
-    ~LangMan(void);
+    clsLanguageManager(void);
+    ~clsLanguageManager(void);
     
 	char * GetLangStr(size_t TextId); //LanguageManager->GetLangStr
-	void LoadLanguage();
+	void Load();
 	
 	static void GenerateXmlExample();
 };
-//--------------------------------------------------------------------------- 
-extern LangMan *LanguageManager;
 //---------------------------------------------------------------------------
 
 #endif

@@ -40,7 +40,7 @@
     #include "../gui.win/RegisteredUsersDialog.h"
 #endif
 //---------------------------------------------------------------------------
-ProfileManager *ProfileMan = NULL;
+clsProfileManager * clsProfileManager::mPtr = NULL;
 //---------------------------------------------------------------------------
 
 ProfileItem::ProfileItem() {
@@ -54,7 +54,7 @@ ProfileItem::ProfileItem() {
 
 ProfileItem::~ProfileItem() {
 #ifdef _WIN32
-    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sName) == 0) {
+    if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sName) == 0) {
         AppendDebugLog("%s - [MEM] Cannot deallocate sName in ProfileItem::~ProfileItem\n", 0);
     }
 #else
@@ -63,23 +63,23 @@ ProfileItem::~ProfileItem() {
 }
 //---------------------------------------------------------------------------
 
-ProfileManager::ProfileManager() {
+clsProfileManager::clsProfileManager() {
     iProfileCount = 0;
 
     ProfilesTable = NULL;
 
 #ifdef _WIN32
-    TiXmlDocument doc((PATH+"\\cfg\\Profiles.xml").c_str());
+    TiXmlDocument doc((clsServerManager::sPath+"\\cfg\\Profiles.xml").c_str());
 #else
-	TiXmlDocument doc((PATH+"/cfg/Profiles.xml").c_str());
+	TiXmlDocument doc((clsServerManager::sPath+"/cfg/Profiles.xml").c_str());
 #endif
 	if(doc.LoadFile() == false) {
 		CreateDefaultProfiles();
 		if(doc.LoadFile() == false) {
 #ifdef _BUILD_GUI
-            ::MessageBox(NULL, LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL], sTitle.c_str(), MB_OK | MB_ICONERROR);
+            ::MessageBox(NULL, clsLanguageManager::mPtr->sTexts[LAN_PROFILES_LOAD_FAIL], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
 #else
-			AppendLog(LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL]);
+			AppendLog(clsLanguageManager::mPtr->sTexts[LAN_PROFILES_LOAD_FAIL]);
 #endif
 			exit(EXIT_FAILURE);
 		}
@@ -130,16 +130,16 @@ ProfileManager::ProfileManager() {
 		}
 	} else {
 #ifdef _BUILD_GUI
-		::MessageBox(NULL, LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL], sTitle.c_str(), MB_OK | MB_ICONERROR);
+		::MessageBox(NULL, clsLanguageManager::mPtr->sTexts[LAN_PROFILES_LOAD_FAIL], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
 #else
-		AppendLog(LanguageManager->sTexts[LAN_PROFILES_LOAD_FAIL]);
+		AppendLog(clsLanguageManager::mPtr->sTexts[LAN_PROFILES_LOAD_FAIL]);
 #endif
 		exit(EXIT_FAILURE);
 	}
 }
 //---------------------------------------------------------------------------
 
-ProfileManager::~ProfileManager() {
+clsProfileManager::~clsProfileManager() {
     SaveProfiles();
 
     for(uint16_t ui16i = 0; ui16i < iProfileCount; ui16i++) {
@@ -147,8 +147,8 @@ ProfileManager::~ProfileManager() {
     }
 
 #ifdef _WIN32
-    if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ProfilesTable) == 0) {
-        AppendDebugLog("%s - [MEM] Cannot deallocate ProfilesTable in ProfileManager::~ProfileManager\n", 0);
+    if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ProfilesTable) == 0) {
+        AppendDebugLog("%s - [MEM] Cannot deallocate ProfilesTable in clsProfileManager::~clsProfileManager\n", 0);
     }
 #else
 	free(ProfilesTable);
@@ -157,7 +157,7 @@ ProfileManager::~ProfileManager() {
 }
 //---------------------------------------------------------------------------
 
-void ProfileManager::CreateDefaultProfiles() {
+void clsProfileManager::CreateDefaultProfiles() {
     const char* profilenames[] = { "Master", "Operator", "VIP", "Reg" };
     const char* profilepermisions[] = {
         "1001111111111111111111111111111111111111111110100011111100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
@@ -167,9 +167,9 @@ void ProfileManager::CreateDefaultProfiles() {
     };
 
 #ifdef _WIN32
-    TiXmlDocument doc((PATH+"\\cfg\\Profiles.xml").c_str());
+    TiXmlDocument doc((clsServerManager::sPath+"\\cfg\\Profiles.xml").c_str());
 #else
-	TiXmlDocument doc((PATH+"/cfg/Profiles.xml").c_str());
+	TiXmlDocument doc((clsServerManager::sPath+"/cfg/Profiles.xml").c_str());
 #endif
     doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
     TiXmlElement profiles("Profiles");
@@ -193,13 +193,13 @@ void ProfileManager::CreateDefaultProfiles() {
 }
 //---------------------------------------------------------------------------
 
-void ProfileManager::SaveProfiles() {
+void clsProfileManager::SaveProfiles() {
     char permisionsbits[257];
 
 #ifdef _WIN32
-    TiXmlDocument doc((PATH+"\\cfg\\Profiles.xml").c_str());
+    TiXmlDocument doc((clsServerManager::sPath+"\\cfg\\Profiles.xml").c_str());
 #else
-	TiXmlDocument doc((PATH+"/cfg/Profiles.xml").c_str());
+	TiXmlDocument doc((clsServerManager::sPath+"/cfg/Profiles.xml").c_str());
 #endif
     doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
     TiXmlElement profiles("Profiles");
@@ -232,7 +232,7 @@ void ProfileManager::SaveProfiles() {
 }
 //---------------------------------------------------------------------------
 
-bool ProfileManager::IsAllowed(User * u, const uint32_t &iOption) const {
+bool clsProfileManager::IsAllowed(User * u, const uint32_t &iOption) const {
     // profile number -1 = normal user/no profile assigned
     if(u->iProfile == -1)
         return false;
@@ -242,7 +242,7 @@ bool ProfileManager::IsAllowed(User * u, const uint32_t &iOption) const {
 }
 //---------------------------------------------------------------------------
 
-bool ProfileManager::IsProfileAllowed(const int32_t &iProfile, const uint32_t &iOption) const {
+bool clsProfileManager::IsProfileAllowed(const int32_t &iProfile, const uint32_t &iOption) const {
     // profile number -1 = normal user/no profile assigned
     if(iProfile == -1)
         return false;
@@ -252,7 +252,7 @@ bool ProfileManager::IsProfileAllowed(const int32_t &iProfile, const uint32_t &i
 }
 //---------------------------------------------------------------------------
 
-int32_t ProfileManager::AddProfile(char * name) {
+int32_t clsProfileManager::AddProfile(char * name) {
     for(uint16_t ui16i = 0; ui16i < iProfileCount; ui16i++) {
 		if(strcasecmp(ProfilesTable[ui16i]->sName, name) == 0) {
             return -1;
@@ -281,14 +281,14 @@ int32_t ProfileManager::AddProfile(char * name) {
     CreateProfile(name);
 
 #ifdef _BUILD_GUI
-    if(pProfilesDialog != NULL) {
-        pProfilesDialog->AddProfile();
+    if(clsProfilesDialog::mPtr != NULL) {
+        clsProfilesDialog::mPtr->AddProfile();
     }
 #endif
 
 #ifdef _BUILD_GUI
-    if(pRegisteredUserDialog != NULL) {
-        pRegisteredUserDialog->UpdateProfiles();
+    if(clsRegisteredUserDialog::mPtr != NULL) {
+        clsRegisteredUserDialog::mPtr->UpdateProfiles();
     }
 #endif
 
@@ -296,7 +296,7 @@ int32_t ProfileManager::AddProfile(char * name) {
 }
 //---------------------------------------------------------------------------
 
-int32_t ProfileManager::GetProfileIndex(const char * name) {
+int32_t clsProfileManager::GetProfileIndex(const char * name) {
     for(uint16_t ui16i = 0; ui16i < iProfileCount; ui16i++) {
 		if(strcasecmp(ProfilesTable[ui16i]->sName, name) == 0) {
             return ui16i;
@@ -311,7 +311,7 @@ int32_t ProfileManager::GetProfileIndex(const char * name) {
 // returns: 0 if the name doesnot exists or is a default profile idx 0-3
 //          -1 if the profile is in use
 //          1 on success
-int32_t ProfileManager::RemoveProfileByName(char * name) {
+int32_t clsProfileManager::RemoveProfileByName(char * name) {
     for(uint16_t ui16i = 0; ui16i < iProfileCount; ui16i++) {
 		if(strcasecmp(ProfilesTable[ui16i]->sName, name) == 0) {
             return (RemoveProfile(ui16i) == true ? 1 : -1);
@@ -323,8 +323,8 @@ int32_t ProfileManager::RemoveProfileByName(char * name) {
 
 //---------------------------------------------------------------------------
 
-bool ProfileManager::RemoveProfile(const uint16_t &iProfile) {
-    RegUser *next = hashRegManager->RegListS;
+bool clsProfileManager::RemoveProfile(const uint16_t &iProfile) {
+    RegUser *next = clsRegManager::mPtr->RegListS;
     while(next != NULL) {
         RegUser *curReg = next;
 		next = curReg->next;
@@ -337,8 +337,8 @@ bool ProfileManager::RemoveProfile(const uint16_t &iProfile) {
     iProfileCount--;
 
 #ifdef _BUILD_GUI
-    if(pProfilesDialog != NULL) {
-        pProfilesDialog->RemoveProfile(iProfile);
+    if(clsProfilesDialog::mPtr != NULL) {
+        clsProfilesDialog::mPtr->RemoveProfile(iProfile);
     }
 #endif
     
@@ -349,8 +349,8 @@ bool ProfileManager::RemoveProfile(const uint16_t &iProfile) {
     }
 
     // Update profiles for online users
-    if(bServerRunning == true) {
-        User *nextUser = colUsers->llist;
+    if(clsServerManager::bServerRunning == true) {
+        User *nextUser = clsUsers::mPtr->llist;
         while(nextUser != NULL) {
             User *curUser = nextUser;
             nextUser = curUser->next;
@@ -362,7 +362,7 @@ bool ProfileManager::RemoveProfile(const uint16_t &iProfile) {
     }
 
     // Update profiles for registered users
-    next = hashRegManager->RegListS;
+    next = clsRegManager::mPtr->RegListS;
     while(next != NULL) {
         RegUser *curReg = next;
 		next = curReg->next;
@@ -373,23 +373,23 @@ bool ProfileManager::RemoveProfile(const uint16_t &iProfile) {
 
     ProfileItem ** pOldTable = ProfilesTable;
 #ifdef _WIN32
-    ProfilesTable = (ProfileItem **)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldTable, iProfileCount*sizeof(ProfileItem *));
+    ProfilesTable = (ProfileItem **)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldTable, iProfileCount*sizeof(ProfileItem *));
 #else
 	ProfilesTable = (ProfileItem **)realloc(pOldTable, iProfileCount*sizeof(ProfileItem *));
 #endif
     if(ProfilesTable == NULL) {
         ProfilesTable = pOldTable;
 
-		AppendDebugLog("%s - [MEM] Cannot reallocate ProfilesTable in ProfileManager::RemoveProfile\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot reallocate ProfilesTable in clsProfileManager::RemoveProfile\n", 0);
     }
 
 #ifdef _BUILD_GUI
-    if(pRegisteredUserDialog != NULL) {
-        pRegisteredUserDialog->UpdateProfiles();
+    if(clsRegisteredUserDialog::mPtr != NULL) {
+        clsRegisteredUserDialog::mPtr->UpdateProfiles();
     }
 
-	if(pRegisteredUsersDialog != NULL) {
-		pRegisteredUsersDialog->UpdateProfiles();
+	if(clsRegisteredUsersDialog::mPtr != NULL) {
+		clsRegisteredUsersDialog::mPtr->UpdateProfiles();
 	}
 #endif
 
@@ -397,41 +397,41 @@ bool ProfileManager::RemoveProfile(const uint16_t &iProfile) {
 }
 //---------------------------------------------------------------------------
 
-ProfileItem * ProfileManager::CreateProfile(const char * name) {
+ProfileItem * clsProfileManager::CreateProfile(const char * name) {
     ProfileItem ** pOldTable = ProfilesTable;
 #ifdef _WIN32
     if(ProfilesTable == NULL) {
-        ProfilesTable = (ProfileItem **)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (iProfileCount+1)*sizeof(ProfileItem *));
+        ProfilesTable = (ProfileItem **)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (iProfileCount+1)*sizeof(ProfileItem *));
     } else {
-        ProfilesTable = (ProfileItem **)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldTable, (iProfileCount+1)*sizeof(ProfileItem *));
+        ProfilesTable = (ProfileItem **)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldTable, (iProfileCount+1)*sizeof(ProfileItem *));
     }
 #else
 	ProfilesTable = (ProfileItem **)realloc(pOldTable, (iProfileCount+1)*sizeof(ProfileItem *));
 #endif
     if(ProfilesTable == NULL) {
 #ifdef _WIN32
-        HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldTable);
+        HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldTable);
 #else
         free(pOldTable);
 #endif
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate ProfilesTable in ProfileManager::CreateProfile\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate ProfilesTable in clsProfileManager::CreateProfile\n", 0);
         exit(EXIT_FAILURE);
     }
 
     ProfileItem * pNewProfile = new ProfileItem();
     if(pNewProfile == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewProfile in ProfileManager::CreateProfile\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewProfile in clsProfileManager::CreateProfile\n", 0);
         exit(EXIT_FAILURE);
     }
  
     size_t szLen = strlen(name);
 #ifdef _WIN32
-    pNewProfile->sName = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
+    pNewProfile->sName = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
 #else
 	pNewProfile->sName = (char *)malloc(szLen+1);
 #endif
     if(pNewProfile->sName == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in ProfileManager::CreateProfile for pNewProfile->sName\n", (uint64_t)szLen);
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in clsProfileManager::CreateProfile for pNewProfile->sName\n", (uint64_t)szLen);
 
         exit(EXIT_FAILURE);
     } 
@@ -450,14 +450,14 @@ ProfileItem * ProfileManager::CreateProfile(const char * name) {
 }
 //---------------------------------------------------------------------------
 
-void ProfileManager::MoveProfileDown(const uint16_t &iProfile) {
+void clsProfileManager::MoveProfileDown(const uint16_t &iProfile) {
     ProfileItem *first = ProfilesTable[iProfile];
     ProfileItem *second = ProfilesTable[iProfile+1];
     
     ProfilesTable[iProfile+1] = first;
     ProfilesTable[iProfile] = second;
 
-    RegUser *nextReg = hashRegManager->RegListS;
+    RegUser *nextReg = clsRegManager::mPtr->RegListS;
 
 	while(nextReg != NULL) {
         RegUser *curReg = nextReg;
@@ -471,24 +471,24 @@ void ProfileManager::MoveProfileDown(const uint16_t &iProfile) {
 	}
 
 #ifdef _BUILD_GUI
-    if(pProfilesDialog != NULL) {
-        pProfilesDialog->MoveDown(iProfile);
+    if(clsProfilesDialog::mPtr != NULL) {
+        clsProfilesDialog::mPtr->MoveDown(iProfile);
     }
 
-    if(pRegisteredUserDialog != NULL) {
-        pRegisteredUserDialog->UpdateProfiles();
+    if(clsRegisteredUserDialog::mPtr != NULL) {
+        clsRegisteredUserDialog::mPtr->UpdateProfiles();
     }
 
-	if(pRegisteredUsersDialog != NULL) {
-		pRegisteredUsersDialog->UpdateProfiles();
+	if(clsRegisteredUsersDialog::mPtr != NULL) {
+		clsRegisteredUsersDialog::mPtr->UpdateProfiles();
 	}
 #endif
 
-    if(colUsers == NULL) {
+    if(clsUsers::mPtr == NULL) {
         return;
     }
 
-    User *nextUser = colUsers->llist;
+    User *nextUser = clsUsers::mPtr->llist;
 
 	while(nextUser != NULL) {
         User *curUser = nextUser;
@@ -503,14 +503,14 @@ void ProfileManager::MoveProfileDown(const uint16_t &iProfile) {
 }
 //---------------------------------------------------------------------------
 
-void ProfileManager::MoveProfileUp(const uint16_t &iProfile) {
+void clsProfileManager::MoveProfileUp(const uint16_t &iProfile) {
     ProfileItem *first = ProfilesTable[iProfile];
     ProfileItem *second = ProfilesTable[iProfile-1];
     
     ProfilesTable[iProfile-1] = first;
     ProfilesTable[iProfile] = second;
 
-	RegUser *nextReg = hashRegManager->RegListS;
+	RegUser *nextReg = clsRegManager::mPtr->RegListS;
 
 	while(nextReg != NULL) {
 		RegUser *curReg = nextReg;
@@ -524,24 +524,24 @@ void ProfileManager::MoveProfileUp(const uint16_t &iProfile) {
 	}
 
 #ifdef _BUILD_GUI
-    if(pProfilesDialog != NULL) {
-        pProfilesDialog->MoveUp(iProfile);
+    if(clsProfilesDialog::mPtr != NULL) {
+        clsProfilesDialog::mPtr->MoveUp(iProfile);
     }
 
-    if(pRegisteredUserDialog != NULL) {
-        pRegisteredUserDialog->UpdateProfiles();
+    if(clsRegisteredUserDialog::mPtr != NULL) {
+        clsRegisteredUserDialog::mPtr->UpdateProfiles();
     }
 
-	if(pRegisteredUsersDialog != NULL) {
-		pRegisteredUsersDialog->UpdateProfiles();
+	if(clsRegisteredUsersDialog::mPtr != NULL) {
+		clsRegisteredUsersDialog::mPtr->UpdateProfiles();
 	}
 #endif
 
-    if(colUsers == NULL) {
+    if(clsUsers::mPtr == NULL) {
         return;
     }
 
-    User *nextUser = colUsers->llist;
+    User *nextUser = clsUsers::mPtr->llist;
 
     while(nextUser != NULL) {
         User *curUser = nextUser;
@@ -556,18 +556,18 @@ void ProfileManager::MoveProfileUp(const uint16_t &iProfile) {
 }
 //---------------------------------------------------------------------------
 
-void ProfileManager::ChangeProfileName(const uint16_t &iProfile, char * sName, const size_t &szLen) {
+void clsProfileManager::ChangeProfileName(const uint16_t &iProfile, char * sName, const size_t &szLen) {
     char * sOldName = ProfilesTable[iProfile]->sName;
 
 #ifdef _WIN32
-    ProfilesTable[iProfile]->sName = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldName, szLen+1);
+    ProfilesTable[iProfile]->sName = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldName, szLen+1);
 #else
 	ProfilesTable[iProfile]->sName = (char *)realloc(sOldName, szLen+1);
 #endif
     if(ProfilesTable[iProfile]->sName == NULL) {
         ProfilesTable[iProfile]->sName = sOldName;
 
-		AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in ProfileManager::ChangeProfileName for ProfilesTable[iProfile]->sName\n", (uint64_t)szLen);
+		AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsProfileManager::ChangeProfileName for ProfilesTable[iProfile]->sName\n", (uint64_t)szLen);
 
         return;
     } 
@@ -575,18 +575,18 @@ void ProfileManager::ChangeProfileName(const uint16_t &iProfile, char * sName, c
     ProfilesTable[iProfile]->sName[szLen] = '\0';
 
 #ifdef _BUILD_GUI
-    if(pRegisteredUserDialog != NULL) {
-        pRegisteredUserDialog->UpdateProfiles();
+    if(clsRegisteredUserDialog::mPtr != NULL) {
+        clsRegisteredUserDialog::mPtr->UpdateProfiles();
     }
 
-	if(pRegisteredUsersDialog != NULL) {
-		pRegisteredUsersDialog->UpdateProfiles();
+	if(clsRegisteredUsersDialog::mPtr != NULL) {
+		clsRegisteredUsersDialog::mPtr->UpdateProfiles();
 	}
 #endif
 }
 //---------------------------------------------------------------------------
 
-void ProfileManager::ChangeProfilePermission(const uint16_t &iProfile, const size_t &szId, const bool &bValue) {
+void clsProfileManager::ChangeProfilePermission(const uint16_t &iProfile, const size_t &szId, const bool &bValue) {
     ProfilesTable[iProfile]->bPermissions[szId] = bValue;
 }
 //---------------------------------------------------------------------------

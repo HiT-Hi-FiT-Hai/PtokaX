@@ -121,8 +121,8 @@ static void WINAPI CtrlHandler(DWORD dwCtrl) {
 	    case SERVICE_CONTROL_SHUTDOWN:
 	    case SERVICE_CONTROL_STOP:
 	        ss.dwCurrentState = SERVICE_STOP_PENDING;
-	        bIsClose = true;
-	        ServerStop();
+	        clsServerManager::bIsClose = true;
+			clsServerManager::Stop();
 	    case SERVICE_CONTROL_INTERROGATE:
 	        // Fall through to send current status.
 	        break;
@@ -156,9 +156,9 @@ static void WINAPI StartService(DWORD /*argc*/, char* argv[]) {
 		return;
 	}
 	
-	ServerInitialize();
+	clsServerManager::Initialize();
 	
-	if(ServerStart() == false) {
+	if (clsServerManager::Start() == false) {
 	    AppendLog("Server start failed!");
 		ss.dwCurrentState = SERVICE_STOPPED;
 		SetServiceStatus(ssh, &ss);
@@ -182,12 +182,12 @@ static void WINAPI StartService(DWORD /*argc*/, char* argv[]) {
 	        if(msg.message == WM_USER+1) {
 	            break;
 	        } else if(msg.message == WM_TIMER) {
-                if(msg.wParam == sectimer) {
-                    ServerOnSecTimer();
-                } else if(msg.wParam == srvLoopTimer) {
-                    srvLoop->Looper();
-                } else if(msg.wParam == regtimer) {
-                    ServerOnRegTimer();
+				if (msg.wParam == clsServerManager::sectimer) {
+					clsServerManager::OnSecTimer();
+				} else if (msg.wParam == clsServiceLoop::srvLoopTimer) {
+                    clsServiceLoop::mPtr->Looper();
+                } else if(msg.wParam == clsServerManager::regtimer) {
+					clsServerManager::OnRegTimer();
                 } else {
                     //Must be script timer
                     ScriptOnTimer(msg.wParam);
@@ -222,7 +222,7 @@ int __cdecl main(int argc, char* argv[]) {
     ::FreeLibrary(hKernel32);
 #endif
 
-	sTitle = "PtokaX DC Hub " + string(PtokaXVersionString);
+	clsServerManager::sTitle = "PtokaX DC Hub " + string(PtokaXVersionString);
 #ifdef _DEBUG
 	sTitle += " [debug]";
 #endif
@@ -237,9 +237,9 @@ int __cdecl main(int argc, char* argv[]) {
 	::GetModuleFileName(NULL, sBuf, MAX_PATH);
 	char * sPath = strrchr(sBuf, '\\');
 	if(sPath != NULL) {
-		PATH = string(sBuf, sPath-sBuf);
+		clsServerManager::sPath = string(sBuf, sPath - sBuf);
 	} else {
-		PATH = sBuf;
+		clsServerManager::sPath = sBuf;
 	}
 
 	char * sServiceName = NULL;
@@ -253,7 +253,7 @@ int __cdecl main(int argc, char* argv[]) {
 	            return EXIT_FAILURE;
 	    	}
 	    	sServiceName = argv[i];
-	    	bService = true;
+			clsServerManager::bService = true;
 	    } else if(stricmp(argv[i], "-c") == 0) {
 	        if(++i == argc) {
 	            printf("Missing config directory!");
@@ -269,13 +269,13 @@ int __cdecl main(int argc, char* argv[]) {
 	    	}
 	
 	    	if(argv[i][szLen - 1] == '/' || argv[i][szLen - 1] == '\\') {
-	            PATH = string(argv[i], szLen - 1);
+				clsServerManager::sPath = string(argv[i], szLen - 1);
 	    	} else {
-	            PATH = string(argv[i], szLen);
+				clsServerManager::sPath = string(argv[i], szLen);
 	        }
 	    
-	        if(DirExist(PATH.c_str()) == false) {
-	            if(CreateDirectory(PATH.c_str(), NULL) == 0) {
+			if(DirExist(clsServerManager::sPath.c_str()) == false) {
+				if(CreateDirectory(clsServerManager::sPath.c_str(), NULL) == 0) {
 	                printf("Config directory not exist and can't be created!");
 	                return EXIT_FAILURE;
 	            }
@@ -295,38 +295,38 @@ int __cdecl main(int argc, char* argv[]) {
 	    	sServiceName = argv[i];
 	    	return UninstallService(sServiceName);
 	    } else if(stricmp(argv[i], "-v") == NULL || stricmp(argv[i], "/version") == NULL) {
-	    	printf((sTitle+" built on "+__DATE__+" "+__TIME__).c_str());
+	    	printf((clsServerManager::sTitle+" built on "+__DATE__+" "+__TIME__).c_str());
 	    	return EXIT_SUCCESS;
 	    } else if(stricmp(argv[i], "-h") == NULL || stricmp(argv[i], "/help") == NULL) {
 	    	printf("PtokaX [-c <configdir>] [-i <servicename>] [-u <servicename>] [-v]");
 	    	return EXIT_SUCCESS;
 	    } else if(stricmp(argv[i], "/generatexmllanguage") == NULL) {
-	        LangMan::GenerateXmlExample();
+	        clsLanguageManager::GenerateXmlExample();
 	        return EXIT_SUCCESS;
 	    }
 	}
 
 	if(bInstallService == true) {
-	    if(sPath == NULL && strcmp(PATH.c_str(), sBuf) == 0) {
+	    if(sPath == NULL && strcmp(clsServerManager::sPath.c_str(), sBuf) == 0) {
 	        return InstallService(sServiceName, NULL);
 		} else {
-			return InstallService(sServiceName, PATH.c_str());
+			return InstallService(sServiceName, clsServerManager::sPath.c_str());
 		}
 	}
 
-    ExceptionHandlingInitialize(PATH, sBuf);
+    ExceptionHandlingInitialize(clsServerManager::sPath, sBuf);
 
-	if(bService == false) {
-	    ServerInitialize();
+	if(clsServerManager::bService == false) {
+	    clsServerManager::Initialize();
 	
-	    if(ServerStart() == false) {
+	    if(clsServerManager::Start() == false) {
 	        printf("Server start failed!");
 
             ExceptionHandlingUnitialize();
 
 	        return EXIT_FAILURE;
 	    } else {
-	        printf((sTitle+" running...\n").c_str());
+	        printf((clsServerManager::sTitle+" running...\n").c_str());
 	    }
 
 	    MSG msg;
@@ -339,10 +339,10 @@ int __cdecl main(int argc, char* argv[]) {
 	            if(msg.message == WM_USER+1) {
 	                break;
 	            } else if(msg.message == WM_TIMER) {
-                    if(msg.wParam == srvLoopTimer) {
-                        srvLoop->Looper();
-                    } else if(msg.wParam == regtimer) {
-                        ServerOnRegTimer();
+                    if(msg.wParam == clsServiceLoop::srvLoopTimer) {
+                        clsServiceLoop::mPtr->Looper();
+                    } else if(msg.wParam == clsServerManager::regtimer) {
+                        clsServerManager::OnRegTimer();
                     } else {
                         //Must be script timer
                         ScriptOnTimer(msg.wParam);

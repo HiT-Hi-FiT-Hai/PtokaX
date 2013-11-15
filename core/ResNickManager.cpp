@@ -22,43 +22,32 @@
 //---------------------------------------------------------------------------
 #include "ResNickManager.h"
 //---------------------------------------------------------------------------
+#include "ServerManager.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-ResNickMan *ResNickManager = NULL;
+clsReservedNicksManager * clsReservedNicksManager::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-ResNickMan::ReservedNick::ReservedNick(const char * nick, uint32_t ui32NickHash) {
-    size_t szNickLen = strlen(nick);
-#ifdef _WIN32
-    sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
-#else
-	sNick = (char *)malloc(szNickLen+1);
-#endif
-    if(sNick == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in ReservedNick::ReservedNick\n", (uint64_t)(szNickLen+1));
-
-        return;
-    }   
-    memcpy(sNick, nick, szNickLen);
-    sNick[szNickLen] = '\0';
-
-	ui32Hash = ui32NickHash;
+clsReservedNicksManager::ReservedNick::ReservedNick() {
+    sNick = NULL;
 
 	prev = NULL;
     next = NULL;
+
+    ui32Hash = 0;
 
     bFromScript = false;
 }
 //---------------------------------------------------------------------------
 
-ResNickMan::ReservedNick::~ReservedNick() {
+clsReservedNicksManager::ReservedNick::~ReservedNick() {
 #ifdef _WIN32
-	if(sNick != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
-        AppendDebugLog("%s - [MEM] Cannot deallocate sNick in ResNickMan::ReservedNick::~ReservedNick\n", 0);
+	if(sNick != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
+        AppendDebugLog("%s - [MEM] Cannot deallocate sNick in clsReservedNicksManager::ReservedNick::~ReservedNick\n", 0);
     }
 #else
 	free(sNick);
@@ -66,16 +55,46 @@ ResNickMan::ReservedNick::~ReservedNick() {
 }
 //---------------------------------------------------------------------------
 
-ResNickMan::ResNickMan() {
+clsReservedNicksManager::ReservedNick * clsReservedNicksManager::ReservedNick::CreateReservedNick(const char * nick, uint32_t ui32NickHash) {
+    ReservedNick * pReservedNick = new ReservedNick();
+
+    if(pReservedNick == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate new pReservedNick in ReservedNick::CreateReservedNick\n", 0);
+
+        return NULL;
+    }
+
+    size_t szNickLen = strlen(nick);
+#ifdef _WIN32
+    pReservedNick->sNick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
+#else
+	pReservedNick->sNick = (char *)malloc(szNickLen+1);
+#endif
+    if(pReservedNick->sNick == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in ReservedNick::CreateReservedNick\n", (uint64_t)(szNickLen+1));
+
+        delete pReservedNick;
+        return NULL;
+    }
+    memcpy(pReservedNick->sNick, nick, szNickLen);
+    pReservedNick->sNick[szNickLen] = '\0';
+
+	pReservedNick->ui32Hash = ui32NickHash;
+
+    return pReservedNick;
+}
+//---------------------------------------------------------------------------
+
+clsReservedNicksManager::clsReservedNicksManager() {
     ReservedNicks = NULL;
 
 	TiXmlDocument doc;
 #ifdef _WIN32
-	if(doc.LoadFile((PATH+"\\cfg\\ReservedNicks.xml").c_str()) == false) {
-		TiXmlDocument doc((PATH+"\\cfg\\ReservedNicks.xml").c_str());
+	if(doc.LoadFile((clsServerManager::sPath+"\\cfg\\ReservedNicks.xml").c_str()) == false) {
+		TiXmlDocument doc((clsServerManager::sPath+"\\cfg\\ReservedNicks.xml").c_str());
 #else
-	if(doc.LoadFile((PATH+"/cfg/ReservedNicks.xml").c_str()) == false) {
-		TiXmlDocument doc((PATH+"/cfg/ReservedNicks.xml").c_str());
+	if(doc.LoadFile((clsServerManager::sPath+"/cfg/ReservedNicks.xml").c_str()) == false) {
+		TiXmlDocument doc((clsServerManager::sPath+"/cfg/ReservedNicks.xml").c_str());
 #endif
 		doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
 		TiXmlElement reservednicks("ReservedNicks");
@@ -92,9 +111,9 @@ ResNickMan::ResNickMan() {
     }
 
 #ifdef _WIN32
-	if(doc.LoadFile((PATH+"\\cfg\\ReservedNicks.xml").c_str())) {
+	if(doc.LoadFile((clsServerManager::sPath+"\\cfg\\ReservedNicks.xml").c_str())) {
 #else
-	if(doc.LoadFile((PATH+"/cfg/ReservedNicks.xml").c_str())) {
+	if(doc.LoadFile((clsServerManager::sPath+"/cfg/ReservedNicks.xml").c_str())) {
 #endif
 		TiXmlHandle cfg(&doc);
 		TiXmlNode *reservednicks = cfg.FirstChild("ReservedNicks").Node();
@@ -116,7 +135,7 @@ ResNickMan::ResNickMan() {
 }
 //---------------------------------------------------------------------------
 	
-ResNickMan::~ResNickMan() {
+clsReservedNicksManager::~clsReservedNicksManager() {
     ReservedNick *next = ReservedNicks;
 
     while(next != NULL) {
@@ -129,7 +148,7 @@ ResNickMan::~ResNickMan() {
 //---------------------------------------------------------------------------
 
 // Check for reserved nicks true = reserved
-bool ResNickMan::CheckReserved(const char * sNick, const uint32_t &hash) const {
+bool clsReservedNicksManager::CheckReserved(const char * sNick, const uint32_t &hash) const {
     ReservedNick *next = ReservedNicks;
 
     while(next != NULL) {
@@ -145,18 +164,13 @@ bool ResNickMan::CheckReserved(const char * sNick, const uint32_t &hash) const {
 }
 //---------------------------------------------------------------------------
 
-void ResNickMan::AddReservedNick(const char * sNick, const bool &bFromScript/* = false*/) {
+void clsReservedNicksManager::AddReservedNick(const char * sNick, const bool &bFromScript/* = false*/) {
     uint32_t ulHash = HashNick(sNick, strlen(sNick));
 
     if(CheckReserved(sNick, ulHash) == false) {
-        ReservedNick * pNewNick = new ReservedNick(sNick, ulHash);
+        ReservedNick * pNewNick = ReservedNick::CreateReservedNick(sNick, ulHash);
         if(pNewNick == NULL) {
-			AppendDebugLog("%s - [MEM] Cannot allocate pNewNick in ResNickMan::AddReservedNick\n", 0);
-        	return;
-        } else if(pNewNick->sNick == NULL) {
-            delete pNewNick;
-
-			AppendDebugLog("%s - [MEM] Cannot allocate pNewNick->sNick in ResNickMan::AddReservedNick\n", 0);
+			AppendDebugLog("%s - [MEM] Cannot allocate pNewNick in clsReservedNicksManager::AddReservedNick\n", 0);
         	return;
         }
 
@@ -173,7 +187,7 @@ void ResNickMan::AddReservedNick(const char * sNick, const bool &bFromScript/* =
 }
 //---------------------------------------------------------------------------
 
-void ResNickMan::DelReservedNick(char * sNick, const bool &bFromScript/* = false*/) {
+void clsReservedNicksManager::DelReservedNick(char * sNick, const bool &bFromScript/* = false*/) {
     uint32_t hash = HashNick(sNick, strlen(sNick));
 
     ReservedNick *next = ReservedNicks;

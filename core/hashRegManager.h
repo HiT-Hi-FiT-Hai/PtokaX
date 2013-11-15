@@ -18,8 +18,8 @@
  */
 
 //---------------------------------------------------------------------------
-#ifndef hashRegManH
-#define hashRegManH
+#ifndef hashRegManagerH
+#define hashRegManagerH
 //---------------------------------------------------------------------------
 struct User;
 //---------------------------------------------------------------------------
@@ -46,14 +46,14 @@ struct RegUser {
     bool bPassHash;
 
     RegUser();
-    ~RegUser(void);
+    ~RegUser();
 
     static RegUser * CreateReg(char * sRegNick, size_t szRegNickLen, char * sRegPassword, size_t szRegPassLen, uint8_t * ui8RegPassHash, const uint16_t &ui16RegProfile);
     bool UpdatePassword(char * sNewPass, size_t &szNewLen);
 }; 
 //---------------------------------------------------------------------------
 
-class hashRegMan {
+class clsRegManager {
 private:
     RegUser *table[65536];
 
@@ -61,10 +61,12 @@ private:
 
     void LoadXML();
 public:
+    static clsRegManager * mPtr;
+
     RegUser *RegListS, *RegListE;
 
-    hashRegMan(void);
-    ~hashRegMan(void);
+    clsRegManager(void);
+    ~clsRegManager(void);
 
     bool AddNew(char * sNick, char * sPasswd, const uint16_t &iProfile);
 
@@ -84,9 +86,6 @@ public:
 
     void HashPasswords();
 };
-
-//--------------------------------------------------------------------------- 
-extern hashRegMan *hashRegManager;
 //---------------------------------------------------------------------------
 
 #endif

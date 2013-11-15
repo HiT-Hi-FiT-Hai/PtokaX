@@ -25,25 +25,26 @@
 #include "LanguageManager.h"
 //---------------------------------------------------------------------------
 #include "SettingManager.h"
+#include "ServerManager.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
 #ifdef _WIN32
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-LangMan *LanguageManager = NULL;
+clsLanguageManager * clsLanguageManager::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-LangMan::LangMan(void) {
+clsLanguageManager::clsLanguageManager(void) {
     for(size_t szi = 0; szi < LANG_IDS_END; szi++) {
         size_t szTextLen = strlen(LangStr[szi]);
 #ifdef _WIN32
-        sTexts[szi] = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, szTextLen+1);
+        sTexts[szi] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szTextLen+1);
 #else
 		sTexts[szi] = (char *)malloc(szTextLen+1);
 #endif
         if(sTexts[szi] == NULL) {
-            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in LangMan::LangMan\n", (uint64_t)(szTextLen+1));
+            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in clsLanguageManager::clsLanguageManager\n", (uint64_t)(szTextLen+1));
 
             exit(EXIT_FAILURE);
         }
@@ -54,11 +55,11 @@ LangMan::LangMan(void) {
 }
 //---------------------------------------------------------------------------
 
-LangMan::~LangMan(void) {
+clsLanguageManager::~clsLanguageManager(void) {
     for(size_t szi = 0; szi < LANG_IDS_END; szi++) {
 #ifdef _WIN32
-        if(sTexts[szi] != NULL && HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sTexts[szi]) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sTexts[szi] in LangMan::~LangMan\n", 0);
+        if(sTexts[szi] != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sTexts[szi]) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate sTexts[szi] in clsLanguageManager::~clsLanguageManager\n", 0);
         }
 #else
 		free(sTexts[szi]);
@@ -67,21 +68,21 @@ LangMan::~LangMan(void) {
 }
 //---------------------------------------------------------------------------
 
-void LangMan::LoadLanguage() {
-    if(SettingManager->sTexts[SETTXT_LANGUAGE] == NULL) {
+void clsLanguageManager::Load() {
+    if(clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE] == NULL) {
         for(size_t szi = 0; szi < LANG_IDS_END; szi++) {
             char * sOldText = sTexts[szi];
 
             size_t szTextLen = strlen(LangStr[szi]);
 #ifdef _WIN32
-            sTexts[szi] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldText, szTextLen+1);
+            sTexts[szi] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldText, szTextLen+1);
 #else
 			sTexts[szi] = (char *)realloc(sOldText, szTextLen+1);
 #endif
             if(sTexts[szi] == NULL) {
                 sTexts[szi] = sOldText;
 
-				AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in LangMan::LoadLanguage\n", (uint64_t)(szTextLen+1));
+				AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsLanguageManager::Load\n", (uint64_t)(szTextLen+1));
 
                 continue;
             }
@@ -92,11 +93,11 @@ void LangMan::LoadLanguage() {
         }
     } else {
 #ifdef _WIN32
-		string sLanguageFile = PATH+"\\language\\"+string(SettingManager->sTexts[SETTXT_LANGUAGE],
+		string sLanguageFile = clsServerManager::sPath+"\\language\\"+string(clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE],
 #else
-		string sLanguageFile = PATH+"/language/"+string(SettingManager->sTexts[SETTXT_LANGUAGE],
+		string sLanguageFile = clsServerManager::sPath+"/language/"+string(clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE],
 #endif
-            (size_t)SettingManager->ui16TextsLens[SETTXT_LANGUAGE])+".xml";
+            (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_LANGUAGE])+".xml";
 
         TiXmlDocument doc(sLanguageFile.c_str());
         if(doc.LoadFile()) {
@@ -117,14 +118,14 @@ void LangMan::LoadLanguage() {
                             if(strcmp(LangXmlStr[szi], sName) == 0) {
                                 char * sOldText = sTexts[szi];
 #ifdef _WIN32
-                                sTexts[szi] = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldText, szLen+1);
+                                sTexts[szi] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldText, szLen+1);
 #else
                                 sTexts[szi] = (char *)realloc(sOldText, szLen+1);
 #endif
                                 if(sTexts[szi] == NULL) {
                                     sTexts[szi] = sOldText;
 
-									AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in LangMan::LoadLanguage1\n", (uint64_t)(szLen+1));
+									AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsLanguageManager::Load1\n", (uint64_t)(szLen+1));
 
                                     break;
                                 }
@@ -143,7 +144,7 @@ void LangMan::LoadLanguage() {
 }
 //---------------------------------------------------------------------------
 
-void LangMan::GenerateXmlExample() {
+void clsLanguageManager::GenerateXmlExample() {
     TiXmlDocument xmldoc;
     xmldoc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
     TiXmlElement xmllanguage("Language");

@@ -22,31 +22,34 @@
 #define ResNickManagerH
 //---------------------------------------------------------------------------
 
-class ResNickMan {
+class clsReservedNicksManager {
 private:
     struct ReservedNick {   
-        ReservedNick(const char * nick, uint32_t ui32NickHash);
-        ~ReservedNick();
-    
-        uint32_t ui32Hash;
-    
         char *sNick;
+
         ReservedNick *prev, *next;
-    
+
+        uint32_t ui32Hash;
+
         bool bFromScript;
+
+        ReservedNick();
+        ~ReservedNick();
+
+        static ReservedNick * CreateReservedNick(const char * nick, uint32_t ui32NickHash);
     };
 
     ReservedNick *ReservedNicks;
 public:
-	ResNickMan();
-	~ResNickMan();
+    static clsReservedNicksManager * mPtr;
+
+	clsReservedNicksManager();
+	~clsReservedNicksManager();
 
     bool CheckReserved(const char * sNick, const uint32_t &hash) const;
     void AddReservedNick(const char * sNick, const bool &bFromScript = false);
     void DelReservedNick(char * sNick, const bool &bFromScript = false);
 };
 //---------------------------------------------------------------------------
-extern ResNickMan *ResNickManager;
-//--------------------------------------------------------------------------- 
 
 #endif

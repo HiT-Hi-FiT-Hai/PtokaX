@@ -22,6 +22,7 @@
 //---------------------------------------------------------------------------
 #include "ExceptionHandling.h"
 //---------------------------------------------------------------------------
+#include "ServerManager.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
 #pragma hdrstop
@@ -151,7 +152,7 @@ LONG WINAPI PtokaX_UnhandledExceptionFilter(LPEXCEPTION_POINTERS ExceptionInfo) 
 
 	// Initialize debug symbols
     SymSetOptions(SYMOPT_DEFERRED_LOADS | SYMOPT_FAIL_CRITICAL_ERRORS | SYMOPT_LOAD_LINES);
-    if(SymInitialize(GetCurrentProcess(), PATH.c_str(), TRUE) == FALSE) {
+    if(SymInitialize(GetCurrentProcess(), clsServerManager::sPath.c_str(), TRUE) == FALSE) {
 #ifdef _BUILD_GUI
         ::MessageBox(NULL, "Something bad happen and PtokaX crashed. PtokaX was not able to collect any information why this happen because initializatin of"
 			" debug symbols failed. If you know why this crash happen then please report it as bug to PPK@PtokaX.org!",

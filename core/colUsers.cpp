@@ -38,10 +38,10 @@
 static const uint32_t MYINFOLISTSIZE = 1024*256;
 static const uint32_t IPLISTSIZE = 1024*64;
 //---------------------------------------------------------------------------
-classUsers *colUsers = NULL;
+clsUsers * clsUsers::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-classUsers::classUsers() {
+clsUsers::clsUsers() {
     msg[0] = '\0';
     llist = NULL;
     elist = NULL;
@@ -52,10 +52,10 @@ classUsers::classUsers() {
     ui16PasSearchs = 0;
 
 #ifdef _WIN32
-    hRecvHeap = HeapCreate(HEAP_NO_SERIALIZE, 0x20000, 0);
-    hSendHeap = HeapCreate(HEAP_NO_SERIALIZE, 0x40000, 0);
+    clsServerManager::hRecvHeap = HeapCreate(HEAP_NO_SERIALIZE, 0x20000, 0);
+    clsServerManager::hSendHeap = HeapCreate(HEAP_NO_SERIALIZE, 0x40000, 0);
 
-    nickList = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, NICKLISTSIZE);
+    nickList = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, NICKLISTSIZE);
 #else
 	nickList = (char *)calloc(NICKLISTSIZE, 1);
 #endif
@@ -68,7 +68,7 @@ classUsers::classUsers() {
     nickListLen = 11;
     nickListSize = NICKLISTSIZE - 1;
 #ifdef _WIN32
-    sZNickList = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ZLISTSIZE);
+    sZNickList = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ZLISTSIZE);
 #else
 	sZNickList = (char *)calloc(ZLISTSIZE, 1);
 #endif
@@ -79,7 +79,7 @@ classUsers::classUsers() {
     iZNickListLen = 0;
     iZNickListSize = ZLISTSIZE - 1;
 #ifdef _WIN32
-    opList = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, OPLISTSIZE);
+    opList = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, OPLISTSIZE);
 #else
 	opList = (char *)calloc(OPLISTSIZE, 1);
 #endif
@@ -92,7 +92,7 @@ classUsers::classUsers() {
     opListLen = 9;
     opListSize = OPLISTSIZE - 1;
 #ifdef _WIN32
-    sZOpList = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ZLISTSIZE);
+    sZOpList = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ZLISTSIZE);
 #else
 	sZOpList = (char *)calloc(ZLISTSIZE, 1);
 #endif
@@ -103,9 +103,9 @@ classUsers::classUsers() {
     iZOpListLen = 0;
     iZOpListSize = ZLISTSIZE - 1;
     
-    if(SettingManager->ui8FullMyINFOOption != 0) {
+    if(clsSettingManager::mPtr->ui8FullMyINFOOption != 0) {
 #ifdef _WIN32
-        myInfos = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, MYINFOLISTSIZE);
+        myInfos = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, MYINFOLISTSIZE);
 #else
 		myInfos = (char *)calloc(MYINFOLISTSIZE, 1);
 #endif
@@ -116,7 +116,7 @@ classUsers::classUsers() {
         myInfosSize = MYINFOLISTSIZE - 1;
         
 #ifdef _WIN32
-        sZMyInfos = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ZMYINFOLISTSIZE);
+        sZMyInfos = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ZMYINFOLISTSIZE);
 #else
 		sZMyInfos = (char *)calloc(ZMYINFOLISTSIZE, 1);
 #endif
@@ -134,9 +134,9 @@ classUsers::classUsers() {
     myInfosLen = 0;
     iZMyInfosLen = 0;
     
-    if(SettingManager->ui8FullMyINFOOption != 2) {
+    if(clsSettingManager::mPtr->ui8FullMyINFOOption != 2) {
 #ifdef _WIN32
-        myInfosTag = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, MYINFOLISTSIZE);
+        myInfosTag = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, MYINFOLISTSIZE);
 #else
 		myInfosTag = (char *)calloc(MYINFOLISTSIZE, 1);
 #endif
@@ -147,7 +147,7 @@ classUsers::classUsers() {
         myInfosTagSize = MYINFOLISTSIZE - 1;
 
 #ifdef _WIN32
-        sZMyInfosTag = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ZMYINFOLISTSIZE);
+        sZMyInfosTag = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ZMYINFOLISTSIZE);
 #else
 		sZMyInfosTag = (char *)calloc(ZMYINFOLISTSIZE, 1);
 #endif
@@ -171,7 +171,7 @@ classUsers::classUsers() {
     bChatLocked = false;
 
 #ifdef _WIN32
-    userIPList = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, IPLISTSIZE);
+    userIPList = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, IPLISTSIZE);
 #else
 	userIPList = (char *)calloc(IPLISTSIZE, 1);
 #endif
@@ -185,7 +185,7 @@ classUsers::classUsers() {
     userIPListSize = IPLISTSIZE - 1;
 
 #ifdef _WIN32
-    sZUserIPList = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ZLISTSIZE);
+    sZUserIPList = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ZLISTSIZE);
 #else
 	sZUserIPList = (char *)calloc(ZLISTSIZE, 1);
 #endif
@@ -198,7 +198,7 @@ classUsers::classUsers() {
 }
 //---------------------------------------------------------------------------
 
-classUsers::~classUsers() {
+clsUsers::~clsUsers() {
     RecTime * next = RecTimeList;
 
     while(next != NULL) {
@@ -207,8 +207,8 @@ classUsers::~classUsers() {
 
 #ifdef _WIN32
         if(cur->sNick != NULL) {
-            if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sNick) == 0) {
-                AppendDebugLog("%s - [MEM] Cannot deallocate cur->sNick in classUsers::~classUsers\n", 0);
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sNick) == 0) {
+                AppendDebugLog("%s - [MEM] Cannot deallocate cur->sNick in clsUsers::~clsUsers\n", 0);
             }
         }
 #else
@@ -220,8 +220,8 @@ classUsers::~classUsers() {
 
 #ifdef _WIN32
     if(nickList != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)nickList) == 0) {
-            AppendDebugLog("%s - [MEM] Cannot deallocate nickList in classUsers::~classUsers\n", 0);
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)nickList) == 0) {
+            AppendDebugLog("%s - [MEM] Cannot deallocate nickList in clsUsers::~clsUsers\n", 0);
         }
     }
 #else
@@ -230,8 +230,8 @@ classUsers::~classUsers() {
 
 #ifdef _WIN32
     if(sZNickList != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZNickList) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sZNickList in classUsers::~classUsers\n", 0);
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZNickList) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate sZNickList in clsUsers::~clsUsers\n", 0);
         }
     }
 #else
@@ -240,8 +240,8 @@ classUsers::~classUsers() {
 
 #ifdef _WIN32
     if(opList != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)opList) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate opList in classUsers::~classUsers\n", 0);
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)opList) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate opList in clsUsers::~clsUsers\n", 0);
         }
     }
 #else
@@ -250,8 +250,8 @@ classUsers::~classUsers() {
 
 #ifdef _WIN32
     if(sZOpList != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZOpList) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sZOpList in classUsers::~classUsers\n", 0);
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZOpList) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate sZOpList in clsUsers::~clsUsers\n", 0);
         }
     }
 #else
@@ -260,8 +260,8 @@ classUsers::~classUsers() {
 
 #ifdef _WIN32
     if(myInfos != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)myInfos) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate myInfos in classUsers::~classUsers\n", 0);
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)myInfos) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate myInfos in clsUsers::~clsUsers\n", 0);
         }
     }
 #else
@@ -270,8 +270,8 @@ classUsers::~classUsers() {
 
 #ifdef _WIN32
     if(sZMyInfos != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZMyInfos) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sZMyInfos in classUsers::~classUsers\n", 0);
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZMyInfos) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate sZMyInfos in clsUsers::~clsUsers\n", 0);
         }
     }
 #else
@@ -280,8 +280,8 @@ classUsers::~classUsers() {
 
 #ifdef _WIN32
     if(myInfosTag != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)myInfosTag) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate myInfosTag in classUsers::~classUsers\n", 0);
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)myInfosTag) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate myInfosTag in clsUsers::~clsUsers\n", 0);
         }
     }
 #else
@@ -290,8 +290,8 @@ classUsers::~classUsers() {
 
 #ifdef _WIN32
     if(sZMyInfosTag != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZMyInfosTag) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sZMyInfosTag in classUsers::~classUsers\n", 0);
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZMyInfosTag) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate sZMyInfosTag in clsUsers::~clsUsers\n", 0);
         }
     }
 #else
@@ -300,8 +300,8 @@ classUsers::~classUsers() {
 
 #ifdef _WIN32
     if(userIPList != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)userIPList) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate userIPList in classUsers::~classUsers\n", 0);
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)userIPList) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate userIPList in clsUsers::~clsUsers\n", 0);
         }
     }
 #else
@@ -310,8 +310,8 @@ classUsers::~classUsers() {
 
 #ifdef _WIN32
     if(sZUserIPList != NULL) {
-        if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZUserIPList) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sZUserIPList in classUsers::~classUsers\n", 0);
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZUserIPList) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate sZUserIPList in clsUsers::~clsUsers\n", 0);
         }
     }
 #else
@@ -319,13 +319,13 @@ classUsers::~classUsers() {
 #endif
 
 #ifdef _WIN32
-    HeapDestroy(hRecvHeap);
-    HeapDestroy(hSendHeap);
+    HeapDestroy(clsServerManager::hRecvHeap);
+    HeapDestroy(clsServerManager::hSendHeap);
 #endif
 }
 //---------------------------------------------------------------------------
 
-void classUsers::AddUser(User * u) {
+void clsUsers::AddUser(User * u) {
     if(llist == NULL) {
     	llist = u;
     	elist = u;
@@ -337,7 +337,7 @@ void classUsers::AddUser(User * u) {
 }
 //---------------------------------------------------------------------------
 
-void classUsers::RemUser(User * u) {
+void clsUsers::RemUser(User * u) {
     if(u->prev == NULL) {
         if(u->next == NULL) {
             llist = NULL;
@@ -355,14 +355,14 @@ void classUsers::RemUser(User * u) {
     }
     #ifdef _DEBUG
         int iret = sprintf(msg, "# User %s removed from linked list.", u->sNick);
-        if(CheckSprintf(iret, 1024, "classUsers::RemUser") == true) {
+        if(CheckSprintf(iret, 1024, "clsUsers::RemUser") == true) {
             Cout(msg);
         }
     #endif
 }
 //---------------------------------------------------------------------------
 
-void classUsers::DisconnectAll() {
+void clsUsers::DisconnectAll() {
     uint32_t iCloseLoops = 0;
 
 #ifndef _WIN32
@@ -402,7 +402,7 @@ void classUsers::DisconnectAll() {
 
 				delete u;
             } else {
-                UserTry2Send(u);
+                u->Try2Send();
             }
         }
         iCloseLoops++;
@@ -430,22 +430,22 @@ void classUsers::DisconnectAll() {
 }
 //---------------------------------------------------------------------------
 
-void classUsers::Add2NickList(User * u) {
+void clsUsers::Add2NickList(User * u) {
     // $NickList nick$$nick2$$|
 
     if(nickListSize < nickListLen+u->ui8NickLen+2) {
         char * pOldBuf = nickList;
 #ifdef _WIN32
-        nickList = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, nickListSize+NICKLISTSIZE+1);
+        nickList = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, nickListSize+NICKLISTSIZE+1);
 #else
 		nickList = (char *)realloc(pOldBuf, nickListSize+NICKLISTSIZE+1);
 #endif
         if(nickList == NULL) {
             nickList = pOldBuf;
             u->ui32BoolBits |= User::BIT_ERROR;
-            UserClose(u);
+            u->Close();
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in classUsers::Add2NickList for NickList\n", (uint64_t)(nickListSize+NICKLISTSIZE+1));
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsUsers::Add2NickList for NickList\n", (uint64_t)(nickListSize+NICKLISTSIZE+1));
 
             return;
 		}
@@ -469,16 +469,16 @@ void classUsers::Add2NickList(User * u) {
     if(opListSize < opListLen+u->ui8NickLen+2) {
         char * pOldBuf = opList;
 #ifdef _WIN32
-        opList = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, opListSize+OPLISTSIZE+1);
+        opList = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, opListSize+OPLISTSIZE+1);
 #else
 		opList = (char *)realloc(pOldBuf, opListSize+OPLISTSIZE+1);
 #endif
         if(opList == NULL) {
             opList = pOldBuf;
             u->ui32BoolBits |= User::BIT_ERROR;
-            UserClose(u);
+            u->Close();
 
-            AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in classUsers::Add2NickList for opList\n", (uint64_t)(opListSize+OPLISTSIZE+1));
+            AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsUsers::Add2NickList for opList\n", (uint64_t)(opListSize+OPLISTSIZE+1));
 
             return;
         }
@@ -497,20 +497,20 @@ void classUsers::Add2NickList(User * u) {
 }
 //---------------------------------------------------------------------------
 
-void classUsers::AddBot2NickList(char * Nick, const size_t &szNickLen, const bool &isOp) {
+void clsUsers::AddBot2NickList(char * Nick, const size_t &szNickLen, const bool &isOp) {
     // $NickList nick$$nick2$$|
 
     if(nickListSize < nickListLen+szNickLen+2) {
         char * pOldBuf = nickList;
 #ifdef _WIN32
-        nickList = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, nickListSize+NICKLISTSIZE+1);
+        nickList = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, nickListSize+NICKLISTSIZE+1);
 #else
 		nickList = (char *)realloc(pOldBuf, nickListSize+NICKLISTSIZE+1);
 #endif
         if(nickList == NULL) {
             nickList = pOldBuf;
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in classUsers::AddBot2NickList for NickList\n", (uint64_t)(nickListSize+NICKLISTSIZE+1));
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsUsers::AddBot2NickList for NickList\n", (uint64_t)(nickListSize+NICKLISTSIZE+1));
 
             return;
 		}
@@ -533,14 +533,14 @@ void classUsers::AddBot2NickList(char * Nick, const size_t &szNickLen, const boo
     if(opListSize < opListLen+szNickLen+2) {
         char * pOldBuf = opList;
 #ifdef _WIN32
-        opList = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, opListSize+OPLISTSIZE+1);
+        opList = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, opListSize+OPLISTSIZE+1);
 #else
 		opList = (char *)realloc(pOldBuf, opListSize+OPLISTSIZE+1);
 #endif
         if(opList == NULL) {
             opList = pOldBuf;
 
-            AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in classUsers::AddBot2NickList for opList\n", (uint64_t)(opListSize+OPLISTSIZE+1));
+            AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsUsers::AddBot2NickList for opList\n", (uint64_t)(opListSize+OPLISTSIZE+1));
 
             return;
         }
@@ -559,20 +559,20 @@ void classUsers::AddBot2NickList(char * Nick, const size_t &szNickLen, const boo
 }
 //---------------------------------------------------------------------------
 
-void classUsers::Add2OpList(User * u) {
+void clsUsers::Add2OpList(User * u) {
     if(opListSize < opListLen+u->ui8NickLen+2) {
         char * pOldBuf = opList;
 #ifdef _WIN32
-        opList = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, opListSize+OPLISTSIZE+1);
+        opList = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, opListSize+OPLISTSIZE+1);
 #else
 		opList = (char *)realloc(pOldBuf, opListSize+OPLISTSIZE+1);
 #endif
         if(opList == NULL) {
             opList = pOldBuf;
             u->ui32BoolBits |= User::BIT_ERROR;
-            UserClose(u);
+            u->Close();
 
-            AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in classUsers::Add2OpList for opList\n", (uint64_t)(opListSize+OPLISTSIZE+1));
+            AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsUsers::Add2OpList for opList\n", (uint64_t)(opListSize+OPLISTSIZE+1));
 
             return;
         }
@@ -591,9 +591,9 @@ void classUsers::Add2OpList(User * u) {
 }
 //---------------------------------------------------------------------------
 
-void classUsers::DelFromNickList(char * Nick, const bool &isOp) {
+void clsUsers::DelFromNickList(char * Nick, const bool &isOp) {
     int m = sprintf(msg, "$%s$", Nick);
-    if(CheckSprintf(m, 1024, "classUsers::DelFromNickList") == false) {
+    if(CheckSprintf(m, 1024, "clsUsers::DelFromNickList") == false) {
         return;
     }
 
@@ -621,9 +621,9 @@ void classUsers::DelFromNickList(char * Nick, const bool &isOp) {
 }
 //---------------------------------------------------------------------------
 
-void classUsers::DelFromOpList(char * Nick) {
+void clsUsers::DelFromOpList(char * Nick) {
     int m = sprintf(msg, "$%s$", Nick);
-    if(CheckSprintf(m, 1024, "classUsers::DelFromOpList") == false) {
+    if(CheckSprintf(m, 1024, "clsUsers::DelFromOpList") == false) {
         return;
     }
 
@@ -640,37 +640,37 @@ void classUsers::DelFromOpList(char * Nick) {
 //---------------------------------------------------------------------------
 
 // PPK ... check global mainchat flood and add to global queue
-void classUsers::SendChat2All(User * cur, char * sData, const size_t &szChatLen, void * ptr) {
-    UdpDebug->Broadcast(sData, szChatLen);
+void clsUsers::SendChat2All(User * cur, char * sData, const size_t &szChatLen, void * ptr) {
+    clsUdpDebug::mPtr->Broadcast(sData, szChatLen);
 
-    if(ProfileMan->IsAllowed(cur, ProfileManager::NODEFLOODMAINCHAT) == false && 
-        SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] != 0) {
+    if(clsProfileManager::mPtr->IsAllowed(cur, clsProfileManager::NODEFLOODMAINCHAT) == false && 
+        clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] != 0) {
         if(iChatMsgs == 0) {
-			iChatMsgsTick = ui64ActualTick;
-			iChatLockFromTick = ui64ActualTick;
+			iChatMsgsTick = clsServerManager::ui64ActualTick;
+			iChatLockFromTick = clsServerManager::ui64ActualTick;
             iChatMsgs = 0;
             bChatLocked = false;
-		} else if((iChatMsgsTick+SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_TIME]) < ui64ActualTick) {
-			iChatMsgsTick = ui64ActualTick;
+		} else if((iChatMsgsTick+clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_TIME]) < clsServerManager::ui64ActualTick) {
+			iChatMsgsTick = clsServerManager::ui64ActualTick;
             iChatMsgs = 0;
         }
 
         iChatMsgs++;
 
-        if(iChatMsgs > (uint16_t)SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_MESSAGES]) {
-			iChatLockFromTick = ui64ActualTick;
+        if(iChatMsgs > (uint16_t)clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_MESSAGES]) {
+			iChatLockFromTick = clsServerManager::ui64ActualTick;
             if(bChatLocked == false) {
-                if(SettingManager->bBools[SETBOOL_DEFLOOD_REPORT] == true) {
-                    if(SettingManager->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-                        int imsgLen = sprintf(msg, "%s $<%s> *** %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], 
-                            LanguageManager->sTexts[LAN_GLOBAL_CHAT_FLOOD_DETECTED]);
-                        if(CheckSprintf(imsgLen, 1024, "classUsers::SendChat2All1") == true) {
-                            g_GlobalDataQueue->SingleItemStore(msg, imsgLen, NULL, 0, GlobalDataQueue::SI_PM2OPS);
+                if(clsSettingManager::mPtr->bBools[SETBOOL_DEFLOOD_REPORT] == true) {
+                    if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
+                        int imsgLen = sprintf(msg, "%s $<%s> *** %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
+                            clsLanguageManager::mPtr->sTexts[LAN_GLOBAL_CHAT_FLOOD_DETECTED]);
+                        if(CheckSprintf(imsgLen, 1024, "clsUsers::SendChat2All1") == true) {
+                            clsGlobalDataQueue::mPtr->SingleItemStore(msg, imsgLen, NULL, 0, clsGlobalDataQueue::SI_PM2OPS);
                         }
                     } else {
-                        int imsgLen = sprintf(msg, "<%s> *** %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_GLOBAL_CHAT_FLOOD_DETECTED]);
-                        if(CheckSprintf(imsgLen, 1024, "classUsers::SendChat2All2") == true) {
-                            g_GlobalDataQueue->AddQueueItem(msg, imsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
+                        int imsgLen = sprintf(msg, "<%s> *** %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_GLOBAL_CHAT_FLOOD_DETECTED]);
+                        if(CheckSprintf(imsgLen, 1024, "clsUsers::SendChat2All2") == true) {
+                            clsGlobalDataQueue::mPtr->AddQueueItem(msg, imsgLen, NULL, 0, clsGlobalDataQueue::CMD_OPS);
                         }
                     }
                 }
@@ -679,20 +679,20 @@ void classUsers::SendChat2All(User * cur, char * sData, const size_t &szChatLen,
         }
 
         if(bChatLocked == true) {
-            if((iChatLockFromTick+SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_TIMEOUT]) > ui64ActualTick) {
-                if(SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 1) {
+            if((iChatLockFromTick+clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_TIMEOUT]) > clsServerManager::ui64ActualTick) {
+                if(clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 1) {
                     return;
-                } else if(SettingManager->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 2) {
+                } else if(clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 2) {
                     if(szChatLen > 64000) {
                         sData[64000] = '\0';
                     }
 
-                	int iMsgLen = sprintf(g_sBuffer, "%s ", cur->sIP);
-                	if(CheckSprintf(iMsgLen, g_szBufferSize, "classUsers::SendChat2All3") == true) {
-                        memcpy(g_sBuffer+iMsgLen, sData, szChatLen);
+                	int iMsgLen = sprintf(clsServerManager::sGlobalBuffer, "%s ", cur->sIP);
+                	if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsUsers::SendChat2All3") == true) {
+                        memcpy(clsServerManager::sGlobalBuffer+iMsgLen, sData, szChatLen);
                         iMsgLen += (uint32_t)szChatLen;
-                        g_sBuffer[iMsgLen] = '\0';
-                        g_GlobalDataQueue->AddQueueItem(g_sBuffer, iMsgLen, NULL, 0, GlobalDataQueue::CMD_OPS);
+                        clsServerManager::sGlobalBuffer[iMsgLen] = '\0';
+                        clsGlobalDataQueue::mPtr->AddQueueItem(clsServerManager::sGlobalBuffer, iMsgLen, NULL, 0, clsGlobalDataQueue::CMD_OPS);
                     }
 
                     return;
@@ -704,27 +704,27 @@ void classUsers::SendChat2All(User * cur, char * sData, const size_t &szChatLen,
     }
 
     if(ptr == NULL) {
-        g_GlobalDataQueue->AddQueueItem(sData, szChatLen, NULL, 0, GlobalDataQueue::CMD_CHAT);
+        clsGlobalDataQueue::mPtr->AddQueueItem(sData, szChatLen, NULL, 0, clsGlobalDataQueue::CMD_CHAT);
     } else {
-        g_GlobalDataQueue->FillBlankQueueItem(sData, szChatLen, ptr);
+        clsGlobalDataQueue::mPtr->FillBlankQueueItem(sData, szChatLen, ptr);
     }
 }
 //---------------------------------------------------------------------------
 
-void classUsers::Add2MyInfos(User * u) {
+void clsUsers::Add2MyInfos(User * u) {
     if(myInfosSize < myInfosLen+u->ui16MyInfoShortLen) {
         char * pOldBuf = myInfos;
 #ifdef _WIN32
-        myInfos = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, myInfosSize+MYINFOLISTSIZE+1);
+        myInfos = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, myInfosSize+MYINFOLISTSIZE+1);
 #else
 		myInfos = (char *)realloc(pOldBuf, myInfosSize+MYINFOLISTSIZE+1);
 #endif
         if(myInfos == NULL) {
             myInfos = pOldBuf;
             u->ui32BoolBits |= User::BIT_ERROR;
-            UserClose(u);
+            u->Close();
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in classUsers::Add2MyInfos\n", (uint64_t)(myInfosSize+MYINFOLISTSIZE+1));
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsUsers::Add2MyInfos\n", (uint64_t)(myInfosSize+MYINFOLISTSIZE+1));
 
             return;
         }
@@ -740,7 +740,7 @@ void classUsers::Add2MyInfos(User * u) {
 }
 //---------------------------------------------------------------------------
 
-void classUsers::DelFromMyInfos(User * u) {
+void clsUsers::DelFromMyInfos(User * u) {
 	char *match = strstr(myInfos, u->sMyInfoShort+8);
     if(match != NULL) {
 		match -= 8;
@@ -751,20 +751,20 @@ void classUsers::DelFromMyInfos(User * u) {
 }
 //---------------------------------------------------------------------------
 
-void classUsers::Add2MyInfosTag(User * u) {
+void clsUsers::Add2MyInfosTag(User * u) {
     if(myInfosTagSize < myInfosTagLen+u->ui16MyInfoLongLen) {
         char * pOldBuf = myInfosTag;
 #ifdef _WIN32
-        myInfosTag = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, myInfosTagSize+MYINFOLISTSIZE+1);
+        myInfosTag = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, myInfosTagSize+MYINFOLISTSIZE+1);
 #else
 		myInfosTag = (char *)realloc(pOldBuf, myInfosTagSize+MYINFOLISTSIZE+1);
 #endif
         if(myInfosTag == NULL) {
             myInfosTag = pOldBuf;
             u->ui32BoolBits |= User::BIT_ERROR;
-            UserClose(u);
+            u->Close();
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in classUsers::Add2MyInfosTag\n", (uint64_t)(myInfosTagSize+MYINFOLISTSIZE+1));
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsUsers::Add2MyInfosTag\n", (uint64_t)(myInfosTagSize+MYINFOLISTSIZE+1));
 
             return;
         }
@@ -780,7 +780,7 @@ void classUsers::Add2MyInfosTag(User * u) {
 }
 //---------------------------------------------------------------------------
 
-void classUsers::DelFromMyInfosTag(User * u) {
+void clsUsers::DelFromMyInfosTag(User * u) {
 	char *match = strstr(myInfosTag, u->sMyInfoLong+8);
     if(match != NULL) {
 		match -= 8;
@@ -791,21 +791,21 @@ void classUsers::DelFromMyInfosTag(User * u) {
 }
 //---------------------------------------------------------------------------
 
-void classUsers::AddBot2MyInfos(char * MyInfo) {
+void clsUsers::AddBot2MyInfos(char * MyInfo) {
 	size_t len = strlen(MyInfo);
 	if(myInfosTag != NULL) {
 	    if(strstr(myInfosTag, MyInfo) == NULL ) {
             if(myInfosTagSize < myInfosTagLen+len) {
                 char * pOldBuf = myInfosTag;
 #ifdef _WIN32
-                myInfosTag = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, myInfosTagSize+MYINFOLISTSIZE+1);
+                myInfosTag = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, myInfosTagSize+MYINFOLISTSIZE+1);
 #else
 				myInfosTag = (char *)realloc(pOldBuf, myInfosTagSize+MYINFOLISTSIZE+1);
 #endif
                 if(myInfosTag == NULL) {
                     myInfosTag = pOldBuf;
 
-					AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for myInfosTag in classUsers::AddBot2MyInfos\n", (uint64_t)(myInfosTagSize+MYINFOLISTSIZE+1));
+					AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for myInfosTag in clsUsers::AddBot2MyInfos\n", (uint64_t)(myInfosTagSize+MYINFOLISTSIZE+1));
 
                     return;
                 }
@@ -822,14 +822,14 @@ void classUsers::AddBot2MyInfos(char * MyInfo) {
             if(myInfosSize < myInfosLen+len) {
                 char * pOldBuf = myInfos;
 #ifdef _WIN32
-                myInfos = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, myInfosSize+MYINFOLISTSIZE+1);
+                myInfos = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, myInfosSize+MYINFOLISTSIZE+1);
 #else
 				myInfos = (char *)realloc(pOldBuf, myInfosSize+MYINFOLISTSIZE+1);
 #endif
                 if(myInfos == NULL) {
                     myInfos = pOldBuf;
 
-					AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for myInfos in classUsers::AddBot2MyInfos\n", (uint64_t)(myInfosSize+MYINFOLISTSIZE+1));
+					AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for myInfos in clsUsers::AddBot2MyInfos\n", (uint64_t)(myInfosSize+MYINFOLISTSIZE+1));
 
                     return;
                 }
@@ -844,7 +844,7 @@ void classUsers::AddBot2MyInfos(char * MyInfo) {
 }
 //---------------------------------------------------------------------------
 
-void classUsers::DelBotFromMyInfos(char * MyInfo) {
+void clsUsers::DelBotFromMyInfos(char * MyInfo) {
 	size_t len = strlen(MyInfo);
 	if(myInfosTag) {
 		char *match = strstr(myInfosTag,  MyInfo);
@@ -865,25 +865,25 @@ void classUsers::DelBotFromMyInfos(char * MyInfo) {
 }
 //---------------------------------------------------------------------------
 
-void classUsers::Add2UserIP(User * cur) {
+void clsUsers::Add2UserIP(User * cur) {
     int m = sprintf(msg,"$%s %s$", cur->sNick, cur->sIP);
-    if(CheckSprintf(m, 1024, "classUsers::Add2UserIP") == false) {
+    if(CheckSprintf(m, 1024, "clsUsers::Add2UserIP") == false) {
         return;
     }
 
     if(userIPListSize < userIPListLen+m) {
         char * pOldBuf = userIPList;
 #ifdef _WIN32
-        userIPList = (char *)HeapReAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, userIPListSize+IPLISTSIZE+1);
+        userIPList = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, userIPListSize+IPLISTSIZE+1);
 #else
 		userIPList = (char *)realloc(pOldBuf, userIPListSize+IPLISTSIZE+1);
 #endif
         if(userIPList == NULL) {
             userIPList = pOldBuf;
             cur->ui32BoolBits |= User::BIT_ERROR;
-            UserClose(cur);
+            cur->Close();
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in classUsers::Add2UserIP\n", (uint64_t)(userIPListSize+IPLISTSIZE+1));
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsUsers::Add2UserIP\n", (uint64_t)(userIPListSize+IPLISTSIZE+1));
 
             return;
         }
@@ -901,9 +901,9 @@ void classUsers::Add2UserIP(User * cur) {
 }
 //---------------------------------------------------------------------------
 
-void classUsers::DelFromUserIP(User * cur) {
+void clsUsers::DelFromUserIP(User * cur) {
     int m = sprintf(msg,"$%s %s$", cur->sNick, cur->sIP);
-    if(CheckSprintf(m, 1024, "classUsers::DelFromUserIP") == false) {
+    if(CheckSprintf(m, 1024, "clsUsers::DelFromUserIP") == false) {
         return;
     }
 
@@ -919,31 +919,31 @@ void classUsers::DelFromUserIP(User * cur) {
 }
 //---------------------------------------------------------------------------
 
-void classUsers::Add2RecTimes(User * curUser) {
+void clsUsers::Add2RecTimes(User * curUser) {
     time_t acc_time;
     time(&acc_time);
 
-    if(ProfileMan->IsAllowed(curUser, ProfileManager::NOUSRSAMEIP) == true ||
-        (acc_time-curUser->LoginTime) >= SettingManager->iShorts[SETSHORT_MIN_RECONN_TIME]) {
+    if(clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::NOUSRSAMEIP) == true ||
+        (acc_time-curUser->LoginTime) >= clsSettingManager::mPtr->iShorts[SETSHORT_MIN_RECONN_TIME]) {
         return;
     }
 
     RecTime * pNewRecTime = new RecTime();
 
 	if(pNewRecTime == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewRecTime in classUsers::Add2RecTimes\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewRecTime in clsUsers::Add2RecTimes\n", 0);
         return;
 	}
 
 #ifdef _WIN32
-    pNewRecTime->sNick = (char *)HeapAlloc(hPtokaXHeap, HEAP_NO_SERIALIZE, curUser->ui8NickLen+1);
+    pNewRecTime->sNick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, curUser->ui8NickLen+1);
 #else
 	pNewRecTime->sNick = (char *)malloc(curUser->ui8NickLen+1);
 #endif
 	if(pNewRecTime->sNick == NULL) {
         delete pNewRecTime;
 
-        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in classUsers::Add2RecTimes\n", (uint64_t)(curUser->ui8NickLen+1));
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in clsUsers::Add2RecTimes\n", (uint64_t)(curUser->ui8NickLen+1));
 
         return;
     }
@@ -951,7 +951,7 @@ void classUsers::Add2RecTimes(User * curUser) {
     memcpy(pNewRecTime->sNick, curUser->sNick, curUser->ui8NickLen);
     pNewRecTime->sNick[curUser->ui8NickLen] = '\0';
 
-	pNewRecTime->ui64DisConnTick = ui64ActualTick-(acc_time-curUser->LoginTime);
+	pNewRecTime->ui64DisConnTick = clsServerManager::ui64ActualTick-(acc_time-curUser->LoginTime);
     pNewRecTime->ui32NickHash = curUser->ui32NickHash;
 
     memcpy(pNewRecTime->ui128IpHash, curUser->ui128IpHash, 16);
@@ -967,7 +967,7 @@ void classUsers::Add2RecTimes(User * curUser) {
 }
 //---------------------------------------------------------------------------
 
-bool classUsers::CheckRecTime(User * curUser) {
+bool clsUsers::CheckRecTime(User * curUser) {
     RecTime * next = RecTimeList;
 
     while(next != NULL) {
@@ -975,11 +975,11 @@ bool classUsers::CheckRecTime(User * curUser) {
         next = cur->next;
 
         // check expires...
-        if(cur->ui64DisConnTick+SettingManager->iShorts[SETSHORT_MIN_RECONN_TIME] <= ui64ActualTick) {
+        if(cur->ui64DisConnTick+clsSettingManager::mPtr->iShorts[SETSHORT_MIN_RECONN_TIME] <= clsServerManager::ui64ActualTick) {
 #ifdef _WIN32
             if(cur->sNick != NULL) {
-                if(HeapFree(hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sNick) == 0) {
-                    AppendDebugLog("%s - [MEM] Cannot deallocate cur->sNick in classUsers::CheckRecTime\n", 0);
+                if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sNick) == 0) {
+                    AppendDebugLog("%s - [MEM] Cannot deallocate cur->sNick in clsUsers::CheckRecTime\n", 0);
                 }
             }
 #else
@@ -1005,10 +1005,10 @@ bool classUsers::CheckRecTime(User * curUser) {
         }
 
         if(cur->ui32NickHash == curUser->ui32NickHash && memcmp(cur->ui128IpHash, curUser->ui128IpHash, 16) == 0 && strcasecmp(cur->sNick, curUser->sNick) == 0) {
-            int imsgLen = sprintf(msg, "<%s> %s %" PRIu64 " %s.|", SettingManager->sPreTexts[SetMan::SETPRETXT_HUB_SEC], LanguageManager->sTexts[LAN_PLEASE_WAIT], 
-                (cur->ui64DisConnTick+SettingManager->iShorts[SETSHORT_MIN_RECONN_TIME])-ui64ActualTick, LanguageManager->sTexts[LAN_SECONDS_BEFORE_RECONN]);
-            if(CheckSprintf(imsgLen, 1024, "classUsers::CheckRecTime1") == true) {
-                UserSendChar(curUser, msg, imsgLen);
+            int imsgLen = sprintf(msg, "<%s> %s %" PRIu64 " %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_PLEASE_WAIT],
+                (cur->ui64DisConnTick+clsSettingManager::mPtr->iShorts[SETSHORT_MIN_RECONN_TIME])-clsServerManager::ui64ActualTick, clsLanguageManager::mPtr->sTexts[LAN_SECONDS_BEFORE_RECONN]);
+            if(CheckSprintf(imsgLen, 1024, "clsUsers::CheckRecTime1") == true) {
+                curUser->SendChar(msg, imsgLen);
             }
             return true;
         }

@@ -27,6 +27,7 @@
 #include "../core/SettingManager.h"
 #include "../core/utility.h"
 //---------------------------------------------------------------------------
+#include "GuiSettingManager.h"
 #include "GuiUtil.h"
 //---------------------------------------------------------------------------
 #pragma hdrstop
@@ -47,12 +48,12 @@
 #include "SettingPageRules2.h"
 #include "../core/TextFileManager.h"
 //---------------------------------------------------------------------------
-SettingDialog * pSettingDialog = NULL;
+clsSettingDialog * clsSettingDialog::mPtr = NULL;
 //---------------------------------------------------------------------------
 static ATOM atomSettingDialog = 0;
 //---------------------------------------------------------------------------
 
-SettingDialog::SettingDialog() {
+clsSettingDialog::clsSettingDialog() {
     memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
 
     memset(&SettingPages, 0, 12 * sizeof(SettingPage *));
@@ -72,26 +73,26 @@ SettingDialog::SettingDialog() {
 
     for(uint8_t ui8i = 0; ui8i < 12; ui8i++) {
         if(SettingPages[ui8i] == NULL) {
-            AppendDebugLog("%s - [MEM] Cannot allocate SettingPage[%" PRIu64 "] in SettingDialog::SettingDialog\n", (uint64_t)ui8i);
+            AppendDebugLog("%s - [MEM] Cannot allocate SettingPage[%" PRIu64 "] in clsSettingDialog::clsSettingDialog\n", (uint64_t)ui8i);
             exit(EXIT_FAILURE);
         }
     }
 }
 //---------------------------------------------------------------------------
 
-SettingDialog::~SettingDialog() {
+clsSettingDialog::~clsSettingDialog() {
     for(uint8_t ui8i = 0; ui8i < 12; ui8i++) {
         if(SettingPages[ui8i] != NULL) {
             delete SettingPages[ui8i];
         }
     }
 
-    pSettingDialog = NULL;
+    clsSettingDialog::mPtr = NULL;
 }
 //---------------------------------------------------------------------------
 
-LRESULT CALLBACK SettingDialog::StaticSettingDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    SettingDialog * pParent = (SettingDialog *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
+LRESULT CALLBACK clsSettingDialog::StaticSettingDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    clsSettingDialog * pParent = (clsSettingDialog *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
     if(pParent == NULL) {
         return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -101,7 +102,7 @@ LRESULT CALLBACK SettingDialog::StaticSettingDialogProc(HWND hWnd, UINT uMsg, WP
 }
 //------------------------------------------------------------------------------
 
-LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT clsSettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch(uMsg) {
         case WM_SETFOCUS:
             ::SetFocus(hWndWindowItems[TV_TREE]);
@@ -118,7 +119,7 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                         bUpdateRedirectAddress = false, bUpdateTempBanRedirAddress = false, bUpdatePermBanRedirAddress = false, bUpdateSysTray = false,
                         bUpdateScripting = false, bUpdateMinShare = false, bUpdateMaxShare = false;
 
-                    SettingManager->bUpdateLocked = true;
+                    clsSettingManager::mPtr->bUpdateLocked = true;
 
                     for(uint8_t ui8i = 0; ui8i < 12; ui8i++) {
                         if(SettingPages[ui8i] != NULL) {
@@ -133,111 +134,111 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                         }
                     }
 
-                    SettingManager->bUpdateLocked = false;
+                    clsSettingManager::mPtr->bUpdateLocked = false;
 
                     if(bUpdateHubSec == true) {
-                        SettingManager->UpdateHubSec();
+                        clsSettingManager::mPtr->UpdateHubSec();
                     }
 
                     if(bUpdateMOTD == true) {
-                        SettingManager->UpdateMOTD();
+                        clsSettingManager::mPtr->UpdateMOTD();
                     }
 
                     if(bUpdateLanguage == true) {
-                        SettingManager->UpdateLanguage();
+                        clsSettingManager::mPtr->UpdateLanguage();
                     }
 
                     if(bUpdateHubNameWelcome == true) {
-                        SettingManager->UpdateHubNameWelcome();
+                        clsSettingManager::mPtr->UpdateHubNameWelcome();
                     }
 
                     if(bUpdateHubName == true) {
-                        pMainWindow->UpdateTitleBar();
-                        SettingManager->UpdateHubName();
+                        clsMainWindow::mPtr->UpdateTitleBar();
+                        clsSettingManager::mPtr->UpdateHubName();
                     }
 
                     if(bUpdateRedirectAddress == true) {
-                        SettingManager->UpdateRedirectAddress();
+                        clsSettingManager::mPtr->UpdateRedirectAddress();
                     }
 
                     if(bUpdateRegOnlyMessage == true) {
-                        SettingManager->UpdateRegOnlyMessage();
+                        clsSettingManager::mPtr->UpdateRegOnlyMessage();
                     }
 
                     if(bUpdateMinShare == true) {
-                        SettingManager->UpdateMinShare();
+                        clsSettingManager::mPtr->UpdateMinShare();
                     }
 
                     if(bUpdateMaxShare == true) {
-                        SettingManager->UpdateMaxShare();
+                        clsSettingManager::mPtr->UpdateMaxShare();
                     }
 
                     if(bUpdateShareLimitMessage == true) {
-                        SettingManager->UpdateShareLimitMessage();
+                        clsSettingManager::mPtr->UpdateShareLimitMessage();
                     }
 
                     if(bUpdateSlotsLimitMessage == true) {
-                        SettingManager->UpdateSlotsLimitMessage();
+                        clsSettingManager::mPtr->UpdateSlotsLimitMessage();
                     }
 
                     if(bUpdateMaxHubsLimitMessage == true) {
-                        SettingManager->UpdateMaxHubsLimitMessage();
+                        clsSettingManager::mPtr->UpdateMaxHubsLimitMessage();
                     }
 
                     if(bUpdateHubSlotRatioMessage == true) {
-                        SettingManager->UpdateHubSlotRatioMessage();
+                        clsSettingManager::mPtr->UpdateHubSlotRatioMessage();
                     }
 
                     if(bUpdateNoTagMessage == true) {
-                        SettingManager->UpdateNoTagMessage();
+                        clsSettingManager::mPtr->UpdateNoTagMessage();
                     }
 
                     if(bUpdateTempBanRedirAddress == true) {
-                        SettingManager->UpdateTempBanRedirAddress();
+                        clsSettingManager::mPtr->UpdateTempBanRedirAddress();
                     }
 
                     if(bUpdatePermBanRedirAddress == true) {
-                        SettingManager->UpdatePermBanRedirAddress();
+                        clsSettingManager::mPtr->UpdatePermBanRedirAddress();
                     }
 
                     if(bUpdateNickLimitMessage == true) {
-                        SettingManager->UpdateNickLimitMessage();
+                        clsSettingManager::mPtr->UpdateNickLimitMessage();
                     }
 
                     if(bUpdateTCPPorts == true) {
-                        SettingManager->UpdateTCPPorts();
+                        clsSettingManager::mPtr->UpdateTCPPorts();
                     }
 
                     if(bUpdateBotsSameNick == true) {
-                        SettingManager->UpdateBotsSameNick();
+                        clsSettingManager::mPtr->UpdateBotsSameNick();
                     }
 
                     if(bUpdateTextFiles == true) {
-                        TextFileManager->RefreshTextFiles();
+                        clsTextFilesManager::mPtr->RefreshTextFiles();
                     }
 
                     if(bUpdateBot == true) {
-                        SettingManager->UpdateBot(bUpdateBotNick);
+                        clsSettingManager::mPtr->UpdateBot(bUpdateBotNick);
                     }
 
                     if(bUpdateOpChat == true) {
-                        SettingManager->UpdateOpChat(bUpdateOpChatNick);
+                        clsSettingManager::mPtr->UpdateOpChat(bUpdateOpChatNick);
                     }
 
                     if(bUpdateUDPPort == true) {
-                        SettingManager->UpdateUDPPort();
+                        clsSettingManager::mPtr->UpdateUDPPort();
                     }
 
                     if(bUpdateSysTray == true) {
-                        pMainWindow->UpdateSysTray();
+                        clsMainWindow::mPtr->UpdateSysTray();
                     }
 
                     if(bUpdateAutoReg == true) {
-                        ServerUpdateAutoRegState();
+                        clsServerManager::UpdateAutoRegState();
                     }
 
                     if(bUpdateScripting == true) {
-                        SettingManager->UpdateScripting();
+                        clsSettingManager::mPtr->UpdateScripting();
                     }
                 }
                 case IDCANCEL:
@@ -287,7 +288,7 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
             break;
         case WM_CLOSE:
             ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
-            g_hWndActiveDialog = NULL;
+            clsServerManager::hWndActiveDialog = NULL;
             break;
         case WM_NCDESTROY:
             delete this;
@@ -298,7 +299,7 @@ LRESULT SettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam
 }
 //------------------------------------------------------------------------------
 
-void SettingDialog::DoModal(HWND hWndParent) {
+void clsSettingDialog::DoModal(HWND hWndParent) {
     if(atomSettingDialog == 0) {
         WNDCLASSEX m_wc;
         memset(&m_wc, 0, sizeof(WNDCLASSEX));
@@ -306,7 +307,7 @@ void SettingDialog::DoModal(HWND hWndParent) {
         m_wc.lpfnWndProc = ::DefWindowProc;
         m_wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
         m_wc.lpszClassName = "PtokaX_SettingDialog";
-        m_wc.hInstance = g_hInstance;
+        m_wc.hInstance = clsServerManager::hInstance;
         m_wc.hCursor = ::LoadCursor(m_wc.hInstance, IDC_ARROW);
         m_wc.style = CS_HREDRAW | CS_VREDRAW;
 
@@ -322,15 +323,15 @@ void SettingDialog::DoModal(HWND hWndParent) {
     int iX = (rcParent.left + (((rcParent.right - rcParent.left)) / 2)) - (iWidth / 2);
     int iY = (rcParent.top + ((rcParent.bottom - rcParent.top)/ 2 )) - (iHeight / 2);
 
-    hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomSettingDialog), LanguageManager->sTexts[LAN_SETTINGS],
+    hWndWindowItems[WINDOW_HANDLE] = ::CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, MAKEINTATOM(atomSettingDialog), clsLanguageManager::mPtr->sTexts[LAN_SETTINGS],
         WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, iX >= 5 ? iX : 5, iY >= 5 ? iY : 5, iWidth, iHeight,
-        hWndParent, NULL, g_hInstance, NULL);
+        hWndParent, NULL, clsServerManager::hInstance, NULL);
 
     if(hWndWindowItems[WINDOW_HANDLE] == NULL) {
         return;
     }
 
-    g_hWndActiveDialog = hWndWindowItems[WINDOW_HANDLE];
+    clsServerManager::hWndActiveDialog = hWndWindowItems[WINDOW_HANDLE];
 
     ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_USERDATA, (LONG_PTR)this);
     ::SetWindowLongPtr(hWndWindowItems[WINDOW_HANDLE], GWLP_WNDPROC, (LONG_PTR)StaticSettingDialogProc);
@@ -338,7 +339,7 @@ void SettingDialog::DoModal(HWND hWndParent) {
     ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
     hWndWindowItems[TV_TREE] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_TREEVIEW, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_HASLINES | TVS_SHOWSELALWAYS |
-        TVS_DISABLEDRAGDROP, 5, 5, ScaleGui(154), rcParent.bottom - ( 2 * iEditHeight) - 16, hWndWindowItems[WINDOW_HANDLE], NULL, g_hInstance, NULL);
+        TVS_DISABLEDRAGDROP, 5, 5, ScaleGui(154), rcParent.bottom - ( 2 * clsGuiSettingManager::iEditHeight) - 16, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
 
     TVINSERTSTRUCT tvIS;
     memset(&tvIS, 0, sizeof(TVINSERTSTRUCT));
@@ -364,17 +365,17 @@ void SettingDialog::DoModal(HWND hWndParent) {
         }
     }
 
-    hWndWindowItems[BTN_OK] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        4, rcParent.bottom - ( 2 * iEditHeight) - 7, ScaleGui(154) + 2, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDOK, g_hInstance, NULL);
+    hWndWindowItems[BTN_OK] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+        4, rcParent.bottom - ( 2 * clsGuiSettingManager::iEditHeight) - 7, ScaleGui(154) + 2, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDOK, clsServerManager::hInstance, NULL);
 
-    hWndWindowItems[BTN_CANCEL] = ::CreateWindowEx(0, WC_BUTTON, LanguageManager->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        4, rcParent.bottom - iEditHeight - 4, ScaleGui(154) + 2, iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDCANCEL, g_hInstance, NULL);
+    hWndWindowItems[BTN_CANCEL] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
+        4, rcParent.bottom - clsGuiSettingManager::iEditHeight - 4, ScaleGui(154) + 2, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDCANCEL, clsServerManager::hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
-        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)hFont, MAKELPARAM(TRUE, 0));
+        ::SendMessage(hWndWindowItems[ui8i], WM_SETFONT, (WPARAM)clsGuiSettingManager::hFont, MAKELPARAM(TRUE, 0));
     }
 
-    wpOldTreeProc = (WNDPROC)::SetWindowLongPtr(hWndWindowItems[TV_TREE], GWLP_WNDPROC, (LONG_PTR)TreeProc);
+    clsGuiSettingManager::wpOldTreeProc = (WNDPROC)::SetWindowLongPtr(hWndWindowItems[TV_TREE], GWLP_WNDPROC, (LONG_PTR)TreeProc);
 
     ::EnableWindow(hWndParent, FALSE);
 
@@ -395,17 +396,17 @@ void SettingDialog::DoModal(HWND hWndParent) {
 
         ::GetClientRect(hWndWindowItems[WINDOW_HANDLE], &rcParent);
 
-        ::SetWindowPos(hWndWindowItems[TV_TREE], NULL, 0, 0, ScaleGui(154), rcParent.bottom - ( 2 * iEditHeight) - 16, SWP_NOMOVE | SWP_NOZORDER);
+        ::SetWindowPos(hWndWindowItems[TV_TREE], NULL, 0, 0, ScaleGui(154), rcParent.bottom - ( 2 * clsGuiSettingManager::iEditHeight) - 16, SWP_NOMOVE | SWP_NOZORDER);
 
-        ::SetWindowPos(hWndWindowItems[BTN_OK], NULL, 4, rcParent.bottom - ( 2 * iEditHeight) - 7, ScaleGui(154) + 2, iEditHeight, SWP_NOZORDER);
-        ::SetWindowPos(hWndWindowItems[BTN_CANCEL], NULL, 4, rcParent.bottom - iEditHeight - 4, ScaleGui(154) + 2, iEditHeight, SWP_NOZORDER);
+        ::SetWindowPos(hWndWindowItems[BTN_OK], NULL, 4, rcParent.bottom - ( 2 * clsGuiSettingManager::iEditHeight) - 7, ScaleGui(154) + 2, clsGuiSettingManager::iEditHeight, SWP_NOZORDER);
+        ::SetWindowPos(hWndWindowItems[BTN_CANCEL], NULL, 4, rcParent.bottom - clsGuiSettingManager::iEditHeight - 4, ScaleGui(154) + 2, clsGuiSettingManager::iEditHeight, SWP_NOZORDER);
     }
 
     ::ShowWindow(hWndWindowItems[WINDOW_HANDLE], SW_SHOW);
 }
 //---------------------------------------------------------------------------
 
-void SettingDialog::OnSelChanged() {
+void clsSettingDialog::OnSelChanged() {
     HTREEITEM htiNode = (HTREEITEM)::SendMessage(hWndWindowItems[TV_TREE], TVM_GETNEXTITEM, TVGN_CARET, 0);
 
     if(htiNode == NULL) {

@@ -115,14 +115,5 @@ void ReduceGlobalBuffer();
 
 bool HashPassword(char * sPassword, size_t &szPassLen, uint8_t * ui8PassHash);
 //---------------------------------------------------------------------------
-extern string PATH, SCRIPT_PATH, sTitle;
-extern size_t g_szBufferSize;
-extern char * g_sBuffer;
-extern bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bUseIPv4, bUseIPv6, bIPv6DualStack;
-#ifdef _WIN32
-	extern HANDLE hConsole, hLuaHeap, hPtokaXHeap, hRecvHeap, hSendHeap;
-	extern string PATH_LUA, sOs;
-#endif
-//---------------------------------------------------------------------------
 
 #endif

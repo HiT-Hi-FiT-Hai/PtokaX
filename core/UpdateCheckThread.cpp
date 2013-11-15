@@ -31,10 +31,10 @@
 //---------------------------------------------------------------------------
 #include "../gui.win/MainWindow.h"
 //---------------------------------------------------------------------------
-UpdateCheckThread * pUpdateCheckThread = NULL;
+clsUpdateCheckThread * clsUpdateCheckThread::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-UpdateCheckThread::UpdateCheckThread() {
+clsUpdateCheckThread::clsUpdateCheckThread() {
     sSocket = INVALID_SOCKET;
 
 	ui32FileLen = 0;
@@ -52,9 +52,9 @@ UpdateCheckThread::UpdateCheckThread() {
 }
 //---------------------------------------------------------------------------
 
-UpdateCheckThread::~UpdateCheckThread() {
-	ui64BytesRead += (uint64_t)ui32BytesRead;
-    ui64BytesSent += (uint64_t)ui32BytesSent;
+clsUpdateCheckThread::~clsUpdateCheckThread() {
+	clsServerManager::ui64BytesRead += (uint64_t)ui32BytesRead;
+    clsServerManager::ui64BytesSent += (uint64_t)ui32BytesSent;
 
     if(sSocket != INVALID_SOCKET) {
 #ifdef _WIN32
@@ -76,13 +76,13 @@ UpdateCheckThread::~UpdateCheckThread() {
 //---------------------------------------------------------------------------
 
 unsigned __stdcall ExecuteUpdateCheck(void * /*pArguments*/) {
-	pUpdateCheckThread->Run();
+	clsUpdateCheckThread::mPtr->Run();
 
 	return 0;
 }
 //---------------------------------------------------------------------------
 
-void UpdateCheckThread::Resume() {
+void clsUpdateCheckThread::Resume() {
 	hThread = (HANDLE)_beginthreadex(NULL, 0, ExecuteUpdateCheck, NULL, 0, NULL);
 	if(hThread == 0) {
 		AppendDebugLog("%s - [ERR] Failed to create new UpdateCheckThread\n", 0);
@@ -90,7 +90,7 @@ void UpdateCheckThread::Resume() {
 }
 //---------------------------------------------------------------------------
 
-void UpdateCheckThread::Run() {
+void clsUpdateCheckThread::Run() {
     struct addrinfo * pResult = NULL;
 
     struct addrinfo hints;
@@ -98,7 +98,7 @@ void UpdateCheckThread::Run() {
 
     hints.ai_socktype = SOCK_STREAM;
 
-    if(bUseIPv6 == true) {
+    if(clsServerManager::bUseIPv6 == true) {
         hints.ai_family = AF_UNSPEC;
     } else {
         hints.ai_family = AF_INET;
@@ -107,11 +107,11 @@ void UpdateCheckThread::Run() {
     if(::getaddrinfo("www.PtokaX.org", "80", &hints, &pResult) != 0 || (pResult->ai_family != AF_INET && pResult->ai_family != AF_INET6)) {
         int iError = WSAGetLastError();
         int iMsgLen = sprintf(sMsg, "Update check resolve error %s (%d).", WSErrorStr(iError), iError);
-        if(CheckSprintf(iMsgLen, 2048, "UpdateCheckThread::Run") == true) {
+        if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::Run") == true) {
             Message(sMsg, iMsgLen);
         }
 
-        ::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+        ::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
         if(pResult != NULL) {
             ::freeaddrinfo(pResult);
@@ -129,11 +129,11 @@ void UpdateCheckThread::Run() {
     if((sSocket = socket(pResult->ai_family, pResult->ai_socktype, pResult->ai_protocol)) == -1) {
         int iMsgLen = sprintf(sMsg, "Update check create error %s (%d).", WSErrorStr(errno), errno);
 #endif
-        if(CheckSprintf(iMsgLen, 2048, "UpdateCheckThread::Run1") == true) {
+        if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::Run1") == true) {
             Message(sMsg, iMsgLen);
         }
 
-        ::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+        ::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
         ::freeaddrinfo(pResult);
 
@@ -150,11 +150,11 @@ void UpdateCheckThread::Run() {
     if(setsockopt(sSocket, SOL_SOCKET, SO_RCVBUF, &bufsize, sizeof(bufsize)) == -1) {
         int iMsgLen = sprintf(sMsg, "Update check recv buff error %s (%d).", WSErrorStr(errno), errno);
 #endif
-		if(CheckSprintf(iMsgLen, 2048, "UpdateCheckThread::Run2") == true) {
+		if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::Run2") == true) {
 			Message(sMsg, iMsgLen);
 		}
 
-		::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+		::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
         ::freeaddrinfo(pResult);
 
@@ -171,11 +171,11 @@ void UpdateCheckThread::Run() {
 	if(setsockopt(sSocket, SOL_SOCKET, SO_SNDBUF, &bufsize, sizeof(bufsize)) == -1) {
         int iMsgLen = sprintf(sMsg, "Update check buff error %s (%d).", WSErrorStr(errno), errno);
 #endif
-        if(CheckSprintf(iMsgLen, 2048, "UpdateCheckThread::Run3") == true) {
+        if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::Run3") == true) {
             Message(sMsg, iMsgLen);
 		}
 			
-		::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+		::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
         ::freeaddrinfo(pResult);
 
@@ -195,11 +195,11 @@ void UpdateCheckThread::Run() {
         if(errno != EAGAIN) {
             int iMsgLen = sprintf(sMsg, "Update check connect error %s (%d).", WSErrorStr(errno), errno);
 #endif
-            if(CheckSprintf(iMsgLen, 2048, "UpdateCheckThread::Run4") == true) {
+            if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::Run4") == true) {
                 Message(sMsg, iMsgLen);
             }
 
-			::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+			::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
             ::freeaddrinfo(pResult);
 
@@ -212,7 +212,7 @@ void UpdateCheckThread::Run() {
 	Message("Connected to PtokaX.org, sending request...", 43);
 
     if(SendHeader() == false) {
-        ::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+        ::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
         return;
     }
@@ -230,20 +230,20 @@ void UpdateCheckThread::Run() {
     if(fcntl(sSocket, F_SETFL, oldFlag | O_NONBLOCK) == -1) {
         int iMsgLen = sprintf(sMsg, "Update check non-block error %s (%d).", WSErrorStr(errno), errno);
 #endif
-        if(CheckSprintf(iMsgLen, 2048, "UpdateCheckThread::Run5") == true) {
+        if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::Run5") == true) {
             Message(sMsg, iMsgLen);
 		}
 
-		::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+		::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
         return;
     }
 
     sRecvBuf = (char *)malloc(512);
     if(sRecvBuf == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate 512 bytes for sRecvBuf in UpdateCheckThread::Run\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate 512 bytes for sRecvBuf in clsUpdateCheckThread::Run\n", 0);
 
-		::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+		::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
         return;
     }
@@ -254,7 +254,7 @@ void UpdateCheckThread::Run() {
         iLoops++;
 
 		if(Receive() == false) {
-			::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+			::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
 			return;
         }
@@ -265,25 +265,25 @@ void UpdateCheckThread::Run() {
     if(bTerminated == false) {
         Message("Update check timeout.", 21);
 
-		::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+		::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
     }
 }
 //---------------------------------------------------------------------------
 
-void UpdateCheckThread::Close() {
+void clsUpdateCheckThread::Close() {
 	bTerminated = true;
 }
 //---------------------------------------------------------------------------
 
-void UpdateCheckThread::WaitFor() {
+void clsUpdateCheckThread::WaitFor() {
     ::WaitForSingleObject(hThread, INFINITE);
 }
 //---------------------------------------------------------------------------
 
-void UpdateCheckThread::Message(char * sMessage, const size_t &szLen) {
+void clsUpdateCheckThread::Message(char * sMessage, const size_t &szLen) {
 	char *sMess = (char *)malloc(szLen + 1);
 	if(sMess == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMess in UpdateCheckThread::Message\n", (uint64_t)(szLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMess in clsUpdateCheckThread::Message\n", (uint64_t)(szLen+1));
 
 		return;
 	}
@@ -291,11 +291,11 @@ void UpdateCheckThread::Message(char * sMessage, const size_t &szLen) {
 	memcpy(sMess, sMessage, szLen);
 	sMess[szLen] = '\0';
 
-	::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_MSG, 0, (LPARAM)sMess);
+	::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_MSG, 0, (LPARAM)sMess);
 }
 //---------------------------------------------------------------------------
 
-bool UpdateCheckThread::SendHeader() {
+bool clsUpdateCheckThread::SendHeader() {
 	char * sDataToSend = "GET /version HTTP/1.1\r\nUser-Agent: PtokaX " PtokaXVersionString " [" BUILD_NUMBER "]"
 		"\r\nHost: www.PtokaX.org\r\nConnection: close\r\nCache-Control: no-cache\r\nAccept: */*\r\nAccept-Language: en\r\n\r\n";
 
@@ -309,7 +309,7 @@ bool UpdateCheckThread::SendHeader() {
     if(iBytes == -1) {
         int iMsgLen = sprintf(sMsg, "Update check send error %s (%d).)", WSErrorStr(errno), errno);
 #endif
-        if(CheckSprintf(iMsgLen, 2048, "UpdateCheckThread::SendHeader") == true) {
+        if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::SendHeader") == true) {
             Message(sMsg, iMsgLen);
         }
 
@@ -322,13 +322,13 @@ bool UpdateCheckThread::SendHeader() {
 }
 //---------------------------------------------------------------------------
 
-bool UpdateCheckThread::Receive() {
+bool clsUpdateCheckThread::Receive() {
     u_long ui32bytes = 0;
 
 	if(ioctlsocket(sSocket, FIONREAD, &ui32bytes) == SOCKET_ERROR) {
         int iError = WSAGetLastError();
 	    int iMsgLen = sprintf(sMsg, "Update check ioctlsocket(FIONREAD) error %s (%d).", WSErrorStr(iError), iError);
-        if(CheckSprintf(iMsgLen, 2048, "UpdateCheckThread::Receive") == true) {
+        if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::Receive") == true) {
 			Message(sMsg, iMsgLen);
         }
 
@@ -352,7 +352,7 @@ bool UpdateCheckThread::Receive() {
         if(sRecvBuf == NULL) {
             sRecvBuf = pOldBuf;
 
-            AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sRecvBuf in UpdateCheckThread::Receive\n", (uint64_t)szAllignLen);
+            AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sRecvBuf in clsUpdateCheckThread::Receive\n", (uint64_t)szAllignLen);
 
             return false;
         }
@@ -372,7 +372,7 @@ bool UpdateCheckThread::Receive() {
         if(errno != EAGAIN) {
 			int iMsgLen = sprintf(sMsg, "Update check recv error %s (%d).", WSErrorStr(errno), errno);
 #endif
-            if(CheckSprintf(iMsgLen, 2048, "UpdateCheckThread::Receive2") == true) {
+            if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::Receive2") == true) {
                 Message(sMsg, iMsgLen);
             }
 
@@ -407,7 +407,7 @@ bool UpdateCheckThread::Receive() {
 						bData = true;
 					} else {
 						Message("Update check failed.", 20);
-						::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+						::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
 						return false;
                     }
@@ -445,7 +445,7 @@ bool UpdateCheckThread::Receive() {
 		if(ui32RecvBufLen == (uint32_t)ui32FileLen) {
 			char *sMess = (char *)malloc(ui32RecvBufLen + 1);
 			if(sMess == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMess in UpdateCheckThread::Receive\n", (uint64_t)(ui32RecvBufLen+1));
+				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMess in clsUpdateCheckThread::Receive\n", (uint64_t)(ui32RecvBufLen+1));
 
 				return false;
 			}
@@ -453,9 +453,9 @@ bool UpdateCheckThread::Receive() {
 			memcpy(sMess, sRecvBuf, ui32RecvBufLen);
 			sMess[ui32RecvBufLen] = '\0';
 
-			::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_DATA, 0, (LPARAM)sMess);
+			::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_DATA, 0, (LPARAM)sMess);
 
-			::PostMessage(pMainWindow->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+			::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
         }
     }
 

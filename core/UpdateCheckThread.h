@@ -22,7 +22,7 @@
 #define UpdateCheckThreadH
 //---------------------------------------------------------------------------
 
-class UpdateCheckThread {
+class clsUpdateCheckThread {
 private:
     SOCKET sSocket;
 
@@ -43,16 +43,16 @@ private:
     bool Receive();
     bool SendHeader();
 public:
-	UpdateCheckThread();
-	~UpdateCheckThread();
+    static clsUpdateCheckThread * mPtr;
+
+	clsUpdateCheckThread();
+	~clsUpdateCheckThread();
 
     void Resume();
     void Run();
 	void Close();
 	void WaitFor();
 };
-//---------------------------------------------------------------------------
-extern UpdateCheckThread * pUpdateCheckThread;
 //---------------------------------------------------------------------------
 
 #endif

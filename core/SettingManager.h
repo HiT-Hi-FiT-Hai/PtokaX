@@ -24,7 +24,7 @@
 #include "SettingIds.h"
 //---------------------------------------------------------------------------
 
-class SetMan {
+class clsSettingManager {
 private:
 #ifdef _WIN32
 	CRITICAL_SECTION csSetting;
@@ -39,6 +39,8 @@ private:
 
     void Load();
 public:
+    static clsSettingManager * mPtr;
+
     enum SetPreTxtIds {
         SETPRETXT_HUB_SEC,
         SETPRETXT_MOTD,
@@ -87,8 +89,8 @@ public:
 	
     uint8_t ui8FullMyINFOOption; //SettingManager->ui8FullMyINFOOption;
 
-    SetMan(void);
-    ~SetMan(void);
+    clsSettingManager(void);
+    ~clsSettingManager(void);
 
     bool GetBool(const size_t &szBoolId);
     uint16_t GetFirstPort();
@@ -133,8 +135,6 @@ public:
     void UpdateUDPPort();
     void UpdateScripting() const;
 };
-//--------------------------------------------------------------------------- 
-extern SetMan *SettingManager;
 //---------------------------------------------------------------------------
 
 #endif
