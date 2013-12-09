@@ -1044,6 +1044,7 @@ void ScriptError(Script * cur) {
 //------------------------------------------------------------------------------
 
 int ScriptTraceback(lua_State *L) {
+#if LUA_VERSION_NUM > 501
     const char * sMsg = lua_tostring(L, 1);
     if(sMsg != NULL) {
         luaL_traceback(L, L, sMsg, 1);
@@ -1051,5 +1052,26 @@ int ScriptTraceback(lua_State *L) {
     }
 
     return 0;
+#else
+    if(!lua_isstring(L, 1)) {
+        return 1;
+    }
+
+    lua_getfield(L, LUA_GLOBALSINDEX, "debug");
+    if(!lua_istable(L, -1)) {
+        lua_pop(L, 1);
+        return 1;
+    }
+
+    lua_getfield(L, -1, "traceback");
+    if(!lua_isfunction(L, -1)) {
+        lua_pop(L, 2);
+        return 1;
+    }
+    lua_pushvalue(L, 1);
+    lua_pushinteger(L, 2);
+    lua_call(L, 2, 1);
+    return 1;
+#endif
 }
 //------------------------------------------------------------------------------
