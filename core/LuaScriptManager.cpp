@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2012  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2013  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -767,6 +767,9 @@ bool clsScriptManager::Arrival(User * u, char * sData, const size_t &szLen, cons
         if(((cur->ui32DataArrivals & iLuaArrivalBits[uiType]) == iLuaArrivalBits[uiType]) == true && (bMoved == false || cur->bProcessed == false)) {
             cur->bProcessed = true;
 
+            lua_pushcfunction(cur->LUA, ScriptTraceback);
+            int iTraceback = lua_gettop(cur->LUA);
+
             // PPK ... table of arrivals
             static const char* arrival[] = { "ChatArrival", "KeyArrival", "ValidateNickArrival", "PasswordArrival",
             "VersionArrival", "GetNickListArrival", "MyINFOArrival", "GetINFOArrival", "SearchArrival",
@@ -791,7 +794,7 @@ bool clsScriptManager::Arrival(User * u, char * sData, const size_t &szLen, cons
             lua_pushlstring(cur->LUA, sData, szLen); // sData
 
             // two passed parameters, zero returned
-            if(lua_pcall(cur->LUA, 2, LUA_MULTRET, 0) != 0) {
+            if(lua_pcall(cur->LUA, 2, LUA_MULTRET, iTraceback) != 0) {
                 ScriptError(cur);
 
                 lua_settop(cur->LUA, 0);
@@ -855,6 +858,9 @@ bool clsScriptManager::UserConnected(User * u) {
 		if(((cur->ui16Functions & iConnectedBits[ui8Type]) == iConnectedBits[ui8Type]) == true && (bMoved == false || cur->bProcessed == false)) {
             cur->bProcessed = true;
 
+            lua_pushcfunction(cur->LUA, ScriptTraceback);
+            int iTraceback = lua_gettop(cur->LUA);
+
             // PPK ... table of connected functions
             static const char* ConnectedFunction[] = { "UserConnected", "RegConnected", "OpConnected" };
 
@@ -884,7 +890,7 @@ bool clsScriptManager::UserConnected(User * u) {
 			ScriptPushUser(cur->LUA, u); // usertable
 
             // 1 passed parameters, zero returned
-			if(lua_pcall(cur->LUA, 1, LUA_MULTRET, 0) != 0) {
+			if(lua_pcall(cur->LUA, 1, LUA_MULTRET, iTraceback) != 0) {
                 ScriptError(cur);
 
                 lua_settop(cur->LUA, 0);
@@ -954,6 +960,9 @@ void clsScriptManager::UserDisconnected(User * u, Script * pScript/* = NULL*/) {
         if(((cur->ui16Functions & iDisconnectedBits[ui8Type]) == iDisconnectedBits[ui8Type]) == true && (bMoved == false || cur->bProcessed == false)) {
             cur->bProcessed = true;
 
+            lua_pushcfunction(cur->LUA, ScriptTraceback);
+            int iTraceback = lua_gettop(cur->LUA);
+
             // PPK ... table of disconnected functions
             static const char* DisconnectedFunction[] = { "UserDisconnected", "RegDisconnected", "OpDisconnected" };
 
@@ -983,7 +992,7 @@ void clsScriptManager::UserDisconnected(User * u, Script * pScript/* = NULL*/) {
 			ScriptPushUser(cur->LUA, u); // usertable
 
             // 1 passed parameters, zero returned
-			if(lua_pcall(cur->LUA, 1, 0, 0) != 0) {
+			if(lua_pcall(cur->LUA, 1, 0, iTraceback) != 0) {
                 ScriptError(cur);
 
                 lua_settop(cur->LUA, 0);

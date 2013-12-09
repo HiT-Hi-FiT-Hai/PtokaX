@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2012  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2013  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -1104,7 +1104,9 @@ bool DirExist(char * sPath) {
 		if(ver.dwPlatformId != VER_PLATFORM_WIN32_NT) {
 			clsServerManager::sOS = "Windows 9x/ME";
 	    } else if(ver.dwMajorVersion == 6) {
-            if(ver.dwMinorVersion == 2) {
+            if(ver.dwMinorVersion == 3) {
+                clsServerManager::sOS = "Windows 8.1";
+            } else if(ver.dwMinorVersion == 2) {
                 clsServerManager::sOS = "Windows 8";
             } else if(ver.dwMinorVersion == 1) {
 	           if(ver.wProductType == VER_NT_WORKSTATION) {

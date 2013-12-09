@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2012  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2013  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -1021,7 +1021,7 @@ void clsDcCommands::BotINFO(User * curUser, char * sData, const uint32_t &iLen) 
 // $ConnectToMe <nickname> <ownip>:<ownlistenport>
 // $MultiConnectToMe <nick> <ownip:port> <hub[:port]>
 void clsDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck, const bool &bMulti) {
-    if((bMulti == false && iLen < 25) || (bMulti == true && iLen < 30)) {
+    if((bMulti == false && iLen < 23) || (bMulti == true && iLen < 28)) {
         int imsgLen = sprintf(msg, "[SYS] Bad $%sConnectToMe (%s) from %s (%s) - user closed.", bMulti == false ? "" : "Multi", sData, curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ConnectToMe1") == true) {
             clsUdpDebug::mPtr->Broadcast(msg, imsgLen);

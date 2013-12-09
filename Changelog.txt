@@ -1,14 +1,19 @@
 PtokaX DC hub software - Ptaczek/Frontline3k/aMutex (c) 2oo2/2oo3
 PtokaX DC hub software - Ptaczek/PPK (c) 2004/2005
-PtokaX DC hub software - PPK (c) 2006/2012
+PtokaX DC hub software - PPK (c) 2006/2013
 ------------------------------------------------------------------------------
 
 
 ----------------------------------------Next Release...---------------------------------------
+
+
+----------------------------------------0.5.0.1 10 December 2013-----------------------------
 Added: White space characters (ascii chars below 32) are not allowed in nicks anymore.
 Added: Option to store passwords for registered users as hashes.
 Added: Registered users autosave after every 100 regs changes and every 15 minutes when regs change.
 Added: AddTimer(iTimerInterval, fFunction) to Lua api.
+Added: ProfMan.RemoveProfile in Lua api now accept profile number as param.
+Added: Error message on script error now contains traceback, when available.
 Fixed: IpToCountry for IPv4 ignored first and last ip in country range (thx Alexey and alex82 for report).
 Fixed: Crash in windows version when script send some global data as reaction to chat without blocking it (thx Alexey for report).
 Fixed: Wrong chat lines order when multiple messages was received in one loop and script send global data reply for one of them.
@@ -17,6 +22,9 @@ Fixed: Few other issues related to hub bot nick and info changes.
 Fixed: Issues related to OpChat bot nick and info changes.
 Fixed: 64bit windoze build was limited to only 2 GB of memory.
 Fixed: Lua float/integer types for better performance with Lua 5.3.
+Fixed: Issues with signals on unix (thx dmvn for report).
+Fixed: Broken text input boxes in settings window in some cases.
+
 
 
 ----------------------------------------0.5.0.0 23 December 2012-----------------------------

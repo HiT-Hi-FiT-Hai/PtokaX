@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2012  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2013  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -559,7 +559,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
         ::EnableWindow(hWndPageItems[EDT_SHARE_REDIR_ADDR], clsSettingManager::mPtr->bBools[SETBOOL_SHARE_LIMIT_REDIR] == true ? TRUE : FALSE);
     }
 
-    clsGuiSettingManager::wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_SEARCH_MAX_LEN], GWLP_WNDPROC, (LONG_PTR)EditProc);
+    clsGuiSettingManager::wpOldNumberEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_SEARCH_MAX_LEN], GWLP_WNDPROC, (LONG_PTR)NumberEditProc);
 
 	return true;
 }

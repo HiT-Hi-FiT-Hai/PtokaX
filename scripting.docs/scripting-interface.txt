@@ -212,7 +212,7 @@ RangeTempBan(sIPFrom, sIPTo, iTime, sReason, sBy, bFull)	- Range temp ban given 
 ProfMan.
 -------------------
 AddProfile(sProfileName)										- Add profile to profilemanager, return nProfileNumber if success or nil when profile already exist.
-RemoveProfile(sProfileName)										- Remove profile from profilemanager, return true if success or nil when profile not exist or is in use.
+RemoveProfile(sProfileName/iProfileNumber)						- Remove profile from profilemanager, return true if success or nil when profile not exist or is in use.
 
 MoveDown(iProfileNumber)										- Move profile down. Return nil when failed, true if success.
 MoveUp(iProfileNumber)											- Move profile up. Return nil when failed, true if success.

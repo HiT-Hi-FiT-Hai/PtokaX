@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2012  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2013  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -2532,18 +2532,18 @@ bool User::GenerateMyInfoShort() { // true == changed
 
     // Add mode to start of description if is enabled
     if(clsSettingManager::mPtr->bBools[SETBOOL_MODE_TO_DESCRIPTION] == true && sModes[0] != 0) {
-        char * sDescription = NULL;
+        char * sActualDescription = NULL;
 
         if(ui8ChangedDescriptionShortLen != 0) {
-            sDescription = sChangedDescriptionShort;
+            sActualDescription = sChangedDescriptionShort;
         } else if(clsSettingManager::mPtr->bBools[SETBOOL_STRIP_DESCRIPTION] == true) {
-            sDescription = sDescription;
+            sActualDescription = sDescription;
         }
 
-        if(sDescription == NULL) {
+        if(sActualDescription == NULL) {
             msg[iLen] = sModes[0];
             iLen++;
-        } else if(sDescription[0] != sModes[0] && sDescription[1] != ' ') {
+        } else if(sActualDescription[0] != sModes[0] && sActualDescription[1] != ' ') {
             msg[iLen] = sModes[0];
             msg[iLen+1] = ' ';
             iLen += 2;

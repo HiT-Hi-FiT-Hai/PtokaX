@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2012  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2013  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -480,15 +480,19 @@ int ScriptGetGC(Script * cur) {
 //------------------------------------------------------------------------------
 
 void ScriptOnStartup(Script * cur) {
+    lua_pushcfunction(cur->LUA, ScriptTraceback);
+    int iTraceback = lua_gettop(cur->LUA);
+
     lua_getglobal(cur->LUA, "OnStartup");
     int i = lua_gettop(cur->LUA);
+
     if(lua_isnil(cur->LUA, i)) {
 		cur->ui16Functions &= ~Script::ONSTARTUP;
 		lua_settop(cur->LUA, 0);
         return;
     }
 
-    if(lua_pcall(cur->LUA, 0, 0, 0) != 0) {
+    if(lua_pcall(cur->LUA, 0, 0, iTraceback) != 0) {
         ScriptError(cur);
 
         lua_settop(cur->LUA, 0);
@@ -501,6 +505,9 @@ void ScriptOnStartup(Script * cur) {
 //------------------------------------------------------------------------------
 
 void ScriptOnExit(Script * cur) {
+    lua_pushcfunction(cur->LUA, ScriptTraceback);
+    int iTraceback = lua_gettop(cur->LUA);
+
     lua_getglobal(cur->LUA, "OnExit");
     int i = lua_gettop(cur->LUA);
     if(lua_isnil(cur->LUA, i)) {
@@ -509,7 +516,7 @@ void ScriptOnExit(Script * cur) {
         return;
     }
 
-    if(lua_pcall(cur->LUA, 0, 0, 0) != 0) {
+    if(lua_pcall(cur->LUA, 0, 0, iTraceback) != 0) {
         ScriptError(cur);
 
         lua_settop(cur->LUA, 0);
@@ -522,6 +529,9 @@ void ScriptOnExit(Script * cur) {
 //------------------------------------------------------------------------------
 
 static bool ScriptOnError(Script * cur, char * sErrorMsg, const size_t &szMsgLen) {
+    lua_pushcfunction(cur->LUA, ScriptTraceback);
+    int iTraceback = lua_gettop(cur->LUA);
+
 	lua_getglobal(cur->LUA, "OnError");
     int i = lua_gettop(cur->LUA);
     if(lua_isnil(cur->LUA, i)) {
@@ -534,7 +544,7 @@ static bool ScriptOnError(Script * cur, char * sErrorMsg, const size_t &szMsgLen
     
     lua_pushlstring(cur->LUA, sErrorMsg, szMsgLen);
 
-	if(lua_pcall(cur->LUA, 1, 0, 0) != 0) { // 1 passed parameters, zero returned
+	if(lua_pcall(cur->LUA, 1, 0, iTraceback) != 0) { // 1 passed parameters, zero returned
 		size_t szLen = 0;
 		char * stmp = (char*)lua_tolstring(cur->LUA, -1, &szLen);
 
@@ -998,6 +1008,9 @@ void ScriptError(Script * cur) {
 #else
 			if(tmr == AccTimer) {
 #endif
+                lua_pushcfunction(cur->LUA, ScriptTraceback);
+                int iTraceback = lua_gettop(cur->LUA);
+
                 if(tmr->sFunctionName != NULL) {
 					lua_getglobal(cur->LUA, tmr->sFunctionName);
 				} else {
@@ -1015,7 +1028,7 @@ void ScriptError(Script * cur) {
 #endif
 
 				// 1 passed parameters, 0 returned
-				if(lua_pcall(cur->LUA, 1, 0, 0) != 0) {
+				if(lua_pcall(cur->LUA, 1, 0, iTraceback) != 0) {
 					ScriptError(cur);
 					return;
 				}
@@ -1027,5 +1040,16 @@ void ScriptError(Script * cur) {
         }
 
 	}
+}
+//------------------------------------------------------------------------------
+
+int ScriptTraceback(lua_State *L) {
+    const char * sMsg = lua_tostring(L, 1);
+    if(sMsg != NULL) {
+        luaL_traceback(L, L, sMsg, 1);
+        return 1;
+    }
+
+    return 0;
 }
 //------------------------------------------------------------------------------

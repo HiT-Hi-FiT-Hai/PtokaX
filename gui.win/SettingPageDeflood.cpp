@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2012  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2013  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -830,7 +830,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::EnableWindow(hWndPageItems[UD_RCTM_SECS2], clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_ACTION2] == 0 ? FALSE : TRUE);
     ::EnableWindow(hWndPageItems[LBL_RCTM_SECONDS2], clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_ACTION2] == 0 ? FALSE : TRUE);
 
-    clsGuiSettingManager::wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_MAX_USERS_LOGINS], GWLP_WNDPROC, (LONG_PTR)EditProc);
+    clsGuiSettingManager::wpOldNumberEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_MAX_USERS_LOGINS], GWLP_WNDPROC, (LONG_PTR)NumberEditProc);
 
 	return true;
 }

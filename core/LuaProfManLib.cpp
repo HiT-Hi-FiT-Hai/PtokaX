@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2012  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2013  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -340,31 +340,55 @@ static int RemoveProfile(lua_State * L) {
         return 1;
     }
 
-    if(lua_type(L, 1) != LUA_TSTRING) {
-        luaL_checktype(L, 1, LUA_TSTRING);
-		lua_settop(L, 0);
-		lua_pushnil(L);
+    if(lua_type(L, 1) == LUA_TSTRING) {
+        size_t szLen;
+        char * sProfileName = (char *)lua_tolstring(L, 1, &szLen);
+
+        if(szLen == 0) {
+            lua_settop(L, 0);
+            lua_pushnil(L);
+            return 1;
+        }
+
+        int32_t result = clsProfileManager::mPtr->RemoveProfileByName(sProfileName);
+        if(result != 1) {
+            lua_settop(L, 0);
+            lua_pushnil(L);
+            return 1;
+        }
+
+        lua_settop(L, 0);
+        lua_pushboolean(L, 1);
+        return 1;
+    } else if(lua_type(L, 1) == LUA_TNUMBER) {
+#if LUA_VERSION_NUM < 503
+        uint16_t idx = (uint16_t)lua_tonumber(L, 1);
+#else
+    	uint16_t idx = (uint16_t)lua_tounsigned(L, 1);
+#endif
+
+    	lua_settop(L, 0);
+
+        // if the requested index is out of bounds return nil
+        if(idx >= clsProfileManager::mPtr->iProfileCount) {
+            lua_pushnil(L);
+            return 1;
+        }
+
+        if(clsProfileManager::mPtr->RemoveProfile(idx) == false) {
+            lua_settop(L, 0);
+            lua_pushnil(L);
+            return 1;
+        }
+
+        lua_settop(L, 0);
+        lua_pushboolean(L, 1);
         return 1;
     }
 
-    size_t szLen;
-    char * sProfileName = (char *)lua_tolstring(L, 1, &szLen);
-
-    if(szLen == 0) {
-		lua_settop(L, 0);
-		lua_pushnil(L);
-        return 1;
-    }
-
-    int32_t result = clsProfileManager::mPtr->RemoveProfileByName(sProfileName);
-    if(result != 1) {
-		lua_settop(L, 0);
-		lua_pushnil(L);
-        return 1;
-    }
-
-    lua_settop(L, 0);
-    lua_pushboolean(L, 1);
+    luaL_error(L, "bad argument #1 to 'RemoveProfile' (string or number expected, got %d)", lua_typename(L, lua_type(L, 1)));
+	lua_settop(L, 0);
+	lua_pushnil(L);
     return 1;
 }
 //------------------------------------------------------------------------------
@@ -488,12 +512,12 @@ static int GetProfile(lua_State * L) {
     
         PushProfile(L, idx);
         return 1;
-    } else {
-        luaL_error(L, "bad argument #1 to 'GetProfile' (string or number expected, got %d)", lua_typename(L, lua_type(L, 1)));
-		lua_settop(L, 0);
-		lua_pushnil(L);
-        return 1;
     }
+
+    luaL_error(L, "bad argument #1 to 'GetProfile' (string or number expected, got %d)", lua_typename(L, lua_type(L, 1)));
+	lua_settop(L, 0);
+	lua_pushnil(L);
+    return 1;
 }
 //------------------------------------------------------------------------------
 
