@@ -86,9 +86,35 @@ bool PXBReader::OpenFileRead(const char * sFilename) {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+void PXBReader::ReadNextFilePart() {
+    memmove(clsServerManager::sGlobalBuffer, sActualPosition, szRemainingSize);
+
+    size_t szReadSize = fread(clsServerManager::sGlobalBuffer + szRemainingSize, 1, 131072 - szRemainingSize, pFile);
+
+    if(szReadSize != (131072 - szRemainingSize)) {
+        bFullRead = true;
+    }
+
+    sActualPosition = clsServerManager::sGlobalBuffer;
+    szRemainingSize += szReadSize;
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 bool PXBReader::ReadNextItem(const uint16_t * sExpectedIdentificators, const uint8_t &ui8ExpectedSubItems, const uint8_t &ui8ExtraSubItems/* = 0*/) {
     if(szRemainingSize == 0) {
         return false;
+    }
+
+    if(szRemainingSize < 4) {
+        if(bFullRead == true) {
+            return false;
+        } else { // read next part of file
+            ReadNextFilePart();
+
+            if(szRemainingSize < 4) {
+                return false;
+            }
+        }
     }
 
     uint32_t ui32ItemSize = ntohl(*((uint32_t *)sActualPosition));
@@ -97,16 +123,7 @@ bool PXBReader::ReadNextItem(const uint16_t * sExpectedIdentificators, const uin
         if(bFullRead == true) {
             return false;
         } else { // read next part of file
-            memmove(clsServerManager::sGlobalBuffer, sActualPosition, szRemainingSize);
-
-            size_t szReadSize = fread(clsServerManager::sGlobalBuffer + szRemainingSize, 1, 131072 - szRemainingSize, pFile);
-
-            if(szReadSize != (131072 - szRemainingSize)) {
-                bFullRead = true;
-            }
-
-            sActualPosition = clsServerManager::sGlobalBuffer;
-            szRemainingSize += szReadSize;
+            ReadNextFilePart();
 
             if(ui32ItemSize > szRemainingSize) {
                 return false;

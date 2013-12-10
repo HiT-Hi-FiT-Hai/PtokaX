@@ -31,6 +31,8 @@ private:
     FILE * pFile;
 
     size_t szRemainingSize;
+
+    void ReadNextFilePart();
 public:
     enum enmDataTypes {
         PXB_BYTE,
