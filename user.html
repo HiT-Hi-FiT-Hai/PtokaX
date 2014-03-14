@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title>PtokaX Lua scripting interface</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="Author" content="PPK">
+        <meta name="Description" content="PtokaX Lua scripting interface doc">
+        <meta name="Keywords" content="PtokaX, Direct Connect, P2P, Peer To Peer, Lua, Scripting">
+        <link rel="Shortcut Icon" href="Spider256-16x16.ico">
+        <link href="style.css" type="text/css" rel="stylesheet">
+    </head>
+    <body>
+        <center>
+    		<h1>User table</h1>
+            <table>
+                <tr>
+                    <td>sNick</td><td>- User nick.</td>
+                </tr>
+                <tr>
+                    <td>sIP</td><td>- User ip address.</td>
+                </tr>
+                <tr>
+                    <td>uptr</td><td>- Memory address to original user data structure, for internal PtokaX use. Don't modify it, else user functions will not work.</td>
+                </tr>
+                <tr>
+                    <td>iProfile</td><td>- User profile.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td><h4>Data available after Core.GetUserAllData or Core.GetUserData call:</h4></td>
+                </tr>
+                <tr>
+                    <td>sMode</td><td>- User mode (from tag) or nil when user don't have tag or mode in tag.</td>
+                </tr>
+                <tr>
+                    <td>sMyInfoString</td><td>- User MYINFO string or nil when user don't send MyINFO yet.</td>
+                </tr>
+                <tr>
+                    <td>sDescription</td><td>- User description or nil when user don't have description.</td>
+                </tr>
+                <tr>
+                    <td>sTag</td><td>- User tag or nil when user don't have tag.</td>
+                </tr>
+                <tr>
+                    <td>sConnection</td><td>- User connection or nil when user don't have connection.</td>
+                </tr>
+                <tr>
+                    <td>sEmail</td><td>- User email or nil when user don't have email.</td>
+                </tr>
+                <tr>
+                    <td>sClient</td><td>- User client (from tag) or nil when user don't have tag.</td>
+                </tr>
+                <tr>
+                    <td>sClientVersion</td><td>- User client version (from tag) or nil when user don't have tag.</td>
+                </tr>
+                <tr>
+                    <td>sVersion</td><td>- User version (from $Version) or nil when user don't send Version.</td>
+                </tr>
+                <tr>
+                    <td>sCountryCode</td><td>- User country code or nil when ip-to-country database is not loaded.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>bConnected</td><td>- User is added in hub (visible for other users, added is after NewUser/OpConnected).</td>
+                </tr>
+                <tr>
+                    <td>bActive</td><td>- true when user is active (from tag or is sending active commands) or nil when is not active.</td>
+                </tr>
+                <tr>
+                    <td>bOperator</td><td>- User have operator status.</td>
+                </tr>
+                <tr>
+                    <td>bUserCommand</td><td>- User support UserCommands protocol extension.</td>
+                </tr>
+                <tr>
+                    <td>bQuickList</td><td>- User support QuickList protocol extension.</td>
+                </tr>
+                <tr>
+                    <td>bSuspiciousTag</td><td>- User have suspicious tag.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>iShareSize</td><td>- User share size.</td>
+                </tr>
+                <tr>
+                    <td>iHubs</td><td>- User hubs count (from tag).</td>
+                </tr>
+                <tr>
+                    <td>iNormalHubs</td><td>- User hubs without registration count (from tag) or nil if user don't have tag or have old-style (only H:x) tag.</td>
+                </tr>
+                <tr>
+                    <td>iRegHubs</td><td>- User hubs with registration count (from tag) or nil if user don't have tag or have old-style (only H:x) tag.</td>
+                </tr>
+                <tr>
+                    <td>iOpHubs</td><td>- User hubs with operator status (from tag) or nil if user don't have tag or have old-style (only H:x) tag.</td>
+                </tr>
+                <tr>
+                    <td>iSlots</td><td>- User slots count (from tag).</td>
+                </tr>
+                <tr>
+                    <td>iLlimit</td><td>- User L or B limit (from tag).</td>
+                </tr>
+                <tr>
+                    <td>iDefloodWarns</td><td>- User deflood warns count.</td>
+                </tr>
+                <tr>
+                    <td>iMagicByte</td><td>- Number of ascii char after connection in myinfo.</td>
+                </tr>
+                <tr>
+                    <td>iLoginTime</td><td>- User login time in seconds from 1.1.1970</td>
+                </tr>
+            </table>
+        </center>
+    </body>
+</html>

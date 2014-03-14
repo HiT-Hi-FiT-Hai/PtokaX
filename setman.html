@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title>PtokaX Lua scripting interface</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="Author" content="PPK">
+        <meta name="Description" content="PtokaX Lua scripting interface doc">
+        <meta name="Keywords" content="PtokaX, Direct Connect, P2P, Peer To Peer, Lua, Scripting">
+        <link rel="Shortcut Icon" href="Spider256-16x16.ico">
+        <link href="style.css" type="text/css" rel="stylesheet">
+    </head>
+    <body>
+        <center>
+    		<h1>SetMan metatable</h1>
+            <table>
+                <tr>
+                    <td>SetMan.Save()</td><td>- Save settings.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>SetMan.GetMOTD()</td>
+                </tr>
+                <tr>
+                    <td>SetMan.SetMOTD(sString)</td><td>- | is not allowed.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>SetMan.GetBool(<a href="bools.html">nBoolId</a>)</td><td>- true or nil.
+                </tr>
+                <tr>
+                    <td>SetMan.SetBool(<a href="bools.html">nBoolId</a>, bBoolean)</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>SetMan.GetNumber(<a href="numbers.html">nNumberId</a>)</td>
+                </tr>
+                <tr>
+                    <td>SetMan.SetNumber(<a href="numbers.html">nNumberId</a>, nNumber)</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>SetMan.GetString(<a href="strings.html">nStringId</a>)</td><td>- String or nil.
+                </tr>
+                <tr>
+                    <td>SetMan.SetString(<a href="strings.html">nStringId</a>, sString)</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>SetMan.GetMinShare()</td><td>- Return min share in bytes.
+                </tr>
+                <tr>
+                    <td>SetMan.SetMinShare(nShareInBytes)</td>
+                </tr>
+                <tr>
+                    <td>SetMan.SetMinShare(nMinShare, nShareUnits)</td><td>- nMinShare max is 9999. nShareUnits 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>SetMan.GetMaxShare()</td><td>- Return max share in bytes.
+                </tr>
+                <tr>
+                    <td>SetMan.SetMaxShare(nShareInBytes)</td>
+                </tr>
+                <tr>
+                    <td>SetMan.SetMaxShare(nMaxShare, nShareUnits)</td><td>- nMaxShare max is 9999. nShareUnits 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>SetMan.SetHubSlotRatio(nHubs, nSlots)</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>SetMan.GetOpChat()</td><td>- Return table with sNick, sDescription, sEmail, bEnabled.
+                </tr>
+                <tr>
+                    <td>SetMan.SetOpChat(bEnabled, sNewOpChatName, sNewDescription, sNewEmail)</td><td>- Max length of string is 64 chars !!! In nick is not allowed $|<>:?*"/\ and space. In Description and Email is not allowed $ and |. Return nil when failed, true when success.
+                </tr>
+                <tr>
+                    <td>SetMan.GetHubBot()</td><td>- Return table with sNick, sDescription, sEmail, bEnabled, bUsedAsHubSecAlias.
+                </tr>
+                <tr>
+                    <td>SetMan.SetHubBot(bEnabled, sNewHubBotName, sNewDescription, sNewEmail, bUseAsHubSecAlias)</td><td>- Max length of string is 64 chars !!! In nick is not allowed $|<>:?*"/\ and space. In Description and Email is not allowed $ and |. Return nil when failed, true when success.
+                </tr>
+            </table>
+        </center>
+    </body>
+</html>

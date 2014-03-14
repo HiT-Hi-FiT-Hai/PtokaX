@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title>PtokaX Lua scripting interface</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="Author" content="PPK">
+        <meta name="Description" content="PtokaX Lua scripting interface doc">
+        <meta name="Keywords" content="PtokaX, Direct Connect, P2P, Peer To Peer, Lua, Scripting">
+        <link rel="Shortcut Icon" href="Spider256-16x16.ico">
+        <link href="style.css" type="text/css" rel="stylesheet">
+    </head>
+    <body>
+        <center>
+    		<h1>Profile permissions table</h1>
+            <table>
+                <tr>
+                    <td>bIsOP</td><td>- User have key / is OP</td>
+                </tr>
+                <tr>
+                    <td>bNoDefloodGetNickList</td><td>- No GetNickList Deflood</td>
+                </tr>
+                <tr>
+                    <td>bNoDefloodNMyINFO</td><td>- No MyINFO Deflood</td>
+                </tr>
+                <tr>
+                    <td>bNoDefloodSearch</td><td>- No Search Deflood</td>
+                </tr>
+                <tr>
+                    <td>bNoDefloodPM</td><td>- No PM Deflood</td>
+                </tr>
+                <tr>
+                    <td>bNoDefloodMainChat</td><td>- No Main Chat Deflood</td>
+                </tr>
+                <tr>
+                    <td>bMassMsg</td><td>- Mass Message</td>
+                </tr>
+                <tr>
+                    <td>bTopic</td><td>- Topic</td>
+                </tr>
+                <tr>
+                    <td>bTempBan</td><td>- TempBan</td>
+                </tr>
+                <tr>
+                    <td>bTempUnban</td><td>- TempUnban</td>
+                </tr>
+                <tr>
+                    <td>bRefreshTxt</td><td>- Reload text files</td>
+                </tr>
+                <tr>
+                    <td>bNoTagCheck</td><td>- No Tag check</td>
+                </tr>
+                <tr>
+                    <td>bDelRegUser</td><td>- DelRegUser</td>
+                </tr>
+                <tr>
+                    <td>bAddRegUser</td><td>- AddRegUser</td>
+                </tr>
+                <tr>
+                    <td>bNoChatLimits</td><td>- No ChatLimits</td>
+                </tr>
+                <tr>
+                    <td>bNoMaxHubCheck</td><td>- No MaxHubs Check</td>
+                </tr>
+                <tr>
+                    <td>bNoSlotHubRatio</td><td>- No Slot/Hub ratio check</td>
+                </tr>
+                <tr>
+                    <td>bNoSlotCheck</td><td>- No SlotCheck</td>
+                </tr>
+                <tr>
+                    <td>bNoShareLimit</td><td>- No ShareLimit</td>
+                </tr>
+                <tr>
+                    <td>bClrPermBan</td><td>- Clear PermBan</td>
+                </tr>
+                <tr>
+                    <td>bClrTempBan</td><td>- Clear TempBan</td>
+                </tr>
+                <tr>
+                    <td>bGetInfo</td><td>- GetInfo</td>
+                </tr>
+                <tr>
+                    <td>bGetBans</td><td>- Get Bans</td>
+                </tr>
+                <tr>
+                    <td>bRestartScripts</td><td>- Start/Stop/Restart script(s)</td>
+                </tr>
+                <tr>
+                    <td>bRestartHub</td><td>- Restart hub</td>
+                </tr>
+                <tr>
+                    <td>bTempOP</td><td>- TempOP</td>
+                </tr>
+                <tr>
+                    <td>bGag</td><td>- Gag, Ungag</td>
+                </tr>
+                <tr>
+                    <td>bRedirect</td><td>- Redirect</td>
+                </tr>
+                <tr>
+                    <td>bBan</td><td>- Ban</td>
+                </tr>
+                <tr>
+                    <td>bUnban</td><td>- Unban</td>
+                </tr>
+                <tr>
+                    <td>bKick</td><td>- Kick</td>
+                </tr>
+                <tr>
+                    <td>bDrop</td><td>- Drop</td>
+                </tr>
+                <tr>
+                    <td>bEnterFullHub</td><td>- Enter full hub</td>
+                </tr>
+                <tr>
+                    <td>bEnterIfIPBan</td><td>- Enter hub if IP banned</td>
+                </tr>
+                <tr>
+                    <td>bAllowedOPChat</td><td>- Allowed for OpChat</td>
+                </tr>
+                <tr>
+                    <td>bSendFullMyinfos</td><td>- Send full myinfos</td>
+                </tr>
+                <tr>
+                    <td>bSendAllUserIP</td><td>- Send all users IP</td>
+                </tr>
+                <tr>
+                    <td>bRangeBan</td><td>- Range ban</td>
+                </tr>
+                <tr>
+                    <td>bRangeUnban</td><td>- Range unban</td>
+                </tr>
+                <tr>
+                    <td>bRangeTempBan</td><td>- Range temp ban</td>
+                </tr>
+                <tr>
+                    <td>bRangeTempUnban</td><td>- Range temp unban</td>
+                </tr>
+                <tr>
+                    <td>bGetRangeBans</td><td>- Get range perm bans</td>
+                </tr>
+                <tr>
+                    <td>bClearRangePermBans</td><td>- Clear range perm bans</td>
+                </tr>
+                <tr>
+                    <td>bClearRangeTempBans</td><td>- Clear range temp bans</td>
+                </tr>
+                <tr>
+                    <td>bNoIpCheck</td><td>- No IP checking in connection and search request.</td>
+                </tr>
+                <tr>
+                    <td>bClose</td><td>- Close</td>
+                </tr>
+                <tr>
+                    <td>bNoSearchLimits</td><td>- No search length limits.</td>
+                </tr>
+                <tr>
+                    <td>bNoDefloodCTM</td><td>- No ConnectToMe deflood.</td>
+                </tr>
+                <tr>
+                    <td>bNoDefloodRCTM</td><td>- No RevConnectToMe deflood.</td>
+                </tr>
+                <tr>
+                    <td>bNoDefloodSR</td><td>- No search reply deflood.</td>
+                </tr>
+                <tr>
+                    <td>bNoDefloodRecv</td><td>- No received data deflood.</td>
+                </tr>
+                <tr>
+                    <td>bNoChatInterval</td><td>- No chat interval.</td>
+                </tr>
+                <tr>
+                    <td>bNoPMInterval</td><td>- No private message interval.</td>
+                </tr>
+                <tr>
+                    <td>bNoSearchInterval</td><td>- No search interval.</td>
+                </tr>
+                <tr>
+                    <td>bNoMaxUsersSameIP</td><td>- No maximum users from same IP.</td>
+                </tr>
+                <tr>
+                    <td>bNoReConnTime</td><td>- No reconnect time.</td>
+                </tr>
+            </table>
+        </center>
+    </body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title>PtokaX Lua scripting interface</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="Author" content="PPK">
+        <meta name="Description" content="PtokaX Lua scripting interface doc">
+        <meta name="Keywords" content="PtokaX, Direct Connect, P2P, Peer To Peer, Lua, Scripting">
+        <link rel="Shortcut Icon" href="Spider256-16x16.ico">
+        <link href="style.css" type="text/css" rel="stylesheet">
+    </head>
+    <body>
+        <center>
+    		<h1>Setting strings IDs</h1>
+            <table>
+                <tr>
+                    <td>0</td><td>- Hub name. Min length 1, max 256.</td>
+                </tr>
+                <tr>
+                    <td>1</td><td>- Admin nick. Min length 1, max 64, $ is not allowed.</td>
+                </tr>
+                <tr>
+                    <td>2</td><td>- Hub address. Min length 1, max 256.</td>
+                </tr>
+                <tr>
+                    <td>3</td><td>- TCP ports. Min length 1, max 64.</td>
+                </tr>
+                <tr>
+                    <td>4</td><td>- UDP port. Min length 1, max 5.</td>
+                </tr>
+                <tr>
+                    <td>5</td><td>- Hub description. Max length 256.</td>
+                </tr>
+                <tr>
+                    <td>6</td><td>- Main redirect address. Max length 256.</td>
+                </tr>
+                <tr>
+                    <td>7</td><td>- Hublist register servers. Max length 1024.</td>
+                </tr>
+                <tr>
+                    <td>8</td><td>- Registered users only message. Min length 1, max 256.</td>
+                </tr>
+                <tr>
+                    <td>9</td><td>- Registered users only redirect address. Max length 256.</td>
+                </tr>
+                <tr>
+                    <td>10</td><td>- Hub topic. Max length 256.</td>
+                </tr>
+                <tr>
+                    <td>11</td><td>- Share limit message. Min length 1, max 256. Use %[min] for min share size and %[max] for max share size.</td>
+                </tr>
+                <tr>
+                    <td>12</td><td>- Share limit redirect address. Max length 256.</td>
+                </tr>
+                <tr>
+                    <td>13</td><td>- Slot limit message. Min length 1, max 256. Use %[min] for min slots and %[max] for max slots.</td>
+                </tr>
+                <tr>
+                    <td>14</td><td>- Slot limit redirect address. Max length 256.</td>
+                </tr>
+                <tr>
+                    <td>15</td><td>- Hub/slot ratio limit message. Min length 1, max 256. Use %[hubs] for hubs and %[slots] for slots.</td>
+                </tr>
+                <tr>
+                    <td>16</td><td>- Hub/slot ratio limit redirect address. Max length 256.</td>
+                </tr>
+                <tr>
+                    <td>17</td><td>- Max hubs limit message. Min length 1, max 256. Use %[hubs] for max hubs.</td>
+                </tr>
+                <tr>
+                    <td>18</td><td>- Max hubs limit redirect address. Max length 256.</td>
+                </tr>
+                <tr>
+                    <td>19</td><td>- No tag rule message. Min length 1, max 256.</td>
+                </tr>
+                <tr>
+                    <td>20</td><td>- No tag rule redirect address. Max length 256.</td>
+                </tr>
+                <tr>
+                    <td>21</td><td>- Hub bot nick. Min length 1, max 64, $ and space is not allowed.</td>
+                </tr>
+                <tr>
+                    <td>22</td><td>- Hub bot description. Max length 64, $ is not allowed.</td>
+                </tr>
+                <tr>
+                    <td>23</td><td>- Hub bot email. Max length 64, $ is not allowed.</td>
+                </tr>
+                <tr>
+                    <td>24</td><td>- OpChat bot nick. Min length 1, max 64, $ and space is not allowed.</td>
+                </tr>
+                <tr>
+                    <td>25</td><td>- OpChat bot description. Max length 64, $ is not allowed.</td>
+                </tr>
+                <tr>
+                    <td>26</td><td>- OpChat bot email. Max length 64, $ is not allowed.</td>
+                </tr>
+                <tr>
+                    <td>27</td><td>- Temp ban redirect address. Max length 256.</td>
+                </tr>
+                <tr>
+                    <td>28</td><td>- Perm ban redirect address. Max length 256.</td>
+                </tr>
+                <tr>
+                    <td>29</td><td>- Chat commands prefixes. Min length 1, max 5.</td>
+                </tr>
+                <tr>
+                    <td>30</td><td>- Hub owner email. Max length 64.</td>
+                </tr>
+                <tr>
+                    <td>31</td><td>- Nick limit message. Min length 1, max 256. Use %[min] for min length and %[max] for max length.</td>
+                </tr>
+                <tr>
+                    <td>32</td><td>- Nick limit redirect address. Max length 256.</td>
+                </tr>
+                <tr>
+                    <td>33</td><td>- Additional message to ban message. Max lenght 256.</td>
+                </tr>
+                <tr>
+                    <td>34</td><td>- Language. When language is default then return nil.</td>
+                </tr>
+            </table>
+        </center>
+    </body>
+</html>

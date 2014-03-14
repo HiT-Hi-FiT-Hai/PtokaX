@@ -1,0 +1,361 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title>PtokaX Lua scripting interface</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="Author" content="PPK">
+        <meta name="Description" content="PtokaX Lua scripting interface doc">
+        <meta name="Keywords" content="PtokaX, Direct Connect, P2P, Peer To Peer, Lua, Scripting">
+        <link rel="Shortcut Icon" href="Spider256-16x16.ico">
+        <link href="style.css" type="text/css" rel="stylesheet">
+    </head>
+    <body>
+        <center>
+    		<h1>Setting numbers IDs</h1>
+            <table>
+                <tr>
+                    <td>0</td><td>- Max users limit</td>
+                </tr>
+                <tr>
+                    <td>1</td><td>- Min share limit. Max 9999.</td>
+                </tr>
+                <tr>
+                    <td>2</td><td>- Min share units. 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB. Max 4.</td>
+                </tr>
+                <tr>
+                    <td>3</td><td>- Max share limit. Max 9999.</td>
+                </tr>
+                <tr>
+                    <td>4</td><td>- Max share units. 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB. Max 4.</td>
+                </tr>
+                <tr>
+                    <td>5</td><td>- Min slots limit.</td>
+                </tr>
+                <tr>
+                    <td>6</td><td>- Max slots limit.</td>
+                </tr>
+                <tr>
+                    <td>7</td><td>- Hubs for hub/slot ratio.</td>
+                </tr>
+                <tr>
+                    <td>8</td><td>- Slots for hub/slot ratio.</td>
+                </tr>
+                <tr>
+                    <td>9</td><td>- Max hubs limit.</td>
+                </tr>
+                <tr>
+                    <td>10</td><td>- No tag option. 0 = accept, 1 = reject, 2 = redirect. Max 2.</td>
+                </tr>
+                <tr>
+                    <td>11</td><td>- Send full MyINFO to... 0 = to all, 1 = to profile, 2 = to none. Max 2.</td>
+                </tr>
+                <tr>
+                    <td>12</td><td>- Max chat length limit.</td>
+                </tr>
+                <tr>
+                    <td>13</td><td>- Max chat lines limit.</td>
+                </tr>
+                <tr>
+                    <td>14</td><td>- Max private message length limit.</td>
+                </tr>
+                <tr>
+                    <td>15</td><td>- Max private message lines limit.</td>
+                </tr>
+                <tr>
+                    <td>16</td><td>- Default tempban time. Must be higher than 0.</td>
+                </tr>
+                <tr>
+                    <td>17</td><td>- Max passive search replys limit.</td>
+                </tr>
+                <tr>
+                    <td>18</td><td>- Time before new MyINFO from user is accepted for broadcast.</td>
+                </tr>
+                <tr>
+                    <td>19</td><td>- Main chat deflood messages count. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>20</td><td>- Main chat deflood time. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>21</td><td>- Main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>22</td><td>- Same main chat deflood messages count. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>23</td><td>- Same main chat deflood time. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>24</td><td>- Same main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>25</td><td>- Same multiline main chat deflood messages count. Min 2, max 999.</td>
+                </tr>
+                <tr>
+                    <td>26</td><td>- Same multiline main chat deflood lines. Min 2, max 999.</td>
+                </tr>
+                <tr>
+                    <td>27</td><td>- Same multiline main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>28</td><td>- Private message deflood messages count. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>29</td><td>- Private message deflood time. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>30</td><td>- Private message deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>31</td><td>- Same private message deflood messages count. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>32</td><td>- Same private message deflood time. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>33</td><td>- Same private message deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>34</td><td>- Same multiline private message deflood messages count. Min 2, max 999.</td>
+                </tr>
+                <tr>
+                    <td>35</td><td>- Same multiline private message deflood lines. Min 2, max 999.</td>
+                </tr>
+                <tr>
+                    <td>36</td><td>- Same multiline private message action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>37</td><td>- Search deflood messages count. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>38</td><td>- Search deflood time. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>39</td><td>- Search deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>40</td><td>- Same search deflood messages count. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>41</td><td>- Same search deflood time. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>42</td><td>- Same search deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>43</td><td>- MyINFO deflood messages count. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>44</td><td>- MyINFO deflood time. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>45</td><td>- MyINFO deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>46</td><td>- GetNickList deflood messages count. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>47</td><td>- GetNickList deflood time. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>48</td><td>- GetNickList deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>49</td><td>- Connection deflood connecions count. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>50</td><td>- Connection deflood time. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>51</td><td>- Deflood warnings count. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>52</td><td>- Deflood warnings action. 0 = disconnect, 1 = kick, 2 = tempban, 3 = permban. Max 3.</td>
+                </tr>
+                <tr>
+                    <td>53</td><td>- Deflood tempban time. Higher than 0.</td>
+                </tr>
+                <tr>
+                    <td>54</td><td>- Global main chat messages count. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>55</td><td>- Global main chat time. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>56</td><td>- Global main chat timeout. Higher than 0, max 999.</td>
+                </tr>
+                <tr>
+                    <td>57</td><td>- Global main chat action. 0 = disabled, 1 = lock chat, 2 = send to ops with ips. Max 2.</td>
+                </tr>
+                <tr>
+                    <td>58</td><td>- Min search length.</td>
+                </tr>
+                <tr>
+                    <td>59</td><td>- Max search length.</td>
+                </tr>
+                <tr>
+                    <td>60</td><td>- Min nick length. Max 64.</td>
+                </tr>
+                <tr>
+                    <td>61</td><td>- Max nick length. Max 64.</td>
+                </tr>
+                <tr>
+                    <td>62</td><td>- Brute force password protection ban type. 0 = disabled, 1 = permban, 2 = tempban. Max 2.</td>
+                </tr>
+                <tr>
+                    <td>63</td><td>- Brute force password protection temp ban time. Higher than 0.</td>
+                </tr>
+                <tr>
+                    <td>64</td><td>- Max pm count to same user per minute.</td>
+                </tr>
+                <tr>
+                    <td>65</td><td>- Max simultaneous logins. Higher than 0, max 500.</td>
+                </tr>
+                <tr>
+                    <td>66</td><td>- Secondary main chat deflood messages count. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>67</td><td>- Secondary main chat deflood time. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>68</td><td>- Secondary main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>69</td><td>- Secondary private message deflood messages count. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>70</td><td>- Secondary private message deflood time. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>71</td><td>- Secondary private message deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>72</td><td>- Secondary search deflood messages count. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>73</td><td>- Secondary search deflood time. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>74</td><td>- Secondary search deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>75</td><td>- Secondary myINFO deflood messages count. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>76</td><td>- Secondary myINFO deflood time. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>77</td><td>- Secondary myINFO deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>78</td><td>- Maximum MyINFO length. Min 64, max 512.</td>
+                </tr>
+                <tr>
+                    <td>79</td><td>- Primary ConnectToMe deflood count. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>80</td><td>- Primary ConnectToMe deflood time. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>81</td><td>- Primary ConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>82</td><td>- Secondary ConnectToMe deflood count. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>83</td><td>- Secondary ConnectToMe deflood time. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>84</td><td>- Secondary ConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>85</td><td>- Primary RevConnectToMe deflood count. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>86</td><td>- Primary RevConnectToMe deflood time. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>87</td><td>- Primary RevConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>88</td><td>- Secondary RevConnectToMe deflood count. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>89</td><td>- Secondary RevConnectToMe deflood time. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>90</td><td>- Secondary RevConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>91</td><td>- Maximum ConnectToMe length. Higher than 0, max 512.</td>
+                </tr>
+                <tr>
+                    <td>92</td><td>- Maximum RevConnectToMe length. Higher than 0, max 512.</td>
+                </tr>
+                <tr>
+                    <td>93</td><td>- Primary SR deflood count. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>94</td><td>- Primary SR deflood time. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>95</td><td>- Primary SR deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>96</td><td>- Secondary SR deflood count. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>97</td><td>- Secondary SR deflood time. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>98</td><td>- Secondary SR deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>99</td><td>- Maximum SR length. Higher than 0, max 8192.</td>
+                </tr>
+                <tr>
+                    <td>100</td><td>- Primary received data deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>101</td><td>- Primary received data deflood kB. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>102</td><td>- Primary received data deflood time. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>103</td><td>- Secondary received data deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.</td>
+                </tr>
+                <tr>
+                    <td>104</td><td>- Secondary received data deflood kB. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>105</td><td>- Secondary received data deflood time. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>106</td><td>- Chat messages interval messages. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>107</td><td>- Chat messages interval time. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>108</td><td>- Private messages interval messages. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>109</td><td>- Private messages interval time. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>110</td><td>- Search interval count. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>111</td><td>- Search interval time. Higher than 0, max 29999.</td>
+                </tr>
+                <tr>
+                    <td>112</td><td>- Maximum connections from same IP.</td>
+                </tr>
+                <tr>
+                    <td>113</td><td>- Minimum reconnect time in seconds. Higher than 0, max 256.</td>
+                </tr>
+            </table>
+        </center>
+    </body>
+</html>

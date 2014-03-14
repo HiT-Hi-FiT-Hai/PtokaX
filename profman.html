@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title>PtokaX Lua scripting interface</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="Author" content="PPK">
+        <meta name="Description" content="PtokaX Lua scripting interface doc">
+        <meta name="Keywords" content="PtokaX, Direct Connect, P2P, Peer To Peer, Lua, Scripting">
+        <link rel="Shortcut Icon" href="Spider256-16x16.ico">
+        <link href="style.css" type="text/css" rel="stylesheet">
+    </head>
+    <body>
+        <center>
+    		<h1>ProfMan metatable</h1>
+            <table>
+                <tr>
+                    <td>ProfMan.AddProfile(sProfileName)</td><td>- Add profile to profilemanager, return nProfileNumber if success or nil when profile already exist.</td>
+                </tr>
+                <tr>
+                    <td>ProfMan.RemoveProfile(sProfileName)</td><td>- Remove profile from profilemanager, return true if success or nil when profile not exist or is in use.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>ProfMan.MoveDown(nProfileNumber)</td><td>- Move profile down. Return nil when failed, true if success.</td>
+                </tr>
+                <tr>
+                    <td>ProfMan.MoveUp(nProfileNumber)	</td><td>- Move profile up. Return nil when failed, true if success.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>ProfMan.GetProfile(sProfileName/nProfileNumber)</td><td>- Return profile as <a href="profile.html">profile table</a> or nil if not exist.</td>
+                </tr>
+                <tr>
+                    <td>ProfMan.GetProfiles()</td><td>- Return table with profiles as <a href="profile.html">profile table</a>s.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>ProfMan.GetProfilePermission(nProfileNumber, <a href="permissionsids.html">iPermissionId</a>)</td><td>- Return true if permission is true, or nil.</td>
+                </tr>
+                <tr>
+                    <td>ProfMan.GetProfilePermissions(nProfileNumber)</td><td>- Return table with <a href="permissions.html">profile permissions</a>.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>ProfMan.SetProfileName(nProfileNumber, sProfileName)</td><td>- Change profile name, return true if success or nil if profile not exist.</td>
+                </tr>
+                <tr>
+                    <td>ProfMan.SetProfilePermission(nProfileNumber, <a href="permissionsids.html">nPermissionId</a>, bBoolean)</td><td>- Change profile permission, return true if success or nil if profile not exist.</td>
+                </tr>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td>ProfMan.Save()</td><td>- Save profiles.</td>
+                </tr>
+            </table>
+        </center>
+    </body>
+</html>

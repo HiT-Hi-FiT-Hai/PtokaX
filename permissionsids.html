@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title>PtokaX Lua scripting interface</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="Author" content="PPK">
+        <meta name="Description" content="PtokaX Lua scripting interface doc">
+        <meta name="Keywords" content="PtokaX, Direct Connect, P2P, Peer To Peer, Lua, Scripting">
+        <link rel="Shortcut Icon" href="Spider256-16x16.ico">
+        <link href="style.css" type="text/css" rel="stylesheet">
+    </head>
+    <body>
+        <center>
+    		<h1>Profile permission IDs</h1>
+            <table>
+                <tr>
+                    <td>0</td><td>- User have key / is OP</td>
+                </tr>
+                <tr>
+                    <td>1</td><td>- No GetNickList Deflood</td>
+                </tr>
+                <tr>
+                    <td>2</td><td>- No MyINFO Deflood</td>
+                </tr>
+                <tr>
+                    <td>3</td><td>- No Search Deflood</td>
+                </tr>
+                <tr>
+                    <td>4</td><td>- No PM Deflood</td>
+                </tr>
+                <tr>
+                    <td>5</td><td>- No Main Chat Deflood</td>
+                </tr>
+                <tr>
+                    <td>6</td><td>- Mass Message</td>
+                </tr>
+                <tr>
+                    <td>7</td><td>- Topic</td>
+                </tr>
+                <tr>
+                    <td>8</td><td>- TempBan</td>
+                </tr>
+                <tr>
+                    <td>9</td><td>- Reload text files</td>
+                </tr>
+                <tr>
+                    <td>10</td><td>- No Tag check</td>
+                </tr>
+                <tr>
+                    <td>11</td><td>- TempUnban</td>
+                </tr>
+                <tr>
+                    <td>12</td><td>- DelRegUser</td>
+                </tr>
+                <tr>
+                    <td>13</td><td>- AddRegUser</td>
+                </tr>
+                <tr>
+                    <td>14</td><td>- No ChatLimits</td>
+                </tr>
+                <tr>
+                    <td>15</td><td>- No MaxHubs Check</td>
+                </tr>
+                <tr>
+                    <td>16</td><td>- No Slot/Hub ratio Check</td>
+                </tr>
+                <tr>
+                    <td>17</td><td>- No SlotCheck</td>
+                </tr>
+                <tr>
+                    <td>18</td><td>- No ShareLimit check</td>
+                </tr>
+                <tr>
+                    <td>19</td><td>- Clear PermBan</td>
+                </tr>
+                <tr>
+                    <td>20</td><td>- Clear TempBan</td>
+                </tr>
+                <tr>
+                    <td>21</td><td>- GetInfo</td>
+                </tr>
+                <tr>
+                    <td>22</td><td>- Get Bans</td>
+                </tr>
+                <tr>
+                    <td>23</td><td>- Start/Stop/Restart script(s)</td>
+                </tr>
+                <tr>
+                    <td>24</td><td>- Restart hub</td>
+                </tr>
+                <tr>
+                    <td>25</td><td>- TempOP</td>
+                </tr>
+                <tr>
+                    <td>26</td><td>- Gag, Ungag</td>
+                </tr>
+                <tr>
+                    <td>27</td><td>- Redirect</td>
+                </tr>
+                <tr>
+                    <td>28</td><td>- Ban</td>
+                </tr>
+                <tr>
+                    <td>29</td><td>- Kick</td>
+                </tr>
+                <tr>
+                    <td>30</td><td>- Drop</td>
+                </tr>
+                <tr>
+                    <td>31</td><td>- Enter full hub</td>
+                </tr>
+                <tr>
+                    <td>32</td><td>- Enter hub if IP banned</td>
+                </tr>
+                <tr>
+                    <td>33</td><td>- Allowed for OpChat</td>
+                </tr>
+                <tr>
+                    <td>34</td><td>- Send all users IP</td>
+                </tr>
+                <tr>
+                    <td>35</td><td>- Range ban</td>
+                </tr>
+                <tr>
+                    <td>36</td><td>- Range unban</td>
+                </tr>
+                <tr>
+                    <td>37</td><td>- Range temp ban</td>
+                </tr>
+                <tr>
+                    <td>38</td><td>- Range temp unban</td>
+                </tr>
+                <tr>
+                    <td>39</td><td>- Get range perm bans</td>
+                </tr>
+                <tr>
+                    <td>40</td><td>- Clear range perm bans</td>
+                </tr>
+                <tr>
+                    <td>41</td><td>- Clear range temp bans</td>
+                </tr>
+                <tr>
+                    <td>42</td><td>- Unban</td>
+                </tr>
+                <tr>
+                    <td>43</td><td>- No search length limits.</td>
+                </tr>
+                <tr>
+                    <td>44</td><td>- Send full myinfos</td>
+                </tr>
+                <tr>
+                    <td>45</td><td>- No IP checking in connection and search request.</td>
+                </tr>
+                <tr>
+                    <td>46</td><td>- Close</td>
+                </tr>
+                <tr>
+                    <td>47</td><td>- No ConnectToMe deflood.</td>
+                </tr>
+                <tr>
+                    <td>48</td><td>- No RevConnectToMe deflood.</td>
+                </tr>
+                <tr>
+                    <td>49</td><td>- No search reply deflood.</td>
+                </tr>
+                <tr>
+                    <td>50</td><td>- No received data deflood.</td>
+                </tr>
+                <tr>
+                    <td>51</td><td>- No chat interval.</td>
+                </tr>
+                <tr>
+                    <td>52</td><td>- No private message interval.</td>
+                </tr>
+                <tr>
+                    <td>53</td><td>- No search interval.</td>
+                </tr>
+                <tr>
+                    <td>54</td><td>- No maximum users from same IP.</td>
+                </tr>
+                <tr>
+                    <td>55</td><td>- No reconnect time.</td>
+                </tr>
+            </table>
+        </center>
+    </body>
+</html>
