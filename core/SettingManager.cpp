@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2013  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2014  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -275,7 +275,19 @@ void clsSettingManager::Load() {
 #else
 	TiXmlDocument doc((clsServerManager::sPath + "/cfg/Settings.xml").c_str());
 #endif
-    if(doc.LoadFile()) {
+    if(doc.LoadFile() == false) {
+        if(doc.ErrorId() != TiXmlBase::TIXML_ERROR_OPENING_FILE && doc.ErrorId() != TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY) {
+            char msg[2048];
+            int imsgLen = sprintf(msg, "Error loading file Settings.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
+			CheckSprintf(imsgLen, 2048, "clsSettingManager::Load");
+#ifdef _BUILD_GUI
+			::MessageBox(NULL, msg, clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
+#else
+			AppendLog(msg);
+#endif
+            exit(EXIT_FAILURE);
+        }
+    } else {
         TiXmlHandle cfg(&doc);
 
         TiXmlElement *settings = cfg.FirstChild("PtokaX").Element();

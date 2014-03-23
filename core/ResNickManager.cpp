@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2013  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2014  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -90,10 +90,10 @@ clsReservedNicksManager::clsReservedNicksManager() {
 
 	TiXmlDocument doc;
 #ifdef _WIN32
-	if(doc.LoadFile((clsServerManager::sPath+"\\cfg\\ReservedNicks.xml").c_str()) == false) {
+	if(doc.LoadFile((clsServerManager::sPath+"\\cfg\\ReservedNicks.xml").c_str()) == false && (doc.ErrorId() == TiXmlBase::TIXML_ERROR_OPENING_FILE || doc.ErrorId() == TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY)) {
 		TiXmlDocument doc((clsServerManager::sPath+"\\cfg\\ReservedNicks.xml").c_str());
 #else
-	if(doc.LoadFile((clsServerManager::sPath+"/cfg/ReservedNicks.xml").c_str()) == false) {
+	if(doc.LoadFile((clsServerManager::sPath+"/cfg/ReservedNicks.xml").c_str()) == false && (doc.ErrorId() == TiXmlBase::TIXML_ERROR_OPENING_FILE || doc.ErrorId() == TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY)) {
 		TiXmlDocument doc((clsServerManager::sPath+"/cfg/ReservedNicks.xml").c_str());
 #endif
 		doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
@@ -111,10 +111,22 @@ clsReservedNicksManager::clsReservedNicksManager() {
     }
 
 #ifdef _WIN32
-	if(doc.LoadFile((clsServerManager::sPath+"\\cfg\\ReservedNicks.xml").c_str())) {
+	if(doc.LoadFile((clsServerManager::sPath+"\\cfg\\ReservedNicks.xml").c_str()) == false) {
 #else
-	if(doc.LoadFile((clsServerManager::sPath+"/cfg/ReservedNicks.xml").c_str())) {
+	if(doc.LoadFile((clsServerManager::sPath+"/cfg/ReservedNicks.xml").c_str()) == false) {
 #endif
+        if(doc.ErrorId() != TiXmlBase::TIXML_ERROR_OPENING_FILE && doc.ErrorId() != TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY) {
+            char msg[2048];
+            int imsgLen = sprintf(msg, "Error loading file ReservedNicks.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
+			CheckSprintf(imsgLen, 2048, "clsReservedNicksManager::clsReservedNicksManager");
+#ifdef _BUILD_GUI
+			::MessageBox(NULL, msg, clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
+#else
+			AppendLog(msg);
+#endif
+            exit(EXIT_FAILURE);
+        }
+    } else {
 		TiXmlHandle cfg(&doc);
 		TiXmlNode *reservednicks = cfg.FirstChild("ReservedNicks").Node();
 		if(reservednicks != NULL) {

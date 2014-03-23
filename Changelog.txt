@@ -5,7 +5,12 @@ PtokaX DC hub software - PPK (c) 2006/2013
 
 
 ----------------------------------------Next Release...---------------------------------------
-
+Added: Makefile recursion to automatically compile skein and tinyxml on unix os.
+Fixed: When xml file fail to load then it is reported and not silently replaced with default (thx dmvn for report).
+Fixed: Missing $MyINFO for bot in some cases (thx Alexey and alex82 for report).
+Fixed: Not working change password in some cases (thx zog for report).
+Fixed: Crash on bans loading in some cases.
+Changed: os.exit in Lua now correctly shutdown PtokaX.
 
 ----------------------------------------0.5.0.1 11 December 2013-----------------------------
 Added: White space characters (ascii chars below 32) are not allowed in nicks anymore.

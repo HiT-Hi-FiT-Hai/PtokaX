@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2013  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2014  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -325,6 +325,13 @@ Script * Script::CreateScript(char * Name, const bool &enabled) {
 }
 //------------------------------------------------------------------------------
 
+static int OsExit(lua_State * /* L*/) {
+	clsEventQueue::mPtr->AddNormal(clsEventQueue::EVENT_SHUTDOWN, NULL);
+
+    return 0;
+}
+//------------------------------------------------------------------------------
+
 bool ScriptStart(Script * cur) {
 	cur->ui16Functions = 65535;
 	cur->ui32DataArrivals = 4294967295U;
@@ -345,6 +352,16 @@ bool ScriptStart(Script * cur) {
 	luaL_openlibs(cur->LUA);
 
 	lua_atpanic(cur->LUA, ScriptPanic);
+
+    // replace internal lua os.exit with correct shutdown
+    lua_getglobal(cur->LUA, "os");
+
+    if(lua_istable(cur->LUA, -1)) {
+        lua_pushcfunction(cur->LUA, OsExit);
+        lua_setfield(cur->LUA, -2, "exit");
+
+        lua_pop(cur->LUA, 1);
+    }
 
 #if LUA_VERSION_NUM > 501
     luaL_requiref(cur->LUA, "Core", RegCore, 1);

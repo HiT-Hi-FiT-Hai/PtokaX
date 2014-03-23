@@ -47,27 +47,41 @@ OBJS = $(CURDIR)/obj/colUsers.o $(CURDIR)/obj/DcCommands.o $(CURDIR)/obj/DeFlood
 #*******************************************************************************
 
 PtokaX: $(OBJS)
+	cd skein; $(MAKE)
+	cd tinyxml; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -llua5.1 -lrt -lz
 
 lua52: INCLUDE = -Itinyxml -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.2
 lua52: $(OBJS)
+	cd skein; $(MAKE)
+	cd tinyxml; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -llua5.2 -lrt -lz
 
 centos5-32: $(OBJS)
+	cd skein; $(MAKE)
+	cd tinyxml; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a /usr/lib/liblua.a -o PtokaX -lstdc++ -lpthread -lrt -lz
 
 centos5-64: $(OBJS)
+	cd skein; $(MAKE)
+	cd tinyxml; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a /usr/lib64/liblua.a -o PtokaX -lstdc++ -lpthread -lrt -lz
 
 centos6: $(OBJS)
+	cd skein; $(MAKE)
+	cd tinyxml; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -llua-5.1 -lrt -lz
 
 freebsd: INCLUDE = -Itinyxml -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include/lua51
 freebsd: $(OBJS)
+	cd skein; $(MAKE)
+	cd tinyxml; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a /usr/local/lib/lua51/liblua.a -o PtokaX -lstdc++ -lpthread -lrt -lz
 
 haiku: CXXFLAGS = -O -g -Wall
 haiku: $(OBJS)
+	cd skein; $(MAKE)
+	cd tinyxml; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lnetwork -llua -lz
 
 
@@ -272,4 +286,6 @@ $(CURDIR)/obj/ZlibUtility.o: $(CURDIR)/core/ZlibUtility.cpp $(CURDIR)/core/stdin
 # Cleanup
 #*******************************************************************************
 clean:
+	cd skein; $(MAKE) clean
+	cd tinyxml; $(MAKE) clean
 	-rm $(OBJS) PtokaX
