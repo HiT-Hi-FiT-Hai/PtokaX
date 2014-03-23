@@ -74,7 +74,7 @@ clsProfileManager::clsProfileManager() {
 	TiXmlDocument doc((clsServerManager::sPath+"/cfg/Profiles.xml").c_str());
 #endif
 	if(doc.LoadFile() == false) {
-        if(doc.ErrorId() == TiXmlBase::TIXML_ERROR_OPENING_FILE && doc.ErrorId() == TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY) {
+        if(doc.ErrorId() == TiXmlBase::TIXML_ERROR_OPENING_FILE || doc.ErrorId() == TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY) {
             CreateDefaultProfiles();
             if(doc.LoadFile() == false) {
 #ifdef _BUILD_GUI

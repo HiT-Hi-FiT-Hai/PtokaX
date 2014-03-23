@@ -416,7 +416,7 @@ static int ChangeReg(lua_State * L) {
     char * sPass = NULL;
 
     if(lua_type(L, 2) == LUA_TSTRING) {
-        char * sPass = (char *)lua_tolstring(L, 2, &szPassLen);
+        sPass = (char *)lua_tolstring(L, 2, &szPassLen);
         if(szPassLen == 0 || szPassLen > 64 || strpbrk(sPass, "|") != NULL) {
             lua_settop(L, 0);
             lua_pushnil(L);

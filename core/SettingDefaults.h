@@ -207,7 +207,7 @@ const char* SetTxtDef[] = {
     "<Enter hub address here>", //HUB_ADDRESS
     "1209;411", //TCP_PORTS
     "0", //UDP_PORT
-    "<Enter hub description here>", //HUB_DESCRIPTION
+    "", //HUB_DESCRIPTION
     "PtokaX-Alpha.CzDC.org:6891", //REDIRECT_ADDRESS
     "reg.hublist.org;serv.hubs-list.com;hublist.cz;hublist.dreamland-net.eu;allhublista.myip.hu;hubinfo.myip.hu;publichublist-nl.no-ip.org;reg.hublist.dk", //REGISTER_SERVERS
     "Sorry, this hub is only for registered users.", //REG_ONLY_MSG
