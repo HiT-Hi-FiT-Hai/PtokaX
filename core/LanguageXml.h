@@ -241,6 +241,7 @@ const char* LangXmlStr[] = {
     "Error", 
     "NickMustBeSpecified",
     "PassMustBeSpecified", 
+    "NoBadCharsInNickName",
     "NoPipeInPass",
     "UserIsAlredyReg", 
     "NoSynErrInScriptFile",

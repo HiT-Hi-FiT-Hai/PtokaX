@@ -10,6 +10,11 @@ Fixed: When xml file fail to load then it is reported and not silently replaced 
 Fixed: Missing $MyINFO for bot in some cases (thx Alexey and alex82 for report).
 Fixed: Not working change password in some cases (thx zog for report).
 Fixed: Crash on bans loading in some cases.
+Fixed: Max users logins in gui range (thx alex82 for report).
+Fixed: NoBadCharsInNick language string has obsolete chars (thx Alexey for report).
+Fixed: !tempban with offline user and wrong time value was returning !nicktempban message (thx sphinx for report).
+Fixed: Change password for registered user from Lua (thx alex82 for report).
+Fixed: When hub description was removed then after restart was changed to default one (thx alex82 for report).
 Changed: os.exit in Lua now correctly shutdown PtokaX.
 
 ----------------------------------------0.5.0.1 11 December 2013-----------------------------

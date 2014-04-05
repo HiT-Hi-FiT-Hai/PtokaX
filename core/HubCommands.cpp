@@ -6056,7 +6056,7 @@ bool clsHubCommands::TempBan(User * curUser, char * sCommand, const size_t &dlen
         }
         return true;
     } else {
-        return TempNickBan(curUser, sCmdParts[0], sCmdParts[1], iCmdPartsLen[1], sCmdParts[2], fromPM);
+        return TempNickBan(curUser, sCmdParts[0], sCmdParts[1], iCmdPartsLen[1], sCmdParts[2], fromPM, true);
     }
 }
 //---------------------------------------------------------------------------
@@ -6306,7 +6306,7 @@ bool clsHubCommands::TempBanIp(User * curUser, char * sCommand, const size_t &dl
 }
 //---------------------------------------------------------------------------
 
-bool clsHubCommands::TempNickBan(User * curUser, char * sNick, char * sTime, const size_t &szTimeLen, char * sReason, bool bFromPM) {
+bool clsHubCommands::TempNickBan(User * curUser, char * sNick, char * sTime, const size_t &szTimeLen, char * sReason, bool bFromPM, bool bNotNickBan/* = false*/) {
     RegUser * pReg = clsRegManager::mPtr->Find(sNick, strlen(sNick));
 
     // don't nickban user with higher profile
@@ -6330,8 +6330,8 @@ bool clsHubCommands::TempNickBan(User * curUser, char * sNick, char * sTime, con
     if(iTime <= 0 || GenerateTempBanTime(cTime, (uint32_t)iTime, acc_time, ban_time) == false) {
         int imsgLen = CheckFromPm(curUser, bFromPM);
 
-        int iret = sprintf(msg+imsgLen, "<%s> *** %s %cnicktempban <%s> <%s> <%s>. %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SNTX_ERR_IN_CMD],
-            clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], clsLanguageManager::mPtr->sTexts[LAN_NICK_LWR], clsLanguageManager::mPtr->sTexts[LAN_TIME_LWR], clsLanguageManager::mPtr->sTexts[LAN_REASON_LWR],
+        int iret = sprintf(msg+imsgLen, "<%s> *** %s %c%stempban <%s> <%s> <%s>. %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SNTX_ERR_IN_CMD],
+            clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], bNotNickBan == false ? "nick" : "", clsLanguageManager::mPtr->sTexts[LAN_NICK_LWR], clsLanguageManager::mPtr->sTexts[LAN_TIME_LWR], clsLanguageManager::mPtr->sTexts[LAN_REASON_LWR],
             clsLanguageManager::mPtr->sTexts[LAN_BAD_TIME_SPECIFIED]);
         imsgLen += iret;
         if(CheckSprintf1(iret, imsgLen, 1024, "clsHubCommands::TempNickBan2") == true) {

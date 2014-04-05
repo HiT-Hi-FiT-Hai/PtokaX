@@ -241,6 +241,7 @@ const char* LangStr[] = {
     "Error",
     "Nick must be specified!",
     "Password must be specified!", 
+    "No $, pipe and space characters in nickname!",
     "No pipe in Password!",
     "User is already registered!", 
     "No syntax errors in script file",

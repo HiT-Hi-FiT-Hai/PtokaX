@@ -92,7 +92,7 @@ LRESULT SettingPageDeflood::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPa
                 break;
             case EDT_MAX_USERS_LOGINS:
                 if(HIWORD(wParam) == EN_CHANGE) {
-					MinMaxCheck((HWND)lParam, 1, 500);
+					MinMaxCheck((HWND)lParam, 1, 1000);
 
                     return 0;
                 }

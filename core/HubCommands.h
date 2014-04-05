@@ -33,7 +33,7 @@ private:
     static bool NickBan(User * curUser, char * sNick, char * sReason, bool bFromPM);
     static bool TempBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
     static bool TempBanIp(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
-    static bool TempNickBan(User * curUser, char * sNick, char * sTime, const size_t &szTimeLen, char * sReason, bool bFromPM);
+    static bool TempNickBan(User * curUser, char * sNick, char * sTime, const size_t &szTimeLen, char * sReason, bool bFromPM, bool bNotNickBan = false);
     static bool RangeBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
     static bool RangeTempBan(User * curUser, char * sCommand, const size_t &dlen, bool fromPM, bool bFull);
     static bool RangeUnban(User * curUser, char * sCommand, bool fromPM);
