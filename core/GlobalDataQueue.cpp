@@ -40,6 +40,8 @@ clsGlobalDataQueue * clsGlobalDataQueue::mPtr = NULL;
 clsGlobalDataQueue::clsGlobalDataQueue() {
     msg[0] = '\0';
 
+    bHaveItems = false;
+
     // OpList buffer
 #ifdef _WIN32
     OpListQueue.sBuffer = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, 256);
@@ -376,6 +378,10 @@ void clsGlobalDataQueue::PrepareQueueItems() {
     pNewQueueItems[0] = NULL;
     pNewQueueItems[1] = NULL;
 
+    if(pQueueItems != NULL || OpListQueue.szLen != 0 || UserIPQueue.szLen != 0) {
+        bHaveItems = true;
+    }
+
     pSingleItems = pNewSingleItems[0];
 
     pNewSingleItems[0] = NULL;
@@ -384,6 +390,8 @@ void clsGlobalDataQueue::PrepareQueueItems() {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void clsGlobalDataQueue::ClearQueues() {
+    bHaveItems = false;
+
     if(pCreatedGlobalQueues != NULL) {
         GlobalQueue * pNext = pCreatedGlobalQueues;
 

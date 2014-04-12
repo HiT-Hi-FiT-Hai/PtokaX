@@ -7,10 +7,6 @@ PtokaX need for compiling packages (and url where to find sources when package i
 
 PtokaX was tested on debian where g++, make, lua (it can be any 5.2.x version, but in debian they always use only 5.2 in name) and zlib is available as packages.
 
-TinyXml is missing in Debian, makefile for it is with PtokaX source in tinyxml directory.
-For TinyXml compiling unpack files tinystr.cpp tinystr.h tinyxml.cpp tinyxml.h tinyxmlerror.cpp tinyxmlparser.cpp to tinyxml/src directory
-and after run make (or gmake when GNU make is not default in your OS) from tinyxml directory.
-
 For compiling PtokaX run make (or gmake when GNU make is not default in your OS) from PtokaX directory.
 
 Compile guides for different Operating Systems are available in PtokaX Wiki http://wiki.ptokax.org/doku.php?id=guides.

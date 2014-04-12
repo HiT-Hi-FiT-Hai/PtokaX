@@ -146,7 +146,11 @@ int main(int argc, char* argv[]) {
             return EXIT_SUCCESS;
 	    }
 	
-	    chdir("/");
+	    if(chdir("/") == -1) {
+	        syslog(LOG_USER | LOG_ERR, "chdir failed!\n");
+	        return EXIT_FAILURE;
+	    } else if(pid2 > 0) {
+        }
 	
 	    close(STDIN_FILENO);
 	    close(STDOUT_FILENO);
@@ -159,8 +163,15 @@ int main(int argc, char* argv[]) {
 	        return EXIT_FAILURE;
 	    }
 	
-	    dup(0);
-	    dup(0);
+	    if(dup(0) == -1) {
+	        syslog(LOG_USER | LOG_ERR, "First dup(0) failed!\n");
+	        return EXIT_FAILURE;
+        }
+
+	    if(dup(0) == -1) {
+	        syslog(LOG_USER | LOG_ERR, "Second dup(0) failed!\n");
+	        return EXIT_FAILURE;
+        }
 	}
 	
 	sigset_t sst;

@@ -1082,7 +1082,7 @@ void clsServiceLoop::SendLoop() {
                 }
 
                 // process global data queues
-                if(clsGlobalDataQueue::mPtr->pQueueItems != NULL) {
+                if(clsGlobalDataQueue::mPtr->bHaveItems == true) {
                     clsGlobalDataQueue::mPtr->ProcessQueues(curUser);
                 }
                 

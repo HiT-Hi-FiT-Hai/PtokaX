@@ -155,7 +155,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <Manifest>
-      <AssemblyIdentity>PtokaX,version=0.5.0.1,processorArchitecture=x86,type=win32</AssemblyIdentity>
+      <AssemblyIdentity>PtokaX,version=0.5.0.2,processorArchitecture=x86,type=win32</AssemblyIdentity>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -218,7 +218,7 @@
       <TerminalServerAware>false</TerminalServerAware>
     </Link>
     <Manifest>
-      <AssemblyIdentity>PtokaX,version=0.5.0.1,processorArchitecture=x86,type=win32</AssemblyIdentity>
+      <AssemblyIdentity>PtokaX,version=0.5.0.2,processorArchitecture=x86,type=win32</AssemblyIdentity>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Testing|Win32'">
@@ -281,7 +281,7 @@
       <TerminalServerAware>false</TerminalServerAware>
     </Link>
     <Manifest>
-      <AssemblyIdentity>PtokaX,version=0.5.0.1,processorArchitecture=x86,type=win32</AssemblyIdentity>
+      <AssemblyIdentity>PtokaX,version=0.5.0.2,processorArchitecture=x86,type=win32</AssemblyIdentity>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -310,7 +310,7 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <Manifest>
-      <AssemblyIdentity>PtokaX,version=0.5.0.1,processorArchitecture=amd64,type=win32</AssemblyIdentity>
+      <AssemblyIdentity>PtokaX,version=0.5.0.2,processorArchitecture=amd64,type=win32</AssemblyIdentity>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -370,7 +370,7 @@
       <TerminalServerAware>false</TerminalServerAware>
     </Link>
     <Manifest>
-      <AssemblyIdentity>PtokaX,version=0.5.0.1,processorArchitecture=amd64,type=win32</AssemblyIdentity>
+      <AssemblyIdentity>PtokaX,version=0.5.0.2,processorArchitecture=amd64,type=win32</AssemblyIdentity>
     </Manifest>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -433,7 +433,7 @@
       <TerminalServerAware>false</TerminalServerAware>
     </Link>
     <Manifest>
-      <AssemblyIdentity>PtokaX,version=0.5.0.1,processorArchitecture=amd64,type=win32</AssemblyIdentity>
+      <AssemblyIdentity>PtokaX,version=0.5.0.2,processorArchitecture=amd64,type=win32</AssemblyIdentity>
     </Manifest>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>

@@ -1,10 +1,13 @@
 PtokaX DC hub software - Ptaczek/Frontline3k/aMutex (c) 2oo2/2oo3
 PtokaX DC hub software - Ptaczek/PPK (c) 2004/2005
-PtokaX DC hub software - PPK (c) 2006/2013
+PtokaX DC hub software - PPK (c) 2006/2014
 ------------------------------------------------------------------------------
 
 
 ----------------------------------------Next Release...---------------------------------------
+
+
+----------------------------------------0.5.0.2 13 April 2014-----------------------------
 Added: Makefile recursion to automatically compile skein and tinyxml on unix os.
 Fixed: When xml file fail to load then it is reported and not silently replaced with default (thx dmvn for report).
 Fixed: Missing $MyINFO for bot in some cases (thx Alexey and alex82 for report).
@@ -15,6 +18,8 @@ Fixed: NoBadCharsInNick language string has obsolete chars (thx Alexey for repor
 Fixed: !tempban with offline user and wrong time value was returning !nicktempban message (thx sphinx for report).
 Fixed: Change password for registered user from Lua (thx alex82 for report).
 Fixed: When hub description was removed then after restart was changed to default one (thx alex82 for report).
+Fixed: Missing $OpList and/or $UserIP in some cases (thx alex82 for report).
+Fixed: Few compiler warning in ubuntu.
 Changed: os.exit in Lua now correctly shutdown PtokaX.
 
 ----------------------------------------0.5.0.1 11 December 2013-----------------------------

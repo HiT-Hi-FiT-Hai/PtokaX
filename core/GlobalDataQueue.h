@@ -62,7 +62,7 @@ private:
 
     GlobalQueue * pCreatedGlobalQueues;
 
-    QueueItem * pNewQueueItems[2];
+    QueueItem * pNewQueueItems[2], * pQueueItems;
     SingleDataItem * pNewSingleItems[2];
 
 	struct OpsQueue OpListQueue;
@@ -117,8 +117,9 @@ public:
         SI_PM2PROFILE,
     };
 
-    QueueItem * pQueueItems;
     SingleDataItem * pSingleItems;
+
+    bool bHaveItems;
 
     clsGlobalDataQueue();
     ~clsGlobalDataQueue();
