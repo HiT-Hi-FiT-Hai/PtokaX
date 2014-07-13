@@ -218,10 +218,11 @@ static int RemoveTimer(lua_State * L) {
 	timer_t timer = (timer_t)lua_touserdata(L, 1);
 #endif
 
-    ScriptTimer * next = cur->TimerList;
+    ScriptTimer * tmr = NULL,
+        * next = cur->TimerList;
     
     while(next != NULL) {
-        ScriptTimer * tmr = next;
+        tmr = next;
         next = tmr->next;
 
 #ifdef _WIN32

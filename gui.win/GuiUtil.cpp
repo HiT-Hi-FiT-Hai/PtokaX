@@ -46,7 +46,7 @@ int ScaleGuiDefaultsOnly(const int &iValue) {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void RichEditOpenLink(const HWND &hRichEdit, const ENLINK * pEnLink) {
-    TCHAR * sURL = new TCHAR[(pEnLink->chrg.cpMax - pEnLink->chrg.cpMin)+1];
+    TCHAR * sURL = new (std::nothrow) TCHAR[(pEnLink->chrg.cpMax - pEnLink->chrg.cpMin)+1];
 
     if(sURL == NULL) {
         return;

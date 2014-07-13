@@ -79,10 +79,11 @@ ServerThread::~ServerThread() {
     pthread_mutex_destroy(&mtxServerThread);
 #endif
         
-    AntiConFlood *acfnext = AntiFloodList;
+    AntiConFlood * acfcur = NULL,
+        * acfnext = AntiFloodList;
         
     while(acfnext != NULL) {
-        AntiConFlood *acfcur = acfnext;
+        acfcur = acfnext;
         acfnext = acfcur->next;
 		delete acfcur;
     }
@@ -121,9 +122,9 @@ void ServerThread::Resume() {
 void ServerThread::Run() {
     bActive = true;
 #ifdef _WIN32
-    SOCKET s;
+    SOCKET s = INVALID_SOCKET;
 #else
-	int s;
+	int s = -1;
 #endif
     sockaddr_storage addr;
 	socklen_t len = sizeof(addr);
@@ -425,9 +426,11 @@ bool ServerThread::isFlooder(const int &s, const sockaddr_storage &addr) {
     int16_t iConDefloodCount = clsSettingManager::mPtr->GetShort(SETSHORT_NEW_CONNECTIONS_COUNT);
     int16_t iConDefloodTime = clsSettingManager::mPtr->GetShort(SETSHORT_NEW_CONNECTIONS_TIME);
    
-    AntiConFlood *nxt = AntiFloodList;
+    AntiConFlood * cur = NULL,
+        * nxt = AntiFloodList;
+
 	while(nxt != NULL) {
-		AntiConFlood *cur = nxt;
+		cur = nxt;
 		nxt = cur->next;
 
     	if(memcmp(ui128IpHash, cur->ui128IpHash, 16) == 0) {
@@ -449,7 +452,7 @@ bool ServerThread::isFlooder(const int &s, const sockaddr_storage &addr) {
         }
     }
 
-    AntiConFlood * pNewItem = new AntiConFlood();
+    AntiConFlood * pNewItem = new (std::nothrow) AntiConFlood();
     if(pNewItem == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem  in theLoop::isFlooder\n", 0);
     	return true;

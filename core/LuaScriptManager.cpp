@@ -216,13 +216,14 @@ bool clsScriptManager::AddScript(char * sName, const bool &bEnabled, const bool 
 //------------------------------------------------------------------------------
 
 void clsScriptManager::Stop() {
-	Script *next = RunningScriptS;
+	Script * S = NULL,
+        * next = RunningScriptS;
 
     RunningScriptS = NULL;
 	RunningScriptE = NULL;
 
     while(next != NULL) {
-		Script *S = next;
+		S = next;
 		next = S->next;
 
 		ScriptStop(S);
@@ -410,10 +411,11 @@ Script * clsScriptManager::FindScript(char * sName) {
 //------------------------------------------------------------------------------
 
 Script * clsScriptManager::FindScript(lua_State * L) {
-    Script *next = RunningScriptS;
+    Script * cur = NULL,
+        * next = RunningScriptS;
 
     while(next != NULL) {
-    	Script *cur = next;
+    	cur = next;
         next = cur->next;
 
         if(cur->LUA == L) {
@@ -701,10 +703,11 @@ void clsScriptManager::OnStartup() {
     ActualUser = NULL;
     bMoved = false;
 
-    Script *next = RunningScriptS;
+    Script * cur = NULL,
+        * next = RunningScriptS;
         
     while(next != NULL) {
-    	Script * cur = next;
+    	cur = next;
         next = cur->next;
 
 		if(((cur->ui16Functions & Script::ONSTARTUP) == Script::ONSTARTUP) == true && (bMoved == false || cur->bProcessed == false)) {
@@ -723,10 +726,11 @@ void clsScriptManager::OnExit(bool bForce/* = false*/) {
     ActualUser = NULL;
     bMoved = false;
 
-    Script *next = RunningScriptS;
+    Script * cur = NULL,
+        * next = RunningScriptS;
         
     while(next != NULL) {
-    	Script *cur = next;
+    	cur = next;
         next = cur->next;
 
 		if(((cur->ui16Functions & Script::ONEXIT) == Script::ONEXIT) == true && (bMoved == false || cur->bProcessed == false)) {
@@ -768,10 +772,13 @@ bool clsScriptManager::Arrival(User * u, char * sData, const size_t &szLen, cons
 
     bMoved = false;
 
-    Script *next = RunningScriptS;
+    int iTop = 0, iTraceback = 0;
+
+    Script * cur = NULL,
+        * next = RunningScriptS;
         
     while(next != NULL) {
-    	Script *cur = next;
+    	cur = next;
         next = cur->next;
 
         // if any of the scripts returns a nonzero value,
@@ -780,7 +787,7 @@ bool clsScriptManager::Arrival(User * u, char * sData, const size_t &szLen, cons
             cur->bProcessed = true;
 
             lua_pushcfunction(cur->LUA, ScriptTraceback);
-            int iTraceback = lua_gettop(cur->LUA);
+            iTraceback = lua_gettop(cur->LUA);
 
             // PPK ... table of arrivals
             static const char* arrival[] = { "ChatArrival", "KeyArrival", "ValidateNickArrival", "PasswordArrival",
@@ -790,8 +797,8 @@ bool clsScriptManager::Arrival(User * u, char * sData, const size_t &szLen, cons
             "CloseArrival", "UnknownArrival" };
 
             lua_getglobal(cur->LUA, arrival[uiType]);
-            int i = lua_gettop(cur->LUA);
-            if(lua_isnil(cur->LUA, i)) {
+            iTop = lua_gettop(cur->LUA);
+            if(lua_isnil(cur->LUA, iTop)) {
                 cur->ui32DataArrivals &= ~iLuaArrivalBits[uiType];
 
                 lua_settop(cur->LUA, 0);
@@ -820,14 +827,14 @@ bool clsScriptManager::Arrival(User * u, char * sData, const size_t &szLen, cons
             // if non-boolean value returned, continue
             // if a boolean true value dwels on the stack, return it
 
-            int top = lua_gettop(cur->LUA);
+            iTop = lua_gettop(cur->LUA);
         
             // no return value
-            if(top == 0) {
+            if(iTop == 0) {
                 continue;
             }
 
-			if(lua_type(cur->LUA, top) != LUA_TBOOLEAN || lua_toboolean(cur->LUA, top) == 0) {
+			if(lua_type(cur->LUA, iTop) != LUA_TBOOLEAN || lua_toboolean(cur->LUA, iTop) == 0) {
                 lua_settop(cur->LUA, 0);
                 continue;
             }
@@ -859,10 +866,13 @@ bool clsScriptManager::UserConnected(User * u) {
 
     bMoved = false;
 
-    Script *next = RunningScriptS;
+    int iTop = 0, iTraceback = 0;
+
+    Script * cur = NULL,
+        * next = RunningScriptS;
         
     while(next != NULL) {
-    	Script *cur = next;
+    	cur = next;
         next = cur->next;
 
 		static const uint32_t iConnectedBits[] = { Script::USERCONNECTED, Script::REGCONNECTED, Script::OPCONNECTED };
@@ -871,14 +881,14 @@ bool clsScriptManager::UserConnected(User * u) {
             cur->bProcessed = true;
 
             lua_pushcfunction(cur->LUA, ScriptTraceback);
-            int iTraceback = lua_gettop(cur->LUA);
+            iTraceback = lua_gettop(cur->LUA);
 
             // PPK ... table of connected functions
             static const char* ConnectedFunction[] = { "UserConnected", "RegConnected", "OpConnected" };
 
             lua_getglobal(cur->LUA, ConnectedFunction[ui8Type]);
-            int i = lua_gettop(cur->LUA);
-			if(lua_isnil(cur->LUA, i)) {
+            iTop = lua_gettop(cur->LUA);
+			if(lua_isnil(cur->LUA, iTop)) {
 				switch(ui8Type) {
 					case 0:
 						cur->ui16Functions &= ~Script::USERCONNECTED;
@@ -916,14 +926,14 @@ bool clsScriptManager::UserConnected(User * u) {
             // if non-boolean value returned, continue
             // if a boolean true value dwels on the stack, return
         
-            int top = lua_gettop(cur->LUA);
+            iTop = lua_gettop(cur->LUA);
         
             // no return value
-            if(top == 0) {
+            if(iTop == 0) {
                 continue;
             }
         
-			if(lua_type(cur->LUA, top) != LUA_TBOOLEAN || lua_toboolean(cur->LUA, top) == 0) {
+			if(lua_type(cur->LUA, iTop) != LUA_TBOOLEAN || lua_toboolean(cur->LUA, iTop) == 0) {
                 lua_settop(cur->LUA, 0);
                 continue;
             }
@@ -957,10 +967,13 @@ void clsScriptManager::UserDisconnected(User * u, Script * pScript/* = NULL*/) {
 
     bMoved = false;
 
-    Script *next = RunningScriptS;
+    int iTop = 0, iTraceback = 0;
+
+    Script * cur = NULL,
+        * next = RunningScriptS;
         
     while(next != NULL) {
-    	Script *cur = next;
+    	cur = next;
         next = cur->next;
 
         if(cur == pScript) {
@@ -973,14 +986,14 @@ void clsScriptManager::UserDisconnected(User * u, Script * pScript/* = NULL*/) {
             cur->bProcessed = true;
 
             lua_pushcfunction(cur->LUA, ScriptTraceback);
-            int iTraceback = lua_gettop(cur->LUA);
+            iTraceback = lua_gettop(cur->LUA);
 
             // PPK ... table of disconnected functions
             static const char* DisconnectedFunction[] = { "UserDisconnected", "RegDisconnected", "OpDisconnected" };
 
             lua_getglobal(cur->LUA, DisconnectedFunction[ui8Type]);
-            int i = lua_gettop(cur->LUA);
-            if(lua_isnil(cur->LUA, i)) {
+            iTop = lua_gettop(cur->LUA);
+            if(lua_isnil(cur->LUA, iTop)) {
 				switch(ui8Type) {
 					case 0:
 						cur->ui16Functions &= ~Script::USERDISCONNECTED;
@@ -1029,10 +1042,11 @@ void clsScriptManager::PrepareMove(lua_State * L) {
 
     bMoved = true;
 
-    Script *next = RunningScriptS;
+    Script * cur = NULL,
+        * next = RunningScriptS;
         
     while(next != NULL) {
-    	Script *cur = next;
+    	cur = next;
         next = cur->next;
 
         if(bBefore == true) {

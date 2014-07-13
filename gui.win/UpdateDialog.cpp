@@ -66,9 +66,11 @@ LRESULT clsUpdateDialog::UpdateDialogProc(UINT uMsg, WPARAM wParam, LPARAM lPara
             ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
             clsServerManager::hWndActiveDialog = NULL;
             break;
-        case WM_NCDESTROY:
+        case WM_NCDESTROY: {
+            HWND hWnd = hWndWindowItems[WINDOW_HANDLE];
             delete this;
-            return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
+            return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+        }
         case WM_COMMAND:
            switch(LOWORD(wParam)) {
                 case IDOK:
@@ -148,9 +150,11 @@ bool clsUpdateDialog::ParseData(char * sData, HWND hWndParent) {
     char * sBegin = sData;
     char * sTemp = strchr(sBegin, '=');
 
+    size_t szLen = 0;
+
     while(sTemp != NULL) {
         sTemp[0] = '\0';
-        size_t szLen = sTemp - sBegin;
+        szLen = sTemp - sBegin;
 
         if(szLen == 7) {
             if(strcmp(sBegin, "Version") == 0) {

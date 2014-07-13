@@ -110,10 +110,11 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                     time_t acc_time;
                     time(&acc_time);
 
-                    BanItem *nextBan = clsBanManager::mPtr->TempBanListS;
+                    BanItem * curBan = NULL,
+                        * nextBan = clsBanManager::mPtr->TempBanListS;
 
                     while(nextBan != NULL) {
-                        BanItem *curBan = nextBan;
+                        curBan = nextBan;
     		            nextBan = curBan->next;
 
                         if(acc_time > curBan->tempbanexpire) {
@@ -173,10 +174,11 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 					BanList += string(clsLanguageManager::mPtr->sTexts[LAN_PERM_BANS], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_PERM_BANS]) + ":\n\n";
 
                     uint32_t iBanNum = 0;
-                    BanItem *nextBan = clsBanManager::mPtr->PermBanListS;
+                    BanItem * curBan = NULL,
+                        * nextBan = clsBanManager::mPtr->PermBanListS;
 
                     while(nextBan != NULL) {
-                        BanItem *curBan = nextBan;
+                        curBan = nextBan;
     		            nextBan = curBan->next;
 
                         iBanNum++;
@@ -527,10 +529,11 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                     time_t acc_time;
                     time(&acc_time);
 
-                    BanItem *nextBan = clsBanManager::mPtr->TempBanListS;
+                    BanItem * curBan = NULL,
+                        * nextBan = clsBanManager::mPtr->TempBanListS;
 
                     while(nextBan != NULL) {
-                        BanItem *curBan = nextBan;
+                        curBan = nextBan;
     		            nextBan = curBan->next;
 
                         if(acc_time > curBan->tempbanexpire) {
@@ -651,10 +654,11 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 					BanList += string(clsLanguageManager::mPtr->sTexts[LAN_PERM_BANS], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_PERM_BANS]) + ":\n\n";
 
                     uint32_t iBanNum = 0;
-                    BanItem *nextBan = clsBanManager::mPtr->PermBanListS;
+                    BanItem * curBan = NULL,
+                        * nextBan = clsBanManager::mPtr->PermBanListS;
 
                     while(nextBan != NULL) {
-                        BanItem *curBan = nextBan;
+                        curBan = nextBan;
     		            nextBan = curBan->next;
 
 						iBanNum++;
@@ -723,10 +727,11 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                     time_t acc_time;
                     time(&acc_time);
 
-                    RangeBanItem *nextBan = clsBanManager::mPtr->RangeBanListS;
+                    RangeBanItem * curBan = NULL,
+                        * nextBan = clsBanManager::mPtr->RangeBanListS;
 
                     while(nextBan != NULL) {
-                        RangeBanItem *curBan = nextBan;
+                        curBan = nextBan;
     		            nextBan = curBan->next;
 
     		            if(((curBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == false)
@@ -776,7 +781,7 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                     nextBan = clsBanManager::mPtr->RangeBanListS;
 
                     while(nextBan != NULL) {
-                        RangeBanItem *curBan = nextBan;
+                        curBan = nextBan;
     		            nextBan = curBan->next;
 
     		            if(((curBan->ui8Bits & clsBanManager::PERM) == clsBanManager::PERM) == false)
@@ -841,10 +846,11 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 
                 if(clsBanManager::mPtr->RangeBanListS != NULL) {
                     uint32_t iBanNum = 0;
-                    RangeBanItem *nextBan = clsBanManager::mPtr->RangeBanListS;
+                    RangeBanItem * curBan = NULL,
+                        * nextBan = clsBanManager::mPtr->RangeBanListS;
 
                     while(nextBan != NULL) {
-                        RangeBanItem *curBan = nextBan;
+                        curBan = nextBan;
     		            nextBan = curBan->next;
 
     		            if(((curBan->ui8Bits & clsBanManager::PERM) == clsBanManager::PERM) == false)
@@ -914,10 +920,11 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                     time_t acc_time;
                     time(&acc_time);
 
-                    RangeBanItem *nextBan = clsBanManager::mPtr->RangeBanListS;
+                    RangeBanItem * curBan = NULL,
+                        * nextBan = clsBanManager::mPtr->RangeBanListS;
 
                     while(nextBan != NULL) {
-                        RangeBanItem *curBan = nextBan;
+                        curBan = nextBan;
     		            nextBan = curBan->next;
 
     		            if(((curBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == false)
@@ -2242,7 +2249,7 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 				UncountDeflood(curUser, fromPM);
 
                 if(pUser->uLogInOut == NULL) {
-                    pUser->uLogInOut = new LoginLogout();
+                    pUser->uLogInOut = new (std::nothrow) LoginLogout();
                     if(pUser->uLogInOut == NULL) {
                         pUser->ui32BoolBits |= User::BIT_ERROR;
                         pUser->Close();
@@ -3080,7 +3087,7 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                 if(dlen < 7) {
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
-                   	int iret = sprintf(msg+imsgLen, "<%s> *** %s %cdebug <%s>, %cdebug <off>. %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
+                   	int iret = sprintf(msg+imsgLen, "<%s> *** %s %cdebug <%s>, %cdebug off. %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
                         clsLanguageManager::mPtr->sTexts[LAN_SNTX_ERR_IN_CMD], clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0],
                         clsLanguageManager::mPtr->sTexts[LAN_PORT_LWR], clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0],
                         clsLanguageManager::mPtr->sTexts[LAN_NO_PARAM_GIVEN]);
@@ -3137,7 +3144,7 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                     if(clsUdpDebug::mPtr->CheckUdpSub(curUser) == true) {
                         int imsgLen = CheckFromPm(curUser, fromPM);
 
-                        int iret = sprintf(msg+imsgLen, "<%s> *** %s %cdebug <off> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
+                        int iret = sprintf(msg+imsgLen, "<%s> *** %s %cdebug off %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
                             clsLanguageManager::mPtr->sTexts[LAN_ALRD_UDP_SUBSCRIP_TO_UNSUB], clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0],
                             clsLanguageManager::mPtr->sTexts[LAN_IN_MAINCHAT]);
                         imsgLen += iret;
@@ -3151,7 +3158,7 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                     if(dbg_port <= 0) {
                         int imsgLen = CheckFromPm(curUser, fromPM);
 
-                        int iret = sprintf(msg+imsgLen, "<%s> *** %s %cdebug <%s>, %cdebug <off>.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
+                        int iret = sprintf(msg+imsgLen, "<%s> *** %s %cdebug <%s>, %cdebug off.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
                             clsLanguageManager::mPtr->sTexts[LAN_SNTX_ERR_IN_CMD], clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0],
                             clsLanguageManager::mPtr->sTexts[LAN_PORT_LWR], clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0]);
                         imsgLen += iret;
@@ -3166,7 +3173,7 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 
                         int imsgLen = CheckFromPm(curUser, fromPM);
 
-                        int iret = sprintf(msg+imsgLen, "<%s> *** %s %d. %s %cdebug <off> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
+                        int iret = sprintf(msg+imsgLen, "<%s> *** %s %d. %s %cdebug off %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
                             clsLanguageManager::mPtr->sTexts[LAN_SUBSCIB_UDP_DEBUG_ON_PORT], dbg_port, clsLanguageManager::mPtr->sTexts[LAN_TO_UNSUB_TYPE],
                             clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], clsLanguageManager::mPtr->sTexts[LAN_IN_MAINCHAT]);
                         imsgLen += iret;
@@ -3521,9 +3528,10 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 
 					string Bans(msg, imsgLen);
                     uint32_t iBanNum = 0;
+                    BanItem * curBan = NULL;
 
                     while(nxtBan != NULL) {
-                        BanItem *curBan = nxtBan;
+                        curBan = nxtBan;
                         nxtBan = curBan->hashiptablenext;
 
                         if(((curBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true) {
@@ -3597,10 +3605,11 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                         return true;
                     }
 
-					RangeBanItem *nxtRangeBan = clsBanManager::mPtr->FindRange(ui128Hash, acc_time);
+					RangeBanItem * curRangeBan = NULL,
+                        * nxtRangeBan = clsBanManager::mPtr->FindRange(ui128Hash, acc_time);
 
                     while(nxtRangeBan != NULL) {
-                        RangeBanItem *curRangeBan = nxtRangeBan;
+                        curRangeBan = nxtRangeBan;
                         nxtRangeBan = curRangeBan->next;
 
 						if(((curRangeBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true) {
@@ -3671,9 +3680,10 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 
 						string Bans(msg, imsgLen);
                         uint32_t iBanNum = 0;
+                        RangeBanItem * curBan = NULL;
 
                         while(nxtBan != NULL) {
-                            RangeBanItem *curBan = nxtBan;
+                            curBan = nxtBan;
                             nxtBan = curBan->next;
 
 							if(((curBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true) {
@@ -4738,39 +4748,41 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 				if(fp != NULL) {
 					string memrss, memhwm, memvms, memvmp, memstk, memlib;
 					char buf[1024];
+					char * tmp = NULL;
+
 					while(fgets(buf, 1024, fp) != NULL) {
 						if(strncmp(buf, "VmRSS:", 6) == 0) {
-							char * tmp = buf+6;
+							tmp = buf+6;
 							while(isspace(*tmp) && *tmp) {
 								tmp++;
 							}
 							memrss = string(tmp, strlen(tmp)-1);
 						} else if(strncmp(buf, "VmHWM:", 6) == 0) {
-							char * tmp = buf+6;
+							tmp = buf+6;
 							while(isspace(*tmp) && *tmp) {
 								tmp++;
 							}
 							memhwm = string(tmp, strlen(tmp)-1);
 						} else if(strncmp(buf, "VmSize:", 7) == 0) {
-							char * tmp = buf+7;
+							tmp = buf+7;
 							while(isspace(*tmp) && *tmp) {
 								tmp++;
 							}
 							memvms = string(tmp, strlen(tmp)-1);
 						} else if(strncmp(buf, "VmPeak:", 7) == 0) {
-							char * tmp = buf+7;
+							tmp = buf+7;
 							while(isspace(*tmp) && *tmp) {
 								tmp++;
 							}
 							memvmp = string(tmp, strlen(tmp)-1);
 						} else if(strncmp(buf, "VmStk:", 6) == 0) {
-							char * tmp = buf+6;
+							tmp = buf+6;
 							while(isspace(*tmp) && *tmp) {
 								tmp++;
 							}
 							memstk = string(tmp, strlen(tmp)-1);
 						} else if(strncmp(buf, "VmLib:", 6) == 0) {
-							char * tmp = buf+6;
+							tmp = buf+6;
 							while(isspace(*tmp) && *tmp) {
 								tmp++;
 							}
@@ -5568,9 +5580,11 @@ bool clsHubCommands::BanIp(User * curUser, char * sCommand, bool fromPM, bool bF
 
             HashIP(sCommand, ui128Hash);
           
-            User *next = clsHashManager::mPtr->FindUser(ui128Hash);
+            User * cur = NULL,
+                * next = clsHashManager::mPtr->FindUser(ui128Hash);
+
             while(next != NULL) {
-            	User *cur = next;
+            	cur = next;
                 next = cur->hashiptablenext;
 
                 if(cur == curUser || (cur->iProfile != -1 && clsProfileManager::mPtr->IsAllowed(cur, clsProfileManager::ENTERIFIPBAN) == true)) {
@@ -6132,9 +6146,10 @@ bool clsHubCommands::TempBanIp(User * curUser, char * sCommand, const size_t &dl
 
             HashIP(sCommand, ui128Hash);
           
-            User *next = clsHashManager::mPtr->FindUser(ui128Hash);
+            User * cur = NULL,
+                * next = clsHashManager::mPtr->FindUser(ui128Hash);
             while(next != NULL) {
-            	User *cur = next;
+            	cur = next;
                 next = cur->hashiptablenext;
 
                 if(cur == curUser || (cur->iProfile != -1 && clsProfileManager::mPtr->IsAllowed(cur, clsProfileManager::ENTERIFIPBAN) == true)) {

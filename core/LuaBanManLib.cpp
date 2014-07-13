@@ -170,10 +170,11 @@ static int GetBans(lua_State * L) {
     time_t acc_time;
     time(&acc_time);
 
-    BanItem *nextBan = clsBanManager::mPtr->TempBanListS;
+    BanItem * curBan = NULL,
+        * nextBan = clsBanManager::mPtr->TempBanListS;
 
     while(nextBan != NULL) {
-        BanItem *curBan = nextBan;
+        curBan = nextBan;
 		nextBan = curBan->next;
 
         if(acc_time > curBan->tempbanexpire) {
@@ -195,7 +196,7 @@ static int GetBans(lua_State * L) {
 	nextBan = clsBanManager::mPtr->PermBanListS;
 
     while(nextBan != NULL) {
-        BanItem *curBan = nextBan;
+        curBan = nextBan;
 		nextBan = curBan->next;
 
 #if LUA_VERSION_NUM < 503
@@ -225,10 +226,11 @@ static int GetTempBans(lua_State * L) {
     time_t acc_time;
     time(&acc_time);
 
-    BanItem *nextBan = clsBanManager::mPtr->TempBanListS;
+    BanItem * curBan = NULL,
+        * nextBan = clsBanManager::mPtr->TempBanListS;
 
     while(nextBan != NULL) {
-        BanItem *curBan = nextBan;
+        curBan = nextBan;
 		nextBan = curBan->next;
 
         if(acc_time > curBan->tempbanexpire) {
@@ -262,10 +264,11 @@ static int GetPermBans(lua_State * L) {
     lua_newtable(L);
     int t = lua_gettop(L), i = 0;
 
-	BanItem *nextBan = clsBanManager::mPtr->PermBanListS;
+	BanItem * curBan = NULL,
+        * nextBan = clsBanManager::mPtr->PermBanListS;
 
     while(nextBan != NULL) {
-        BanItem *curBan = nextBan;
+        curBan = nextBan;
 		nextBan = curBan->next;
 
 #if LUA_VERSION_NUM < 503
@@ -333,10 +336,11 @@ static int GetBan(lua_State * L) {
             PushBan(L, Ban);        
             lua_rawset(L, t);
 
-            BanItem *nextBan = Ban->hashiptablenext;
+            BanItem * curBan = NULL,
+                * nextBan = Ban->hashiptablenext;
         
             while(nextBan != NULL) {
-                BanItem *curBan = nextBan;
+                curBan = nextBan;
 				nextBan = curBan->hashiptablenext;
 
 				if((((curBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true) && acc_time > curBan->tempbanexpire) {
@@ -419,10 +423,11 @@ static int GetPermBan(lua_State * L) {
             PushBan(L, Ban);        
             lua_rawset(L, t);
 
-            BanItem *nextBan = Ban->hashiptablenext;
+            BanItem * curBan = NULL,
+                * nextBan = Ban->hashiptablenext;
         
             while(nextBan != NULL) {
-                BanItem *curBan = nextBan;
+                curBan = nextBan;
         		nextBan = curBan->hashiptablenext;
 
 				if(((curBan->ui8Bits & clsBanManager::PERM) == clsBanManager::PERM) == false) {
@@ -505,10 +510,11 @@ static int GetTempBan(lua_State * L) {
             PushBan(L, Ban);        
             lua_rawset(L, t);
 
-            BanItem *nextBan = Ban->hashiptablenext;
+            BanItem * curBan = NULL,
+                * nextBan = Ban->hashiptablenext;
         
             while(nextBan != NULL) {
-                BanItem *curBan = nextBan;
+                curBan = nextBan;
         		nextBan = curBan->hashiptablenext;
 
 				if(((curBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true) {
@@ -558,10 +564,11 @@ static int GetRangeBans(lua_State * L) {
     time_t acc_time;
     time(&acc_time);
 
-    RangeBanItem *nextBan = clsBanManager::mPtr->RangeBanListS;
+    RangeBanItem * curBan = NULL,
+        * nextBan = clsBanManager::mPtr->RangeBanListS;
 
     while(nextBan != NULL) {
-        RangeBanItem *curBan = nextBan;
+        curBan = nextBan;
 		nextBan = curBan->next;
         
         if((((curBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true) && acc_time > curBan->tempbanexpire) {
@@ -598,10 +605,11 @@ static int GetTempRangeBans(lua_State * L) {
     time_t acc_time;
     time(&acc_time);
 
-    RangeBanItem *nextBan = clsBanManager::mPtr->RangeBanListS;
+    RangeBanItem * curBan = NULL,
+        * nextBan = clsBanManager::mPtr->RangeBanListS;
 
     while(nextBan != NULL) {
-        RangeBanItem *curBan = nextBan;
+        curBan = nextBan;
 		nextBan = curBan->next;
 
         if(((curBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == false) {
@@ -639,10 +647,11 @@ static int GetPermRangeBans(lua_State * L) {
     lua_newtable(L);
 	int t = lua_gettop(L), i = 0;
 
-    RangeBanItem *nextBan = clsBanManager::mPtr->RangeBanListS;
+    RangeBanItem * curBan = NULL,
+        * nextBan = clsBanManager::mPtr->RangeBanListS;
 
     while(nextBan != NULL) {
-        RangeBanItem *curBan = nextBan;
+        curBan = nextBan;
 		nextBan = curBan->next;
 
         if(((curBan->ui8Bits & clsBanManager::PERM) == clsBanManager::PERM) == false) {
@@ -697,10 +706,11 @@ static int GetRangeBan(lua_State * L) {
     time_t acc_time;
     time(&acc_time);
 
-	RangeBanItem *next = clsBanManager::mPtr->RangeBanListS;
+	RangeBanItem * cur = NULL,
+        * next = clsBanManager::mPtr->RangeBanListS;
 
     while(next != NULL) {
-        RangeBanItem *cur = next;
+        cur = next;
         next = cur->next;
 
         if(memcmp(cur->ui128FromIpHash, ui128FromHash, 16) == 0 && memcmp(cur->ui128ToIpHash, ui128ToHash, 16) == 0) {
@@ -755,10 +765,11 @@ static int GetRangePermBan(lua_State * L) {
 
     lua_settop(L, 0);
 
-    RangeBanItem *next = clsBanManager::mPtr->RangeBanListS;
+    RangeBanItem * cur = NULL,
+        * next = clsBanManager::mPtr->RangeBanListS;
 
     while(next != NULL) {
-        RangeBanItem *cur = next;
+        cur = next;
         next = cur->next;
 
         if(memcmp(cur->ui128FromIpHash, ui128FromHash, 16) == 0 && memcmp(cur->ui128ToIpHash, ui128ToHash, 16) == 0) {
@@ -809,10 +820,11 @@ static int GetRangeTempBan(lua_State * L) {
     time_t acc_time;
     time(&acc_time);
 
-    RangeBanItem *next = clsBanManager::mPtr->RangeBanListS;
+    RangeBanItem * cur = NULL,
+        * next = clsBanManager::mPtr->RangeBanListS;
 
     while(next != NULL) {
-        RangeBanItem *cur = next;
+        cur = next;
         next = cur->next;
 
         if(memcmp(cur->ui128FromIpHash, ui128FromHash, 16) == 0 && memcmp(cur->ui128ToIpHash, ui128ToHash, 16) == 0) {

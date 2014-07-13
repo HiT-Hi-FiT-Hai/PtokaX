@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 	clsServerManager::sTitle = "PtokaX DC Hub " + string(PtokaXVersionString);
 	
 #ifdef _DEBUG
-	sTitle += " [debug]";
+	clsServerManager::sTitle += " [debug]";
 #endif
 	
 	for(int i = 0; i < argc; i++) {
@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
 	        }
 	
 	        if(DirExist(clsServerManager::sPath.c_str()) == false) {
-	        	if(mkdir(clsServerManager::sPath.c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP) == -1) {
+	        	if(mkdir(clsServerManager::sPath.c_str(), 0755) == -1) {
 	                if(clsServerManager::bDaemon == true) {
 	                    syslog(LOG_USER | LOG_ERR, "Config directory not exist and can't be created!\n");
 	                } else {
@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
 	        clsServerManager::sPath = string(home) + "/.PtokaX";
 	            
 	        if(DirExist(clsServerManager::sPath.c_str()) == false) {
-	            if(mkdir(clsServerManager::sPath.c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP) == -1) {
+	            if(mkdir(clsServerManager::sPath.c_str(), 0755) == -1) {
 	                syslog(LOG_USER | LOG_ERR, "Config directory not exist and can't be created!\n");
 	            }
 	        }
@@ -155,8 +155,6 @@ int main(int argc, char* argv[]) {
 	    close(STDIN_FILENO);
 	    close(STDOUT_FILENO);
 	    close(STDERR_FILENO);
-	
-	    umask(117);
 	
 	    if(open("/dev/null", O_RDWR) == -1) {
 	        syslog(LOG_USER | LOG_ERR, "Failed to open /dev/null!\n");

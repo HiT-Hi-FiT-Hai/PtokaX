@@ -105,10 +105,11 @@ clsRegisterThread::~clsRegisterThread() {
 	clsServerManager::ui64BytesRead += (uint64_t)iBytesRead;
     clsServerManager::ui64BytesSent += (uint64_t)iBytesSent;
     
-    RegSocket *next = RegSockListS;
+    RegSocket * cur = NULL,
+        * next = RegSockListS;
         
     while(next != NULL) {
-        RegSocket *cur = next;
+        cur = next;
         next = cur->next;
                        
         delete cur;
@@ -154,7 +155,7 @@ void clsRegisterThread::Setup(char * sListAddresses, const uint16_t &ui16AddrsLe
 //---------------------------------------------------------------------------
 
 void clsRegisterThread::AddSock(char * sAddress, const size_t &ui32Len) {
-    RegSocket * pNewSock = new RegSocket();
+    RegSocket * pNewSock = new (std::nothrow) RegSocket();
     if(pNewSock == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewSock in clsRegisterThread::AddSock\n", 0);
     	return;
@@ -239,9 +240,11 @@ void clsRegisterThread::Run() {
     sleeptime.tv_nsec = 1000000;
 #endif
 
-    RegSocket *next = RegSockListS;
+    RegSocket * cur = NULL,
+        * next = RegSockListS;
+
     while(bTerminated == false && next != NULL) {
-        RegSocket *cur = next;
+        cur = next;
         next = cur->next;
 
         char *port = strchr(cur->sAddress, ':');
@@ -422,7 +425,7 @@ void clsRegisterThread::Run() {
         next = RegSockListS;
      
         while(next != NULL) {
-            RegSocket *cur = next;
+            cur = next;
             next = cur->next;
 
             if(Receive(cur) == false) {
@@ -448,7 +451,7 @@ void clsRegisterThread::Run() {
 
     next = RegSockListS;
     while(next != NULL) {
-        RegSocket *cur = next;
+        cur = next;
         next = cur->next;
 
         if(bTerminated == false) {

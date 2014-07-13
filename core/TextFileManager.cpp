@@ -63,10 +63,11 @@ clsTextFilesManager::clsTextFilesManager() {
 //---------------------------------------------------------------------------
 	
 clsTextFilesManager::~clsTextFilesManager() {
-    TextFile * next = TextFiles;
+    TextFile * cur = NULL,
+        * next = TextFiles;
 
     while(next != NULL) {
-        TextFile * cur = next;
+        cur = next;
         next = cur->next;
 
     	delete cur;
@@ -75,10 +76,11 @@ clsTextFilesManager::~clsTextFilesManager() {
 //---------------------------------------------------------------------------
 
 bool clsTextFilesManager::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = false*/) const {
-    TextFile * next = TextFiles;
+    TextFile * cur = NULL,
+        * next = TextFiles;
 
     while(next != NULL) {
-        TextFile * cur = next;
+        cur = next;
         next = cur->next;
 
 		if(strcasecmp(cur->sCommand, cmd) == 0) {
@@ -141,10 +143,11 @@ void clsTextFilesManager::RefreshTextFiles() {
 	if(clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_TEXT_FILES] == false)
         return;
 
-    TextFile * next = TextFiles;
+    TextFile * cur = NULL,
+        * next = TextFiles;
 
     while(next != NULL) {
-        TextFile * cur = next;
+        cur = next;
         next = cur->next;
 
     	delete cur;
@@ -166,7 +169,7 @@ void clsTextFilesManager::RefreshTextFiles() {
         	FILE *f = fopen((clsServerManager::sPath+"\\texts\\"+textfile.name).c_str(), "rb");
 			if(f != NULL) {
 				if(textfile.size != 0) {
-					TextFile * pNewTxtFile = new TextFile();
+					TextFile * pNewTxtFile = new (std::nothrow) TextFile();
 					if(pNewTxtFile == NULL) {
 						AppendDebugLog("%s - [MEM] Cannot allocate pNewTxtFile in clsTextFilesManager::RefreshTextFiles\n", 0);
 
@@ -247,7 +250,7 @@ void clsTextFilesManager::RefreshTextFiles() {
         FILE *f = fopen(txtfile.c_str(), "rb");
 		if(f != NULL) {
 			if(s_buf.st_size != 0) {
-                TextFile * pNewTxtFile = new TextFile();
+                TextFile * pNewTxtFile = new (std::nothrow) TextFile();
 				if(pNewTxtFile == NULL) {
 					AppendDebugLog("%s - [MEM] Cannot allocate pNewTxtFile in clsTextFilesManager::RefreshTextFiles1\n", 0);
 

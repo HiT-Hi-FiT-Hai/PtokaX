@@ -232,7 +232,7 @@ LRESULT clsMainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam,
 
                     ::SendMessage(hWndPageItems[LV_USERS], LVM_GETITEM, 0, (LPARAM)&lvItem);
 
-                    clsRegisteredUserDialog::mPtr = new clsRegisteredUserDialog();
+                    clsRegisteredUserDialog::mPtr = new (std::nothrow) clsRegisteredUserDialog();
 
                     if(clsRegisteredUserDialog::mPtr != NULL) {
                         clsRegisteredUserDialog::mPtr->DoModal(clsMainWindow::mPtr->m_hWnd, NULL, sNick);
@@ -491,18 +491,20 @@ void clsMainWindowPageUsersChat::UpdateUserList() {
 
     uint32_t ui32InClose = 0, ui32InLogin = 0, ui32LoggedIn = 0, ui32Total = 0;
 
-	User *next = clsUsers::mPtr->llist;
-	while(next != NULL) {
+	User * pCur = NULL,
+     * pNext = clsUsers::mPtr->llist;
+
+	while(pNext != NULL) {
         ui32Total++;
 
-        User *u = next;
-        next = u->next;
+        pCur = pNext;
+        pNext = pCur->next;
 
-        switch(u->ui8State) {
+        switch(pCur->ui8State) {
             case User::STATE_ADDED:
                 ui32LoggedIn++;
 
-                AddUser(u);
+                AddUser(pCur);
 
                 break;
             case User::STATE_CLOSING:
@@ -724,7 +726,7 @@ void clsMainWindowPageUsersChat::KickUser() {
         return;
     }
 
-	LineDialog * pKickDlg = new LineDialog(&OnKickOk);
+	LineDialog * pKickDlg = new (std::nothrow) LineDialog(&OnKickOk);
 
 	if(pKickDlg != NULL) {
 	   pKickDlg->DoModal(::GetParent(m_hWnd), clsLanguageManager::mPtr->sTexts[LAN_PLEASE_ENTER_REASON], "");
@@ -803,7 +805,7 @@ void clsMainWindowPageUsersChat::BanUser() {
         return;
     }
 
-	LineDialog * pBanDlg = new LineDialog(&OnBanOk);
+	LineDialog * pBanDlg = new (std::nothrow) LineDialog(&OnBanOk);
 
 	if(pBanDlg != NULL) {
 	   pBanDlg->DoModal(::GetParent(m_hWnd), clsLanguageManager::mPtr->sTexts[LAN_PLEASE_ENTER_REASON], "");
@@ -867,7 +869,7 @@ void clsMainWindowPageUsersChat::RedirectUser() {
         return;
     }
 
-	LineDialog * pRedirectDlg = new LineDialog(&OnRedirectOk);
+	LineDialog * pRedirectDlg = new (std::nothrow) LineDialog(&OnRedirectOk);
 
 	if(pRedirectDlg != NULL) {
         pRedirectDlg->DoModal(::GetParent(m_hWnd), clsLanguageManager::mPtr->sTexts[LAN_PLEASE_ENTER_REDIRECT_ADDRESS],

@@ -251,13 +251,16 @@ void OnRedirectAllOk(char * sLine, const int &iLen) {
         return;
     }
 
-    User *next = clsUsers::mPtr->llist;
-    while(next != NULL) {
-        User *curUser = next;
-		next = curUser->next;
-        curUser->SendChar(sMSG, imsgLen);
+    User * pCur = NULL,
+        * pNext = clsUsers::mPtr->llist;
+
+    while(pNext != NULL) {
+        pCur = pNext;
+		pNext = pCur->next;
+
+        pCur->SendChar(sMSG, imsgLen);
         // PPK ... close by hub needed !
-        curUser->Close(true);
+        pCur->Close(true);
     }
 
     if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMSG) == 0) {
@@ -269,7 +272,7 @@ void OnRedirectAllOk(char * sLine, const int &iLen) {
 void MainWindowPageStats::OnRedirectAll() {
     clsUdpDebug::mPtr->Broadcast("[SYS] Redirect All.");
 
-	LineDialog * pRedirectAllDlg = new LineDialog(&OnRedirectAllOk);
+	LineDialog * pRedirectAllDlg = new (std::nothrow) LineDialog(&OnRedirectAllOk);
 
 	if(pRedirectAllDlg != NULL) {
         pRedirectAllDlg->DoModal(::GetParent(m_hWnd), clsLanguageManager::mPtr->sTexts[LAN_REDIRECT_ALL_USERS_TO],
@@ -303,7 +306,7 @@ void OnMassMessageOk(char * sLine, const int &iLen) {
 //---------------------------------------------------------------------------
 
 void MainWindowPageStats::OnMassMessage() {
-	LineDialog * pMassMsgDlg = new LineDialog(&OnMassMessageOk);
+	LineDialog * pMassMsgDlg = new (std::nothrow) LineDialog(&OnMassMessageOk);
 
 	if(pMassMsgDlg != NULL) {
         pMassMsgDlg->DoModal(::GetParent(m_hWnd), clsLanguageManager::mPtr->sTexts[LAN_MASS_MSG], "");

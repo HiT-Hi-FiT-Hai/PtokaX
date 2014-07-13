@@ -204,7 +204,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
             if(clsSettingManager::mPtr->bBools[SETBOOL_CHECK_NEW_RELEASES] == true) {
                 // Create update check thread
-                clsUpdateCheckThread::mPtr = new clsUpdateCheckThread();
+                clsUpdateCheckThread::mPtr = new (std::nothrow) clsUpdateCheckThread();
                 if(clsUpdateCheckThread::mPtr == NULL) {
                     AppendDebugLog("%s - [MEM] Cannot allocate clsUpdateCheckThread::mPtr in MainWindow::MainWindowProc::WM_CREATE\n", 0);
                     exit(EXIT_FAILURE);
@@ -366,7 +366,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     ::PostMessage(m_hWnd, WM_CLOSE, 0, 0);
                     return 0;
                 case IDC_SETTINGS: {
-                    clsSettingDialog::mPtr = new clsSettingDialog();
+                    clsSettingDialog::mPtr = new (std::nothrow) clsSettingDialog();
 
                     if(clsSettingDialog::mPtr != NULL) {
                         clsSettingDialog::mPtr->DoModal(m_hWnd);
@@ -375,7 +375,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     return 0;
                 }
                 case IDC_REG_USERS: {
-                    clsRegisteredUsersDialog::mPtr = new clsRegisteredUsersDialog();
+                    clsRegisteredUsersDialog::mPtr = new (std::nothrow) clsRegisteredUsersDialog();
 
                     if(clsRegisteredUsersDialog::mPtr != NULL) {
                         clsRegisteredUsersDialog::mPtr->DoModal(m_hWnd);
@@ -384,7 +384,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     return 0;
                 }
                 case IDC_PROFILES: {
-                    clsProfilesDialog::mPtr = new clsProfilesDialog();
+                    clsProfilesDialog::mPtr = new (std::nothrow) clsProfilesDialog();
 
                     if(clsProfilesDialog::mPtr != NULL) {
                         clsProfilesDialog::mPtr->DoModal(m_hWnd);
@@ -393,7 +393,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     return 0;
                 }
                 case IDC_BANS: {
-                    clsBansDialog::mPtr = new clsBansDialog();
+                    clsBansDialog::mPtr = new (std::nothrow) clsBansDialog();
 
                     if(clsBansDialog::mPtr != NULL) {
                         clsBansDialog::mPtr->DoModal(m_hWnd);
@@ -402,7 +402,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     return 0;
 				}
                 case IDC_RANGE_BANS: {
-                    clsRangeBansDialog::mPtr = new clsRangeBansDialog();
+                    clsRangeBansDialog::mPtr = new (std::nothrow) clsRangeBansDialog();
 
                     if(clsRangeBansDialog::mPtr != NULL) {
                         clsRangeBansDialog::mPtr->DoModal(m_hWnd);
@@ -411,7 +411,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     return 0;
                 }
                 case IDC_ABOUT: {
-                    AboutDialog * pAboutDlg = new AboutDialog();
+                    AboutDialog * pAboutDlg = new (std::nothrow) AboutDialog();
 
                     if(pAboutDlg != NULL) {
                         pAboutDlg->DoModal(m_hWnd);
@@ -429,7 +429,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     ::ShellExecute(NULL, NULL, "http://wiki.PtokaX.org", NULL, NULL, SW_SHOWNORMAL);
                     return 0;
                 case IDC_UPDATE_CHECK: {
-                    clsUpdateDialog::mPtr = new clsUpdateDialog();
+                    clsUpdateDialog::mPtr = new (std::nothrow) clsUpdateDialog();
 
                     if(clsUpdateDialog::mPtr != NULL) {
                         clsUpdateDialog::mPtr->DoModal(m_hWnd);
@@ -444,7 +444,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                         }
 
                         // Create update check thread
-                        clsUpdateCheckThread::mPtr = new clsUpdateCheckThread();
+                        clsUpdateCheckThread::mPtr = new (std::nothrow) clsUpdateCheckThread();
                         if(clsUpdateCheckThread::mPtr == NULL) {
                             AppendDebugLog("%s - [MEM] Cannot allocate clsUpdateCheckThread::mPtr in MainWindow::MainWindowProc::IDC_UPDATE_CHECK\n", 0);
                             exit(EXIT_FAILURE);
@@ -500,7 +500,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             char * sMsg = (char *)lParam;
 
             if(clsUpdateDialog::mPtr == NULL) {
-                clsUpdateDialog::mPtr = new clsUpdateDialog();
+                clsUpdateDialog::mPtr = new (std::nothrow) clsUpdateDialog();
 
                 if(clsUpdateDialog::mPtr != NULL) {
                     if(clsUpdateDialog::mPtr->ParseData(sMsg, m_hWnd) == false) {
@@ -540,7 +540,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 //------------------------------------------------------------------------------
 
 HWND clsMainWindow::CreateEx() {
-    clsGuiSettingManager::mPtr = new clsGuiSettingManager();
+    clsGuiSettingManager::mPtr = new (std::nothrow) clsGuiSettingManager();
 
     if(clsGuiSettingManager::mPtr == NULL) {
         AppendDebugLog("%s - [MEM] Cannot allocate clsGuiSettingManager::mPtr in clsMainWindow::clsMainWindow\n", 0);
@@ -551,9 +551,9 @@ HWND clsMainWindow::CreateEx() {
         ICC_STANDARD_CLASSES | ICC_TAB_CLASSES | ICC_TREEVIEW_CLASSES | ICC_UPDOWN_CLASS };
 	InitCommonControlsEx(&iccx);
 
-    MainWindowPages[0] = new MainWindowPageStats();
-    MainWindowPages[1] = new clsMainWindowPageUsersChat();
-    MainWindowPages[2] = new clsMainWindowPageScripts();
+    MainWindowPages[0] = new (std::nothrow) MainWindowPageStats();
+    MainWindowPages[1] = new (std::nothrow) clsMainWindowPageUsersChat();
+    MainWindowPages[2] = new (std::nothrow) clsMainWindowPageScripts();
 
     for(uint8_t ui8i = 0; ui8i < 3; ui8i++) {
         if(MainWindowPages[ui8i] == NULL) {

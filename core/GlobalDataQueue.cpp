@@ -124,9 +124,11 @@ clsGlobalDataQueue::~clsGlobalDataQueue() {
 #endif
 
     if(pNewSingleItems[0] != NULL) {
-        SingleDataItem * pNext = pNewSingleItems[0];
+        SingleDataItem * pCur = NULL,
+            * pNext = pNewSingleItems[0];
+
         while(pNext != NULL) {
-            SingleDataItem * pCur = pNext;
+            pCur = pNext;
             pNext = pCur->pNext;
 
 #ifdef _WIN32
@@ -143,9 +145,11 @@ clsGlobalDataQueue::~clsGlobalDataQueue() {
     }
 
     if(pSingleItems != NULL) {
-        SingleDataItem * pNext = pSingleItems;
+        SingleDataItem * pCur = NULL,
+            * pNext = pSingleItems;
+
         while(pNext != NULL) {
-            SingleDataItem * pCur = pNext;
+            pCur = pNext;
             pNext = pCur->pNext;
 
 #ifdef _WIN32
@@ -162,9 +166,11 @@ clsGlobalDataQueue::~clsGlobalDataQueue() {
     }
 
     if(pNewQueueItems[0] != NULL) {
-        QueueItem * pNext = pNewQueueItems[0];
+        QueueItem * pCur = NULL,
+            * pNext = pNewQueueItems[0];
+
         while(pNext != NULL) {
-            QueueItem * pCur = pNext;
+            pCur = pNext;
             pNext = pCur->pNext;
 
 #ifdef _WIN32
@@ -187,9 +193,11 @@ clsGlobalDataQueue::~clsGlobalDataQueue() {
     }
 
     if(pQueueItems != NULL) {
-        QueueItem * pNext = pQueueItems;
+        QueueItem * pCur = NULL,
+            * pNext = pQueueItems;
+
         while(pNext != NULL) {
-            QueueItem * pCur = pNext;
+            pCur = pNext;
             pNext = pCur->pNext;
 
 #ifdef _WIN32
@@ -233,7 +241,7 @@ clsGlobalDataQueue::~clsGlobalDataQueue() {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void clsGlobalDataQueue::AddQueueItem(char * sCommand1, const size_t &szLen1, char * sCommand2, const size_t &szLen2, const uint8_t &ui8CmdType) {
-    QueueItem * pNewItem = new QueueItem();
+    QueueItem * pNewItem = new (std::nothrow) QueueItem();
     if(pNewItem == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem in clsGlobalDataQueue::AddQueueItem\n", 0);
     	return;
@@ -393,10 +401,11 @@ void clsGlobalDataQueue::ClearQueues() {
     bHaveItems = false;
 
     if(pCreatedGlobalQueues != NULL) {
-        GlobalQueue * pNext = pCreatedGlobalQueues;
+        GlobalQueue * pCur = NULL,
+            * pNext = pCreatedGlobalQueues;
 
         while(pNext != NULL) {
-            GlobalQueue * pCur = pNext;
+            pCur = pNext;
             pNext = pCur->pNext;
 
             pCur->szLen = 0;
@@ -416,10 +425,11 @@ void clsGlobalDataQueue::ClearQueues() {
     UserIPQueue.szLen = 0;
 
     if(pQueueItems != NULL) {
-        QueueItem * pNext = pQueueItems;
+        QueueItem * pCur = NULL,
+            * pNext = pQueueItems;
 
         while(pNext != NULL) {
-            QueueItem * pCur = pNext;
+            pCur = pNext;
             pNext = pCur->pNext;
 
 #ifdef _WIN32
@@ -444,10 +454,11 @@ void clsGlobalDataQueue::ClearQueues() {
     pQueueItems = NULL;
 
     if(pSingleItems != NULL) {
-        SingleDataItem * pNext = pSingleItems;
+        SingleDataItem * pCur = NULL,
+            * pNext = pSingleItems;
 
         while(pNext != NULL) {
-            SingleDataItem * pCur = pNext;
+            pCur = pNext;
             pNext = pCur->pNext;
 
 #ifdef _WIN32
@@ -534,10 +545,11 @@ void clsGlobalDataQueue::ProcessQueues(User * pUser) {
 
     if(GlobalQueues[ui32QueueType].bCreated == false) {
         if(pQueueItems != NULL) {
-            QueueItem * pNext = pQueueItems;
+            QueueItem * pCur = NULL,
+                * pNext = pQueueItems;
 
             while(pNext != NULL) {
-                QueueItem * pCur = pNext;
+                pCur = pNext;
                 pNext = pCur->pNext;
 
                 switch(pCur->ui8CommandType) {
@@ -733,25 +745,27 @@ void clsGlobalDataQueue::ProcessQueues(User * pUser) {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void clsGlobalDataQueue::ProcessSingleItems(User * u) const {
-    size_t szLen = 0;
+    size_t szLen = 0, szWanted = 0;
+    int iret = 0;
 
-    SingleDataItem * pNext = pSingleItems;
+    SingleDataItem * pCur = NULL,
+        * pNext = pSingleItems;
 
     while(pNext != NULL) {
-        SingleDataItem * pCur = pNext;
+        pCur = pNext;
         pNext = pCur->pNext;
 
         if(pCur->pFromUser != u) {
             switch(pCur->ui8Type) {
                 case SI_PM2ALL: { // send PM to ALL
-                    size_t szWanted = szLen+pCur->szDataLen+u->ui8NickLen+13;
+                    szWanted = szLen+pCur->szDataLen+u->ui8NickLen+13;
                     if(clsServerManager::szGlobalBufferSize < szWanted) {
                         if(CheckAndResizeGlobalBuffer(szWanted) == false) {
 							AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsGlobalDataQueue::ProcessSingleItems\n", (uint64_t)Allign128K(szWanted));
                             break;
                         }
                     }
-                    int iret = sprintf(clsServerManager::sGlobalBuffer+szLen, "$To: %s From: ", u->sNick);
+                    iret = sprintf(clsServerManager::sGlobalBuffer+szLen, "$To: %s From: ", u->sNick);
                     szLen += iret;
                     CheckSprintf1(iret, szLen, clsServerManager::szGlobalBufferSize, "clsGlobalDataQueue::ProcessSingleItems1");
 
@@ -763,14 +777,14 @@ void clsGlobalDataQueue::ProcessSingleItems(User * u) const {
                 }
                 case SI_PM2OPS: { // send PM only to operators
                     if(((u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
-                        size_t szWanted = szLen+pCur->szDataLen+u->ui8NickLen+13;
+                        szWanted = szLen+pCur->szDataLen+u->ui8NickLen+13;
                         if(clsServerManager::szGlobalBufferSize < szWanted) {
                             if(CheckAndResizeGlobalBuffer(szWanted) == false) {
 								AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsGlobalDataQueue::ProcessSingleItems1\n", (uint64_t)Allign128K(szWanted));
 								break;
                             }
                         }
-                        int iret = sprintf(clsServerManager::sGlobalBuffer+szLen, "$To: %s From: ", u->sNick);
+                        iret = sprintf(clsServerManager::sGlobalBuffer+szLen, "$To: %s From: ", u->sNick);
                         szLen += iret;
                         CheckSprintf1(iret, szLen, clsServerManager::szGlobalBufferSize, "clsGlobalDataQueue::ProcessSingleItems2");
 
@@ -782,14 +796,14 @@ void clsGlobalDataQueue::ProcessSingleItems(User * u) const {
                 }
                 case SI_OPCHAT: { // send OpChat only to allowed users...
                     if(clsProfileManager::mPtr->IsAllowed(u, clsProfileManager::ALLOWEDOPCHAT) == true) {
-                        size_t szWanted = szLen+pCur->szDataLen+u->ui8NickLen+13;
+                        szWanted = szLen+pCur->szDataLen+u->ui8NickLen+13;
                         if(clsServerManager::szGlobalBufferSize < szWanted) {
                             if(CheckAndResizeGlobalBuffer(szWanted) == false) {
 								AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsGlobalDataQueue::ProcessSingleItems2\n", (uint64_t)Allign128K(szWanted));
                                 break;
                             }
                         }
-                        int iret = sprintf(clsServerManager::sGlobalBuffer+szLen, "$To: %s From: ", u->sNick);
+                        iret = sprintf(clsServerManager::sGlobalBuffer+szLen, "$To: %s From: ", u->sNick);
                         szLen += iret;
                         CheckSprintf1(iret, szLen, clsServerManager::szGlobalBufferSize, "clsGlobalDataQueue::ProcessSingleItems3");
 
@@ -801,7 +815,7 @@ void clsGlobalDataQueue::ProcessSingleItems(User * u) const {
                 }
                 case SI_TOPROFILE: { // send data only to given profile...
                     if(u->iProfile == pCur->i32Profile) {
-                        size_t szWanted = szLen+pCur->szDataLen;
+                        szWanted = szLen+pCur->szDataLen;
                         if(clsServerManager::szGlobalBufferSize < szWanted) {
                             if(CheckAndResizeGlobalBuffer(szWanted) == false) {
 								AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsGlobalDataQueue::ProcessSingleItems3\n", (uint64_t)Allign128K(szWanted));
@@ -816,14 +830,14 @@ void clsGlobalDataQueue::ProcessSingleItems(User * u) const {
                 }
                 case SI_PM2PROFILE: { // send pm only to given profile...
                     if(u->iProfile == pCur->i32Profile) {
-                        size_t szWanted = szLen+pCur->szDataLen+u->ui8NickLen+13;
+                        szWanted = szLen+pCur->szDataLen+u->ui8NickLen+13;
                         if(clsServerManager::szGlobalBufferSize < szWanted) {
                             if(CheckAndResizeGlobalBuffer(szWanted) == false) {
 								AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsGlobalDataQueue::ProcessSingleItems4\n", (uint64_t)Allign128K(szWanted));
                                 break;
                             }
                         }
-                        int iret = sprintf(clsServerManager::sGlobalBuffer+szLen, "$To: %s From: ", u->sNick);
+                        iret = sprintf(clsServerManager::sGlobalBuffer+szLen, "$To: %s From: ", u->sNick);
                         szLen += iret;
                         CheckSprintf1(iret, szLen, clsServerManager::szGlobalBufferSize, "clsGlobalDataQueue::ProcessSingleItems4");
                         memcpy(clsServerManager::sGlobalBuffer+szLen, pCur->sData, pCur->szDataLen);
@@ -847,7 +861,7 @@ void clsGlobalDataQueue::ProcessSingleItems(User * u) const {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void clsGlobalDataQueue::SingleItemStore(char * sData, const size_t &szDataLen, User * pFromUser, const int32_t &i32Profile, const uint8_t &ui8Type) {
-    SingleDataItem * pNewItem = new SingleDataItem();
+    SingleDataItem * pNewItem = new (std::nothrow) SingleDataItem();
     if(pNewItem == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem in clsGlobalDataQueue::SingleItemStore\n", 0);
     	return;
@@ -897,10 +911,11 @@ void clsGlobalDataQueue::SingleItemStore(char * sData, const size_t &szDataLen, 
 
 void clsGlobalDataQueue::SendFinalQueue() {
     if(pQueueItems != NULL) {
-        QueueItem * pNext = pQueueItems;
+        QueueItem * pCur = NULL,
+            * pNext = pQueueItems;
 
         while(pNext != NULL) {
-            QueueItem * pCur = pNext;
+            pCur = pNext;
             pNext = pCur->pNext;
 
             switch(pCur->ui8CommandType) {
@@ -916,10 +931,11 @@ void clsGlobalDataQueue::SendFinalQueue() {
     }
 
     if(pNewQueueItems[0] != NULL) {
-        QueueItem * pNext = pNewQueueItems[0];
+        QueueItem * pCur = NULL,
+            * pNext = pNewQueueItems[0];
 
         while(pNext != NULL) {
-            QueueItem * pCur = pNext;
+            pCur = pNext;
             pNext = pCur->pNext;
 
             switch(pCur->ui8CommandType) {
@@ -940,9 +956,11 @@ void clsGlobalDataQueue::SendFinalQueue() {
 
     GlobalQueues[0].sZbuffer = clsZlibUtility::mPtr->CreateZPipe(GlobalQueues[0].sBuffer, GlobalQueues[0].szLen, GlobalQueues[0].sZbuffer, GlobalQueues[0].szZlen, GlobalQueues[0].szZsize);
 
-	User * pNext = clsUsers::mPtr->llist;
+	User * pCur = NULL,
+        * pNext = clsUsers::mPtr->llist;
+
     while(pNext != NULL) {
-        User * pCur = pNext;
+        pCur = pNext;
         pNext = pCur->next;
 
         if(GlobalQueues[0].szZlen != 0) {
@@ -992,7 +1010,7 @@ void * clsGlobalDataQueue::GetFirstQueueItem() {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void * clsGlobalDataQueue::InsertBlankQueueItem(void * pAfterItem, const uint8_t &ui8CmdType) {
-    QueueItem * pNewItem = new QueueItem();
+    QueueItem * pNewItem = new (std::nothrow) QueueItem();
     if(pNewItem == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem in clsGlobalDataQueue::InsertBlankQueueItem\n", 0);
     	return NULL;
@@ -1012,10 +1030,11 @@ void * clsGlobalDataQueue::InsertBlankQueueItem(void * pAfterItem, const uint8_t
         return pNewItem;
     }
 
-    QueueItem * pNext = pNewQueueItems[0];
+    QueueItem * pCur = NULL,
+        * pNext = pNewQueueItems[0];
 
     while(pNext != NULL) {
-        QueueItem * pCur = pNext;
+        pCur = pNext;
         pNext = pCur->pNext;
 
         if(pCur == pAfterItem) {

@@ -107,7 +107,7 @@ ScriptBot::~ScriptBot() {
 //------------------------------------------------------------------------------
 
 ScriptBot * ScriptBot::CreateScriptBot(char * sBotNick, const size_t &szNickLen, char * sDescription, const size_t &szDscrLen, char * sEmail, const size_t &szEmlLen, const bool &bOP) {
-    ScriptBot * pScriptBot = new ScriptBot();
+    ScriptBot * pScriptBot = new (std::nothrow) ScriptBot();
 
     if(pScriptBot == NULL) {
         AppendDebugLog("%s - [MEM] Cannot allocate new pScriptBot in ScriptBot::CreateScriptBot\n", 0);
@@ -188,7 +188,7 @@ ScriptTimer * ScriptTimer::CreateScriptTimer(UINT_PTR uiTmrId, char * sFunctName
 #else
 ScriptTimer * ScriptTimer::CreateScriptTimer(char * sFunctName, const size_t &szLen, const int &iRef) {
 #endif
-    ScriptTimer * pScriptTimer = new ScriptTimer();
+    ScriptTimer * pScriptTimer = new (std::nothrow) ScriptTimer();
 
     if(pScriptTimer == NULL) {
         AppendDebugLog("%s - [MEM] Cannot allocate new pScriptTimer in ScriptTimer::CreateScriptTimer\n", 0);
@@ -255,10 +255,11 @@ Script::~Script() {
         bRegUDP = false;
     }
 
-    ScriptTimer * next = TimerList;
+    ScriptTimer * tmr = NULL,
+        * next = TimerList;
     
     while(next != NULL) {
-        ScriptTimer * tmr = next;
+        tmr = next;
         next = tmr->next;
 
 #ifdef _WIN32
@@ -288,7 +289,7 @@ Script::~Script() {
 //------------------------------------------------------------------------------
 
 Script * Script::CreateScript(char * Name, const bool &enabled) {
-    Script * pScript = new Script();
+    Script * pScript = new (std::nothrow) Script();
 
     if(pScript == NULL) {
         AppendDebugLog("%s - [MEM] Cannot allocate new pScript in Script::CreateScript\n", 0);
@@ -440,10 +441,11 @@ void ScriptStop(Script * cur) {
         cur->bRegUDP = false;
     }
 
-	ScriptTimer * tmrnext = cur->TimerList;
+	ScriptTimer * tmr = NULL,
+        * tmrnext = cur->TimerList;
     
 	while(tmrnext != NULL) {
-		ScriptTimer * tmr = tmrnext;
+		tmr = tmrnext;
 		tmrnext = tmr->next;
 
 #ifdef _WIN32
@@ -465,10 +467,11 @@ void ScriptStop(Script * cur) {
         cur->LUA = NULL;
     }
 
-    ScriptBot * next = cur->BotList;
+    ScriptBot * bot = NULL,
+        * next = cur->BotList;
     
     while(next != NULL) {
-        ScriptBot * bot = next;
+        bot = next;
         next = bot->next;
 
         clsReservedNicksManager::mPtr->DelReservedNick(bot->sNick, true);
@@ -1008,17 +1011,19 @@ void ScriptError(Script * cur) {
 #else
 	void ScriptOnTimer(ScriptTimer * AccTimer) {
 #endif
-	Script *next = clsScriptManager::mPtr->RunningScriptS;
+	Script * cur = NULL,
+        * next = clsScriptManager::mPtr->RunningScriptS;
 
     while(next != NULL) {
-    	Script *cur = next;
+    	cur = next;
         next = cur->next;
 
-        ScriptTimer * next = cur->TimerList;
+        ScriptTimer * tmr = NULL,
+            * nexttmr = cur->TimerList;
         
-        while(next != NULL) {
-            ScriptTimer * tmr = next;
-            next = tmr->next;
+        while(nexttmr != NULL) {
+            tmr = nexttmr;
+            nexttmr = tmr->next;
 
 #ifdef _WIN32
             if(tmr->uiTimerId == uiTimerId) {

@@ -59,7 +59,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 
 	clsServerManager::sTitle = "PtokaX DC Hub " + string(PtokaXVersionString);
 #ifdef _DEBUG
-	sTitle += " [debug]";
+	clsServerManager::sTitle += " [debug]";
 #endif
 
 #ifdef _DEBUG
@@ -80,6 +80,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 	size_t szCmdLen = strlen(lpCmdLine);
 	if(szCmdLen != 0) {
 	    char *sParam = lpCmdLine;
+	    size_t szParamLen = 0, szLen = 0;
 
 	    for(size_t szi = 0; szi < szCmdLen; szi++) {
 	        if(szi == szCmdLen-1) {
@@ -90,7 +91,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 	            continue;
 	        }
 
-			size_t szParamLen = (lpCmdLine+szi)-sParam;
+			szParamLen = (lpCmdLine+szi)-sParam;
 
 	        switch(szParamLen) {
 	            case 7:
@@ -116,7 +117,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 	                break;
 	            default:
                     if(strnicmp(sParam, "-c ", 3) == NULL) {
-                        size_t szLen = strlen(sParam+3);
+                        szLen = strlen(sParam+3);
                         if(szLen == 0) {
                             ::MessageBox(NULL, "Missing config directory!", "Error!", MB_OK);
                             return 0;
@@ -173,8 +174,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
         ::ShowWindow(clsMainWindow::mPtr->m_hWnd, nCmdShow);
     }
 
-	MSG msg;
-	BOOL bRet;
+	MSG msg = { 0 };
+	BOOL bRet = -1;
 
 	while((bRet = ::GetMessage(&msg, NULL, 0, 0)) != 0) {
 	    if(bRet == -1) {

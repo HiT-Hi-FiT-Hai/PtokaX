@@ -106,15 +106,16 @@ void clsGuiSettingManager::Load() {
     ui16Identificators[1] = *((uint16_t *)"SV");
 
     bool bSuccess = pxbSetting.ReadNextItem(ui16Identificators, 2);
+    size_t szi = 0;
 
     while(bSuccess == true) {
-        for(size_t szi = 0; szi < GUISETBOOL_IDS_END; szi++) {
+        for(szi = 0; szi < GUISETBOOL_IDS_END; szi++) {
             if(pxbSetting.ui16ItemLengths[0] == strlen(GuiSetBoolStr[szi]) && strncmp((char *)pxbSetting.pItemDatas[0], GuiSetBoolStr[szi], pxbSetting.ui16ItemLengths[0]) == 0) {
                 SetBool(szi, ((char *)pxbSetting.pItemDatas[1])[0] == '0' ? false : true);
             }
         }
 
-        for(size_t szi = 0; szi < GUISETINT_IDS_END; szi++) {
+        for(szi = 0; szi < GUISETINT_IDS_END; szi++) {
             if(pxbSetting.ui16ItemLengths[0] == strlen(GuiSetIntegerStr[szi]) && strncmp((char *)pxbSetting.pItemDatas[0], GuiSetIntegerStr[szi], pxbSetting.ui16ItemLengths[0]) == 0) {
                 SetInteger(szi, ntohl(*((uint32_t *)(pxbSetting.pItemDatas[1]))));
             }

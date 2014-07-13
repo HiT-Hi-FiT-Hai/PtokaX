@@ -98,7 +98,7 @@ RegUser::~RegUser() {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 RegUser * RegUser::CreateReg(char * sRegNick, size_t szRegNickLen, char * sRegPassword, size_t szRegPassLen, uint8_t * ui8RegPassHash, const uint16_t &ui16RegProfile) {
-    RegUser * pReg = new RegUser();
+    RegUser * pReg = new (std::nothrow) RegUser();
 
     if(pReg == NULL) {
         AppendDebugLog("%s - [MEM] Cannot allocate new Reg in RegUser::CreateReg\n", 0);
@@ -227,20 +227,20 @@ bool RegUser::UpdatePassword(char * sNewPass, size_t &szNewLen) {
 clsRegManager::clsRegManager(void) {
     RegListS = RegListE = NULL;
 
-    for(uint32_t ui32i = 0; ui32i < 65536; ui32i++) {
-        table[ui32i] = NULL;
-    }
+    memset(table, 0, sizeof(table));
 
     ui8SaveCalls = 0;
 }
 //---------------------------------------------------------------------------
 
 clsRegManager::~clsRegManager(void) {
-    RegUser *next = RegListS;
+    RegUser * curReg = NULL,
+        * next = RegListS;
         
     while(next != NULL) {
-        RegUser *curReg = next;
+        curReg = next;
 		next = curReg->next;
+
 		delete curReg;
     }
 }
@@ -535,10 +535,11 @@ RegUser* clsRegManager::Find(char * sNick, const size_t &szNickLen) {
     uint16_t ui16dx = 0;
     memcpy(&ui16dx, &ui32Hash, sizeof(uint16_t));
 
-    RegUser *next = table[ui16dx];
+    RegUser * cur = NULL,
+        * next = table[ui16dx];
 
     while(next != NULL) {
-        RegUser *cur = next;
+        cur = next;
         next = cur->hashtablenext;
 
 		if(cur->ui32Hash == ui32Hash && strcasecmp(cur->sNick, sNick) == 0) {
@@ -554,10 +555,11 @@ RegUser* clsRegManager::Find(User * u) {
     uint16_t ui16dx = 0;
     memcpy(&ui16dx, &u->ui32NickHash, sizeof(uint16_t));
 
-	RegUser *next = table[ui16dx];
+	RegUser * cur = NULL,
+        * next = table[ui16dx];
 
     while(next != NULL) {
-        RegUser *cur = next;
+        cur = next;
         next = cur->hashtablenext;
 
 		if(cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->sNick, u->sNick) == 0) {
@@ -573,10 +575,11 @@ RegUser* clsRegManager::Find(uint32_t ui32Hash, char * sNick) {
     uint16_t ui16dx = 0;
     memcpy(&ui16dx, &ui32Hash, sizeof(uint16_t));
 
-	RegUser *next = table[ui16dx];
+	RegUser * cur = NULL,
+        * next = table[ui16dx];
 
     while(next != NULL) {
-        RegUser *cur = next;
+        cur = next;
         next = cur->hashtablenext;
 
 		if(cur->ui32Hash == ui32Hash && strcasecmp(cur->sNick, sNick) == 0) {
@@ -637,23 +640,26 @@ void clsRegManager::Load(void) {
     ui16Identificators[2] = *((uint16_t *)"PR");
     ui16Identificators[3] = *((uint16_t *)"PA");
 
+    uint16_t iProfile = UINT16_MAX;
+    RegUser * pNewUser = NULL;
+    uint8_t ui8Hash[64];
+    size_t szPassLen = 0;
+
     bool bSuccess = pxbRegs.ReadNextItem(ui16Identificators, 3, 1);
 
     while(bSuccess == true) {
 		if(pxbRegs.ui16ItemLengths[0] < 65 && pxbRegs.ui16ItemLengths[1] < 65 && pxbRegs.ui16ItemLengths[2] == 2) {
-            uint16_t iProfile = (uint16_t)ntohs(*((uint16_t *)(pxbRegs.pItemDatas[2])));
+            iProfile = (uint16_t)ntohs(*((uint16_t *)(pxbRegs.pItemDatas[2])));
 
             if(iProfile > iProfilesCount) {
                 iProfile = iProfilesCount;
             }
 
-            RegUser * pNewUser = NULL;
+            pNewUser = NULL;
 
             if(pxbRegs.ui16ItemLengths[3] != 0) {
                 if(clsSettingManager::mPtr->bBools[SETBOOL_HASH_PASSWORDS] == true) {
-                    uint8_t ui8Hash[64];
-
-                    size_t szPassLen = (size_t)pxbRegs.ui16ItemLengths[3];
+                    szPassLen = (size_t)pxbRegs.ui16ItemLengths[3];
 
                     if(HashPassword((char *)pxbRegs.pItemDatas[3], szPassLen, ui8Hash) == false) {
                         pNewUser = RegUser::CreateReg((char *)pxbRegs.pItemDatas[0], pxbRegs.ui16ItemLengths[0], (char *)pxbRegs.pItemDatas[3], pxbRegs.ui16ItemLengths[3], NULL, iProfile);
@@ -831,9 +837,11 @@ void clsRegManager::Save(const bool &bSaveOnChange/* = false*/, const bool &bSav
     pxbRegs.ui8ItemValues[1] = PXBReader::PXB_STRING;
     pxbRegs.ui8ItemValues[2] = PXBReader::PXB_TWO_BYTES;
 
-    RegUser *next = RegListS;
+    RegUser * curReg = NULL,
+        * next = RegListS;
+
     while(next != NULL) {
-        RegUser *curReg = next;
+        curReg = next;
 		next = curReg->next;
 
         pxbRegs.ui16ItemLengths[0] = (uint16_t)strlen(curReg->sNick);
@@ -865,13 +873,18 @@ void clsRegManager::Save(const bool &bSaveOnChange/* = false*/, const bool &bSav
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void clsRegManager::HashPasswords() {
-    RegUser * pNextReg = RegListS;
+    size_t szPassLen = 0;
+    char * sOldPass = NULL;
+
+    RegUser * pCurReg = NULL,
+        * pNextReg = RegListS;
+
     while(pNextReg != NULL) {
-        RegUser * pCurReg = pNextReg;
+        pCurReg = pNextReg;
 		pNextReg = pCurReg->next;
 
         if(pCurReg->bPassHash == false) {
-            char * sOldPass = pCurReg->sPass;
+            sOldPass = pCurReg->sPass;
 #ifdef _WIN32
             pCurReg->ui8PassHash = (uint8_t *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, 64);
 #else
@@ -885,7 +898,7 @@ void clsRegManager::HashPasswords() {
                 continue;
             }
 
-            size_t szPassLen = strlen(sOldPass);
+            szPassLen = strlen(sOldPass);
 
             if(HashPassword(sOldPass, szPassLen, pCurReg->ui8PassHash) == true) {
                 pCurReg->bPassHash = true;

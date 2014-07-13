@@ -88,7 +88,7 @@ LRESULT clsBansDialog::BansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         case WM_COMMAND:
             switch(LOWORD(wParam)) {
                 case (BTN_ADD_BAN+100): {
-                    clsBanDialog * pBanDialog = new clsBanDialog();
+                    clsBanDialog * pBanDialog = new (std::nothrow) clsBanDialog();
 
                     if(pBanDialog != NULL) {
                         pBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE]);
@@ -164,7 +164,7 @@ LRESULT clsBansDialog::BansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
                     BanItem * pBan = (BanItem *)ListViewGetItem(hWndWindowItems[LV_BANS], ((LPNMITEMACTIVATE)lParam)->iItem);
 
-                    clsBanDialog * pBanDialog = new clsBanDialog();
+                    clsBanDialog * pBanDialog = new (std::nothrow) clsBanDialog();
 
                     if(pBanDialog != NULL) {
                         pBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pBan);
@@ -203,9 +203,11 @@ LRESULT clsBansDialog::BansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
             break;
         }
-        case WM_NCDESTROY:
+        case WM_NCDESTROY: {
+            HWND hWnd = hWndWindowItems[WINDOW_HANDLE];
             delete this;
-            return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
+            return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+        }
         case WM_SETFOCUS:
             if((UINT)::SendMessage(hWndWindowItems[LV_BANS], LVM_GETSELECTEDCOUNT, 0, 0) != 0) {
                 ::SetFocus(hWndWindowItems[LV_BANS]);
@@ -335,8 +337,8 @@ void clsBansDialog::AddAllBans() {
 
     time_t acc_time; time(&acc_time);
 
-    BanItem * nextBan = clsBanManager::mPtr->TempBanListS,
-        * curBan = NULL;
+    BanItem * curBan = NULL,
+        * nextBan = clsBanManager::mPtr->TempBanListS;
 
     while(nextBan != NULL) {
 		curBan = nextBan;
@@ -488,9 +490,11 @@ void clsBansDialog::RemoveBans() {
 
     ::SendMessage(hWndWindowItems[LV_BANS], WM_SETREDRAW, (WPARAM)FALSE, 0);
 
+    BanItem * pBan = NULL;
     int iSel = -1;
+
     while((iSel = (int)::SendMessage(hWndWindowItems[LV_BANS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED)) != -1) {
-        BanItem * pBan = (BanItem *)ListViewGetItem(hWndWindowItems[LV_BANS], iSel);
+        pBan = (BanItem *)ListViewGetItem(hWndWindowItems[LV_BANS], iSel);
 
         clsBanManager::mPtr->Rem(pBan, true);
 
@@ -527,12 +531,12 @@ void clsBansDialog::FilterBans() {
 
         time_t acc_time; time(&acc_time);
 
-        BanItem * nextBan = clsBanManager::mPtr->TempBanListS,
-            * curBan = NULL;
+        BanItem * curBan = NULL,
+            * nextBan = clsBanManager::mPtr->TempBanListS;
 
         while(nextBan != NULL) {
-		  curBan = nextBan;
-    	   nextBan = curBan->next;
+            curBan = nextBan;
+            nextBan = curBan->next;
 
             if(acc_time > curBan->tempbanexpire) {
                 clsBanManager::mPtr->Rem(curBan);
@@ -652,7 +656,7 @@ void clsBansDialog::ChangeBan() {
 
     BanItem * pBan = (BanItem *)ListViewGetItem(hWndWindowItems[LV_BANS], iSel);
 
-    clsBanDialog * pBanDialog = new clsBanDialog();
+    clsBanDialog * pBanDialog = new (std::nothrow) clsBanDialog();
 
     if(pBanDialog != NULL) {
         pBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pBan);

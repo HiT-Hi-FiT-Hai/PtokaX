@@ -81,9 +81,11 @@ clsUdpDebug::clsUdpDebug() {
 //---------------------------------------------------------------------------
 
 clsUdpDebug::~clsUdpDebug() {
-    UdpDbgItem *next = llist;
+    UdpDbgItem * cur = NULL,
+        * next = llist;
+
 	while(next != NULL) {
-        UdpDbgItem *cur = next;
+        cur = next;
         next = cur->next;
 
     	delete cur;
@@ -92,8 +94,9 @@ clsUdpDebug::~clsUdpDebug() {
     llist = NULL;
 
     next = ScriptList;
+
 	while(next != NULL) {
-        UdpDbgItem *cur = next;
+        cur = next;
         next = cur->next;
 
     	delete cur;
@@ -131,9 +134,11 @@ void clsUdpDebug::Broadcast(const char * msg, const size_t &szMsgLen) const {
     memcpy(sMsg+4, clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]);
     memcpy(sMsg+4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME], msg, szMsgLen);
      
-    UdpDbgItem *next = llist;
+    UdpDbgItem * cur = NULL,
+        * next = llist;
+
 	while(next != NULL) {
-        UdpDbgItem *cur = next;
+        cur = next;
         next = cur->next;
 #ifdef _WIN32
     	sendto(cur->s, sMsg, (int)szLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
@@ -159,7 +164,7 @@ void clsUdpDebug::Broadcast(const string & msg) const {
 //---------------------------------------------------------------------------
 
 bool clsUdpDebug::New(User * u, const int32_t &port) {
-	UdpDbgItem * pNewDbg = new UdpDbgItem();
+	UdpDbgItem * pNewDbg = new (std::nothrow) UdpDbgItem();
     if(pNewDbg == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewDbg in clsUdpDebug::New\n", 0);
     	return false;
@@ -295,7 +300,7 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
 //---------------------------------------------------------------------------
 
 bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, char * sScriptName) {
-	UdpDbgItem * pNewDbg = new UdpDbgItem();
+	UdpDbgItem * pNewDbg = new (std::nothrow) UdpDbgItem();
     if(pNewDbg == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewDbg in clsUdpDebug::New\n", 0);
     	return false;
@@ -446,9 +451,11 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
 //---------------------------------------------------------------------------
 
 bool clsUdpDebug::Remove(User * u) {
-    UdpDbgItem *next = llist;
+    UdpDbgItem * cur = NULL,
+        * next = llist;
+
 	while(next != NULL) {
-        UdpDbgItem *cur = next;
+        cur = next;
         next = cur->next;
 
 		if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->Nick, u->sNick) == 0) {
@@ -475,9 +482,11 @@ bool clsUdpDebug::Remove(User * u) {
 //---------------------------------------------------------------------------
 
 void clsUdpDebug::Remove(char * sScriptName) {
-    UdpDbgItem *next = ScriptList;
+    UdpDbgItem * cur = NULL,
+        * next = ScriptList;
+
 	while(next != NULL) {
-        UdpDbgItem *cur = next;
+        cur = next;
         next = cur->next;
 
 		if(strcasecmp(cur->Nick, sScriptName) == 0) {
@@ -502,7 +511,7 @@ void clsUdpDebug::Remove(char * sScriptName) {
 
     next = llist;
 	while(next != NULL) {
-        UdpDbgItem *cur = next;
+        cur = next;
         next = cur->next;
 
 		if(cur->bIsScript == true && strcasecmp(cur->Nick, sScriptName) == 0) {
@@ -528,9 +537,11 @@ void clsUdpDebug::Remove(char * sScriptName) {
 //---------------------------------------------------------------------------
 
 bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) const {
-    UdpDbgItem *next = llist;
+    UdpDbgItem * cur = NULL,
+        * next = llist;
+
 	while(next != NULL) {
-        UdpDbgItem *cur = next;
+        cur = next;
         next = cur->next;
 
 		if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->Nick, u->sNick) == 0) {
@@ -550,9 +561,11 @@ bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) const {
 //---------------------------------------------------------------------------
 
 void clsUdpDebug::Send(char * sScriptName, char * sMessage, const size_t &szMsgLen) const {
-    UdpDbgItem *next = ScriptList;
+    UdpDbgItem * cur = NULL,
+        * next = ScriptList;
+
 	while(next != NULL) {
-        UdpDbgItem *cur = next;
+        cur = next;
         next = cur->next;
 
 		if(strcasecmp(cur->Nick, sScriptName) == 0) {
@@ -604,9 +617,11 @@ void clsUdpDebug::Send(char * sScriptName, char * sMessage, const size_t &szMsgL
 //---------------------------------------------------------------------------
 
 void clsUdpDebug::Cleanup() {
-    UdpDbgItem *next = llist;
+    UdpDbgItem * cur = NULL,
+        * next = llist;
+
 	while(next != NULL) {
-        UdpDbgItem *cur = next;
+        cur = next;
         next = cur->next;
     	delete cur;
     }
@@ -615,7 +630,7 @@ void clsUdpDebug::Cleanup() {
 
     next = ScriptList;
 	while(next != NULL) {
-        UdpDbgItem *cur = next;
+        cur = next;
         next = cur->next;
     	delete cur;
     }

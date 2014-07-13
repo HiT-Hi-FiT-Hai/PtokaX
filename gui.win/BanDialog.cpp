@@ -129,9 +129,11 @@ LRESULT clsBanDialog::BanDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
             clsServerManager::hWndActiveDialog = NULL;
             break;
-        case WM_NCDESTROY:
+        case WM_NCDESTROY: {
+            HWND hWnd = hWndWindowItems[WINDOW_HANDLE];
             delete this;
-            return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
+            return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+        }
         case WM_SETFOCUS:
             ::SetFocus(hWndWindowItems[EDT_NICK]);
             return 0;
@@ -413,7 +415,7 @@ bool clsBanDialog::OnAccept() {
 	}
 
 	if(pBanToChange == NULL) {
-		BanItem * pBan = new BanItem();
+		BanItem * pBan = new (std::nothrow) BanItem();
 		if(pBan == NULL) {
             AppendDebugLog("%s - [MEM] Cannot allocate Ban in clsBanDialog::OnAccept\n", 0);
 			return false;

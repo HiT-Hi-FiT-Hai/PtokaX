@@ -56,7 +56,7 @@ clsReservedNicksManager::ReservedNick::~ReservedNick() {
 //---------------------------------------------------------------------------
 
 clsReservedNicksManager::ReservedNick * clsReservedNicksManager::ReservedNick::CreateReservedNick(const char * nick, uint32_t ui32NickHash) {
-    ReservedNick * pReservedNick = new ReservedNick();
+    ReservedNick * pReservedNick = new (std::nothrow) ReservedNick();
 
     if(pReservedNick == NULL) {
         AppendDebugLog("%s - [MEM] Cannot allocate new pReservedNick in ReservedNick::CreateReservedNick\n", 0);
@@ -148,10 +148,11 @@ clsReservedNicksManager::clsReservedNicksManager() {
 //---------------------------------------------------------------------------
 	
 clsReservedNicksManager::~clsReservedNicksManager() {
-    ReservedNick *next = ReservedNicks;
+    ReservedNick * cur = NULL,
+        * next = ReservedNicks;
 
     while(next != NULL) {
-        ReservedNick *cur = next;
+        cur = next;
         next = cur->next;
 
         delete cur;
@@ -161,10 +162,11 @@ clsReservedNicksManager::~clsReservedNicksManager() {
 
 // Check for reserved nicks true = reserved
 bool clsReservedNicksManager::CheckReserved(const char * sNick, const uint32_t &hash) const {
-    ReservedNick *next = ReservedNicks;
+    ReservedNick * cur = NULL,
+        * next = ReservedNicks;
 
     while(next != NULL) {
-        ReservedNick *cur = next;
+        cur = next;
         next = cur->next;
 
 		if(cur->ui32Hash == hash && strcasecmp(cur->sNick, sNick) == 0) {
@@ -202,9 +204,11 @@ void clsReservedNicksManager::AddReservedNick(const char * sNick, const bool &bF
 void clsReservedNicksManager::DelReservedNick(char * sNick, const bool &bFromScript/* = false*/) {
     uint32_t hash = HashNick(sNick, strlen(sNick));
 
-    ReservedNick *next = ReservedNicks;
+    ReservedNick * cur = NULL,
+        * next = ReservedNicks;
+
     while(next != NULL) {
-        ReservedNick *cur = next;
+        cur = next;
         next = cur->next;
 
         if(cur->ui32Hash == hash && strcmp(cur->sNick, sNick) == 0) {

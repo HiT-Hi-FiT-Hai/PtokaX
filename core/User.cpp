@@ -60,9 +60,9 @@ static bool UserProcessLines(User * u, const uint32_t &iStrtLen) {
 	if(u->recvbuf[0] == '\0')
         return false;
 
-    char c;
+    char c = 0;
     
-    char *buffer = u->recvbuf;
+    char * buffer = u->recvbuf;
 
     for(uint32_t ui32i = iStrtLen; ui32i < u->rbdatalen; ui32i++) {
         if(u->recvbuf[ui32i] == '|') {
@@ -517,7 +517,7 @@ UserBan::~UserBan() {
 //---------------------------------------------------------------------------
 
 UserBan * UserBan::CreateUserBan(char * sMess, const uint32_t &iMessLen, const uint32_t &ui32Hash) {
-    UserBan * pUserBan = new UserBan();
+    UserBan * pUserBan = new (std::nothrow) UserBan();
 
     if(pUserBan == NULL) {
         AppendDebugLog("%s - [MEM] Cannot allocate new pUserBan in UserBan::CreateUserBan\n", 0);
@@ -969,10 +969,11 @@ User::~User() {
 		cmdPassiveSearch = NULL;
     }
                 
-	PrcsdUsrCmd *next = cmdStrt;
+	PrcsdUsrCmd * cur = NULL,
+        * next = cmdStrt;
         
     while(next != NULL) {
-        PrcsdUsrCmd *cur = next;
+        cur = next;
         next = cur->next;
 
 #ifdef _WIN32
@@ -990,10 +991,11 @@ User::~User() {
 	cmdStrt = NULL;
 	cmdEnd = NULL;
 
-	PrcsdToUsrCmd *nextto = cmdToUserStrt;
+	PrcsdToUsrCmd * curto = NULL,
+        * nextto = cmdToUserStrt;
                     
     while(nextto != NULL) {
-        PrcsdToUsrCmd *curto = nextto;
+        curto = nextto;
         nextto = curto->next;
 
 #ifdef _WIN32
@@ -1909,7 +1911,7 @@ void User::SetBuffer(char * sKickMsg, size_t szLen/* = 0*/) {
     }
 
     if(uLogInOut == NULL) {
-        uLogInOut = new LoginLogout();
+        uLogInOut = new (std::nothrow) LoginLogout();
         if(uLogInOut == NULL) {
     		ui32BoolBits |= BIT_ERROR;
     		Close();
@@ -2046,10 +2048,11 @@ void User::Close(bool bNoQuit/* = false*/) {
         cmdPassiveSearch = NULL;
     }
                         
-    PrcsdUsrCmd *next = cmdStrt;
+    PrcsdUsrCmd * cur = NULL,
+        * next = cmdStrt;
                         
     while(next != NULL) {
-        PrcsdUsrCmd *cur = next;
+        cur = next;
         next = cur->next;
 
 #ifdef _WIN32
@@ -2067,10 +2070,11 @@ void User::Close(bool bNoQuit/* = false*/) {
     cmdStrt = NULL;
     cmdEnd = NULL;
     
-    PrcsdToUsrCmd *nextto = cmdToUserStrt;
+    PrcsdToUsrCmd * curto = NULL,
+        * nextto = cmdToUserStrt;
                         
     while(nextto != NULL) {
-        PrcsdToUsrCmd *curto = nextto;
+        curto = nextto;
         nextto = curto->next;
 
 #ifdef _WIN32
@@ -2114,7 +2118,7 @@ void User::Close(bool bNoQuit/* = false*/) {
         ui8State = STATE_REMME;
     } else {
         if(uLogInOut == NULL) {
-            uLogInOut = new LoginLogout();
+            uLogInOut = new (std::nothrow) LoginLogout();
             if(uLogInOut == NULL) {
                 ui8State = STATE_REMME;
         		AppendDebugLog("%s - [MEM] Cannot allocate new uLogInOut in User::Close\n", 0);
@@ -2788,10 +2792,13 @@ bool User::ProcessRules() {
 
 void User::AddPrcsdCmd(const unsigned char &cType, char * sCommand, const size_t &szCommandLen, User * to, const bool &bIsPm/* = false*/) {
     if(cType == PrcsdUsrCmd::CTM_MCTM_RCTM_SR_TO) {
-        PrcsdToUsrCmd *next = cmdToUserStrt;
+        PrcsdToUsrCmd * cur = NULL,
+            * next = cmdToUserStrt;
+
         while(next != NULL) {
-            PrcsdToUsrCmd *cur = next;
+            cur = next;
             next = cur->next;
+
             if(cur->To == to) {
                 char * pOldBuf = cur->sCommand;
 #ifdef _WIN32
@@ -2816,7 +2823,7 @@ void User::AddPrcsdCmd(const unsigned char &cType, char * sCommand, const size_t
             }
         }
 
-        PrcsdToUsrCmd * pNewcmd = new PrcsdToUsrCmd();
+        PrcsdToUsrCmd * pNewcmd = new (std::nothrow) PrcsdToUsrCmd();
         if(pNewcmd == NULL) {
             ui32BoolBits |= BIT_ERROR;
             Close();
@@ -2878,7 +2885,7 @@ void User::AddPrcsdCmd(const unsigned char &cType, char * sCommand, const size_t
         return;
     }
     
-    PrcsdUsrCmd * pNewcmd = new PrcsdUsrCmd();
+    PrcsdUsrCmd * pNewcmd = new (std::nothrow) PrcsdUsrCmd();
     if(pNewcmd == NULL) {
         ui32BoolBits |= BIT_ERROR;
         Close();

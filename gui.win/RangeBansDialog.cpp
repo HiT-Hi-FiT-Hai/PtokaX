@@ -89,7 +89,7 @@ LRESULT clsRangeBansDialog::RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM
             switch(LOWORD(wParam)) {
                 case (BTN_ADD_RANGE_BAN+100): {
 
-                    clsRangeBanDialog * pRangeBanDialog = new clsRangeBanDialog();
+                    clsRangeBanDialog * pRangeBanDialog = new (std::nothrow) clsRangeBanDialog();
 
                     if(pRangeBanDialog != NULL) {
                         pRangeBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE]);
@@ -166,7 +166,7 @@ LRESULT clsRangeBansDialog::RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM
 
                     RangeBanItem * pRangeBan = (RangeBanItem *)ListViewGetItem(hWndWindowItems[LV_RANGE_BANS], ((LPNMITEMACTIVATE)lParam)->iItem);
 
-                    clsRangeBanDialog * pRangeBanDialog = new clsRangeBanDialog();
+                    clsRangeBanDialog * pRangeBanDialog = new (std::nothrow) clsRangeBanDialog();
 
                     if(pRangeBanDialog != NULL) {
                         pRangeBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pRangeBan);
@@ -201,9 +201,11 @@ LRESULT clsRangeBansDialog::RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM
 
             break;
         }
-        case WM_NCDESTROY:
+        case WM_NCDESTROY: {
+            HWND hWnd = hWndWindowItems[WINDOW_HANDLE];
             delete this;
-            return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
+            return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+        }
         case WM_SETFOCUS:
             if((UINT)::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_GETSELECTEDCOUNT, 0, 0) != 0) {
                 ::SetFocus(hWndWindowItems[LV_RANGE_BANS]);
@@ -335,8 +337,8 @@ void clsRangeBansDialog::AddAllRangeBans() {
 
     time_t acc_time; time(&acc_time);
 
-    RangeBanItem * nextRangeBan = clsBanManager::mPtr->RangeBanListS,
-        * curRangeBan = NULL;
+    RangeBanItem * curRangeBan = NULL,
+        * nextRangeBan = clsBanManager::mPtr->RangeBanListS;
 
     while(nextRangeBan != NULL) {
 		curRangeBan = nextRangeBan;
@@ -464,9 +466,11 @@ void clsRangeBansDialog::RemoveRangeBans() {
 
     ::SendMessage(hWndWindowItems[LV_RANGE_BANS], WM_SETREDRAW, (WPARAM)FALSE, 0);
 
+    RangeBanItem * pRangeBan = NULL;
     int iSel = -1;
+
     while((iSel = (int)::SendMessage(hWndWindowItems[LV_RANGE_BANS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED)) != -1) {
-        RangeBanItem * pRangeBan = (RangeBanItem *)ListViewGetItem(hWndWindowItems[LV_RANGE_BANS], iSel);
+        pRangeBan = (RangeBanItem *)ListViewGetItem(hWndWindowItems[LV_RANGE_BANS], iSel);
 
         clsBanManager::mPtr->RemRange(pRangeBan, true);
 
@@ -503,8 +507,8 @@ void clsRangeBansDialog::FilterRangeBans() {
 
         time_t acc_time; time(&acc_time);
 
-        RangeBanItem * nextRangeBan = clsBanManager::mPtr->RangeBanListS,
-            * curRangeBan = NULL;
+        RangeBanItem * curRangeBan = NULL,
+            * nextRangeBan = clsBanManager::mPtr->RangeBanListS;
 
         while(nextRangeBan != NULL) {
             curRangeBan = nextRangeBan;
@@ -616,7 +620,7 @@ void clsRangeBansDialog::ChangeRangeBan() {
 
     RangeBanItem * pRangeBan = (RangeBanItem *)ListViewGetItem(hWndWindowItems[LV_RANGE_BANS], iSel);
 
-    clsRangeBanDialog * pRangeBanDialog = new clsRangeBanDialog();
+    clsRangeBanDialog * pRangeBanDialog = new (std::nothrow) clsRangeBanDialog();
 
     if(pRangeBanDialog != NULL) {
         pRangeBanDialog->DoModal(hWndWindowItems[WINDOW_HANDLE], pRangeBan);

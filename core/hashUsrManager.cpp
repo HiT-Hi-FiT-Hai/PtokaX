@@ -33,10 +33,8 @@ clsHashManager * clsHashManager::mPtr = NULL;
 //---------------------------------------------------------------------------
 
 clsHashManager::clsHashManager() {
-    for(uint32_t ui32i = 0; ui32i < 65536; ui32i++) {
-        nicktable[ui32i] = NULL;
-        iptable[ui32i] = NULL;
-    }
+    memset(nicktable, 0, sizeof(nicktable));
+    memset(iptable, 0, sizeof(iptable));
 
     //Memo("clsHashManager created");
 }
@@ -45,10 +43,11 @@ clsHashManager::clsHashManager() {
 clsHashManager::~clsHashManager() {
     //Memo("clsHashManager destroyed");
     for(uint32_t ui32i = 0; ui32i < 65536; ui32i++) {
-		IpTableItem * next = iptable[ui32i];
+		IpTableItem * cur = NULL,
+            * next = iptable[ui32i];
         
         while(next != NULL) {
-            IpTableItem * cur = next;
+            cur = next;
             next = cur->next;
         
             delete cur;
@@ -69,7 +68,7 @@ bool clsHashManager::Add(User * u) {
     nicktable[ui16dx] = u;
 
     if(iptable[u->ui16IpTableIdx] == NULL) {
-        iptable[u->ui16IpTableIdx] = new IpTableItem();
+        iptable[u->ui16IpTableIdx] = new (std::nothrow) IpTableItem();
 
         if(iptable[u->ui16IpTableIdx] == NULL) {
             u->ui32BoolBits |= User::BIT_ERROR;
@@ -88,10 +87,11 @@ bool clsHashManager::Add(User * u) {
         return true;
     }
 
-    IpTableItem * next = iptable[u->ui16IpTableIdx];
+    IpTableItem * cur = NULL,
+        * next = iptable[u->ui16IpTableIdx];
 
     while(next != NULL) {
-        IpTableItem * cur = next;
+        cur = next;
         next = cur->next;
 
         if(memcmp(cur->FirstUser->ui128IpHash, u->ui128IpHash, 16) == 0) {
@@ -104,7 +104,7 @@ bool clsHashManager::Add(User * u) {
         }
     }
 
-    IpTableItem * cur = new IpTableItem();
+    cur = new (std::nothrow) IpTableItem();
 
     if(cur == NULL) {
         u->ui32BoolBits |= User::BIT_ERROR;
@@ -149,10 +149,11 @@ void clsHashManager::Remove(User * u) {
     u->hashtablenext = NULL;
 
 	if(u->hashiptableprev == NULL) {
-        IpTableItem * next = iptable[u->ui16IpTableIdx];
+        IpTableItem * cur = NULL,
+            * next = iptable[u->ui16IpTableIdx];
     
         while(next != NULL) {
-            IpTableItem * cur = next;
+            cur = next;
             next = cur->next;
 
             if(memcmp(cur->FirstUser->ui128IpHash, u->ui128IpHash, 16) == 0) {
@@ -195,10 +196,11 @@ void clsHashManager::Remove(User * u) {
     u->hashiptableprev = NULL;
     u->hashiptablenext = NULL;
 
-    IpTableItem * next = iptable[u->ui16IpTableIdx];
+    IpTableItem * cur = NULL,
+        * next = iptable[u->ui16IpTableIdx];
 
     while(next != NULL) {
-        IpTableItem * cur = next;
+        cur = next;
         next = cur->next;
 
         if(memcmp(cur->FirstUser->ui128IpHash, u->ui128IpHash, 16) == 0) {
@@ -216,12 +218,14 @@ User * clsHashManager::FindUser(char * sNick, const size_t &szNickLen) {
     uint16_t ui16dx = 0;
     memcpy(&ui16dx, &ui32Hash, sizeof(uint16_t));
 
-    User *next = nicktable[ui16dx];
+    User * next = nicktable[ui16dx];
 
     // pointer exists ? Then we need look for nick 
     if(next != NULL) {
+        User * cur = NULL;
+
         while(next != NULL) {
-            User *cur = next;
+            cur = next;
             next = cur->hashtablenext;
 
             // we are looking for duplicate string
@@ -240,12 +244,14 @@ User * clsHashManager::FindUser(User * u) {
     uint16_t ui16dx = 0;
     memcpy(&ui16dx, &u->ui32NickHash, sizeof(uint16_t));
 
-    User *next = nicktable[ui16dx];  
+    User * next = nicktable[ui16dx];
 
     // pointer exists ? Then we need look for nick
     if(next != NULL) { 
+        User * cur = NULL;
+
         while(next != NULL) {
-            User *cur = next;
+            cur = next;
             next = cur->hashtablenext;
 
             // we are looking for duplicate string
@@ -269,10 +275,11 @@ User * clsHashManager::FindUser(const uint8_t * ui128IpHash) {
         ui16IpTableIdx = GetIpTableIdx(ui128IpHash);
     }
 
-	IpTableItem * next = iptable[ui16IpTableIdx];
+	IpTableItem * cur = NULL,
+        * next = iptable[ui16IpTableIdx];
 
     while(next != NULL) {
-		IpTableItem * cur = next;
+		cur = next;
         next = cur->next;
 
         if(memcmp(cur->FirstUser->ui128IpHash, ui128IpHash, 16) == 0) {
@@ -285,10 +292,11 @@ User * clsHashManager::FindUser(const uint8_t * ui128IpHash) {
 //---------------------------------------------------------------------------
 
 uint32_t clsHashManager::GetUserIpCount(User * u) const {
-	IpTableItem * next = iptable[u->ui16IpTableIdx];
+	IpTableItem * cur = NULL,
+        * next = iptable[u->ui16IpTableIdx];
 
 	while(next != NULL) {
-		IpTableItem * cur = next;
+		cur = next;
 		next = cur->next;
 
         if(memcmp(cur->FirstUser->ui128IpHash, u->ui128IpHash, 16) == 0) {

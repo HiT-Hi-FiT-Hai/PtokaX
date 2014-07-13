@@ -32,7 +32,8 @@
 //---------------------------------------------------------------------------
 LPTOP_LEVEL_EXCEPTION_FILTER pOldTLEF = NULL;
 string sLogPath = "", sDebugSymbolsFile = "";
-static char sDebugBuf[512];
+static const size_t szDebugBufLen = 512;
+static char sDebugBuf[szDebugBufLen];
 //---------------------------------------------------------------------------
 
 void AppendLog(const char * sData) {
@@ -48,7 +49,7 @@ void AppendLog(const char * sData) {
 	struct tm * acc_tm;
 	acc_tm = localtime(&acc_time);
 
-	strftime(sDebugBuf, 128, "%d.%m.%Y %H:%M:%S", acc_tm);
+	strftime(sDebugBuf, szDebugBufLen, "%d.%m.%Y %H:%M:%S", acc_tm);
 
 	fprintf(fw, "%s - %s\n", sDebugBuf, sData);
 
@@ -110,7 +111,7 @@ void GetFunctionInfo(DWORD64 dw64Address, FILE * fw) {
 
 	if(SymFromAddr(GetCurrentProcess(), dw64Address, &dw64Displacement, pSym) == TRUE) {
         // We have decorated name, try to make it readable
-        if(UnDecorateSymbolName(pSym->Name, sDebugBuf, 512, UNDNAME_COMPLETE | UNDNAME_NO_THISTYPE | UNDNAME_NO_SPECIAL_SYMS | UNDNAME_NO_MEMBER_TYPE |
+        if(UnDecorateSymbolName(pSym->Name, sDebugBuf, szDebugBufLen, UNDNAME_COMPLETE | UNDNAME_NO_THISTYPE | UNDNAME_NO_SPECIAL_SYMS | UNDNAME_NO_MEMBER_TYPE |
             UNDNAME_NO_MS_KEYWORDS | UNDNAME_NO_ACCESS_SPECIFIERS) > 0) {
             // We have readable name, write it
             fprintf(fw, "%s\n", sDebugBuf);
@@ -172,7 +173,7 @@ LONG WINAPI PtokaX_UnhandledExceptionFilter(LPEXCEPTION_POINTERS ExceptionInfo) 
     time(&acc_time);
 
     struct tm *tm = localtime(&acc_time);
-    strftime(sDebugBuf, 128, "Crash-%d.%m.%Y-%H.%M.%S.log", tm);
+    strftime(sDebugBuf, szDebugBufLen, "Crash-%d.%m.%Y-%H.%M.%S.log", tm);
 
     // Open crash file
     FILE * fw = fopen((sLogPath + sDebugBuf).c_str(), "w");
@@ -215,7 +216,7 @@ LONG WINAPI PtokaX_UnhandledExceptionFilter(LPEXCEPTION_POINTERS ExceptionInfo) 
     }
 
     // Write date and time when crash happen
-    strftime(sDebugBuf, 128, "Date and time: %d.%m.%Y %H:%M:%S\n\n", tm);
+    strftime(sDebugBuf, szDebugBufLen, "Date and time: %d.%m.%Y %H:%M:%S\n\n", tm);
     fprintf(fw, sDebugBuf);
 
     STACKFRAME64 sf64CallStack;

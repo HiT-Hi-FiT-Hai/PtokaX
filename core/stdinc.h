@@ -24,6 +24,7 @@
 #ifndef _WIN32
 	#define _REENTRANT 1
 	#define __STDC_FORMAT_MACROS 1
+	#define __STDC_LIMIT_MACROS 1
 #endif
 //---------------------------------------------------------------------------
 #include <stdlib.h>
@@ -34,12 +35,13 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
+#include <new>
+#include <stdint.h>
 #ifdef _WIN32
 	#include <dos.h>
 
 	#pragma warning(disable: 4996) // Deprecated stricmp
 
-    #include <stdint.h>
 	#include <winsock2.h>
 	#include <ws2tcpip.h>
 	#ifdef _BUILD_GUI
@@ -85,7 +87,7 @@
 #include "pxstring.h"
 //---------------------------------------------------------------------------
 #define PtokaXVersionString "0.5.0.2"
-#define BUILD_NUMBER "457"
+#define BUILD_NUMBER "463"
 
 #ifdef _WIN32
     #define PRIu64 "I64u"

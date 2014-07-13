@@ -71,7 +71,7 @@ LRESULT LineDialog::LineDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 case IDOK: {
                     int iLen = ::GetWindowTextLength(hWndWindowItems[EDT_LINE]);
                     if(iLen != 0) {
-                        char * sBuf = new char[iLen + 1];
+                        char * sBuf = new (std::nothrow) char[iLen + 1];
 
                         if(sBuf != NULL) {
                             ::GetWindowText(hWndWindowItems[EDT_LINE], sBuf, iLen + 1);
@@ -90,9 +90,11 @@ LRESULT LineDialog::LineDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
             clsServerManager::hWndActiveDialog = NULL;
             break;
-        case WM_NCDESTROY:
+        case WM_NCDESTROY: {
+            HWND hWnd = hWndWindowItems[WINDOW_HANDLE];
             delete this;
-            return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
+            return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+        }
     }
 
 	return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);

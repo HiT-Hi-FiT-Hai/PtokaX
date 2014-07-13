@@ -62,10 +62,11 @@ clsEventQueue::clsEventQueue() {
 //---------------------------------------------------------------------------
 
 clsEventQueue::~clsEventQueue() {
-    event * next = NormalS;
+    event * cur = NULL,
+        * next = NormalS;
 
     while(next != NULL) {
-        event * cur = next;
+        cur = next;
         next = cur->next;
 
 #ifdef _WIN32
@@ -84,7 +85,7 @@ clsEventQueue::~clsEventQueue() {
     next = ThreadS;
 
     while(next != NULL) {
-        event * cur = next;
+        cur = next;
         next = cur->next;
 
         free(cur->sMsg);
@@ -102,10 +103,11 @@ clsEventQueue::~clsEventQueue() {
 
 void clsEventQueue::AddNormal(uint8_t ui8Id, char * sMsg) {
 	if(ui8Id != EVENT_RSTSCRIPT && ui8Id != EVENT_STOPSCRIPT) {
-		event * next = NormalS;
+		event * cur = NULL,
+            * next = NormalS;
 
 		while(next != NULL) {
-			event * cur = next;
+			cur = next;
 			next = cur->next;
 
 			if(cur->ui8Id == ui8Id) {
@@ -114,7 +116,7 @@ void clsEventQueue::AddNormal(uint8_t ui8Id, char * sMsg) {
 		}
 	}
 
-    event * pNewEvent = new event();
+    event * pNewEvent = new (std::nothrow) event();
 
 	if(pNewEvent == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewEvent in clsEventQueue::AddNormal\n", 0);
@@ -158,7 +160,7 @@ void clsEventQueue::AddNormal(uint8_t ui8Id, char * sMsg) {
 //---------------------------------------------------------------------------
 
 void clsEventQueue::AddThread(uint8_t ui8Id, char * sMsg, const sockaddr_storage * sas/* = NULL*/) {
-	event * pNewEvent = new event();
+	event * pNewEvent = new (std::nothrow) event();
 
 	if(pNewEvent == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewEvent in clsEventQueue::AddThread\n", 0);
@@ -223,13 +225,14 @@ void clsEventQueue::AddThread(uint8_t ui8Id, char * sMsg, const sockaddr_storage
 //---------------------------------------------------------------------------
 
 void clsEventQueue::ProcessEvents() {
-	event * next = NormalS;
+	event * cur = NULL,
+        * next = NormalS;
 
 	NormalS = NULL;
 	NormalE = NULL;
 
 	while(next != NULL) {
-		event * cur = next;
+		cur = next;
 		next = cur->next;
 
         switch(cur->ui8Id) {
@@ -314,7 +317,7 @@ void clsEventQueue::ProcessEvents() {
 #endif
 
     while(next != NULL) {
-        event * cur = next;
+        cur = next;
         next = cur->next;
 
         switch(cur->ui8Id) {

@@ -58,18 +58,18 @@ clsSettingDialog::clsSettingDialog() {
 
     memset(&SettingPages, 0, 12 * sizeof(SettingPage *));
 
-    SettingPages[0] = new SettingPageGeneral();
-    SettingPages[1] = new SettingPageMOTD();
-    SettingPages[2] = new SettingPageBots();
-    SettingPages[3] = new SettingPageGeneral2();
-    SettingPages[4] = new SettingPageBans();
-    SettingPages[5] = new SettingPageAdvanced();
-    SettingPages[6] = new SettingPageMyINFO();
-    SettingPages[7] = new SettingPageRules();
-    SettingPages[8] = new SettingPageRules2();
-    SettingPages[9] = new SettingPageDeflood();
-    SettingPages[10] = new SettingPageDeflood2();
-    SettingPages[11] = new SettingPageDeflood3();
+    SettingPages[0] = new (std::nothrow) SettingPageGeneral();
+    SettingPages[1] = new (std::nothrow) SettingPageMOTD();
+    SettingPages[2] = new (std::nothrow) SettingPageBots();
+    SettingPages[3] = new (std::nothrow) SettingPageGeneral2();
+    SettingPages[4] = new (std::nothrow) SettingPageBans();
+    SettingPages[5] = new (std::nothrow) SettingPageAdvanced();
+    SettingPages[6] = new (std::nothrow) SettingPageMyINFO();
+    SettingPages[7] = new (std::nothrow) SettingPageRules();
+    SettingPages[8] = new (std::nothrow) SettingPageRules2();
+    SettingPages[9] = new (std::nothrow) SettingPageDeflood();
+    SettingPages[10] = new (std::nothrow) SettingPageDeflood2();
+    SettingPages[11] = new (std::nothrow) SettingPageDeflood3();
 
     for(uint8_t ui8i = 0; ui8i < 12; ui8i++) {
         if(SettingPages[ui8i] == NULL) {
@@ -290,9 +290,11 @@ LRESULT clsSettingDialog::SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lPa
             ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
             clsServerManager::hWndActiveDialog = NULL;
             break;
-        case WM_NCDESTROY:
+        case WM_NCDESTROY: {
+            HWND hWnd = hWndWindowItems[WINDOW_HANDLE];
             delete this;
-            return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
+            return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+        }
     }
 
 	return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);

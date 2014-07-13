@@ -71,7 +71,7 @@ static void RegTimerHandler() {
         }
         
         // Create hublist reg thread
-        clsRegisterThread::mPtr = new clsRegisterThread();
+        clsRegisterThread::mPtr = new (std::nothrow) clsRegisterThread();
         if(clsRegisterThread::mPtr == NULL) {
         	AppendDebugLog("%s - [MEM] Cannot allocate clsRegisterThread::mPtr in RegTimerHandler\n", 0);
         	return;
@@ -164,10 +164,11 @@ clsServiceLoop::clsServiceLoop() {
 //---------------------------------------------------------------------------
 
 clsServiceLoop::~clsServiceLoop() {
-    AcceptedSocket *nextsck = AcceptedSocketsS;
+    AcceptedSocket * cursck = NULL,
+        * nextsck = AcceptedSocketsS;
         
     while(nextsck != NULL) {
-        AcceptedSocket *cursck = nextsck;
+        cursck = nextsck;
 		nextsck = cursck->next;
 #ifdef _WIN32
 		shutdown(cursck->s, SD_SEND);
@@ -387,7 +388,7 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
     clsServerManager::ui32Joins++;
 
     // set properties of the new user object
-	User * pUser = new User();
+	User * pUser = new (std::nothrow) User();
 
 	if(pUser == NULL) {
 #ifdef _WIN32
@@ -401,7 +402,7 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 		return;
 	}
 
-	pUser->uLogInOut = new LoginLogout();
+	pUser->uLogInOut = new (std::nothrow) LoginLogout();
 
     if(pUser->uLogInOut == NULL) {
 #ifdef _WIN32
@@ -563,7 +564,8 @@ void clsServiceLoop::ReceiveLoop() {
         iLstUptmTck = clsServerManager::ui64ActualTick;
     }
 
-    AcceptedSocket *NextSck = NULL;
+    AcceptedSocket * CurSck = NULL,
+        * NextSck = NULL;
 
 #ifdef _WIN32
     EnterCriticalSection(&csAcceptQueue);
@@ -584,15 +586,17 @@ void clsServiceLoop::ReceiveLoop() {
 #endif
 
     while(NextSck != NULL) {
-        AcceptedSocket *CurSck = NextSck;
+        CurSck = NextSck;
         NextSck = CurSck->next;
         AcceptUser(CurSck);
         delete CurSck;
     }
 
-    User *nextUser = clsUsers::mPtr->llist;
+    User * curUser = NULL,
+        * nextUser = clsUsers::mPtr->llist;
+
     while(nextUser != 0 && clsServerManager::bServerTerminated == false) {
-        User *curUser = nextUser;
+        curUser = nextUser;
         nextUser = curUser->next;
 
         // PPK ... true == we have rest ;)
@@ -767,13 +771,14 @@ void clsServiceLoop::ReceiveLoop() {
             }
             case User::STATE_ADDED:
                 if(curUser->cmdToUserStrt != NULL) {
-                    PrcsdToUsrCmd *next = curUser->cmdToUserStrt;
+                    PrcsdToUsrCmd * cur = NULL,
+                        * next = curUser->cmdToUserStrt;
                         
                     curUser->cmdToUserStrt = NULL;
                     curUser->cmdToUserEnd = NULL;
             
                     while(next != NULL) {
-                        PrcsdToUsrCmd *cur = next;
+                        cur = next;
                         next = cur->next;
                                                
                         if(cur->iLoops >= 2) {
@@ -1008,9 +1013,11 @@ void clsServiceLoop::SendLoop() {
     // Sending Loop
     uint32_t iSendRests = 0;
 
-    User *nextUser = clsUsers::mPtr->llist;
+    User * curUser = NULL,
+        * nextUser = clsUsers::mPtr->llist;
+
     while(nextUser != 0 && clsServerManager::bServerTerminated == false) {
-        User *curUser = nextUser;
+        curUser = nextUser;
         nextUser = curUser->next;
 
         switch(curUser->ui8State) {
@@ -1132,7 +1139,7 @@ void clsServiceLoop::AcceptSocket(const SOCKET &s, const sockaddr_storage &addr)
 #else
 void clsServiceLoop::AcceptSocket(const int &s, const sockaddr_storage &addr) {
 #endif
-    AcceptedSocket * pNewSocket = new AcceptedSocket();
+    AcceptedSocket * pNewSocket = new (std::nothrow) AcceptedSocket();
     if(pNewSocket == NULL) {
 #ifdef _WIN32
 		shutdown(s, SD_SEND);

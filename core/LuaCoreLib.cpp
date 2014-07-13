@@ -181,10 +181,11 @@ static int RegBot(lua_State * L) {
         return 1;
     }
 
-    ScriptBot * next = obj->BotList;
+    ScriptBot * cur = NULL,
+        * next = obj->BotList;
 
     while(next != NULL) {
-        ScriptBot * cur = next;
+        cur = next;
         next = cur->next;
 
 		if(strcasecmp(pNewBot->sNick, cur->sNick) == 0) {
@@ -263,10 +264,11 @@ static int UnregBot(lua_State * L) {
         return 1;
     }
 
-    ScriptBot * next = obj->BotList;
+    ScriptBot * cur = NULL,
+        * next = obj->BotList;
 
     while(next != NULL) {
-        ScriptBot * cur = next;
+        cur = next;
         next = cur->next;
 
 		if(strcasecmp(botnick, cur->sNick) == 0) {
@@ -323,17 +325,19 @@ static int GetBots(lua_State * L) {
 
     int t = lua_gettop(L), i = 0;
 
-	Script *next = clsScriptManager::mPtr->RunningScriptS;
+	Script * cur = NULL,
+        * next = clsScriptManager::mPtr->RunningScriptS;
 
     while(next != NULL) {
-    	Script *cur = next;
+    	cur = next;
         next = cur->next;
 
-        ScriptBot * next = cur->BotList;
+        ScriptBot * bot = NULL,
+            * nextbot = cur->BotList;
         
-        while(next != NULL) {
-            ScriptBot * bot = next;
-            next = bot->next;
+        while(nextbot != NULL) {
+            bot = nextbot;
+            nextbot = bot->next;
 
 #if LUA_VERSION_NUM < 503
 			lua_pushnumber(L, ++i);
@@ -604,10 +608,11 @@ static int GetOnlineByOpStatus(lua_State * L, const bool &bOperator) {
 
     int t = lua_gettop(L), i = 0;
 
-    User *next = clsUsers::mPtr->llist;
+    User * curUser = NULL,
+        * next = clsUsers::mPtr->llist;
 
     while(next != NULL) {
-        User *curUser = next;
+        curUser = next;
         next = curUser->next;
 
         if(curUser->ui8State == User::STATE_ADDED && ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == bOperator) {
@@ -666,11 +671,13 @@ static int GetOnlineRegs(lua_State * L) {
 
     int t = lua_gettop(L), i = 0;
 
-    User *next = clsUsers::mPtr->llist;
+    User * curUser = NULL,
+        * next = clsUsers::mPtr->llist;
 
     while(next != NULL) {
-        User *curUser = next;
+        curUser = next;
         next = curUser->next;
+
         if(curUser->ui8State == User::STATE_ADDED && curUser->iProfile != -1) {
 #if LUA_VERSION_NUM < 503
 			lua_pushnumber(L, ++i);
@@ -735,11 +742,12 @@ static int GetOnlineUsers(lua_State * L) {
 
     int t = lua_gettop(L), i = 0;
 
-    User *next = clsUsers::mPtr->llist;
+    User * curUser = NULL,
+        * next = clsUsers::mPtr->llist;
 
     if(iProfile == -2) {
 	    while(next != NULL) {
-	        User *curUser = next;
+	        curUser = next;
 	        next = curUser->next;
 
 	        if(curUser->ui8State == User::STATE_ADDED) {
@@ -755,7 +763,7 @@ static int GetOnlineUsers(lua_State * L) {
 	    }
     } else {
 		while(next != NULL) {
-		    User *curUser = next;
+		    curUser = next;
 		    next = curUser->next;
 
 		    if(curUser->ui8State == User::STATE_ADDED && curUser->iProfile == iProfile) {
@@ -890,7 +898,7 @@ static int GetUsers(lua_State * L) {
         return 1;
     }
 
-    User *next = clsHashManager::mPtr->FindUser(ui128Hash);
+    User * next = clsHashManager::mPtr->FindUser(ui128Hash);
 
     lua_settop(L, 0);
 
@@ -903,8 +911,10 @@ static int GetUsers(lua_State * L) {
     
     int t = lua_gettop(L), i = 0;
     
+    User * curUser = NULL;
+
     while(next != NULL) {
-		User *curUser = next;
+		curUser = next;
         next = curUser->hashiptablenext;
 
 #if LUA_VERSION_NUM < 503

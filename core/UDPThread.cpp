@@ -169,9 +169,10 @@ void UDPThread::Resume() {
 void UDPThread::Run() {
     sockaddr_storage sas;
 	socklen_t sas_len = sizeof(sockaddr_storage);
+	int len = 0;
 
 	while(bTerminated == false) {
-		int len = recvfrom(sock, rcvbuf, 4095, 0, (struct sockaddr *)&sas, &sas_len);
+		len = recvfrom(sock, rcvbuf, 4095, 0, (struct sockaddr *)&sas, &sas_len);
 
 		if(len < 5 || strncmp(rcvbuf, "$SR ", 4) != 0) {
 			continue;
@@ -209,7 +210,7 @@ void UDPThread::WaitFor() {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 UDPThread * UDPThread::Create(const int &iAddressFamily) {
-    UDPThread * pUDPThread = new UDPThread();
+    UDPThread * pUDPThread = new (std::nothrow) UDPThread();
     if(pUDPThread == NULL) {
         AppendDebugLog("%s - [MEM] Cannot allocate pUDPThread in UDPThread::Create\n", 0);
         return NULL;

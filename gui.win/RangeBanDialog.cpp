@@ -91,9 +91,11 @@ LRESULT clsRangeBanDialog::RangeBanDialogProc(UINT uMsg, WPARAM wParam, LPARAM l
             ::EnableWindow(::GetParent(hWndWindowItems[WINDOW_HANDLE]), TRUE);
             clsServerManager::hWndActiveDialog = NULL;
             break;
-        case WM_NCDESTROY:
+        case WM_NCDESTROY: {
+            HWND hWnd = hWndWindowItems[WINDOW_HANDLE];
             delete this;
-            return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
+            return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+        }
         case WM_SETFOCUS:
             ::SetFocus(hWndWindowItems[EDT_FROM_IP]);
             return 0;
@@ -356,7 +358,7 @@ bool clsRangeBanDialog::OnAccept() {
 	}
 
 	if(pRangeBanToChange == NULL) {
-		RangeBanItem * pRangeBan = new RangeBanItem();
+		RangeBanItem * pRangeBan = new (std::nothrow) RangeBanItem();
 		if(pRangeBan == NULL) {
 			AppendDebugLog("%s - [MEM] Cannot allocate pRangeBan in clsRangeBanDialog::OnAccept\n", 0);
 			return false;
@@ -379,11 +381,12 @@ bool clsRangeBanDialog::OnAccept() {
 			pRangeBan->ui8Bits |= clsBanManager::FULL;
         }
 
-		RangeBanItem *nxtBan = clsBanManager::mPtr->RangeBanListS;
+		RangeBanItem * curBan = NULL,
+            * nxtBan = clsBanManager::mPtr->RangeBanListS;
 
 		// PPK ... don't add range ban if is already here same range ban
 		while(nxtBan != NULL) {
-			RangeBanItem *curBan = nxtBan;
+			curBan = nxtBan;
 			nxtBan = curBan->next;
 
 			if(((curBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true && acc_time > curBan->tempbanexpire) {

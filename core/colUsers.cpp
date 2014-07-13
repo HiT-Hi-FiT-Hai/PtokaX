@@ -199,10 +199,11 @@ clsUsers::clsUsers() {
 //---------------------------------------------------------------------------
 
 clsUsers::~clsUsers() {
-    RecTime * next = RecTimeList;
+    RecTime * cur = NULL,
+        * next = RecTimeList;
 
     while(next != NULL) {
-        RecTime * cur = next;
+        cur = next;
         next = cur->next;
 
 #ifdef _WIN32
@@ -371,11 +372,15 @@ void clsUsers::DisconnectAll() {
     sleeptime.tv_nsec = 50000000;
 #endif
 
+    User * u = NULL, * next = NULL;
+
     while(llist != NULL && iCloseLoops <= 100) {
-        User *next = llist;
+        next = llist;
+
         while(next != NULL) {
-            User *u = next;
+            u = next;
     		next = u->next;
+
             if(((u->ui32BoolBits & User::BIT_ERROR) == User::BIT_ERROR) == true || u->sbdatalen == 0) {
 //              Memo("*** User " + string(u->Nick, u->NickLen) + " closed...");
                 if(u->prev == NULL) {
@@ -413,10 +418,12 @@ void clsUsers::DisconnectAll() {
 #endif
     }
 
-    User *next = llist;
+    next = llist;
+
     while(next != NULL) {
-        User *u = next;
+        u = next;
     	next = u->next;
+
 #ifdef _WIN32
     	shutdown(u->Sck, SD_SEND);
 		closesocket(u->Sck);
@@ -928,7 +935,7 @@ void clsUsers::Add2RecTimes(User * curUser) {
         return;
     }
 
-    RecTime * pNewRecTime = new RecTime();
+    RecTime * pNewRecTime = new (std::nothrow) RecTime();
 
 	if(pNewRecTime == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewRecTime in clsUsers::Add2RecTimes\n", 0);
@@ -968,10 +975,11 @@ void clsUsers::Add2RecTimes(User * curUser) {
 //---------------------------------------------------------------------------
 
 bool clsUsers::CheckRecTime(User * curUser) {
-    RecTime * next = RecTimeList;
+    RecTime * cur = NULL,
+        * next = RecTimeList;
 
     while(next != NULL) {
-        RecTime * cur = next;
+        cur = next;
         next = cur->next;
 
         // check expires...

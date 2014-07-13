@@ -84,11 +84,13 @@ clsDcCommands::clsDcCommands() {
 //---------------------------------------------------------------------------
 
 clsDcCommands::~clsDcCommands() {
-	PassBf *next = PasswdBfCheck;
+	PassBf * cur = NULL,
+        * next = PasswdBfCheck;
 
     while(next != NULL) {
-        PassBf *cur = next;
+        cur = next;
 		next = cur->next;
+
 		delete cur;
     }
 
@@ -1464,11 +1466,11 @@ void clsDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
         }
 
         if(curUser->cmdToUserStrt != NULL) {
-            PrcsdToUsrCmd *prev = NULL, 
-                *next = curUser->cmdToUserStrt;
+            PrcsdToUsrCmd * cur = NULL, * prev = NULL,
+                * next = curUser->cmdToUserStrt;
 
             while(next != NULL) {
-                PrcsdToUsrCmd *cur = next;
+                cur = next;
                 next = cur->next;
                                        
                 if(OtherUser == cur->To) {
@@ -2117,7 +2119,7 @@ void clsDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
             // brute force password protection
 			PassBf * PassBfItem = Find(curUser->ui128IpHash);
             if(PassBfItem == NULL) {
-                PassBfItem = new PassBf(curUser->ui128IpHash);
+                PassBfItem = new (std::nothrow) PassBf(curUser->ui128IpHash);
                 if(PassBfItem == NULL) {
 					AppendDebugLog("%s - [MEM] Cannot allocate new PassBfItem in clsDcCommands::MyPass\n", 0);
                 	return;
@@ -2203,6 +2205,8 @@ void clsDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
         curUser->Close();
         return;
     } else {
+        curUser->iProfile = (int32_t)pReg->ui16Profile;
+
         pReg->ui8BadPassCount = 0;
 
         PassBf * PassBfItem = Find(curUser->ui128IpHash);
@@ -3426,6 +3430,8 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
         return false;
     }
 
+    int32_t i32Profile = -1;
+
     // Nick is ok, check for registered nick
     RegUser *Reg = clsRegManager::mPtr->Find(curUser);
     if(Reg != NULL) {
@@ -3454,12 +3460,12 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
                 return false;
             }
         }
-            
-        curUser->iProfile = (int32_t)Reg->ui16Profile;
+
+        i32Profile = (int32_t)Reg->ui16Profile;
     }
 
     // PPK ... moved IP ban check here, we need to allow registered users on shared IP to log in if not have banned nick, but only IP.
-    if(clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::ENTERIFIPBAN) == false) {
+    if(clsProfileManager::mPtr->IsProfileAllowed(i32Profile, clsProfileManager::ENTERIFIPBAN) == false) {
         // PPK ... check if we already have ban for this user
         if(curUser->uLogInOut->uBan != NULL) {
             curUser->SendChar(curUser->uLogInOut->uBan->sMessage, curUser->uLogInOut->uBan->ui32Len);
@@ -3479,7 +3485,7 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
     }
 
     // first check for user limit ! PPK ... allow hublist pinger to check hub any time ;)
-    if(clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::ENTERFULLHUB) == false && ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == false) {
+    if(clsProfileManager::mPtr->IsProfileAllowed(i32Profile, clsProfileManager::ENTERFULLHUB) == false && ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == false) {
         // user is NOT allowed enter full hub, check for maxClients
         if(clsServerManager::ui32Joins-clsServerManager::ui32Parts > (uint32_t)clsSettingManager::mPtr->iShorts[SETSHORT_MAX_USERS]) {
 			int imsgLen = sprintf(msg, "$HubIsFull|<%s> %s. %u %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THIS_HUB_IS_FULL], clsServerManager::ui32Logged,
@@ -3503,7 +3509,7 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
     }
 
     // Check for maximum connections from same IP
-    if(clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::NOUSRSAMEIP) == false) {
+    if(clsProfileManager::mPtr->IsProfileAllowed(i32Profile, clsProfileManager::NOUSRSAMEIP) == false) {
         uint32_t ui32Count = clsHashManager::mPtr->GetUserIpCount(curUser);
         if(ui32Count >= (uint32_t)clsSettingManager::mPtr->iShorts[SETSHORT_MAX_CONN_SAME_IP]) {
             int imsgLen = sprintf(msg, "<%s> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_ALREADY_MAX_IP_CONNS]);
@@ -3525,10 +3531,11 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
                 tmp = msg;
             }
 
-            User *nxt = clsHashManager::mPtr->FindUser(curUser->ui128IpHash);
+            User * cur = NULL,
+                * nxt = clsHashManager::mPtr->FindUser(curUser->ui128IpHash);
 
             while(nxt != NULL) {
-        		User *cur = nxt;
+        		cur = nxt;
                 nxt = cur->hashiptablenext;
 
                 tmp += " "+string(cur->sNick, cur->ui8NickLen);
@@ -3542,7 +3549,7 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
     }
 
     // Check for reconnect time
-    if(clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::NORECONNTIME) == false &&
+    if(clsProfileManager::mPtr->IsProfileAllowed(i32Profile, clsProfileManager::NORECONNTIME) == false &&
         clsUsers::mPtr->CheckRecTime(curUser) == true) {
         int imsgLen = sprintf(msg, "[SYS] Fast reconnect from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
         if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick11") == true) {
@@ -3577,7 +3584,7 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
                 OtherUser->Close();
                 return false;
             } else {
-                if(curUser->iProfile == -1) {
+                if(Reg == NULL) {
            	        int imsgLen = sprintf(msg, "$ValidateDenide %s|", Nick);
            	        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick14") == true) {
                         curUser->SendChar(msg, imsgLen);
@@ -3603,7 +3610,7 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
         }
     }
         
-    if(curUser->iProfile == -1) {
+    if(Reg == NULL) {
         // user is NOT registered
         
         // nick length check
@@ -3656,11 +3663,13 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
 //---------------------------------------------------------------------------
 
 PassBf * clsDcCommands::Find(const uint8_t * ui128IpHash) {
-	PassBf *next = PasswdBfCheck;
+	PassBf * cur = NULL,
+        * next = PasswdBfCheck;
 
     while(next != NULL) {
-        PassBf *cur = next;
+        cur = next;
         next = cur->next;
+
 		if(memcmp(cur->ui128IpHash, ui128IpHash, 16) == 0) {
             return cur;
         }
@@ -3690,11 +3699,13 @@ void clsDcCommands::Remove(PassBf * PassBfItem) {
 void clsDcCommands::ProcessCmds(User * curUser) {
     curUser->ui32BoolBits &= ~User::BIT_CHAT_INSERT;
 
-    PrcsdUsrCmd *next = curUser->cmdStrt;
+    PrcsdUsrCmd * cur = NULL,
+        * next = curUser->cmdStrt;
     
     while(next != NULL) {
-        PrcsdUsrCmd *cur = next;
+        cur = next;
         next = cur->next;
+
         switch(cur->cType) {
             case PrcsdUsrCmd::SUPPORTS: {
                 memcpy(msg, "$Supports", 9);
@@ -3924,7 +3935,7 @@ void clsDcCommands::SendIncorrectIPMsg(User * curUser, char * sBadIP, const bool
 		return;
 	}
 
-    if((curUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
+    if((curUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6 && sBadIP[0] == '[') {
         uint8_t ui8i = 1;
         while(sBadIP[ui8i] != '\0') {
             if(isxdigit(sBadIP[ui8i]) == false && sBadIP[ui8i] != ':') {
@@ -4059,7 +4070,7 @@ PrcsdUsrCmd * clsDcCommands::AddSearch(User * pUser, PrcsdUsrCmd * cmdSearch, ch
             clsUsers::mPtr->ui16PasSearchs++;
         }
     } else {
-        cmdSearch = new PrcsdUsrCmd();
+        cmdSearch = new (std::nothrow) PrcsdUsrCmd();
         if(cmdSearch == NULL) {
             pUser->ui32BoolBits |= User::BIT_ERROR;
             pUser->Close();

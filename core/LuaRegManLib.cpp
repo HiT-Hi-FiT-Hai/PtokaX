@@ -108,10 +108,11 @@ static int GetRegsByProfile(lua_State * L) {
     lua_newtable(L);
     int t = lua_gettop(L), i = 0;
 
-	RegUser *next = clsRegManager::mPtr->RegListS;
+	RegUser * cur = NULL,
+        * next = clsRegManager::mPtr->RegListS;
         
     while(next != NULL) {
-        RegUser *cur = next;
+        cur = next;
         next = cur->next;
         
 		if(cur->ui16Profile == iProfile) {
@@ -144,10 +145,11 @@ static int GetRegsByOpStatus(lua_State * L, const bool &bOperator) {
     lua_newtable(L);
     int t = lua_gettop(L), i = 0;
 
-    RegUser *next = clsRegManager::mPtr->RegListS;
+    RegUser * curReg = NULL,
+        * next = clsRegManager::mPtr->RegListS;
 
     while(next != NULL) {
-        RegUser *curReg = next;
+        curReg = next;
 		next = curReg->next;
 
         if(clsProfileManager::mPtr->IsProfileAllowed(curReg->ui16Profile, clsProfileManager::HASKEYICON) == bOperator) {
@@ -225,10 +227,11 @@ static int GetRegs(lua_State * L) {
     lua_newtable(L);
     int t = lua_gettop(L), i = 0;
 
-    RegUser *next = clsRegManager::mPtr->RegListS;
+    RegUser * curReg = NULL,
+        * next = clsRegManager::mPtr->RegListS;
 
     while(next != NULL) {
-        RegUser *curReg = next;
+        curReg = next;
 		next = curReg->next;
 
 #if LUA_VERSION_NUM < 503
@@ -323,7 +326,7 @@ static int AddReg(lua_State * L) {
         }
 
         if(pUser->uLogInOut == NULL) {
-            pUser->uLogInOut = new LoginLogout();
+            pUser->uLogInOut = new (std::nothrow) LoginLogout();
             if(pUser->uLogInOut == NULL) {
                 pUser->ui32BoolBits |= User::BIT_ERROR;
                 pUser->Close();

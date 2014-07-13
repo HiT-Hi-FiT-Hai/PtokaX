@@ -420,7 +420,7 @@ void clsMainWindowPageScripts::OnContextMenu(HWND hWindow, LPARAM lParam) {
 //------------------------------------------------------------------------------
 
 void clsMainWindowPageScripts::OpenScriptEditor(char * sScript/* = NULL*/) {
-    ScriptEditorDialog * pScriptEditorDialog = new ScriptEditorDialog();
+    ScriptEditorDialog * pScriptEditorDialog = new (std::nothrow) ScriptEditorDialog();
 
     if(pScriptEditorDialog != NULL) {
         pScriptEditorDialog->DoModal(clsMainWindow::mPtr->m_hWnd);
@@ -552,6 +552,10 @@ void clsMainWindowPageScripts::ClearMemUsageAll() {
 //------------------------------------------------------------------------------
 
 void clsMainWindowPageScripts::UpdateMemUsage() {
+    LVITEM lvItem = { 0 };
+    lvItem.mask = LVIF_TEXT;
+    lvItem.iSubItem = 1;
+
 	for(uint8_t ui8i = 0; ui8i < clsScriptManager::mPtr->ui8ScriptCount; ui8i++) {
         if(clsScriptManager::mPtr->ScriptTable[ui8i]->bEnabled == false) {
             continue;
@@ -559,10 +563,7 @@ void clsMainWindowPageScripts::UpdateMemUsage() {
 
         string tmp(lua_gc(clsScriptManager::mPtr->ScriptTable[ui8i]->LUA, LUA_GCCOUNT, 0));
 
-        LVITEM lvItem = { 0 };
-        lvItem.mask = LVIF_TEXT;
         lvItem.iItem = ui8i;
-        lvItem.iSubItem = 1;
 
         string sMemUsage(lua_gc(clsScriptManager::mPtr->ScriptTable[ui8i]->LUA, LUA_GCCOUNT, 0));
         lvItem.pszText = sMemUsage.c_str();

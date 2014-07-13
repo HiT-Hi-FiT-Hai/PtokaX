@@ -86,7 +86,7 @@ LRESULT clsRegisteredUsersDialog::RegisteredUsersDialogProc(UINT uMsg, WPARAM wP
         case WM_COMMAND:
             switch(LOWORD(wParam)) {
                 case (BTN_ADD_REG+100): {
-                    clsRegisteredUserDialog::mPtr = new clsRegisteredUserDialog();
+                    clsRegisteredUserDialog::mPtr = new (std::nothrow) clsRegisteredUserDialog();
 
                     if(clsRegisteredUserDialog::mPtr != NULL) {
                         clsRegisteredUserDialog::mPtr->DoModal(hWndWindowItems[WINDOW_HANDLE]);
@@ -142,7 +142,7 @@ LRESULT clsRegisteredUsersDialog::RegisteredUsersDialogProc(UINT uMsg, WPARAM wP
 
                     RegUser * pReg = (RegUser *)ListViewGetItem(hWndWindowItems[LV_REGS],  ((LPNMITEMACTIVATE)lParam)->iItem);
 
-                    clsRegisteredUserDialog::mPtr = new clsRegisteredUserDialog();
+                    clsRegisteredUserDialog::mPtr = new (std::nothrow) clsRegisteredUserDialog();
 
                     if(clsRegisteredUserDialog::mPtr != NULL) {
                         clsRegisteredUserDialog::mPtr->DoModal(hWndWindowItems[WINDOW_HANDLE], pReg);
@@ -176,9 +176,11 @@ LRESULT clsRegisteredUsersDialog::RegisteredUsersDialogProc(UINT uMsg, WPARAM wP
 
             break;
         }
-        case WM_NCDESTROY:
+        case WM_NCDESTROY: {
+            HWND hWnd = hWndWindowItems[WINDOW_HANDLE];
             delete this;
-            return ::DefWindowProc(hWndWindowItems[WINDOW_HANDLE], uMsg, wParam, lParam);
+            return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+        }
         case WM_SETFOCUS:
             if((UINT)::SendMessage(hWndWindowItems[LV_REGS], LVM_GETSELECTEDCOUNT, 0, 0) != 0) {
                 ::SetFocus(hWndWindowItems[LV_REGS]);
@@ -306,8 +308,8 @@ void clsRegisteredUsersDialog::AddAllRegs() {
 
     ::SendMessage(hWndWindowItems[LV_REGS], LVM_DELETEALLITEMS, 0, 0);
 
-    RegUser * curReg,
-        *nextReg = clsRegManager::mPtr->RegListS;
+    RegUser * curReg = NULL,
+        * nextReg = clsRegManager::mPtr->RegListS;
 
     while(nextReg != NULL) {
         curReg = nextReg;
@@ -404,9 +406,11 @@ void clsRegisteredUsersDialog::RemoveRegs() {
 
     ::SendMessage(hWndWindowItems[LV_REGS], WM_SETREDRAW, (WPARAM)FALSE, 0);
 
+    RegUser * pReg = NULL;
     int iSel = -1;
+
     while((iSel = (int)::SendMessage(hWndWindowItems[LV_REGS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED)) != -1) {
-        RegUser * pReg = (RegUser *)ListViewGetItem(hWndWindowItems[LV_REGS], iSel);
+        pReg = (RegUser *)ListViewGetItem(hWndWindowItems[LV_REGS], iSel);
 
         clsRegManager::mPtr->Delete(pReg, true);
 
@@ -441,8 +445,8 @@ void clsRegisteredUsersDialog::FilterRegs() {
 
         ::SendMessage(hWndWindowItems[LV_REGS], LVM_DELETEALLITEMS, 0, 0);
 
-        RegUser * curReg,
-            *nextReg = clsRegManager::mPtr->RegListS;
+        RegUser * curReg = NULL,
+            * nextReg = clsRegManager::mPtr->RegListS;
 
         while(nextReg != NULL) {
             curReg = nextReg;
@@ -557,7 +561,7 @@ void clsRegisteredUsersDialog::ChangeReg() {
 
     RegUser * pReg = (RegUser *)ListViewGetItem(hWndWindowItems[LV_REGS], iSel);
 
-    clsRegisteredUserDialog::mPtr = new clsRegisteredUserDialog();
+    clsRegisteredUserDialog::mPtr = new (std::nothrow) clsRegisteredUserDialog();
 
     if(clsRegisteredUserDialog::mPtr != NULL) {
         clsRegisteredUserDialog::mPtr->DoModal(hWndWindowItems[WINDOW_HANDLE], pReg);

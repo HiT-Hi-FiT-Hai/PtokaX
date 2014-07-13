@@ -79,7 +79,7 @@ GetUser(sNick)														- Return online user as user table.
 GetUser(sNick, bAllData)											- Return online user as user table. Use true for bAllData if you want user table with all data.
 GetUserAllData(tUser)												- Add or update all user data in user table. Return nil when failed (user is not online) or true when sucess.
 GetUserData(tUser, iValueId)										- Add or update value of given id in user table. Return nil when failed (user is not online) or true when sucess.
-GetUserValue(tUser, iValueId)										- Return value of wanted nValueId or nil when failed (user is not online).
+GetUserValue(tUser, iValueId)										- Return value of wanted iValueId or nil when failed (user is not online).
 GetUsers(sIP)														- Return online users from given ip as table with user tables or nil when no user with that IP is found or invalid IP is given.
 GetUsers(sIP, bAllData)												- Return online users from given ip as table with user tables or nil when no user with that IP is found or invalid IP is given. Use true for bAllData if you want user table with all data.
 
@@ -211,7 +211,7 @@ RangeTempBan(sIPFrom, sIPTo, iTime, sReason, sBy, bFull)	- Range temp ban given 
 
 ProfMan.
 -------------------
-AddProfile(sProfileName)										- Add profile to profilemanager, return nProfileNumber if success or nil when profile already exist.
+AddProfile(sProfileName)										- Add profile to profilemanager, return iProfileNumber if success or nil when profile already exist.
 RemoveProfile(sProfileName/iProfileNumber)						- Remove profile from profilemanager, return true if success or nil when profile not exist or is in use.
 
 MoveDown(iProfileNumber)										- Move profile down. Return nil when failed, true if success.
@@ -230,9 +230,9 @@ Save()															- Save profiles.
 
 TmrMan.
 -------------------
-AddTimer(iTimerInterval)				- Add new timer for script. nTimerInterval is in ms. Return nil when failed or uTimerId when success.
-AddTimer(iTimerInterval, fFunction)		- Add new timer for script. nTimerInterval is in ms. fFunction is Lua function called by this timer. Return nil when failed or uTimerId when success.
-AddTimer(iTimerInterval, sFunctionName)	- Add new timer for script. nTimerInterval is in ms. sFunctionName is name of function called by this timer. Return nil when failed or uTimerId when success.
+AddTimer(iTimerInterval)				- Add new timer for script. iTimerInterval is in ms. Return nil when failed or uTimerId when success.
+AddTimer(iTimerInterval, fFunction)		- Add new timer for script. iTimerInterval is in ms. fFunction is Lua function called by this timer. Return nil when failed or uTimerId when success.
+AddTimer(iTimerInterval, sFunctionName)	- Add new timer for script. iTimerInterval is in ms. sFunctionName is name of function called by this timer. Return nil when failed or uTimerId when success.
 RemoveTimer(uTimerId)					- Remove timer with given ID from script.
 
 
@@ -287,7 +287,7 @@ sClientVersion	- User client version (from tag) or nil when user don't have tag.
 sVersion		- User version (from $Version) or nil when user don't send Version.
 sCountryCode	- User country code or nil when ip-to-country database is not loaded.
 
-bConnected		- User is added in hub (visible for other users, added is after NewUser/OpConnected).
+bConnected		- User is added in hub (visible for other users, added is after User/Reg/OpConnected).
 bActive			- true when user is active (from tag or is sending active commands) or nil when is not active.
 bOperator		- User have operator status.
 bUserCommand	- User support UserCommands protocol extension.

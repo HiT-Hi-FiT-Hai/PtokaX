@@ -84,6 +84,10 @@ haiku: $(OBJS)
 	cd tinyxml; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lnetwork -llua -lz
 
+install:
+	cp PtokaX /usr/local/bin
+	setcap 'cap_net_bind_service=+ep' /usr/local/bin/PtokaX
+
 
 #*******************************************************************************
 # Files to compile

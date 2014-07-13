@@ -336,10 +336,13 @@ int32_t clsProfileManager::RemoveProfileByName(char * name) {
 //---------------------------------------------------------------------------
 
 bool clsProfileManager::RemoveProfile(const uint16_t &iProfile) {
-    RegUser *next = clsRegManager::mPtr->RegListS;
+    RegUser * curReg = NULL,
+        * next = clsRegManager::mPtr->RegListS;
+
     while(next != NULL) {
-        RegUser *curReg = next;
+        curReg = next;
 		next = curReg->next;
+
 		if(curReg->ui16Profile == iProfile) {
             //Profile in use can't be deleted!
             return false;
@@ -362,9 +365,11 @@ bool clsProfileManager::RemoveProfile(const uint16_t &iProfile) {
 
     // Update profiles for online users
     if(clsServerManager::bServerRunning == true) {
-        User *nextUser = clsUsers::mPtr->llist;
+        User * curUser = NULL,
+            * nextUser = clsUsers::mPtr->llist;
+
         while(nextUser != NULL) {
-            User *curUser = nextUser;
+            curUser = nextUser;
             nextUser = curUser->next;
             
             if(curUser->iProfile > iProfile) {
@@ -376,7 +381,7 @@ bool clsProfileManager::RemoveProfile(const uint16_t &iProfile) {
     // Update profiles for registered users
     next = clsRegManager::mPtr->RegListS;
     while(next != NULL) {
-        RegUser *curReg = next;
+        curReg = next;
 		next = curReg->next;
         if(curReg->ui16Profile > iProfile) {
             curReg->ui16Profile--;
@@ -430,7 +435,7 @@ ProfileItem * clsProfileManager::CreateProfile(const char * name) {
         exit(EXIT_FAILURE);
     }
 
-    ProfileItem * pNewProfile = new ProfileItem();
+    ProfileItem * pNewProfile = new (std::nothrow) ProfileItem();
     if(pNewProfile == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewProfile in clsProfileManager::CreateProfile\n", 0);
         exit(EXIT_FAILURE);
@@ -469,10 +474,11 @@ void clsProfileManager::MoveProfileDown(const uint16_t &iProfile) {
     ProfilesTable[iProfile+1] = first;
     ProfilesTable[iProfile] = second;
 
-    RegUser *nextReg = clsRegManager::mPtr->RegListS;
+    RegUser * curReg = NULL,
+        * nextReg = clsRegManager::mPtr->RegListS;
 
 	while(nextReg != NULL) {
-        RegUser *curReg = nextReg;
+        curReg = nextReg;
 		nextReg = curReg->next;
 
 		if(curReg->ui16Profile == iProfile) {
@@ -500,10 +506,11 @@ void clsProfileManager::MoveProfileDown(const uint16_t &iProfile) {
         return;
     }
 
-    User *nextUser = clsUsers::mPtr->llist;
+    User * curUser = NULL,
+        * nextUser = clsUsers::mPtr->llist;
 
 	while(nextUser != NULL) {
-        User *curUser = nextUser;
+        curUser = nextUser;
 		nextUser = curUser->next;
 
 		if(curUser->iProfile == (int32_t)iProfile) {
@@ -522,10 +529,11 @@ void clsProfileManager::MoveProfileUp(const uint16_t &iProfile) {
     ProfilesTable[iProfile-1] = first;
     ProfilesTable[iProfile] = second;
 
-	RegUser *nextReg = clsRegManager::mPtr->RegListS;
+	RegUser * curReg = NULL,
+        * nextReg = clsRegManager::mPtr->RegListS;
 
 	while(nextReg != NULL) {
-		RegUser *curReg = nextReg;
+		curReg = nextReg;
 		nextReg = curReg->next;
 
         if(curReg->ui16Profile == iProfile) {
@@ -553,10 +561,11 @@ void clsProfileManager::MoveProfileUp(const uint16_t &iProfile) {
         return;
     }
 
-    User *nextUser = clsUsers::mPtr->llist;
+    User * curUser = NULL,
+        * nextUser = clsUsers::mPtr->llist;
 
     while(nextUser != NULL) {
-        User *curUser = nextUser;
+        curUser = nextUser;
 		nextUser = curUser->next;
 
 		if(curUser->iProfile == (int32_t)iProfile) {
