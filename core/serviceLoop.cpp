@@ -801,8 +801,8 @@ void clsServiceLoop::ReceiveLoop() {
                                                     clsLanguageManager::mPtr->sTexts[LAN_SRY_LST_MSG_BCS], cur->ToNick, clsLanguageManager::mPtr->sTexts[LAN_EXC_MSG_LIMIT]);
                                                 bSprintfCheck = CheckSprintf(imsgLen, 1024, "clsServiceLoop::ReceiveLoop1");
                                             } else {
-                                                imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s %d %s %s %s!|", curUser->sNick, cur->ToNick,
-                                                    clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_LAST], cur->iPmCount,
+                                                imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s %lu %s %s %s!|", curUser->sNick, cur->ToNick,
+                                                    clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_LAST], (unsigned long)cur->iPmCount,
                                                     clsLanguageManager::mPtr->sTexts[LAN_MSGS_NOT_SENT], cur->ToNick, clsLanguageManager::mPtr->sTexts[LAN_EXC_MSG_LIMIT]);
                                                 bSprintfCheck = CheckSprintf(imsgLen, 1024, "clsServiceLoop::ReceiveLoop2");
                                             }

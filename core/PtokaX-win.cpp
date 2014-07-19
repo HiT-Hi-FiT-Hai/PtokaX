@@ -42,7 +42,7 @@ static int InstallService(const char * sServiceName, const char * sPath) {
 	SC_HANDLE schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 	     
 	if(schSCManager == NULL) {
-	    printf("OpenSCManager failed (%d)!", GetLastError());
+	    printf("OpenSCManager failed (%lu)!", GetLastError());
 	    return EXIT_FAILURE;
 	}
 	
@@ -60,7 +60,7 @@ static int InstallService(const char * sServiceName, const char * sPath) {
 	    NULL, NULL, NULL, NULL, NULL);
 	
 	if(schService == NULL) {
-	    printf("CreateService failed (%d)!", GetLastError());
+	    printf("CreateService failed (%lu)!", GetLastError());
 	    CloseServiceHandle(schSCManager);
 	    return EXIT_FAILURE;
 	} else {
@@ -78,14 +78,14 @@ static int UninstallService(const char * sServiceName) {
 	SC_HANDLE schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 	     
 	if(schSCManager == NULL) {
-	    printf("OpenSCManager failed (%d)!", GetLastError());
+	    printf("OpenSCManager failed (%lu)!", GetLastError());
 	    return EXIT_FAILURE;
 	}
 	
 	SC_HANDLE schService = OpenService(schSCManager, sServiceName, SERVICE_QUERY_STATUS | SERVICE_STOP | DELETE);
 	     
 	if(schService == NULL) {
-	    printf("OpenService failed (%d)!", GetLastError());
+	    printf("OpenService failed (%lu)!", GetLastError());
 	    CloseServiceHandle(schSCManager);
 	    return EXIT_FAILURE;
 	}
@@ -100,7 +100,7 @@ static int UninstallService(const char * sServiceName) {
 	}
 	
 	if(DeleteService(schService) == false) {
-	    printf("DeleteService failed (%d)!", GetLastError());
+	    printf("DeleteService failed (%lu)!", GetLastError());
 	    CloseServiceHandle(schService);
 	    CloseServiceHandle(schSCManager);
 	    return EXIT_FAILURE;

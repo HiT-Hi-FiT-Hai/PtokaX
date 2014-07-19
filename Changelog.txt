@@ -14,7 +14,8 @@ Fixed: Possible crash on closing some gui windows (thx Alex82 for report).
 Fixed: Directory/file permissions on *nix.
 Fixed: Partial IP was shown as wrong when IPv6 user without IPv4 connection sent IPv4 address in command (thx Mank for report).
 Fixed: Possible crash when new throw exception on memory failure.
-Fixed: Few possible issues found by VPS studio (thx Pavel Pimenov for report).
+Fixed: Few possible issues found by PVS studio (thx Pavel Pimenov for report).
+Fixed: Memory access outside array in script editor window on load/save (thx Pavel Pimenov for report).
 Other: Some minor performance improvements.
 
 

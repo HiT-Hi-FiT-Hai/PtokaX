@@ -1077,7 +1077,7 @@ bool FileExist(char * sPath) {
 bool DirExist(char * sPath) {
 #ifdef _WIN32
 	DWORD code = GetFileAttributes(sPath);
-	if(code != INVALID_FILE_ATTRIBUTES && code == FILE_ATTRIBUTE_DIRECTORY) {
+	if(code == FILE_ATTRIBUTE_DIRECTORY) {
 #else
     struct stat st;
 	if(stat(sPath, &st) == 0 && S_ISDIR(st.st_mode)) {
