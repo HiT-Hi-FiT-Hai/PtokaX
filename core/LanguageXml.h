@@ -720,7 +720,7 @@ const char* LangXmlStr[] = {
     "DisallowBuggySupports",
     "MaxAlwdTopicLen256Chars",
     "MaxAlwdScriptNameLen256Chars",
-    "MaxAlwdIPLen15Chars",
+    "MaxAlwdIPLen39Chars",
     "View",
     "Help",
     "Exit",

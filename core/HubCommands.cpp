@@ -6483,12 +6483,12 @@ bool clsHubCommands::RangeBan(User * curUser, char * sCommand, const size_t &dle
         sCmdParts[2] = NULL;
     }
 
-    if(iCmdPartsLen[0] > 15 || iCmdPartsLen[1] > 15) {
+    if(iCmdPartsLen[0] > 39 || iCmdPartsLen[1] > 39) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> %s %c%srangeban <%s> <%s> <%s>. %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SNTX_ERR_IN_CMD],
             clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], bFull == true ? "full" : "", clsLanguageManager::mPtr->sTexts[LAN_FROMIP],
-            clsLanguageManager::mPtr->sTexts[LAN_TOIP], clsLanguageManager::mPtr->sTexts[LAN_REASON_LWR], clsLanguageManager::mPtr->sTexts[LAN_MAX_ALWD_IP_LEN_15_CHARS]);
+            clsLanguageManager::mPtr->sTexts[LAN_TOIP], clsLanguageManager::mPtr->sTexts[LAN_REASON_LWR], clsLanguageManager::mPtr->sTexts[LAN_MAX_ALWD_IP_LEN_39_CHARS]);
         imsgLen += iret;
         if(CheckSprintf1(iret, imsgLen, 1024, "clsHubCommands::DoCommand518") == true) {
             curUser->SendCharDelayed(msg, imsgLen);
@@ -6657,12 +6657,12 @@ bool clsHubCommands::RangeTempBan(User * curUser, char * sCommand, const size_t 
         sCmdParts[3] = NULL;
     }
 
-    if(iCmdPartsLen[0] > 15 || iCmdPartsLen[1] > 15) {
+    if(iCmdPartsLen[0] > 39 || iCmdPartsLen[1] > 39) {
         int imsgLen = CheckFromPm(curUser, fromPM);
 
         int iret = sprintf(msg+imsgLen, "<%s> %s %c%srangetempban <%s> <%s> <%s> <%s>. %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SNTX_ERR_IN_CMD],
             clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], bFull == true ? "full" : "", clsLanguageManager::mPtr->sTexts[LAN_FROMIP],
-            clsLanguageManager::mPtr->sTexts[LAN_TOIP], clsLanguageManager::mPtr->sTexts[LAN_TIME_LWR], clsLanguageManager::mPtr->sTexts[LAN_REASON_LWR], clsLanguageManager::mPtr->sTexts[LAN_MAX_ALWD_IP_LEN_15_CHARS]);
+            clsLanguageManager::mPtr->sTexts[LAN_TOIP], clsLanguageManager::mPtr->sTexts[LAN_TIME_LWR], clsLanguageManager::mPtr->sTexts[LAN_REASON_LWR], clsLanguageManager::mPtr->sTexts[LAN_MAX_ALWD_IP_LEN_39_CHARS]);
         imsgLen += iret;
         if(CheckSprintf1(iret, imsgLen, 1024, "clsHubCommands::DoCommand530") == true) {
             curUser->SendCharDelayed(msg, imsgLen);

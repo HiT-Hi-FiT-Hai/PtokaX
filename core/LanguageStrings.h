@@ -720,7 +720,7 @@ const char* LangStr[] = {
     "Disallow clients sending buggy $Supports command",
     "Max allowed topic length is 256 characters",
     "Max allowed script name length is 256 characters",
-    "Max allowed IP length is 15 characters",
+    "Max allowed IP length is 39 characters",
     "&View",
     "&Help",
     "&Exit",

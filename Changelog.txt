@@ -16,6 +16,8 @@ Fixed: Partial IP was shown as wrong when IPv6 user without IPv4 connection sent
 Fixed: Possible crash when new throw exception on memory failure.
 Fixed: Few possible issues found by PVS studio (thx Pavel Pimenov for report).
 Fixed: Memory access outside array in script editor window on load/save (thx Pavel Pimenov for report).
+Fixed: User who was allowed to kick can ban and tempban user without permissions for ban and tempban (thx Alexey for report).
+Fixed: Range ban and range temp ban command was not working for IPv6 addresses longer than 15 characters (thx Alexey for report).
 Other: Some minor performance improvements.
 
 

@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<Language Name="Turkish Language" Author="zapman" Version="0.4.2.0 build 241">
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<Language Name="Turkish Language" Author="zapman" Version="0.5.0.2 build 457">
     <String Name="ThisHubIsRunning">Hub şu sürümü çalıştırıyor:</String>
     <String Name="HubName">Hub ismi</String>
     <String Name="MOTD(motd)">MOTD (günün mesajı)</String>
@@ -7,8 +7,8 @@
     <String Name="HubDescription">Hub açıklaması</String>
     <String Name="AntiMoGLODescription">Anti MoGLO açıklaması</String>
     <String Name="HubAddress">Hub adresi (makine ismi veya IP adresi)</String>
-    <String Name="ResolveHostToIP">Makine ismini IP adresine çözümle (aşağıdaki ayar için lazımdır)</String>
-    <String Name="ListenOnlyOnIP">Sadece bu adreste bağlantıları kabul et</String>
+    <String Name="ResolveHostToIPs">Makine ismini IP adresleri olarak çözümle</String>
+    <String Name="ListenOnlyOnIPs">Sadece bu adreslerden bağlantıları kabul et</String>
     <String Name="TCPPorts">TCP portları</String>
     <String Name="TCPPortsHint">4861;666;411 gibi daha fazla portlar</String>
     <String Name="UDPPort">UDP portu</String>
@@ -75,7 +75,6 @@
     <String Name="ReportBadTags">Şüpheli açıklama etiketlerini operatörlere rapor et</String>
     <String Name="ReportBadPass">3 kez yanlış parola alınmasını Operatörlere rapor et</String>
     <String Name="AdvPassProtect">Gelişmiş parola korumasını etkinleştir</String>
-    <String Name="AcceptUnknownTag">Geçerliyse açıklama etiketini bilinmeyen istemcilerden kabul et</String>
     <String Name="KeepSlow">Yavaş kullanıcıları çevrim içinde tut</String>
     <String Name="CheckStartupNewVersion">Başlangıçta yeni PtokaX sürümü olup olmadığını denetle</String>
     <String Name="MyinfoProcess">MyINFO işlemi</String>
@@ -206,7 +205,7 @@
     <String Name="AddRegisteredUser">Kayıtlı kullanıcı ekle</String>
     <String Name="DelRegisteredUser">Kayıtlı kullanıcı sil</String>
     <String Name="AllowedForOpChat">OpChat için izin verilir</String>
-    <String Name="SendFullMyinfos">Tam myinfolar gönder</String>
+    <String Name="SendLongMyinfos">Uzun myinfo verileri gönder</String>
     <String Name="SendUsersIP">IP&apos;yi tüm kullanıcılara yolla</String>
     <String Name="DontCheckIP">DC komutlarında IP&apos;yi kontrol etme</String>
     <String Name="HaveKeyIsOp">Anahtarı var / Op</String>
@@ -219,7 +218,7 @@
     <String Name="Error">Hata</String>
     <String Name="NickMustBeSpecified">Rumuz belirtilmeli!</String>
     <String Name="PassMustBeSpecified">Parola belirtilmesi lazım!</String>
-    <String Name="NoBadCharsInNick">Rumuzlar $&lt;&gt;:?*&quot;/\ düşey çizgi ve &lt;boşluk&gt; içeremez!</String>
+    <String Name="NoBadCharsInNickName">Rumuzda $, boşluk ve düşey çizgi karakterleri bulunamaz!</String>
     <String Name="NoPipeInPass">Parolada düşey çizgi bulunamaz!</String>
     <String Name="UserIsAlredyReg">Kullanıcı hâlihazırda kayıtlı!</String>
     <String Name="NoSynErrInScriptFile">Betik dosyasında hiçbir söz dizimi hatası yok</String>
@@ -343,6 +342,7 @@
     <String Name="TempBansCleared">Geçici yasaklar temizlendi</String>
     <String Name="HasClearedPermBans">daimi yasakları temizledi</String>
     <String Name="PermBansCleared">Daimi yasaklamalar temizlendi</String>
+    <String Name="HasClearedTempRangeBans">geçici alan yasaklamalarını temizledi</String>
     <String Name="TempRangeBansCleared">Geçici alan yasakları temizlendi</String>
     <String Name="HasClearedPermRangeBans">daimi alan yasaklarını temizledi</String>
     <String Name="PermRangeBansCleared">Daimi yasaklama aralıkları temizlendi</String>
@@ -440,7 +440,7 @@
     <String Name="IsNotValidRange">geçerli bir aralık değil</String>
     <String Name="BanLwr">yasak</String>
     <String Name="TempBanNick">rumuzu geçici olarak yasakla</String>
-    <String Name="DropLwr"> bağlantıyı kes</String>
+    <String Name="DropLwr">bağlantıyı kes</String>
     <String Name="BannedLwr">yasaklandı</String>
     <String Name="TempBanned">geçici olarak yasaklandı</String>
     <String Name="IsNotInMyRange">aralığımda değil</String>
@@ -694,7 +694,6 @@
     <String Name="Country">Ülke</String>
     <String Name="LogScriptErrors">Betik hatalarını kütüğe kaydet</String>
     <String Name="QuackSupports">Üzgünüz, bu hub hatalı $Supports komutu gönderen istemcilere izin vermiyor</String>
-    <String Name="ClientsBuggySupports">hatalı $Supports komut destekli istemci</String>
     <String Name="DisallowBuggySupports">Hatalı $Supports komutu tollayan istemcilere izin verme</String>
     <String Name="MaxAlwdTopicLen256Chars">İzin verilen azami mevzu boyutu 256 karakterdir</String>
     <String Name="MaxAlwdScriptNameLen256Chars">İzin verilen azami betik ismi boyutu 256 karakterdir</String>
@@ -703,14 +702,14 @@
     <String Name="Help">&amp;Yardım</String>
     <String Name="Exit">&amp;Çık</String>
     <String Name="website">&amp;Site</String>
-    <String Name="board">&amp;forum</String>
+    <String Name="forum">&amp;forum</String>
     <String Name="wiki">v&amp;iki</String>
     <String Name="MenuAbout">&amp;Hakkında</String>
     <String Name="CheckForUpdate">&amp;Güncellemeleri denetle</String>
     <String Name="ReloadTextFiles">&amp;Metin dosyalarını tekrar yükle</String>
     <String Name="RedirectAllUsersTo">Tüm kullanıcıları şuraya yeniden yönlendir</String>
-    <String Name="SendOriginalMyINFO">Özgün MyINFO gönder</String>
-    <String Name="OptionsForModifiedMyINFO">Değiştirilmiş MyINFO için seçenekler</String>
+    <String Name="SendLongMyINFO">Uzun MyINFO gönder</String>
+    <String Name="OptionsForShortMyINFO">Kısa MyINFO için seçenekler</String>
     <String Name="RemoveDescription">Açıklamayı kaldır</String>
     <String Name="RemoveTag">Etiketi kaldır</String>
     <String Name="RemoveConnection">Bağlantıyı kaldır</String>
@@ -729,7 +728,7 @@
     <String Name="MenuSelectAll">&amp;Tümünü seç</String>
     <String Name="MenuRegisterUser">kullanıcıyı k&amp;aydet</String>
     <String Name="MenuDisconnectUser">K&amp;ullanıcının bağlantısını kes</String>
-    <String Name="MenuKickUser">K&amp;ullaniciyi kov</String>
+    <String Name="MenuKickUser">K&amp;ullanıcıyı kov</String>
     <String Name="MenuBanUser">K&amp;ullanıcıyı yasakla</String>
     <String Name="MenuRedirectUser">K&amp;ullanıcıyı yeniden y&amp;önlendir</String>
     <String Name="PleaseEnterReason">Lütfen sebep girin</String>
@@ -758,4 +757,16 @@
     <String Name="FilterRangeBans">Aralık yasaklamalarını filtrele</String>
     <String Name="RangeBanDeletedAcceptToNew">Aralık yasağı silindi. Yeniden kabule bastığınızda yeni bir aralık yasağı oluşturulacaktır!</String>
     <String Name="IsAvailable">mevcut</String>
+    <String Name="IPv4Address">IPv4 adresi</String>
+    <String Name="IPv6Address">IPv6 adresi</String>
+    <String Name="Register">kaydet</String>
+    <String Name="Registered">kayıtlı</String>
+    <String Name="YouWereRegisteredPleaseEnterYourPassword">Kaydınız vardı, lütfen parolanızı giriniz</String>
+    <String Name="SorryYouAreAlreadyRegistered">Üzgünüz, zaten kayıtlısınız</String>
+    <String Name="ThankYouForPasswordYouAreNowRegisteredAs">Parolanız için teşekkürler, şimdi şu kişi olarak kayıtlısınız:</String>
+    <String Name="RegisterUserWithSpecifiedProfile">belirtilen profilli kullanıcıyı kaydet. Hub kullanıcıya parolasını soracak ve parola girildikten sonra kayıtlılara eklenecektir</String>
+    <String Name="InCommandHubReplacedItWithYourRealIP">komutta hub onu gerçek IP adresinizle değiştirdi</String>
+    <String Name="YourNickContainsIllegalWhiteCharacter">Rumuzunuz geçersiz boşluk karakteri içermektedir</String>
+    <String Name="PasswordIsHashed">Parola hash değerine çevrildiğinden dolayı bu kutu boştur</String>
+    <String Name="StoreRegPassHashed">Kayıtlı kullanıcıların parolalarını hash değeri olarak kaydet</String>
 </Language>

@@ -1521,6 +1521,15 @@ void clsDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
 			sBanTime[0] = '\0';
 
 			if(sBanTime[5] == '\0' || sBanTime[5] == ' ') { // permban
+                if(clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::BAN) == false) {
+                    int imsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALWD_TO_USE_THIS_CMD]);
+                    if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Kick->_BAN_") == true) {
+                        curUser->SendCharDelayed(msg, imsgLen);
+                    }
+
+                    return;
+                }
+
 				clsBanManager::mPtr->Ban(OtherUser, OtherUser->uLogInOut->pBuffer, curUser->sNick, false);
     
                 if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
@@ -1560,6 +1569,15 @@ void clsDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
 
                 return;
 			} else if(isdigit(sBanTime[5]) != 0) { // tempban
+                if(clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::TEMP_BAN) == false) {
+                    int imsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALWD_TO_USE_THIS_CMD]);
+                    if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Kick->_BAN_2") == true) {
+                        curUser->SendCharDelayed(msg, imsgLen);
+                    }
+
+                    return;
+                }
+
 				uint32_t i = 6;
 				while(sBanTime[i] != '\0' && isdigit(sBanTime[i]) != 0) {
                 	i++;

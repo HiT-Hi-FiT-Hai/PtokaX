@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1251" standalone="yes" ?>
-<Language Name="Russian Language" Author="dmvn, WAJIM, Alexey" Version="0.5.0.1 build 448">
+<Language Name="Russian Language" Author="dmvn, WAJIM, Alexey" Version="0.5.0.2 build 457">
     <String Name="ThisHubIsRunning">Этот хаб работает под управлением</String>
     <String Name="HubName">Название хаба</String>
     <String Name="MOTD(motd)">MOTD (сообщение дня, отправляется при входе в хаб)</String>
@@ -75,7 +75,6 @@
     <String Name="ReportBadTags">Сообщать о подозрительных тэгах ОПам</String>
     <String Name="ReportBadPass">Сообщать ОПам о трёх неудачных попытках ввести пароль</String>
     <String Name="AdvPassProtect">Увеличивать паузу между попытками ввести пароль</String>
-    <String Name="AcceptUnknownTag">Принимать неизвестные тэги</String>
     <String Name="KeepSlow">Поддержка медленных клиентов</String>
     <String Name="CheckStartupNewVersion">Проверять наличие новой версии PtokaX при старте</String>
     <String Name="MyinfoProcess">Обработка MyINFO</String>
@@ -126,7 +125,7 @@
     <String Name="GlobalMainChatDeflood">Общий антифлуд в главном чате</String>
     <String Name="LockChat">Заблокировать чат</String>
     <String Name="OnlyToOPsWithIP">Блокировать и сообщить ОПам</String>
-    <String Name="For">за</String>
+    <String Name="For">на</String>
     <String Name="WarnSettings">Настройки предупреждений</String>
     <String Name="After">после</String>
     <String Name="Warnings">предупреждений</String>
@@ -154,9 +153,9 @@
     <String Name="YouSubscribedUdpDebug">Вы подписаны на получение отладочных сообщений на порту</String>
     <String Name="ToUnsubUdpDbg">Для отказа от подписки, наберите !debug off в главном чате</String>
     <String Name="YouRedirTo">Вы были перенаправлены на</String>
-    <String Name="SryLastMsgBcs">Простите, но предыдущее сообщение не было отправлено по причине</String>
+    <String Name="SryLastMsgBcs">Извините, но предыдущее сообщение не было отправлено по причине</String>
     <String Name="ExcMsgLmt">уже превысили предел сообщений в минуту</String>
-    <String Name="SorryLast">Простите, предыдущее</String>
+    <String Name="SorryLast">Извините, предыдущее</String>
     <String Name="MsgsNotSent">сообщение не было отправлено по причине</String>
     <String Name="UnbCrtSrvSck">Не удалось создать сокет сервера на порту</String>
     <String Name="ErrorCode">Код ошибки</String>
@@ -219,7 +218,7 @@
     <String Name="Error">Ошибка:</String>
     <String Name="NickMustBeSpecified">Надо указать ник!</String>
     <String Name="PassMustBeSpecified">Надо указать пароль!</String>
-    <String Name="NoBadCharsInNick">Ник не должен содержать символов пробела, вертикальной черты (pipe) и $!</String>
+    <String Name="NoBadCharsInNickName">Ник не должен содержать символов вертикальной черты (pipe), доллара ($) и пробела!</String>
     <String Name="NoPipeInPass">Пароль не должен содержать символ вертикальной черты (pipe)</String>
     <String Name="UserIsAlredyReg">Пользователь уже зарегистрирован!</String>
     <String Name="NoSynErrInScriptFile">Нет синтаксических ошибок в скрипте</String>
@@ -239,7 +238,7 @@
     <String Name="By">Забанил</String>
     <String Name="Full">Полный</String>
     <String Name="NoBansFound">Баны не найдены</String>
-    <String Name="SyntaxErrInCmd">Синтаксическая ошибка в команде!</String>
+    <String Name="SyntaxErrInCmd">Синтаксическая ошибка в команде</String>
     <String Name="NickLwr">ник</String>
     <String Name="NoParamGiven">Параметр не задан</String>
     <String Name="IsNotInUserlist">отсутствует в списке</String>
@@ -282,7 +281,7 @@
     <String Name="HasBeenTempBannedBy">был временно забанен</String>
     <String Name="ToLwr">на</String>
     <String Name="HasBeenTempBannedTo">был временно забанен на</String>
-    <String Name="Sorry">Извините</String>
+    <String Name="Sorry">Извините,</String>
     <String Name="IsNotInMyTempBans">нет в списке временных банов</String>
     <String Name="RemovedLwr">удалил</String>
     <String Name="FromTempBans">из списка временных банов</String>
@@ -315,7 +314,7 @@
     <String Name="FromBans">из банов</String>
     <String Name="RemovedFromBans">удалён из банов</String>
     <String Name="IsNotGagged">не заглушен</String>
-    <String Name="YouAreUngaggedBy">Вам была возвращена возможность говорить в главном чате</String>
+    <String Name="YouAreUngaggedBy">Вам была возвращена возможность говорить в чате</String>
     <String Name="HasUngagged">снял заглушку с</String>
     <String Name="AlredyGotOperatorStatus">уже имеет статус оператора</String>
     <String Name="OperatorProfileMissing">Профиль оператора не существует</String>
@@ -367,7 +366,7 @@
     <String Name="FolowCommandsAvailableToYou">Вам доступны команды</String>
     <String Name="ProfileSpecificCommands">Команды, доступные вашему профилю</String>
     <String Name="NewPassword">новый пароль</String>
-    <String Name="ChangeYourPassword">изменить свой пароль</String>
+    <String Name="ChangeYourPassword">сменить свой пароль</String>
     <String Name="PermBanUserGivenNickDisconnect">постоянный бан пользователя с текущим ником и последующим отключением от хаба</String>
     <String Name="PermBanIpAddress">постоянный бан IP-адреса</String>
     <String Name="BanUsersNickIfConnThenDisconn">забанить ник пользователя (если пользователь онлайн, то он будет отключён)</String>
@@ -428,7 +427,7 @@
     <String Name="StartedLwr">запущен</String>
     <String Name="StartFailed">запуск не удался</String>
     <String Name="YouAreNotAllowedToChangePassword">У вас недостаточно прав для изменения своего пароля</String>
-    <String Name="YourPassUpdateSuccess">Вы успешно изменили пароль</String>
+    <String Name="YourPassUpdateSuccess">Ваш пароль успешно изменён</String>
     <String Name="IsNotOnline">не на хабе</String>
     <String Name="YouAreNotAllowedToBan">У вас недостаточно прав для бана</String>
     <String Name="HasBeen">был</String>
@@ -442,7 +441,7 @@
     <String Name="BanLwr">бан</String>
     <String Name="TempBanNick">временный бан ника</String>
     <String Name="DropLwr">дроп</String>
-    <String Name="BannedLwr">забанен</String>
+    <String Name="BannedLwr">забанен,</String>
     <String Name="TempBanned">временно забанен,</String>
     <String Name="IsNotInMyRange">не находится в диапазоне</String>
     <String Name="TempBansLwr">временные баны</String>
@@ -513,8 +512,8 @@
     <String Name="PleaseDontFloodWithSearches">Пожалуйста, не используйте поиск так часто</String>
     <String Name="SearchFlooding">Флуд в поиске</String>
     <String Name="SearchFlooder">Флудер поиска</String>
-    <String Name="SorryMinSearchLenIs">Простите, но минимальная длина поиска</String>
-    <String Name="SorryMaxSearchLenIs">Простите, но максимальная длина поиска</String>
+    <String Name="SorryMinSearchLenIs">Извините, но минимальная длина поиска</String>
+    <String Name="SorryMaxSearchLenIs">Извините, но максимальная длина поиска</String>
     <String Name="PleaseDontFloodWithMyINFO">Пожалуйста, не флудите MyINFO</String>
     <String Name="MyINFOFlooding">MyINFO флуд</String>
     <String Name="MyINFOFlooder">MyINFO флудер</String>
@@ -525,7 +524,7 @@
     <String Name="YouAreNotAllowedToRedirect">У вас недостаточно прав для перенаправления пользователей</String>
     <String Name="YouAreRedirectedTo">Вы были перенаправлены на</String>
     <String Name="IsRedirectedTo">был перенаправлен на</String>
-    <String Name="SorryThisHubNotAllowPingerChecking">Простите, но данный хаб не поддерживает пинг с хаблиста</String>
+    <String Name="SorryThisHubNotAllowPingerChecking">Извините, но данный хаб не поддерживает пинг с хаблиста</String>
     <String Name="PleaseDontFloodWithPM">Пожалуйста, не флудите в ЛС</String>
     <String Name="PMFlooding">Флуд в ЛС</String>
     <String Name="PMFlooder">Флудер ЛС</String>
@@ -537,7 +536,7 @@
     <String Name="PleaseCorrectItAndGetBackAgain">Пожалуйста, исправьте это и повторите снова</String>
     <String Name="TheNickIsReservedForSomeoneOther">Ник, который вы используете, принадлежит другому пользователю</String>
     <String Name="ChangeYourNickAndGetBackAgain">Смените ник и попробуйте войти снова</String>
-    <String Name="LastPassWasWrongYouNeedWait">Прошлый пароль для этого ника не подошёл. Вам необходимо подождать ещё</String>
+    <String Name="LastPassWasWrongYouNeedWait">Прошлый пароль для этого ника не подошёл. Вам надо подождать ещё</String>
     <String Name="BeforeYouTryAgain">перед следующей попыткой</String>
     <String Name="ThisHubIsFull">Хаб переполнен</String>
     <String Name="UsersOnlineLwr">пользователей онлайн</String>
@@ -678,8 +677,8 @@
     <String Name="DataFlooding">Флуд данными</String>
     <String Name="DataFlooder">Флудер данными</String>
     <String Name="Interval">Интервал</String>
-    <String Name="NoChatInterval">Нет интервала в чате</String>
-    <String Name="NoPMInterval">Нет интервала в ЛС</String>
+    <String Name="NoChatInterval">Нет интервала для чата</String>
+    <String Name="NoPMInterval">Нет интервала для ЛС</String>
     <String Name="NoSearchInterval">Нет интервала при поиске</String>
     <String Name="PleaseWait">Пожалуйста, подождите</String>
     <String Name="SecBeforeNextChatMsg">секунд перед отправкой следующего сообщения в чат</String>
@@ -687,7 +686,7 @@
     <String Name="SecBeforeNextSearch">секунд перед следующим поиском</String>
     <String Name="MaxUsersSameIP">Макс. пользователей с одного IP</String>
     <String Name="NoMaxUsersSameIP">Нет огр. количества подключений с 1 IP</String>
-    <String Name="SorryAlreadyMaxIPConns">Простите, достигнуто максимальное количество подключений с Вашего IP</String>
+    <String Name="SorryAlreadyMaxIPConns">Извините, достигнуто максимальное количество подключений с Вашего IP</String>
     <String Name="NoReConnTime">Нет огр. на время переподключения</String>
     <String Name="ReConnTime">Время до повторного подключения</String>
     <String Name="SecBeforeReconn">секунд до повторного подключения</String>
@@ -732,17 +731,20 @@
     <String Name="MenuKickUser">Кикнуть</String>
     <String Name="MenuBanUser">Забанить</String>
     <String Name="MenuRedirectUser">Перенаправить</String>
-    <String Name="PleaseEnterReason">Пожалуйста, введите причину</String>
+    <String Name="PleaseEnterReason">Пожалуйста, укажите причину</String>
     <String Name="WasRedirectedTo">был перенаправлен на</String>
     <String Name="PleaseEnterRedirectAddress">Адрес перенаправления</String>
+    <String Name="Limiter">Limiter</String>
     <String Name="ScriptsErrors">Сообщения скриптов</String>
     <String Name="ScriptEditor">Редактор скриптов</String>
     <String Name="OpenScriptEditor">Редактор скриптов</String>
     <String Name="FailedToOpen">Не удалось открыть</String>
     <String Name="OpenInScriptEditor">Открыть во встроенном редакторе</String>
     <String Name="FailedToSave">Не удалось сохранить</String>
+    <String Name="FailedToCheckSyntax">Failed to check syntax</String>
     <String Name="Change">Изменить</String>
     <String Name="FilterRegisteredUsers">Фильтр зарегистрированных пользователей</String>
+    <String Name="UserDeletedAcceptToNew">Registered user was deleted. When you now press accept then new registered user will be created!</String>
     <String Name="UserChanged">Параметры регистрации пользователя изменены.</String>
     <String Name="AddNewReg">Зарегистрировать нового пользователя</String>
     <String Name="Profiles">Профили</String>
@@ -750,16 +752,19 @@
     <String Name="ProfilePermissions">Полномочия профиля</String>
     <String Name="AddNewBan">Новый бан</String>
     <String Name="FilterBans">Фильтр банов</String>
+    <String Name="BanDeletedAcceptToNew">Ban was deleted. When you now press accept then new ban will be created!</String>
     <String Name="AddNewRangeBan">Забанить диапазон</String>
     <String Name="FilterRangeBans">Фильтр банов диапазонов</String>
+    <String Name="RangeBanDeletedAcceptToNew">Range ban was deleted. When you now press accept then new range ban will be created!</String>
     <String Name="IsAvailable">доступно</String>
     <String Name="IPv4Address">Адрес IPv4</String>
     <String Name="IPv6Address">Адрес IPv6</String>
     <String Name="Register">предложил зарегистрироваться пользователю</String>
-    <String Name="As">с профилем</String>
-    <String Name="Registered">предложил зарегистрироваться пользователю</String>
-    <String Name="YouWereRegisteredPleaseEnterYourPassword">Вам предлагают зарегистрироваться. Пожалуйста, введите ваш пароль</String>
-    <String Name="ThankYouForPasswordYouAreNowRegisteredAs">Спасибо, что ввели пароль, теперь вы зарегистрированы в хабе с профилем</String>
+    <String Name="As">зарегистрироваться с профилем</String>
+    <String Name="Registered">предложил пользователю</String>
+    <String Name="YouWereRegisteredPleaseEnterYourPassword">Вас приглашают зарегистрироваться. Пожалуйста, введите ваш пароль</String>
+    <String Name="SorryYouAreAlreadyRegistered">Sorry you are already registered</String>
+    <String Name="ThankYouForPasswordYouAreNowRegisteredAs">Благодарим за ввод пароля, теперь вы зарегистрированы в хабе с профилем</String>
     <String Name="RegisterUserWithSpecifiedProfile">зарегистрировать онлайн-пользователя с указанным профилем. Хаб запросит у пользователя пароль и зарегистрирует его</String>
     <String Name="InCommandHubReplacedItWithYourRealIP">в параметрах команды, сервер заменил его на Ваш настоящий IP</String>
     <String Name="YourNickContainsIllegalWhiteCharacter">Ваш ник содержит запрещённые управляющие символы</String>
