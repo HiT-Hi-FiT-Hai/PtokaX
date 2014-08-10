@@ -27,6 +27,7 @@ struct User;
 class clsTextFilesManager {
 private:
     struct TextFile {
+        TextFile();
         ~TextFile();
 
         char * sCommand, * sText;

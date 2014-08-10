@@ -268,7 +268,7 @@ bool clsBanManager::Add2IpTable(BanItem *Ban) {
     }
     
     if(iptable[ui16IpTableIdx] == NULL) {
-		iptable[ui16IpTableIdx] = new (std::nothrow) IpTableItem();
+		iptable[ui16IpTableIdx] = new (std::nothrow) IpTableItem;
 
         if(iptable[ui16IpTableIdx] == NULL) {
 			AppendDebugLog("%s - [MEM] Cannot allocate IpTableItem in clsBanManager::Add2IpTable\n", 0);
@@ -299,7 +299,7 @@ bool clsBanManager::Add2IpTable(BanItem *Ban) {
         }
     }
 
-    cur = new (std::nothrow) IpTableItem();
+    cur = new (std::nothrow) IpTableItem;
 
     if(cur == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate IpTableBans2 in clsBanManager::Add2IpTable\n", 0);

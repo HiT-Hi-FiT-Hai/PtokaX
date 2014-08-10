@@ -33,10 +33,6 @@
 #include "ExceptionHandling.h"
 #include "LuaScript.h"
 //---------------------------------------------------------------------------
-#ifdef TIXML_USE_STL
-	#undef TIXML_USE_STL
-#endif
-//---------------------------------------------------------------------------
 
 static int InstallService(const char * sServiceName, const char * sPath) {
 	SC_HANDLE schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);

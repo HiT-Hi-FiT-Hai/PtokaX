@@ -935,7 +935,7 @@ void clsUsers::Add2RecTimes(User * curUser) {
         return;
     }
 
-    RecTime * pNewRecTime = new (std::nothrow) RecTime();
+    RecTime * pNewRecTime = new (std::nothrow) RecTime;
 
 	if(pNewRecTime == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewRecTime in clsUsers::Add2RecTimes\n", 0);

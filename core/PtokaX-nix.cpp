@@ -32,10 +32,6 @@
 #include "regtmrinc.h"
 #include "scrtmrinc.h"
 //---------------------------------------------------------------------------
-#ifdef TIXML_USE_STL
-	#undef TIXML_USE_STL
-#endif
-//---------------------------------------------------------------------------
 static bool bTerminatedBySignal = false;
 static int iSignal = 0;
 //---------------------------------------------------------------------------

@@ -452,7 +452,7 @@ bool ServerThread::isFlooder(const int &s, const sockaddr_storage &addr) {
         }
     }
 
-    AntiConFlood * pNewItem = new (std::nothrow) AntiConFlood();
+    AntiConFlood * pNewItem = new (std::nothrow) AntiConFlood;
     if(pNewItem == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem  in theLoop::isFlooder\n", 0);
     	return true;
@@ -470,6 +470,7 @@ bool ServerThread::isFlooder(const int &s, const sockaddr_storage &addr) {
     if(AntiFloodList != NULL) {
         AntiFloodList->prev = pNewItem;
     }
+
     AntiFloodList = pNewItem;
 
     clsServiceLoop::mPtr->AcceptSocket(s, addr);

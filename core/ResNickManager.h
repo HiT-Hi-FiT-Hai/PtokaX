@@ -24,7 +24,10 @@
 
 class clsReservedNicksManager {
 private:
-    struct ReservedNick {   
+    struct ReservedNick {
+        ReservedNick();
+        ~ReservedNick();
+
         char *sNick;
 
         ReservedNick *prev, *next;
@@ -32,9 +35,6 @@ private:
         uint32_t ui32Hash;
 
         bool bFromScript;
-
-        ReservedNick();
-        ~ReservedNick();
 
         static ReservedNick * CreateReservedNick(const char * nick, uint32_t ui32NickHash);
     };

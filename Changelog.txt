@@ -18,6 +18,7 @@ Fixed: Few possible issues found by PVS studio (thx Pavel Pimenov for report).
 Fixed: Memory access outside array in script editor window on load/save (thx Pavel Pimenov for report).
 Fixed: User who was allowed to kick can ban and tempban user without permissions for ban and tempban (thx Alexey for report).
 Fixed: Range ban and range temp ban command was not working for IPv6 addresses longer than 15 characters (thx Alexey for report).
+Fixed: Few possible memory leaks when memory allocation fail.
 Other: Some minor performance improvements.
 
 

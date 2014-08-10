@@ -116,7 +116,7 @@ void clsEventQueue::AddNormal(uint8_t ui8Id, char * sMsg) {
 		}
 	}
 
-    event * pNewEvent = new (std::nothrow) event();
+    event * pNewEvent = new (std::nothrow) event;
 
 	if(pNewEvent == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewEvent in clsEventQueue::AddNormal\n", 0);
@@ -160,7 +160,7 @@ void clsEventQueue::AddNormal(uint8_t ui8Id, char * sMsg) {
 //---------------------------------------------------------------------------
 
 void clsEventQueue::AddThread(uint8_t ui8Id, char * sMsg, const sockaddr_storage * sas/* = NULL*/) {
-	event * pNewEvent = new (std::nothrow) event();
+	event * pNewEvent = new (std::nothrow) event;
 
 	if(pNewEvent == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewEvent in clsEventQueue::AddThread\n", 0);

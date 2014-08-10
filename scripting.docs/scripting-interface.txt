@@ -467,7 +467,7 @@ ProfilePermission IDs for SetProfilePermission
 55	- No reconnect time.
 
 
-Settings bool IDs forSetMan.(G/S)etBool
+Settings bool IDs for SetMan.(G/S)etBool
 -------------------
 0	- Anti MoGlo description
 1	- Hub autostart

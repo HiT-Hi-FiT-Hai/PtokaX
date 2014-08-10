@@ -34,6 +34,15 @@
 clsTextFilesManager * clsTextFilesManager::mPtr = NULL;
 //---------------------------------------------------------------------------
 
+clsTextFilesManager::TextFile::TextFile() {
+    sCommand = NULL;
+    sText = NULL;
+
+    prev = NULL;
+    next = NULL;
+}
+//---------------------------------------------------------------------------
+
 clsTextFilesManager::TextFile::~TextFile() {
 #ifdef _WIN32
     if(sCommand != NULL) {
@@ -187,6 +196,8 @@ void clsTextFilesManager::RefreshTextFiles() {
 						fclose(f);
 						_findclose(hFile);
 
+                        delete pNewTxtFile;
+
 						return;
  					}
 
@@ -201,6 +212,8 @@ void clsTextFilesManager::RefreshTextFiles() {
 
 						fclose(f);
 						_findclose(hFile);
+
+                        delete pNewTxtFile;
 
 						return;
 					}
@@ -267,6 +280,8 @@ void clsTextFilesManager::RefreshTextFiles() {
 					fclose(f);
 					closedir(p_txtdir);
 
+                    delete pNewTxtFile;
+
                     return;
                 }
     	        size_t size = fread(pNewTxtFile->sText, 1, s_buf.st_size, f);
@@ -279,6 +294,8 @@ void clsTextFilesManager::RefreshTextFiles() {
 
 					fclose(f);
 					closedir(p_txtdir);
+
+                    delete pNewTxtFile;
 
                     return;
                 }

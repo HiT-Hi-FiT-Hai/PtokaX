@@ -68,7 +68,7 @@ bool clsHashManager::Add(User * u) {
     nicktable[ui16dx] = u;
 
     if(iptable[u->ui16IpTableIdx] == NULL) {
-        iptable[u->ui16IpTableIdx] = new (std::nothrow) IpTableItem();
+        iptable[u->ui16IpTableIdx] = new (std::nothrow) IpTableItem;
 
         if(iptable[u->ui16IpTableIdx] == NULL) {
             u->ui32BoolBits |= User::BIT_ERROR;
@@ -104,7 +104,7 @@ bool clsHashManager::Add(User * u) {
         }
     }
 
-    cur = new (std::nothrow) IpTableItem();
+    cur = new (std::nothrow) IpTableItem;
 
     if(cur == NULL) {
         u->ui32BoolBits |= User::BIT_ERROR;

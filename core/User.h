@@ -23,12 +23,12 @@
 //---------------------------------------------------------------------------
 
 struct UserBan {
+    UserBan();
+    ~UserBan();
+
     char * sMessage;
 
     uint32_t ui32Len, ui32NickHash;
-
-    UserBan();
-    ~UserBan();
 
     static UserBan * CreateUserBan(char * sMess, const uint32_t &iMessLen, const uint32_t &ui32Hash);
 };

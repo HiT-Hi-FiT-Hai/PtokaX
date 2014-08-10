@@ -2823,69 +2823,82 @@ void User::AddPrcsdCmd(const unsigned char &cType, char * sCommand, const size_t
             }
         }
 
-        PrcsdToUsrCmd * pNewcmd = new (std::nothrow) PrcsdToUsrCmd();
-        if(pNewcmd == NULL) {
+        PrcsdToUsrCmd * pNewToCmd = new (std::nothrow) PrcsdToUsrCmd;
+        if(pNewToCmd == NULL) {
             ui32BoolBits |= BIT_ERROR;
             Close();
 
-			AppendDebugLog("%s - [MEM] User::AddPrcsdCmd cannot allocate new pNewcmd\n", 0);
+			AppendDebugLog("%s - [MEM] User::AddPrcsdCmd cannot allocate new pNewToCmd\n", 0);
 
         	return;
         }
 
 #ifdef _WIN32
-        pNewcmd->sCommand = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szCommandLen+1);
+        pNewToCmd->sCommand = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szCommandLen+1);
 #else
-		pNewcmd->sCommand = (char *)malloc(szCommandLen+1);
+		pNewToCmd->sCommand = (char *)malloc(szCommandLen+1);
 #endif
-        if(pNewcmd->sCommand == NULL) {
+        if(pNewToCmd->sCommand == NULL) {
             ui32BoolBits |= BIT_ERROR;
             Close();
 
 			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sCommand in User::AddPrcsdCmd\n", (uint64_t)(szCommandLen+1));
 
+            delete pNewToCmd;
+
             return;
         }
 
-        memcpy(pNewcmd->sCommand, sCommand, szCommandLen);
-        pNewcmd->sCommand[szCommandLen] = '\0';
+        memcpy(pNewToCmd->sCommand, sCommand, szCommandLen);
+        pNewToCmd->sCommand[szCommandLen] = '\0';
 
-        pNewcmd->iLen = (uint32_t)szCommandLen;
-        pNewcmd->iPmCount = bIsPm == true ? 1 : 0;
-        pNewcmd->iLoops = 0;
-        pNewcmd->To = to;
+        pNewToCmd->iLen = (uint32_t)szCommandLen;
+        pNewToCmd->iPmCount = bIsPm == true ? 1 : 0;
+        pNewToCmd->iLoops = 0;
+        pNewToCmd->To = to;
         
 #ifdef _WIN32
-        pNewcmd->ToNick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, to->ui8NickLen+1);
+        pNewToCmd->ToNick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, to->ui8NickLen+1);
 #else
-		pNewcmd->ToNick = (char *)malloc(to->ui8NickLen+1);
+		pNewToCmd->ToNick = (char *)malloc(to->ui8NickLen+1);
 #endif
-        if(pNewcmd->ToNick == NULL) {
+        if(pNewToCmd->ToNick == NULL) {
             ui32BoolBits |= BIT_ERROR;
             Close();
 
 			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for ToNick in User::AddPrcsdCmd\n", (uint64_t)(to->ui8NickLen+1));
 
+#ifdef _WIN32
+            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pNewToCmd->sCommand) == 0) {
+                AppendDebugLog("%s - [MEM] Cannot deallocate pNewToCmd->sCommand in User::AddPrcsdCmd\n", 0);
+			}
+#else
+            free(pNewToCmd->sCommand);
+#endif
+
+            delete pNewToCmd;
+
             return;
         }   
 
-        memcpy(pNewcmd->ToNick, to->sNick, to->ui8NickLen);
-        pNewcmd->ToNick[to->ui8NickLen] = '\0';
+        memcpy(pNewToCmd->ToNick, to->sNick, to->ui8NickLen);
+        pNewToCmd->ToNick[to->ui8NickLen] = '\0';
         
-        pNewcmd->iToNickLen = to->ui8NickLen;
-        pNewcmd->next = NULL;
+        pNewToCmd->iToNickLen = to->ui8NickLen;
+        pNewToCmd->next = NULL;
                
         if(cmdToUserStrt == NULL) {
-            cmdToUserStrt = pNewcmd;
-            cmdToUserEnd = pNewcmd;
+            cmdToUserStrt = pNewToCmd;
+            cmdToUserEnd = pNewToCmd;
         } else {
-            cmdToUserEnd->next = pNewcmd;
-            cmdToUserEnd = pNewcmd;
+            cmdToUserEnd->next = pNewToCmd;
+            cmdToUserEnd = pNewToCmd;
         }
+
         return;
     }
     
-    PrcsdUsrCmd * pNewcmd = new (std::nothrow) PrcsdUsrCmd();
+    PrcsdUsrCmd * pNewcmd = new (std::nothrow) PrcsdUsrCmd;
     if(pNewcmd == NULL) {
         ui32BoolBits |= BIT_ERROR;
         Close();
@@ -2905,6 +2918,8 @@ void User::AddPrcsdCmd(const unsigned char &cType, char * sCommand, const size_t
         Close();
 
 		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sCommand in User::AddPrcsdCmd1\n", (uint64_t)(szCommandLen+1));
+
+        delete pNewcmd;
 
         return;
     }

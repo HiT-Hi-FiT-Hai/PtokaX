@@ -34,10 +34,6 @@
 #include "../core/LuaScript.h"
 #include "MainWindow.h"
 //---------------------------------------------------------------------------
-#ifdef TIXML_USE_STL
-	#undef TIXML_USE_STL
-#endif
-//---------------------------------------------------------------------------
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmdLine, int nCmdShow) {
     ::SetDllDirectory("");
