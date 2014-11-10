@@ -121,6 +121,9 @@ private:
         BTN_REPORT_FLOOD_TO_OPS
     };
 
+    SettingPageDeflood2(const SettingPageDeflood2&);
+    const SettingPageDeflood2& operator=(const SettingPageDeflood2&);
+
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 //------------------------------------------------------------------------------

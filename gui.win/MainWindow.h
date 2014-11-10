@@ -62,6 +62,9 @@ private:
     UINT uiTaskBarCreated;
     uint64_t ui64LastTrayMouseMove;
 
+    clsMainWindow(const clsMainWindow&);
+    const clsMainWindow& operator=(const clsMainWindow&);
+
     LRESULT MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     void OnSelChanged();

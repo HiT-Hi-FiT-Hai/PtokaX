@@ -72,15 +72,7 @@ static int ScriptPanic(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
-ScriptBot::ScriptBot() {
-    sNick = NULL;
-    sMyINFO = NULL;
-
-    prev = NULL;
-    next = NULL;
-
-    bIsOP = false;
-
+ScriptBot::ScriptBot() : sNick(NULL), sMyINFO(NULL), pPrev(NULL), pNext(NULL), bIsOP(false) {
     clsScriptManager::mPtr->ui8BotsCount++;
 }
 //------------------------------------------------------------------------------
@@ -153,19 +145,14 @@ ScriptBot * ScriptBot::CreateScriptBot(char * sBotNick, const size_t &szNickLen,
 }
 //------------------------------------------------------------------------------
 
-ScriptTimer::ScriptTimer() {
+ScriptTimer::ScriptTimer() : 
 #ifdef _WIN32
-	uiTimerId = NULL;
+	uiTimerId(NULL),
 #else
-	TimerId = 0;
+	TimerId(0),
 #endif
-
-	sFunctionName = NULL;
-
-    iFunctionRef = 0;
-
-    prev = NULL;
-    next = NULL;
+	sFunctionName(NULL), iFunctionRef(0), pPrev(NULL), pNext(NULL) {
+	// ...
 }
 //------------------------------------------------------------------------------
 
@@ -227,25 +214,9 @@ ScriptTimer * ScriptTimer::CreateScriptTimer(char * sFunctName, const size_t &sz
 }
 //------------------------------------------------------------------------------
 
-Script::Script() {
-    ui32DataArrivals = 4294967295U;
-
-    sName = NULL;
-
-    LUA = NULL;
-
-    prev = NULL;
-    next = NULL;
-
-    BotList = NULL;
-
-    TimerList = NULL;
-
-    ui16Functions = 65535;
-
-    bEnabled = false;
-    bRegUDP = false;
-    bProcessed = false;
+Script::Script() : ui32DataArrivals(4294967295U), sName(NULL), pLUA(NULL), pPrev(NULL), pNext(NULL), pBotList(NULL), pTimerList(NULL), ui16Functions(65535),
+	bEnabled(false), bRegUDP(false), bProcessed(false) {
+	// ...
 }
 //------------------------------------------------------------------------------
 
@@ -256,11 +227,11 @@ Script::~Script() {
     }
 
     ScriptTimer * tmr = NULL,
-        * next = TimerList;
+        * next = pTimerList;
     
     while(next != NULL) {
         tmr = next;
-        next = tmr->next;
+        next = tmr->pNext;
 
 #ifdef _WIN32
         if(tmr->uiTimerId != 0) {
@@ -274,8 +245,8 @@ Script::~Script() {
 		delete tmr;
     }
 
-    if(LUA != NULL) {
-        lua_close(LUA);
+    if(pLUA != NULL) {
+        lua_close(pLUA);
     }
 
 #ifdef _WIN32
@@ -337,73 +308,73 @@ bool ScriptStart(Script * cur) {
 	cur->ui16Functions = 65535;
 	cur->ui32DataArrivals = 4294967295U;
 
-	cur->prev = NULL;
-	cur->next = NULL;
+	cur->pPrev = NULL;
+	cur->pNext = NULL;
 
 #ifdef _WIN32
-	cur->LUA = lua_newstate(LuaAlocator, NULL);
+	cur->pLUA = lua_newstate(LuaAlocator, NULL);
 #else
-    cur->LUA = luaL_newstate();
+    cur->pLUA = luaL_newstate();
 #endif
 
-    if(cur->LUA == NULL) {
+    if(cur->pLUA == NULL) {
         return false;
     }
 
-	luaL_openlibs(cur->LUA);
+	luaL_openlibs(cur->pLUA);
 
-	lua_atpanic(cur->LUA, ScriptPanic);
+	lua_atpanic(cur->pLUA, ScriptPanic);
 
     // replace internal lua os.exit with correct shutdown
-    lua_getglobal(cur->LUA, "os");
+    lua_getglobal(cur->pLUA, "os");
 
-    if(lua_istable(cur->LUA, -1)) {
-        lua_pushcfunction(cur->LUA, OsExit);
-        lua_setfield(cur->LUA, -2, "exit");
+    if(lua_istable(cur->pLUA, -1)) {
+        lua_pushcfunction(cur->pLUA, OsExit);
+        lua_setfield(cur->pLUA, -2, "exit");
 
-        lua_pop(cur->LUA, 1);
+        lua_pop(cur->pLUA, 1);
     }
 
 #if LUA_VERSION_NUM > 501
-    luaL_requiref(cur->LUA, "Core", RegCore, 1);
-    lua_pop(cur->LUA, 1);
+    luaL_requiref(cur->pLUA, "Core", RegCore, 1);
+    lua_pop(cur->pLUA, 1);
 
-    luaL_requiref(cur->LUA, "SetMan", RegSetMan, 1);
-    lua_pop(cur->LUA, 1);
+    luaL_requiref(cur->pLUA, "SetMan", RegSetMan, 1);
+    lua_pop(cur->pLUA, 1);
 
-    luaL_requiref(cur->LUA, "RegMan", RegRegMan, 1);
-    lua_pop(cur->LUA, 1);
+    luaL_requiref(cur->pLUA, "RegMan", RegRegMan, 1);
+    lua_pop(cur->pLUA, 1);
 
-    luaL_requiref(cur->LUA, "BanMan", RegBanMan, 1);
-    lua_pop(cur->LUA, 1);
+    luaL_requiref(cur->pLUA, "BanMan", RegBanMan, 1);
+    lua_pop(cur->pLUA, 1);
 
-    luaL_requiref(cur->LUA, "ProfMan", RegProfMan, 1);
-    lua_pop(cur->LUA, 1);
+    luaL_requiref(cur->pLUA, "ProfMan", RegProfMan, 1);
+    lua_pop(cur->pLUA, 1);
 
-    luaL_requiref(cur->LUA, "TmrMan", RegTmrMan, 1);
-    lua_pop(cur->LUA, 1);
+    luaL_requiref(cur->pLUA, "TmrMan", RegTmrMan, 1);
+    lua_pop(cur->pLUA, 1);
 
-    luaL_requiref(cur->LUA, "UDPDbg", RegUDPDbg, 1);
-    lua_pop(cur->LUA, 1);
+    luaL_requiref(cur->pLUA, "UDPDbg", RegUDPDbg, 1);
+    lua_pop(cur->pLUA, 1);
 
-    luaL_requiref(cur->LUA, "ScriptMan", RegScriptMan, 1);
-    lua_pop(cur->LUA, 1);
+    luaL_requiref(cur->pLUA, "ScriptMan", RegScriptMan, 1);
+    lua_pop(cur->pLUA, 1);
 
-    luaL_requiref(cur->LUA, "IP2Country", RegIP2Country, 1);
-    lua_pop(cur->LUA, 1);
+    luaL_requiref(cur->pLUA, "IP2Country", RegIP2Country, 1);
+    lua_pop(cur->pLUA, 1);
 #else
-	RegCore(cur->LUA);
-	RegSetMan(cur->LUA);
-	RegRegMan(cur->LUA);
-	RegBanMan(cur->LUA);
-	RegProfMan(cur->LUA);
-	RegTmrMan(cur->LUA);
-	RegUDPDbg(cur->LUA);
-	RegScriptMan(cur->LUA);
-	RegIP2Country(cur->LUA);
+	RegCore(cur->pLUA);
+	RegSetMan(cur->pLUA);
+	RegRegMan(cur->pLUA);
+	RegBanMan(cur->pLUA);
+	RegProfMan(cur->pLUA);
+	RegTmrMan(cur->pLUA);
+	RegUDPDbg(cur->pLUA);
+	RegScriptMan(cur->pLUA);
+	RegIP2Country(cur->pLUA);
 #endif
 
-	if(luaL_dofile(cur->LUA, (clsServerManager::sScriptPath+cur->sName).c_str()) == 0) {
+	if(luaL_dofile(cur->pLUA, (clsServerManager::sScriptPath+cur->sName).c_str()) == 0) {
 #ifdef _BUILD_GUI
         RichEditAppendText(clsMainWindowPageScripts::mPtr->hWndPageItems[clsMainWindowPageScripts::REDT_SCRIPTS_ERRORS],
             (string(clsLanguageManager::mPtr->sTexts[LAN_NO_SYNERR_IN_SCRIPT_FILE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_NO_SYNERR_IN_SCRIPT_FILE]) + " " + string(cur->sName)).c_str());
@@ -412,7 +383,7 @@ bool ScriptStart(Script * cur) {
         return true;
 	} else {
         size_t szLen = 0;
-        char * stmp = (char*)lua_tolstring(cur->LUA, -1, &szLen);
+        char * stmp = (char*)lua_tolstring(cur->pLUA, -1, &szLen);
 
         string sMsg(stmp, szLen);
 
@@ -427,8 +398,8 @@ bool ScriptStart(Script * cur) {
             AppendLog(sMsg, true);
         }
 
-		lua_close(cur->LUA);
-		cur->LUA = NULL;
+		lua_close(cur->pLUA);
+		cur->pLUA = NULL;
     
         return false;
     }
@@ -442,11 +413,11 @@ void ScriptStop(Script * cur) {
     }
 
 	ScriptTimer * tmr = NULL,
-        * tmrnext = cur->TimerList;
+        * tmrnext = cur->pTimerList;
     
 	while(tmrnext != NULL) {
 		tmr = tmrnext;
-		tmrnext = tmr->next;
+		tmrnext = tmr->pNext;
 
 #ifdef _WIN32
         if(tmr->uiTimerId != 0) {
@@ -460,19 +431,19 @@ void ScriptStop(Script * cur) {
 		delete tmr;
     }
 
-    cur->TimerList = NULL;
+    cur->pTimerList = NULL;
 
-    if(cur->LUA != NULL) {
-        lua_close(cur->LUA);
-        cur->LUA = NULL;
+    if(cur->pLUA != NULL) {
+        lua_close(cur->pLUA);
+        cur->pLUA = NULL;
     }
 
     ScriptBot * bot = NULL,
-        * next = cur->BotList;
+        * next = cur->pBotList;
     
     while(next != NULL) {
         bot = next;
-        next = bot->next;
+        next = bot->pNext;
 
         clsReservedNicksManager::mPtr->DelReservedNick(bot->sNick, true);
 
@@ -481,92 +452,92 @@ void ScriptStop(Script * cur) {
 
             clsUsers::mPtr->DelBotFromMyInfos(bot->sMyINFO);
 
-			int iMsgLen = sprintf(clsServerManager::sGlobalBuffer, "$Quit %s|", bot->sNick);
+			int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "$Quit %s|", bot->sNick);
            	if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "ScriptStop") == true) {
-                clsGlobalDataQueue::mPtr->AddQueueItem(clsServerManager::sGlobalBuffer, iMsgLen, NULL, 0, clsGlobalDataQueue::CMD_QUIT);
+                clsGlobalDataQueue::mPtr->AddQueueItem(clsServerManager::pGlobalBuffer, iMsgLen, NULL, 0, clsGlobalDataQueue::CMD_QUIT);
             }
 		}
 
 		delete bot;
     }
 
-    cur->BotList = NULL;
+    cur->pBotList = NULL;
 }
 //------------------------------------------------------------------------------
 
 int ScriptGetGC(Script * cur) {
-	return lua_gc(cur->LUA, LUA_GCCOUNT, 0);
+	return lua_gc(cur->pLUA, LUA_GCCOUNT, 0);
 }
 //------------------------------------------------------------------------------
 
 void ScriptOnStartup(Script * cur) {
-    lua_pushcfunction(cur->LUA, ScriptTraceback);
-    int iTraceback = lua_gettop(cur->LUA);
+    lua_pushcfunction(cur->pLUA, ScriptTraceback);
+    int iTraceback = lua_gettop(cur->pLUA);
 
-    lua_getglobal(cur->LUA, "OnStartup");
-    int i = lua_gettop(cur->LUA);
+    lua_getglobal(cur->pLUA, "OnStartup");
+    int i = lua_gettop(cur->pLUA);
 
-    if(lua_isnil(cur->LUA, i)) {
+    if(lua_isnil(cur->pLUA, i)) {
 		cur->ui16Functions &= ~Script::ONSTARTUP;
-		lua_settop(cur->LUA, 0);
+		lua_settop(cur->pLUA, 0);
         return;
     }
 
-    if(lua_pcall(cur->LUA, 0, 0, iTraceback) != 0) {
+    if(lua_pcall(cur->pLUA, 0, 0, iTraceback) != 0) {
         ScriptError(cur);
 
-        lua_settop(cur->LUA, 0);
+        lua_settop(cur->pLUA, 0);
         return;
     }
 
     // clear the stack for sure
-    lua_settop(cur->LUA, 0);
+    lua_settop(cur->pLUA, 0);
 }
 //------------------------------------------------------------------------------
 
 void ScriptOnExit(Script * cur) {
-    lua_pushcfunction(cur->LUA, ScriptTraceback);
-    int iTraceback = lua_gettop(cur->LUA);
+    lua_pushcfunction(cur->pLUA, ScriptTraceback);
+    int iTraceback = lua_gettop(cur->pLUA);
 
-    lua_getglobal(cur->LUA, "OnExit");
-    int i = lua_gettop(cur->LUA);
-    if(lua_isnil(cur->LUA, i)) {
+    lua_getglobal(cur->pLUA, "OnExit");
+    int i = lua_gettop(cur->pLUA);
+    if(lua_isnil(cur->pLUA, i)) {
 		cur->ui16Functions &= ~Script::ONEXIT;
-		lua_settop(cur->LUA, 0);
+		lua_settop(cur->pLUA, 0);
         return;
     }
 
-    if(lua_pcall(cur->LUA, 0, 0, iTraceback) != 0) {
+    if(lua_pcall(cur->pLUA, 0, 0, iTraceback) != 0) {
         ScriptError(cur);
 
-        lua_settop(cur->LUA, 0);
+        lua_settop(cur->pLUA, 0);
         return;
 	}
 
 	// clear the stack for sure
-    lua_settop(cur->LUA, 0);
+    lua_settop(cur->pLUA, 0);
 }
 //------------------------------------------------------------------------------
 
 static bool ScriptOnError(Script * cur, char * sErrorMsg, const size_t &szMsgLen) {
-    lua_pushcfunction(cur->LUA, ScriptTraceback);
-    int iTraceback = lua_gettop(cur->LUA);
+    lua_pushcfunction(cur->pLUA, ScriptTraceback);
+    int iTraceback = lua_gettop(cur->pLUA);
 
-	lua_getglobal(cur->LUA, "OnError");
-    int i = lua_gettop(cur->LUA);
-    if(lua_isnil(cur->LUA, i)) {
+	lua_getglobal(cur->pLUA, "OnError");
+    int i = lua_gettop(cur->pLUA);
+    if(lua_isnil(cur->pLUA, i)) {
 		cur->ui16Functions &= ~Script::ONERROR;
-		lua_settop(cur->LUA, 0);
+		lua_settop(cur->pLUA, 0);
         return true;
     }
 
-	clsScriptManager::mPtr->ActualUser = NULL;
+	clsScriptManager::mPtr->pActualUser = NULL;
     
-    lua_pushlstring(cur->LUA, sErrorMsg, szMsgLen);
+    lua_pushlstring(cur->pLUA, sErrorMsg, szMsgLen);
 
-	if(lua_pcall(cur->LUA, 1, 0, iTraceback) != 0) { // 1 passed parameters, zero returned
+	if(lua_pcall(cur->pLUA, 1, 0, iTraceback) != 0) { // 1 passed parameters, zero returned
 		size_t szLen = 0;
-		char * stmp = (char*)lua_tolstring(cur->LUA, -1, &szLen);
+		char * stmp = (char*)lua_tolstring(cur->pLUA, -1, &szLen);
 
 		string sMsg(stmp, szLen);
 
@@ -582,12 +553,12 @@ static bool ScriptOnError(Script * cur, char * sErrorMsg, const size_t &szMsgLen
 			AppendLog(sMsg, true);
 		}
 
-        lua_settop(cur->LUA, 0);
+        lua_settop(cur->pLUA, 0);
         return false;
     }
 
     // clear the stack for sure
-    lua_settop(cur->LUA, 0);
+    lua_settop(cur->pLUA, 0);
     return true;
 }
 //------------------------------------------------------------------------------
@@ -611,7 +582,7 @@ void ScriptPushUser(lua_State * L, User * u, const bool &bFullTable/* = false*/)
 	lua_rawset(L, i);
 
 	lua_pushliteral(L, "iProfile");
-	lua_pushinteger(L, u->iProfile);
+	lua_pushinteger(L, u->i32Profile);
 	lua_rawset(L, i);
 
     if(bFullTable == true) {
@@ -733,7 +704,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 #if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, (double)u->ui64SharedSize);
 #else
-	lua_pushunsigned(L, u->ui64SharedSize);
+	lua_pushinteger(L, u->ui64SharedSize);
 #endif
 	lua_rawset(L, iTable);
 
@@ -741,7 +712,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 #if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, u->Hubs);
 #else
-	lua_pushunsigned(L, u->Hubs);
+	lua_pushinteger(L, u->Hubs);
 #endif
 	lua_rawset(L, iTable);
 
@@ -749,7 +720,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 #if LUA_VERSION_NUM < 503
 	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushnumber(L, u->iNormalHubs);
 #else
-	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushunsigned(L, u->iNormalHubs);
+	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushinteger(L, u->iNormalHubs);
 #endif
 	lua_rawset(L, iTable);
     
@@ -757,7 +728,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 #if LUA_VERSION_NUM < 503
 	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushnumber(L, u->iRegHubs);
 #else
-	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushunsigned(L, u->iRegHubs);
+	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushinteger(L, u->iRegHubs);
 #endif
 	lua_rawset(L, iTable);
     
@@ -765,7 +736,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 #if LUA_VERSION_NUM < 503
 	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushnumber(L, u->iOpHubs);
 #else
-	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushunsigned(L, u->iOpHubs);
+	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushinteger(L, u->iOpHubs);
 #endif
 	lua_rawset(L, iTable);
 
@@ -773,7 +744,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 #if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, u->Slots);
 #else
-	lua_pushunsigned(L, u->Slots);
+	lua_pushinteger(L, u->Slots);
 #endif
 	lua_rawset(L, iTable);
 
@@ -781,7 +752,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 #if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, u->LLimit);
 #else
-	lua_pushunsigned(L, u->LLimit);
+	lua_pushinteger(L, u->LLimit);
 #endif
 	lua_rawset(L, iTable);
 
@@ -789,23 +760,23 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 #if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, u->iDefloodWarnings);
 #else
-	lua_pushunsigned(L, u->iDefloodWarnings);
+	lua_pushinteger(L, u->iDefloodWarnings);
 #endif
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iMagicByte");
 #if LUA_VERSION_NUM < 503
-	lua_pushnumber(L, u->MagicByte);
+	lua_pushnumber(L, u->ui8MagicByte);
 #else
-	lua_pushunsigned(L, u->MagicByte);
+	lua_pushinteger(L, u->ui8MagicByte);
 #endif
 	lua_rawset(L, iTable);
 
 	lua_pushliteral(L, "iLoginTime");
 #if LUA_VERSION_NUM < 503
-	lua_pushnumber(L, (double)u->LoginTime);
+	lua_pushnumber(L, (double)u->tLoginTime);
 #else
-	lua_pushunsigned(L, u->LoginTime);
+	lua_pushinteger(L, u->tLoginTime);
 #endif
 	lua_rawset(L, iTable);
 
@@ -906,7 +877,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 #if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, (double)u->ui64ChangedSharedSizeShort);
 #else
-    lua_pushunsigned(L, u->ui64ChangedSharedSizeShort);
+    lua_pushinteger(L, u->ui64ChangedSharedSizeShort);
 #endif
     lua_rawset(L, iTable);
 
@@ -914,7 +885,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 #if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, (double)u->ui64ChangedSharedSizeLong);
 #else
-    lua_pushunsigned(L, u->ui64ChangedSharedSizeLong);
+    lua_pushinteger(L, u->ui64ChangedSharedSizeLong);
 #endif
     lua_rawset(L, iTable);
 
@@ -926,7 +897,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 #if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, 1);
 #else
-	lua_pushunsigned(L, 1);
+	lua_pushinteger(L, 1);
 #endif
 	lua_pushlstring(L, u->sIP, u->ui8IpLen);
 	lua_rawset(L, t);
@@ -935,7 +906,7 @@ void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
 #if LUA_VERSION_NUM < 503
 		lua_pushnumber(L, 2);
 #else
-        lua_pushunsigned(L, 2);
+        lua_pushinteger(L, 2);
 #endif
         lua_pushlstring(L, u->sIPv4, u->ui8IPv4Len);
         lua_rawset(L, t);
@@ -960,7 +931,7 @@ User * ScriptGetUser(lua_State * L, const int &iTop, const char * sFunction) {
         return NULL;
     }
 
-	if(u != clsScriptManager::mPtr->ActualUser) {
+	if(u != clsScriptManager::mPtr->pActualUser) {
         lua_pushliteral(L, "sNick");
         lua_gettable(L, 1);
 
@@ -983,7 +954,7 @@ User * ScriptGetUser(lua_State * L, const int &iTop, const char * sFunction) {
 
 void ScriptError(Script * cur) {
 	size_t szLen = 0;
-	char * stmp = (char*)lua_tolstring(cur->LUA, -1, &szLen);
+	char * stmp = (char*)lua_tolstring(cur->pLUA, -1, &szLen);
 
 	string sMsg(stmp, szLen);
 
@@ -1012,51 +983,51 @@ void ScriptError(Script * cur) {
 	void ScriptOnTimer(ScriptTimer * AccTimer) {
 #endif
 	Script * cur = NULL,
-        * next = clsScriptManager::mPtr->RunningScriptS;
+        * next = clsScriptManager::mPtr->pRunningScriptS;
 
     while(next != NULL) {
     	cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
         ScriptTimer * tmr = NULL,
-            * nexttmr = cur->TimerList;
+            * nexttmr = cur->pTimerList;
         
         while(nexttmr != NULL) {
             tmr = nexttmr;
-            nexttmr = tmr->next;
+            nexttmr = tmr->pNext;
 
 #ifdef _WIN32
             if(tmr->uiTimerId == uiTimerId) {
 #else
 			if(tmr == AccTimer) {
 #endif
-                lua_pushcfunction(cur->LUA, ScriptTraceback);
-                int iTraceback = lua_gettop(cur->LUA);
+                lua_pushcfunction(cur->pLUA, ScriptTraceback);
+                int iTraceback = lua_gettop(cur->pLUA);
 
                 if(tmr->sFunctionName != NULL) {
-					lua_getglobal(cur->LUA, tmr->sFunctionName);
+					lua_getglobal(cur->pLUA, tmr->sFunctionName);
 				} else {
-                    lua_rawgeti(cur->LUA, LUA_REGISTRYINDEX, tmr->iFunctionRef);
+                    lua_rawgeti(cur->pLUA, LUA_REGISTRYINDEX, tmr->iFunctionRef);
                 }
 
-				clsScriptManager::mPtr->ActualUser = NULL;
+				clsScriptManager::mPtr->pActualUser = NULL;
 
-				lua_checkstack(cur->LUA, 1); // we need 1 empty slots in stack, check it to be sure
+				lua_checkstack(cur->pLUA, 1); // we need 1 empty slots in stack, check it to be sure
 
 #ifdef _WIN32
-                lua_pushlightuserdata(cur->LUA, (void *)uiTimerId);
+                lua_pushlightuserdata(cur->pLUA, (void *)uiTimerId);
 #else
-				lua_pushlightuserdata(cur->LUA, (void *)tmr->TimerId);
+				lua_pushlightuserdata(cur->pLUA, (void *)tmr->TimerId);
 #endif
 
 				// 1 passed parameters, 0 returned
-				if(lua_pcall(cur->LUA, 1, 0, iTraceback) != 0) {
+				if(lua_pcall(cur->pLUA, 1, 0, iTraceback) != 0) {
 					ScriptError(cur);
 					return;
 				}
 
 				// clear the stack for sure
-				lua_settop(cur->LUA, 0);
+				lua_settop(cur->pLUA, 0);
 				return;
             }
         }

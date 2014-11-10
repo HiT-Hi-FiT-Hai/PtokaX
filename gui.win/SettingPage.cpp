@@ -44,10 +44,8 @@ int SettingPage::iTwoLineGB = 17 + (2 * 23) + 13;
 int SettingPage::iThreeLineGB = 17 + (3 * 23) + 18;
 //---------------------------------------------------------------------------
 
-SettingPage::SettingPage() {
-    m_hWnd = NULL;
-
-    bCreated = false;
+SettingPage::SettingPage() : m_hWnd(NULL), bCreated(false) {
+    // ...
 }
 //---------------------------------------------------------------------------
 

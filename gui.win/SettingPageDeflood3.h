@@ -131,6 +131,9 @@ private:
         LBL_RECONNECT_TIME_SECONDS,
     };
 
+    SettingPageDeflood3(const SettingPageDeflood3&);
+    const SettingPageDeflood3& operator=(const SettingPageDeflood3&);
+
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 //------------------------------------------------------------------------------

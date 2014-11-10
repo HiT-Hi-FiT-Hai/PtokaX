@@ -25,13 +25,18 @@
 class ServerThread {
 private:
     struct AntiConFlood {
+        AntiConFlood(const uint8_t * pIpHash);
+
+        AntiConFlood(const AntiConFlood&);
+        const AntiConFlood& operator=(const AntiConFlood&);
+
         uint8_t ui128IpHash[16];
 
-        uint64_t Time;
+        uint64_t ui64Time;
 
-        AntiConFlood *prev, *next;
+        AntiConFlood * pPrev, * pNext;
 
-        int16_t hits;
+        int16_t ui16Hits;
     };
 
 #ifdef _WIN32
@@ -46,20 +51,23 @@ private:
 #else
     int server;
 
-    unsigned int iSuspendTime;
-
     pthread_t threadId;
+
+	unsigned int iSuspendTime;
 
     pthread_mutex_t mtxServerThread;
 #endif
 
-	AntiConFlood *AntiFloodList;
+	AntiConFlood * pAntiFloodList;
 
     int iAdressFamily;
 
 	bool bTerminated;
+
+	ServerThread(const ServerThread&);
+	const ServerThread& operator=(const ServerThread&);
 public:
-    ServerThread *prev, *next;
+    ServerThread * pPrev, * pNext;
 
     uint16_t ui16Port;
 

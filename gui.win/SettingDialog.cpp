@@ -54,9 +54,8 @@ static ATOM atomSettingDialog = 0;
 //---------------------------------------------------------------------------
 
 clsSettingDialog::clsSettingDialog() {
-    memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
-
-    memset(&SettingPages, 0, 12 * sizeof(SettingPage *));
+    memset(&hWndWindowItems, 0, sizeof(hWndWindowItems));
+    memset(&SettingPages, 0, sizeof(SettingPages));
 
     SettingPages[0] = new (std::nothrow) SettingPageGeneral();
     SettingPages[1] = new (std::nothrow) SettingPageMOTD();

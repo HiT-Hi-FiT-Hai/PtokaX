@@ -4,6 +4,7 @@ PtokaX need for compiling packages (and url where to find sources when package i
     liblua5.2 + liblua5.2-dev			(names in Debian)   |   http://www.lua.org
     zlib1g + zlib1g-dev					(names in Debian)   |   http://zlib.net
     libtinyxml2.6.2 + libtinyxml-dev	(names in Debian)	|   http://sourceforge.net/projects/tinyxml
+    The Skein Hash Function Family                     		|   http://www.skein-hash.info/
 
 PtokaX was tested on debian where g++, make, lua (it can be any 5.2.x version, but in debian they always use only 5.2 in name), zlib and tinyxml is available as packages.
 

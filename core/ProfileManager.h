@@ -28,13 +28,19 @@ struct ProfileItem {
     ProfileItem();
     ~ProfileItem();
 
+    ProfileItem(const ProfileItem&);
+    const ProfileItem& operator=(const ProfileItem&);
+
     char *sName;
     bool bPermissions[256];
 };
 //---------------------------------------------------------------------------
 
 class clsProfileManager {
-private: 
+private:
+    clsProfileManager(const clsProfileManager&);
+    const clsProfileManager& operator=(const clsProfileManager&);
+
     static void CreateDefaultProfiles();
     ProfileItem * CreateProfile(const char * name);
 public:
@@ -99,8 +105,8 @@ public:
         NORECONNTIME
     };
 
-    uint16_t iProfileCount;
-    ProfileItem **ProfilesTable;
+    uint16_t ui16ProfileCount;
+    ProfileItem ** ppProfilesTable;
 
     clsProfileManager();
     ~clsProfileManager();

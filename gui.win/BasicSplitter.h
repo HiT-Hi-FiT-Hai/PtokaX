@@ -25,7 +25,7 @@
 class BasicSplitter {
 public:
     BasicSplitter();
-    ~BasicSplitter() { }
+    virtual ~BasicSplitter() { }
 
     bool BasicSplitterProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -34,6 +34,9 @@ public:
     RECT rcSplitter;
     int iSplitterPos, iPercentagePos;
 private:
+    BasicSplitter(const BasicSplitter&);
+    const BasicSplitter& operator=(const BasicSplitter&);
+
     virtual HWND GetWindowHandle() = NULL;
     virtual void UpdateSplitterParts() = NULL;
 

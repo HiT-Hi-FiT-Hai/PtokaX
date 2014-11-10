@@ -62,6 +62,9 @@ protected:
     void AddUpDown(HWND &hWnd, const int &iX, const int &iY, const int &iWidth, const int &iHeight, const LPARAM &lpRange, const WPARAM &wpBuddy, const LPARAM &lpPos);
     void AddToolTip(const HWND &hWnd, char * sTipText) const;
 private:
+    SettingPage(const SettingPage&);
+    const SettingPage& operator=(const SettingPage&);
+
     virtual LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam) = NULL;
 };
 //------------------------------------------------------------------------------

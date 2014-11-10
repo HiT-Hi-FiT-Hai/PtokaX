@@ -70,6 +70,9 @@ private:
         UD_MINUTES_BEFORE_ACCEPT_NEW_MYINFO
     };
 
+    SettingPageMyINFO(const SettingPageMyINFO&);
+    const SettingPageMyINFO& operator=(const SettingPageMyINFO&);
+
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 //------------------------------------------------------------------------------

@@ -38,7 +38,7 @@ static ATOM atomAboutDialog = 0;
 //---------------------------------------------------------------------------
 
 AboutDialog::AboutDialog() {
-    memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
+    memset(&hWndWindowItems, 0, sizeof(hWndWindowItems));
 
     hSpider = (HICON)::LoadImage(clsServerManager::hInstance, MAKEINTRESOURCE(IDR_MAINICONBIG), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
     hLua = (HICON)::LoadImage(clsServerManager::hInstance, MAKEINTRESOURCE(IDR_LUAICON), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);

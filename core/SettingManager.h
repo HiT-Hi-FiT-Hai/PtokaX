@@ -32,6 +32,9 @@ private:
 	pthread_mutex_t mtxSetting;
 #endif
 
+    clsSettingManager(const clsSettingManager&);
+    const clsSettingManager& operator=(const clsSettingManager&);
+
     void CreateDefaultMOTD();
     void LoadMOTD();
     void SaveMOTD();
@@ -70,13 +73,13 @@ public:
     char * sPreTexts[SETPRETXT_IDS_END]; //SettingManager->sPreTexts[]
     char * sTexts[SETTXT_IDS_END]; //SettingManager->sTexts[]
 
-    int16_t iShorts[SETSHORT_IDS_END]; //SettingManager->iShorts[]
+    int16_t i16Shorts[SETSHORT_IDS_END]; //SettingManager->i16Shorts[]
 
     uint16_t ui16MOTDLen;
     uint16_t ui16PreTextsLens[SETPRETXT_IDS_END]; //SettingManager->ui16PreTextsLens[]
     uint16_t ui16TextsLens[SETTXT_IDS_END]; //SettingManager->ui16TextsLens[]
     
-    uint16_t iPortNumbers[25]; //SettingManager->iPortNumbers[0]
+    uint16_t ui16PortNumbers[25]; //SettingManager->ui16PortNumbers[0]
 
     bool bBools[SETBOOL_IDS_END]; //SettingManager->bBools[]
     

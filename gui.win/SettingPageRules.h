@@ -96,6 +96,9 @@ private:
         UD_SEARCH_MAX_LEN
     };
 
+    SettingPageRules(const SettingPageRules&);
+    const SettingPageRules& operator=(const SettingPageRules&);
+
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 //------------------------------------------------------------------------------

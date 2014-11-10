@@ -42,6 +42,9 @@ private:
         REDT_UPDATE
     };
 
+    clsUpdateDialog(const clsUpdateDialog&);
+    const clsUpdateDialog& operator=(const clsUpdateDialog&);
+
     LRESULT UpdateDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 //------------------------------------------------------------------------------

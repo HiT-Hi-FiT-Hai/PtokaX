@@ -26,6 +26,9 @@
 
 class clsGuiSettingManager {
 private:
+    clsGuiSettingManager(const clsGuiSettingManager&);
+    const clsGuiSettingManager& operator=(const clsGuiSettingManager&);
+
     void Load();
 public:
     static clsGuiSettingManager * mPtr;
@@ -52,7 +55,7 @@ public:
     static WNDPROC wpOldTabsProc;
     static WNDPROC wpOldTreeProc;
 
-    int32_t iIntegers[GUISETINT_IDS_END]; //clsGuiSettingManager::mPtr->iIntegers[]
+    int32_t i32Integers[GUISETINT_IDS_END]; //clsGuiSettingManager::mPtr->iIntegers[]
 
     bool bBools[GUISETBOOL_IDS_END]; //clsGuiSettingManager::mPtr->bBools[]
 

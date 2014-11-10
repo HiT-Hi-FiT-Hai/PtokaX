@@ -37,10 +37,8 @@
 static ATOM atomRangeBanDialog = 0;
 //---------------------------------------------------------------------------
 
-clsRangeBanDialog::clsRangeBanDialog() {
-    memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
-
-    pRangeBanToChange = NULL;
+clsRangeBanDialog::clsRangeBanDialog() : pRangeBanToChange(NULL) {
+    memset(&hWndWindowItems, 0, sizeof(hWndWindowItems));
 }
 //---------------------------------------------------------------------------
 
@@ -259,7 +257,7 @@ void clsRangeBanDialog::DoModal(HWND hWndParent, RangeBanItem * pRangeBan/* = NU
 
             SYSTEMTIME stDateTime = { 0 };
 
-            struct tm *tm = localtime(&pRangeBanToChange->tempbanexpire);
+            struct tm *tm = localtime(&pRangeBanToChange->tTempBanExpire);
 
             stDateTime.wDay = (WORD)tm->tm_mday;
             stDateTime.wMonth = (WORD)(tm->tm_mon+1);
@@ -366,7 +364,7 @@ bool clsRangeBanDialog::OnAccept() {
 
 		if(bTempBan == true) {
 			pRangeBan->ui8Bits |= clsBanManager::TEMP;
-			pRangeBan->tempbanexpire = ban_time;
+			pRangeBan->tTempBanExpire = ban_time;
 		} else {
 			pRangeBan->ui8Bits |= clsBanManager::PERM;
 		}
@@ -382,14 +380,14 @@ bool clsRangeBanDialog::OnAccept() {
         }
 
 		RangeBanItem * curBan = NULL,
-            * nxtBan = clsBanManager::mPtr->RangeBanListS;
+            * nxtBan = clsBanManager::mPtr->pRangeBanListS;
 
 		// PPK ... don't add range ban if is already here same range ban
 		while(nxtBan != NULL) {
 			curBan = nxtBan;
-			nxtBan = curBan->next;
+			nxtBan = curBan->pNext;
 
-			if(((curBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true && acc_time > curBan->tempbanexpire) {
+			if(((curBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true && acc_time > curBan->tTempBanExpire) {
 				clsBanManager::mPtr->RemRange(curBan);
 				delete curBan;
 
@@ -442,7 +440,7 @@ bool clsRangeBanDialog::OnAccept() {
 			pRangeBanToChange->ui8Bits &= ~clsBanManager::PERM;
 
 			pRangeBanToChange->ui8Bits |= clsBanManager::TEMP;
-			pRangeBanToChange->tempbanexpire = ban_time;
+			pRangeBanToChange->tTempBanExpire = ban_time;
 		} else {
 			pRangeBanToChange->ui8Bits &= ~clsBanManager::TEMP;
 

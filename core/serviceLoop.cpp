@@ -60,6 +60,17 @@ clsServiceLoop * clsServiceLoop::mPtr = NULL;
 #endif
 //---------------------------------------------------------------------------
 
+clsServiceLoop::AcceptedSocket::AcceptedSocket() :
+#ifdef _WIN32
+	s(INVALID_SOCKET),
+#else
+	s(-1),
+#endif
+    pNext(NULL) {
+    // ...
+};
+//---------------------------------------------------------------------------
+
 #ifndef _WIN32
 static void RegTimerHandler() {
     if(clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG] == true && clsSettingManager::mPtr->sTexts[SETTXT_REGISTER_SERVERS] != NULL) {
@@ -123,7 +134,8 @@ void clsServiceLoop::Looper() {
 }
 //---------------------------------------------------------------------------
 
-clsServiceLoop::clsServiceLoop() {
+clsServiceLoop::clsServiceLoop() : ui64LstUptmTck(clsServerManager::ui64ActualTick), pAcceptedSocketsS(NULL), pAcceptedSocketsE(NULL), dLoggedUsers(0), dActualSrvLoopLogins(0),
+	ui32LastSendRest(0), ui32SendRestsPeak(0), ui32LastRecvRest(0), ui32RecvRestsPeak(0), ui32LoopsForLogins(0), bRecv(true) {
     msg[0] = '\0';
 
 #ifdef _WIN32
@@ -134,17 +146,8 @@ clsServiceLoop::clsServiceLoop() {
 	pthread_mutex_init(&mtxAcceptQueue, NULL);
 #endif
 
-    AcceptedSocketsS = NULL;
-    AcceptedSocketsE = NULL;
-    
-    bRecv = true;
-    
-    iLstUptmTck = clsServerManager::ui64ActualTick;
-
 	clsServerManager::bServerTerminated = false;
-	iSendRestsPeak = iRecvRestsPeak = iLastSendRest = iLastRecvRest = iLoopsForLogins = 0;
-	dLoggedUsers = dActualSrvLoopLogins = 0;
-
+	
 #ifdef _WIN32
 	srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
 
@@ -165,11 +168,11 @@ clsServiceLoop::clsServiceLoop() {
 
 clsServiceLoop::~clsServiceLoop() {
     AcceptedSocket * cursck = NULL,
-        * nextsck = AcceptedSocketsS;
+        * nextsck = pAcceptedSocketsS;
         
     while(nextsck != NULL) {
         cursck = nextsck;
-		nextsck = cursck->next;
+		nextsck = cursck->pNext;
 #ifdef _WIN32
 		shutdown(cursck->s, SD_SEND);
         closesocket(cursck->s);
@@ -180,8 +183,8 @@ clsServiceLoop::~clsServiceLoop() {
         delete cursck;
 	}
    
-    AcceptedSocketsS = NULL;
-    AcceptedSocketsE = NULL;
+    pAcceptedSocketsS = NULL;
+    pAcceptedSocketsE = NULL;
 
 #ifdef _WIN32
 	DeleteCriticalSection(&csAcceptQueue);
@@ -402,9 +405,9 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 		return;
 	}
 
-	pUser->uLogInOut = new (std::nothrow) LoginLogout();
+	pUser->pLogInOut = new (std::nothrow) LoginLogout();
 
-    if(pUser->uLogInOut == NULL) {
+    if(pUser->pLogInOut == NULL) {
 #ifdef _WIN32
 		shutdown(AccptSocket->s, SD_SEND);
 		closesocket(AccptSocket->s);
@@ -414,11 +417,11 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 #endif
         delete pUser;
 
-        AppendDebugLog("%s - [MEM] Cannot allocate uLogInOut in clsServiceLoop::AcceptUser\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate pLogInOut in clsServiceLoop::AcceptUser\n", 0);
 		return;
     }
 
-    pUser->uLogInOut->logonClk = clsServerManager::ui64ActualTick;
+    pUser->pLogInOut->ui64LogonTick = clsServerManager::ui64ActualTick;
     pUser->Sck = AccptSocket->s;
     pUser->ui8State = User::STATE_KEY_OR_SUP;
 
@@ -452,8 +455,8 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
         }
         int imsglen;
         char *messg = GenerateBanMessage(Ban, imsglen, acc_time);
-        pUser->uLogInOut->uBan = UserBan::CreateUserBan(messg, imsglen, hash);
-        if(pUser->uLogInOut->uBan == NULL) {
+        pUser->pLogInOut->pBan = UserBan::CreateUserBan(messg, imsglen, hash);
+        if(pUser->pLogInOut->pBan == NULL) {
 #ifdef _WIN32
             shutdown(AccptSocket->s, SD_SEND);
             closesocket(AccptSocket->s);
@@ -471,8 +474,8 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
     } else if(RangeBan != NULL) {
         int imsglen;
         char *messg = GenerateRangeBanMessage(RangeBan, imsglen, acc_time);
-        pUser->uLogInOut->uBan = UserBan::CreateUserBan(messg, imsglen, 0);
-        if(pUser->uLogInOut->uBan == NULL) {
+        pUser->pLogInOut->pBan = UserBan::CreateUserBan(messg, imsglen, 0);
+        if(pUser->pLogInOut->pBan == NULL) {
 #ifdef _WIN32
             shutdown(AccptSocket->s, SD_SEND);
             closesocket(AccptSocket->s);
@@ -515,7 +518,7 @@ void clsServiceLoop::ReceiveLoop() {
         clsServerManager::ui8SrCntr = 0;
     }
 
-    if(clsServerManager::ui64ActualTick-iLstUptmTck > 60) {
+    if(clsServerManager::ui64ActualTick-ui64LstUptmTck > 60) {
         time_t acctime;
         time(&acctime);
         acctime -= clsServerManager::tStartTime;
@@ -561,7 +564,7 @@ void clsServiceLoop::ReceiveLoop() {
 #endif
         }
 
-        iLstUptmTck = clsServerManager::ui64ActualTick;
+        ui64LstUptmTck = clsServerManager::ui64ActualTick;
     }
 
     AcceptedSocket * CurSck = NULL,
@@ -573,10 +576,10 @@ void clsServiceLoop::ReceiveLoop() {
 	pthread_mutex_lock(&mtxAcceptQueue);
 #endif
 
-    if(AcceptedSocketsS != NULL) {
-        NextSck = AcceptedSocketsS;
-        AcceptedSocketsS = NULL;
-        AcceptedSocketsE = NULL;
+    if(pAcceptedSocketsS != NULL) {
+        NextSck = pAcceptedSocketsS;
+        pAcceptedSocketsS = NULL;
+        pAcceptedSocketsE = NULL;
     }
 
 #ifdef _WIN32
@@ -587,22 +590,22 @@ void clsServiceLoop::ReceiveLoop() {
 
     while(NextSck != NULL) {
         CurSck = NextSck;
-        NextSck = CurSck->next;
+        NextSck = CurSck->pNext;
         AcceptUser(CurSck);
         delete CurSck;
     }
 
     User * curUser = NULL,
-        * nextUser = clsUsers::mPtr->llist;
+        * nextUser = clsUsers::mPtr->pListS;
 
     while(nextUser != 0 && clsServerManager::bServerTerminated == false) {
         curUser = nextUser;
-        nextUser = curUser->next;
+        nextUser = curUser->pNext;
 
         // PPK ... true == we have rest ;)
         if(curUser->DoRecv() == true) {
             iRecvRests++;
-            //Memo("Rest " + string(curUser->Nick, curUser->NickLen) + ": '" + string(curUser->recvbuf) + "'");
+            //Memo("Rest " + string(curUser->Nick, curUser->NickLen) + ": '" + string(curUser->pRecvBuf) + "'");
         }
 
         //    curUser->ProcessLines();
@@ -611,7 +614,7 @@ void clsServiceLoop::ReceiveLoop() {
         switch(curUser->ui8State) {
             case User::STATE_KEY_OR_SUP:{
                 // check logon timeout for iState 1
-                if(clsServerManager::ui64ActualTick - curUser->uLogInOut->logonClk > 20) {
+                if(clsServerManager::ui64ActualTick - curUser->pLogInOut->ui64LogonTick > 20) {
                     int imsgLen = sprintf(msg, "[SYS] Login timeout 1 for %s - user disconnected.", curUser->sIP);
                     if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::ReceiveLoop3") == true) {
                         clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
@@ -623,7 +626,7 @@ void clsServiceLoop::ReceiveLoop() {
             }
             case User::STATE_IPV4_CHECK: {
                 // check IPv4Check timeout
-                if((clsServerManager::ui64ActualTick - curUser->uLogInOut->ui64IPv4CheckTick) > 10) {
+                if((clsServerManager::ui64ActualTick - curUser->pLogInOut->ui64IPv4CheckTick) > 10) {
                     int imsgLen = sprintf(msg, "[SYS] IPv4Check timeout for %s (%s).", curUser->sNick, curUser->sIP);
                     if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::ReceiveLoop31") == true) {
                         clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
@@ -648,7 +651,7 @@ void clsServiceLoop::ReceiveLoop() {
             case User::STATE_ADDME_1LOOP: {
                 // PPK ... added login delay.
                 if(dLoggedUsers >= dActualSrvLoopLogins && ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
-                    if(clsServerManager::ui64ActualTick - curUser->uLogInOut->logonClk > 300) {
+                    if(clsServerManager::ui64ActualTick - curUser->pLogInOut->ui64LogonTick > 300) {
                         int imsgLen = sprintf(msg, "[SYS] Login timeout (%d) 3 for %s (%s) - user disconnected.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                         if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::ReceiveLoop4") == true) {
                             clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
@@ -682,7 +685,7 @@ void clsServiceLoop::ReceiveLoop() {
                 }
 
                 //New User Connected ... the user is operator ? invoke lua User/OpConnected
-                uint32_t iBeforeLuaLen = curUser->sbdatalen;
+                uint32_t iBeforeLuaLen = curUser->ui32SendBufDataLen;
 
 				bool bRet = clsScriptManager::mPtr->UserConnected(curUser);
 				if(curUser->ui8State >= User::STATE_CLOSING) {// connection closed by script?
@@ -693,20 +696,20 @@ void clsServiceLoop::ReceiveLoop() {
 					continue;
 				}
 
-                if(iBeforeLuaLen < curUser->sbdatalen) {
-                    size_t szNeededLen = curUser->sbdatalen-iBeforeLuaLen;
+                if(iBeforeLuaLen < curUser->ui32SendBufDataLen) {
+                    size_t szNeededLen = curUser->ui32SendBufDataLen-iBeforeLuaLen;
 
-					void * sOldBuf = curUser->uLogInOut->pBuffer;
+					void * sOldBuf = curUser->pLogInOut->pBuffer;
 #ifdef _WIN32
-					if(curUser->uLogInOut->pBuffer == NULL) {
-						curUser->uLogInOut->pBuffer = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededLen+1);
+					if(curUser->pLogInOut->pBuffer == NULL) {
+						curUser->pLogInOut->pBuffer = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededLen+1);
 					} else {
-						curUser->uLogInOut->pBuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, sOldBuf, szNeededLen+1);
+						curUser->pLogInOut->pBuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, sOldBuf, szNeededLen+1);
 					}
 #else
-					curUser->uLogInOut->pBuffer = (char *)realloc(sOldBuf, szNeededLen+1);
+					curUser->pLogInOut->pBuffer = (char *)realloc(sOldBuf, szNeededLen+1);
 #endif
-                    if(curUser->uLogInOut->pBuffer == NULL) {
+                    if(curUser->pLogInOut->pBuffer == NULL) {
                         curUser->ui32BoolBits |= User::BIT_ERROR;
                         curUser->Close();
 
@@ -714,11 +717,11 @@ void clsServiceLoop::ReceiveLoop() {
 
                 		continue;
                     }
-                    memcpy(curUser->uLogInOut->pBuffer, curUser->sendbuf+iBeforeLuaLen, szNeededLen);
-                	curUser->uLogInOut->iUserConnectedLen = (uint32_t)szNeededLen;
-                	curUser->uLogInOut->pBuffer[curUser->uLogInOut->iUserConnectedLen] = '\0';
-                	curUser->sbdatalen = iBeforeLuaLen;
-                	curUser->sendbuf[curUser->sbdatalen] = '\0';
+                    memcpy(curUser->pLogInOut->pBuffer, curUser->pSendBuf+iBeforeLuaLen, szNeededLen);
+                	curUser->pLogInOut->ui32UserConnectedLen = (uint32_t)szNeededLen;
+                	curUser->pLogInOut->pBuffer[curUser->pLogInOut->ui32UserConnectedLen] = '\0';
+                	curUser->ui32SendBufDataLen = iBeforeLuaLen;
+                	curUser->pSendBuf[curUser->ui32SendBufDataLen] = '\0';
                 }
 
                 // PPK ... wow user is accepted, now add it :)
@@ -770,40 +773,40 @@ void clsServiceLoop::ReceiveLoop() {
                 break;
             }
             case User::STATE_ADDED:
-                if(curUser->cmdToUserStrt != NULL) {
+                if(curUser->pCmdToUserStrt != NULL) {
                     PrcsdToUsrCmd * cur = NULL,
-                        * next = curUser->cmdToUserStrt;
+                        * next = curUser->pCmdToUserStrt;
                         
-                    curUser->cmdToUserStrt = NULL;
-                    curUser->cmdToUserEnd = NULL;
+                    curUser->pCmdToUserStrt = NULL;
+                    curUser->pCmdToUserEnd = NULL;
             
                     while(next != NULL) {
                         cur = next;
-                        next = cur->next;
+                        next = cur->pNext;
                                                
-                        if(cur->iLoops >= 2) {
-                            User * ToUser = clsHashManager::mPtr->FindUser(cur->ToNick, cur->iToNickLen);
-                            if(ToUser == cur->To) {
-                                if(clsSettingManager::mPtr->iShorts[SETSHORT_MAX_PM_COUNT_TO_USER] == 0 || cur->iPmCount == 0) {
-                                    cur->To->SendCharDelayed(cur->sCommand, cur->iLen);
+                        if(cur->ui32Loops >= 2) {
+                            User * ToUser = clsHashManager::mPtr->FindUser(cur->sToNick, cur->ui32ToNickLen);
+                            if(ToUser == cur->pTo) {
+                                if(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_PM_COUNT_TO_USER] == 0 || cur->ui32PmCount == 0) {
+                                    cur->pTo->SendCharDelayed(cur->sCommand, cur->ui32Len);
                                 } else {
-                                    if(cur->To->iReceivedPmCount == 0) {
-                                        cur->To->iReceivedPmTick = clsServerManager::ui64ActualTick;
-                                    } else if(cur->To->iReceivedPmCount >= (uint32_t)clsSettingManager::mPtr->iShorts[SETSHORT_MAX_PM_COUNT_TO_USER]) {
-                                        if(cur->To->iReceivedPmTick+60 < clsServerManager::ui64ActualTick) {
-                                            cur->To->iReceivedPmTick = clsServerManager::ui64ActualTick;
-                                            cur->To->iReceivedPmCount = 0;
+                                    if(cur->pTo->iReceivedPmCount == 0) {
+                                        cur->pTo->iReceivedPmTick = clsServerManager::ui64ActualTick;
+                                    } else if(cur->pTo->iReceivedPmCount >= (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_PM_COUNT_TO_USER]) {
+                                        if(cur->pTo->iReceivedPmTick+60 < clsServerManager::ui64ActualTick) {
+                                            cur->pTo->iReceivedPmTick = clsServerManager::ui64ActualTick;
+                                            cur->pTo->iReceivedPmCount = 0;
                                         } else {
                                             bool bSprintfCheck;
                                             int imsgLen;
-                                            if(cur->iPmCount == 1) {
-                                                imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s %s %s!|", curUser->sNick, cur->ToNick, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
-                                                    clsLanguageManager::mPtr->sTexts[LAN_SRY_LST_MSG_BCS], cur->ToNick, clsLanguageManager::mPtr->sTexts[LAN_EXC_MSG_LIMIT]);
+                                            if(cur->ui32PmCount == 1) {
+                                                imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s %s %s!|", curUser->sNick, cur->sToNick, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
+                                                    clsLanguageManager::mPtr->sTexts[LAN_SRY_LST_MSG_BCS], cur->sToNick, clsLanguageManager::mPtr->sTexts[LAN_EXC_MSG_LIMIT]);
                                                 bSprintfCheck = CheckSprintf(imsgLen, 1024, "clsServiceLoop::ReceiveLoop1");
                                             } else {
-                                                imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s %lu %s %s %s!|", curUser->sNick, cur->ToNick,
-                                                    clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_LAST], (unsigned long)cur->iPmCount,
-                                                    clsLanguageManager::mPtr->sTexts[LAN_MSGS_NOT_SENT], cur->ToNick, clsLanguageManager::mPtr->sTexts[LAN_EXC_MSG_LIMIT]);
+                                                imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s %lu %s %s %s!|", curUser->sNick, cur->sToNick,
+                                                    clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_LAST], (unsigned long)cur->ui32PmCount,
+                                                    clsLanguageManager::mPtr->sTexts[LAN_MSGS_NOT_SENT], cur->sToNick, clsLanguageManager::mPtr->sTexts[LAN_EXC_MSG_LIMIT]);
                                                 bSprintfCheck = CheckSprintf(imsgLen, 1024, "clsServiceLoop::ReceiveLoop2");
                                             }
                                             if(bSprintfCheck == true) {
@@ -820,32 +823,32 @@ void clsServiceLoop::ReceiveLoop() {
                                             cur->sCommand = NULL;
 
 #ifdef _WIN32
-                                            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->ToNick) == 0) {
+                                            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sToNick) == 0) {
 												AppendDebugLog("%s - [MEM] Cannot deallocate cur->ToNick in clsServiceLoop::ReceiveLoop\n", 0);
                                             }
 #else
-											free(cur->ToNick);
+											free(cur->sToNick);
 #endif
-                                            cur->ToNick = NULL;
+                                            cur->sToNick = NULL;
         
                                             delete cur;
 
                                             continue;
                                         }
                                     }  
-                                    cur->To->SendCharDelayed(cur->sCommand, cur->iLen);
-                                    cur->To->iReceivedPmCount += cur->iPmCount;
+                                    cur->pTo->SendCharDelayed(cur->sCommand, cur->ui32Len);
+                                    cur->pTo->iReceivedPmCount += cur->ui32PmCount;
                                 }
                             }
                         } else {
-                            cur->iLoops++;
-                            if(curUser->cmdToUserStrt == NULL) {
-                                cur->next = NULL;
-                                curUser->cmdToUserStrt = cur;
-                                curUser->cmdToUserEnd = cur;
+                            cur->ui32Loops++;
+                            if(curUser->pCmdToUserStrt == NULL) {
+                                cur->pNext = NULL;
+                                curUser->pCmdToUserStrt = cur;
+                                curUser->pCmdToUserEnd = cur;
                             } else {
-                                curUser->cmdToUserEnd->next = cur;
-                                curUser->cmdToUserEnd = cur;
+                                curUser->pCmdToUserEnd->pNext = cur;
+                                curUser->pCmdToUserEnd = cur;
                             }
                             continue;
                         }
@@ -860,31 +863,31 @@ void clsServiceLoop::ReceiveLoop() {
                         cur->sCommand = NULL;
 
 #ifdef _WIN32
-                        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->ToNick) == 0) {
+                        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sToNick) == 0) {
 							AppendDebugLog("%s - [MEM] Cannot deallocate cur->ToNick1 in clsServiceLoop::ReceiveLoop\n", 0);
                         }
 #else
-						free(cur->ToNick);
+						free(cur->sToNick);
 #endif
-                        cur->ToNick = NULL;
+                        cur->sToNick = NULL;
         
                         delete cur;
 					}
                 }
         
                 if(clsServerManager::ui8SrCntr == 0) {
-                    if(curUser->cmdActive6Search != NULL) {
-						if(curUser->cmdActive4Search != NULL) {
-							clsGlobalDataQueue::mPtr->AddQueueItem(curUser->cmdActive6Search->sCommand, curUser->cmdActive6Search->iLen, 
-								curUser->cmdActive4Search->sCommand, curUser->cmdActive4Search->iLen, clsGlobalDataQueue::CMD_ACTIVE_SEARCH_V64);
+                    if(curUser->pCmdActive6Search != NULL) {
+						if(curUser->pCmdActive4Search != NULL) {
+							clsGlobalDataQueue::mPtr->AddQueueItem(curUser->pCmdActive6Search->sCommand, curUser->pCmdActive6Search->ui32Len,
+								curUser->pCmdActive4Search->sCommand, curUser->pCmdActive4Search->ui32Len, clsGlobalDataQueue::CMD_ACTIVE_SEARCH_V64);
 						} else {
-							clsGlobalDataQueue::mPtr->AddQueueItem(curUser->cmdActive6Search->sCommand, curUser->cmdActive6Search->iLen, NULL, 0, clsGlobalDataQueue::CMD_ACTIVE_SEARCH_V6);
+							clsGlobalDataQueue::mPtr->AddQueueItem(curUser->pCmdActive6Search->sCommand, curUser->pCmdActive6Search->ui32Len, NULL, 0, clsGlobalDataQueue::CMD_ACTIVE_SEARCH_V6);
 						}
-                    } else if(curUser->cmdActive4Search != NULL) {
-						clsGlobalDataQueue::mPtr->AddQueueItem(curUser->cmdActive4Search->sCommand, curUser->cmdActive4Search->iLen, NULL, 0, clsGlobalDataQueue::CMD_ACTIVE_SEARCH_V4);
+                    } else if(curUser->pCmdActive4Search != NULL) {
+						clsGlobalDataQueue::mPtr->AddQueueItem(curUser->pCmdActive4Search->sCommand, curUser->pCmdActive4Search->ui32Len, NULL, 0, clsGlobalDataQueue::CMD_ACTIVE_SEARCH_V4);
 					}
 
-                    if(curUser->cmdPassiveSearch != NULL) {
+                    if(curUser->pCmdPassiveSearch != NULL) {
 						uint8_t ui8CmdType = clsGlobalDataQueue::CMD_PASSIVE_SEARCH_V4;
 						if((curUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
 							if((curUser->ui32BoolBits & User::BIT_IPV4) == User::BIT_IPV4) {
@@ -900,17 +903,17 @@ void clsServiceLoop::ReceiveLoop() {
                             }
 						}
 
-						clsGlobalDataQueue::mPtr->AddQueueItem(curUser->cmdPassiveSearch->sCommand, curUser->cmdPassiveSearch->iLen, NULL, 0, ui8CmdType);
+						clsGlobalDataQueue::mPtr->AddQueueItem(curUser->pCmdPassiveSearch->sCommand, curUser->pCmdPassiveSearch->ui32Len, NULL, 0, ui8CmdType);
 
-                        User::DeletePrcsdUsrCmd(curUser->cmdPassiveSearch);
-                        curUser->cmdPassiveSearch = NULL;
+                        User::DeletePrcsdUsrCmd(curUser->pCmdPassiveSearch);
+                        curUser->pCmdPassiveSearch = NULL;
                     }
                 }
 
                 // PPK ... deflood memory cleanup, if is not needed anymore
 				if(clsServerManager::ui8SrCntr == 0) {
 					if(curUser->sLastChat != NULL && curUser->ui16LastChatLines < 2 && 
-                        (curUser->ui64SameChatsTick+clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MAIN_CHAT_TIME]) < clsServerManager::ui64ActualTick) {
+                        (curUser->ui64SameChatsTick+clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MAIN_CHAT_TIME]) < clsServerManager::ui64ActualTick) {
 #ifdef _WIN32
                         if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->sLastChat) == 0) {
                             AppendDebugLog("%s - [MEM] Cannot deallocate curUser->sLastChat in clsServiceLoop::ReceiveLoop\n", 0);
@@ -925,7 +928,7 @@ void clsServiceLoop::ReceiveLoop() {
                     }
 
 					if(curUser->sLastPM != NULL && curUser->ui16LastPmLines < 2 && 
-                        (curUser->ui64SamePMsTick+clsSettingManager::mPtr->iShorts[SETSHORT_SAME_PM_TIME]) < clsServerManager::ui64ActualTick) {
+                        (curUser->ui64SamePMsTick+clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_PM_TIME]) < clsServerManager::ui64ActualTick) {
 #ifdef _WIN32
 						if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->sLastPM) == 0) {
 							AppendDebugLog("%s - [MEM] Cannot deallocate curUser->sLastPM in clsServiceLoop::ReceiveLoop\n", 0);
@@ -939,7 +942,7 @@ void clsServiceLoop::ReceiveLoop() {
                         curUser->ui16LastPmLines = 0;
                     }
                     
-					if(curUser->sLastSearch != NULL && (curUser->ui64SameSearchsTick+clsSettingManager::mPtr->iShorts[SETSHORT_SAME_SEARCH_TIME]) < clsServerManager::ui64ActualTick) {
+					if(curUser->sLastSearch != NULL && (curUser->ui64SameSearchsTick+clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_SEARCH_TIME]) < clsServerManager::ui64ActualTick) {
 #ifdef _WIN32
                         if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->sLastSearch) == 0) {
 							AppendDebugLog("%s - [MEM] Cannot deallocate curUser->sLastSearch in clsServiceLoop::ReceiveLoop\n", 0);
@@ -953,10 +956,10 @@ void clsServiceLoop::ReceiveLoop() {
                 }
                 continue;
             case User::STATE_CLOSING: {
-                if(((curUser->ui32BoolBits & User::BIT_ERROR) == User::BIT_ERROR) == false && curUser->sbdatalen != 0) {
-                  	if(curUser->uLogInOut->iToCloseLoops != 0 || ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true) {
+                if(((curUser->ui32BoolBits & User::BIT_ERROR) == User::BIT_ERROR) == false && curUser->ui32SendBufDataLen != 0) {
+                  	if(curUser->pLogInOut->ui32ToCloseLoops != 0 || ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true) {
                 		curUser->Try2Send();
-                		curUser->uLogInOut->iToCloseLoops--;
+                		curUser->pLogInOut->ui32ToCloseLoops--;
                 		continue;
                 	}
                 }
@@ -981,7 +984,7 @@ void clsServiceLoop::ReceiveLoop() {
             }
             default: {
                 // check logon timeout
-                if(clsServerManager::ui64ActualTick - curUser->uLogInOut->logonClk > 60) {
+                if(clsServerManager::ui64ActualTick - curUser->pLogInOut->ui64LogonTick > 60) {
                     int imsgLen = sprintf(msg, "[SYS] Login timeout (%d) 2 for %s (%s) - user disconnected.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
                     if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::ReceiveLoop7") == true) {
                         clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
@@ -999,8 +1002,8 @@ void clsServiceLoop::ReceiveLoop() {
         clsUsers::mPtr->ui16PasSearchs = 0;
     }
 
-    iLastRecvRest = iRecvRests;
-    iRecvRestsPeak = iRecvRests > iRecvRestsPeak ? iRecvRests : iRecvRestsPeak;
+    ui32LastRecvRest = iRecvRests;
+    ui32RecvRestsPeak = iRecvRests > ui32RecvRestsPeak ? iRecvRests : ui32RecvRestsPeak;
 }
 //---------------------------------------------------------------------------
 
@@ -1014,11 +1017,11 @@ void clsServiceLoop::SendLoop() {
     uint32_t iSendRests = 0;
 
     User * curUser = NULL,
-        * nextUser = clsUsers::mPtr->llist;
+        * nextUser = clsUsers::mPtr->pListS;
 
     while(nextUser != 0 && clsServerManager::bServerTerminated == false) {
         curUser = nextUser;
-        nextUser = curUser->next;
+        nextUser = curUser->pNext;
 
         switch(curUser->ui8State) {
             case User::STATE_ADDME_2LOOP: {
@@ -1026,7 +1029,7 @@ void clsServiceLoop::SendLoop() {
 
                 if(clsServerManager::ui32Peak < clsServerManager::ui32Logged) {
                     clsServerManager::ui32Peak = clsServerManager::ui32Logged;
-                    if(clsSettingManager::mPtr->iShorts[SETSHORT_MAX_USERS_PEAK] < (int16_t)clsServerManager::ui32Peak)
+                    if(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_USERS_PEAK] < (int16_t)clsServerManager::ui32Peak)
                         clsSettingManager::mPtr->SetShort(SETSHORT_MAX_USERS_PEAK, (int16_t)clsServerManager::ui32Peak);
                 }
 
@@ -1050,9 +1053,9 @@ void clsServiceLoop::SendLoop() {
                 // PPK ... send motd ???
                 if(clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_MOTD] != 0) {
                     if(clsSettingManager::mPtr->bBools[SETBOOL_MOTD_AS_PM] == true) {
-                        int imsgLen = sprintf(clsServerManager::sGlobalBuffer, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_MOTD], curUser->sNick);
+                        int imsgLen = sprintf(clsServerManager::pGlobalBuffer, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_MOTD], curUser->sNick);
                         if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsServiceLoop::SendLoop2") == true) {
-                            curUser->SendCharDelayed(clsServerManager::sGlobalBuffer, imsgLen);
+                            curUser->SendCharDelayed(clsServerManager::pGlobalBuffer, imsgLen);
                         }
                     } else {
                         curUser->SendCharDelayed(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_MOTD],
@@ -1064,18 +1067,18 @@ void clsServiceLoop::SendLoop() {
                 if(((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true)
                     clsUdpDebug::mPtr->CheckUdpSub(curUser, true);
 
-                if(curUser->uLogInOut->iUserConnectedLen != 0) {
-                    curUser->PutInSendBuf(curUser->uLogInOut->pBuffer, curUser->uLogInOut->iUserConnectedLen);
+                if(curUser->pLogInOut->ui32UserConnectedLen != 0) {
+                    curUser->PutInSendBuf(curUser->pLogInOut->pBuffer, curUser->pLogInOut->ui32UserConnectedLen);
 
                     curUser->FreeBuffer();
                 }
 
                 // Login struct no more needed, free mem ! ;)
-                delete curUser->uLogInOut;
-                curUser->uLogInOut = NULL;
+                delete curUser->pLogInOut;
+                curUser->pLogInOut = NULL;
 
             	// PPK ... send all login data from buffer !
-            	if(curUser->sbdatalen > 0) {
+            	if(curUser->ui32SendBufDataLen != 0) {
                     curUser->Try2Send();
                 }
                     
@@ -1099,7 +1102,7 @@ void clsServiceLoop::SendLoop() {
 
                 // send data acumulated by queues above
                 // if sending caused error, close the user
-                if(curUser->sbdatalen != 0) {
+                if(curUser->ui32SendBufDataLen != 0) {
                     // PPK ... true = we have rest ;)
                 	if(curUser->Try2Send() == true) {
                 	    iSendRests++;
@@ -1111,7 +1114,7 @@ void clsServiceLoop::SendLoop() {
             case User::STATE_REMME:
                 continue;
             default:
-                if(curUser->sbdatalen > 0) {
+                if(curUser->ui32SendBufDataLen != 0) {
                     curUser->Try2Send();
                 }
                 break;
@@ -1120,17 +1123,17 @@ void clsServiceLoop::SendLoop() {
 
     clsGlobalDataQueue::mPtr->ClearQueues();
 
-    if(iLoopsForLogins >= 40) {
+    if(ui32LoopsForLogins >= 40) {
         dLoggedUsers = 0;
-        iLoopsForLogins = 0;
+        ui32LoopsForLogins = 0;
         dActualSrvLoopLogins = 0;
     }
 
-    dActualSrvLoopLogins += (double)clsSettingManager::mPtr->iShorts[SETSHORT_MAX_SIMULTANEOUS_LOGINS]/40;
-    iLoopsForLogins++;
+    dActualSrvLoopLogins += (double)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SIMULTANEOUS_LOGINS]/40;
+    ui32LoopsForLogins++;
 
-    iLastSendRest = iSendRests;
-    iSendRestsPeak = iSendRests > iSendRestsPeak ? iSendRests : iSendRestsPeak;
+    ui32LastSendRest = iSendRests;
+    ui32SendRestsPeak = iSendRests > ui32SendRestsPeak ? iSendRests : ui32SendRestsPeak;
 }
 //---------------------------------------------------------------------------
 
@@ -1139,7 +1142,7 @@ void clsServiceLoop::AcceptSocket(const SOCKET &s, const sockaddr_storage &addr)
 #else
 void clsServiceLoop::AcceptSocket(const int &s, const sockaddr_storage &addr) {
 #endif
-    AcceptedSocket * pNewSocket = new (std::nothrow) AcceptedSocket;
+    AcceptedSocket * pNewSocket = new (std::nothrow) AcceptedSocket();
     if(pNewSocket == NULL) {
 #ifdef _WIN32
 		shutdown(s, SD_SEND);
@@ -1157,7 +1160,7 @@ void clsServiceLoop::AcceptSocket(const int &s, const sockaddr_storage &addr) {
 
     memcpy(&pNewSocket->addr, &addr, sizeof(sockaddr_storage));
 
-    pNewSocket->next = NULL;
+    pNewSocket->pNext = NULL;
 
 #ifdef _WIN32
     EnterCriticalSection(&csAcceptQueue);
@@ -1165,12 +1168,12 @@ void clsServiceLoop::AcceptSocket(const int &s, const sockaddr_storage &addr) {
     pthread_mutex_lock(&mtxAcceptQueue);
 #endif
 
-    if(AcceptedSocketsS == NULL) {
-        AcceptedSocketsS = pNewSocket;
-        AcceptedSocketsE = pNewSocket;
+    if(pAcceptedSocketsS == NULL) {
+        pAcceptedSocketsS = pNewSocket;
+        pAcceptedSocketsE = pNewSocket;
     } else {
-        AcceptedSocketsE->next = pNewSocket;
-        AcceptedSocketsE = pNewSocket;
+        pAcceptedSocketsE->pNext = pNewSocket;
+        pAcceptedSocketsE = pNewSocket;
     }
 
 #ifdef _WIN32

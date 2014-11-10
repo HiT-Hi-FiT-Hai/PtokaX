@@ -26,11 +26,14 @@ struct UserBan {
     UserBan();
     ~UserBan();
 
+    UserBan(const UserBan&);
+    const UserBan& operator=(const UserBan&);
+
     char * sMessage;
 
     uint32_t ui32Len, ui32NickHash;
 
-    static UserBan * CreateUserBan(char * sMess, const uint32_t &iMessLen, const uint32_t &ui32Hash);
+    static UserBan * CreateUserBan(char * sMess, const uint32_t &ui32MessLen, const uint32_t &ui32Hash);
 };
 //---------------------------------------------------------------------------
 
@@ -38,17 +41,25 @@ struct LoginLogout {
     LoginLogout();
     ~LoginLogout();
 
-    uint64_t logonClk, ui64IPv4CheckTick;
+    LoginLogout(const LoginLogout&);
+    const LoginLogout& operator=(const LoginLogout&);
 
-    uint32_t iToCloseLoops, iUserConnectedLen;
+    uint64_t ui64LogonTick, ui64IPv4CheckTick;
+
+    uint32_t ui32ToCloseLoops, ui32UserConnectedLen;
 
     char * pBuffer;
 
-    UserBan *uBan;
+    UserBan * pBan;
 };
 //---------------------------------------------------------------------------
 
 struct PrcsdUsrCmd {
+    PrcsdUsrCmd() : ui32Len(0), sCommand(NULL), pNext(NULL), pPtr(NULL), ui8Type(0) { };
+
+    PrcsdUsrCmd(const PrcsdUsrCmd&);
+    const PrcsdUsrCmd& operator=(const PrcsdUsrCmd&);
+
     enum PrcsdCmdsIds {
         CTM_MCTM_RCTM_SR_TO,
         SUPPORTS,
@@ -58,11 +69,15 @@ struct PrcsdUsrCmd {
         TO_OP_CHAT
     };
 
-    uint32_t iLen;
+    uint32_t ui32Len;
+
     char * sCommand;
-    PrcsdUsrCmd *next;
-    void * ptr;
-    unsigned char cType;
+
+    PrcsdUsrCmd * pNext;
+
+    void * pPtr;
+
+    uint8_t ui8Type;
 };
 //---------------------------------------------------------------------------
 
@@ -71,10 +86,18 @@ struct User; // needed for next struct, and next struct must be defined before u
 //---------------------------------------------------------------------------
 
 struct PrcsdToUsrCmd {
-    uint32_t iLen, iPmCount, iLoops, iToNickLen;
-    char * sCommand, * ToNick;
-    PrcsdToUsrCmd *next;
-    User *To;
+    PrcsdToUsrCmd() : ui32Len(0), ui32PmCount(0), ui32Loops(0), ui32ToNickLen(0), sCommand(NULL), sToNick(NULL), pNext(NULL), pTo(NULL) { };
+
+    PrcsdToUsrCmd(const PrcsdToUsrCmd&);
+    const PrcsdToUsrCmd& operator=(const PrcsdToUsrCmd&);
+
+    uint32_t ui32Len, ui32PmCount, ui32Loops, ui32ToNickLen;
+
+    char * sCommand, * sToNick;
+
+    PrcsdToUsrCmd * pNext;
+
+    User * pTo;
 };
 //---------------------------------------------------------------------------
 struct QzBuf; // for send queue
@@ -83,6 +106,9 @@ struct QzBuf; // for send queue
 struct User {
 	User();
 	~User();
+
+    User(const User&);
+    const User& operator=(const User&);
 
 	bool MakeLock();
 	bool DoRecv();
@@ -118,7 +144,7 @@ struct User {
 
     bool ProcessRules();
 
-    void AddPrcsdCmd(const unsigned char &cType, char * sCommand, const size_t &szCommandLen, User * to, const bool &bIsPm = false);
+    void AddPrcsdCmd(const uint8_t &ui8Type, char * sCommand, const size_t &szCommandLen, User * to, const bool &bIsPm = false);
 
     void AddMeOrIPv4Check();
 
@@ -224,33 +250,33 @@ struct User {
 	int Sck;
 #endif
 
-    time_t LoginTime;
+    time_t tLoginTime;
 
-    uint32_t sendbuflen, recvbuflen, sbdatalen, rbdatalen;
+    uint32_t ui32SendBufLen, ui32RecvBufLen, ui32SendBufDataLen, ui32RecvBufDataLen;
 
     uint32_t ui32NickHash;
 
-    int32_t iProfile;
+    int32_t i32Profile;
 
     char * sNick, *sVersion;
     char * sMyInfoOriginal, *sMyInfoShort, *sMyInfoLong;
     char * sDescription, *sTag, *sConnection, *sEmail;
     char * sClient, *sTagVersion;
     char * sLastChat, *sLastPM, *sLastSearch;
-    char * sendbuf, *recvbuf, *sbplayhead;
+    char * pSendBuf, * pRecvBuf, * pSendBufHead;
     char * sChangedDescriptionShort, *sChangedDescriptionLong, *sChangedTagShort, *sChangedTagLong;
     char * sChangedConnectionShort, *sChangedConnectionLong, *sChangedEmailShort, *sChangedEmailLong;
     
-    unsigned char MagicByte;
+    uint8_t ui8MagicByte;
     
-    LoginLogout *uLogInOut;
+    LoginLogout * pLogInOut;
 
-    PrcsdToUsrCmd *cmdToUserStrt, *cmdToUserEnd;
+    PrcsdToUsrCmd * pCmdToUserStrt, * pCmdToUserEnd;
 
-    PrcsdUsrCmd *cmdStrt, *cmdEnd, 
-        * cmdActive4Search, * cmdActive6Search, * cmdPassiveSearch;
+    PrcsdUsrCmd * pCmdStrt, * pCmdEnd,
+        * pCmdActive4Search, * pCmdActive6Search, * pCmdPassiveSearch;
 
-    User *prev, *next, *hashtableprev, *hashtablenext, *hashiptableprev, *hashiptablenext;
+    User * pPrev, * pNext, * pHashTablePrev, * pHashTableNext, * pHashIpTablePrev, * pHashIpTableNext;
 
     uint16_t ui16MyInfoOriginalLen, ui16MyInfoShortLen, ui16MyInfoLongLen;
     uint16_t ui16GetNickLists, ui16MyINFOs, ui16Searchs, ui16ChatMsgs, ui16PMs;

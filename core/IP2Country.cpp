@@ -461,21 +461,8 @@ void clsIpP2Country::LoadIPv6() {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-clsIpP2Country::clsIpP2Country() {
-    ui32Count = 0;
-    ui32Size = 0;
-
-	ui32RangeFrom = NULL;
-    ui32RangeTo = NULL;
-    ui8RangeCI = NULL;
-
-    ui32IPv6Count = 0;
-    ui32IPv6Size = 0;
-
-	ui128IPv6RangeFrom = NULL;
-    ui128IPv6RangeTo = NULL;
-    ui8IPv6RangeCI = NULL;
-
+clsIpP2Country::clsIpP2Country() : ui32Size(0), ui32IPv6Size(0), ui32RangeFrom(NULL), ui32RangeTo(NULL), ui8RangeCI(NULL), ui8IPv6RangeCI(NULL),
+	ui128IPv6RangeFrom(NULL), ui128IPv6RangeTo(NULL), ui32Count(0), ui32IPv6Count(0) {
     LoadIPv4();
     LoadIPv6();
 }

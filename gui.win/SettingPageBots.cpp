@@ -32,12 +32,10 @@
 #pragma hdrstop
 //---------------------------------------------------------------------------
 
-SettingPageBots::SettingPageBots() {
-	bUpdateHubSec = bUpdateMOTD = bUpdateHubNameWelcome = bUpdateRegOnlyMessage = bUpdateShareLimitMessage = bUpdateSlotsLimitMessage = false;
-	bUpdateHubSlotRatioMessage = bUpdateMaxHubsLimitMessage = bUpdateNoTagMessage = bUpdateNickLimitMessage = bUpdateBotsSameNick = false;
-	bBotNickChanged = bUpdateBot = bOpChatNickChanged = bUpdateOpChat = false;
-
-    memset(&hWndPageItems, 0, (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])) * sizeof(HWND));
+SettingPageBots::SettingPageBots() : bUpdateHubSec(false), bUpdateMOTD(false), bUpdateHubNameWelcome(false), bUpdateRegOnlyMessage(false), bUpdateShareLimitMessage(false), bUpdateSlotsLimitMessage(false),
+	bUpdateHubSlotRatioMessage(false), bUpdateMaxHubsLimitMessage(false), bUpdateNoTagMessage(false), bUpdateNickLimitMessage(false), bUpdateBotsSameNick(false),
+	bBotNickChanged(false), bUpdateBot(false), bOpChatNickChanged(false), bUpdateOpChat(false) {
+    memset(&hWndPageItems, 0, sizeof(hWndPageItems));
 }
 //---------------------------------------------------------------------------
 

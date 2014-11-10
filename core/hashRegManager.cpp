@@ -36,7 +36,7 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-#include "../core/PXBReader.h"
+#include "PXBReader.h"
 //---------------------------------------------------------------------------
 #ifdef _BUILD_GUI
     #include "../gui.win/RegisteredUserDialog.h"
@@ -46,25 +46,9 @@
 clsRegManager * clsRegManager::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-RegUser::RegUser() {
-    sNick = NULL;
+RegUser::RegUser() : sNick(NULL), pPrev(NULL), pNext(NULL), pHashTablePrev(NULL), pHashTableNext(NULL), tLastBadPass(0), ui32Hash(0), ui16Profile(0),
+	ui8BadPassCount(0), bPassHash(false){
     sPass = NULL;
-
-    prev = NULL;
-    next = NULL;
-
-    hashtableprev = NULL;
-    hashtablenext = NULL;
-
-    tLastBadPass = 0;
-
-    ui32Hash = 0;
-
-    ui16Profile = 0;
-
-    ui8BadPassCount = 0;
-
-    bPassHash = false;
 }
 //---------------------------------------------------------------------------
 
@@ -225,9 +209,9 @@ bool RegUser::UpdatePassword(char * sNewPass, size_t &szNewLen) {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 clsRegManager::clsRegManager(void) {
-    RegListS = RegListE = NULL;
+    pRegListS = pRegListE = NULL;
 
-    memset(table, 0, sizeof(table));
+    memset(pTable, 0, sizeof(pTable));
 
     ui8SaveCalls = 0;
 }
@@ -235,11 +219,11 @@ clsRegManager::clsRegManager(void) {
 
 clsRegManager::~clsRegManager(void) {
     RegUser * curReg = NULL,
-        * next = RegListS;
+        * next = pRegListS;
         
     while(next != NULL) {
         curReg = next;
-		next = curReg->next;
+		next = curReg->pNext;
 
 		delete curReg;
     }
@@ -291,7 +275,7 @@ bool clsRegManager::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfil
 
     if(AddedUser != NULL) {
         bool bAllowedOpChat = clsProfileManager::mPtr->IsAllowed(AddedUser, clsProfileManager::ALLOWEDOPCHAT);
-        AddedUser->iProfile = iProfile;
+        AddedUser->i32Profile = iProfile;
 
         if(((AddedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
             if(clsProfileManager::mPtr->IsAllowed(AddedUser, clsProfileManager::HASKEYICON) == true) {
@@ -333,13 +317,13 @@ bool clsRegManager::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfil
 void clsRegManager::Add(RegUser * Reg) {
 	Add2Table(Reg);
     
-    if(RegListE == NULL) {
-    	RegListS = Reg;
-    	RegListE = Reg;
+    if(pRegListE == NULL) {
+    	pRegListS = Reg;
+    	pRegListE = Reg;
     } else {
-        Reg->prev = RegListE;
-    	RegListE->next = Reg;
-        RegListE = Reg;
+        Reg->pPrev = pRegListE;
+    	pRegListE->pNext = Reg;
+        pRegListE = Reg;
     }
 
 	return;
@@ -350,12 +334,12 @@ void clsRegManager::Add2Table(RegUser * Reg) {
     uint16_t ui16dx = 0;
     memcpy(&ui16dx, &Reg->ui32Hash, sizeof(uint16_t));
 
-    if(table[ui16dx] != NULL) {
-        table[ui16dx]->hashtableprev = Reg;
-        Reg->hashtablenext = table[ui16dx];
+    if(pTable[ui16dx] != NULL) {
+        pTable[ui16dx]->pHashTablePrev = Reg;
+        Reg->pHashTableNext = pTable[ui16dx];
     }
     
-    table[ui16dx] = Reg;
+    pTable[ui16dx] = Reg;
 }
 //---------------------------------------------------------------------------
 
@@ -382,10 +366,10 @@ void clsRegManager::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t 
     }
 
     User *ChangedUser = clsHashManager::mPtr->FindUser(pReg->sNick, strlen(pReg->sNick));
-    if(ChangedUser != NULL && ChangedUser->iProfile != (int32_t)ui16NewProfile) {
+    if(ChangedUser != NULL && ChangedUser->i32Profile != (int32_t)ui16NewProfile) {
         bool bAllowedOpChat = clsProfileManager::mPtr->IsAllowed(ChangedUser, clsProfileManager::ALLOWEDOPCHAT);
 
-        ChangedUser->iProfile = (int32_t)ui16NewProfile;
+        ChangedUser->i32Profile = (int32_t)ui16NewProfile;
 
         if(((ChangedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) !=
             clsProfileManager::mPtr->IsAllowed(ChangedUser, clsProfileManager::HASKEYICON)) {
@@ -446,7 +430,7 @@ void clsRegManager::Delete(RegUser * pReg, const bool &/*bFromGui = false*/) {
         User * pRemovedUser = clsHashManager::mPtr->FindUser(pReg->sNick, strlen(pReg->sNick));
 
         if(pRemovedUser != NULL) {
-            pRemovedUser->iProfile = -1;
+            pRemovedUser->i32Profile = -1;
             if(((pRemovedUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
                 clsUsers::mPtr->DelFromOpList(pRemovedUser->sNick);
                 pRemovedUser->ui32BoolBits &= ~User::BIT_OPERATOR;
@@ -486,46 +470,46 @@ void clsRegManager::Rem(RegUser * Reg) {
 	RemFromTable(Reg);
     
     RegUser *prev, *next;
-    prev = Reg->prev; next = Reg->next;
+    prev = Reg->pPrev; next = Reg->pNext;
 
     if(prev == NULL) {
         if(next == NULL) {
-            RegListS = NULL;
-            RegListE = NULL;
+            pRegListS = NULL;
+            pRegListE = NULL;
         } else {
-            next->prev = NULL;
-            RegListS = next;
+            next->pPrev = NULL;
+            pRegListS = next;
         }
     } else if(next == NULL) {
-        prev->next = NULL;
-        RegListE = prev;
+        prev->pNext = NULL;
+        pRegListE = prev;
     } else {
-        prev->next = next;
-        next->prev = prev;
+        prev->pNext = next;
+        next->pPrev = prev;
     }
 }
 //---------------------------------------------------------------------------
 
 void clsRegManager::RemFromTable(RegUser * Reg) {
-    if(Reg->hashtableprev == NULL) {
+    if(Reg->pHashTablePrev == NULL) {
         uint16_t ui16dx = 0;
         memcpy(&ui16dx, &Reg->ui32Hash, sizeof(uint16_t));
 
-        if(Reg->hashtablenext == NULL) {
-            table[ui16dx] = NULL;
+        if(Reg->pHashTableNext == NULL) {
+            pTable[ui16dx] = NULL;
         } else {
-            Reg->hashtablenext->hashtableprev = NULL;
-			table[ui16dx] = Reg->hashtablenext;
+            Reg->pHashTableNext->pHashTablePrev = NULL;
+			pTable[ui16dx] = Reg->pHashTableNext;
         }
-    } else if(Reg->hashtablenext == NULL) {
-        Reg->hashtableprev->hashtablenext = NULL;
+    } else if(Reg->pHashTableNext == NULL) {
+        Reg->pHashTablePrev->pHashTableNext = NULL;
     } else {
-        Reg->hashtableprev->hashtablenext = Reg->hashtablenext;
-        Reg->hashtablenext->hashtableprev = Reg->hashtableprev;
+        Reg->pHashTablePrev->pHashTableNext = Reg->pHashTableNext;
+        Reg->pHashTableNext->pHashTablePrev = Reg->pHashTablePrev;
     }
 
-	Reg->hashtableprev = NULL;
-    Reg->hashtablenext = NULL;
+	Reg->pHashTablePrev = NULL;
+    Reg->pHashTableNext = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -536,11 +520,11 @@ RegUser* clsRegManager::Find(char * sNick, const size_t &szNickLen) {
     memcpy(&ui16dx, &ui32Hash, sizeof(uint16_t));
 
     RegUser * cur = NULL,
-        * next = table[ui16dx];
+        * next = pTable[ui16dx];
 
     while(next != NULL) {
         cur = next;
-        next = cur->hashtablenext;
+        next = cur->pHashTableNext;
 
 		if(cur->ui32Hash == ui32Hash && strcasecmp(cur->sNick, sNick) == 0) {
             return cur;
@@ -556,11 +540,11 @@ RegUser* clsRegManager::Find(User * u) {
     memcpy(&ui16dx, &u->ui32NickHash, sizeof(uint16_t));
 
 	RegUser * cur = NULL,
-        * next = table[ui16dx];
+        * next = pTable[ui16dx];
 
     while(next != NULL) {
         cur = next;
-        next = cur->hashtablenext;
+        next = cur->pHashTableNext;
 
 		if(cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->sNick, u->sNick) == 0) {
             return cur;
@@ -576,11 +560,11 @@ RegUser* clsRegManager::Find(uint32_t ui32Hash, char * sNick) {
     memcpy(&ui16dx, &ui32Hash, sizeof(uint16_t));
 
 	RegUser * cur = NULL,
-        * next = table[ui16dx];
+        * next = pTable[ui16dx];
 
     while(next != NULL) {
         cur = next;
-        next = cur->hashtablenext;
+        next = cur->pHashTableNext;
 
 		if(cur->ui32Hash == ui32Hash && strcasecmp(cur->sNick, sNick) == 0) {
             return cur;
@@ -601,7 +585,7 @@ void clsRegManager::Load(void) {
         return;
     }
 
-    uint16_t iProfilesCount = (uint16_t)(clsProfileManager::mPtr->iProfileCount-1);
+    uint16_t iProfilesCount = (uint16_t)(clsProfileManager::mPtr->ui16ProfileCount-1);
 
     PXBReader pxbRegs;
 
@@ -688,7 +672,7 @@ void clsRegManager::Load(void) {
 //---------------------------------------------------------------------------
 
 void clsRegManager::LoadXML() {
-    uint16_t iProfilesCount = (uint16_t)(clsProfileManager::mPtr->iProfileCount-1);
+    uint16_t iProfilesCount = (uint16_t)(clsProfileManager::mPtr->ui16ProfileCount-1);
 
 #ifdef _WIN32
     TiXmlDocument doc((clsServerManager::sPath+"\\cfg\\RegisteredUsers.xml").c_str());
@@ -741,7 +725,7 @@ void clsRegManager::LoadXML() {
 				if(iProfile > iProfilesCount) {
                     char msg[1024];
                     int imsgLen = sprintf(msg, "%s %s %s! %s %s.", clsLanguageManager::mPtr->sTexts[LAN_USER], nick, clsLanguageManager::mPtr->sTexts[LAN_HAVE_NOT_EXIST_PROFILE],
-                        clsLanguageManager::mPtr->sTexts[LAN_CHANGED_PROFILE_TO], clsProfileManager::mPtr->ProfilesTable[iProfilesCount]->sName);
+                        clsLanguageManager::mPtr->sTexts[LAN_CHANGED_PROFILE_TO], clsProfileManager::mPtr->ppProfilesTable[iProfilesCount]->sName);
 					CheckSprintf(imsgLen, 1024, "clsRegManager::Load");
 
 #ifdef _BUILD_GUI
@@ -838,11 +822,11 @@ void clsRegManager::Save(const bool &bSaveOnChange/* = false*/, const bool &bSav
     pxbRegs.ui8ItemValues[2] = PXBReader::PXB_TWO_BYTES;
 
     RegUser * curReg = NULL,
-        * next = RegListS;
+        * next = pRegListS;
 
     while(next != NULL) {
         curReg = next;
-		next = curReg->next;
+		next = curReg->pNext;
 
         pxbRegs.ui16ItemLengths[0] = (uint16_t)strlen(curReg->sNick);
         pxbRegs.pItemDatas[0] = (void *)curReg->sNick;
@@ -877,11 +861,11 @@ void clsRegManager::HashPasswords() {
     char * sOldPass = NULL;
 
     RegUser * pCurReg = NULL,
-        * pNextReg = RegListS;
+        * pNextReg = pRegListS;
 
     while(pNextReg != NULL) {
         pCurReg = pNextReg;
-		pNextReg = pCurReg->next;
+		pNextReg = pCurReg->pNext;
 
         if(pCurReg->bPassHash == false) {
             sOldPass = pCurReg->sPass;

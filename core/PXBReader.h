@@ -26,11 +26,14 @@ class PXBReader {
 private:
     bool bFullRead;
 
-    char * sActualPosition;
+    char * pActualPosition;
 
     FILE * pFile;
 
     size_t szRemainingSize;
+
+	PXBReader(const PXBReader&);
+	const PXBReader& operator=(const PXBReader&);
 
     void ReadNextFilePart();
 public:

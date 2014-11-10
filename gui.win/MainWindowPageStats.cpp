@@ -41,7 +41,7 @@
 //---------------------------------------------------------------------------
 
 MainWindowPageStats::MainWindowPageStats() {
-    memset(&hWndPageItems, 0, (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])) * sizeof(HWND));
+    memset(&hWndPageItems, 0, sizeof(hWndPageItems));
 }
 //---------------------------------------------------------------------------
 
@@ -252,11 +252,11 @@ void OnRedirectAllOk(char * sLine, const int &iLen) {
     }
 
     User * pCur = NULL,
-        * pNext = clsUsers::mPtr->llist;
+        * pNext = clsUsers::mPtr->pListS;
 
     while(pNext != NULL) {
         pCur = pNext;
-		pNext = pCur->next;
+		pNext = pCur->pNext;
 
         pCur->SendChar(sMSG, imsgLen);
         // PPK ... close by hub needed !

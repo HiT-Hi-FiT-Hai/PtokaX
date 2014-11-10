@@ -135,6 +135,9 @@ private:
         LBL_MAX_USERS_LOGINS
     };
 
+    SettingPageDeflood(const SettingPageDeflood&);
+    const SettingPageDeflood& operator=(const SettingPageDeflood&);
+
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 //------------------------------------------------------------------------------

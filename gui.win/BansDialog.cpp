@@ -42,12 +42,8 @@ clsBansDialog * clsBansDialog::mPtr = NULL;
 static ATOM atomBansDialog = 0;
 //---------------------------------------------------------------------------
 
-clsBansDialog::clsBansDialog() {
-    memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
-
-    iFilterColumn = iSortColumn = 0;
-
-    bSortAscending = true;
+clsBansDialog::clsBansDialog() : iFilterColumn(0), iSortColumn(0), bSortAscending(true) {
+    memset(&hWndWindowItems, 0, sizeof(hWndWindowItems));
 }
 //---------------------------------------------------------------------------
 
@@ -309,7 +305,7 @@ void clsBansDialog::DoModal(HWND hWndParent) {
     const int iBansWidths[] = { GUISETINT_BANS_NICK, GUISETINT_BANS_IP, GUISETINT_BANS_REASON, GUISETINT_BANS_EXPIRE, GUISETINT_BANS_BY };
 
     for(uint8_t ui8i = 0; ui8i < 5; ui8i++) {
-        lvColumn.cx = clsGuiSettingManager::mPtr->iIntegers[iBansWidths[ui8i]];
+        lvColumn.cx = clsGuiSettingManager::mPtr->i32Integers[iBansWidths[ui8i]];
         lvColumn.pszText = clsLanguageManager::mPtr->sTexts[iBansStrings[ui8i]];
         lvColumn.iSubItem = ui8i;
 
@@ -338,13 +334,13 @@ void clsBansDialog::AddAllBans() {
     time_t acc_time; time(&acc_time);
 
     BanItem * curBan = NULL,
-        * nextBan = clsBanManager::mPtr->TempBanListS;
+        * nextBan = clsBanManager::mPtr->pTempBanListS;
 
     while(nextBan != NULL) {
 		curBan = nextBan;
-    	nextBan = curBan->next;
+    	nextBan = curBan->pNext;
 
-        if(acc_time > curBan->tempbanexpire) {
+        if(acc_time > curBan->tTempBanExpire) {
 			clsBanManager::mPtr->Rem(curBan);
             delete curBan;
 
@@ -354,11 +350,11 @@ void clsBansDialog::AddAllBans() {
         AddBan(curBan);
     }
 
-    nextBan = clsBanManager::mPtr->PermBanListS;
+    nextBan = clsBanManager::mPtr->pPermBanListS;
 
     while(nextBan != NULL) {
         curBan = nextBan;
-    	nextBan = curBan->next;
+    	nextBan = curBan->pNext;
 
         AddBan(curBan);
     }
@@ -414,7 +410,7 @@ void clsBansDialog::AddBan(const BanItem * pBan) {
 
     if((pBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) {
         char msg[256];
-        struct tm *tm = localtime(&pBan->tempbanexpire);
+        struct tm *tm = localtime(&pBan->tTempBanExpire);
         strftime(msg, 256, "%c", tm);
 
         lvItem.iSubItem = 3;
@@ -451,7 +447,7 @@ int clsBansDialog::CompareBans(const void * pItem, const void * pOtherItem) {
             } else if((pSecondBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) {
                 return 1;
             } else {
-                return (pFirstBan->tempbanexpire > pSecondBan->tempbanexpire) ? 1 : ((pFirstBan->tempbanexpire == pSecondBan->tempbanexpire) ? 0 : -1);
+                return (pFirstBan->tTempBanExpire > pSecondBan->tTempBanExpire) ? 1 : ((pFirstBan->tTempBanExpire == pSecondBan->tTempBanExpire) ? 0 : -1);
             }
         case 4:
             return _stricmp(pFirstBan->sBy == NULL ? "" : pFirstBan->sBy, pSecondBan->sBy == NULL ? "" : pSecondBan->sBy);
@@ -532,13 +528,13 @@ void clsBansDialog::FilterBans() {
         time_t acc_time; time(&acc_time);
 
         BanItem * curBan = NULL,
-            * nextBan = clsBanManager::mPtr->TempBanListS;
+            * nextBan = clsBanManager::mPtr->pTempBanListS;
 
         while(nextBan != NULL) {
             curBan = nextBan;
-            nextBan = curBan->next;
+            nextBan = curBan->pNext;
 
-            if(acc_time > curBan->tempbanexpire) {
+            if(acc_time > curBan->tTempBanExpire) {
                 clsBanManager::mPtr->Rem(curBan);
                 delete curBan;
 
@@ -550,11 +546,11 @@ void clsBansDialog::FilterBans() {
             }
         }
 
-        nextBan = clsBanManager::mPtr->PermBanListS;
+        nextBan = clsBanManager::mPtr->pPermBanListS;
 
         while(nextBan != NULL) {
             curBan = nextBan;
-            nextBan = curBan->next;
+            nextBan = curBan->pNext;
 
             if(FilterBan(curBan) == false) {
                 AddBan(curBan);
@@ -588,7 +584,7 @@ bool clsBansDialog::FilterBan(const BanItem * pBan) {
         case 3:
             if((pBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) {
                 char msg[256];
-                struct tm *tm = localtime(&pBan->tempbanexpire);
+                struct tm *tm = localtime(&pBan->tTempBanExpire);
                 strftime(msg, 256, "%c", tm);
 
                 if(stristr2(msg, sFilterString.c_str()) != NULL) {

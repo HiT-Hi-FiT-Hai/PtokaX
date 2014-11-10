@@ -34,12 +34,8 @@
 clsTextFilesManager * clsTextFilesManager::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-clsTextFilesManager::TextFile::TextFile() {
-    sCommand = NULL;
-    sText = NULL;
-
-    prev = NULL;
-    next = NULL;
+clsTextFilesManager::TextFile::TextFile() : sCommand(NULL), sText(NULL), pPrev(NULL), pNext(NULL) {
+    // ...
 }
 //---------------------------------------------------------------------------
 
@@ -66,18 +62,18 @@ clsTextFilesManager::TextFile::~TextFile() {
 }
 //---------------------------------------------------------------------------
 
-clsTextFilesManager::clsTextFilesManager() {
-    TextFiles = NULL;
+clsTextFilesManager::clsTextFilesManager() : pTextFiles(NULL) {
+    // ...
 }
 //---------------------------------------------------------------------------
 	
 clsTextFilesManager::~clsTextFilesManager() {
     TextFile * cur = NULL,
-        * next = TextFiles;
+        * next = pTextFiles;
 
     while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
     	delete cur;
     }
@@ -86,11 +82,11 @@ clsTextFilesManager::~clsTextFilesManager() {
 
 bool clsTextFilesManager::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/* = false*/) const {
     TextFile * cur = NULL,
-        * next = TextFiles;
+        * next = pTextFiles;
 
     while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
 		if(strcasecmp(cur->sCommand, cmd) == 0) {
             bool bInPM = (clsSettingManager::mPtr->bBools[SETBOOL_SEND_TEXT_FILES_AS_PM] == true || fromPM);
@@ -153,16 +149,16 @@ void clsTextFilesManager::RefreshTextFiles() {
         return;
 
     TextFile * cur = NULL,
-        * next = TextFiles;
+        * next = pTextFiles;
 
     while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
     	delete cur;
     }
 
-    TextFiles = NULL;
+    pTextFiles = NULL;
 
 #ifdef _WIN32
     struct _finddata_t textfile;
@@ -221,16 +217,16 @@ void clsTextFilesManager::RefreshTextFiles() {
 					memcpy(pNewTxtFile->sCommand, textfile.name, strlen(textfile.name)-4);
 					pNewTxtFile->sCommand[strlen(textfile.name)-4] = '\0';
 
-					pNewTxtFile->prev = NULL;
+					pNewTxtFile->pPrev = NULL;
 
-					if(TextFiles == NULL) {
-						pNewTxtFile->next = NULL;
+					if(pTextFiles == NULL) {
+						pNewTxtFile->pNext = NULL;
 					} else {
-						TextFiles->prev = pNewTxtFile;
-						pNewTxtFile->next = TextFiles;
+						pTextFiles->pPrev = pNewTxtFile;
+						pNewTxtFile->pNext = pTextFiles;
 					}
 
-					TextFiles = pNewTxtFile;
+					pTextFiles = pNewTxtFile;
 				}
 
 				fclose(f);
@@ -303,16 +299,16 @@ void clsTextFilesManager::RefreshTextFiles() {
                 memcpy(pNewTxtFile->sCommand, p_dirent->d_name, strlen(p_dirent->d_name)-4);
                 pNewTxtFile->sCommand[strlen(p_dirent->d_name)-4] = '\0';
 
-                pNewTxtFile->prev = NULL;
+                pNewTxtFile->pPrev = NULL;
 
-                if(TextFiles == NULL) {
-                    pNewTxtFile->next = NULL;
+                if(pTextFiles == NULL) {
+                    pNewTxtFile->pNext = NULL;
                 } else {
-                    TextFiles->prev = pNewTxtFile;
-                    pNewTxtFile->next = TextFiles;
+                    pTextFiles->pPrev = pNewTxtFile;
+                    pNewTxtFile->pNext = pTextFiles;
                 }
 
-                TextFiles = pNewTxtFile;
+                pTextFiles = pNewTxtFile;
     	    }
 
             fclose(f);

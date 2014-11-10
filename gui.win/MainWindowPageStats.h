@@ -60,6 +60,9 @@ public:
     void FocusFirstItem();
     void FocusLastItem();
 private:
+    MainWindowPageStats(const MainWindowPageStats&);
+    const MainWindowPageStats& operator=(const MainWindowPageStats&);
+
     LRESULT MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     void OnRedirectAll();

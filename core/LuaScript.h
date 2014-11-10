@@ -29,12 +29,15 @@ struct ScriptBot {
     char *sNick;
     char *sMyINFO;
     
-    ScriptBot *prev, *next;
+    ScriptBot * pPrev, * pNext;
 
     bool bIsOP;
 
     ScriptBot();
     ~ScriptBot();
+
+    ScriptBot(const ScriptBot&);
+    const ScriptBot& operator=(const ScriptBot&);
 
     static ScriptBot * CreateScriptBot(char * sNick, const size_t &szNickLen, char * sDescription, const size_t &szDscrLen, char * sEmail, const size_t &szEmailLen, const bool &bOP);
 };
@@ -53,10 +56,13 @@ struct ScriptTimer {
 
     int iFunctionRef;
 
-    ScriptTimer *prev, *next;
+    ScriptTimer * pPrev, * pNext;
 
     ScriptTimer();
     ~ScriptTimer();
+
+    ScriptTimer(const ScriptTimer&);
+    const ScriptTimer& operator=(const ScriptTimer&);
 
 #ifdef _WIN32
     static ScriptTimer * CreateScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &szLen, const int &iRef);
@@ -83,13 +89,13 @@ struct Script {
 
     char * sName;
 
-    lua_State * LUA;
+    lua_State * pLUA;
 
-    Script *prev, *next;
+    Script * pPrev, * pNext;
 
-    ScriptBot *BotList;
+    ScriptBot * pBotList;
 
-    ScriptTimer *TimerList;
+    ScriptTimer * pTimerList;
 
 	uint16_t ui16Functions;
 
@@ -97,6 +103,9 @@ struct Script {
 
     Script();
     ~Script();
+
+    Script(const Script&);
+    const Script& operator=(const Script&);
 
     static Script * CreateScript(char *Name, const bool &enabled);
 };

@@ -25,7 +25,7 @@ struct User;
 //---------------------------------------------------------------------------
 
 struct BanItem {
-    time_t tempbanexpire;
+    time_t tTempBanExpire;
 
     uint32_t ui32NickHash;
 
@@ -33,26 +33,29 @@ struct BanItem {
 
     char *sNick, *sReason, *sBy;
 
-    BanItem *prev, *next;
-    BanItem *hashnicktableprev, *hashnicktablenext;
-    BanItem *hashiptableprev, *hashiptablenext;
+    BanItem * pPrev, * pNext;
+    BanItem * pHashNickTablePrev, * pHashNickTableNext;
+    BanItem * pHashIpTablePrev, * pHashIpTableNext;
 
     uint8_t ui8Bits;
     char sIp[46];
 
     BanItem();
     ~BanItem();
+
+    BanItem(const BanItem&);
+    const BanItem& operator=(const BanItem&);
 }; 
 //---------------------------------------------------------------------------
 
 struct RangeBanItem {
-    time_t tempbanexpire;
+    time_t tTempBanExpire;
 
     uint8_t ui128FromIpHash[16], ui128ToIpHash[16];
 
     char *sReason, *sBy;
 
-    RangeBanItem *prev, *next;
+    RangeBanItem * pPrev, * pNext;
 
     uint8_t ui8Bits;
 
@@ -60,26 +63,37 @@ struct RangeBanItem {
 
     RangeBanItem();
     ~RangeBanItem();
+
+    RangeBanItem(const RangeBanItem&);
+    const RangeBanItem& operator=(const RangeBanItem&);
 };
 //---------------------------------------------------------------------------
 
 class clsBanManager {
 private:
     struct IpTableItem {
-        IpTableItem *prev, *next;
-        BanItem * FirstBan;
+        IpTableItem() : pPrev(NULL), pNext(NULL), pFirstBan(NULL) { };
+
+        IpTableItem(const IpTableItem&);
+        const IpTableItem& operator=(const IpTableItem&);
+
+        IpTableItem * pPrev, * pNext;
+        BanItem * pFirstBan;
     };
 
-    uint32_t iSaveCalled;
+    uint32_t ui32SaveCalled;
 
-    BanItem *nicktable[65536];
-    IpTableItem *iptable[65536];
+    BanItem * pNickTable[65536];
+    IpTableItem * pIpTable[65536];
+
+    clsBanManager(const clsBanManager&);
+    const clsBanManager& operator=(const clsBanManager&);
 public:
     static clsBanManager * mPtr;
 
-    BanItem *TempBanListS, *TempBanListE;
-    BanItem *PermBanListS, *PermBanListE;
-    RangeBanItem *RangeBanListS, *RangeBanListE;
+    BanItem * pTempBanListS, * pTempBanListE;
+    BanItem * pPermBanListS, * pPermBanListE;
+    RangeBanItem * pRangeBanListS, * pRangeBanListE;
 
     enum BanBits {
         PERM        = 0x1,

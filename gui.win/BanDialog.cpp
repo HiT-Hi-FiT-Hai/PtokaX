@@ -37,10 +37,8 @@
 static ATOM atomBanDialog = 0;
 //---------------------------------------------------------------------------
 
-clsBanDialog::clsBanDialog() {
-    memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
-
-    pBanToChange = NULL;
+clsBanDialog::clsBanDialog() : pBanToChange(NULL) {
+    memset(&hWndWindowItems, 0, sizeof(hWndWindowItems));
 }
 //---------------------------------------------------------------------------
 
@@ -320,7 +318,7 @@ void clsBanDialog::DoModal(HWND hWndParent, BanItem * pBan/* = NULL*/) {
 
             SYSTEMTIME stDateTime = { 0 };
 
-            struct tm *tm = localtime(&pBanToChange->tempbanexpire);
+            struct tm *tm = localtime(&pBanToChange->tTempBanExpire);
 
             stDateTime.wDay = (WORD)tm->tm_mday;
             stDateTime.wMonth = (WORD)(tm->tm_mon+1);
@@ -436,7 +434,7 @@ bool clsBanDialog::OnAccept() {
 
 		if(bTempBan == true) {
 			pBan->ui8Bits |= clsBanManager::TEMP;
-            pBan->tempbanexpire = ban_time;
+            pBan->tTempBanExpire = ban_time;
 		} else {
 			pBan->ui8Bits |= clsBanManager::PERM;
         }
@@ -595,75 +593,75 @@ bool clsBanDialog::OnAccept() {
 				pBanToChange->ui8Bits &= ~clsBanManager::PERM;
 
 				// remove from perm
-				if(pBanToChange->prev == NULL) {
-					if(pBanToChange->next == NULL) {
-						clsBanManager::mPtr->PermBanListS = NULL;
-						clsBanManager::mPtr->PermBanListE = NULL;
+				if(pBanToChange->pPrev == NULL) {
+					if(pBanToChange->pNext == NULL) {
+						clsBanManager::mPtr->pPermBanListS = NULL;
+						clsBanManager::mPtr->pPermBanListE = NULL;
 					} else {
-						pBanToChange->next->prev = NULL;
-						clsBanManager::mPtr->PermBanListS = pBanToChange->next;
+						pBanToChange->pNext->pPrev = NULL;
+						clsBanManager::mPtr->pPermBanListS = pBanToChange->pNext;
 					}
-				} else if(pBanToChange->next == NULL) {
-					pBanToChange->prev->next = NULL;
-					clsBanManager::mPtr->PermBanListE = pBanToChange->prev;
+				} else if(pBanToChange->pNext == NULL) {
+					pBanToChange->pPrev->pNext = NULL;
+					clsBanManager::mPtr->pPermBanListE = pBanToChange->pPrev;
 				} else {
-					pBanToChange->prev->next = pBanToChange->next;
-					pBanToChange->next->prev = pBanToChange->prev;
+					pBanToChange->pPrev->pNext = pBanToChange->pNext;
+					pBanToChange->pNext->pPrev = pBanToChange->pPrev;
 				}
 
-                pBanToChange->prev = NULL;
-                pBanToChange->next = NULL;
+                pBanToChange->pPrev = NULL;
+                pBanToChange->pNext = NULL;
 
 				// add to temp
-				if(clsBanManager::mPtr->TempBanListE == NULL) {
-					clsBanManager::mPtr->TempBanListS = pBanToChange;
-					clsBanManager::mPtr->TempBanListE = pBanToChange;
+				if(clsBanManager::mPtr->pTempBanListE == NULL) {
+					clsBanManager::mPtr->pTempBanListS = pBanToChange;
+					clsBanManager::mPtr->pTempBanListE = pBanToChange;
 				} else {
-					clsBanManager::mPtr->TempBanListE->next = pBanToChange;
-					pBanToChange->prev = clsBanManager::mPtr->TempBanListE;
-					clsBanManager::mPtr->TempBanListE = pBanToChange;
+					clsBanManager::mPtr->pTempBanListE->pNext = pBanToChange;
+					pBanToChange->pPrev = clsBanManager::mPtr->pTempBanListE;
+					clsBanManager::mPtr->pTempBanListE = pBanToChange;
 				}
 			}
 
 			pBanToChange->ui8Bits |= clsBanManager::TEMP;
-			pBanToChange->tempbanexpire = ban_time;
+			pBanToChange->tTempBanExpire = ban_time;
 		} else {
 			if(((pBanToChange->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true) {
 				pBanToChange->ui8Bits &= ~clsBanManager::TEMP;
 
 				// remove from temp
-				if(pBanToChange->prev == NULL) {
-					if(pBanToChange->next == NULL) {
-						clsBanManager::mPtr->TempBanListS = NULL;
-						clsBanManager::mPtr->TempBanListE = NULL;
+				if(pBanToChange->pPrev == NULL) {
+					if(pBanToChange->pNext == NULL) {
+						clsBanManager::mPtr->pTempBanListS = NULL;
+						clsBanManager::mPtr->pTempBanListE = NULL;
 					} else {
-						pBanToChange->next->prev = NULL;
-						clsBanManager::mPtr->TempBanListS = pBanToChange->next;
+						pBanToChange->pNext->pPrev = NULL;
+						clsBanManager::mPtr->pTempBanListS = pBanToChange->pNext;
 					}
-				} else if(pBanToChange->next == NULL) {
-					pBanToChange->prev->next = NULL;
-					clsBanManager::mPtr->TempBanListE = pBanToChange->prev;
+				} else if(pBanToChange->pNext == NULL) {
+					pBanToChange->pPrev->pNext = NULL;
+					clsBanManager::mPtr->pTempBanListE = pBanToChange->pPrev;
 				} else {
-					pBanToChange->prev->next = pBanToChange->next;
-					pBanToChange->next->prev = pBanToChange->prev;
+					pBanToChange->pPrev->pNext = pBanToChange->pNext;
+					pBanToChange->pNext->pPrev = pBanToChange->pPrev;
 				}
 
-                pBanToChange->prev = NULL;
-                pBanToChange->next = NULL;
+                pBanToChange->pPrev = NULL;
+                pBanToChange->pNext = NULL;
 
 				// add to perm
-				if(clsBanManager::mPtr->PermBanListE == NULL) {
-					clsBanManager::mPtr->PermBanListS = pBanToChange;
-					clsBanManager::mPtr->PermBanListE = pBanToChange;
+				if(clsBanManager::mPtr->pPermBanListE == NULL) {
+					clsBanManager::mPtr->pPermBanListS = pBanToChange;
+					clsBanManager::mPtr->pPermBanListE = pBanToChange;
 				} else {
-					clsBanManager::mPtr->PermBanListE->next = pBanToChange;
-					pBanToChange->prev = clsBanManager::mPtr->PermBanListE;
-					clsBanManager::mPtr->PermBanListE = pBanToChange;
+					clsBanManager::mPtr->pPermBanListE->pNext = pBanToChange;
+					pBanToChange->pPrev = clsBanManager::mPtr->pPermBanListE;
+					clsBanManager::mPtr->pPermBanListE = pBanToChange;
 				}
 			}
 
 			pBanToChange->ui8Bits |= clsBanManager::PERM;
-			pBanToChange->tempbanexpire = 0;
+			pBanToChange->tTempBanExpire = 0;
         }
 
 		char * sNick = NULL;

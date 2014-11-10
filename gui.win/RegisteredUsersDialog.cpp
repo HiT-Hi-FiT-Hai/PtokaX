@@ -43,12 +43,8 @@ clsRegisteredUsersDialog * clsRegisteredUsersDialog::mPtr = NULL;
 static ATOM atomRegisteredUsersDialog = 0;
 //---------------------------------------------------------------------------
 
-clsRegisteredUsersDialog::clsRegisteredUsersDialog() {
-    memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
-
-    iFilterColumn = iSortColumn = 0;
-
-    bSortAscending = true;
+clsRegisteredUsersDialog::clsRegisteredUsersDialog() : iFilterColumn(0), iSortColumn(0), bSortAscending(true) {
+    memset(&hWndWindowItems, 0, sizeof(hWndWindowItems));
 }
 //---------------------------------------------------------------------------
 
@@ -276,19 +272,19 @@ void clsRegisteredUsersDialog::DoModal(HWND hWndParent) {
     LVCOLUMN lvColumn = { 0 };
     lvColumn.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
     lvColumn.fmt = LVCFMT_LEFT;
-    lvColumn.cx = clsGuiSettingManager::mPtr->iIntegers[GUISETINT_REGS_NICK];
+    lvColumn.cx = clsGuiSettingManager::mPtr->i32Integers[GUISETINT_REGS_NICK];
     lvColumn.pszText = clsLanguageManager::mPtr->sTexts[LAN_NICK];
     lvColumn.iSubItem = 0;
 
     ::SendMessage(hWndWindowItems[LV_REGS], LVM_INSERTCOLUMN, 0, (LPARAM)&lvColumn);
 
     lvColumn.fmt = LVCFMT_RIGHT;
-    lvColumn.cx = clsGuiSettingManager::mPtr->iIntegers[GUISETINT_REGS_PASSWORD];
+    lvColumn.cx = clsGuiSettingManager::mPtr->i32Integers[GUISETINT_REGS_PASSWORD];
     lvColumn.pszText = clsLanguageManager::mPtr->sTexts[LAN_PASSWORD];
     lvColumn.iSubItem = 1;
     ::SendMessage(hWndWindowItems[LV_REGS], LVM_INSERTCOLUMN, 1, (LPARAM)&lvColumn);
 
-    lvColumn.cx = clsGuiSettingManager::mPtr->iIntegers[GUISETINT_REGS_PROFILE];
+    lvColumn.cx = clsGuiSettingManager::mPtr->i32Integers[GUISETINT_REGS_PROFILE];
     lvColumn.pszText = clsLanguageManager::mPtr->sTexts[LAN_PROFILE];
     lvColumn.iSubItem = 2;
     ::SendMessage(hWndWindowItems[LV_REGS], LVM_INSERTCOLUMN, 2, (LPARAM)&lvColumn);
@@ -309,11 +305,11 @@ void clsRegisteredUsersDialog::AddAllRegs() {
     ::SendMessage(hWndWindowItems[LV_REGS], LVM_DELETEALLITEMS, 0, 0);
 
     RegUser * curReg = NULL,
-        * nextReg = clsRegManager::mPtr->RegListS;
+        * nextReg = clsRegManager::mPtr->pRegListS;
 
     while(nextReg != NULL) {
         curReg = nextReg;
-        nextReg = curReg->next;
+        nextReg = curReg->pNext;
 
         AddReg(curReg);
     }
@@ -353,7 +349,7 @@ void clsRegisteredUsersDialog::AddReg(const RegUser * pReg) {
         ::SendMessage(hWndWindowItems[LV_REGS], LVM_SETITEM, 0, (LPARAM)&lvItem);
 
         lvItem.iSubItem = 2;
-        lvItem.pszText = clsProfileManager::mPtr->ProfilesTable[pReg->ui16Profile]->sName;
+        lvItem.pszText = clsProfileManager::mPtr->ppProfilesTable[pReg->ui16Profile]->sName;
 
         ::SendMessage(hWndWindowItems[LV_REGS], LVM_SETITEM, 0, (LPARAM)&lvItem);
     }
@@ -446,11 +442,11 @@ void clsRegisteredUsersDialog::FilterRegs() {
         ::SendMessage(hWndWindowItems[LV_REGS], LVM_DELETEALLITEMS, 0, 0);
 
         RegUser * curReg = NULL,
-            * nextReg = clsRegManager::mPtr->RegListS;
+            * nextReg = clsRegManager::mPtr->pRegListS;
 
         while(nextReg != NULL) {
             curReg = nextReg;
-            nextReg = curReg->next;
+            nextReg = curReg->pNext;
 
             switch(iFilterColumn) {
                 case 0:
@@ -464,7 +460,7 @@ void clsRegisteredUsersDialog::FilterRegs() {
                     }
                     break;
                 case 2:
-                    if(stristr2(clsProfileManager::mPtr->ProfilesTable[curReg->ui16Profile]->sName, sFilterString.c_str()) == NULL) {
+                    if(stristr2(clsProfileManager::mPtr->ppProfilesTable[curReg->ui16Profile]->sName, sFilterString.c_str()) == NULL) {
                         continue;
                     }
                     break;
@@ -508,7 +504,7 @@ void clsRegisteredUsersDialog::UpdateProfiles() {
         pReg = (RegUser *)ListViewGetItem(hWndWindowItems[LV_REGS], i);
 
         lvItem.iItem = i;
-        lvItem.pszText = clsProfileManager::mPtr->ProfilesTable[pReg->ui16Profile]->sName;
+        lvItem.pszText = clsProfileManager::mPtr->ppProfilesTable[pReg->ui16Profile]->sName;
 
         ::SendMessage(hWndWindowItems[LV_REGS], LVM_SETITEM, 0, (LPARAM)&lvItem);
     }

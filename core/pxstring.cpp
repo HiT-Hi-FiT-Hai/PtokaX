@@ -51,28 +51,27 @@ void string::stralloc(const char * sTxt, const size_t &szLen) {
 }
 //---------------------------------------------------------------------------
 
-string::string() {
-	sData = (char *)sEmpty;
-    szDataLen = 0;
+string::string() : sData((char *)sEmpty), szDataLen(0) {
+	// ...
 }
 //---------------------------------------------------------------------------
 
-string::string(const char * sTxt) {
+string::string(const char * sTxt) : sData((char *)sEmpty), szDataLen(0) {
 	stralloc(sTxt, strlen(sTxt));
 }
 //---------------------------------------------------------------------------
 
-string::string(const char * sTxt, const size_t &szLen) {
+string::string(const char * sTxt, const size_t &szLen) : sData((char *)sEmpty), szDataLen(0) {
 	stralloc(sTxt, szLen);
 }
 //---------------------------------------------------------------------------
 
-string::string(const string & sStr) {
+string::string(const string & sStr) : sData((char *)sEmpty), szDataLen(0) {
     stralloc(sStr.c_str(), sStr.size());
 }
 //---------------------------------------------------------------------------
 
-string::string(const uint32_t & ui32Number) {
+string::string(const uint32_t & ui32Number) : sData((char *)sEmpty), szDataLen(0) {
 	char tmp[16];
 #ifdef _WIN32
 	ultoa(ui32Number, tmp, 10);
@@ -84,7 +83,7 @@ string::string(const uint32_t & ui32Number) {
 }
 //---------------------------------------------------------------------------
 
-string::string(const int32_t & i32Number) {
+string::string(const int32_t & i32Number) : sData((char *)sEmpty), szDataLen(0) {
 	char tmp[16];
 #ifdef _WIN32
 	ltoa(i32Number, tmp, 10);
@@ -96,7 +95,7 @@ string::string(const int32_t & i32Number) {
 }
 //---------------------------------------------------------------------------
 
-string::string(const uint64_t & ui64Number) {
+string::string(const uint64_t & ui64Number) : sData((char *)sEmpty), szDataLen(0) {
 	char tmp[32];
 #ifdef _WIN32
 	_ui64toa(ui64Number, tmp, 10);
@@ -108,7 +107,7 @@ string::string(const uint64_t & ui64Number) {
 }
 //---------------------------------------------------------------------------
 
-string::string(const int64_t & i64Number) {
+string::string(const int64_t & i64Number) : sData((char *)sEmpty), szDataLen(0) {
 	char tmp[32];
 #ifdef _WIN32
 	_i64toa(i64Number, tmp, 10);
@@ -120,7 +119,7 @@ string::string(const int64_t & i64Number) {
 }
 //---------------------------------------------------------------------------
 
-string::string(const string & sStr1, const string & sStr2) {
+string::string(const string & sStr1, const string & sStr2) : sData((char *)sEmpty), szDataLen(0) {
     szDataLen = sStr1.size()+sStr2.size();
 
     if(szDataLen == 0) {
@@ -141,7 +140,7 @@ string::string(const string & sStr1, const string & sStr2) {
 }
 //---------------------------------------------------------------------------
 
-string::string(const char * sTxt, const string & sStr) {
+string::string(const char * sTxt, const string & sStr) : sData((char *)sEmpty), szDataLen(0) {
     size_t szLen = strlen(sTxt);
 	szDataLen = szLen+sStr.size();
 
@@ -163,7 +162,7 @@ string::string(const char * sTxt, const string & sStr) {
 }
 //---------------------------------------------------------------------------
 
-string::string(const string & sStr, const char * sTxt) {
+string::string(const string & sStr, const char * sTxt) : sData((char *)sEmpty), szDataLen(0) {
     size_t szLen = strlen(sTxt);
 	szDataLen = sStr.size()+szLen;
 

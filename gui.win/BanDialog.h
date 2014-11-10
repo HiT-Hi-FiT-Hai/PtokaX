@@ -61,6 +61,9 @@ public:
 private:
     BanItem * pBanToChange;
 
+    clsBanDialog(const clsBanDialog&);
+    const clsBanDialog& operator=(const clsBanDialog&);
+
     LRESULT BanDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     bool OnAccept();

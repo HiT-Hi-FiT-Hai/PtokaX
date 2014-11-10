@@ -70,6 +70,9 @@ private:
         EDT_ADMIN_NICK,
     };
 
+    SettingPageAdvanced(const SettingPageAdvanced&);
+    const SettingPageAdvanced& operator=(const SettingPageAdvanced&);
+
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 //------------------------------------------------------------------------------

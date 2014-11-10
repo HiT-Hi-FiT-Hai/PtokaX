@@ -27,27 +27,37 @@ struct User;
 class clsHashManager {
 private:
     struct IpTableItem {
-        IpTableItem *prev, *next;
-        User * FirstUser;
+        IpTableItem() : pPrev(NULL), pNext(NULL), pFirstUser(NULL), ui16Count(0) { };
+
+        IpTableItem(const IpTableItem&);
+        const IpTableItem& operator=(const IpTableItem&);
+
+        IpTableItem * pPrev, * pNext;
+
+        User * pFirstUser;
+
         uint16_t ui16Count;
     };
 
-    User *nicktable[65536];
-    IpTableItem *iptable[65536];
+    User * pNickTable[65536];
+    IpTableItem * pIpTable[65536];
+
+    clsHashManager(const clsHashManager&);
+    const clsHashManager& operator=(const clsHashManager&);
 public:
     static clsHashManager * mPtr;
 
     clsHashManager();
     ~clsHashManager();
 
-    bool Add(User * u);
-    void Remove(User * u);
+    bool Add(User * pUser);
+    void Remove(User * pUser);
 
     User * FindUser(char * sNick, const size_t &szNickLen);
-    User * FindUser(User * u);
+    User * FindUser(User * pUser);
     User * FindUser(const uint8_t * ui128IpHash);
 
-    uint32_t GetUserIpCount(User * u) const;
+    uint32_t GetUserIpCount(User * pUser) const;
 };
 //---------------------------------------------------------------------------
 

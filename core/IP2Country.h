@@ -29,6 +29,9 @@ private:
     uint8_t * ui8RangeCI, * ui8IPv6RangeCI;
     uint8_t * ui128IPv6RangeFrom, * ui128IPv6RangeTo;
 
+    clsIpP2Country(const clsIpP2Country&);
+    const clsIpP2Country& operator=(const clsIpP2Country&);
+
     void LoadIPv4();
     void LoadIPv6();
 public:

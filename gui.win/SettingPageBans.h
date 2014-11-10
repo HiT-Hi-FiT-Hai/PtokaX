@@ -76,6 +76,9 @@ private:
         BTN_REPORT_3X_BAD_PASS
     };
 
+    SettingPageBans(const SettingPageBans&);
+    const SettingPageBans& operator=(const SettingPageBans&);
+
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 //------------------------------------------------------------------------------

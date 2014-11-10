@@ -76,6 +76,9 @@ private:
         BTN_HUBLIST_AUTO_REG
     };
 
+    SettingPageGeneral(const SettingPageGeneral&);
+    const SettingPageGeneral& operator=(const SettingPageGeneral&);
+
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 //------------------------------------------------------------------------------

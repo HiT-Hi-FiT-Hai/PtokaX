@@ -71,15 +71,9 @@ uint64_t PXGetTickCount64() {
 }
 //---------------------------------------------------------------------------
 
-clsMainWindow::clsMainWindow() {
-    m_hWnd = NULL;
-
-    memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
-    memset(&MainWindowPages, 0, (sizeof(MainWindowPages) / sizeof(MainWindowPages[0])) * sizeof(MainWindowPage *));
-
-    uiTaskBarCreated = 0;
-
-    ui64LastTrayMouseMove = 0;
+clsMainWindow::clsMainWindow() : m_hWnd(NULL), uiTaskBarCreated(0), ui64LastTrayMouseMove(0) {
+    memset(&hWndWindowItems, 0, sizeof(hWndWindowItems));
+    memset(&MainWindowPages, 0, sizeof(MainWindowPages));
 }
 //---------------------------------------------------------------------------
 
@@ -186,7 +180,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     ::SendMessage(hWndWindowItems[TC_TABS], TCM_INSERTITEM, ui8i, (LPARAM)&tcItem);
                 }
 
-                if(ui8i == 0 && clsGuiSettingManager::mPtr->iIntegers[GUISETINT_MAIN_WINDOW_HEIGHT] == clsGuiSettingManager::mPtr->GetDefaultInteger(GUISETINT_MAIN_WINDOW_HEIGHT)) {
+                if(ui8i == 0 && clsGuiSettingManager::mPtr->i32Integers[GUISETINT_MAIN_WINDOW_HEIGHT] == clsGuiSettingManager::mPtr->GetDefaultInteger(GUISETINT_MAIN_WINDOW_HEIGHT)) {
                     RECT rcPage = { 0 };
                     ::GetWindowRect(MainWindowPages[0]->m_hWnd, &rcPage);
 
@@ -267,10 +261,10 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                         }
 					}
 
-					size_t szSize = sizeof(nid.szTip);
+					const size_t szSize = sizeof(nid.szTip);
 
 					if(szSize < (size_t)(clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+iret+10)) {
-						nid.szTip[szSize] = '\0';
+						nid.szTip[szSize-1] = '\0';
 						memcpy(nid.szTip+(szSize-(iret+1)), msg, iret);
 						nid.szTip[szSize-(iret+2)] = '.';
 						nid.szTip[szSize-(iret+3)] = '.';

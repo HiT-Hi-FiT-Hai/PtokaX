@@ -70,6 +70,7 @@ clsGuiSettingManager::clsGuiSettingManager(void) {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 clsGuiSettingManager::~clsGuiSettingManager(void) {
+    // ...
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -178,7 +179,7 @@ void clsGuiSettingManager::Save() const {
 
     for(size_t szi = 0; szi < GUISETINT_IDS_END; szi++) {
         // Don't save setting with default value
-        if(iIntegers[szi] == GuiSetIntegerDef[szi]) {
+        if(i32Integers[szi] == GuiSetIntegerDef[szi]) {
             continue;
         }
 
@@ -187,7 +188,7 @@ void clsGuiSettingManager::Save() const {
         pxbSetting.ui8ItemValues[0] = PXBReader::PXB_STRING;
 
         pxbSetting.ui16ItemLengths[1] = 4;
-        pxbSetting.pItemDatas[1] = (void *)&iIntegers[szi];
+        pxbSetting.pItemDatas[1] = (void *)&i32Integers[szi];
         pxbSetting.ui8ItemValues[1] = PXBReader::PXB_FOUR_BYTES;
 
         if(pxbSetting.WriteNextItem(pxbSetting.ui16ItemLengths[0] + pxbSetting.ui16ItemLengths[1], 2) == false) {
@@ -219,10 +220,10 @@ void clsGuiSettingManager::SetBool(const size_t &szBoolId, const bool &bValue) {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void clsGuiSettingManager::SetInteger(const size_t &szIntegerId, const int32_t &i32Value) {
-    if(i32Value < 0 || iIntegers[szIntegerId] == i32Value) {
+    if(i32Value < 0 || i32Integers[szIntegerId] == i32Value) {
         return;
     }
 
-    iIntegers[szIntegerId] = i32Value;
+    i32Integers[szIntegerId] = i32Value;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

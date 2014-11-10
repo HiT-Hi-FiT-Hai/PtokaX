@@ -42,6 +42,9 @@ private:
     static void Message(char * sMessage, const size_t &szLen);
     bool Receive();
     bool SendHeader();
+
+    clsUpdateCheckThread(const clsUpdateCheckThread&);
+    const clsUpdateCheckThread& operator=(const clsUpdateCheckThread&);
 public:
     static clsUpdateCheckThread * mPtr;
 

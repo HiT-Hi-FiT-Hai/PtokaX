@@ -32,10 +32,8 @@
 #pragma hdrstop
 //---------------------------------------------------------------------------
 
-SettingPageRules2::SettingPageRules2() {
-    bUpdateSlotsLimitMessage = bUpdateHubSlotRatioMessage = bUpdateMaxHubsLimitMessage = false;
-
-    memset(&hWndPageItems, 0, (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])) * sizeof(HWND));
+SettingPageRules2::SettingPageRules2() : bUpdateSlotsLimitMessage(false), bUpdateHubSlotRatioMessage(false), bUpdateMaxHubsLimitMessage(false) {
+    memset(&hWndPageItems, 0, sizeof(hWndPageItems));
 }
 //---------------------------------------------------------------------------
 
@@ -183,7 +181,7 @@ void SettingPageRules2::Save() {
 
     LRESULT lResult = ::SendMessage(hWndPageItems[UD_SLOTS_MIN], UDM_GETPOS, 0, 0);
     if(HIWORD(lResult) == 0) {
-        if(LOWORD(lResult) != clsSettingManager::mPtr->iShorts[SETSHORT_MIN_SLOTS_LIMIT]) {
+        if(LOWORD(lResult) != clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SLOTS_LIMIT]) {
             bUpdateSlotsLimitMessage = true;
         }
         clsSettingManager::mPtr->SetShort(SETSHORT_MIN_SLOTS_LIMIT, LOWORD(lResult));
@@ -191,7 +189,7 @@ void SettingPageRules2::Save() {
 
     lResult = ::SendMessage(hWndPageItems[UD_SLOTS_MAX], UDM_GETPOS, 0, 0);
     if(HIWORD(lResult) == 0) {
-        if(LOWORD(lResult) != clsSettingManager::mPtr->iShorts[SETSHORT_MAX_SLOTS_LIMIT]) {
+        if(LOWORD(lResult) != clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SLOTS_LIMIT]) {
             bUpdateSlotsLimitMessage = true;
         }
         clsSettingManager::mPtr->SetShort(SETSHORT_MAX_SLOTS_LIMIT, LOWORD(lResult));
@@ -226,7 +224,7 @@ void SettingPageRules2::Save() {
 
     lResult = ::SendMessage(hWndPageItems[UD_HUBS], UDM_GETPOS, 0, 0);
     if(HIWORD(lResult) == 0) {
-        if(LOWORD(lResult) != clsSettingManager::mPtr->iShorts[SETSHORT_HUB_SLOT_RATIO_HUBS]) {
+        if(LOWORD(lResult) != clsSettingManager::mPtr->i16Shorts[SETSHORT_HUB_SLOT_RATIO_HUBS]) {
             bUpdateHubSlotRatioMessage = true;
         }
         clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_HUBS, LOWORD(lResult));
@@ -234,7 +232,7 @@ void SettingPageRules2::Save() {
 
     lResult = ::SendMessage(hWndPageItems[UD_SLOTS], UDM_GETPOS, 0, 0);
     if(HIWORD(lResult) == 0) {
-        if(LOWORD(lResult) != clsSettingManager::mPtr->iShorts[SETSHORT_HUB_SLOT_RATIO_SLOTS]) {
+        if(LOWORD(lResult) != clsSettingManager::mPtr->i16Shorts[SETSHORT_HUB_SLOT_RATIO_SLOTS]) {
             bUpdateHubSlotRatioMessage = true;
         }
         clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_SLOTS, LOWORD(lResult));
@@ -268,7 +266,7 @@ void SettingPageRules2::Save() {
 
     lResult = ::SendMessage(hWndPageItems[UD_MAX_HUBS], UDM_GETPOS, 0, 0);
     if(HIWORD(lResult) == 0) {
-        if(LOWORD(lResult) != clsSettingManager::mPtr->iShorts[SETSHORT_MAX_HUBS_LIMIT]) {
+        if(LOWORD(lResult) != clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_HUBS_LIMIT]) {
             bUpdateMaxHubsLimitMessage = true;
         }
         clsSettingManager::mPtr->SetShort(SETSHORT_MAX_HUBS_LIMIT, LOWORD(lResult));
@@ -350,7 +348,7 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
     AddToolTip(hWndPageItems[EDT_SLOTS_MIN], clsLanguageManager::mPtr->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_SLOTS_MIN], ScaleGui(40) + 8, clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_SLOTS_MIN],
-        (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MIN_SLOTS_LIMIT], 0));
+        (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SLOTS_LIMIT], 0));
 
     hWndPageItems[LBL_SLOTS_MIN] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_MIN_SLOTS], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(40) + clsGuiSettingManager::iUpDownWidth + 13, clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -366,7 +364,7 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
     AddToolTip(hWndPageItems[EDT_SLOTS_MAX], clsLanguageManager::mPtr->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_SLOTS_MAX], (rcThis.right - rcThis.left) - 13 - clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 0),
-        (WPARAM)hWndPageItems[EDT_SLOTS_MAX], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAX_SLOTS_LIMIT], 0));
+        (WPARAM)hWndPageItems[EDT_SLOTS_MAX], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SLOTS_LIMIT], 0));
 
     hWndPageItems[GB_SLOTS_MSG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         5, clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 2, iGBinGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -405,7 +403,7 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
     AddToolTip(hWndPageItems[EDT_HUBS], clsLanguageManager::mPtr->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_HUBS], (((rcThis.right - rcThis.left) - 21) / 2) - (ScaleGui(10) / 2) - clsGuiSettingManager::iUpDownWidth - 5, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight,
-        (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_HUBS], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_HUB_SLOT_RATIO_HUBS], 0));
+        (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_HUBS], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_HUB_SLOT_RATIO_HUBS], 0));
 
     hWndPageItems[LBL_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER,
         (((rcThis.right - rcThis.left) - 21) / 2) - (ScaleGui(10) / 2), iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(10), clsGuiSettingManager::iTextHeight,
@@ -417,7 +415,7 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
     AddToolTip(hWndPageItems[EDT_SLOTS], clsLanguageManager::mPtr->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_SLOTS], (((rcThis.right - rcThis.left) - 21) / 2) + (ScaleGui(10) / 2) + ScaleGui(40) + 5, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight,
-        (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_SLOTS], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_HUB_SLOT_RATIO_SLOTS], 0));
+        (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_SLOTS], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_HUB_SLOT_RATIO_SLOTS], 0));
 
     hWndPageItems[LBL_SLOTS] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_SLOTS], WS_CHILD | WS_VISIBLE | SS_LEFT,
         (((rcThis.right - rcThis.left) - 21) / 2) + (ScaleGui(10) / 2) + ScaleGui(40) + clsGuiSettingManager::iUpDownWidth + 10, iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -456,7 +454,7 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
     AddToolTip(hWndPageItems[EDT_MAX_HUBS], clsLanguageManager::mPtr->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_MAX_HUBS], ScaleGui(40) + 8, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_MAX_HUBS],
-        (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAX_HUBS_LIMIT], 0));
+        (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_HUBS_LIMIT], 0));
 
     hWndPageItems[LBL_MAX_HUBS] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_MAX_HUBS], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(40) + clsGuiSettingManager::iUpDownWidth + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -497,7 +495,7 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_CTM_LEN], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_CTM_LEN], ((rcThis.right - rcThis.left - 5) / 2) - clsGuiSettingManager::iUpDownWidth - 10, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(512, 1),
-        (WPARAM)hWndPageItems[EDT_CTM_LEN], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAX_CTM_LEN], 0));
+        (WPARAM)hWndPageItems[EDT_CTM_LEN], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_CTM_LEN], 0));
 
     hWndPageItems[GB_RCTM_LEN] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_RCTM_LIMIT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         ((rcThis.right - rcThis.left - 5) / 2) + 3, iPosX, (rcThis.right - rcThis.left) - (((rcThis.right - rcThis.left - 5) / 2) + 8), clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -511,7 +509,7 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_RCTM_LEN], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_RCTM_LEN], (rcThis.right - rcThis.left) - clsGuiSettingManager::iUpDownWidth - 13, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(512, 1),
-        (WPARAM)hWndPageItems[EDT_RCTM_LEN], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAX_RCTM_LEN], 0));
+        (WPARAM)hWndPageItems[EDT_RCTM_LEN], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_RCTM_LEN], 0));
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {
@@ -521,7 +519,7 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
         ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)clsGuiSettingManager::hFont, MAKELPARAM(TRUE, 0));
     }
 
-    if(clsSettingManager::mPtr->iShorts[SETSHORT_MIN_SLOTS_LIMIT] == 0 && clsSettingManager::mPtr->iShorts[SETSHORT_MAX_SLOTS_LIMIT] == 0) {
+    if(clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SLOTS_LIMIT] == 0 && clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SLOTS_LIMIT] == 0) {
         ::EnableWindow(hWndPageItems[EDT_SLOTS_MSG], FALSE);
         ::EnableWindow(hWndPageItems[BTN_SLOTS_REDIR], FALSE);
         ::EnableWindow(hWndPageItems[EDT_SLOTS_REDIR_ADDR], FALSE);
@@ -531,7 +529,7 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
         ::EnableWindow(hWndPageItems[EDT_SLOTS_REDIR_ADDR], clsSettingManager::mPtr->bBools[SETBOOL_SLOTS_LIMIT_REDIR] == true ? TRUE : FALSE);
     }
 
-    if(clsSettingManager::mPtr->iShorts[SETSHORT_HUB_SLOT_RATIO_HUBS] == 0 || clsSettingManager::mPtr->iShorts[SETSHORT_HUB_SLOT_RATIO_SLOTS] == 0) {
+    if(clsSettingManager::mPtr->i16Shorts[SETSHORT_HUB_SLOT_RATIO_HUBS] == 0 || clsSettingManager::mPtr->i16Shorts[SETSHORT_HUB_SLOT_RATIO_SLOTS] == 0) {
         ::EnableWindow(hWndPageItems[EDT_HUBS_SLOTS_MSG], FALSE);
         ::EnableWindow(hWndPageItems[BTN_HUBS_SLOTS_REDIR], FALSE);
         ::EnableWindow(hWndPageItems[EDT_HUBS_SLOTS_REDIR_ADDR], FALSE);
@@ -541,7 +539,7 @@ bool SettingPageRules2::CreateSettingPage(HWND hOwner) {
         ::EnableWindow(hWndPageItems[EDT_HUBS_SLOTS_REDIR_ADDR], clsSettingManager::mPtr->bBools[SETBOOL_HUB_SLOT_RATIO_REDIR] == true ? TRUE : FALSE);
     }
 
-    if(clsSettingManager::mPtr->iShorts[SETSHORT_MAX_HUBS_LIMIT] == 0) {
+    if(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_HUBS_LIMIT] == 0) {
         ::EnableWindow(hWndPageItems[EDT_HUBS_MSG], FALSE);
         ::EnableWindow(hWndPageItems[BTN_HUBS_REDIR], FALSE);
         ::EnableWindow(hWndPageItems[EDT_HUBS_REDIR_ADDR], FALSE);

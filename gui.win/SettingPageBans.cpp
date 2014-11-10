@@ -32,10 +32,8 @@
 #pragma hdrstop
 //---------------------------------------------------------------------------
 
-SettingPageBans::SettingPageBans() {
-    bUpdateTempBanRedirAddress = bUpdatePermBanRedirAddress = false;
-
-    memset(&hWndPageItems, 0, (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])) * sizeof(HWND));
+SettingPageBans::SettingPageBans() : bUpdateTempBanRedirAddress(false), bUpdatePermBanRedirAddress(false) {
+    memset(&hWndPageItems, 0, sizeof(hWndPageItems));
 }
 //---------------------------------------------------------------------------
 
@@ -191,7 +189,7 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_DEFAULT_TEMPBAN_TIME], EM_SETLIMITTEXT, 5, 0);
 
     AddUpDown(hWndPageItems[UD_DEFAULT_TEMPBAN_TIME], (iFullEDT / 2) + 8, clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(32767, 1),
-        (WPARAM)hWndPageItems[EDT_DEFAULT_TEMPBAN_TIME], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_DEFAULT_TEMP_BAN_TIME], 0));
+        (WPARAM)hWndPageItems[EDT_DEFAULT_TEMPBAN_TIME], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_DEFAULT_TEMP_BAN_TIME], 0));
 
     hWndPageItems[LBL_DEFAULT_TEMPBAN_TIME_MINUTES] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_MINUTES_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
         (iFullEDT / 2) + clsGuiSettingManager::iUpDownWidth + 13, clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), (rcThis.right - rcThis.left) - ((iFullEDT / 2) + clsGuiSettingManager::iUpDownWidth + 18), clsGuiSettingManager::iTextHeight,
@@ -277,7 +275,7 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_DISABLED]);
     ::SendMessage(hWndPageItems[CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_PERM_BAN]);
     ::SendMessage(hWndPageItems[CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_TEMP_BAN]);
-    ::SendMessage(hWndPageItems[CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION], CB_SETCURSEL, clsSettingManager::mPtr->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE], 0);
+    ::SendMessage(hWndPageItems[CB_BRUTE_FORCE_PASSWORD_PROTECTION_ACTION], CB_SETCURSEL, clsSettingManager::mPtr->i16Shorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE], 0);
 
     hWndPageItems[LBL_TEMP_BAN_TIME] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_TEMPORARY_BAN_TIME], WS_CHILD | WS_VISIBLE | SS_LEFT,
         13, iPosX + (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + clsGuiSettingManager::iEditHeight + 6 + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(225), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -287,7 +285,7 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_TEMP_BAN_TIME], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_TEMP_BAN_TIME], ScaleGui(225) + 18 + ScaleGui(80), iPosX + (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + clsGuiSettingManager::iEditHeight + 6, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight,
-        (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_TEMP_BAN_TIME], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_TEMP_BAN_TIME], 0));
+        (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_TEMP_BAN_TIME], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_TEMP_BAN_TIME], 0));
 
     hWndPageItems[LBL_TEMP_BAN_TIME_HOURS] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_HOURS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(225) + 18 + ScaleGui(80) + clsGuiSettingManager::iUpDownWidth + 5, iPosX + (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + clsGuiSettingManager::iEditHeight + 6 + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -309,11 +307,11 @@ bool SettingPageBans::CreateSettingPage(HWND hOwner) {
 
     ::EnableWindow(hWndPageItems[EDT_PERM_BAN_REDIR], clsSettingManager::mPtr->bBools[SETBOOL_PERM_BAN_REDIR] == true ? TRUE : FALSE);
 
-    ::EnableWindow(hWndPageItems[LBL_TEMP_BAN_TIME], clsSettingManager::mPtr->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 2 ? TRUE : FALSE);
-    ::EnableWindow(hWndPageItems[EDT_TEMP_BAN_TIME], clsSettingManager::mPtr->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 2 ? TRUE : FALSE);
-    ::EnableWindow(hWndPageItems[UD_TEMP_BAN_TIME], clsSettingManager::mPtr->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 2 ? TRUE : FALSE);
-    ::EnableWindow(hWndPageItems[LBL_TEMP_BAN_TIME_HOURS], clsSettingManager::mPtr->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 2 ? TRUE : FALSE);
-    ::EnableWindow(hWndPageItems[BTN_REPORT_3X_BAD_PASS], clsSettingManager::mPtr->iShorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_TEMP_BAN_TIME], clsSettingManager::mPtr->i16Shorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 2 ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[EDT_TEMP_BAN_TIME], clsSettingManager::mPtr->i16Shorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 2 ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[UD_TEMP_BAN_TIME], clsSettingManager::mPtr->i16Shorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 2 ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[LBL_TEMP_BAN_TIME_HOURS], clsSettingManager::mPtr->i16Shorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 2 ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[BTN_REPORT_3X_BAD_PASS], clsSettingManager::mPtr->i16Shorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_BAN_TYPE] == 0 ? FALSE : TRUE);
 
     clsGuiSettingManager::wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[BTN_REPORT_3X_BAD_PASS], GWLP_WNDPROC, (LONG_PTR)ButtonProc);
 

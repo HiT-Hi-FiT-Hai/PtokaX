@@ -28,7 +28,10 @@ private:
         RegSocket();
         ~RegSocket();
 
-        uint64_t iTotalShare;
+        RegSocket(const RegSocket&);
+        const RegSocket& operator=(const RegSocket&);
+
+        uint64_t ui64TotalShare;
 
 #ifdef _WIN32
         SOCKET sock;
@@ -36,13 +39,13 @@ private:
 		int sock;
 #endif
 
-        uint32_t iRecvBufLen, iRecvBufSize, iSendBufLen, iTotalUsers;
+        uint32_t ui32RecvBufLen, ui32RecvBufSize, ui32SendBufLen, ui32TotalUsers;
 
         uint32_t ui32AddrLen;
 
-		char *sAddress, *sRecvBuf, *sSendBuf, *sSendBufHead;
+		char * sAddress, * pRecvBuf, * pSendBuf, * pSendBufHead;
 
-        RegSocket *prev, *next;    
+        RegSocket * pPrev, * pNext;
     };
 
 #ifdef _WIN32
@@ -53,21 +56,24 @@ private:
 	pthread_t threadId;
 #endif
 
-    RegSocket *RegSockListS, *RegSockListE;
+    RegSocket * pRegSockListS, * pRegSockListE;
 
     bool bTerminated;
 
     char sMsg[2048];
 
+	clsRegisterThread(const clsRegisterThread&);
+	const clsRegisterThread& operator=(const clsRegisterThread&);
+
 	void AddSock(char * sAddress, const size_t &ui32Len);
-	bool Receive(RegSocket * Sock);
-    static void Add2SendBuf(RegSocket * Sock, char * sData);
-    bool Send(RegSocket * Sock);
-    void RemoveSock(RegSocket * Sock);
+	bool Receive(RegSocket * pSock);
+    static void Add2SendBuf(RegSocket * pSock, char * sData);
+    bool Send(RegSocket * pSock);
+    void RemoveSock(RegSocket * pSock);
 public:
     static clsRegisterThread * mPtr;
 
-    uint32_t iBytesRead, iBytesSent;
+    uint32_t ui32BytesRead, ui32BytesSent;
 
 	clsRegisterThread();
 	~clsRegisterThread();

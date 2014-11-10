@@ -28,18 +28,24 @@ private:
         ReservedNick();
         ~ReservedNick();
 
-        char *sNick;
+        ReservedNick(const ReservedNick&);
+        const ReservedNick& operator=(const ReservedNick&);
 
-        ReservedNick *prev, *next;
+        char * sNick;
+
+        ReservedNick * pPrev, * pNext;
 
         uint32_t ui32Hash;
 
         bool bFromScript;
 
-        static ReservedNick * CreateReservedNick(const char * nick, uint32_t ui32NickHash);
+        static ReservedNick * CreateReservedNick(const char * sNewNick, uint32_t ui32NickHash);
     };
 
-    ReservedNick *ReservedNicks;
+    ReservedNick * pReservedNicks;
+
+    clsReservedNicksManager(const clsReservedNicksManager&);
+    const clsReservedNicksManager& operator=(const clsReservedNicksManager&);
 public:
     static clsReservedNicksManager * mPtr;
 

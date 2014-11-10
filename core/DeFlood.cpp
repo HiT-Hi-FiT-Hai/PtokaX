@@ -203,9 +203,9 @@ void DeFloodDoAction(User * u, const uint8_t &ui8DefloodType, const int16_t &ui1
         }
         case 5: {
 			clsBanManager::mPtr->TempBan(u, DeFloodGetMessage(ui8DefloodType, 1), NULL,
-                clsSettingManager::mPtr->iShorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME], 0, false);
+                clsSettingManager::mPtr->i16Shorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME], 0, false);
             int iret = sprintf(msg+imsgLen, "<%s> %s: %s %s: %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_HAD_BEEN_TEMP_BANNED_TO],
-                formatTime(clsSettingManager::mPtr->iShorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME]), clsLanguageManager::mPtr->sTexts[LAN_BECAUSE_LWR], DeFloodGetMessage(ui8DefloodType, 1));
+                formatTime(clsSettingManager::mPtr->i16Shorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME]), clsLanguageManager::mPtr->sTexts[LAN_BECAUSE_LWR], DeFloodGetMessage(ui8DefloodType, 1));
 			imsgLen += iret;
             if(CheckSprintf1(iret, imsgLen, 1024, "DeFloodDoAction5") == true) {
 				u->SendChar(msg, imsgLen);
@@ -235,7 +235,7 @@ void DeFloodDoAction(User * u, const uint8_t &ui8DefloodType, const int16_t &ui1
 //---------------------------------------------------------------------------
 
 bool DeFloodCheckForWarn(User * u, const uint8_t &ui8DefloodType, char * sOtherNick) {
-	if(u->iDefloodWarnings < (uint32_t)clsSettingManager::mPtr->iShorts[SETSHORT_DEFLOOD_WARNING_COUNT]) {
+	if(u->iDefloodWarnings < (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_DEFLOOD_WARNING_COUNT]) {
         int imsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], DeFloodGetMessage(ui8DefloodType, 0));
         if(CheckSprintf(imsgLen, 1024, "DeFloodCheckForWarn1") == true) {
 			u->SendCharDelayed(msg, imsgLen);
@@ -249,7 +249,7 @@ bool DeFloodCheckForWarn(User * u, const uint8_t &ui8DefloodType, char * sOtherN
                 return true;
             }
         }
-        switch(clsSettingManager::mPtr->iShorts[SETSHORT_DEFLOOD_WARNING_ACTION]) {
+        switch(clsSettingManager::mPtr->i16Shorts[SETSHORT_DEFLOOD_WARNING_ACTION]) {
 			case 0: {
                 int iret = sprintf(msg+imsgLen, "<%s> %s: %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_BEING_DISCONNECTED_BECAUSE],
                     DeFloodGetMessage(ui8DefloodType, 1));
@@ -276,9 +276,9 @@ bool DeFloodCheckForWarn(User * u, const uint8_t &ui8DefloodType, char * sOtherN
 			}
 			case 2: {
 				clsBanManager::mPtr->TempBan(u, DeFloodGetMessage(ui8DefloodType, 1), NULL,
-                    clsSettingManager::mPtr->iShorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME], 0, false);
+                    clsSettingManager::mPtr->i16Shorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME], 0, false);
                 int iret = sprintf(msg+imsgLen, "<%s> %s: %s %s: %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_HAD_BEEN_TEMP_BANNED_TO],
-                    formatTime(clsSettingManager::mPtr->iShorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME]), clsLanguageManager::mPtr->sTexts[LAN_BECAUSE_LWR], DeFloodGetMessage(ui8DefloodType, 1));
+                    formatTime(clsSettingManager::mPtr->i16Shorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME]), clsLanguageManager::mPtr->sTexts[LAN_BECAUSE_LWR], DeFloodGetMessage(ui8DefloodType, 1));
 				if(CheckSprintf1(iret, imsgLen, 1024, "DeFloodCheckForWarn5") == true) {
 					u->SendChar(msg, imsgLen);
                 }

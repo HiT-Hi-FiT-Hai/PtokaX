@@ -32,37 +32,45 @@ static const uint32_t ZMYINFOLISTSIZE = 1024*128;
 class clsUsers {
 private:
     struct RecTime {
+        RecTime(const uint8_t * pIpHash);
+
+        RecTime(const RecTime&);
+        const RecTime& operator=(const RecTime&);
+
         uint64_t ui64DisConnTick;
         uint32_t ui32NickHash;
-        RecTime *prev, *next;
+        RecTime * pPrev, * pNext;
         char * sNick;
         uint8_t ui128IpHash[16];
     };
 
-    uint64_t iChatMsgsTick, iChatLockFromTick;
+    uint64_t ui64ChatMsgsTick, ui64ChatLockFromTick;
 
-    uint16_t iChatMsgs;
+    uint16_t ui16ChatMsgs;
 
-    RecTime * RecTimeList;
+    RecTime * pRecTimeList;
 
-	User *elist;
+	User * pListE;
 
     bool bChatLocked;
 
 	char msg[1024];
+
+    clsUsers(const clsUsers&);
+    const clsUsers& operator=(const clsUsers&);
 public:
     static clsUsers * mPtr;
 
-    uint32_t myInfosLen, myInfosSize, iZMyInfosLen, iZMyInfosSize;
-    uint32_t myInfosTagLen, myInfosTagSize, iZMyInfosTagLen, iZMyInfosTagSize;
-    uint32_t nickListLen, nickListSize, iZNickListLen, iZNickListSize;
-    uint32_t opListLen, opListSize, iZOpListLen, iZOpListSize;
-    uint32_t userIPListSize, userIPListLen, iZUserIPListSize, iZUserIPListLen;
+    uint32_t ui32MyInfosLen, ui32MyInfosSize, ui32ZMyInfosLen, ui32ZMyInfosSize;
+    uint32_t ui32MyInfosTagLen, ui32MyInfosTagSize, ui32ZMyInfosTagLen, ui32ZMyInfosTagSize;
+    uint32_t ui32NickListLen, ui32NickListSize, ui32ZNickListLen, ui32ZNickListSize;
+    uint32_t ui32OpListLen, ui32OpListSize, ui32ZOpListLen, ui32ZOpListSize;
+    uint32_t ui32UserIPListSize, ui32UserIPListLen, ui32ZUserIPListSize, ui32ZUserIPListLen;
 
-    char *nickList, *sZNickList, *opList, *sZOpList, *userIPList, *sZUserIPList; 
-    char *myInfos, *sZMyInfos, *myInfosTag, *sZMyInfosTag;
+    char * pNickList, * pZNickList, * pOpList, * pZOpList, * pUserIPList, * pZUserIPList;
+    char * pMyInfos, * pZMyInfos, * pMyInfosTag, * pZMyInfosTag;
 
-    User *llist;
+    User * pListS;
     
     uint16_t ui16ActSearchs, ui16PasSearchs;
 

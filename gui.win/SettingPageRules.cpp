@@ -32,10 +32,8 @@
 #pragma hdrstop
 //---------------------------------------------------------------------------
 
-SettingPageRules::SettingPageRules() {
-    bUpdateNickLimitMessage = bUpdateMinShare = bUpdateMaxShare = bUpdateShareLimitMessage = false;
-
-    memset(&hWndPageItems, 0, (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])) * sizeof(HWND));
+SettingPageRules::SettingPageRules() : bUpdateNickLimitMessage(false), bUpdateMinShare(false), bUpdateMaxShare(false), bUpdateShareLimitMessage(false) {
+    memset(&hWndPageItems, 0, sizeof(hWndPageItems));
 }
 //---------------------------------------------------------------------------
 
@@ -161,7 +159,7 @@ void SettingPageRules::Save() {
 
     LRESULT lResult = ::SendMessage(hWndPageItems[UD_MIN_NICK_LEN], UDM_GETPOS, 0, 0);
     if(HIWORD(lResult) == 0) {
-        if(LOWORD(lResult) != clsSettingManager::mPtr->iShorts[SETSHORT_MIN_NICK_LEN]) {
+        if(LOWORD(lResult) != clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_NICK_LEN]) {
             bUpdateNickLimitMessage = true;
         }
         clsSettingManager::mPtr->SetShort(SETSHORT_MIN_NICK_LEN, LOWORD(lResult));
@@ -169,7 +167,7 @@ void SettingPageRules::Save() {
 
     lResult = ::SendMessage(hWndPageItems[UD_MAX_NICK_LEN], UDM_GETPOS, 0, 0);
     if(HIWORD(lResult) == 0) {
-        if(LOWORD(lResult) != clsSettingManager::mPtr->iShorts[SETSHORT_MAX_NICK_LEN]) {
+        if(LOWORD(lResult) != clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_NICK_LEN]) {
             bUpdateNickLimitMessage = true;
         }
         clsSettingManager::mPtr->SetShort(SETSHORT_MAX_NICK_LEN, LOWORD(lResult));
@@ -204,7 +202,7 @@ void SettingPageRules::Save() {
 
     lResult = ::SendMessage(hWndPageItems[UD_MIN_SHARE], UDM_GETPOS, 0, 0);
     if(HIWORD(lResult) == 0) {
-        if(LOWORD(lResult) != clsSettingManager::mPtr->iShorts[SETSHORT_MIN_SHARE_LIMIT]) {
+        if(LOWORD(lResult) != clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SHARE_LIMIT]) {
             bUpdateMinShare = true;
             bUpdateShareLimitMessage = true;
         }
@@ -213,7 +211,7 @@ void SettingPageRules::Save() {
 
     uint16_t ui16MinShareUnits = (int16_t)::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_GETCURSEL, 0, 0);
 
-    if(ui16MinShareUnits != clsSettingManager::mPtr->iShorts[SETSHORT_MIN_SHARE_UNITS]) {
+    if(ui16MinShareUnits != clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SHARE_UNITS]) {
         bUpdateMinShare = true;
         bUpdateShareLimitMessage = true;
     }
@@ -222,7 +220,7 @@ void SettingPageRules::Save() {
 
     lResult = ::SendMessage(hWndPageItems[UD_MAX_SHARE], UDM_GETPOS, 0, 0);
     if(HIWORD(lResult) == 0) {
-        if(LOWORD(lResult) != clsSettingManager::mPtr->iShorts[SETSHORT_MAX_SHARE_LIMIT]) {
+        if(LOWORD(lResult) != clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SHARE_LIMIT]) {
             bUpdateMaxShare = true;
             bUpdateShareLimitMessage = true;
         }
@@ -231,7 +229,7 @@ void SettingPageRules::Save() {
 
     uint16_t ui16MaxShareUnits = (int16_t)::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_GETCURSEL, 0, 0);
 
-    if(ui16MaxShareUnits != clsSettingManager::mPtr->iShorts[SETSHORT_MAX_SHARE_UNITS]) {
+    if(ui16MaxShareUnits != clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SHARE_UNITS]) {
         bUpdateMaxShare = true;
         bUpdateShareLimitMessage = true;
     }
@@ -337,7 +335,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     AddToolTip(hWndPageItems[EDT_MIN_NICK_LEN], clsLanguageManager::mPtr->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_MIN_NICK_LEN], ScaleGui(40) + 8, clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(64, 0), (WPARAM)hWndPageItems[EDT_MIN_NICK_LEN],
-        (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MIN_NICK_LEN], 0));
+        (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_NICK_LEN], 0));
 
     hWndPageItems[LBL_MIN_NICK_LEN] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_MIN_LEN], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(40) + clsGuiSettingManager::iUpDownWidth + 13, clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -353,7 +351,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     AddToolTip(hWndPageItems[EDT_MAX_NICK_LEN], clsLanguageManager::mPtr->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_MAX_NICK_LEN], (rcThis.right - rcThis.left) - 13 - clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(64, 0),
-        (WPARAM)hWndPageItems[EDT_MAX_NICK_LEN], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAX_NICK_LEN], 0));
+        (WPARAM)hWndPageItems[EDT_MAX_NICK_LEN], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_NICK_LEN], 0));
 
     hWndPageItems[GB_NICK_LEN_MSG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         5, clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 2, iGBinGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -387,7 +385,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     AddToolTip(hWndPageItems[EDT_MIN_SHARE], clsLanguageManager::mPtr->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_MIN_SHARE], ScaleGui(40) + 8, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(9999, 0), (WPARAM)hWndPageItems[EDT_MIN_SHARE],
-        (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MIN_SHARE_LIMIT], 0));
+        (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SHARE_LIMIT], 0));
 
     hWndPageItems[CB_MIN_SHARE] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
         ScaleGui(40) + clsGuiSettingManager::iUpDownWidth + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin, ScaleGui(50), clsGuiSettingManager::iEditHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -396,7 +394,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_MEGA_BYTES]);
     ::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_GIGA_BYTES]);
     ::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_TERA_BYTES]);
-    ::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_SETCURSEL, clsSettingManager::mPtr->iShorts[SETSHORT_MIN_SHARE_UNITS], 0);
+    ::SendMessage(hWndPageItems[CB_MIN_SHARE], CB_SETCURSEL, clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SHARE_UNITS], 0);
 
     hWndPageItems[LBL_MIN_SHARE] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_MIN_SHARE], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(90) + clsGuiSettingManager::iUpDownWidth + 18, iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -412,7 +410,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     AddToolTip(hWndPageItems[EDT_MAX_SHARE], clsLanguageManager::mPtr->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_MAX_SHARE], (rcThis.right - rcThis.left) - clsGuiSettingManager::iUpDownWidth - ScaleGui(50) - 18, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(9999, 0),
-        (WPARAM)hWndPageItems[EDT_MAX_SHARE], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAX_SHARE_LIMIT], 0));
+        (WPARAM)hWndPageItems[EDT_MAX_SHARE], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SHARE_LIMIT], 0));
 
     hWndPageItems[CB_MAX_SHARE] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
         (rcThis.right - rcThis.left) - ScaleGui(50) - 13, iPosX + clsGuiSettingManager::iGroupBoxMargin, ScaleGui(50), clsGuiSettingManager::iEditHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -421,7 +419,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_MEGA_BYTES]);
     ::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_GIGA_BYTES]);
     ::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_TERA_BYTES]);
-    ::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_SETCURSEL, clsSettingManager::mPtr->iShorts[SETSHORT_MAX_SHARE_UNITS], 0);
+    ::SendMessage(hWndPageItems[CB_MAX_SHARE], CB_SETCURSEL, clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SHARE_UNITS], 0);
 
     hWndPageItems[GB_SHARE_MSG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         5, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 2, iGBinGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -455,7 +453,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     AddToolTip(hWndPageItems[EDT_MAIN_CHAT_LEN], clsLanguageManager::mPtr->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_MAIN_CHAT_LEN], ScaleGui(40) + 8, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(32767, 0), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_LEN],
-        (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAX_CHAT_LEN], 0));
+        (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_CHAT_LEN], 0));
 
     hWndPageItems[LBL_MAIN_CHAT_LEN] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_LENGTH], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(40) + clsGuiSettingManager::iUpDownWidth + 13, iPosX +clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -471,7 +469,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     AddToolTip(hWndPageItems[EDT_MAIN_CHAT_LINES], clsLanguageManager::mPtr->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_MAIN_CHAT_LINES], (rcThis.right - rcThis.left) - 13 - clsGuiSettingManager::iUpDownWidth, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 0),
-        (WPARAM)hWndPageItems[EDT_MAIN_CHAT_LINES], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAX_CHAT_LINES], 0));
+        (WPARAM)hWndPageItems[EDT_MAIN_CHAT_LINES], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_CHAT_LINES], 0));
 
     iPosX += clsGuiSettingManager::iOneLineGB;
 
@@ -484,7 +482,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     AddToolTip(hWndPageItems[EDT_PM_LEN], clsLanguageManager::mPtr->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_PM_LEN], ScaleGui(40) + 8, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(32767, 0), (WPARAM)hWndPageItems[EDT_PM_LEN],
-        (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAX_PM_LEN], 0));
+        (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_PM_LEN], 0));
 
     hWndPageItems[LBL_PM_LEN] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_LENGTH], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(40) + clsGuiSettingManager::iUpDownWidth + 13, iPosX +clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -500,7 +498,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     AddToolTip(hWndPageItems[EDT_PM_LINES], clsLanguageManager::mPtr->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_PM_LINES], (rcThis.right - rcThis.left) - 13 - clsGuiSettingManager::iUpDownWidth, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 0),
-        (WPARAM)hWndPageItems[EDT_PM_LINES], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAX_PM_LINES], 0));
+        (WPARAM)hWndPageItems[EDT_PM_LINES], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_PM_LINES], 0));
 
     iPosX += clsGuiSettingManager::iOneLineGB;
 
@@ -513,7 +511,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     AddToolTip(hWndPageItems[EDT_SEARCH_MIN_LEN], clsLanguageManager::mPtr->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_SEARCH_MIN_LEN], ScaleGui(40) + 8, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_SEARCH_MIN_LEN],
-        (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MIN_SEARCH_LEN], 0));
+        (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SEARCH_LEN], 0));
 
     hWndPageItems[LBL_SEARCH_MIN] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_MINIMUM], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(40) + clsGuiSettingManager::iUpDownWidth + 13, iPosX +clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -529,7 +527,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
     AddToolTip(hWndPageItems[EDT_SEARCH_MAX_LEN], clsLanguageManager::mPtr->sTexts[LAN_ZERO_IS_UNLIMITED_HINT]);
 
     AddUpDown(hWndPageItems[UD_SEARCH_MAX_LEN], (rcThis.right - rcThis.left) - 13 - clsGuiSettingManager::iUpDownWidth, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 0),
-        (WPARAM)hWndPageItems[EDT_SEARCH_MAX_LEN], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAX_SEARCH_LEN], 0));
+        (WPARAM)hWndPageItems[EDT_SEARCH_MAX_LEN], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN], 0));
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {
@@ -539,7 +537,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
         ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)clsGuiSettingManager::hFont, MAKELPARAM(TRUE, 0));
     }
 
-    if(clsSettingManager::mPtr->iShorts[SETSHORT_MIN_SHARE_LIMIT] == 0 && clsSettingManager::mPtr->iShorts[SETSHORT_MAX_SHARE_LIMIT] == 0) {
+    if(clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SHARE_LIMIT] == 0 && clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SHARE_LIMIT] == 0) {
         ::EnableWindow(hWndPageItems[EDT_NICK_LEN_MSG], FALSE);
         ::EnableWindow(hWndPageItems[BTN_NICK_LEN_REDIR], FALSE);
         ::EnableWindow(hWndPageItems[EDT_NICK_LEN_REDIR_ADDR], FALSE);
@@ -549,7 +547,7 @@ bool SettingPageRules::CreateSettingPage(HWND hOwner) {
         ::EnableWindow(hWndPageItems[EDT_NICK_LEN_REDIR_ADDR], clsSettingManager::mPtr->bBools[SETBOOL_NICK_LIMIT_REDIR] == true ? TRUE : FALSE);
     }
 
-    if(clsSettingManager::mPtr->iShorts[SETSHORT_MIN_NICK_LEN] == 0 && clsSettingManager::mPtr->iShorts[SETSHORT_MAX_NICK_LEN] == 0) {
+    if(clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_NICK_LEN] == 0 && clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_NICK_LEN] == 0) {
         ::EnableWindow(hWndPageItems[EDT_SHARE_MSG], FALSE);
         ::EnableWindow(hWndPageItems[BTN_SHARE_REDIR], FALSE);
         ::EnableWindow(hWndPageItems[EDT_SHARE_REDIR_ADDR], FALSE);

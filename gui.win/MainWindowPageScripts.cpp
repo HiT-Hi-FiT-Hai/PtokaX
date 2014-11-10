@@ -48,14 +48,12 @@ clsMainWindowPageScripts * clsMainWindowPageScripts::mPtr = NULL;
 #define IDC_DELETE_SCRIPT           502
 //---------------------------------------------------------------------------
 
-clsMainWindowPageScripts::clsMainWindowPageScripts() {
+clsMainWindowPageScripts::clsMainWindowPageScripts() : bIgnoreItemChanged(false) {
     clsMainWindowPageScripts::mPtr = this;
 
-    memset(&hWndPageItems, 0, (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])) * sizeof(HWND));
+    memset(&hWndPageItems, 0, sizeof(hWndPageItems));
 
-    bIgnoreItemChanged = false;
-
-    iPercentagePos = clsGuiSettingManager::mPtr->iIntegers[GUISETINT_SCRIPTS_SPLITTER];
+    iPercentagePos = clsGuiSettingManager::mPtr->i32Integers[GUISETINT_SCRIPTS_SPLITTER];
 }
 //---------------------------------------------------------------------------
 
@@ -325,14 +323,14 @@ bool clsMainWindowPageScripts::CreateMainWindowPage(HWND hOwner) {
     LVCOLUMN lvColumn = { 0 };
     lvColumn.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
     lvColumn.fmt = LVCFMT_LEFT;
-    lvColumn.cx = clsGuiSettingManager::mPtr->iIntegers[GUISETINT_SCRIPT_NAMES];
+    lvColumn.cx = clsGuiSettingManager::mPtr->i32Integers[GUISETINT_SCRIPT_NAMES];
     lvColumn.pszText = clsLanguageManager::mPtr->sTexts[LAN_SCRIPT_FILE];
     lvColumn.iSubItem = 0;
 
     ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_INSERTCOLUMN, 0, (LPARAM)&lvColumn);
 
     lvColumn.fmt = LVCFMT_RIGHT;
-    lvColumn.cx = clsGuiSettingManager::mPtr->iIntegers[GUISETINT_SCRIPT_MEMORY_USAGES];
+    lvColumn.cx = clsGuiSettingManager::mPtr->i32Integers[GUISETINT_SCRIPT_MEMORY_USAGES];
     lvColumn.pszText = clsLanguageManager::mPtr->sTexts[LAN_MEM_USAGE];
     lvColumn.iSubItem = 1;
     ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_INSERTCOLUMN, 1, (LPARAM)&lvColumn);
@@ -465,8 +463,8 @@ void clsMainWindowPageScripts::ScriptToList(const uint8_t &ui8ScriptId, const bo
     LVITEM lvItem = { 0 };
     lvItem.mask = LVIF_PARAM | LVIF_TEXT;
     lvItem.iItem = ui8ScriptId;
-    lvItem.pszText = clsScriptManager::mPtr->ScriptTable[ui8ScriptId]->sName;
-    lvItem.lParam = (LPARAM)clsScriptManager::mPtr->ScriptTable[ui8ScriptId];
+    lvItem.pszText = clsScriptManager::mPtr->ppScriptTable[ui8ScriptId]->sName;
+    lvItem.lParam = (LPARAM)clsScriptManager::mPtr->ppScriptTable[ui8ScriptId];
 
     if(bSelected == true) {
         lvItem.mask |= LVIF_STATE;
@@ -484,7 +482,7 @@ void clsMainWindowPageScripts::ScriptToList(const uint8_t &ui8ScriptId, const bo
 
     if(i != -1 || bInsert == false) {
         lvItem.mask = LVIF_STATE;
-        lvItem.state = INDEXTOSTATEIMAGEMASK(clsScriptManager::mPtr->ScriptTable[ui8ScriptId]->bEnabled == true ? 2 : 1);
+        lvItem.state = INDEXTOSTATEIMAGEMASK(clsScriptManager::mPtr->ppScriptTable[ui8ScriptId]->bEnabled == true ? 2 : 1);
         lvItem.stateMask = LVIS_STATEIMAGEMASK;
 
         ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_SETITEMSTATE, ui8ScriptId, (LPARAM)&lvItem);
@@ -502,32 +500,32 @@ void clsMainWindowPageScripts::OnItemChanged(const LPNMLISTVIEW &pListView) {
     }
 
     if((((pListView->uNewState & LVIS_STATEIMAGEMASK) >> 12) - 1) == 0) {
-        if(clsScriptManager::mPtr->ScriptTable[pListView->iItem]->bEnabled == false) {
+        if(clsScriptManager::mPtr->ppScriptTable[pListView->iItem]->bEnabled == false) {
             return;
         }
 
-        clsScriptManager::mPtr->ScriptTable[pListView->iItem]->bEnabled = false;
+        clsScriptManager::mPtr->ppScriptTable[pListView->iItem]->bEnabled = false;
 
         if(clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_SCRIPTING] == false || clsServerManager::bServerRunning == false) {
 			return;
         }
 
-		clsScriptManager::mPtr->StopScript(clsScriptManager::mPtr->ScriptTable[pListView->iItem], false);
+		clsScriptManager::mPtr->StopScript(clsScriptManager::mPtr->ppScriptTable[pListView->iItem], false);
 		ClearMemUsage((uint8_t)pListView->iItem);
 
 		RichEditAppendText(hWndPageItems[REDT_SCRIPTS_ERRORS], (string(clsLanguageManager::mPtr->sTexts[LAN_SCRIPT_STOPPED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SCRIPT_STOPPED])+".").c_str());
     } else {
-        if(clsScriptManager::mPtr->ScriptTable[pListView->iItem]->bEnabled == true) {
+        if(clsScriptManager::mPtr->ppScriptTable[pListView->iItem]->bEnabled == true) {
             return;
         }
 
-        clsScriptManager::mPtr->ScriptTable[pListView->iItem]->bEnabled = true;
+        clsScriptManager::mPtr->ppScriptTable[pListView->iItem]->bEnabled = true;
 
 		if(clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_SCRIPTING] == false || clsServerManager::bServerRunning == false) {
             return;
         }
 
-		if(clsScriptManager::mPtr->StartScript(clsScriptManager::mPtr->ScriptTable[pListView->iItem], false) == true) {
+		if(clsScriptManager::mPtr->StartScript(clsScriptManager::mPtr->ppScriptTable[pListView->iItem], false) == true) {
 			RichEditAppendText(hWndPageItems[REDT_SCRIPTS_ERRORS], (string(clsLanguageManager::mPtr->sTexts[LAN_SCRIPT_STARTED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SCRIPT_STARTED])+".").c_str());
 		}
     }
@@ -538,7 +536,7 @@ void clsMainWindowPageScripts::OnDoubleClick(const LPNMITEMACTIVATE &pItemActiva
     RECT rc = { LVIR_ICON, 0, 0, 0 };
 
     if(::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_GETITEMRECT, pItemActivate->iItem, (LPARAM)&rc) == FALSE || pItemActivate->ptAction.x > rc.left) {
-        string sScript = clsServerManager::sScriptPath + clsScriptManager::mPtr->ScriptTable[pItemActivate->iItem]->sName;
+        string sScript = clsServerManager::sScriptPath + clsScriptManager::mPtr->ppScriptTable[pItemActivate->iItem]->sName;
         OpenScriptEditor(sScript.c_str());
     }
 }
@@ -557,15 +555,15 @@ void clsMainWindowPageScripts::UpdateMemUsage() {
     lvItem.iSubItem = 1;
 
 	for(uint8_t ui8i = 0; ui8i < clsScriptManager::mPtr->ui8ScriptCount; ui8i++) {
-        if(clsScriptManager::mPtr->ScriptTable[ui8i]->bEnabled == false) {
+        if(clsScriptManager::mPtr->ppScriptTable[ui8i]->bEnabled == false) {
             continue;
         }
 
-        string tmp(lua_gc(clsScriptManager::mPtr->ScriptTable[ui8i]->LUA, LUA_GCCOUNT, 0));
+        string tmp(lua_gc(clsScriptManager::mPtr->ppScriptTable[ui8i]->pLUA, LUA_GCCOUNT, 0));
 
         lvItem.iItem = ui8i;
 
-        string sMemUsage(lua_gc(clsScriptManager::mPtr->ScriptTable[ui8i]->LUA, LUA_GCCOUNT, 0));
+        string sMemUsage(lua_gc(clsScriptManager::mPtr->ppScriptTable[ui8i]->pLUA, LUA_GCCOUNT, 0));
         lvItem.pszText = sMemUsage.c_str();
 
         ::SendMessage(hWndPageItems[LV_SCRIPTS], LVM_SETITEM, 0, (LPARAM)&lvItem);
@@ -678,7 +676,7 @@ void clsMainWindowPageScripts::OpenInExternalEditor() {
         return;
     }
 
-    ::ShellExecute(NULL, NULL, (clsServerManager::sScriptPath + clsScriptManager::mPtr->ScriptTable[iSel]->sName).c_str(), NULL, NULL, SW_SHOWNORMAL);
+    ::ShellExecute(NULL, NULL, (clsServerManager::sScriptPath + clsScriptManager::mPtr->ppScriptTable[iSel]->sName).c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 //------------------------------------------------------------------------------
 
@@ -689,7 +687,7 @@ void clsMainWindowPageScripts::OpenInScriptEditor() {
         return;
     }
 
-    string sScript = clsServerManager::sScriptPath + clsScriptManager::mPtr->ScriptTable[iSel]->sName;
+    string sScript = clsServerManager::sScriptPath + clsScriptManager::mPtr->ppScriptTable[iSel]->sName;
     OpenScriptEditor(sScript.c_str());
 }
 //------------------------------------------------------------------------------
@@ -737,9 +735,9 @@ void clsMainWindowPageScripts::MoveScript(uint8_t ui8ScriptId, const bool &bUp) 
 void clsMainWindowPageScripts::UpdateCheck(const uint8_t &ui8ScriptId) {
     bIgnoreItemChanged = true;
 
-    ListView_SetItemState(hWndPageItems[LV_SCRIPTS], ui8ScriptId, INDEXTOSTATEIMAGEMASK(clsScriptManager::mPtr->ScriptTable[ui8ScriptId]->bEnabled == true ? 2 : 1), LVIS_STATEIMAGEMASK);
+    ListView_SetItemState(hWndPageItems[LV_SCRIPTS], ui8ScriptId, INDEXTOSTATEIMAGEMASK(clsScriptManager::mPtr->ppScriptTable[ui8ScriptId]->bEnabled == true ? 2 : 1), LVIS_STATEIMAGEMASK);
 
-    if(clsScriptManager::mPtr->ScriptTable[ui8ScriptId]->bEnabled == false) {
+    if(clsScriptManager::mPtr->ppScriptTable[ui8ScriptId]->bEnabled == false) {
         ClearMemUsage(ui8ScriptId);
     }
 

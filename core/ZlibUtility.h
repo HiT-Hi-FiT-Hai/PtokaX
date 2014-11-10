@@ -25,7 +25,10 @@
 class clsZlibUtility {
 private:
     size_t szZbufferSize;
-    char *sZbuffer;
+    char * pZbuffer;
+
+    clsZlibUtility(const clsZlibUtility&);
+    const clsZlibUtility& operator=(const clsZlibUtility&);
 public:
     static clsZlibUtility * mPtr;
 

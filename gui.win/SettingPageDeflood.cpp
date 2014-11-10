@@ -33,7 +33,7 @@
 //---------------------------------------------------------------------------
 
 SettingPageDeflood::SettingPageDeflood() {
-    memset(&hWndPageItems, 0, (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])) * sizeof(HWND));
+    memset(&hWndPageItems, 0, sizeof(hWndPageItems));
 }
 //---------------------------------------------------------------------------
 
@@ -384,7 +384,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_GLOBAL_MAIN_CHAT_MSGS], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_GLOBAL_MAIN_CHAT_MSGS], ScaleGui(30) + 8, clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_GLOBAL_MAIN_CHAT_MSGS],
-        (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_MESSAGES], 0));
+        (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_MESSAGES], 0));
 
     hWndPageItems[LBL_GLOBAL_MAIN_CHAT_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER,
         ScaleGui(30) + clsGuiSettingManager::iUpDownWidth + 13, clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(10), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -394,7 +394,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_GLOBAL_MAIN_CHAT_SECS], ScaleGui(70) + clsGuiSettingManager::iUpDownWidth + 18, clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1),
-        (WPARAM)hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_TIME], 0));
+        (WPARAM)hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_TIME], 0));
 
     hWndPageItems[LBL_GLOBAL_MAIN_CHAT_SEC] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_SEC_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(70) + (2 * clsGuiSettingManager::iUpDownWidth) + 23, clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(25), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -404,7 +404,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_GLOBAL_MAIN_CHAT], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_DISABLED]);
     ::SendMessage(hWndPageItems[CB_GLOBAL_MAIN_CHAT], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_LOCK_CHAT]);
     ::SendMessage(hWndPageItems[CB_GLOBAL_MAIN_CHAT], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_ONLY_TO_OPS_WITH_IP]);
-    ::SendMessage(hWndPageItems[CB_GLOBAL_MAIN_CHAT], CB_SETCURSEL, clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION], 0);
+    ::SendMessage(hWndPageItems[CB_GLOBAL_MAIN_CHAT], CB_SETCURSEL, clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION], 0);
 
     hWndPageItems[LBL_GLOBAL_MAIN_CHAT_FOR] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_FOR], WS_CHILD | WS_VISIBLE | SS_CENTER,
         ScaleGui(270) + (2 * clsGuiSettingManager::iUpDownWidth) + 33, clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(20), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -414,7 +414,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS2], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_GLOBAL_MAIN_CHAT_SECS2], ScaleGui(320) + (2 * clsGuiSettingManager::iUpDownWidth) + 38, clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1),
-        (WPARAM)hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS2], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_TIMEOUT], 0));
+        (WPARAM)hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS2], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_TIMEOUT], 0));
 
     hWndPageItems[LBL_GLOBAL_MAIN_CHAT_SEC2] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_SEC_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
         (rcThis.right - rcThis.left) - (ScaleGui(25) + 13), clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(25), clsGuiSettingManager::iTextHeight,
@@ -434,14 +434,14 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_MAIN_CHAT], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_KICK]);
     ::SendMessage(hWndPageItems[CB_MAIN_CHAT], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_TEMP_BAN]);
     ::SendMessage(hWndPageItems[CB_MAIN_CHAT], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_PERM_BAN]);
-    ::SendMessage(hWndPageItems[CB_MAIN_CHAT], CB_SETCURSEL, clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_ACTION], 0);
+    ::SendMessage(hWndPageItems[CB_MAIN_CHAT], CB_SETCURSEL, clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_ACTION], 0);
 
     hWndPageItems[EDT_MAIN_CHAT_MSGS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         ScaleGui(180) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin, ScaleGui(40), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_MAIN_CHAT_MSGS, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MAIN_CHAT_MSGS], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_MAIN_CHAT_MSGS], ScaleGui(220) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_MSGS],
-        (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_MESSAGES], 0));
+        (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_MESSAGES], 0));
 
     hWndPageItems[LBL_MAIN_CHAT_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER,
         ScaleGui(220) + clsGuiSettingManager::iUpDownWidth + 18, iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(10), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -451,7 +451,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_MAIN_CHAT_SECS], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_MAIN_CHAT_SECS], ScaleGui(270) + clsGuiSettingManager::iUpDownWidth + 23, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1),
-        (WPARAM)hWndPageItems[EDT_MAIN_CHAT_SECS], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_TIME], 0));
+        (WPARAM)hWndPageItems[EDT_MAIN_CHAT_SECS], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_TIME], 0));
 
     hWndPageItems[LBL_MAIN_CHAT_SECONDS] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(270) + (2 * clsGuiSettingManager::iUpDownWidth) + 28, iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -466,14 +466,14 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_MAIN_CHAT2], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_KICK]);
     ::SendMessage(hWndPageItems[CB_MAIN_CHAT2], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_TEMP_BAN]);
     ::SendMessage(hWndPageItems[CB_MAIN_CHAT2], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_PERM_BAN]);
-    ::SendMessage(hWndPageItems[CB_MAIN_CHAT2], CB_SETCURSEL, clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_ACTION2], 0);
+    ::SendMessage(hWndPageItems[CB_MAIN_CHAT2], CB_SETCURSEL, clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_ACTION2], 0);
 
     hWndPageItems[EDT_MAIN_CHAT_MSGS2] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         ScaleGui(180) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 5, ScaleGui(40), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_MAIN_CHAT_MSGS2, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MAIN_CHAT_MSGS2], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_MAIN_CHAT_MSGS2], ScaleGui(220) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 5, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_MSGS2],
-        (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_MESSAGES2], 0));
+        (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_MESSAGES2], 0));
 
     hWndPageItems[LBL_MAIN_CHAT_DIVIDER2] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER,
         ScaleGui(220) + clsGuiSettingManager::iUpDownWidth + 18, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 5 + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(10), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -483,7 +483,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_MAIN_CHAT_SECS2], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_MAIN_CHAT_SECS2], ScaleGui(270) + clsGuiSettingManager::iUpDownWidth + 23, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 5, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1),
-        (WPARAM)hWndPageItems[EDT_MAIN_CHAT_SECS2], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_TIME2], 0));
+        (WPARAM)hWndPageItems[EDT_MAIN_CHAT_SECS2], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_TIME2], 0));
 
     hWndPageItems[LBL_MAIN_CHAT_SECONDS2] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(270) + (2 * clsGuiSettingManager::iUpDownWidth) + 28, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 5 + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -497,7 +497,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_MAIN_CHAT_INTERVAL_MSGS], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_MAIN_CHAT_INTERVAL_MSGS], ScaleGui(220) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin + (2 * clsGuiSettingManager::iEditHeight) + 10, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1),
-        (WPARAM)hWndPageItems[EDT_MAIN_CHAT_INTERVAL_MSGS], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_CHAT_INTERVAL_MESSAGES], 0));
+        (WPARAM)hWndPageItems[EDT_MAIN_CHAT_INTERVAL_MSGS], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_CHAT_INTERVAL_MESSAGES], 0));
 
     hWndPageItems[LBL_MAIN_CHAT_INTERVAL_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER,
         ScaleGui(220) + clsGuiSettingManager::iUpDownWidth + 18, iPosX + clsGuiSettingManager::iGroupBoxMargin + (2 * clsGuiSettingManager::iEditHeight) + 10 + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(10), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -507,7 +507,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_MAIN_CHAT_INTERVAL_SECS], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_MAIN_CHAT_INTERVAL_SECS], ScaleGui(270) + clsGuiSettingManager::iUpDownWidth + 23, iPosX + clsGuiSettingManager::iGroupBoxMargin + (2 * clsGuiSettingManager::iEditHeight) + 10, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight,
-        (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_INTERVAL_SECS], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_CHAT_INTERVAL_TIME], 0));
+        (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_MAIN_CHAT_INTERVAL_SECS], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_CHAT_INTERVAL_TIME], 0));
 
     hWndPageItems[LBL_MAIN_CHAT_INTERVAL_SECONDS] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(270) + (2 * clsGuiSettingManager::iUpDownWidth) + 28, iPosX + clsGuiSettingManager::iGroupBoxMargin + (2 * clsGuiSettingManager::iEditHeight) + 10 + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -527,14 +527,14 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_SAME_MAIN_CHAT], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_KICK]);
     ::SendMessage(hWndPageItems[CB_SAME_MAIN_CHAT], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_TEMP_BAN]);
     ::SendMessage(hWndPageItems[CB_SAME_MAIN_CHAT], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_PERM_BAN]);
-    ::SendMessage(hWndPageItems[CB_SAME_MAIN_CHAT], CB_SETCURSEL, clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MAIN_CHAT_ACTION], 0);
+    ::SendMessage(hWndPageItems[CB_SAME_MAIN_CHAT], CB_SETCURSEL, clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MAIN_CHAT_ACTION], 0);
 
     hWndPageItems[EDT_SAME_MAIN_CHAT_MSGS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         ScaleGui(180) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin, ScaleGui(40), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_SAME_MAIN_CHAT_MSGS, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SAME_MAIN_CHAT_MSGS], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_SAME_MAIN_CHAT_MSGS], ScaleGui(220) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_SAME_MAIN_CHAT_MSGS],
-        (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MAIN_CHAT_MESSAGES], 0));
+        (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MAIN_CHAT_MESSAGES], 0));
 
     hWndPageItems[LBL_SAME_MAIN_CHAT_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER,
         ScaleGui(220) + clsGuiSettingManager::iUpDownWidth + 18, iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(10), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -544,7 +544,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_SAME_MAIN_CHAT_SECS], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_SAME_MAIN_CHAT_SECS], ScaleGui(270) + clsGuiSettingManager::iUpDownWidth + 23, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_SAME_MAIN_CHAT_SECS],
-        (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MAIN_CHAT_TIME], 0));
+        (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MAIN_CHAT_TIME], 0));
 
     hWndPageItems[LBL_SAME_MAIN_CHAT_SECONDS] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(270) + (2 * clsGuiSettingManager::iUpDownWidth) + 28, iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -564,14 +564,14 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_SAME_MULTI_MAIN_CHAT], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_KICK]);
     ::SendMessage(hWndPageItems[CB_SAME_MULTI_MAIN_CHAT], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_TEMP_BAN]);
     ::SendMessage(hWndPageItems[CB_SAME_MULTI_MAIN_CHAT], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_PERM_BAN]);
-    ::SendMessage(hWndPageItems[CB_SAME_MULTI_MAIN_CHAT], CB_SETCURSEL, clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MULTI_MAIN_CHAT_ACTION], 0);
+    ::SendMessage(hWndPageItems[CB_SAME_MULTI_MAIN_CHAT], CB_SETCURSEL, clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MULTI_MAIN_CHAT_ACTION], 0);
 
     hWndPageItems[EDT_SAME_MULTI_MAIN_CHAT_MSGS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         ScaleGui(180) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin, ScaleGui(40), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_SAME_MULTI_MAIN_CHAT_MSGS, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SAME_MULTI_MAIN_CHAT_MSGS], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_SAME_MULTI_MAIN_CHAT_MSGS], ScaleGui(220) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 2),
-        (WPARAM)hWndPageItems[EDT_SAME_MULTI_MAIN_CHAT_MSGS], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MULTI_MAIN_CHAT_MESSAGES], 0));
+        (WPARAM)hWndPageItems[EDT_SAME_MULTI_MAIN_CHAT_MSGS], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MULTI_MAIN_CHAT_MESSAGES], 0));
 
     hWndPageItems[LBL_SAME_MULTI_MAIN_CHAT_WITH] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_WITH_LWR], WS_CHILD | WS_VISIBLE | SS_CENTER,
         ScaleGui(220) + clsGuiSettingManager::iUpDownWidth + 18, iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(30), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -581,7 +581,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_SAME_MULTI_MAIN_CHAT_LINES], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_SAME_MULTI_MAIN_CHAT_LINES], ScaleGui(290) + clsGuiSettingManager::iUpDownWidth + 23, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 2),
-        (WPARAM)hWndPageItems[EDT_SAME_MULTI_MAIN_CHAT_LINES], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MULTI_MAIN_CHAT_LINES], 0));
+        (WPARAM)hWndPageItems[EDT_SAME_MULTI_MAIN_CHAT_LINES], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MULTI_MAIN_CHAT_LINES], 0));
 
     hWndPageItems[LBL_SAME_MULTI_MAIN_CHAT_LINES] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_LINES_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(290) + (2 * clsGuiSettingManager::iUpDownWidth) + 28, iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -601,14 +601,14 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_CTM], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_KICK]);
     ::SendMessage(hWndPageItems[CB_CTM], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_TEMP_BAN]);
     ::SendMessage(hWndPageItems[CB_CTM], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_PERM_BAN]);
-    ::SendMessage(hWndPageItems[CB_CTM], CB_SETCURSEL, clsSettingManager::mPtr->iShorts[SETSHORT_CTM_ACTION], 0);
+    ::SendMessage(hWndPageItems[CB_CTM], CB_SETCURSEL, clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_ACTION], 0);
 
     hWndPageItems[EDT_CTM_MSGS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         ScaleGui(180) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin, ScaleGui(40), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_CTM_MSGS, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_CTM_MSGS], EM_SETLIMITTEXT, 4, 0);
 
     AddUpDown(hWndPageItems[UD_CTM_MSGS], ScaleGui(220) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(9999, 1), (WPARAM)hWndPageItems[EDT_CTM_MSGS],
-        (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_CTM_MESSAGES], 0));
+        (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_MESSAGES], 0));
 
     hWndPageItems[LBL_CTM_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER,
         ScaleGui(220) + clsGuiSettingManager::iUpDownWidth + 18, iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(10), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -618,7 +618,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_CTM_SECS], EM_SETLIMITTEXT, 4, 0);
 
     AddUpDown(hWndPageItems[UD_CTM_SECS], ScaleGui(270) + clsGuiSettingManager::iUpDownWidth + 23, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(9999, 1),
-        (WPARAM)hWndPageItems[EDT_CTM_SECS], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_CTM_TIME], 0));
+        (WPARAM)hWndPageItems[EDT_CTM_SECS], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_TIME], 0));
 
     hWndPageItems[LBL_CTM_SECONDS] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(270) + (2 * clsGuiSettingManager::iUpDownWidth) + 28, iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -633,14 +633,14 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_CTM2], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_KICK]);
     ::SendMessage(hWndPageItems[CB_CTM2], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_TEMP_BAN]);
     ::SendMessage(hWndPageItems[CB_CTM2], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_PERM_BAN]);
-    ::SendMessage(hWndPageItems[CB_CTM2], CB_SETCURSEL, clsSettingManager::mPtr->iShorts[SETSHORT_CTM_ACTION2], 0);
+    ::SendMessage(hWndPageItems[CB_CTM2], CB_SETCURSEL, clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_ACTION2], 0);
 
     hWndPageItems[EDT_CTM_MSGS2] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         ScaleGui(180) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 5, ScaleGui(40), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_CTM_MSGS2, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_CTM_MSGS2], EM_SETLIMITTEXT, 4, 0);
 
     AddUpDown(hWndPageItems[UD_CTM_MSGS2], ScaleGui(220) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 5, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(9999, 1), (WPARAM)hWndPageItems[EDT_CTM_MSGS2],
-        (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_CTM_MESSAGES2], 0));
+        (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_MESSAGES2], 0));
 
     hWndPageItems[LBL_CTM_DIVIDER2] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER,
         ScaleGui(220) + clsGuiSettingManager::iUpDownWidth + 18, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 5 + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(10), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -650,7 +650,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_CTM_SECS2], EM_SETLIMITTEXT, 4, 0);
 
     AddUpDown(hWndPageItems[UD_CTM_SECS2], ScaleGui(270) + clsGuiSettingManager::iUpDownWidth + 23, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 5, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(9999, 1), (WPARAM)hWndPageItems[EDT_CTM_SECS2],
-        (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_CTM_TIME2], 0));
+        (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_TIME2], 0));
 
     hWndPageItems[LBL_CTM_SECONDS2] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(270) + (2 * clsGuiSettingManager::iUpDownWidth) + 28, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 5 + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -670,14 +670,14 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_RCTM], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_KICK]);
     ::SendMessage(hWndPageItems[CB_RCTM], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_TEMP_BAN]);
     ::SendMessage(hWndPageItems[CB_RCTM], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_PERM_BAN]);
-    ::SendMessage(hWndPageItems[CB_RCTM], CB_SETCURSEL, clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_ACTION], 0);
+    ::SendMessage(hWndPageItems[CB_RCTM], CB_SETCURSEL, clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_ACTION], 0);
 
     hWndPageItems[EDT_RCTM_MSGS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         ScaleGui(180) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin, ScaleGui(40), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_RCTM_MSGS, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_RCTM_MSGS], EM_SETLIMITTEXT, 4, 0);
 
     AddUpDown(hWndPageItems[UD_RCTM_MSGS], ScaleGui(220) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(9999, 1), (WPARAM)hWndPageItems[EDT_RCTM_MSGS],
-        (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_MESSAGES], 0));
+        (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_MESSAGES], 0));
 
     hWndPageItems[LBL_RCTM_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER,
         ScaleGui(220) + clsGuiSettingManager::iUpDownWidth + 18, iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(10), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -687,7 +687,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_RCTM_SECS], EM_SETLIMITTEXT, 4, 0);
 
     AddUpDown(hWndPageItems[UD_RCTM_SECS], ScaleGui(270) + clsGuiSettingManager::iUpDownWidth + 23, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(9999, 1),
-        (WPARAM)hWndPageItems[EDT_RCTM_SECS], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_TIME], 0));
+        (WPARAM)hWndPageItems[EDT_RCTM_SECS], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_TIME], 0));
 
     hWndPageItems[LBL_RCTM_SECONDS] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(270) + (2 * clsGuiSettingManager::iUpDownWidth) + 28, iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -702,14 +702,14 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_RCTM2], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_KICK]);
     ::SendMessage(hWndPageItems[CB_RCTM2], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_TEMP_BAN]);
     ::SendMessage(hWndPageItems[CB_RCTM2], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_PERM_BAN]);
-    ::SendMessage(hWndPageItems[CB_RCTM2], CB_SETCURSEL, clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_ACTION2], 0);
+    ::SendMessage(hWndPageItems[CB_RCTM2], CB_SETCURSEL, clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_ACTION2], 0);
 
     hWndPageItems[EDT_RCTM_MSGS2] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
         ScaleGui(180) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 5, ScaleGui(40), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_RCTM_MSGS2, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_RCTM_MSGS2], EM_SETLIMITTEXT, 4, 0);
 
     AddUpDown(hWndPageItems[UD_RCTM_MSGS2], ScaleGui(220) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 5, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(9999, 1),
-        (WPARAM)hWndPageItems[EDT_RCTM_MSGS2], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_MESSAGES2], 0));
+        (WPARAM)hWndPageItems[EDT_RCTM_MSGS2], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_MESSAGES2], 0));
 
     hWndPageItems[LBL_RCTM_DIVIDER2] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER,
         ScaleGui(220) + clsGuiSettingManager::iUpDownWidth + 18, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 5 + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(10), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -719,7 +719,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_RCTM_SECS2], EM_SETLIMITTEXT, 4, 0);
 
     AddUpDown(hWndPageItems[UD_RCTM_SECS2], ScaleGui(270) + clsGuiSettingManager::iUpDownWidth + 23, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 5, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(9999, 1),
-        (WPARAM)hWndPageItems[EDT_RCTM_SECS2], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_TIME2], 0));
+        (WPARAM)hWndPageItems[EDT_RCTM_SECS2], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_TIME2], 0));
 
     hWndPageItems[LBL_RCTM_SECONDS2] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_SECONDS_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(270) + (2 * clsGuiSettingManager::iUpDownWidth) + 28, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 5 + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -735,7 +735,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_DEFLOOD_TEMP_BAN_TIME], EM_SETLIMITTEXT, 5, 0);
 
     AddUpDown(hWndPageItems[UD_DEFLOOD_TEMP_BAN_TIME], ScaleGui(40) + 8, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(32767, 1),
-        (WPARAM)hWndPageItems[EDT_DEFLOOD_TEMP_BAN_TIME], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME], 0));
+        (WPARAM)hWndPageItems[EDT_DEFLOOD_TEMP_BAN_TIME], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_DEFLOOD_TEMP_BAN_TIME], 0));
 
     hWndPageItems[LBL_DEFLOOD_TEMP_BAN_TIME_MINUTES] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_MINUTES_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ScaleGui(40) + clsGuiSettingManager::iUpDownWidth + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -749,7 +749,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_MAX_USERS_LOGINS], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_MAX_USERS_LOGINS], ((rcThis.right - rcThis.left - 5) / 2) + ScaleGui(40) + 11, iPosX + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(1000, 1),
-        (WPARAM)hWndPageItems[EDT_MAX_USERS_LOGINS], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAX_SIMULTANEOUS_LOGINS], 0));
+        (WPARAM)hWndPageItems[EDT_MAX_USERS_LOGINS], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SIMULTANEOUS_LOGINS], 0));
 
     hWndPageItems[LBL_MAX_USERS_LOGINS] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_PER_10_SECONDS], WS_CHILD | WS_VISIBLE | SS_LEFT,
         ((rcThis.right - rcThis.left - 5) / 2) + ScaleGui(40) + clsGuiSettingManager::iUpDownWidth + 16, iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2),
@@ -763,72 +763,72 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
         ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)clsGuiSettingManager::hFont, MAKELPARAM(TRUE, 0));
     }
 
-    ::EnableWindow(hWndPageItems[EDT_GLOBAL_MAIN_CHAT_MSGS], clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_GLOBAL_MAIN_CHAT_MSGS], clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_GLOBAL_MAIN_CHAT_DIVIDER], clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS], clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_GLOBAL_MAIN_CHAT_SECS], clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_GLOBAL_MAIN_CHAT_SEC], clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_GLOBAL_MAIN_CHAT_FOR], clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS2], clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_GLOBAL_MAIN_CHAT_SECS2], clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_GLOBAL_MAIN_CHAT_SEC2], clsSettingManager::mPtr->iShorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_GLOBAL_MAIN_CHAT_MSGS], clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_GLOBAL_MAIN_CHAT_MSGS], clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_GLOBAL_MAIN_CHAT_DIVIDER], clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS], clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_GLOBAL_MAIN_CHAT_SECS], clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_GLOBAL_MAIN_CHAT_SEC], clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_GLOBAL_MAIN_CHAT_FOR], clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_GLOBAL_MAIN_CHAT_SECS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_GLOBAL_MAIN_CHAT_SEC2], clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
 
-    ::EnableWindow(hWndPageItems[EDT_MAIN_CHAT_MSGS], clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_MAIN_CHAT_MSGS], clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_MAIN_CHAT_DIVIDER], clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[EDT_MAIN_CHAT_SECS], clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_MAIN_CHAT_SECS], clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_MAIN_CHAT_SECONDS], clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_MAIN_CHAT_MSGS], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_MAIN_CHAT_MSGS], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_MAIN_CHAT_DIVIDER], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_MAIN_CHAT_SECS], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_MAIN_CHAT_SECS], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_MAIN_CHAT_SECONDS], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
 
-    ::EnableWindow(hWndPageItems[EDT_MAIN_CHAT_MSGS2], clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_ACTION2] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_MAIN_CHAT_MSGS2], clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_ACTION2] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_MAIN_CHAT_DIVIDER2], clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_ACTION2] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[EDT_MAIN_CHAT_SECS2], clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_ACTION2] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_MAIN_CHAT_SECS2], clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_ACTION2] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_MAIN_CHAT_SECONDS2], clsSettingManager::mPtr->iShorts[SETSHORT_MAIN_CHAT_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_MAIN_CHAT_MSGS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_MAIN_CHAT_MSGS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_MAIN_CHAT_DIVIDER2], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_MAIN_CHAT_SECS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_MAIN_CHAT_SECS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_MAIN_CHAT_SECONDS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAIN_CHAT_ACTION2] == 0 ? FALSE : TRUE);
 
-    ::EnableWindow(hWndPageItems[EDT_SAME_MAIN_CHAT_MSGS], clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_SAME_MAIN_CHAT_MSGS], clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_SAME_MAIN_CHAT_DIVIDER], clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[EDT_SAME_MAIN_CHAT_SECS], clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_SAME_MAIN_CHAT_SECS], clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_SAME_MAIN_CHAT_SECONDS], clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_SAME_MAIN_CHAT_MSGS], clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_SAME_MAIN_CHAT_MSGS], clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_SAME_MAIN_CHAT_DIVIDER], clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_SAME_MAIN_CHAT_SECS], clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_SAME_MAIN_CHAT_SECS], clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_SAME_MAIN_CHAT_SECONDS], clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
 
-    ::EnableWindow(hWndPageItems[EDT_SAME_MULTI_MAIN_CHAT_MSGS], clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MULTI_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_SAME_MULTI_MAIN_CHAT_MSGS], clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MULTI_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_SAME_MULTI_MAIN_CHAT_WITH], clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MULTI_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[EDT_SAME_MULTI_MAIN_CHAT_LINES], clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MULTI_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_SAME_MULTI_MAIN_CHAT_LINES], clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MULTI_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_SAME_MULTI_MAIN_CHAT_LINES], clsSettingManager::mPtr->iShorts[SETSHORT_SAME_MULTI_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_SAME_MULTI_MAIN_CHAT_MSGS], clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MULTI_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_SAME_MULTI_MAIN_CHAT_MSGS], clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MULTI_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_SAME_MULTI_MAIN_CHAT_WITH], clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MULTI_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_SAME_MULTI_MAIN_CHAT_LINES], clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MULTI_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_SAME_MULTI_MAIN_CHAT_LINES], clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MULTI_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_SAME_MULTI_MAIN_CHAT_LINES], clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MULTI_MAIN_CHAT_ACTION] == 0 ? FALSE : TRUE);
 
-    ::EnableWindow(hWndPageItems[EDT_CTM_MSGS], clsSettingManager::mPtr->iShorts[SETSHORT_CTM_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_CTM_MSGS], clsSettingManager::mPtr->iShorts[SETSHORT_CTM_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_CTM_DIVIDER], clsSettingManager::mPtr->iShorts[SETSHORT_CTM_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[EDT_CTM_SECS], clsSettingManager::mPtr->iShorts[SETSHORT_CTM_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_CTM_SECS], clsSettingManager::mPtr->iShorts[SETSHORT_CTM_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_CTM_SECONDS], clsSettingManager::mPtr->iShorts[SETSHORT_CTM_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_CTM_MSGS], clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_CTM_MSGS], clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_CTM_DIVIDER], clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_CTM_SECS], clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_CTM_SECS], clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_CTM_SECONDS], clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_ACTION] == 0 ? FALSE : TRUE);
 
-    ::EnableWindow(hWndPageItems[EDT_CTM_MSGS2], clsSettingManager::mPtr->iShorts[SETSHORT_CTM_ACTION2] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_CTM_MSGS2], clsSettingManager::mPtr->iShorts[SETSHORT_CTM_ACTION2] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_CTM_DIVIDER2], clsSettingManager::mPtr->iShorts[SETSHORT_CTM_ACTION2] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[EDT_CTM_SECS2], clsSettingManager::mPtr->iShorts[SETSHORT_CTM_ACTION2] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_CTM_SECS2], clsSettingManager::mPtr->iShorts[SETSHORT_CTM_ACTION2] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_CTM_SECONDS2], clsSettingManager::mPtr->iShorts[SETSHORT_CTM_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_CTM_MSGS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_CTM_MSGS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_CTM_DIVIDER2], clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_CTM_SECS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_CTM_SECS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_CTM_SECONDS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_CTM_ACTION2] == 0 ? FALSE : TRUE);
 
-    ::EnableWindow(hWndPageItems[EDT_RCTM_MSGS], clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_RCTM_MSGS], clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_RCTM_DIVIDER], clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[EDT_RCTM_SECS], clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_RCTM_SECS], clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_ACTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_RCTM_SECONDS], clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_RCTM_MSGS], clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_RCTM_MSGS], clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_RCTM_DIVIDER], clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_RCTM_SECS], clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_RCTM_SECS], clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_ACTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_RCTM_SECONDS], clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_ACTION] == 0 ? FALSE : TRUE);
 
-    ::EnableWindow(hWndPageItems[EDT_RCTM_MSGS2], clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_ACTION2] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_RCTM_MSGS2], clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_ACTION2] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_RCTM_DIVIDER2], clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_ACTION2] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[EDT_RCTM_SECS2], clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_ACTION2] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[UD_RCTM_SECS2], clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_ACTION2] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[LBL_RCTM_SECONDS2], clsSettingManager::mPtr->iShorts[SETSHORT_RCTM_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_RCTM_MSGS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_RCTM_MSGS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_RCTM_DIVIDER2], clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[EDT_RCTM_SECS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[UD_RCTM_SECS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_ACTION2] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[LBL_RCTM_SECONDS2], clsSettingManager::mPtr->i16Shorts[SETSHORT_RCTM_ACTION2] == 0 ? FALSE : TRUE);
 
     clsGuiSettingManager::wpOldNumberEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_MAX_USERS_LOGINS], GWLP_WNDPROC, (LONG_PTR)NumberEditProc);
 

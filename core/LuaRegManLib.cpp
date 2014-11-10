@@ -63,7 +63,7 @@ static void PushReg(lua_State * L, RegUser * r) {
 #if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, r->ui16Profile);
 #else
-    lua_pushunsigned(L, r->ui16Profile);
+    lua_pushinteger(L, r->ui16Profile);
 #endif
     lua_rawset(L, i);
 }
@@ -100,7 +100,7 @@ static int GetRegsByProfile(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
 #else
-    uint16_t iProfile = (uint16_t)lua_tounsigned(L, 1);
+    uint16_t iProfile = (uint16_t)lua_tointeger(L, 1);
 #endif
 
     lua_settop(L, 0);
@@ -109,17 +109,17 @@ static int GetRegsByProfile(lua_State * L) {
     int t = lua_gettop(L), i = 0;
 
 	RegUser * cur = NULL,
-        * next = clsRegManager::mPtr->RegListS;
+        * next = clsRegManager::mPtr->pRegListS;
         
     while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
         
 		if(cur->ui16Profile == iProfile) {
 #if LUA_VERSION_NUM < 503
 			lua_pushnumber(L, ++i);
 #else
-            lua_pushunsigned(L, ++i);
+            lua_pushinteger(L, ++i);
 #endif
             PushReg(L, cur);
             lua_rawset(L, t);
@@ -146,17 +146,17 @@ static int GetRegsByOpStatus(lua_State * L, const bool &bOperator) {
     int t = lua_gettop(L), i = 0;
 
     RegUser * curReg = NULL,
-        * next = clsRegManager::mPtr->RegListS;
+        * next = clsRegManager::mPtr->pRegListS;
 
     while(next != NULL) {
         curReg = next;
-		next = curReg->next;
+		next = curReg->pNext;
 
         if(clsProfileManager::mPtr->IsProfileAllowed(curReg->ui16Profile, clsProfileManager::HASKEYICON) == bOperator) {
 #if LUA_VERSION_NUM < 503
 			lua_pushnumber(L, ++i);
 #else
-            lua_pushunsigned(L, ++i);
+            lua_pushinteger(L, ++i);
 #endif
 			PushReg(L, curReg);
             lua_rawset(L, t);
@@ -228,16 +228,16 @@ static int GetRegs(lua_State * L) {
     int t = lua_gettop(L), i = 0;
 
     RegUser * curReg = NULL,
-        * next = clsRegManager::mPtr->RegListS;
+        * next = clsRegManager::mPtr->pRegListS;
 
     while(next != NULL) {
         curReg = next;
-		next = curReg->next;
+		next = curReg->pNext;
 
 #if LUA_VERSION_NUM < 503
 		lua_pushnumber(L, ++i);
 #else
-        lua_pushunsigned(L, ++i);
+        lua_pushinteger(L, ++i);
 #endif
 
 		PushReg(L, curReg); 
@@ -267,10 +267,10 @@ static int AddReg(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 		uint16_t i16Profile = (uint16_t)lua_tonumber(L, 3);
 #else
-        uint16_t i16Profile = (uint16_t)lua_tounsigned(L, 3);
+        uint16_t i16Profile = (uint16_t)lua_tointeger(L, 3);
 #endif
 
-        if(i16Profile > clsProfileManager::mPtr->iProfileCount-1 || szNickLen == 0 || szNickLen > 64 || szPassLen == 0 || szPassLen > 64 || strpbrk(sNick, " $|") != NULL || strchr(sPass, '|') != NULL) {
+        if(i16Profile > clsProfileManager::mPtr->ui16ProfileCount-1 || szNickLen == 0 || szNickLen > 64 || szPassLen == 0 || szPassLen > 64 || strpbrk(sNick, " $|") != NULL || strchr(sPass, '|') != NULL) {
             lua_settop(L, 0);
             lua_pushnil(L);
             return 1;
@@ -302,10 +302,10 @@ static int AddReg(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 		uint16_t ui16Profile = (uint16_t)lua_tonumber(L, 2);
 #else
-        uint16_t ui16Profile = (uint16_t)lua_tounsigned(L, 2);
+        uint16_t ui16Profile = (uint16_t)lua_tointeger(L, 2);
 #endif
 
-        if(ui16Profile > clsProfileManager::mPtr->iProfileCount-1 || szNickLen == 0 || szNickLen > 64 || strpbrk(sNick, " $|") != NULL) {
+        if(ui16Profile > clsProfileManager::mPtr->ui16ProfileCount-1 || szNickLen == 0 || szNickLen > 64 || strpbrk(sNick, " $|") != NULL) {
             lua_settop(L, 0);
             lua_pushnil(L);
             return 1;
@@ -325,25 +325,25 @@ static int AddReg(lua_State * L) {
             return 1;
         }
 
-        if(pUser->uLogInOut == NULL) {
-            pUser->uLogInOut = new (std::nothrow) LoginLogout();
-            if(pUser->uLogInOut == NULL) {
+        if(pUser->pLogInOut == NULL) {
+            pUser->pLogInOut = new (std::nothrow) LoginLogout();
+            if(pUser->pLogInOut == NULL) {
                 pUser->ui32BoolBits |= User::BIT_ERROR;
                 pUser->Close();
 
-                AppendDebugLog("%s - [MEM] Cannot allocate new pUser->uLogInOut in RegMan.AddReg\n", 0);
+                AppendDebugLog("%s - [MEM] Cannot allocate new pUser->pLogInOut in RegMan.AddReg\n", 0);
                 lua_settop(L, 0);
                 lua_pushnil(L);
                 return 1;
             }
         }
 
-        pUser->SetBuffer(clsProfileManager::mPtr->ProfilesTable[ui16Profile]->sName);
+        pUser->SetBuffer(clsProfileManager::mPtr->ppProfilesTable[ui16Profile]->sName);
         pUser->ui32BoolBits |= User::BIT_WAITING_FOR_PASS;
 
-        int iMsgLen = sprintf(clsServerManager::sGlobalBuffer, "<%s> %s.|$GetPass|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_WERE_REGISTERED_PLEASE_ENTER_YOUR_PASSWORD]);
+        int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> %s.|$GetPass|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_WERE_REGISTERED_PLEASE_ENTER_YOUR_PASSWORD]);
         if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "RegMan.AddReg1") == true) {
-            pUser->SendCharDelayed(clsServerManager::sGlobalBuffer, iMsgLen);
+            pUser->SendCharDelayed(clsServerManager::pGlobalBuffer, iMsgLen);
         }
 
         lua_settop(L, 0);
@@ -435,10 +435,10 @@ static int ChangeReg(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	uint16_t i16Profile = (uint16_t)lua_tonumber(L, 3);
 #else
-	uint16_t i16Profile = (uint16_t)lua_tounsigned(L, 3);
+	uint16_t i16Profile = (uint16_t)lua_tointeger(L, 3);
 #endif
 
-	if(i16Profile > clsProfileManager::mPtr->iProfileCount-1 || szNickLen == 0 || szNickLen > 64 || strpbrk(sNick, " $|") != NULL) {
+	if(i16Profile > clsProfileManager::mPtr->ui16ProfileCount-1 || szNickLen == 0 || szNickLen > 64 || strpbrk(sNick, " $|") != NULL) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;

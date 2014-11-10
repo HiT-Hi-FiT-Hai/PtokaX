@@ -41,6 +41,9 @@ private:
         BTN_CANCEL
     };
 
+    LineDialog(const LineDialog&);
+    const LineDialog& operator=(const LineDialog&);
+
     LRESULT LineDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 //------------------------------------------------------------------------------

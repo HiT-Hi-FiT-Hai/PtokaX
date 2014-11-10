@@ -37,10 +37,10 @@ int ScaleGui(const int &iValue) {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int ScaleGuiDefaultsOnly(const int &iValue) {
-    if(clsGuiSettingManager::mPtr->iIntegers[iValue] == clsGuiSettingManager::mPtr->GetDefaultInteger(iValue)) {
-        return (int)(clsGuiSettingManager::mPtr->iIntegers[iValue] * clsGuiSettingManager::fScaleFactor);
+    if(clsGuiSettingManager::mPtr->i32Integers[iValue] == clsGuiSettingManager::mPtr->GetDefaultInteger(iValue)) {
+        return (int)(clsGuiSettingManager::mPtr->i32Integers[iValue] * clsGuiSettingManager::fScaleFactor);
     } else {
-        return clsGuiSettingManager::mPtr->iIntegers[iValue];
+        return clsGuiSettingManager::mPtr->i32Integers[iValue];
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -61,7 +61,7 @@
     #include "regtmrinc.h"
 #endif
 //---------------------------------------------------------------------------
-static ServerThread * ServersE = NULL;
+static ServerThread * pServersE = NULL;
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
@@ -77,7 +77,7 @@ static ServerThread * ServersE = NULL;
 
 string clsServerManager::sPath = "", clsServerManager::sScriptPath = "", clsServerManager::sTitle = "";
 size_t clsServerManager::szGlobalBufferSize = 0;
-char * clsServerManager::sGlobalBuffer = NULL;
+char * clsServerManager::pGlobalBuffer = NULL;
 bool clsServerManager::bCmdAutoStart = false, clsServerManager::bCmdNoAutoStart = false, clsServerManager::bCmdNoTray = false, clsServerManager::bUseIPv4 = true,
     clsServerManager::bUseIPv6 = true, clsServerManager::bIPv6DualStack = false;
 
@@ -98,7 +98,7 @@ uint32_t clsServerManager::ui32Joins = 0, clsServerManager::ui32Parts = 0, clsSe
 uint32_t clsServerManager::ui32ActualBytesRead = 0, clsServerManager::ui32ActualBytesSent = 0;
 uint32_t clsServerManager::ui32AverageBytesRead = 0, clsServerManager::ui32AverageBytesSent = 0;
 
-ServerThread * clsServerManager::ServersS = NULL;
+ServerThread * clsServerManager::pServersS = NULL;
 
 time_t clsServerManager::tStartTime = 0;
 
@@ -305,8 +305,8 @@ void clsServerManager::Initialize() {
 
     ui32Joins = ui32Parts = ui32Logged = ui32Peak = 0;
 
-    ServersS = NULL;
-    ServersE = NULL;
+    pServersS = NULL;
+    pServersE = NULL;
 
     tStartTime = 0;
 
@@ -587,22 +587,22 @@ bool clsServerManager::Start() {
     }
 
     for(uint8_t ui8i = 0; ui8i < 25; ui8i++) {
-        if(clsSettingManager::mPtr->iPortNumbers[ui8i] == 0) {
+        if(clsSettingManager::mPtr->ui16PortNumbers[ui8i] == 0) {
             break;
         }
 
         if(clsSettingManager::mPtr->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true || (bUseIPv6 == true && bIPv6DualStack == false)) {
             if(bUseIPv6 == true) {
-                CreateServerThread(AF_INET6, clsSettingManager::mPtr->iPortNumbers[ui8i]);
+                CreateServerThread(AF_INET6, clsSettingManager::mPtr->ui16PortNumbers[ui8i]);
             }
 
-            CreateServerThread(AF_INET, clsSettingManager::mPtr->iPortNumbers[ui8i]);
+            CreateServerThread(AF_INET, clsSettingManager::mPtr->ui16PortNumbers[ui8i]);
         } else {
-            CreateServerThread(bUseIPv6 == true ? AF_INET6 : AF_INET, clsSettingManager::mPtr->iPortNumbers[ui8i]);
+            CreateServerThread(bUseIPv6 == true ? AF_INET6 : AF_INET, clsSettingManager::mPtr->ui16PortNumbers[ui8i]);
         }
     }
 
-	if(ServersS == NULL) {
+	if(pServersS == NULL) {
 #ifdef _BUILD_GUI
 		::MessageBox(clsMainWindow::mPtr->m_hWnd, clsLanguageManager::mPtr->sTexts[LAN_NO_VALID_TCP_PORT_SPECIFIED], clsLanguageManager::mPtr->sTexts[LAN_ERROR], MB_OK|MB_ICONERROR);
         clsMainWindow::mPtr->EnableStartButton(TRUE);
@@ -692,11 +692,11 @@ bool clsServerManager::Start() {
 
     // Start the server socket threads
     ServerThread * cur = NULL,
-        * next = ServersS;
+        * next = pServersS;
 
     while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
 		cur->Resume();
     }
@@ -783,11 +783,11 @@ void clsServerManager::Stop() {
     }
 
     ServerThread * cur = NULL,
-        * next = ServersS;
+        * next = pServersS;
 
     while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
 		cur->Close();
 		cur->WaitFor();
@@ -795,8 +795,8 @@ void clsServerManager::Stop() {
 		delete cur;
     }
 
-    ServersS = NULL;
-    ServersE = NULL;
+    pServersS = NULL;
+    pServersE = NULL;
 
 	// stop the main hub loop
 	if(clsServiceLoop::mPtr != NULL) {
@@ -969,40 +969,40 @@ void clsServerManager::UpdateServers() {
 
     // Remove servers for ports we don't want use anymore
     ServerThread * cur = NULL,
-        * next = ServersS;
+        * next = pServersS;
 
     while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
         bFound = false;
 
         for(uint8_t ui8i = 0; ui8i < 25; ui8i++) {
-            if(clsSettingManager::mPtr->iPortNumbers[ui8i] == 0) {
+            if(clsSettingManager::mPtr->ui16PortNumbers[ui8i] == 0) {
                 break;
             }
 
-            if(cur->ui16Port == clsSettingManager::mPtr->iPortNumbers[ui8i]) {
+            if(cur->ui16Port == clsSettingManager::mPtr->ui16PortNumbers[ui8i]) {
                 bFound = true;
                 break;
             }
         }
 
         if(bFound == false) {
-            if(cur->prev == NULL) {
-                if(cur->next == NULL) {
-                    ServersS = NULL;
-                    ServersE = NULL;
+            if(cur->pPrev == NULL) {
+                if(cur->pNext == NULL) {
+                    pServersS = NULL;
+                    pServersE = NULL;
                 } else {
-                    cur->next->prev = NULL;
-                    ServersS = cur->next;
+                    cur->pNext->pPrev = NULL;
+                    pServersS = cur->pNext;
                 }
-            } else if(cur->next == NULL) {
-                cur->prev->next = NULL;
-                ServersE = cur->prev;
+            } else if(cur->pNext == NULL) {
+                cur->pPrev->pNext = NULL;
+                pServersE = cur->pPrev;
             } else {
-                cur->prev->next = cur->next;
-                cur->next->prev = cur->prev;
+                cur->pPrev->pNext = cur->pNext;
+                cur->pNext->pPrev = cur->pPrev;
             }
 
             cur->Close();
@@ -1014,20 +1014,20 @@ void clsServerManager::UpdateServers() {
 
     // Add servers for ports that not running
     for(uint8_t ui8i = 0; ui8i < 25; ui8i++) {
-        if(clsSettingManager::mPtr->iPortNumbers[ui8i] == 0) {
+        if(clsSettingManager::mPtr->ui16PortNumbers[ui8i] == 0) {
             break;
         }
 
         bFound = false;
 
         ServerThread * cur = NULL,
-            * next = ServersS;
+            * next = pServersS;
 
         while(next != NULL) {
             cur = next;
-            next = cur->next;
+            next = cur->pNext;
 
-            if(cur->ui16Port == clsSettingManager::mPtr->iPortNumbers[ui8i]) {
+            if(cur->ui16Port == clsSettingManager::mPtr->ui16PortNumbers[ui8i]) {
                 bFound = true;
                 break;
             }
@@ -1036,11 +1036,11 @@ void clsServerManager::UpdateServers() {
         if(bFound == false) {
             if(clsSettingManager::mPtr->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true || (bUseIPv6 == true && bIPv6DualStack == false)) {
                 if(bUseIPv6 == true) {
-                    CreateServerThread(AF_INET6, clsSettingManager::mPtr->iPortNumbers[ui8i], true);
+                    CreateServerThread(AF_INET6, clsSettingManager::mPtr->ui16PortNumbers[ui8i], true);
                 }
-                CreateServerThread(AF_INET, clsSettingManager::mPtr->iPortNumbers[ui8i], true);
+                CreateServerThread(AF_INET, clsSettingManager::mPtr->ui16PortNumbers[ui8i], true);
             } else {
-                CreateServerThread(bUseIPv6 == true ? AF_INET6 : AF_INET, clsSettingManager::mPtr->iPortNumbers[ui8i], true);
+                CreateServerThread(bUseIPv6 == true ? AF_INET6 : AF_INET, clsSettingManager::mPtr->ui16PortNumbers[ui8i], true);
             }
         }
     }
@@ -1053,11 +1053,11 @@ void clsServerManager::ResumeAccepts() {
     }
 
     ServerThread * cur = NULL,
-        * next = ServersS;
+        * next = pServersS;
 
     while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
         cur->ResumeSck();
     }
@@ -1076,11 +1076,11 @@ void clsServerManager::SuspendAccepts(const uint32_t &iTime) {
     }
 
     ServerThread * cur = NULL,
-        * next = ServersS;
+        * next = pServersS;
 
     while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
         cur->SuspendSck(iTime);
     }
@@ -1138,13 +1138,13 @@ void clsServerManager::CreateServerThread(const int &iAddrFamily, const uint16_t
     }
 
 	if(pServer->Listen() == true) {
-		if(ServersE == NULL) {
-            ServersS = pServer;
-            ServersE = pServer;
+		if(pServersE == NULL) {
+            pServersS = pServer;
+            pServersE = pServer;
         } else {
-            pServer->prev = ServersE;
-            ServersE->next = pServer;
-            ServersE = pServer;
+            pServer->pPrev = pServersE;
+            pServersE->pNext = pServer;
+            pServersE = pServer;
         }
     } else {
         delete pServer;

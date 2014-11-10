@@ -52,7 +52,7 @@ public:
 
     static size_t szGlobalBufferSize;
 
-    static char * sGlobalBuffer;
+    static char * pGlobalBuffer;
 
 #ifdef _WIN32
 	static HANDLE hConsole, hLuaHeap, hPtokaXHeap, hRecvHeap, hSendHeap;
@@ -74,7 +74,7 @@ public:
     static uint32_t ui32ActualBytesRead, ui32ActualBytesSent;
     static uint32_t ui32AverageBytesRead, ui32AverageBytesSent;
 
-    static ServerThread * ServersS;
+    static ServerThread * pServersS;
 
     static time_t tStartTime;
 

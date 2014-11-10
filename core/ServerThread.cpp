@@ -35,22 +35,19 @@
 #include "ServerThread.h"
 //---------------------------------------------------------------------------
 
-ServerThread::ServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber) {
+ServerThread::AntiConFlood::AntiConFlood(const uint8_t * pIpHash) : ui64Time(clsServerManager::ui64ActualTick), pPrev(NULL), pNext(NULL), ui16Hits(1) {
+    memcpy(ui128IpHash, pIpHash, 16);
+};
+//---------------------------------------------------------------------------
+
+ServerThread::ServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber) :
 #ifdef _WIN32
-    server = INVALID_SOCKET;
+    server(INVALID_SOCKET),
 #else
-    server = -1;
+    server(-1),
 #endif
-
-	bActive = false;
-	bSuspended = false;
-	bTerminated = false;
-
-    threadId = 0;
-	iSuspendTime = 0;
-
-    iAdressFamily = iAddrFamily;
-    ui16Port = ui16PortNumber;
+	threadId(0), iSuspendTime(0), pAntiFloodList(NULL), iAdressFamily(iAddrFamily), bTerminated(false), pPrev(NULL), pNext(NULL), ui16Port(ui16PortNumber), 
+	bActive(false), bSuspended(false) {
 
 #ifdef _WIN32
     threadHandle = INVALID_HANDLE_VALUE;
@@ -59,11 +56,6 @@ ServerThread::ServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumbe
 #else
 	pthread_mutex_init(&mtxServerThread, NULL);
 #endif
-
-    AntiFloodList = NULL;
-
-    prev = NULL;
-    next = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -80,11 +72,11 @@ ServerThread::~ServerThread() {
 #endif
         
     AntiConFlood * acfcur = NULL,
-        * acfnext = AntiFloodList;
+        * acfnext = pAntiFloodList;
         
     while(acfnext != NULL) {
         acfcur = acfnext;
-        acfnext = acfcur->next;
+        acfnext = acfcur->pNext;
 		delete acfcur;
     }
 
@@ -427,16 +419,16 @@ bool ServerThread::isFlooder(const int &s, const sockaddr_storage &addr) {
     int16_t iConDefloodTime = clsSettingManager::mPtr->GetShort(SETSHORT_NEW_CONNECTIONS_TIME);
    
     AntiConFlood * cur = NULL,
-        * nxt = AntiFloodList;
+        * nxt = pAntiFloodList;
 
 	while(nxt != NULL) {
 		cur = nxt;
-		nxt = cur->next;
+		nxt = cur->pNext;
 
     	if(memcmp(ui128IpHash, cur->ui128IpHash, 16) == 0) {
-            if(cur->Time+((uint64_t)iConDefloodTime) >= clsServerManager::ui64ActualTick) {
-                cur->hits++;
-                if(cur->hits > iConDefloodCount) {
+            if(cur->ui64Time+((uint64_t)iConDefloodTime) >= clsServerManager::ui64ActualTick) {
+                cur->ui16Hits++;
+                if(cur->ui16Hits > iConDefloodCount) {
                     return true;
                 } else {
                     clsServiceLoop::mPtr->AcceptSocket(s, addr);
@@ -446,32 +438,25 @@ bool ServerThread::isFlooder(const int &s, const sockaddr_storage &addr) {
                 RemoveConFlood(cur);
                 delete cur;
             }
-        } else if(cur->Time+((uint64_t)iConDefloodTime) < clsServerManager::ui64ActualTick) {
+        } else if(cur->ui64Time+((uint64_t)iConDefloodTime) < clsServerManager::ui64ActualTick) {
             RemoveConFlood(cur);
             delete cur;
         }
     }
 
-    AntiConFlood * pNewItem = new (std::nothrow) AntiConFlood;
+    AntiConFlood * pNewItem = new (std::nothrow) AntiConFlood(ui128IpHash);
     if(pNewItem == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem  in theLoop::isFlooder\n", 0);
     	return true;
     }
 
-    memcpy(pNewItem->ui128IpHash, ui128IpHash, 16);
+    pNewItem->pNext = pAntiFloodList;
 
-    pNewItem->Time = clsServerManager::ui64ActualTick;
-
-    pNewItem->prev = NULL;
-    pNewItem->next = AntiFloodList;
-
-    pNewItem->hits = 1;
-
-    if(AntiFloodList != NULL) {
-        AntiFloodList->prev = pNewItem;
+    if(pAntiFloodList != NULL) {
+        pAntiFloodList->pPrev = pNewItem;
     }
 
-    AntiFloodList = pNewItem;
+    pAntiFloodList = pNewItem;
 
     clsServiceLoop::mPtr->AcceptSocket(s, addr);
 
@@ -480,18 +465,18 @@ bool ServerThread::isFlooder(const int &s, const sockaddr_storage &addr) {
 //---------------------------------------------------------------------------
 
 void ServerThread::RemoveConFlood(AntiConFlood *cur) {
-    if(cur->prev == NULL) {
-        if(cur->next == NULL) {
-            AntiFloodList = NULL;
+    if(cur->pPrev == NULL) {
+        if(cur->pNext == NULL) {
+            pAntiFloodList = NULL;
         } else {
-            cur->next->prev = NULL;
-            AntiFloodList = cur->next;
+            cur->pNext->pPrev = NULL;
+            pAntiFloodList = cur->pNext;
         }
-    } else if(cur->next == NULL) {
-        cur->prev->next = NULL;
+    } else if(cur->pNext == NULL) {
+        cur->pPrev->pNext = NULL;
     } else {
-        cur->prev->next = cur->next;
-        cur->next->prev = cur->prev;
+        cur->pPrev->pNext = cur->pNext;
+        cur->pNext->pPrev = cur->pPrev;
     }
 }
 //---------------------------------------------------------------------------

@@ -54,6 +54,9 @@ public:
 private:
     RegUser * pRegToChange;
 
+    clsRegisteredUserDialog(const clsRegisteredUserDialog&);
+    const clsRegisteredUserDialog& operator=(const clsRegisteredUserDialog&);
+
     LRESULT RegisteredUserDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     bool OnAccept();

@@ -38,7 +38,7 @@ static ATOM atomUpdateDialog = 0;
 //---------------------------------------------------------------------------
 
 clsUpdateDialog::clsUpdateDialog() {
-    memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
+    memset(&hWndWindowItems, 0, sizeof(hWndWindowItems));
 }
 //---------------------------------------------------------------------------
 

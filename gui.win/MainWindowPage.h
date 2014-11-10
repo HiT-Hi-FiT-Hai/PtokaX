@@ -39,6 +39,9 @@ public:
 protected:
     void CreateHWND(HWND hOwner);
 private:
+    MainWindowPage(const MainWindowPage&);
+    const MainWindowPage& operator=(const MainWindowPage&);
+
     virtual LRESULT MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam) = NULL;
 };
 //------------------------------------------------------------------------------

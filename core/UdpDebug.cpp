@@ -35,35 +35,26 @@
 clsUdpDebug * clsUdpDebug::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-clsUdpDebug::UdpDbgItem::UdpDbgItem() {
+clsUdpDebug::UdpDbgItem::UdpDbgItem() :
 #ifdef _WIN32
-    s = INVALID_SOCKET;
+    s(INVALID_SOCKET),
 #else
-    s = -1;
+    s(-1),
 #endif
+	sas_len(0), ui32Hash(0), sNick(NULL), pPrev(NULL), pNext(NULL), bIsScript(false) {
     memset(&sas_to, 0, sizeof(sockaddr_storage));
-    sas_len = 0;
-
-    prev = NULL;
-    next = NULL;
-
-    Nick = NULL;
-
-    ui32Hash = 0;
-
-    bIsScript = false;
 }
 //---------------------------------------------------------------------------
 
 clsUdpDebug::UdpDbgItem::~UdpDbgItem() {
 #ifdef _WIN32
-    if(Nick != NULL) {
-        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)Nick) == 0) {
-            AppendDebugLog("%s - [MEM] Cannot deallocate Nick in clsUdpDebug::UdpDbgItem::~UdpDbgItem\n", 0);
+    if(sNick != NULL) {
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
+            AppendDebugLog("%s - [MEM] Cannot deallocate sNick in clsUdpDebug::UdpDbgItem::~UdpDbgItem\n", 0);
         }
     }
 #else
-	free(Nick);
+	free(sNick);
 #endif
 
 #ifdef _WIN32
@@ -74,35 +65,34 @@ clsUdpDebug::UdpDbgItem::~UdpDbgItem() {
 }
 //---------------------------------------------------------------------------
 
-clsUdpDebug::clsUdpDebug() {
-	llist = NULL;
-	ScriptList = NULL;
+clsUdpDebug::clsUdpDebug() : pList(NULL), pScriptList(NULL) {
+	// ...
 }
 //---------------------------------------------------------------------------
 
 clsUdpDebug::~clsUdpDebug() {
     UdpDbgItem * cur = NULL,
-        * next = llist;
+        * next = pList;
 
 	while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
     	delete cur;
     }
     
-    llist = NULL;
+    pList = NULL;
 
-    next = ScriptList;
+    next = pScriptList;
 
 	while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
     	delete cur;
     }
 
-    ScriptList = NULL;
+    pScriptList = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -112,7 +102,7 @@ void clsUdpDebug::Broadcast(const char * msg) const {
 //---------------------------------------------------------------------------
 
 void clsUdpDebug::Broadcast(const char * msg, const size_t &szMsgLen) const {
-    if(llist == NULL)
+    if(pList == NULL)
         return;
 
     size_t szLen = 4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+szMsgLen;
@@ -135,11 +125,11 @@ void clsUdpDebug::Broadcast(const char * msg, const size_t &szMsgLen) const {
     memcpy(sMsg+4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME], msg, szMsgLen);
      
     UdpDbgItem * cur = NULL,
-        * next = llist;
+        * next = pList;
 
 	while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 #ifdef _WIN32
     	sendto(cur->s, sMsg, (int)szLen, 0, (struct sockaddr *)&cur->sas_to, cur->sas_len);
 #else
@@ -172,19 +162,19 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
 
     // initialize dbg item
 #ifdef _WIN32
-    pNewDbg->Nick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
+    pNewDbg->sNick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
 #else
-	pNewDbg->Nick = (char *)malloc(u->ui8NickLen+1);
+	pNewDbg->sNick = (char *)malloc(u->ui8NickLen+1);
 #endif
-    if(pNewDbg->Nick == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for Nick in clsUdpDebug::New\n", (uint64_t)(u->ui8NickLen+1));
+    if(pNewDbg->sNick == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in clsUdpDebug::New\n", (uint64_t)(u->ui8NickLen+1));
 
 		delete pNewDbg;
         return false;
     }
 
-    memcpy(pNewDbg->Nick, u->sNick, u->ui8NickLen);
-    pNewDbg->Nick[u->ui8NickLen] = '\0';
+    memcpy(pNewDbg->sNick, u->sNick, u->ui8NickLen);
+    pNewDbg->sNick[u->ui8NickLen] = '\0';
 
     pNewDbg->ui32Hash = u->ui32NickHash;
 
@@ -243,15 +233,15 @@ bool clsUdpDebug::New(User * u, const int32_t &port) {
         return false;
     }
 
-    pNewDbg->prev = NULL;
-    pNewDbg->next = NULL;
+    pNewDbg->pPrev = NULL;
+    pNewDbg->pNext = NULL;
 
-    if(llist == NULL){
-        llist = pNewDbg;
+    if(pList == NULL){
+        pList = pNewDbg;
     } else {
-        llist->prev = pNewDbg;
-        pNewDbg->next = llist;
-        llist = pNewDbg;
+        pList->pPrev = pNewDbg;
+        pNewDbg->pNext = pList;
+        pList = pNewDbg;
     }
 
     char msg[128];
@@ -309,19 +299,19 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
     // initialize dbg item
     size_t szNameLen = strlen(sScriptName);
 #ifdef _WIN32
-    pNewDbg->Nick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNameLen+1);
+    pNewDbg->sNick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNameLen+1);
 #else
-	pNewDbg->Nick = (char *)malloc(szNameLen+1);
+	pNewDbg->sNick = (char *)malloc(szNameLen+1);
 #endif
-    if(pNewDbg->Nick == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for Nick in clsUdpDebug::New\n", (uint64_t)(szNameLen+1));
+    if(pNewDbg->sNick == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in clsUdpDebug::New\n", (uint64_t)(szNameLen+1));
 
         delete pNewDbg;
         return false;
     }
 
-	memcpy(pNewDbg->Nick, sScriptName, szNameLen);
-    pNewDbg->Nick[szNameLen] = '\0';
+	memcpy(pNewDbg->sNick, sScriptName, szNameLen);
+    pNewDbg->sNick[szNameLen] = '\0';
 
     pNewDbg->ui32Hash = 0;
 
@@ -368,24 +358,24 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
         return false;
     }
         
-    pNewDbg->prev = NULL;
-    pNewDbg->next = NULL;
+    pNewDbg->pPrev = NULL;
+    pNewDbg->pNext = NULL;
 
     if(bAllData == true) {
-        if(llist == NULL){
-            llist = pNewDbg;
+        if(pList == NULL){
+            pList = pNewDbg;
         } else {
-            llist->prev = pNewDbg;
-            pNewDbg->next = llist;
-            llist = pNewDbg;
+            pList->pPrev = pNewDbg;
+            pNewDbg->pNext = pList;
+            pList = pNewDbg;
         }
     } else {
-        if(ScriptList == NULL){
-            ScriptList = pNewDbg;
+        if(pScriptList == NULL){
+            pScriptList = pNewDbg;
         } else {
-            ScriptList->prev = pNewDbg;
-            pNewDbg->next = ScriptList;
-            ScriptList = pNewDbg;
+            pScriptList->pPrev = pNewDbg;
+            pNewDbg->pNext = pScriptList;
+            pScriptList = pNewDbg;
         }
     }
 
@@ -452,25 +442,25 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &usPort, const bool &bAllData, 
 
 bool clsUdpDebug::Remove(User * u) {
     UdpDbgItem * cur = NULL,
-        * next = llist;
+        * next = pList;
 
 	while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
-		if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->Nick, u->sNick) == 0) {
-            if(cur->prev == NULL) {
-                if(cur->next == NULL) {
-                    llist = NULL;
+		if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->sNick, u->sNick) == 0) {
+            if(cur->pPrev == NULL) {
+                if(cur->pNext == NULL) {
+                    pList = NULL;
                 } else {
-                    cur->next->prev = NULL;
-                    llist = cur->next;
+                    cur->pNext->pPrev = NULL;
+                    pList = cur->pNext;
                 }
-            } else if(cur->next == NULL) {
-                cur->prev->next = NULL;
+            } else if(cur->pNext == NULL) {
+                cur->pPrev->pNext = NULL;
             } else {
-                cur->prev->next = cur->next;
-                cur->next->prev = cur->prev;
+                cur->pPrev->pNext = cur->pNext;
+                cur->pNext->pPrev = cur->pPrev;
             }
             
 	        delete cur;
@@ -483,25 +473,25 @@ bool clsUdpDebug::Remove(User * u) {
 
 void clsUdpDebug::Remove(char * sScriptName) {
     UdpDbgItem * cur = NULL,
-        * next = ScriptList;
+        * next = pScriptList;
 
 	while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
-		if(strcasecmp(cur->Nick, sScriptName) == 0) {
-            if(cur->prev == NULL) {
-                if(cur->next == NULL) {
-                    llist = NULL;
+		if(strcasecmp(cur->sNick, sScriptName) == 0) {
+            if(cur->pPrev == NULL) {
+                if(cur->pNext == NULL) {
+                    pList = NULL;
                 } else {
-                    cur->next->prev = NULL;
-                    llist = cur->next;
+                    cur->pNext->pPrev = NULL;
+                    pList = cur->pNext;
                 }
-            } else if(cur->next == NULL) {
-                cur->prev->next = NULL;
+            } else if(cur->pNext == NULL) {
+                cur->pPrev->pNext = NULL;
             } else {
-                cur->prev->next = cur->next;
-                cur->next->prev = cur->prev;
+                cur->pPrev->pNext = cur->pNext;
+                cur->pNext->pPrev = cur->pPrev;
             }
             
 	        delete cur;
@@ -509,24 +499,24 @@ void clsUdpDebug::Remove(char * sScriptName) {
         }
     }
 
-    next = llist;
+    next = pList;
 	while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
-		if(cur->bIsScript == true && strcasecmp(cur->Nick, sScriptName) == 0) {
-            if(cur->prev == NULL) {
-                if(cur->next == NULL) {
-                    llist = NULL;
+		if(cur->bIsScript == true && strcasecmp(cur->sNick, sScriptName) == 0) {
+            if(cur->pPrev == NULL) {
+                if(cur->pNext == NULL) {
+                    pList = NULL;
                 } else {
-                    cur->next->prev = NULL;
-                    llist = cur->next;
+                    cur->pNext->pPrev = NULL;
+                    pList = cur->pNext;
                 }
-            } else if(cur->next == NULL) {
-                cur->prev->next = NULL;
+            } else if(cur->pNext == NULL) {
+                cur->pPrev->pNext = NULL;
             } else {
-                cur->prev->next = cur->next;
-                cur->next->prev = cur->prev;
+                cur->pPrev->pNext = cur->pNext;
+                cur->pNext->pPrev = cur->pPrev;
             }
             
 	        delete cur;
@@ -538,13 +528,13 @@ void clsUdpDebug::Remove(char * sScriptName) {
 
 bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) const {
     UdpDbgItem * cur = NULL,
-        * next = llist;
+        * next = pList;
 
 	while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
-		if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->Nick, u->sNick) == 0) {
+		if(cur->bIsScript == false && cur->ui32Hash == u->ui32NickHash && strcasecmp(cur->sNick, u->sNick) == 0) {
             if(bSndMess == true) {
 				string Txt = "<"+string(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], (size_t)clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_HUB_SEC])+
 					"> *** "+string(clsLanguageManager::mPtr->sTexts[LAN_YOU_SUBSCRIBED_UDP_DBG], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_YOU_SUBSCRIBED_UDP_DBG])+
@@ -562,13 +552,13 @@ bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) const {
 
 void clsUdpDebug::Send(char * sScriptName, char * sMessage, const size_t &szMsgLen) const {
     UdpDbgItem * cur = NULL,
-        * next = ScriptList;
+        * next = pScriptList;
 
 	while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
-		if(strcasecmp(cur->Nick, sScriptName) == 0) {
+		if(strcasecmp(cur->sNick, sScriptName) == 0) {
             size_t szNameLen = strlen(sScriptName);
             size_t szLen = 4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+szNameLen+2+szMsgLen;
 
@@ -618,23 +608,23 @@ void clsUdpDebug::Send(char * sScriptName, char * sMessage, const size_t &szMsgL
 
 void clsUdpDebug::Cleanup() {
     UdpDbgItem * cur = NULL,
-        * next = llist;
+        * next = pList;
 
 	while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
     	delete cur;
     }
 
-    llist = NULL;
+    pList = NULL;
 
-    next = ScriptList;
+    next = pScriptList;
 	while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
     	delete cur;
     }
 
-    ScriptList = NULL;
+    pScriptList = NULL;
 }
 //---------------------------------------------------------------------------

@@ -53,6 +53,9 @@ private:
         BTN_DISABLE_MOTD
     };
 
+    SettingPageMOTD(const SettingPageMOTD&);
+    const SettingPageMOTD& operator=(const SettingPageMOTD&);
+
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 //------------------------------------------------------------------------------

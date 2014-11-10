@@ -59,6 +59,9 @@ private:
 
     bool bSortAscending;
 
+    clsRangeBansDialog(const clsRangeBansDialog&);
+    const clsRangeBansDialog& operator=(const clsRangeBansDialog&);
+
     LRESULT RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     void AddAllRangeBans();

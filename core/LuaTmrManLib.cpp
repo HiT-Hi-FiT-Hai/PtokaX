@@ -105,7 +105,7 @@ static int AddTimer(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tonumber(L, 1), NULL);
 #else
-	UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tounsigned(L, 1), NULL);
+	UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tointeger(L, 1), NULL);
 #endif
 
     if(timer == 0) {
@@ -149,7 +149,7 @@ static int AddTimer(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	uint32_t ui32Milis = (uint32_t)lua_tonumber(L, 1);// ms
 #else
-    uint32_t ui32Milis = (uint32_t)lua_tounsigned(L, 1);// ms
+    uint32_t ui32Milis = (uint32_t)lua_tointeger(L, 1);// ms
 #endif
 
     uint32_t ui32Sec = ui32Milis / 1000;
@@ -178,16 +178,16 @@ static int AddTimer(lua_State * L) {
     lua_pushlightuserdata(L, (void *)pNewtimer->TimerId);
 #endif
 
-    pNewtimer->prev = NULL;
+    pNewtimer->pPrev = NULL;
 
-    if(cur->TimerList == NULL) {
-        pNewtimer->next = NULL;
+    if(cur->pTimerList == NULL) {
+        pNewtimer->pNext = NULL;
     } else {
-        pNewtimer->next = cur->TimerList;
-        cur->TimerList->prev = pNewtimer;
+        pNewtimer->pNext = cur->pTimerList;
+        cur->pTimerList->pPrev = pNewtimer;
     }
 
-    cur->TimerList = pNewtimer;
+    cur->pTimerList = pNewtimer;
 
     return 1;
 }
@@ -219,11 +219,11 @@ static int RemoveTimer(lua_State * L) {
 #endif
 
     ScriptTimer * tmr = NULL,
-        * next = cur->TimerList;
+        * next = cur->pTimerList;
     
     while(next != NULL) {
         tmr = next;
-        next = tmr->next;
+        next = tmr->pNext;
 
 #ifdef _WIN32
         if(tmr->uiTimerId == timer) {
@@ -233,18 +233,18 @@ static int RemoveTimer(lua_State * L) {
             timer_delete(tmr->TimerId);
 #endif
 
-            if(tmr->prev == NULL) {
-                if(tmr->next == NULL) {
-                    cur->TimerList = NULL;
+            if(tmr->pPrev == NULL) {
+                if(tmr->pNext == NULL) {
+                    cur->pTimerList = NULL;
                 } else {
-                    tmr->next->prev = NULL;
-                    cur->TimerList = tmr->next;
+                    tmr->pNext->pPrev = NULL;
+                    cur->pTimerList = tmr->pNext;
                 }
-            } else if(tmr->next == NULL) {
-                tmr->prev->next = NULL;
+            } else if(tmr->pNext == NULL) {
+                tmr->pPrev->pNext = NULL;
             } else {
-                tmr->prev->next = tmr->next;
-                tmr->next->prev = tmr->prev;
+                tmr->pPrev->pNext = tmr->pNext;
+                tmr->pNext->pPrev = tmr->pPrev;
             }
 
             if(tmr->sFunctionName == NULL) {

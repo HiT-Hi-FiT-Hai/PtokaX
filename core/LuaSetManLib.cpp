@@ -25,7 +25,7 @@
 #include "LuaSetManLib.h"
 //---------------------------------------------------------------------------
 #include "eventqueue.h"
-#include "../core/hashRegManager.h"
+#include "hashRegManager.h"
 #include "hashUsrManager.h"
 #include "LuaScriptManager.h"
 #include "SettingManager.h"
@@ -111,7 +111,7 @@ static int GetBool(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	size_t szId = (size_t)lua_tonumber(L, 1);
 #else
-    size_t szId = (size_t)lua_tounsigned(L, 1);
+    size_t szId = (size_t)lua_tointeger(L, 1);
 #endif
 
     lua_settop(L, 0);
@@ -145,7 +145,7 @@ static int SetBool(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	size_t szId = (size_t)lua_tonumber(L, 1);
 #else
-    size_t szId = (size_t)lua_tounsigned(L, 1);
+    size_t szId = (size_t)lua_tointeger(L, 1);
 #endif
 
     bool bValue = (lua_toboolean(L, 2) == 0 ? false : true);
@@ -190,7 +190,7 @@ static int GetNumber(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	size_t szId = (size_t)lua_tonumber(L, 1);
 #else
-    size_t szId = (size_t)lua_tounsigned(L, 1);
+    size_t szId = (size_t)lua_tointeger(L, 1);
 #endif
 
     lua_settop(L, 0);
@@ -201,7 +201,7 @@ static int GetNumber(lua_State * L) {
         return 1;
     }  
 
-    lua_pushinteger(L, clsSettingManager::mPtr->iShorts[szId]);
+    lua_pushinteger(L, clsSettingManager::mPtr->i16Shorts[szId]);
 
     return 1;
 }
@@ -224,7 +224,7 @@ static int SetNumber(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	size_t szId = (size_t)lua_tonumber(L, 1);
 #else
-    size_t szId = (size_t)lua_tounsigned(L, 1);
+    size_t szId = (size_t)lua_tointeger(L, 1);
 #endif
 
     int16_t iValue = (int16_t)lua_tointeger(L, 2);
@@ -260,7 +260,7 @@ static int GetString(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	size_t szId = (size_t)lua_tonumber(L, 1);
 #else
-    size_t szId = (size_t)lua_tounsigned(L, 1);
+    size_t szId = (size_t)lua_tointeger(L, 1);
 #endif
 
     lua_settop(L, 0);
@@ -298,7 +298,7 @@ static int SetString(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	size_t szId = (size_t)lua_tonumber(L, 1);
 #else
-    size_t szId = (size_t)lua_tounsigned(L, 1);
+    size_t szId = (size_t)lua_tointeger(L, 1);
 #endif
 
     if(szId >= SETTXT_IDS_END) {
@@ -328,7 +328,7 @@ static int GetMinShare(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, (double)clsSettingManager::mPtr->ui64MinShare);
 #else
-    lua_pushunsigned(L, clsSettingManager::mPtr->ui64MinShare);
+    lua_pushinteger(L, clsSettingManager::mPtr->ui64MinShare);
 #endif
 
     return 1;
@@ -352,8 +352,8 @@ static int SetMinShare(lua_State * L) {
 		clsSettingManager::mPtr->SetShort(SETSHORT_MIN_SHARE_LIMIT, (int16_t)lua_tonumber(L, 1));
 		clsSettingManager::mPtr->SetShort(SETSHORT_MIN_SHARE_UNITS, (int16_t)lua_tonumber(L, 2));
 #else
-        clsSettingManager::mPtr->SetShort(SETSHORT_MIN_SHARE_LIMIT, (int16_t)lua_tounsigned(L, 1));
-		clsSettingManager::mPtr->SetShort(SETSHORT_MIN_SHARE_UNITS, (int16_t)lua_tounsigned(L, 2));
+        clsSettingManager::mPtr->SetShort(SETSHORT_MIN_SHARE_LIMIT, (int16_t)lua_tointeger(L, 1));
+		clsSettingManager::mPtr->SetShort(SETSHORT_MIN_SHARE_UNITS, (int16_t)lua_tointeger(L, 2));
 #endif
 
 		clsSettingManager::mPtr->bUpdateLocked = false;
@@ -401,7 +401,7 @@ static int GetMaxShare(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, (double)clsSettingManager::mPtr->ui64MaxShare);
 #else
-    lua_pushunsigned(L, clsSettingManager::mPtr->ui64MaxShare);
+    lua_pushinteger(L, clsSettingManager::mPtr->ui64MaxShare);
 #endif
 
     return 1;
@@ -425,8 +425,8 @@ static int SetMaxShare(lua_State * L) {
 		clsSettingManager::mPtr->SetShort(SETSHORT_MAX_SHARE_LIMIT, (int16_t)lua_tonumber(L, 1));
 		clsSettingManager::mPtr->SetShort(SETSHORT_MAX_SHARE_UNITS, (int16_t)lua_tonumber(L, 2));
 #else
-        clsSettingManager::mPtr->SetShort(SETSHORT_MAX_SHARE_LIMIT, (int16_t)lua_tounsigned(L, 1));
-		clsSettingManager::mPtr->SetShort(SETSHORT_MAX_SHARE_UNITS, (int16_t)lua_tounsigned(L, 2));
+        clsSettingManager::mPtr->SetShort(SETSHORT_MAX_SHARE_LIMIT, (int16_t)lua_tointeger(L, 1));
+		clsSettingManager::mPtr->SetShort(SETSHORT_MAX_SHARE_UNITS, (int16_t)lua_tointeger(L, 2));
 #endif
 
 		clsSettingManager::mPtr->bUpdateLocked = false;
@@ -483,8 +483,8 @@ static int SetHubSlotRatio(lua_State * L) {
 		clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_HUBS, (int16_t)lua_tonumber(L, 1));
 		clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_SLOTS, (int16_t)lua_tonumber(L, 2));
 #else
-    clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_HUBS, (int16_t)lua_tounsigned(L, 1));
-	clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_SLOTS, (int16_t)lua_tounsigned(L, 2));
+    clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_HUBS, (int16_t)lua_tointeger(L, 1));
+	clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_SLOTS, (int16_t)lua_tointeger(L, 2));
 #endif
 
 	clsSettingManager::mPtr->bUpdateLocked = false;

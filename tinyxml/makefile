@@ -44,4 +44,9 @@ $(CURDIR)/obj/tinyxmlparser.o: $(CURDIR)/tinyxmlparser.cpp $(CURDIR)/tinyxml.h $
 # Cleanup
 #*******************************************************************************
 clean:
-	-rm $(CURDIR)/obj/tinystr.o $(CURDIR)/obj/tinyxml.o $(CURDIR)/obj/tinyxmlerror.o $(CURDIR)/obj/tinyxmlparser.o tinyxml.a
+	@if test -f tinyxml.a; then \
+		rm $(CURDIR)/obj/tinystr.o $(CURDIR)/obj/tinyxml.o $(CURDIR)/obj/tinyxmlerror.o $(CURDIR)/obj/tinyxmlparser.o tinyxml.a && \
+		echo rm $(CURDIR)/obj/tinystr.o $(CURDIR)/obj/tinyxml.o $(CURDIR)/obj/tinyxmlerror.o $(CURDIR)/obj/tinyxmlparser.o tinyxml.a; \
+	else \
+		echo "tinyxml.a not exist, leaving"; \
+	fi

@@ -44,6 +44,9 @@ private:
         REDT_ABOUT
     };
 
+    AboutDialog(const AboutDialog&);
+    const AboutDialog& operator=(const AboutDialog&);
+
     LRESULT AboutDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 //------------------------------------------------------------------------------

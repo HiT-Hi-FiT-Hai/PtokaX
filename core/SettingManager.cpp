@@ -53,26 +53,13 @@ static const char * sHubSec = "Hub-Security";
 clsSettingManager * clsSettingManager::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-clsSettingManager::clsSettingManager(void) {
-    bUpdateLocked = true;
-
+clsSettingManager::clsSettingManager(void) : ui64MinShare(0), ui64MaxShare(0), sMOTD(NULL), ui16MOTDLen(0), bBotsSameNick(false), bUpdateLocked(true), bFirstRun(false),
+	ui8FullMyINFOOption(0) {
 #ifdef _WIN32
     InitializeCriticalSection(&csSetting);
 #else
 	pthread_mutex_init(&mtxSetting, NULL);
 #endif
-
-    sMOTD = NULL;
-    ui16MOTDLen = 0;
-
-    ui8FullMyINFOOption = 0;
-
-    ui64MinShare = 0;
-    ui64MaxShare = 0;
-
-    bBotsSameNick = false;
-
-	bFirstRun = false;
 
     memset(sPreTexts, 0 , sizeof(sPreTexts));
     memset(ui16PreTextsLens, 0 , sizeof(ui16PreTextsLens));
@@ -80,9 +67,9 @@ clsSettingManager::clsSettingManager(void) {
     memset(sTexts, 0 , sizeof(sTexts));
     memset(ui16TextsLens, 0 , sizeof(ui16TextsLens));
 
-    memset(iShorts, 0 , sizeof(iShorts));
+    memset(i16Shorts, 0 , sizeof(i16Shorts));
 
-    memset(iPortNumbers, 0 , sizeof(iPortNumbers));
+    memset(ui16PortNumbers, 0 , sizeof(ui16PortNumbers));
     
     memset(bBools, 0 , sizeof(bBools));
 
@@ -412,13 +399,13 @@ void clsSettingManager::Save() {
     char msg[8];
     for(size_t szi = 0; szi < SETSHORT_IDS_END; szi++) {
         // Don't save setting with default value
-        if(iShorts[szi] == SetShortDef[szi] || SetShortXmlStr[szi][0] == '\0') {
+        if(i16Shorts[szi] == SetShortDef[szi] || SetShortXmlStr[szi][0] == '\0') {
             continue;
         }
 
         TiXmlElement integer("Integer");
         integer.SetAttribute("Name", SetShortXmlStr[szi]);
-		sprintf(msg, "%hd", iShorts[szi]);
+		sprintf(msg, "%hd", i16Shorts[szi]);
         integer.InsertEndChild(TiXmlText(msg));
         integers.InsertEndChild(integer);
     }
@@ -472,7 +459,7 @@ uint16_t clsSettingManager::GetFirstPort() {
 	pthread_mutex_lock(&mtxSetting);
 #endif
 
-    uint16_t iValue = iPortNumbers[0];
+    uint16_t iValue = ui16PortNumbers[0];
 
 #ifdef _WIN32
     LeaveCriticalSection(&csSetting);
@@ -491,7 +478,7 @@ int16_t clsSettingManager::GetShort(const size_t &szShortId) {
 	pthread_mutex_lock(&mtxSetting);
 #endif
 
-    int16_t iValue = iShorts[szShortId];
+    int16_t iValue = i16Shorts[szShortId];
 
 #ifdef _WIN32
     LeaveCriticalSection(&csSetting);
@@ -675,7 +662,7 @@ void clsSettingManager::SetMOTD(char * sTxt, const size_t &szLen) {
 //---------------------------------------------------------------------------
 
 void clsSettingManager::SetShort(const size_t &szShortId, const int16_t &iValue) {
-    if(iValue < 0 || iShorts[szShortId] == iValue) {
+    if(iValue < 0 || i16Shorts[szShortId] == iValue) {
         return;
     }
 
@@ -793,7 +780,7 @@ void clsSettingManager::SetShort(const size_t &szShortId, const int16_t &iValue)
 			pthread_mutex_lock(&mtxSetting);
 #endif
 
-            iShorts[szShortId] = iValue;
+            i16Shorts[szShortId] = iValue;
 
 #ifdef _WIN32
             LeaveCriticalSection(&csSetting);
@@ -877,7 +864,7 @@ void clsSettingManager::SetShort(const size_t &szShortId, const int16_t &iValue)
             break;
     }
 
-    iShorts[szShortId] = iValue;
+    i16Shorts[szShortId] = iValue;
 
     switch(szShortId) {
         case SETSHORT_MIN_SHARE_LIMIT:
@@ -949,7 +936,7 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
             if(strchr(sTxt, '$') != NULL || strchr(sTxt, ' ') != NULL || szLen == 0 || szLen > 64) {
                 return;
             }
-            if(clsServerManager::ServersS != NULL && bBotsSameNick == false) {
+            if(clsServerManager::pServersS != NULL && bBotsSameNick == false) {
                 clsReservedNicksManager::mPtr->DelReservedNick(sTexts[SETTXT_BOT_NICK]);
             }
             if(bBools[SETBOOL_REG_BOT] == true) {
@@ -960,7 +947,7 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
             if(strchr(sTxt, '$') != NULL || strchr(sTxt, ' ') != NULL || szLen == 0 || szLen > 64) {
                 return;
             }
-            if(clsServerManager::ServersS != NULL && bBotsSameNick == false) {
+            if(clsServerManager::pServersS != NULL && bBotsSameNick == false) {
                 clsReservedNicksManager::mPtr->DelReservedNick(sTexts[SETTXT_OP_CHAT_NICK]);
             }
             if(bBools[SETBOOL_REG_OP_CHAT] == true) {
@@ -1122,7 +1109,7 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
             UpdateNickLimitMessage();
             UpdateBotsSameNick();
 
-            if(clsServerManager::ServersS != NULL && bBotsSameNick == false) {
+            if(clsServerManager::pServersS != NULL && bBotsSameNick == false) {
                 clsReservedNicksManager::mPtr->AddReservedNick(sTexts[SETTXT_BOT_NICK]);
             }
 
@@ -1135,7 +1122,7 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
             break;
         case SETTXT_OP_CHAT_NICK:
             UpdateBotsSameNick();
-            if(clsServerManager::ServersS != NULL && bBotsSameNick == false) {
+            if(clsServerManager::pServersS != NULL && bBotsSameNick == false) {
                 clsReservedNicksManager::mPtr->AddReservedNick(sTexts[SETTXT_OP_CHAT_NICK]);
             }
             UpdateOpChat();
@@ -1171,7 +1158,7 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
             if(bBools[SETBOOL_MAX_HUBS_LIMIT_REDIR] == true) {
                 UpdateMaxHubsLimitMessage();
             }
-            if(iShorts[SETSHORT_NO_TAG_OPTION] == 2) {
+            if(i16Shorts[SETSHORT_NO_TAG_OPTION] == 2) {
                 UpdateNoTagMessage();
             }
             if(sTexts[SETTXT_TEMP_BAN_REDIR_ADDRESS] != NULL) {
@@ -1233,7 +1220,7 @@ void clsSettingManager::SetText(const size_t &szTxtId, const string & sTxt) {
 //---------------------------------------------------------------------------
 
 void clsSettingManager::UpdateAll() {
-	ui8FullMyINFOOption = (uint8_t)iShorts[SETSHORT_FULL_MYINFO_OPTION];
+	ui8FullMyINFOOption = (uint8_t)i16Shorts[SETSHORT_FULL_MYINFO_OPTION];
 
     UpdateHubSec();
     UpdateMOTD();
@@ -1623,7 +1610,7 @@ void clsSettingManager::UpdateShareLimitMessage() {
         if(sTexts[SETTXT_SHARE_LIMIT_MSG][ui16i] == '%') {
             if(strncmp(sTexts[SETTXT_SHARE_LIMIT_MSG]+ui16i+1, sMin, 5) == 0) {
                 if(ui64MinShare != 0) {
-                    int iRet = sprintf(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG]+iMsgLen, "%hd %s", iShorts[SETSHORT_MIN_SHARE_LIMIT], units[iShorts[SETSHORT_MIN_SHARE_UNITS]]);
+                    int iRet = sprintf(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG]+iMsgLen, "%hd %s", i16Shorts[SETSHORT_MIN_SHARE_LIMIT], units[i16Shorts[SETSHORT_MIN_SHARE_UNITS]]);
                     iMsgLen += iRet;
                     if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateShareLimitMessage") == false) {
                         exit(EXIT_FAILURE);
@@ -1636,7 +1623,7 @@ void clsSettingManager::UpdateShareLimitMessage() {
                 continue;
             } else if(strncmp(sTexts[SETTXT_SHARE_LIMIT_MSG]+ui16i+1, sMax, 5) == 0) {
                 if(ui64MaxShare != 0) {
-                    int iRet = sprintf(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG]+iMsgLen, "%hd %s", iShorts[SETSHORT_MAX_SHARE_LIMIT], units[iShorts[SETSHORT_MAX_SHARE_UNITS]]);
+                    int iRet = sprintf(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG]+iMsgLen, "%hd %s", i16Shorts[SETSHORT_MAX_SHARE_LIMIT], units[i16Shorts[SETSHORT_MAX_SHARE_UNITS]]);
                     iMsgLen += iRet;
                     if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateShareLimitMessage1") == false) {
                         exit(EXIT_FAILURE);
@@ -1717,7 +1704,7 @@ void clsSettingManager::UpdateSlotsLimitMessage() {
     for(uint16_t ui16i = 0; ui16i < ui16TextsLens[SETTXT_SLOTS_LIMIT_MSG]; ui16i++) {
         if(sTexts[SETTXT_SLOTS_LIMIT_MSG][ui16i] == '%') {
             if(strncmp(sTexts[SETTXT_SLOTS_LIMIT_MSG]+ui16i+1, sMin, 5) == 0) {
-                int iRet = sprintf(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG]+iMsgLen, "%hd", iShorts[SETSHORT_MIN_SLOTS_LIMIT]);
+                int iRet = sprintf(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG]+iMsgLen, "%hd", i16Shorts[SETSHORT_MIN_SLOTS_LIMIT]);
                 iMsgLen += iRet;
                 if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateSlotsLimitMessage") == false) {
                     exit(EXIT_FAILURE);
@@ -1726,8 +1713,8 @@ void clsSettingManager::UpdateSlotsLimitMessage() {
                 ui16i += (uint16_t)5;
                 continue;
             } else if(strncmp(sTexts[SETTXT_SLOTS_LIMIT_MSG]+ui16i+1, sMax, 5) == 0) {
-                if(iShorts[SETSHORT_MAX_SLOTS_LIMIT] != 0) {
-                    int iRet = sprintf(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG]+iMsgLen, "%hd", iShorts[SETSHORT_MAX_SLOTS_LIMIT]);
+                if(i16Shorts[SETSHORT_MAX_SLOTS_LIMIT] != 0) {
+                    int iRet = sprintf(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG]+iMsgLen, "%hd", i16Shorts[SETSHORT_MAX_SLOTS_LIMIT]);
                     iMsgLen += iRet;
                     if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateSlotsLimitMessage1") == false) {
                         exit(EXIT_FAILURE);
@@ -1811,7 +1798,7 @@ void clsSettingManager::UpdateHubSlotRatioMessage() {
     for(uint16_t ui16i = 0; ui16i < ui16TextsLens[SETTXT_HUB_SLOT_RATIO_MSG]; ui16i++) {
         if(sTexts[SETTXT_HUB_SLOT_RATIO_MSG][ui16i] == '%') {
             if(strncmp(sTexts[SETTXT_HUB_SLOT_RATIO_MSG]+ui16i+1, sHubs, 6) == 0) {
-                int iRet = sprintf(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG]+iMsgLen, "%hd", iShorts[SETSHORT_HUB_SLOT_RATIO_HUBS]);
+                int iRet = sprintf(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG]+iMsgLen, "%hd", i16Shorts[SETSHORT_HUB_SLOT_RATIO_HUBS]);
                 iMsgLen += iRet;
                 if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateHubSlotRatioMessage") == false) {
                     exit(EXIT_FAILURE);
@@ -1819,7 +1806,7 @@ void clsSettingManager::UpdateHubSlotRatioMessage() {
                 ui16i += (uint16_t)6;
                 continue;
             } else if(strncmp(sTexts[SETTXT_HUB_SLOT_RATIO_MSG]+ui16i+1, sSlots, 7) == 0) {
-                int iRet = sprintf(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG]+iMsgLen, "%hd", iShorts[SETSHORT_HUB_SLOT_RATIO_SLOTS]);
+                int iRet = sprintf(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG]+iMsgLen, "%hd", i16Shorts[SETSHORT_HUB_SLOT_RATIO_SLOTS]);
                 iMsgLen += iRet;
                 if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateHubSlotRatioMessage1") == false) {
                     exit(EXIT_FAILURE);
@@ -1904,7 +1891,7 @@ void clsSettingManager::UpdateMaxHubsLimitMessage() {
             iMsgLen += (int)szLen;
         }
 
-        int iRet = sprintf(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG]+iMsgLen, "%hd", iShorts[SETSHORT_MAX_HUBS_LIMIT]);
+        int iRet = sprintf(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG]+iMsgLen, "%hd", i16Shorts[SETSHORT_MAX_HUBS_LIMIT]);
         iMsgLen += iRet;
         if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateMaxHubsLimitMessage") == false) {
             exit(EXIT_FAILURE);
@@ -1946,7 +1933,7 @@ void clsSettingManager::UpdateNoTagMessage() {
         return;
     }
 
-    if(iShorts[SETSHORT_NO_TAG_OPTION] == 0) {
+    if(i16Shorts[SETSHORT_NO_TAG_OPTION] == 0) {
         if(sPreTexts[SETPRETXT_NO_TAG_MSG] != NULL) {
 #ifdef _WIN32
             if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPreTexts[SETPRETXT_NO_TAG_MSG]) == 0) {
@@ -1964,7 +1951,7 @@ void clsSettingManager::UpdateNoTagMessage() {
 
     size_t szNeededMem = 5 + ui16PreTextsLens[SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_NO_TAG_MSG];
 
-    if(iShorts[SETSHORT_NO_TAG_OPTION] == 2) {
+    if(i16Shorts[SETSHORT_NO_TAG_OPTION] == 2) {
         if(sTexts[SETTXT_NO_TAG_REDIR_ADDRESS] != NULL) {
             szNeededMem += 12 + ui16TextsLens[SETTXT_NO_TAG_REDIR_ADDRESS];
         }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
@@ -1996,7 +1983,7 @@ void clsSettingManager::UpdateNoTagMessage() {
         exit(EXIT_FAILURE);
     }
 
-    if(iShorts[SETSHORT_NO_TAG_OPTION] == 2) { 
+    if(i16Shorts[SETSHORT_NO_TAG_OPTION] == 2) {
         if(sTexts[SETTXT_NO_TAG_REDIR_ADDRESS] != NULL) {
            	int iRet = sprintf(sPreTexts[SETPRETXT_NO_TAG_MSG]+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_NO_TAG_REDIR_ADDRESS]);
             iMsgLen += iRet;
@@ -2182,7 +2169,7 @@ void clsSettingManager::UpdateNickLimitMessage() {
     for(uint16_t ui16i = 0; ui16i < ui16TextsLens[SETTXT_NICK_LIMIT_MSG]; ui16i++) {
         if(sTexts[SETTXT_NICK_LIMIT_MSG][ui16i] == '%') {
             if(strncmp(sTexts[SETTXT_NICK_LIMIT_MSG]+ui16i+1, sMin, 5) == 0) {
-                int iRet = sprintf(sPreTexts[SETPRETXT_NICK_LIMIT_MSG]+iMsgLen, "%hd", iShorts[SETSHORT_MIN_NICK_LEN]);
+                int iRet = sprintf(sPreTexts[SETPRETXT_NICK_LIMIT_MSG]+iMsgLen, "%hd", i16Shorts[SETSHORT_MIN_NICK_LEN]);
                 iMsgLen += iRet;
                 if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateNickLimitMessage") == false) {
                     exit(EXIT_FAILURE);
@@ -2191,8 +2178,8 @@ void clsSettingManager::UpdateNickLimitMessage() {
                 ui16i += (uint16_t)5;
                 continue;
             } else if(strncmp(sTexts[SETTXT_NICK_LIMIT_MSG]+ui16i+1, sMax, 5) == 0) {
-                if(iShorts[SETSHORT_MAX_NICK_LEN] != 0) {
-                    int iRet = sprintf(sPreTexts[SETPRETXT_NICK_LIMIT_MSG]+iMsgLen, "%hd", iShorts[SETSHORT_MAX_NICK_LEN]);
+                if(i16Shorts[SETSHORT_MAX_NICK_LEN] != 0) {
+                    int iRet = sprintf(sPreTexts[SETPRETXT_NICK_LIMIT_MSG]+iMsgLen, "%hd", i16Shorts[SETSHORT_MAX_NICK_LEN]);
                     iMsgLen += iRet;
                     if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateNickLimitMessage1") == false) {
                         exit(EXIT_FAILURE);
@@ -2236,7 +2223,7 @@ void clsSettingManager::UpdateMinShare() {
         return;
     }
 
-	ui64MinShare = (uint64_t)(iShorts[SETSHORT_MIN_SHARE_LIMIT] == 0 ? 0 : iShorts[SETSHORT_MIN_SHARE_LIMIT] * pow(1024.0, (int)iShorts[SETSHORT_MIN_SHARE_UNITS]));
+	ui64MinShare = (uint64_t)(i16Shorts[SETSHORT_MIN_SHARE_LIMIT] == 0 ? 0 : i16Shorts[SETSHORT_MIN_SHARE_LIMIT] * pow(1024.0, (int)i16Shorts[SETSHORT_MIN_SHARE_UNITS]));
 }
 //---------------------------------------------------------------------------
 
@@ -2245,7 +2232,7 @@ void clsSettingManager::UpdateMaxShare() {
         return;
     }
 
-	ui64MaxShare = (uint64_t)(iShorts[SETSHORT_MAX_SHARE_LIMIT] == 0 ? 0 : iShorts[SETSHORT_MAX_SHARE_LIMIT] * pow(1024.0, (int)iShorts[SETSHORT_MAX_SHARE_UNITS]));
+	ui64MaxShare = (uint64_t)(i16Shorts[SETSHORT_MAX_SHARE_LIMIT] == 0 ? 0 : i16Shorts[SETSHORT_MAX_SHARE_LIMIT] * pow(1024.0, (int)i16Shorts[SETSHORT_MAX_SHARE_UNITS]));
 }
 //---------------------------------------------------------------------------
 
@@ -2261,7 +2248,7 @@ void clsSettingManager::UpdateTCPPorts() {
             sTexts[SETTXT_TCP_PORTS][ui16i] = '\0';
 
             if(ui8ActualPort != 0) {
-                iPortNumbers[ui8ActualPort] = (uint16_t)atoi(sPort);
+                ui16PortNumbers[ui8ActualPort] = (uint16_t)atoi(sPort);
             } else {
 #ifdef _WIN32
                 EnterCriticalSection(&csSetting);
@@ -2269,7 +2256,7 @@ void clsSettingManager::UpdateTCPPorts() {
 				pthread_mutex_lock(&mtxSetting);
 #endif
 
-                iPortNumbers[ui8ActualPort] = (uint16_t)atoi(sPort);
+                ui16PortNumbers[ui8ActualPort] = (uint16_t)atoi(sPort);
 
 #ifdef _WIN32
                 LeaveCriticalSection(&csSetting);
@@ -2287,12 +2274,12 @@ void clsSettingManager::UpdateTCPPorts() {
     }
 
     if(sPort[0] != '\0') {
-        iPortNumbers[ui8ActualPort] = (uint16_t)atoi(sPort);
+        ui16PortNumbers[ui8ActualPort] = (uint16_t)atoi(sPort);
         ui8ActualPort++;
     }
 
     while(ui8ActualPort < 25) {
-        iPortNumbers[ui8ActualPort] = 0;
+        ui16PortNumbers[ui8ActualPort] = 0;
         ui8ActualPort++;
     }
 
@@ -2385,17 +2372,17 @@ void clsSettingManager::UpdateBot(const bool &bNickChanged/* = true*/) {
     ui16PreTextsLens[SETPRETXT_HUB_BOT_MYINFO] = (uint16_t)iMsgLen;
     sPreTexts[SETPRETXT_HUB_BOT_MYINFO][iMsgLen] = '\0';
 
-    if(clsServerManager::ServersS == NULL) {
+    if(clsServerManager::pServersS == NULL) {
         return;
     }
 
-    if(bNickChanged == true && (bBotsSameNick == false || clsServerManager::ServersS->bActive == false)) {
+    if(bNickChanged == true && (bBotsSameNick == false || clsServerManager::pServersS->bActive == false)) {
         clsUsers::mPtr->AddBot2NickList(sTexts[SETTXT_BOT_NICK], (size_t)ui16TextsLens[SETTXT_BOT_NICK], true);
     }
 
     clsUsers::mPtr->AddBot2MyInfos(sPreTexts[SETPRETXT_HUB_BOT_MYINFO]);
 
-    if(clsServerManager::ServersS->bActive == false) {
+    if(clsServerManager::pServersS->bActive == false) {
         return;
     }
 
@@ -2432,11 +2419,11 @@ void clsSettingManager::DisableBot(const bool &bNickChanged/* = true*/, const bo
             if(bBotsSameNick == true) {
                 // PPK ... send Quit only to users without opchat permission...
                 User * curUser = NULL,
-                    * next = clsUsers::mPtr->llist;
+                    * next = clsUsers::mPtr->pListS;
 
                 while(next != NULL) {
                     curUser = next;
-                    next = curUser->next;
+                    next = curUser->pNext;
                     if(curUser->ui8State == User::STATE_ADDED && clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::ALLOWEDOPCHAT) == false) {
                         curUser->SendCharDelayed(sMsg, iMsgLen);
                     }
@@ -2561,11 +2548,11 @@ void clsSettingManager::UpdateOpChat(const bool &bNickChanged/* = true*/) {
         }
 
         User * curUser = NULL,
-            * next = clsUsers::mPtr->llist;
+            * next = clsUsers::mPtr->pListS;
 
         while(next != NULL) {
             curUser = next;
-            next = curUser->next;
+            next = curUser->pNext;
             if(curUser->ui8State == User::STATE_ADDED && clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::ALLOWEDOPCHAT) == true) {
                 if(bNickChanged == true && (((curUser->ui32SupportBits & User::SUPPORTBIT_NOHELLO) == User::SUPPORTBIT_NOHELLO) == false)) {
                     curUser->SendCharDelayed(sPreTexts[SETPRETXT_OP_CHAT_HELLO], ui16PreTextsLens[SETPRETXT_OP_CHAT_HELLO]);
@@ -2581,7 +2568,7 @@ void clsSettingManager::UpdateOpChat(const bool &bNickChanged/* = true*/) {
 //---------------------------------------------------------------------------
 
 void clsSettingManager::DisableOpChat(const bool &bNickChanged/* = true*/) {
-    if(bUpdateLocked == true || clsServerManager::ServersS == NULL || bBotsSameNick == true) {
+    if(bUpdateLocked == true || clsServerManager::pServersS == NULL || bBotsSameNick == true) {
         return;
     }
 
@@ -2592,11 +2579,11 @@ void clsSettingManager::DisableOpChat(const bool &bNickChanged/* = true*/) {
         int iMsgLen = sprintf(msg, "$Quit %s|", sTexts[SETTXT_OP_CHAT_NICK]);
         if(CheckSprintf(iMsgLen, 128, "clsSettingManager::DisableOpChat") == true) {
             User * curUser = NULL,
-                * next = clsUsers::mPtr->llist;
+                * next = clsUsers::mPtr->pListS;
 
             while(next != NULL) {
                 curUser = next;
-                next = curUser->next;
+                next = curUser->pNext;
                 if(curUser->ui8State == User::STATE_ADDED && clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::ALLOWEDOPCHAT) == true) {
                     curUser->SendCharDelayed(msg, iMsgLen);
                 }

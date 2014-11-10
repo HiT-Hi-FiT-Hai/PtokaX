@@ -53,6 +53,9 @@ public:
 private:
     bool bIgnoreItemChanged;
 
+    clsProfilesDialog(const clsProfilesDialog&);
+    const clsProfilesDialog& operator=(const clsProfilesDialog&);
+
     LRESULT ProfilesDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     void AddAllProfiles();

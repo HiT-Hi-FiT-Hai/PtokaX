@@ -59,6 +59,9 @@ private:
 
     bool bSortAscending;
 
+    clsBansDialog(const clsBansDialog&);
+    const clsBansDialog& operator=(const clsBansDialog&);
+
     LRESULT BansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     void AddAllBans();

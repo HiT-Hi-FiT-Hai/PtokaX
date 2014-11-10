@@ -32,15 +32,8 @@
 clsReservedNicksManager * clsReservedNicksManager::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-clsReservedNicksManager::ReservedNick::ReservedNick() {
-    sNick = NULL;
-
-	prev = NULL;
-    next = NULL;
-
-    ui32Hash = 0;
-
-    bFromScript = false;
+clsReservedNicksManager::ReservedNick::ReservedNick() : sNick(NULL), pPrev(NULL), pNext(NULL), ui32Hash(0), bFromScript(false) {
+	// ...
 }
 //---------------------------------------------------------------------------
 
@@ -55,7 +48,7 @@ clsReservedNicksManager::ReservedNick::~ReservedNick() {
 }
 //---------------------------------------------------------------------------
 
-clsReservedNicksManager::ReservedNick * clsReservedNicksManager::ReservedNick::CreateReservedNick(const char * nick, uint32_t ui32NickHash) {
+clsReservedNicksManager::ReservedNick * clsReservedNicksManager::ReservedNick::CreateReservedNick(const char * sNewNick, uint32_t ui32NickHash) {
     ReservedNick * pReservedNick = new (std::nothrow) ReservedNick();
 
     if(pReservedNick == NULL) {
@@ -64,7 +57,7 @@ clsReservedNicksManager::ReservedNick * clsReservedNicksManager::ReservedNick::C
         return NULL;
     }
 
-    size_t szNickLen = strlen(nick);
+    size_t szNickLen = strlen(sNewNick);
 #ifdef _WIN32
     pReservedNick->sNick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
 #else
@@ -76,7 +69,7 @@ clsReservedNicksManager::ReservedNick * clsReservedNicksManager::ReservedNick::C
         delete pReservedNick;
         return NULL;
     }
-    memcpy(pReservedNick->sNick, nick, szNickLen);
+    memcpy(pReservedNick->sNick, sNewNick, szNickLen);
     pReservedNick->sNick[szNickLen] = '\0';
 
 	pReservedNick->ui32Hash = ui32NickHash;
@@ -85,9 +78,7 @@ clsReservedNicksManager::ReservedNick * clsReservedNicksManager::ReservedNick::C
 }
 //---------------------------------------------------------------------------
 
-clsReservedNicksManager::clsReservedNicksManager() {
-    ReservedNicks = NULL;
-
+clsReservedNicksManager::clsReservedNicksManager() : pReservedNicks(NULL) {
 	TiXmlDocument doc;
 #ifdef _WIN32
 	if(doc.LoadFile((clsServerManager::sPath+"\\cfg\\ReservedNicks.xml").c_str()) == false && (doc.ErrorId() == TiXmlBase::TIXML_ERROR_OPENING_FILE || doc.ErrorId() == TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY)) {
@@ -149,11 +140,11 @@ clsReservedNicksManager::clsReservedNicksManager() {
 	
 clsReservedNicksManager::~clsReservedNicksManager() {
     ReservedNick * cur = NULL,
-        * next = ReservedNicks;
+        * next = pReservedNicks;
 
     while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
         delete cur;
     }
@@ -163,11 +154,11 @@ clsReservedNicksManager::~clsReservedNicksManager() {
 // Check for reserved nicks true = reserved
 bool clsReservedNicksManager::CheckReserved(const char * sNick, const uint32_t &hash) const {
     ReservedNick * cur = NULL,
-        * next = ReservedNicks;
+        * next = pReservedNicks;
 
     while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
 		if(cur->ui32Hash == hash && strcasecmp(cur->sNick, sNick) == 0) {
             return true;
@@ -188,12 +179,12 @@ void clsReservedNicksManager::AddReservedNick(const char * sNick, const bool &bF
         	return;
         }
 
-        if(ReservedNicks == NULL) {
-            ReservedNicks = pNewNick;
+        if(pReservedNicks == NULL) {
+            pReservedNicks = pNewNick;
         } else {
-            ReservedNicks->prev = pNewNick;
-            pNewNick->next = ReservedNicks;
-            ReservedNicks = pNewNick;
+            pReservedNicks->pPrev = pNewNick;
+            pNewNick->pNext = pReservedNicks;
+            pReservedNicks = pNewNick;
         }
 
         pNewNick->bFromScript = bFromScript;
@@ -205,29 +196,29 @@ void clsReservedNicksManager::DelReservedNick(char * sNick, const bool &bFromScr
     uint32_t hash = HashNick(sNick, strlen(sNick));
 
     ReservedNick * cur = NULL,
-        * next = ReservedNicks;
+        * next = pReservedNicks;
 
     while(next != NULL) {
         cur = next;
-        next = cur->next;
+        next = cur->pNext;
 
         if(cur->ui32Hash == hash && strcmp(cur->sNick, sNick) == 0) {
             if(bFromScript == true && cur->bFromScript == false) {
                 continue;
             }
 
-            if(cur->prev == NULL) {
-                if(cur->next == NULL) {
-                    ReservedNicks = NULL;
+            if(cur->pPrev == NULL) {
+                if(cur->pNext == NULL) {
+                    pReservedNicks = NULL;
                 } else {
-                    cur->next->prev = NULL;
-                    ReservedNicks = cur->next;
+                    cur->pNext->pPrev = NULL;
+                    pReservedNicks = cur->pNext;
                 }
-            } else if(cur->next == NULL) {
-                cur->prev->next = NULL;
+            } else if(cur->pNext == NULL) {
+                cur->pPrev->pNext = NULL;
             } else {
-                cur->prev->next = cur->next;
-                cur->next->prev = cur->prev;
+                cur->pPrev->pNext = cur->pNext;
+                cur->pNext->pPrev = cur->pPrev;
             }
 
             delete cur;

@@ -40,28 +40,28 @@ clsZlibUtility * clsZlibUtility::mPtr = NULL;
 clsZlibUtility::clsZlibUtility() {
 	// allocate buffer for zlib
 #ifdef _WIN32
-	sZbuffer = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ZBUFFERLEN);
+	pZbuffer = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ZBUFFERLEN);
 #else
-	sZbuffer = (char *)calloc(ZBUFFERLEN, 1);
+	pZbuffer = (char *)calloc(ZBUFFERLEN, 1);
 #endif
-	if(sZbuffer == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sZbuffer in clsZlibUtility::clsZlibUtility\n", (uint64_t)ZBUFFERLEN);
+	if(pZbuffer == NULL) {
+        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pZbuffer in clsZlibUtility::clsZlibUtility\n", (uint64_t)ZBUFFERLEN);
 		exit(EXIT_FAILURE);
 	}
-	memcpy(sZbuffer, "$ZOn|", 5);
+	memcpy(pZbuffer, "$ZOn|", 5);
     szZbufferSize = ZBUFFERLEN;
 }
 //---------------------------------------------------------------------------
 	
 clsZlibUtility::~clsZlibUtility() {
 #ifdef _WIN32
-    if(sZbuffer != NULL) {
-        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sZbuffer) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sZbuffer in clsZlibUtility::~clsZlibUtility\n", 0);
+    if(pZbuffer != NULL) {
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pZbuffer) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate pZbuffer in clsZlibUtility::~clsZlibUtility\n", 0);
         }
     }
 #else
-	free(sZbuffer);
+	free(pZbuffer);
 #endif
 }
 //---------------------------------------------------------------------------
@@ -73,20 +73,20 @@ char * clsZlibUtility::CreateZPipe(const char *sInData, const size_t &szInDataSi
 
         szZbufferSize = Allign128K(szInDataSize + 128);
 
-        char * pOldBuf = sZbuffer;
+        char * pOldBuf = pZbuffer;
 #ifdef _WIN32
-        sZbuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szZbufferSize);
+        pZbuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szZbufferSize);
 #else
-		sZbuffer = (char *)realloc(pOldBuf, szZbufferSize);
+		pZbuffer = (char *)realloc(pOldBuf, szZbufferSize);
 #endif
-        if(sZbuffer == NULL) {
-            sZbuffer = pOldBuf;
+        if(pZbuffer == NULL) {
+            pZbuffer = pOldBuf;
             szZbufferSize = szOldZbufferSize;
             ui32OutDataLen = 0;
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sZbuffer in clsZlibUtility::CreateZPipe\n", (uint64_t)szZbufferSize);
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for pZbuffer in clsZlibUtility::CreateZPipe\n", (uint64_t)szZbufferSize);
 
-            return sZbuffer;
+            return pZbuffer;
         }
     }
     
@@ -104,7 +104,7 @@ char * clsZlibUtility::CreateZPipe(const char *sInData, const size_t &szInDataSi
     stream.next_in  = (Bytef*)sInData;
     stream.avail_in = (uInt)szInDataSize;
 
-    stream.next_out = (Bytef*)sZbuffer+5;
+    stream.next_out = (Bytef*)pZbuffer+5;
     stream.avail_out = (uInt)(szZbufferSize-5);
 
     // compress
@@ -112,7 +112,7 @@ char * clsZlibUtility::CreateZPipe(const char *sInData, const size_t &szInDataSi
         deflateEnd(&stream);
         AppendDebugLog("%s - [ERR] deflate error\n", 0);
         ui32OutDataLen = 0;
-        return sZbuffer;
+        return pZbuffer;
     }
     
     ui32OutDataLen = stream.total_out+5;
@@ -122,10 +122,10 @@ char * clsZlibUtility::CreateZPipe(const char *sInData, const size_t &szInDataSi
 
     if(ui32OutDataLen >= szInDataSize) {
         ui32OutDataLen = 0;
-        return sZbuffer;
+        return pZbuffer;
     }
    
-    return sZbuffer;
+    return pZbuffer;
 }
 //---------------------------------------------------------------------------
 
@@ -139,18 +139,18 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const size_t &szInDataSize, ch
 
         szZbufferSize = Allign128K(szInDataSize + 128);
 
-        char * pOldBuf = sZbuffer;
+        char * pOldBuf = pZbuffer;
 #ifdef _WIN32
-        sZbuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szZbufferSize);
+        pZbuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szZbufferSize);
 #else
-		sZbuffer = (char *)realloc(pOldBuf, szZbufferSize);
+		pZbuffer = (char *)realloc(pOldBuf, szZbufferSize);
 #endif
-        if(sZbuffer == NULL) {
-            sZbuffer = pOldBuf;
+        if(pZbuffer == NULL) {
+            pZbuffer = pOldBuf;
             szZbufferSize = szOldZbufferSize;
             szOutDataLen = 0;
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sZbuffer in clsZlibUtility::CreateZPipe\n", (uint64_t)szZbufferSize);
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for pZbuffer in clsZlibUtility::CreateZPipe\n", (uint64_t)szZbufferSize);
 
             return sOutData;
         }
@@ -170,7 +170,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const size_t &szInDataSize, ch
     stream.next_in  = (Bytef*)sInData;
     stream.avail_in = (uInt)szInDataSize;
 
-    stream.next_out = (Bytef*)sZbuffer+5;
+    stream.next_out = (Bytef*)pZbuffer+5;
     stream.avail_out = (uInt)(szZbufferSize-5);
 
     // compress
@@ -212,7 +212,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const size_t &szInDataSize, ch
         }
     }
     
-    memcpy(sOutData, sZbuffer, szOutDataLen);
+    memcpy(sOutData, pZbuffer, szOutDataLen);
     
     return sOutData;
 }
@@ -228,18 +228,18 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &uiInDataSi
 
         szZbufferSize = Allign128K(uiInDataSize + 128);
 
-        char * pOldBuf = sZbuffer;
+        char * pOldBuf = pZbuffer;
 #ifdef _WIN32
-        sZbuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szZbufferSize);
+        pZbuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szZbufferSize);
 #else
-		sZbuffer = (char *)realloc(pOldBuf, szZbufferSize);
+		pZbuffer = (char *)realloc(pOldBuf, szZbufferSize);
 #endif
-        if(sZbuffer == NULL) {
-            sZbuffer = pOldBuf;
+        if(pZbuffer == NULL) {
+            pZbuffer = pOldBuf;
             szZbufferSize = szOldZbufferSize;
             uiOutDataLen = 0;
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sZbuffer in clsZlibUtility::CreateZPipe\n", (uint64_t)szZbufferSize);
+			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for pZbuffer in clsZlibUtility::CreateZPipe\n", (uint64_t)szZbufferSize);
 
             return sOutData;
         }
@@ -248,7 +248,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &uiInDataSi
     z_stream stream;
 
     // init zlib struct
-    memset(&stream, 0 , sizeof (stream));
+    memset(&stream, 0 , sizeof(stream));
 
     stream.zalloc = Z_NULL;
     stream.zfree  = Z_NULL;
@@ -259,7 +259,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &uiInDataSi
     stream.next_in  = (Bytef*)sInData;
     stream.avail_in = (uInt)uiInDataSize;
 
-    stream.next_out = (Bytef*)sZbuffer+5;
+    stream.next_out = (Bytef*)pZbuffer+5;
     stream.avail_out = (uInt)(szZbufferSize-5);
 
     // compress
@@ -302,7 +302,7 @@ char * clsZlibUtility::CreateZPipe(char *sInData, const unsigned int &uiInDataSi
         }
     }
     
-    memcpy(sOutData, sZbuffer, uiOutDataLen);
+    memcpy(sOutData, pZbuffer, uiOutDataLen);
    
     return sOutData;
 }

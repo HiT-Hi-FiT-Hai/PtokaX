@@ -34,8 +34,8 @@
 static ATOM atomMainWindowPage = 0;
 //---------------------------------------------------------------------------
 
-MainWindowPage::MainWindowPage() {
-    m_hWnd = NULL;
+MainWindowPage::MainWindowPage() : m_hWnd(NULL) {
+    // ...
 }
 //---------------------------------------------------------------------------
 

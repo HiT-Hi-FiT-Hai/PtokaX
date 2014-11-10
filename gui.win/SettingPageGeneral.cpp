@@ -33,10 +33,8 @@
 #pragma hdrstop
 //---------------------------------------------------------------------------
 
-SettingPageGeneral::SettingPageGeneral() {
-    bUpdateHubNameWelcome = bUpdateHubName = bUpdateTCPPorts = bUpdateUDPPort = bUpdateAutoReg = bUpdateLanguage = false;
-
-    memset(&hWndPageItems, 0, (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])) * sizeof(HWND));
+SettingPageGeneral::SettingPageGeneral() : bUpdateHubNameWelcome(false), bUpdateHubName(false), bUpdateTCPPorts(false), bUpdateUDPPort(false), bUpdateAutoReg(false), bUpdateLanguage(false) {
+    memset(&hWndPageItems, 0, sizeof(hWndPageItems));
 }
 //---------------------------------------------------------------------------
 
@@ -290,7 +288,7 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_MAX_USERS], EM_SETLIMITTEXT, 5, 0);
 
     AddUpDown(hWndPageItems[UD_MAX_USERS], (rcThis.right - rcThis.left)-clsGuiSettingManager::iUpDownWidth-13, clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(32767, 1),
-        (WPARAM)hWndPageItems[EDT_MAX_USERS], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MAX_USERS], 0));
+        (WPARAM)hWndPageItems[EDT_MAX_USERS], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_USERS], 0));
 
     hWndPageItems[GB_HUB_NAME] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_HUB_NAME], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         0, iPosX, iFullGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);

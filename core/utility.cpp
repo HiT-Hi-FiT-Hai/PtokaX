@@ -640,7 +640,7 @@ char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_tim
         }
     } else {
         iMsgLen = sprintf(banmsg, "<%s> %s: %s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_TEMP_BANNED],
-            formatSecTime(Ban->tempbanexpire-acc_time));
+            formatSecTime(Ban->tTempBanExpire-acc_time));
         if(CheckSprintf(iMsgLen, 2048, "GenerateBanMessage2") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -735,7 +735,7 @@ char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const 
         }
     } else {
         iMsgLen = sprintf(banmsg, "<%s> %s: %s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_TEMP_BANNED],
-            formatSecTime(RangeBan->tempbanexpire-acc_time));
+            formatSecTime(RangeBan->tTempBanExpire-acc_time));
         if(CheckSprintf(iMsgLen, 2048, "GenerateRangeBanMessage2") == false) {
             banmsg[0] = '\0';
             iMsgLen = 0;
@@ -1104,7 +1104,16 @@ bool DirExist(char * sPath) {
 		if(ver.dwPlatformId != VER_PLATFORM_WIN32_NT) {
 			clsServerManager::sOS = "Windows 9x/ME";
 	    } else if(ver.dwMajorVersion == 6) {
-            if(ver.dwMinorVersion == 3) {
+            // temporary (maybe) hack to detect win 10
+            OSVERSIONINFOEX ver2;
+            memset(&ver2, 0, sizeof(OSVERSIONINFOEX));
+            ver2.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+            ver2.dwMinorVersion = 4;
+            ULONGLONG mask = ::VerSetConditionMask(0, VER_MINORVERSION, VER_EQUAL);
+
+            if(::VerifyVersionInfo(&ver2, VER_MINORVERSION, mask)) {
+                clsServerManager::sOS = "Windows 10";
+            } else if(ver.dwMinorVersion == 3) {
                 clsServerManager::sOS = "Windows 8.1";
             } else if(ver.dwMinorVersion == 2) {
                 clsServerManager::sOS = "Windows 8";
@@ -1355,12 +1364,12 @@ bool GetMacAddress(const char * sIP, char * sMac) {
 void CreateGlobalBuffer() {
     clsServerManager::szGlobalBufferSize = 131072;
 #ifdef _WIN32
-    clsServerManager::sGlobalBuffer = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, clsServerManager::szGlobalBufferSize);
+    clsServerManager::pGlobalBuffer = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, clsServerManager::szGlobalBufferSize);
 #else
-    clsServerManager::sGlobalBuffer = (char *)calloc(clsServerManager::szGlobalBufferSize, 1);
+    clsServerManager::pGlobalBuffer = (char *)calloc(clsServerManager::szGlobalBufferSize, 1);
 #endif
-    if(clsServerManager::sGlobalBuffer == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot create clsServerManager::sGlobalBuffer\n", 0);
+    if(clsServerManager::pGlobalBuffer == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot create clsServerManager::pGlobalBuffer\n", 0);
 		exit(EXIT_FAILURE);
     }
 }
@@ -1368,13 +1377,13 @@ void CreateGlobalBuffer() {
 
 void DeleteGlobalBuffer() {
 #ifdef _WIN32
-    if(clsServerManager::sGlobalBuffer != NULL) {
-        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)clsServerManager::sGlobalBuffer) == 0) {
-            AppendDebugLog("%s - [MEM] Cannot deallocate clsServerManager::sGlobalBuffer\n", 0);
+    if(clsServerManager::pGlobalBuffer != NULL) {
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)clsServerManager::pGlobalBuffer) == 0) {
+            AppendDebugLog("%s - [MEM] Cannot deallocate clsServerManager::pGlobalBuffer\n", 0);
         }
     }
 #else
-	free(clsServerManager::sGlobalBuffer);
+	free(clsServerManager::pGlobalBuffer);
 #endif
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1385,19 +1394,19 @@ bool CheckAndResizeGlobalBuffer(const size_t &szWantedSize) {
     }
 
     size_t szOldSize = clsServerManager::szGlobalBufferSize;
-    char * sOldBuf = clsServerManager::sGlobalBuffer;
+    char * sOldBuf = clsServerManager::pGlobalBuffer;
 
     clsServerManager::szGlobalBufferSize = Allign128K(szWantedSize);
 
 #ifdef _WIN32
-    clsServerManager::sGlobalBuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldBuf, clsServerManager::szGlobalBufferSize);
+    clsServerManager::pGlobalBuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldBuf, clsServerManager::szGlobalBufferSize);
 #else
-    clsServerManager::sGlobalBuffer = (char *)realloc(sOldBuf, clsServerManager::szGlobalBufferSize);
+    clsServerManager::pGlobalBuffer = (char *)realloc(sOldBuf, clsServerManager::szGlobalBufferSize);
 #endif
-    if(clsServerManager::sGlobalBuffer == NULL) {
-        clsServerManager::sGlobalBuffer = sOldBuf;
+    if(clsServerManager::pGlobalBuffer == NULL) {
+        clsServerManager::pGlobalBuffer = sOldBuf;
 
-		AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in CheckAndResizeGlobalBuffer for clsServerManager::sGlobalBuffer\n", (uint64_t)clsServerManager::szGlobalBufferSize);
+		AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in CheckAndResizeGlobalBuffer for clsServerManager::pGlobalBuffer\n", (uint64_t)clsServerManager::szGlobalBufferSize);
 
         clsServerManager::szGlobalBufferSize = szOldSize;
         return false;
@@ -1413,19 +1422,19 @@ void ReduceGlobalBuffer() {
     }
 
     size_t szOldSize = clsServerManager::szGlobalBufferSize;
-    char * sOldBuf = clsServerManager::sGlobalBuffer;
+    char * sOldBuf = clsServerManager::pGlobalBuffer;
 
     clsServerManager::szGlobalBufferSize = 131072;
 
 #ifdef _WIN32
-    clsServerManager::sGlobalBuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldBuf, clsServerManager::szGlobalBufferSize);
+    clsServerManager::pGlobalBuffer = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldBuf, clsServerManager::szGlobalBufferSize);
 #else
-    clsServerManager::sGlobalBuffer = (char *)realloc(sOldBuf, clsServerManager::szGlobalBufferSize);
+    clsServerManager::pGlobalBuffer = (char *)realloc(sOldBuf, clsServerManager::szGlobalBufferSize);
 #endif
-    if(clsServerManager::sGlobalBuffer == NULL) {
-        clsServerManager::sGlobalBuffer = sOldBuf;
+    if(clsServerManager::pGlobalBuffer == NULL) {
+        clsServerManager::pGlobalBuffer = sOldBuf;
 
-		AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in ReduceGlobalBuffer for clsServerManager::sGlobalBuffer\n", (uint64_t)clsServerManager::szGlobalBufferSize);
+		AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in ReduceGlobalBuffer for clsServerManager::pGlobalBuffer\n", (uint64_t)clsServerManager::szGlobalBufferSize);
 
         clsServerManager::szGlobalBufferSize = szOldSize;
         return;

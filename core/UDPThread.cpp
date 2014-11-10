@@ -35,22 +35,18 @@ UDPThread * UDPThread::mPtrIPv4 = NULL;
 UDPThread * UDPThread::mPtrIPv6 = NULL;
 //---------------------------------------------------------------------------
 
-UDPThread::UDPThread() {
+UDPThread::UDPThread() :
 #ifdef _WIN32
-    sock = INVALID_SOCKET;
+    sock(INVALID_SOCKET),
 #else
-    sock = -1;
+    sock(-1),
 #endif
-
-    rcvbuf[0] = '\0';
-
-    threadId = 0;
-
+	threadId(0),
 #ifdef _WIN32
-    threadHandle = INVALID_HANDLE_VALUE;
+    hThreadHandle(INVALID_HANDLE_VALUE),
 #endif
-
-	bTerminated = false;
+    bTerminated(false) {
+    rcvbuf[0] = '\0';
 }
 
 bool UDPThread::Listen(const int &iAddressFamily) {
@@ -132,8 +128,8 @@ UDPThread::~UDPThread() {
         sock = INVALID_SOCKET;
     }
 
-    if(threadHandle != INVALID_HANDLE_VALUE) {
-        CloseHandle(threadHandle);
+    if(hThreadHandle != INVALID_HANDLE_VALUE) {
+        CloseHandle(hThreadHandle);
 #else
     if(threadId != 0) {
         Close();
@@ -155,8 +151,8 @@ static void* ExecuteUDP(void* UDPThrd) {
 
 void UDPThread::Resume() {
 #ifdef _WIN32
-	threadHandle = (HANDLE)_beginthreadex(NULL, 0, ExecuteUDP, this, 0, &threadId);
-	if(threadHandle == 0) {
+	hThreadHandle = (HANDLE)_beginthreadex(NULL, 0, ExecuteUDP, this, 0, &threadId);
+	if(hThreadHandle == 0) {
 #else
 	int iRet = pthread_create(&threadId, NULL, ExecuteUDP, this);
 	if(iRet != 0) {
@@ -199,7 +195,7 @@ void UDPThread::Close() {
 
 void UDPThread::WaitFor() {
 #ifdef _WIN32
-    WaitForSingleObject(threadHandle, INFINITE);
+    WaitForSingleObject(hThreadHandle, INFINITE);
 #else
 	if(threadId != 0) {
 		pthread_join(threadId, NULL);

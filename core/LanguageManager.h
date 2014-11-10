@@ -26,7 +26,8 @@
 
 class clsLanguageManager {
 private:
-    // ...
+    clsLanguageManager(const clsLanguageManager&);
+    const clsLanguageManager& operator=(const clsLanguageManager&);
 public:
     static clsLanguageManager * mPtr;
 

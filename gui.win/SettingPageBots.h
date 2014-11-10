@@ -68,6 +68,9 @@ private:
         EDT_OP_CHAT_BOT_EMAIL
     };
 
+    SettingPageBots(const SettingPageBots&);
+    const SettingPageBots& operator=(const SettingPageBots&);
+
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 //------------------------------------------------------------------------------

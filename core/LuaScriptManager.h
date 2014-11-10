@@ -29,7 +29,10 @@ struct User;
 
 class clsScriptManager {
 private:
-	Script *RunningScriptE;
+	Script * pRunningScriptE;
+
+    clsScriptManager(const clsScriptManager&);
+    const clsScriptManager& operator=(const clsScriptManager&);
 
 	void AddRunningScript(Script * curScript);
 	void RemoveRunningScript(Script * curScript);
@@ -60,10 +63,10 @@ public:
         UNKNOWN_ARRIVAL
     };
 
-    Script *RunningScriptS;
+    Script * pRunningScriptS;
 
-    Script **ScriptTable;
-	User *ActualUser;
+    Script ** ppScriptTable;
+	User * pActualUser;
 
     uint8_t ui8ScriptCount, ui8BotsCount;
 

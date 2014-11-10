@@ -44,6 +44,9 @@ public:
 private:
     string sScriptPath;
 
+    ScriptEditorDialog(const ScriptEditorDialog&);
+    const ScriptEditorDialog& operator=(const ScriptEditorDialog&);
+
     LRESULT ScriptEditorDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     void OnContextMenu(HWND hWindow, LPARAM lParam);

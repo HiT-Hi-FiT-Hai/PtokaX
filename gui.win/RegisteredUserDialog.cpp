@@ -38,10 +38,8 @@ clsRegisteredUserDialog * clsRegisteredUserDialog::mPtr = NULL;
 static ATOM atomRegisteredUserDialog = 0;
 //---------------------------------------------------------------------------
 
-clsRegisteredUserDialog::clsRegisteredUserDialog() {
-    memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
-
-    pRegToChange = NULL;
+clsRegisteredUserDialog::clsRegisteredUserDialog() : pRegToChange(NULL) {
+    memset(&hWndWindowItems, 0, sizeof(hWndWindowItems));
 }
 //---------------------------------------------------------------------------
 
@@ -290,8 +288,8 @@ void clsRegisteredUserDialog::DoModal(HWND hWndParent, RegUser * pReg/* = NULL*/
 void clsRegisteredUserDialog::UpdateProfiles() {
     int iSel = (int)::SendMessage(hWndWindowItems[CB_PROFILE], CB_GETCURSEL, 0, 0);
 
-    for(uint16_t ui16i = 0; ui16i < clsProfileManager::mPtr->iProfileCount; ui16i++) {
-        ::SendMessage(hWndWindowItems[CB_PROFILE], CB_ADDSTRING, 0, (LPARAM)clsProfileManager::mPtr->ProfilesTable[ui16i]->sName);
+    for(uint16_t ui16i = 0; ui16i < clsProfileManager::mPtr->ui16ProfileCount; ui16i++) {
+        ::SendMessage(hWndWindowItems[CB_PROFILE], CB_ADDSTRING, 0, (LPARAM)clsProfileManager::mPtr->ppProfilesTable[ui16i]->sName);
     }
 
     if(pRegToChange != NULL) {

@@ -57,6 +57,9 @@ public:
     void RemoveUser(const User * curUser);
     User * GetUser();
 private:
+    clsMainWindowPageUsersChat(const clsMainWindowPageUsersChat&);
+    const clsMainWindowPageUsersChat& operator=(const clsMainWindowPageUsersChat&);
+
     LRESULT MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     void UpdateUserList();

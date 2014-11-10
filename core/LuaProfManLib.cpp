@@ -32,7 +32,7 @@
 //---------------------------------------------------------------------------
 
 static void PushProfilePermissions(lua_State * L, const uint16_t &iProfile) {
-    ProfileItem *Prof = clsProfileManager::mPtr->ProfilesTable[iProfile];
+    ProfileItem *Prof = clsProfileManager::mPtr->ppProfilesTable[iProfile];
 
     lua_checkstack(L, 3); // we need 3 (1 table, 2 id, 3 value) empty slots in stack, check it to be sure
 
@@ -272,14 +272,14 @@ static void PushProfile(lua_State * L, const uint16_t &iProfile) {
     int i = lua_gettop(L);
 
     lua_pushliteral(L, "sProfileName");
-	lua_pushstring(L, clsProfileManager::mPtr->ProfilesTable[iProfile]->sName);
+	lua_pushstring(L, clsProfileManager::mPtr->ppProfilesTable[iProfile]->sName);
     lua_rawset(L, i);
 
     lua_pushliteral(L, "iProfileNumber");
 #if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, iProfile);
 #else
-	lua_pushunsigned(L, iProfile);
+	lua_pushinteger(L, iProfile);
 #endif
     lua_rawset(L, i);
 
@@ -325,7 +325,7 @@ static int AddProfile(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	lua_pushnumber(L, idx);
 #else
-    lua_pushunsigned(L, idx);
+    lua_pushinteger(L, idx);
 #endif
 
     return 1;
@@ -364,13 +364,13 @@ static int RemoveProfile(lua_State * L) {
 #if LUA_VERSION_NUM < 503
         uint16_t idx = (uint16_t)lua_tonumber(L, 1);
 #else
-    	uint16_t idx = (uint16_t)lua_tounsigned(L, 1);
+    	uint16_t idx = (uint16_t)lua_tointeger(L, 1);
 #endif
 
     	lua_settop(L, 0);
 
         // if the requested index is out of bounds return nil
-        if(idx >= clsProfileManager::mPtr->iProfileCount) {
+        if(idx >= clsProfileManager::mPtr->ui16ProfileCount) {
             lua_pushnil(L);
             return 1;
         }
@@ -412,11 +412,11 @@ static int MoveDown(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
 #else
-	uint16_t iProfile = (uint16_t)lua_tounsigned(L, 1);
+	uint16_t iProfile = (uint16_t)lua_tointeger(L, 1);
 #endif
     
     // if the requested index is out of bounds return nil
-    if(iProfile >= clsProfileManager::mPtr->iProfileCount-1) {
+    if(iProfile >= clsProfileManager::mPtr->ui16ProfileCount-1) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -449,11 +449,11 @@ static int MoveUp(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
 #else
-	uint16_t iProfile = (uint16_t)lua_tounsigned(L, 1);
+	uint16_t iProfile = (uint16_t)lua_tointeger(L, 1);
 #endif
     
     // if the requested index is out of bounds return nil
-    if(iProfile == 0 || iProfile >= clsProfileManager::mPtr->iProfileCount) {
+    if(iProfile == 0 || iProfile >= clsProfileManager::mPtr->ui16ProfileCount) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -499,13 +499,13 @@ static int GetProfile(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 		uint16_t idx = (uint16_t)lua_tonumber(L, 1);
 #else
-    	uint16_t idx = (uint16_t)lua_tounsigned(L, 1);
+    	uint16_t idx = (uint16_t)lua_tointeger(L, 1);
 #endif
 
     	lua_settop(L, 0);
     
         // if the requested index is out of bounds return nil
-        if(idx >= clsProfileManager::mPtr->iProfileCount) {
+        if(idx >= clsProfileManager::mPtr->ui16ProfileCount) {
             lua_pushnil(L);
             return 1;
         }
@@ -532,11 +532,11 @@ static int GetProfiles(lua_State * L) {
     lua_newtable(L);
     int t = lua_gettop(L);
 
-    for(uint16_t ui16i = 0; ui16i < clsProfileManager::mPtr->iProfileCount; ui16i++) {
+    for(uint16_t ui16i = 0; ui16i < clsProfileManager::mPtr->ui16ProfileCount; ui16i++) {
 #if LUA_VERSION_NUM < 503
 		lua_pushnumber(L, (ui16i+1));
 #else
-        lua_pushunsigned(L, (ui16i+1));
+        lua_pushinteger(L, (ui16i+1));
 #endif
 
         PushProfile(L, ui16i);
@@ -567,13 +567,13 @@ static int GetProfilePermission(lua_State * L) {
 	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
 	size_t szId = (size_t)lua_tonumber(L, 2);
 #else
-    uint16_t iProfile = (uint16_t)lua_tounsigned(L, 1);
-    size_t szId = (size_t)lua_tounsigned(L, 2);
+    uint16_t iProfile = (uint16_t)lua_tointeger(L, 1);
+    size_t szId = (size_t)lua_tointeger(L, 2);
 #endif
     
     lua_settop(L, 0);
     
-	if(iProfile >= clsProfileManager::mPtr->iProfileCount) {
+	if(iProfile >= clsProfileManager::mPtr->ui16ProfileCount) {
         lua_pushnil(L);
         return 1;
     }
@@ -584,7 +584,7 @@ static int GetProfilePermission(lua_State * L) {
 		return 1;
 	}
 
-    clsProfileManager::mPtr->ProfilesTable[iProfile]->bPermissions[szId] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
+    clsProfileManager::mPtr->ppProfilesTable[iProfile]->bPermissions[szId] == true ? lua_pushboolean(L, 1) : lua_pushnil(L);
 
     return 1;
 }
@@ -609,11 +609,11 @@ static int GetProfilePermissions(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
 #else
-	uint16_t iProfile = (uint16_t)lua_tounsigned(L, 1);
+	uint16_t iProfile = (uint16_t)lua_tointeger(L, 1);
 #endif
     
     // if the requested index is out of bounds return nil
-    if(iProfile >= clsProfileManager::mPtr->iProfileCount) {
+    if(iProfile >= clsProfileManager::mPtr->ui16ProfileCount) {
 		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
@@ -644,10 +644,10 @@ static int SetProfileName(lua_State * L) {
 #if LUA_VERSION_NUM < 503
 	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
 #else
-    uint16_t iProfile = (uint16_t)lua_tounsigned(L, 1);
+    uint16_t iProfile = (uint16_t)lua_tointeger(L, 1);
 #endif
 
-    if(iProfile >= clsProfileManager::mPtr->iProfileCount) {
+    if(iProfile >= clsProfileManager::mPtr->ui16ProfileCount) {
         lua_settop(L, 0);
         lua_pushnil(L);
         return 1;
@@ -691,15 +691,15 @@ static int SetProfilePermission(lua_State * L) {
 	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
 	size_t szId = (size_t)lua_tonumber(L, 2);
 #else
-    uint16_t iProfile = (uint16_t)lua_tounsigned(L, 1);
-    size_t szId = (size_t)lua_tounsigned(L, 2);
+    uint16_t iProfile = (uint16_t)lua_tointeger(L, 1);
+    size_t szId = (size_t)lua_tointeger(L, 2);
 #endif
 
     bool bValue = lua_toboolean(L, 3) == 0 ? false : true;
     
     lua_settop(L, 0);
     
-	if(iProfile >= clsProfileManager::mPtr->iProfileCount) {
+	if(iProfile >= clsProfileManager::mPtr->ui16ProfileCount) {
 		lua_pushnil(L);
 		return 1;
 	}

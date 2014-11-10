@@ -73,6 +73,9 @@ private:
         BTN_KILL_THAT_DUCK,
     };
 
+    SettingPageGeneral2(const SettingPageGeneral2&);
+    const SettingPageGeneral2& operator=(const SettingPageGeneral2&);
+
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 //------------------------------------------------------------------------------

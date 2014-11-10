@@ -91,6 +91,9 @@ private:
         UD_RCTM_LEN,
     };
 
+    SettingPageRules2(const SettingPageRules2&);
+    const SettingPageRules2& operator=(const SettingPageRules2&);
+
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 //------------------------------------------------------------------------------

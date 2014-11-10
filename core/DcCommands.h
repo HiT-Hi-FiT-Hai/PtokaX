@@ -28,9 +28,24 @@ struct PassBf;
 
 class clsDcCommands {
 private:
+    struct PassBf {
+        int iCount;
+        PassBf * pPrev, * pNext;
+        uint8_t ui128IpHash[16];
+
+        PassBf(const uint8_t * ui128Hash);
+        ~PassBf(void) { };
+
+        PassBf(const PassBf&);
+        const PassBf& operator=(const PassBf&);
+    };
+
     PassBf * PasswdBfCheck;
     char msg[1024];
-    
+
+    clsDcCommands(const clsDcCommands&);
+    const clsDcCommands& operator=(const clsDcCommands&);
+
 	void BotINFO(User * curUser, char * sData, const uint32_t &iLen);
     void ConnectToMe(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck, const bool &bMulti);
 	void GetINFO(User * curUser, char * sData, const uint32_t &iLen);

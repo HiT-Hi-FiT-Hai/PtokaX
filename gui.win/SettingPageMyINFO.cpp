@@ -32,10 +32,8 @@
 #pragma hdrstop
 //---------------------------------------------------------------------------
 
-SettingPageMyINFO::SettingPageMyINFO() {
-    bUpdateNoTagMessage = false;
-
-    memset(&hWndPageItems, 0, (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])) * sizeof(HWND));
+SettingPageMyINFO::SettingPageMyINFO() : bUpdateNoTagMessage(false) {
+    memset(&hWndPageItems, 0, sizeof(hWndPageItems));
 }
 //---------------------------------------------------------------------------
 
@@ -102,7 +100,7 @@ void SettingPageMyINFO::Save() {
     char buf[257];
     int iLen = ::GetWindowText(hWndPageItems[EDT_NO_TAG_MESSAGE], buf, 257);
 
-    if((int16_t)::SendMessage(hWndPageItems[CB_NO_TAG_ACTION], CB_GETCURSEL, 0, 0) != clsSettingManager::mPtr->iShorts[SETSHORT_NO_TAG_OPTION] ||
+    if((int16_t)::SendMessage(hWndPageItems[CB_NO_TAG_ACTION], CB_GETCURSEL, 0, 0) != clsSettingManager::mPtr->i16Shorts[SETSHORT_NO_TAG_OPTION] ||
         strcmp(buf, clsSettingManager::mPtr->sTexts[SETTXT_NO_TAG_MSG]) != NULL) {
         bUpdateNoTagMessage = true;
     }
@@ -181,7 +179,7 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_NO_TAG_ACTION], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_ACCEPT]);
     ::SendMessage(hWndPageItems[CB_NO_TAG_ACTION], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_REJECT]);
     ::SendMessage(hWndPageItems[CB_NO_TAG_ACTION], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_REDIR]);
-    ::SendMessage(hWndPageItems[CB_NO_TAG_ACTION], CB_SETCURSEL, clsSettingManager::mPtr->iShorts[SETSHORT_NO_TAG_OPTION], 0);
+    ::SendMessage(hWndPageItems[CB_NO_TAG_ACTION], CB_SETCURSEL, clsSettingManager::mPtr->i16Shorts[SETSHORT_NO_TAG_OPTION], 0);
 
     hWndPageItems[GB_NO_TAG_MESSAGE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_MSG_TO_SND], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         10, (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + clsGuiSettingManager::iEditHeight + 3, iGBinGBinGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -210,7 +208,7 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_ORIGINAL_MYINFO_ACTION], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_FULL_MYINFO_ALL]);
     ::SendMessage(hWndPageItems[CB_ORIGINAL_MYINFO_ACTION], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_FULL_MYINFO_PROFILE]);
     ::SendMessage(hWndPageItems[CB_ORIGINAL_MYINFO_ACTION], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_FULL_MYINFO_NONE]);
-    ::SendMessage(hWndPageItems[CB_ORIGINAL_MYINFO_ACTION], CB_SETCURSEL, clsSettingManager::mPtr->iShorts[SETSHORT_FULL_MYINFO_OPTION], 0);
+    ::SendMessage(hWndPageItems[CB_ORIGINAL_MYINFO_ACTION], CB_SETCURSEL, clsSettingManager::mPtr->i16Shorts[SETSHORT_FULL_MYINFO_OPTION], 0);
     AddToolTip(hWndPageItems[CB_ORIGINAL_MYINFO_ACTION], clsLanguageManager::mPtr->sTexts[LAN_MYINFO_TO_HINT]);
 
     iPosX += clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 2;
@@ -253,7 +251,7 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO], EM_SETLIMITTEXT, 3, 0);
 
     AddUpDown(hWndPageItems[UD_MINUTES_BEFORE_ACCEPT_NEW_MYINFO], (rcThis.right - rcThis.left) - clsGuiSettingManager::iUpDownWidth - 13, iPosX + 5, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight,
-        (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO], (LPARAM)MAKELONG(clsSettingManager::mPtr->iShorts[SETSHORT_MYINFO_DELAY], 0));
+        (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MYINFO_DELAY], 0));
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {
@@ -263,16 +261,16 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
         ::SendMessage(hWndPageItems[ui8i], WM_SETFONT, (WPARAM)clsGuiSettingManager::hFont, MAKELPARAM(TRUE, 0));
     }
 
-    ::EnableWindow(hWndPageItems[EDT_NO_TAG_MESSAGE], clsSettingManager::mPtr->iShorts[SETSHORT_NO_TAG_OPTION] != 0 ? TRUE : FALSE);
-    ::EnableWindow(hWndPageItems[EDT_NO_TAG_REDIRECT], clsSettingManager::mPtr->iShorts[SETSHORT_NO_TAG_OPTION] == 2 ? TRUE : FALSE);
-    ::EnableWindow(hWndPageItems[BTN_REPORT_SUSPICIOUS_TAG], clsSettingManager::mPtr->iShorts[SETSHORT_NO_TAG_OPTION] == 0 ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[EDT_NO_TAG_MESSAGE], clsSettingManager::mPtr->i16Shorts[SETSHORT_NO_TAG_OPTION] != 0 ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[EDT_NO_TAG_REDIRECT], clsSettingManager::mPtr->i16Shorts[SETSHORT_NO_TAG_OPTION] == 2 ? TRUE : FALSE);
+    ::EnableWindow(hWndPageItems[BTN_REPORT_SUSPICIOUS_TAG], clsSettingManager::mPtr->i16Shorts[SETSHORT_NO_TAG_OPTION] == 0 ? TRUE : FALSE);
 
-    ::EnableWindow(hWndPageItems[BTN_REMOVE_DESCRIPTION], clsSettingManager::mPtr->iShorts[SETSHORT_FULL_MYINFO_OPTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[BTN_REMOVE_TAG], clsSettingManager::mPtr->iShorts[SETSHORT_FULL_MYINFO_OPTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[BTN_REMOVE_CONNECTION], clsSettingManager::mPtr->iShorts[SETSHORT_FULL_MYINFO_OPTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[BTN_REMOVE_EMAIL], clsSettingManager::mPtr->iShorts[SETSHORT_FULL_MYINFO_OPTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[BTN_MODE_TO_MYINFO], clsSettingManager::mPtr->iShorts[SETSHORT_FULL_MYINFO_OPTION] == 0 ? FALSE : TRUE);
-    ::EnableWindow(hWndPageItems[BTN_MODE_TO_DESCRIPTION], clsSettingManager::mPtr->iShorts[SETSHORT_FULL_MYINFO_OPTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[BTN_REMOVE_DESCRIPTION], clsSettingManager::mPtr->i16Shorts[SETSHORT_FULL_MYINFO_OPTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[BTN_REMOVE_TAG], clsSettingManager::mPtr->i16Shorts[SETSHORT_FULL_MYINFO_OPTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[BTN_REMOVE_CONNECTION], clsSettingManager::mPtr->i16Shorts[SETSHORT_FULL_MYINFO_OPTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[BTN_REMOVE_EMAIL], clsSettingManager::mPtr->i16Shorts[SETSHORT_FULL_MYINFO_OPTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[BTN_MODE_TO_MYINFO], clsSettingManager::mPtr->i16Shorts[SETSHORT_FULL_MYINFO_OPTION] == 0 ? FALSE : TRUE);
+    ::EnableWindow(hWndPageItems[BTN_MODE_TO_DESCRIPTION], clsSettingManager::mPtr->i16Shorts[SETSHORT_FULL_MYINFO_OPTION] == 0 ? FALSE : TRUE);
 
     clsGuiSettingManager::wpOldNumberEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO], GWLP_WNDPROC, (LONG_PTR)NumberEditProc);
 

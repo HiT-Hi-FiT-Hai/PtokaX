@@ -32,8 +32,8 @@ struct RegUser {
         uint8_t * ui8PassHash;
     };
 
-    RegUser *prev, *next;
-    RegUser *hashtableprev, *hashtablenext;
+    RegUser * pPrev, * pNext;
+    RegUser * pHashTablePrev, * pHashTableNext;
 
     time_t tLastBadPass;
 
@@ -48,6 +48,9 @@ struct RegUser {
     RegUser();
     ~RegUser();
 
+    RegUser(const RegUser&);
+    const RegUser& operator=(const RegUser&);
+
     static RegUser * CreateReg(char * sRegNick, size_t szRegNickLen, char * sRegPassword, size_t szRegPassLen, uint8_t * ui8RegPassHash, const uint16_t &ui16RegProfile);
     bool UpdatePassword(char * sNewPass, size_t &szNewLen);
 }; 
@@ -55,15 +58,18 @@ struct RegUser {
 
 class clsRegManager {
 private:
-    RegUser *table[65536];
+    RegUser * pTable[65536];
 
     uint8_t ui8SaveCalls;
+
+    clsRegManager(const clsRegManager&);
+    const clsRegManager& operator=(const clsRegManager&);
 
     void LoadXML();
 public:
     static clsRegManager * mPtr;
 
-    RegUser *RegListS, *RegListE;
+    RegUser * pRegListS, * pRegListE;
 
     clsRegManager(void);
     ~clsRegManager(void);

@@ -63,9 +63,9 @@ static LRESULT CALLBACK MultiRichEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 clsMainWindowPageUsersChat::clsMainWindowPageUsersChat() {
     clsMainWindowPageUsersChat::mPtr = this;
 
-    memset(&hWndPageItems, 0, (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])) * sizeof(HWND));
+    memset(&hWndPageItems, 0, sizeof(hWndPageItems));
 
-    iPercentagePos = clsGuiSettingManager::mPtr->iIntegers[GUISETINT_USERS_CHAT_SPLITTER];
+    iPercentagePos = clsGuiSettingManager::mPtr->i32Integers[GUISETINT_USERS_CHAT_SPLITTER];
 }
 //---------------------------------------------------------------------------
 
@@ -146,8 +146,8 @@ LRESULT clsMainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam,
                     sInfoTip += "\n" + string(clsLanguageManager::mPtr->sTexts[LAN_LIMITER], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_LIMITER])+ " L:" + string(curUser->LLimit) + " kB/s";
                 }
 
-                sInfoTip += "\n\nRecvBuf: " + string(curUser->recvbuflen) + " bytes";
-                sInfoTip += "\nSendBuf: " + string(curUser->sendbuflen) + " bytes";
+                sInfoTip += "\n\nRecvBuf: " + string(curUser->ui32RecvBufLen) + " bytes";
+                sInfoTip += "\nSendBuf: " + string(curUser->ui32SendBufLen) + " bytes";
 
                 pGetInfoTip->cchTextMax = (int)(sInfoTip.size() > INFOTIPSIZE ? INFOTIPSIZE : sInfoTip.size());
                 memcpy(pGetInfoTip->pszText, sInfoTip.c_str(), sInfoTip.size() > INFOTIPSIZE ? INFOTIPSIZE : sInfoTip.size());
@@ -492,13 +492,13 @@ void clsMainWindowPageUsersChat::UpdateUserList() {
     uint32_t ui32InClose = 0, ui32InLogin = 0, ui32LoggedIn = 0, ui32Total = 0;
 
 	User * pCur = NULL,
-     * pNext = clsUsers::mPtr->llist;
+     * pNext = clsUsers::mPtr->pListS;
 
 	while(pNext != NULL) {
         ui32Total++;
 
         pCur = pNext;
-        pNext = pCur->next;
+        pNext = pCur->pNext;
 
         switch(pCur->ui8State) {
             case User::STATE_ADDED:

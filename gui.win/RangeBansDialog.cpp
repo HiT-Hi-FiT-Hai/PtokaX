@@ -42,12 +42,8 @@ clsRangeBansDialog * clsRangeBansDialog::mPtr = NULL;
 static ATOM atomRangeBansDialog = 0;
 //---------------------------------------------------------------------------
 
-clsRangeBansDialog::clsRangeBansDialog() {
-    memset(&hWndWindowItems, 0, (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])) * sizeof(HWND));
-
-    iFilterColumn = iSortColumn = 0;
-
-    bSortAscending = true;
+clsRangeBansDialog::clsRangeBansDialog() : iFilterColumn(0), iSortColumn(0), bSortAscending(true) {
+    memset(&hWndWindowItems, 0, sizeof(hWndWindowItems));
 }
 //---------------------------------------------------------------------------
 
@@ -309,7 +305,7 @@ void clsRangeBansDialog::DoModal(HWND hWndParent) {
     const int iRangeBansWidths[] = { GUISETINT_RANGE_BANS_RANGE, GUISETINT_RANGE_BANS_REASON, GUISETINT_RANGE_BANS_EXPIRE, GUISETINT_RANGE_BANS_BY };
 
     for(uint8_t ui8i = 0; ui8i < 4; ui8i++) {
-        lvColumn.cx = clsGuiSettingManager::mPtr->iIntegers[iRangeBansWidths[ui8i]];
+        lvColumn.cx = clsGuiSettingManager::mPtr->i32Integers[iRangeBansWidths[ui8i]];
         lvColumn.pszText = clsLanguageManager::mPtr->sTexts[iRangeBansStrings[ui8i]];
         lvColumn.iSubItem = ui8i;
 
@@ -338,13 +334,13 @@ void clsRangeBansDialog::AddAllRangeBans() {
     time_t acc_time; time(&acc_time);
 
     RangeBanItem * curRangeBan = NULL,
-        * nextRangeBan = clsBanManager::mPtr->RangeBanListS;
+        * nextRangeBan = clsBanManager::mPtr->pRangeBanListS;
 
     while(nextRangeBan != NULL) {
 		curRangeBan = nextRangeBan;
-    	nextRangeBan = curRangeBan->next;
+    	nextRangeBan = curRangeBan->pNext;
 
-        if((((curRangeBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true) && acc_time > curRangeBan->tempbanexpire) {
+        if((((curRangeBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true) && acc_time > curRangeBan->tTempBanExpire) {
             clsBanManager::mPtr->RemRange(curRangeBan);
             delete curRangeBan;
 
@@ -389,7 +385,7 @@ void clsRangeBansDialog::AddRangeBan(const RangeBanItem * pRangeBan) {
 
     if((pRangeBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) {
         char msg[256];
-        struct tm * tm = localtime(&pRangeBan->tempbanexpire);
+        struct tm * tm = localtime(&pRangeBan->tTempBanExpire);
         strftime(msg, 256, "%c", tm);
 
         lvItem.iSubItem = 2;
@@ -427,7 +423,7 @@ int clsRangeBansDialog::CompareRangeBans(const void * pItem, const void * pOther
             } else if((pSecondRangeBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) {
                 return 1;
             } else {
-                return (pFirstRangeBan->tempbanexpire > pSecondRangeBan->tempbanexpire) ? 1 : ((pFirstRangeBan->tempbanexpire == pSecondRangeBan->tempbanexpire) ? 0 : -1);
+                return (pFirstRangeBan->tTempBanExpire > pSecondRangeBan->tTempBanExpire) ? 1 : ((pFirstRangeBan->tTempBanExpire == pSecondRangeBan->tTempBanExpire) ? 0 : -1);
             }
         case 3:
             return _stricmp(pFirstRangeBan->sBy == NULL ? "" : pFirstRangeBan->sBy, pSecondRangeBan->sBy == NULL ? "" : pSecondRangeBan->sBy);
@@ -508,13 +504,13 @@ void clsRangeBansDialog::FilterRangeBans() {
         time_t acc_time; time(&acc_time);
 
         RangeBanItem * curRangeBan = NULL,
-            * nextRangeBan = clsBanManager::mPtr->RangeBanListS;
+            * nextRangeBan = clsBanManager::mPtr->pRangeBanListS;
 
         while(nextRangeBan != NULL) {
             curRangeBan = nextRangeBan;
-            nextRangeBan = curRangeBan->next;
+            nextRangeBan = curRangeBan->pNext;
 
-            if((((curRangeBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true) && acc_time > curRangeBan->tempbanexpire) {
+            if((((curRangeBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true) && acc_time > curRangeBan->tTempBanExpire) {
                 clsBanManager::mPtr->RemRange(curRangeBan);
                 delete curRangeBan;
 
@@ -552,7 +548,7 @@ bool clsRangeBansDialog::FilterRangeBan(const RangeBanItem * pRangeBan) {
         case 2:
             if((pRangeBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) {
                 char msg[256];
-                struct tm * tm = localtime(&pRangeBan->tempbanexpire);
+                struct tm * tm = localtime(&pRangeBan->tTempBanExpire);
                 strftime(msg, 256, "%c", tm);
 
                 if(stristr2(msg, sFilterString.c_str()) != NULL) {

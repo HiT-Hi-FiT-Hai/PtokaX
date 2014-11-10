@@ -29,7 +29,7 @@ private:
 
     unsigned int threadId;
 
-    HANDLE threadHandle;
+    HANDLE hThreadHandle;
 #else
     int sock;
 
@@ -39,6 +39,9 @@ private:
     bool bTerminated;
 
 	char rcvbuf[4096];
+
+    UDPThread(const UDPThread&);
+    const UDPThread& operator=(const UDPThread&);
 public:
     static UDPThread * mPtrIPv4;
     static UDPThread * mPtrIPv6;
