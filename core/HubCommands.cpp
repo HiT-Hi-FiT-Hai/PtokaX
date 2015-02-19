@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2014  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -44,6 +44,9 @@
 //---------------------------------------------------------------------------
 #include "HubCommands.h"
 //---------------------------------------------------------------------------
+#ifdef _WITH_POSTGRES
+	#include "DB-PostgreSQL.h"
+#endif
 #include "IP2Country.h"
 #include "LuaScript.h"
 #include "TextFileManager.h"
@@ -389,10 +392,16 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 
                 User *user = clsHashManager::mPtr->FindUser(sCommand, dlen-8);
                 if(user == NULL) {
+#ifdef _WITH_POSTGRES
+					if(DBPostgreSQL::mPtr->SearchNick(sCommand, dlen-8, curUser, fromPM) == true) {
+						UncountDeflood(curUser, fromPM);
+						return true;
+					}
+#endif
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
                     int iret = sprintf(msg+imsgLen, "<%s> *** %s: %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
-                        clsLanguageManager::mPtr->sTexts[LAN_ERROR], sCommand, clsLanguageManager::mPtr->sTexts[LAN_IS_NOT_IN_USERLIST]);
+                        clsLanguageManager::mPtr->sTexts[LAN_ERROR], sCommand, clsLanguageManager::mPtr->sTexts[LAN_NOT_FOUND]);
                     imsgLen += iret;
                     if(CheckSprintf1(iret, imsgLen, 1024, "clsHubCommands::DoCommand21") == true) {
                         curUser->SendCharDelayed(msg, imsgLen);
@@ -404,7 +413,7 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 
                 int imsgLen = CheckFromPm(curUser, fromPM);
 
-                int iret = sprintf(msg+imsgLen, "<%s> " "\n%s: %s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
+                int iret = sprintf(msg+imsgLen, "<%s> \n%s: %s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
                     clsLanguageManager::mPtr->sTexts[LAN_NICK], user->sNick);
                 imsgLen += iret;
                 if(CheckSprintf1(iret, imsgLen, 1024, "clsHubCommands::DoCommand23") == false) {
@@ -503,7 +512,63 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                 curUser->SendCharDelayed(msg, imsgLen+1);
                 return true;
             }
+#ifdef _WITH_POSTGRES
+            // Hub commands: !getipinfo
+			if(strncasecmp(sCommand+1, "etipinfo ", 9) == 0) {
+                if(clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::GETINFO) == false) {
+                    SendNoPermission(curUser, fromPM);
+                    return true;
+                }
 
+                if(dlen < 11 || sCommand[10] == 0) {
+                    int imsgLen = CheckFromPm(curUser, fromPM);
+
+                    int iret = sprintf(msg+imsgLen, "<%s> *** %s %cgetipinfo <%s>. %s.|", 
+                        clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SNTX_ERR_IN_CMD],
+                        clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], clsLanguageManager::mPtr->sTexts[LAN_NICK_LWR],
+                        clsLanguageManager::mPtr->sTexts[LAN_NO_PARAM_GIVEN]);
+                    imsgLen += iret;
+                    if(CheckSprintf1(iret, imsgLen, 1024, "clsHubCommands::DoCommand19-1") == true) {
+                        curUser->SendCharDelayed(msg, imsgLen);
+                    }
+                    return true;
+                }
+
+                if(dlen > 102) {
+                    int imsgLen = CheckFromPm(curUser, fromPM);
+
+                    int iret = sprintf(msg+imsgLen, "<%s> *** %s %cgetipinfo <%s>. %s!|",
+                        clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SNTX_ERR_IN_CMD],
+                        clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], clsLanguageManager::mPtr->sTexts[LAN_NICK_LWR],
+                        clsLanguageManager::mPtr->sTexts[LAN_MAX_ALWD_NICK_LEN_64_CHARS]);
+                    imsgLen += iret;
+                    if(CheckSprintf1(iret, imsgLen, 1024, "clsHubCommands::DoCommand20-1") == true) {
+                        curUser->SendCharDelayed(msg, imsgLen);
+                    }
+                    return true;
+                }
+
+                sCommand += 10;
+
+                User *user = clsHashManager::mPtr->FindUser(sCommand, dlen-10);
+                if(user == NULL) {
+					if(DBPostgreSQL::mPtr->SearchIP(sCommand, curUser, fromPM) == true) {
+						UncountDeflood(curUser, fromPM);
+						return true;
+					}
+
+                    int imsgLen = CheckFromPm(curUser, fromPM);
+
+                    int iret = sprintf(msg+imsgLen, "<%s> *** %s: %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
+                        clsLanguageManager::mPtr->sTexts[LAN_ERROR], sCommand, clsLanguageManager::mPtr->sTexts[LAN_NOT_FOUND]);
+                    imsgLen += iret;
+                    if(CheckSprintf1(iret, imsgLen, 1024, "clsHubCommands::DoCommand21-1") == true) {
+                        curUser->SendCharDelayed(msg, imsgLen);
+                    }
+                    return true;
+                }
+            }
+#endif
             // Hub commands: !gettempbans
 			if(dlen == 11 && strncasecmp(sCommand+1, "ettempbans", 10) == 0) {
                 if(clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::GETBANLIST) == false) {
@@ -6867,6 +6932,7 @@ bool clsHubCommands::RangeUnban(User * curUser, char * sCommand, bool fromPM, un
         if(CheckSprintf1(iret, imsgLen, 1024, "clsHubCommands::DoCommand549") == true) {
             curUser->SendCharDelayed(msg, imsgLen);
         }
+        return true;
     }
 
 	UncountDeflood(curUser, fromPM);
@@ -6948,6 +7014,7 @@ bool clsHubCommands::RangeUnban(User * curUser, char * sCommand, bool fromPM) {
         if(CheckSprintf1(iret, imsgLen, 1024, "clsHubCommands::DoCommand559") == true) {
             curUser->SendCharDelayed(msg, imsgLen);
         }
+        return true;
     }
 
     UncountDeflood(curUser, fromPM);

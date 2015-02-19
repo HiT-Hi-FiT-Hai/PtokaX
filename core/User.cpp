@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2014  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -39,6 +39,9 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
+#ifdef _WITH_POSTGRES
+	#include "DB-PostgreSQL.h"
+#endif
 #include "DeFlood.h"
 //---------------------------------------------------------------------------
 #ifdef _BUILD_GUI
@@ -577,7 +580,7 @@ User::User() : ui64SharedSize(0), ui64ChangedSharedSizeShort(0), ui64ChangedShar
 #else
 	Sck(-1),
 #endif
-	ui32SendBufLen(0), ui32RecvBufLen(0), ui32SendBufDataLen(0), ui32RecvBufDataLen(0),
+	tLoginTime(0), ui32SendBufLen(0), ui32RecvBufLen(0), ui32SendBufDataLen(0), ui32RecvBufDataLen(0),
 	ui32NickHash(0), i32Profile(-1), 
 	sNick((char *)sDefaultNick), sVersion(NULL), sMyInfoOriginal(NULL), sMyInfoShort(NULL), sMyInfoLong(NULL), 
 	sDescription(NULL), sTag(NULL), sConnection(NULL), sEmail(NULL), sClient((char *)sOtherNoTag), sTagVersion(NULL), 
@@ -1867,6 +1870,9 @@ void User::Close(bool bNoQuit/* = false*/) {
 #endif
 
         //sqldb->FinalizeVisit(u);
+#ifdef _WITH_POSTGRES
+		DBPostgreSQL::mPtr->UpdateRecord(this);
+#endif
 
 		if(((ui32BoolBits & BIT_HAVE_SHARECOUNTED) == BIT_HAVE_SHARECOUNTED) == true) {
             clsServerManager::ui64TotalShare -= ui64SharedSize;

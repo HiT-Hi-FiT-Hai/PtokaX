@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2014  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -59,6 +59,10 @@
 //---------------------------------------------------------------------------
 #ifndef _WIN32
     #include "regtmrinc.h"
+#endif
+//---------------------------------------------------------------------------
+#ifdef _WITH_POSTGRES
+	#include "DB-PostgreSQL.h"
 #endif
 //---------------------------------------------------------------------------
 static ServerThread * pServersE = NULL;
@@ -622,6 +626,14 @@ bool clsServerManager::Start() {
         }*/
 //  }
 
+#ifdef _WITH_POSTGRES
+    DBPostgreSQL::mPtr = new (std::nothrow) DBPostgreSQL();
+    if(DBPostgreSQL::mPtr == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate DBPostgreSQL::mPtr in ServerStart\n", 0);
+    	exit(EXIT_FAILURE);
+    }
+#endif
+
     clsIpP2Country::mPtr = new (std::nothrow) clsIpP2Country();
     if(clsIpP2Country::mPtr == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate clsIpP2Country::mPtr in ServerStart\n", 0);
@@ -852,6 +864,11 @@ void clsServerManager::FinalStop(const bool &bDeleteServiceLoop) {
 
 	delete clsIpP2Country::mPtr;
     clsIpP2Country::mPtr = NULL;
+
+#ifdef _WITH_POSTGRES
+	delete DBPostgreSQL::mPtr;
+    DBPostgreSQL::mPtr = NULL;
+#endif
 
 /*	if(TLSManager != NULL) {
 		delete TLSManager;

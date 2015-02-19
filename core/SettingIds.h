@@ -1,8 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2014  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -199,6 +198,9 @@ enum SetShortIds {
     SETSHORT_SEARCH_INTERVAL_TIME, 
     SETSHORT_MAX_CONN_SAME_IP, 
     SETSHORT_MIN_RECONN_TIME, 
+#ifdef _WITH_POSTGRES
+    SETSHORT_DB_REMOVE_OLD_RECORDS,
+#endif
     SETSHORT_MAX_USERS_PEAK, 
     SETSHORT_IDS_END
 };//SETSHORT_, 
@@ -241,6 +243,14 @@ enum SetTxtIds {
     SETTXT_LANGUAGE, 
     SETTXT_IPV4_ADDRESS,
     SETTXT_IPV6_ADDRESS,
+#ifdef _WITH_POSTGRES
+	SETTXT_ENCODING,
+	SETTXT_POSTGRES_HOST,
+	SETTXT_POSTGRES_PORT,
+	SETTXT_POSTGRES_DBNAME,
+	SETTXT_POSTGRES_USER,
+	SETTXT_POSTGRES_PASS,
+#endif
     SETTXT_IDS_END
 };//SETTXT_, 
 //---------------------------------------------------------------------------

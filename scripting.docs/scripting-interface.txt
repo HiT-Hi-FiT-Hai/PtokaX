@@ -409,281 +409,280 @@ bNoReConnTime				- No reconnect time.
 
 ProfilePermission IDs for SetProfilePermission
 -------------------
-0	- User have key / is OP
-1	- No GetNickList Deflood
-2	- No MyINFO Deflood
-3	- No Search Deflood
-4	- No PM Deflood
-5	- No Main Chat Deflood
-6	- Mass Message
-7	- Topic
-8	- TempBan
-9	- Reload text files
-10	- No Tag check
-11	- TempUnban
-12	- DelRegUser
-13	- AddRegUser
-14	- No ChatLimits
-15	- No MaxHubs Check
-16	- No Slot/Hub ratio Check
-17	- No SlotCheck
-18	- No ShareLimit check
-19	- Clear PermBan
-20	- Clear TempBan
-21	- GetInfo
-22	- Get Bans
-23	- Start/Stop/Restart script(s)
-24	- Restart hub
-25	- TempOP
-26	- Gag, Ungag
-27	- Redirect
-28	- Ban
-29	- Kick
-30	- Drop
-31	- Enter full hub
-32	- Enter hub if IP banned
-33	- Allowed for OpChat
-34	- Send all users IP
-35	- Range ban
-36	- Range unban
-37	- Range temp ban
-38	- Range temp unban
-39	- Get range perm bans
-40	- Clear range perm bans
-41	- Clear range temp bans
-42	- Unban
-43	- No search length limits.
-44	- Send full myinfos
-45	- No IP checking in connection and search request.
-46	- Close
-47	- No ConnectToMe deflood.
-48	- No RevConnectToMe deflood.
-49	- No search reply deflood.
-50	- No received data deflood.
-51	- No chat interval.
-52	- No private message interval.
-53	- No search interval.
-54	- No maximum users from same IP.
-55	- No reconnect time.
+ProfMan.tPermissions.IsOperator				-	User have key / is OP
+ProfMan.tPermissions.NoDefloodGetnicklist	-	No GetNickList Deflood
+ProfMan.tPermissions.NoDefloodMyinfo		-	No MyINFO Deflood
+ProfMan.tPermissions.NoDefloodSearch		-	No Search Deflood
+ProfMan.tPermissions.NoDefloodPm			-	No PM Deflood
+ProfMan.tPermissions.NoDefloodMainChat		-	No Main Chat Deflood
+ProfMan.tPermissions.MassMsg				-	Mass Message
+ProfMan.tPermissions.Topic					-	Topic
+ProfMan.tPermissions.TempBan				-	TempBan
+ProfMan.tPermissions.ReloadTxtFiles			-	Reload text files
+ProfMan.tPermissions.NoTagCheck				-	No Tag check
+ProfMan.tPermissions.TempUnban				-	TempUnban
+ProfMan.tPermissions.DelRegUser				-	DelRegUser
+ProfMan.tPermissions.AddRegUser				-	AddRegUser
+ProfMan.tPermissions.NoChatLimits			-	No ChatLimits
+ProfMan.tPermissions.NoMaxHubsCheck			-	No MaxHubs Check
+ProfMan.tPermissions.NoSlotHubRatioCheck	-	No Slot/Hub ratio Check
+ProfMan.tPermissions.NoSlotCheck			-	No SlotCheck
+ProfMan.tPermissions.NoShareLimit			-	No ShareLimit check
+ProfMan.tPermissions.ClrPermBan				-	Clear PermBan
+ProfMan.tPermissions.ClrTempBan				-	Clear TempBan
+ProfMan.tPermissions.GetInfo				-	GetInfo
+ProfMan.tPermissions.GetBans				-	Get Bans
+ProfMan.tPermissions.ScriptControl			-	Start/Stop/Restart script(s)
+ProfMan.tPermissions.RstHub					-	Restart hub
+ProfMan.tPermissions.TempOp					-	TempOP
+ProfMan.tPermissions.GagUngag				-	Gag, Ungag
+ProfMan.tPermissions.Redirect				-	Redirect
+ProfMan.tPermissions.Ban					-	Ban
+ProfMan.tPermissions.Kick					-	Kick
+ProfMan.tPermissions.Drop					-	Drop
+ProfMan.tPermissions.EnterIfHubFull			-	Enter full hub
+ProfMan.tPermissions.EnterIfIpBan			-	Enter hub if IP banned
+ProfMan.tPermissions.AllowedOpChat			-	Allowed for OpChat
+ProfMan.tPermissions.SendAllUsersIp			-	Send all users IP
+ProfMan.tPermissions.RangeBan				-	Range ban
+ProfMan.tPermissions.RangeUnban				-	Range unban
+ProfMan.tPermissions.RangeTempBan			-	Range temp ban
+ProfMan.tPermissions.RangeTempUnban			-	Range temp unban
+ProfMan.tPermissions.GetRangeBans			-	Get range perm bans
+ProfMan.tPermissions.ClrRangePermBans		-	Clear range perm bans
+ProfMan.tPermissions.ClrRangeTempBans		-	Clear range temp bans
+ProfMan.tPermissions.Unban					-	Unban
+ProfMan.tPermissions.NoSearchLimits			-	No search length limits.
+ProfMan.tPermissions.SendLongMyinfos		-	Send full myinfos
+ProfMan.tPermissions.NoIpCheck				-	No IP checking in connection and search request.
+ProfMan.tPermissions.Close					-	Close
+ProfMan.tPermissions.NoDefloodCtm			-	No ConnectToMe deflood.
+ProfMan.tPermissions.NoDefloodRctm			-	No RevConnectToMe deflood.
+ProfMan.tPermissions.NoDefloodSr			-	No search reply deflood.
+ProfMan.tPermissions.NoDefloodRecv			-	No received data deflood.
+ProfMan.tPermissions.NoChatInterval			-	No chat interval.
+ProfMan.tPermissions.NoPmInterval			-	No private message interval.
+ProfMan.tPermissions.NoSearchInterval		-	No search interval.
+ProfMan.tPermissions.NoMaxUsrSameIp			-	No maximum users from same IP.
+ProfMan.tPermissions.NoReconnTime			-	No reconnect time.
 
 
 Settings bool IDs for SetMan.(G/S)etBool
 -------------------
-0	- Anti MoGlo description
-1	- Hub autostart
-2	- Redirect all connecting users
-3	- Redirect users when hub is full
-4	- Automatically register to hublist
-5	- Hub for registered users only
-6	- Redirect non-registered users when hub is for registered users only
-7	- Redirect user when he's don't have share limit
-8	- Redirect user when he's don't have slot limit
-9	- Redirect user when he's don't have hub/slot ratio limit
-10	- Redirect user when he's don't have max hubs limit
-11	- Add user mode to MyINFO command.
-12	- Add user mode to description.
-13	- Strip user description.
-14	- Strip user description tag.
-15	- Strip user connection.
-16	- Strip user email
-17	- Register hub bot on hub.
-18	- Use hub bot nick instead of Hub-Security.
-19	- Register Opchat bot on hub.
-20	- Redirect user when is temp banned.
-21	- Redirect user when is perm banned.
-22	- Enable scripting interface.
-23	- Keep slow clients.
-24	- Automatically check for new PtokaX releases on startup
-25	- Enable tray icon.
-26	- Start minimized.
-27	- Filter kick messages.
-28	- Send kick messages to OPs.
-29	- Send status messages to OPs.
-30	- Send status messages as private messages.
-31	- Enable text files.
-32	- Send text files as private messages.
-33	- Stop script on error.
-34	- Send MOTD as private message.
-35	- Report deflood actions.
-36	- Reply to hub commands with private messages.
-37	- Disable MOTD.
-38	- Don't allow hublist pingers.
-39	- Report hublist pingers.
-40	- Report 3x bad password.
-41	- Advanced password protection.
-42	- Listen only on single IP.
-43	- Resolve hostname to IP.
-44	- Redir user when he's don't have nick in length limits.
-45	- Not used. Before version 0.4.2.0 version it was send UserIP to user on login.
-46	- Send ip in ban message.
-47	- Send range in ban message.
-48	- Send nick in ban message.
-49	- Send reason in ban message.
-50	- Send who create ban in ban message.
-51	- Report suspicious tag to OPs.
-52	- Not used. Before version 0.5 version it was accept tag from unknown clients.
-53	- Check IP in commands.
-54	- Not used. Before version 0.4.2.0 version it was popup scripts window on script error.
-55	- Save script errors to log.
-56	- Disallow clients sending buggy supports.
-57	- Hash registered users passwords.
+SetMan.tBooleans.AntiMoGlo				-	Anti MoGlo description
+SetMan.tBooleans.AutoStart				-	Hub autostart
+SetMan.tBooleans.RedirectAll			-	Redirect all connecting users
+SetMan.tBooleans.RedirectWhenHubFull	-	Redirect users when hub is full
+SetMan.tBooleans.AutoReg				-	Automatically register to hublist
+SetMan.tBooleans.RegOnly				-	Hub for registered users only
+SetMan.tBooleans.RegOnlyRedir			-	Redirect non
+SetMan.tBooleans.ShareLimitRedir		-	Redirect user when he's don't have share limit
+SetMan.tBooleans.SlotLimitRedir			-	Redirect user when he's don't have slot limit
+SetMan.tBooleans.HubSlotRatioRedir		-	Redirect user when he's don't have hub/slot ratio limit
+SetMan.tBooleans.MaxHubsLimitRedir		-	Redirect user when he's don't have max hubs limit
+SetMan.tBooleans.ModeToMyInfo			-	Add user mode to MyINFO command.
+SetMan.tBooleans.ModeToDescription		-	Add user mode to description.
+SetMan.tBooleans.StripDescription		-	Strip user description.
+SetMan.tBooleans.StripTag				-	Strip user description tag.
+SetMan.tBooleans.StripConnection		-	Strip user connection.
+SetMan.tBooleans.StripEmail				-	Strip user email
+SetMan.tBooleans.RegBot					-	Register hub bot on hub.
+SetMan.tBooleans.UseBotAsHubSec			-	Use hub bot nick instead of Hub
+SetMan.tBooleans.RegOpChat				-	Register Opchat bot on hub.
+SetMan.tBooleans.TempBanRedir			-	Redirect user when is temp banned.
+SetMan.tBooleans.PermBanRedir			-	Redirect user when is perm banned.
+SetMan.tBooleans.EnableScripting		-	Enable scripting interface.
+SetMan.tBooleans.KeepSlowUsers			-	Keep slow clients.
+SetMan.tBooleans.CheckNewReleases		-	Automatically check for new PtokaX releases on startup
+SetMan.tBooleans.EnableTrayIcon			-	Enable tray icon.
+SetMan.tBooleans.StartMinimized			-	Start minimized.
+SetMan.tBooleans.FilterKickMessages		-	Filter kick messages.
+SetMan.tBooleans.SendKickMessagesToOps	-	Send kick messages to OPs.
+SetMan.tBooleans.SendStatusMessages		-	Send status messages to OPs.
+SetMan.tBooleans.SendStatusMessagesAsPm	-	Send status messages as private messages.
+SetMan.tBooleans.EnableTextFiles		-	Enable text files.
+SetMan.tBooleans.SendTextFilesAsPm		-	Send text files as private messages.
+SetMan.tBooleans.StopScriptOnError		-	Stop script on error.
+SetMan.tBooleans.SendMotdAsPm			-	Send MOTD as private message.
+SetMan.tBooleans.DefloodReport			-	Report deflood actions.
+SetMan.tBooleans.ReplyToHubCommandsAsPm	-	Reply to hub commands with private messages.
+SetMan.tBooleans.DisableMotd			-	Disable MOTD.
+SetMan.tBooleans.DontAllowPingers		-	Don't allow hublist pingers.
+SetMan.tBooleans.ReportPingers			-	Report hublist pingers.
+SetMan.tBooleans.Report3xBadPass		-	Report 3x bad password.
+SetMan.tBooleans.AdvancedPassProtection	-	Advanced password protection.
+SetMan.tBooleans.ListenOnlySingleIp		-	Listen only on single IP.
+SetMan.tBooleans.ResolveToIp			-	Resolve hostname to IP.
+SetMan.tBooleans.NickLimitRedir			-	Redir user when he's don't have nick in length limits.
+SetMan.tBooleans.BanMsgShowIp			-	Send ip in ban message.
+SetMan.tBooleans.BanMsgShowRange		-	Send range in ban message.
+SetMan.tBooleans.BanMsgShowNick			-	Send nick in ban message.
+SetMan.tBooleans.BanMsgShowReason		-	Send reason in ban message.
+SetMan.tBooleans.BanMsgShowBy			-	Send who create ban in ban message.
+SetMan.tBooleans.ReportSuspiciousTag	-	Report suspicious tag to OPs.
+SetMan.tBooleans.CheckIpInCommands		-	Check IP in commands.
+SetMan.tBooleans.LogScriptErrors		-	Save script errors to log.
+SetMan.tBooleans.DisallowBadSupports	-	Disallow clients sending buggy supports.
+SetMan.tBooleans.HashPasswords			-	Hash registered users passwords.
 
 
 Setting number IDs for SetMan.(G/S)etNumber
 -------------------
-0	- Max users limit
-1	- Min share limit. Max 9999.
-2	- Min share units. 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB. Max 4.
-3	- Max share limit. Max 9999.
-4	- Max share units. 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB. Max 4.
-5	- Min slots limit.
-6	- Max slots limit.
-7	- Hubs for hub/slot ratio.
-8	- Slots for hub/slot ratio.
-9	- Max hubs limit.
-10	- No tag option. 0 = accept, 1 = reject, 2 = redirect. Max 2.
-11	- Send full MyINFO to... 0 = to all, 1 = to profile, 2 = to none. Max 2.
-12	- Max chat length limit.
-13	- Max chat lines limit.
-14	- Max private message length limit.
-15	- Max private message lines limit.
-16	- Default tempban time. Must be higher than 0.
-17	- Max passive search replys limit.
-18	- Time before new MyINFO from user is accepted for broadcast.
-19	- Main chat deflood messages count. Higher than 0, max 29999.
-20	- Main chat deflood time. Higher than 0, max 29999.
-21	- Main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-22	- Same main chat deflood messages count. Higher than 0, max 29999.
-23	- Same main chat deflood time. Higher than 0, max 29999.
-24	- Same main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-25	- Same multiline main chat deflood messages count. Min 2, max 999.
-26	- Same multiline main chat deflood lines. Min 2, max 999.
-27	- Same multiline main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-28	- Private message deflood messages count. Higher than 0, max 29999.
-29	- Private message deflood time. Higher than 0, max 29999.
-30	- Private message deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-31	- Same private message deflood messages count. Higher than 0, max 29999.
-32	- Same private message deflood time. Higher than 0, max 29999.
-33	- Same private message deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-34	- Same multiline private message deflood messages count. Min 2, max 999.
-35	- Same multiline private message deflood lines. Min 2, max 999.
-36	- Same multiline private message action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-37	- Search deflood messages count. Higher than 0, max 29999.
-38	- Search deflood time. Higher than 0, max 29999.
-39	- Search deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-40	- Same search deflood messages count. Higher than 0, max 29999.
-41	- Same search deflood time. Higher than 0, max 29999.
-42	- Same search deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-43	- MyINFO deflood messages count. Higher than 0, max 29999.
-44	- MyINFO deflood time. Higher than 0, max 29999.
-45	- MyINFO deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-46	- GetNickList deflood messages count. Higher than 0, max 29999.
-47	- GetNickList deflood time. Higher than 0, max 29999. 
-48	- GetNickList deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-49	- Connection deflood connecions count. Higher than 0, max 999. 
-50	- Connection deflood time. Higher than 0, max 999.
-51	- Deflood warnings count. Higher than 0, max 29999.
-52	- Deflood warnings action. 0 = disconnect, 1 = kick, 2 = tempban, 3 = permban. Max 3.
-53	- Deflood tempban time. Higher than 0.
-54	- Global main chat messages count. Higher than 0, max 29999.
-55	- Global main chat time. Higher than 0, max 29999.
-56	- Global main chat timeout. Higher than 0, max 29999.
-57	- Global main chat action. 0 = disabled, 1 = lock chat, 2 = send to ops with ips. Max 2.
-58	- Min search length.
-59	- Max search length.
-60	- Min nick length. Max 64.
-61	- Max nick length. Max 64.
-62	- Brute force password protection ban type. 0 = disabled, 1 = permban, 2 = tempban. Max 2.
-63	- Brute force password protection temp ban time. Higher than 0.
-64	- Max pm count to same user per minute.
-65	- Max simultaneous logins. Higher than 0, max 500.
-66	- Secondary main chat deflood messages count. Higher than 0, max 29999.
-67	- Secondary main chat deflood time. Higher than 0, max 29999.
-68	- Secondary main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-69	- Secondary private message deflood messages count. Higher than 0, max 29999.
-70	- Secondary private message deflood time. Higher than 0, max 29999.
-71	- Secondary private message deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-72	- Secondary search deflood messages count. Higher than 0, max 29999.
-73	- Secondary search deflood time. Higher than 0, max 29999.
-74	- Secondary search deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-75	- Secondary myINFO deflood messages count. Higher than 0, max 29999.
-76	- Secondary myINFO deflood time. Higher than 0, max 29999.
-77	- Secondary myINFO deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-78	- Maximum MyINFO length. Min 64, max 512.
-79	- Primary ConnectToMe deflood count. Higher than 0, max 29999.
-80	- Primary ConnectToMe deflood time. Higher than 0, max 29999.
-81	- Primary ConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-82	- Secondary ConnectToMe deflood count. Higher than 0, max 29999.
-83	- Secondary ConnectToMe deflood time. Higher than 0, max 29999.
-84	- Secondary ConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-85	- Primary RevConnectToMe deflood count. Higher than 0, max 29999.
-86	- Primary RevConnectToMe deflood time. Higher than 0, max 29999.
-87	- Primary RevConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-88	- Secondary RevConnectToMe deflood count. Higher than 0, max 29999.
-89	- Secondary RevConnectToMe deflood time. Higher than 0, max 29999.
-90	- Secondary RevConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-91	- Maximum ConnectToMe length. Higher than 0, max 512.
-92	- Maximum RevConnectToMe length. Higher than 0, max 512.
-93	- Primary SR deflood count. Higher than 0, max 29999.
-94	- Primary SR deflood time. Higher than 0, max 29999.
-95	- Primary SR deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-96	- Secondary SR deflood count. Higher than 0, max 29999.
-97	- Secondary SR deflood time. Higher than 0, max 29999.
-98	- Secondary SR deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-99	- Maximum SR length. Higher than 0, max 8192.
-100	- Primary received data deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-101	- Primary received data deflood kB. Higher than 0, max 29999.
-102	- Primary received data deflood time. Higher than 0, max 29999.
-103	- Secondary received data deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-104	- Secondary received data deflood kB. Higher than 0, max 29999.
-105	- Secondary received data deflood time. Higher than 0, max 29999.
-106	- Chat messages interval messages. Higher than 0, max 29999.
-107	- Chat messages interval time. Higher than 0, max 29999.
-108	- Private messages interval messages. Higher than 0, max 29999.
-109	- Private messages interval time. Higher than 0, max 29999.
-110	- Search interval count. Higher than 0, max 29999.
-111	- Search interval time. Higher than 0, max 29999.
-112	- Maximum users from same IP. Higher than 0, max 256.
-113	- Minimum reconnect time in seconds. Higher than 0, max 256.
+SetMan.tNumbers.MaxUsers	-	Max users limit
+SetMan.tNumbers.MinShareLimit	-	Min share limit. Max 9999.
+SetMan.tNumbers.MinShareUnits	-	Min share units. 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB. Max 4.
+SetMan.tNumbers.MaxShareLimit	-	Max share limit. Max 9999.
+SetMan.tNumbers.MaxShareUnits	-	Max share units. 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB. Max 4.
+SetMan.tNumbers.MinSlotsLimit	-	Min slots limit.
+SetMan.tNumbers.MaxSlotsLimt	-	Max slots limit.
+SetMan.tNumbers.HubSlotRatioHubs	-	Hubs for hub/slot ratio.
+SetMan.tNumbers.HubSlotRatioSlots	-	Slots for hub/slot ratio.
+SetMan.tNumbers.MaxHubsLimit	-	Max hubs limit.
+SetMan.tNumbers.NoTagOption	-	No tag option. 0 = accept, 1 = reject, 2 = redirect. Max 2.
+SetMan.tNumbers.LongMyinfoOption	-	Send full MyINFO to... 0 = to all, 1 = to profile, 2 = to none. Max 2.
+SetMan.tNumbers.MaxChatLen	-	Max chat length limit.
+SetMan.tNumbers.MaxChatLines	-	Max chat lines limit.
+SetMan.tNumbers.MaxPmLen	-	Max private message length limit.
+SetMan.tNumbers.MaxPmLines	-	Max private message lines limit.
+SetMan.tNumbers.DefaultTempBanTime	-	Default tempban time. Must be higher than 0.
+SetMan.tNumbers.MaxPasiveSr	-	Max passive search replys limit.
+SetMan.tNumbers.MyInfoDelay	-	Time before new MyINFO from user is accepted for broadcast.
+SetMan.tNumbers.MainChatMessages	-	Main chat deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.MainChatTime	-	Main chat deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.MainChatAction	-	Main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.SameMainChatMessages	-	Same main chat deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.SameMainChatTime	-	Same main chat deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.SameMainChatAction	-	Same main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.SameMultiMainChatMessages	-	Same multiline main chat deflood messages count. Min 2, max 999.
+SetMan.tNumbers.SameMultiMainChatLines	-	Same multiline main chat deflood lines. Min 2, max 999.
+SetMan.tNumbers.SameMultiMainChatAction	-	Same multiline main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.PmMessages	-	Private message deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.PmTime	-	Private message deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.PmAction	-	Private message deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.SamePmMessages	-	Same private message deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.SamePmTime	-	Same private message deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.SamePmAction	-	Same private message deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.SameMultiPmMessages	-	Same multiline private message deflood messages count. Min 2, max 999.
+SetMan.tNumbers.SameMultiPmLines	-	Same multiline private message deflood lines. Min 2, max 999.
+SetMan.tNumbers.SameMultiPmAction	-	Same multiline private message action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.SearchMessages	-	Search deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.SearchTime	-	Search deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.SearchAction	-	Search deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.SameSearchMessages					-	Same search deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.SameSearchTime						-	Same search deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.SameSearchAction					-	Same search deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.MyinfoMessages						-	MyINFO deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.MyinfoTime							-	MyINFO deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.MyinfoAction						-	MyINFO deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.GetnicklistMessages					-	GetNickList deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.GetnicklistTime						-	GetNickList deflood time. Higher than 0, max 29999. 
+SetMan.tNumbers.GetnicklistAction					-	GetNickList deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.NewConnectionsCount					-	Connection deflood connecions count. Higher than 0, max 999. 
+SetMan.tNumbers.NewConnectionsTime					-	Connection deflood time. Higher than 0, max 999.
+SetMan.tNumbers.DefloodWarningCount					-	Deflood warnings count. Higher than 0, max 29999.
+SetMan.tNumbers.DefloodWarningAction				-	Deflood warnings action. 0 = disconnect, 1 = kick, 2 = tempban, 3 = permban. Max 3.
+SetMan.tNumbers.DefloodTempBanTime					-	Deflood tempban time. Higher than 0.
+SetMan.tNumbers.GlobalMainChatMessages				-	Global main chat messages count. Higher than 0, max 29999.
+SetMan.tNumbers.GlobalMainChatTime					-	Global main chat time. Higher than 0, max 29999.
+SetMan.tNumbers.GlobalMainChatTimeout				-	Global main chat timeout. Higher than 0, max 29999.
+SetMan.tNumbers.GlobalMainChatAction				-	Global main chat action. 0 = disabled, 1 = lock chat, 2 = send to ops with ips. Max 2.
+SetMan.tNumbers.MinSearchLen						-	Min search length.
+SetMan.tNumbers.MaxSearchLen						-	Max search length.
+SetMan.tNumbers.MinNickLen							-	Min nick length. Max 64.
+SetMan.tNumbers.MaxNickLen							-	Max nick length. Max 64.
+SetMan.tNumbers.BruteForcePassProtectBanType		-	Brute force password protection ban type. 0 = disabled, 1 = permban, 2 = tempban. Max 2.
+SetMan.tNumbers.BruteForcePassProtectTempBanTime	-	Brute force password protection temp ban time. Higher than 0.
+SetMan.tNumbers.MaxPmCountToUser					-	Max pm count to same user per minute.
+SetMan.tNumbers.MaxSimultaneousLogins				-	Max simultaneous logins. Higher than 0, max 500.
+SetMan.tNumbers.MainChatMessages2					-	Secondary main chat deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.MainChatTime2						-	Secondary main chat deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.MainChatAction2						-	Secondary main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.PmMessages2							-	Secondary private message deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.PmTime2								-	Secondary private message deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.PmAction2							-	Secondary private message deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.SearchMessages2						-	Secondary search deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.SearchTime2							-	Secondary search deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.SearchAction2						-	Secondary search deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.MyinfoMessages2						-	Secondary myINFO deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.MyinfoTime2							-	Secondary myINFO deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.MyinfoAction2						-	Secondary myINFO deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.MaxMyinfoLen						-	Maximum MyINFO length. Min 64, max 512.
+SetMan.tNumbers.CtmMessages							-	Primary ConnectToMe deflood count. Higher than 0, max 29999.
+SetMan.tNumbers.CtmTime								-	Primary ConnectToMe deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.CtmAction							-	Primary ConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.CtmMessages2						-	Secondary ConnectToMe deflood count. Higher than 0, max 29999.
+SetMan.tNumbers.CtmTime2							-	Secondary ConnectToMe deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.CtmAction2							-	Secondary ConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.RctmMessages						-	Primary RevConnectToMe deflood count. Higher than 0, max 29999.
+SetMan.tNumbers.RctmTime							-	Primary RevConnectToMe deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.RctmAction							-	Primary RevConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.RctmMessages2						-	Secondary RevConnectToMe deflood count. Higher than 0, max 29999.
+SetMan.tNumbers.RctmTime2							-	Secondary RevConnectToMe deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.RctmAction2							-	Secondary RevConnectToMe deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.MaxCtmLen							-	Maximum ConnectToMe length. Higher than 0, max 512.
+SetMan.tNumbers.MaxRctmLen							-	Maximum RevConnectToMe length. Higher than 0, max 512.
+SetMan.tNumbers.SrMessages							-	Primary SR deflood count. Higher than 0, max 29999.
+SetMan.tNumbers.SrTime								-	Primary SR deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.SrAction							-	Primary SR deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.SrMessages2							-	Secondary SR deflood count. Higher than 0, max 29999.
+SetMan.tNumbers.SrTime2								-	Secondary SR deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.SrAction2							-	Secondary SR deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.MaxSrLen							-	Maximum SR length. Higher than 0, max 8192.
+SetMan.tNumbers.MaxDownAction						-	Primary received data deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.MaxDownKB							-	Primary received data deflood kB. Higher than 0, max 29999.
+SetMan.tNumbers.MaxDownTime							-	Primary received data deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.MaxDownAction2						-	Secondary received data deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.MaxDownKB2							-	Secondary received data deflood kB. Higher than 0, max 29999.
+SetMan.tNumbers.MaxDownTime2						-	Secondary received data deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.ChatIntervalMessages				-	Chat messages interval messages. Higher than 0, max 29999.
+SetMan.tNumbers.ChatIntervalTime					-	Chat messages interval time. Higher than 0, max 29999.
+SetMan.tNumbers.PmIntervalMessages					-	Private messages interval messages. Higher than 0, max 29999.
+SetMan.tNumbers.PmIntervalTime						-	Private messages interval time. Higher than 0, max 29999.
+SetMan.tNumbers.SearchIntervalMessages				-	Search interval count. Higher than 0, max 29999.
+SetMan.tNumbers.SearchIntervalTime					-	Search interval time. Higher than 0, max 29999.
+SetMan.tNumbers.MaxConnsSameIp						-	Maximum users from same IP. Higher than 0, max 256.
+SetMan.tNumbers.MinReconnTime						-	Minimum reconnect time in seconds. Higher than 0, max 256.
 
 
 Setting string IDs for SetMan.(G/S)etString (| is not allowed in all strings, if max length is not specified then is max 4096)
 -------------------
-0	- Hub name. Min length 1, max 256.
-1	- Admin nick. Min length 1, max 64, $ is not allowed.
-2	- Hub address. Min length 1, max 256.
-3	- TCP ports. Min length 1, max 64.
-4	- UDP port. Min length 1, max 5.
-5	- Hub description. Max length 256.
-6	- Main redirect address. Max length 256.
-7	- Hublist register servers. Max length 1024.
-8	- Registered users only message. Min length 1, max 256.
-9	- Registered users only redirect address. Max length 256.
-10	- Hub topic. Max length 256.
-11	- Share limit message. Min length 1, max 256. Use %[min] for min share size and %[max] for max share size.
-12	- Share limit redirect address. Max length 256.
-13	- Slot limit message. Min length 1, max 256. Use %[min] for min slots and %[max] for max slots.
-14	- Slot limit redirect address. Max length 256.
-15	- Hub/slot ratio limit message. Min length 1, max 256. Use %[hubs] for hubs and %[slots] for slots.
-16	- Hub/slot ratio limit redirect address. Max length 256.
-17	- Max hubs limit message. Min length 1, max 256. Use %[hubs] for max hubs.
-18	- Max hubs limit redirect address. Max length 256.
-19	- No tag rule message. Min length 1, max 256.
-20	- No tag rule redirect address. Max length 256.
-21	- Hub bot nick. Min length 1, max 64, $ and space is not allowed.
-22	- Hub bot description. Max length 64, $ is not allowed.
-23	- Hub bot email. Max length 64, $ is not allowed.
-24	- OpChat bot nick. Min length 1, max 64, $ and space is not allowed.
-25	- OpChat bot description. Max length 64, $ is not allowed.
-26	- OpChat bot email. Max length 64, $ is not allowed.
-27	- Temp ban redirect address. Max length 256.
-28	- Perm ban redirect address. Max length 256.
-29	- Chat commands prefixes. Min length 1, max 5.
-30	- Hub owner email. Max length 64.
-31	- Nick limit message. Min length 1, max 256. Use %[min] for min length and %[max] for max length.
-32	- Nick limit redirect address. Max length 256.
-33	- Additional message to ban message. Max lenght 256.
-34	- Language. When language is default then return nil.
+SetMan.tStrings.HubName						-	Hub name. Min length 1, max 256.
+SetMan.tStrings.AdminNick					-	Admin nick. Min length 1, max 64, $ is not allowed.
+SetMan.tStrings.HubAddress					-	Hub address. Min length 1, max 256.
+SetMan.tStrings.TCPPorts					-	TCP ports. Min length 1, max 64.
+SetMan.tStrings.UDPPort						-	UDP port. Min length 1, max 5.
+SetMan.tStrings.HubDescription				-	Hub description. Max length 256.
+SetMan.tStrings.MainRedirectAddress			-	Main redirect address. Max length 256.
+SetMan.tStrings.HublistRegisterAddresses	-	Hublist register servers. Max length 1024.
+SetMan.tStrings.RegOnlyMessage				-	Registered users only message. Min length 1, max 256.
+SetMan.tStrings.RegOnlyRedirAddress			-	Registered users only redirect address. Max length 256.
+SetMan.tStrings.HubTopic					-	Hub topic. Max length 256.
+SetMan.tStrings.ShareLimitMessage			-	Share limit message. Min length 1, max 256. Use %[min] for min share size and %[max] for max share size.
+SetMan.tStrings.ShareLimitRedirAddress		-	Share limit redirect address. Max length 256.
+SetMan.tStrings.SlotLimitMessage			-	Slot limit message. Min length 1, max 256. Use %[min] for min slots and %[max] for max slots.
+SetMan.tStrings.SlotLimitRedirAddress		-	Slot limit redirect address. Max length 256.
+SetMan.tStrings.HubSlotRatioMessage			-	Hub/slot ratio limit message. Min length 1, max 256. Use %[hubs] for hubs and %[slots] for slots.
+SetMan.tStrings.HubSlotRatioRedirAddress	-	Hub/slot ratio limit redirect address. Max length 256.
+SetMan.tStrings.MaxHubsLimitMessage			-	Max hubs limit message. Min length 1, max 256. Use %[hubs] for max hubs.
+SetMan.tStrings.MaxHubsLimitRedirAddress	-	Max hubs limit redirect address. Max length 256.
+SetMan.tStrings.NoTagMessage				-	No tag rule message. Min length 1, max 256.
+SetMan.tStrings.NoTagRedirAddress			-	No tag rule redirect address. Max length 256.
+SetMan.tStrings.HubBotNick					-	Hub bot nick. Min length 1, max 64, $ and space is not allowed.
+SetMan.tStrings.HubBotDescription			-	Hub bot description. Max length 64, $ is not allowed.
+SetMan.tStrings.HubBotEmail					-	Hub bot email. Max length 64, $ is not allowed.
+SetMan.tStrings.OpChatNick					-	OpChat bot nick. Min length 1, max 64, $ and space is not allowed.
+SetMan.tStrings.OpChatDescription			-	OpChat bot description. Max length 64, $ is not allowed.
+SetMan.tStrings.OpChatEmail					-	OpChat bot email. Max length 64, $ is not allowed.
+SetMan.tStrings.TempBanRedirAddress			-	Temp ban redirect address. Max length 256.
+SetMan.tStrings.PermBanRedirAddress			-	Perm ban redirect address. Max length 256.
+SetMan.tStrings.ChatCommandsPrefixes		-	Chat commands prefixes. Min length 1, max 5.
+SetMan.tStrings.HubOwnerEmail				-	Hub owner email. Max length 64.
+SetMan.tStrings.NickLimitMessage			-	Nick limit message. Min length 1, max 256. Use %[min] for min length and %[max] for max length.
+SetMan.tStrings.NickLimitRedirAddress		-	Nick limit redirect address. Max length 256.
+SetMan.tStrings.MessageToAddToBanMessage	-	Additional message to ban message. Max lenght 256.
+SetMan.tStrings.Language					-	Language. When language is default then return nil.
+SetMan.tStrings.IPv4Address					-	TCP/IP version 4 address.
+SetMan.tStrings.IPv6Address					-	TCP/IP version 6 address.
 
 
 User data IDs for Core.GetUserData and Core.GetUserValue call.

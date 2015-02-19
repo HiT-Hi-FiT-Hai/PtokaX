@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2014  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -55,7 +55,7 @@ void Cout(const string &/*msg*/) {
 }
 #endif
 //---------------------------------------------------------------------------
-
+/*
 #ifdef _WIN32
 	// Boyer-Moore string matching algo.
 	// returns :
@@ -63,12 +63,12 @@ void Cout(const string &/*msg*/) {
 	int BMFind(char *text, int N, char *pat, int M) {
 	   int i, j, DD[MAX_PAT_SIZE], D[MAX_ALPHABET_SIZE];
 	
-	   /* Predzpracovani */
+	   // Predzpracovani
 	   preDD(pat, M, DD);
 	   preD(pat, M, D);
 	
-	   /* Vyhledavani */
-	   /* Searching */
+	   // Vyhledavani 
+	   // Searching
 	   i = 0;
 	   while (i <= N-M) {
 	      for(j = M-1; j >= 0  &&  pat[j] == text[j+i]; --j);
@@ -92,10 +92,10 @@ void Cout(const string &/*msg*/) {
 	}
 //---------------------------------------------------------------------------
 	
-	/* Funkce ulozi do suff[i] delku nejdelsiho podretezce,
-	 * ktery konci na pozici pat[i]
-	 * a soucasne je priponou pat
-	 */
+	// Funkce ulozi do suff[i] delku nejdelsiho podretezce,
+	// ktery konci na pozici pat[i]
+	// a soucasne je priponou pat
+	//
 	void suffixes(char *pat, int M, int *suff) {
 	   int f = 0, g, i;
 	
@@ -133,6 +133,7 @@ void Cout(const string &/*msg*/) {
 	      DD[M - 1 - suff[i]] = M-1-i;
 	}
 #endif
+*/
 //---------------------------------------------------------------------------
 
 char * Lock2Key(char * sLock) {
@@ -1103,31 +1104,34 @@ bool DirExist(char * sPath) {
 
 		if(ver.dwPlatformId != VER_PLATFORM_WIN32_NT) {
 			clsServerManager::sOS = "Windows 9x/ME";
-	    } else if(ver.dwMajorVersion == 6) {
-            // temporary (maybe) hack to detect win 10
-            OSVERSIONINFOEX ver2;
-            memset(&ver2, 0, sizeof(OSVERSIONINFOEX));
-            ver2.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-            ver2.dwMinorVersion = 4;
-            ULONGLONG mask = ::VerSetConditionMask(0, VER_MINORVERSION, VER_EQUAL);
-
-            if(::VerifyVersionInfo(&ver2, VER_MINORVERSION, mask)) {
+			return;
+		} else if(ver.dwMajorVersion == 10) {
+			if(ver.dwMinorVersion == 0) {
                 clsServerManager::sOS = "Windows 10";
-            } else if(ver.dwMinorVersion == 3) {
+                return;
+            }
+	    } else if(ver.dwMajorVersion == 6) {
+            if(ver.dwMinorVersion == 3) {
                 clsServerManager::sOS = "Windows 8.1";
+                return;
             } else if(ver.dwMinorVersion == 2) {
                 clsServerManager::sOS = "Windows 8";
+                return;
             } else if(ver.dwMinorVersion == 1) {
 	           if(ver.wProductType == VER_NT_WORKSTATION) {
 	               clsServerManager::sOS = "Windows 7";
+	               return;
 	           } else {
 	               clsServerManager::sOS = "Windows 2008 R2";
+	               return;
 	           }
             } else {
 	           if(ver.wProductType == VER_NT_WORKSTATION) {
 	               clsServerManager::sOS = "Windows Vista";
+	               return;
 	           } else {
 	               clsServerManager::sOS = "Windows 2008";
+	               return;
 	           }
             }
 		} else if(ver.dwMajorVersion == 5) {
@@ -1155,14 +1159,20 @@ bool DirExist(char * sPath) {
 
                 // should not happen, but for sure...
                 clsServerManager::sOS = "Windows 2003/XP64";
+                return;
 			} else if(ver.dwMinorVersion == 1) {
 				clsServerManager::sOS = "Windows XP";
+				return;
 			} else if(ver.dwMinorVersion == 0) {
 				clsServerManager::sOS = "Windows 2000";
+				return;
 			}
 		} else if(ver.dwMajorVersion == 4) {
 			clsServerManager::sOS = "Windows NT4";
+			return;
 		}
+
+		clsServerManager::sOS = "Windows (unknown version)";
 	}
 //---------------------------------------------------------------------------
 

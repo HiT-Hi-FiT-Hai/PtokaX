@@ -148,7 +148,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;Iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;Iphlpapi.lib;Dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)PtokaX.exe</OutputFile>
       <AdditionalLibraryDirectories>lua;tinyxml;zlib;skein;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -156,7 +156,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <Manifest>
-      <AssemblyIdentity>PtokaX,version=0.5.0.2,processorArchitecture=x86,type=win32</AssemblyIdentity>
+      <AssemblyIdentity>PtokaX,version=0.5.0.3,processorArchitecture=x86,type=win32</AssemblyIdentity>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -184,6 +184,7 @@
       <OpenMPSupport>false</OpenMPSupport>
       <CompileAs>CompileAsCpp</CompileAs>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <AdditionalOptions>/Zc:inline /cgthreads4 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0409</Culture>
@@ -217,7 +218,7 @@
       <TerminalServerAware>false</TerminalServerAware>
     </Link>
     <Manifest>
-      <AssemblyIdentity>PtokaX,version=0.5.0.2,processorArchitecture=x86,type=win32</AssemblyIdentity>
+      <AssemblyIdentity>PtokaX,version=0.5.0.3,processorArchitecture=x86,type=win32</AssemblyIdentity>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Testing|Win32'">
@@ -245,6 +246,7 @@
       <OpenMPSupport>false</OpenMPSupport>
       <CompileAs>CompileAsCpp</CompileAs>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <AdditionalOptions>/Zc:inline /cgthreads4 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0409</Culture>
@@ -278,7 +280,7 @@
       <TerminalServerAware>false</TerminalServerAware>
     </Link>
     <Manifest>
-      <AssemblyIdentity>PtokaX,version=0.5.0.2,processorArchitecture=x86,type=win32</AssemblyIdentity>
+      <AssemblyIdentity>PtokaX,version=0.5.0.3,processorArchitecture=x86,type=win32</AssemblyIdentity>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -300,7 +302,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;Iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;Iphlpapi.lib;Dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)PtokaX-x64.exe</OutputFile>
       <AdditionalLibraryDirectories>lua;tinyxml;zlib;skein;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -308,7 +310,7 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <Manifest>
-      <AssemblyIdentity>PtokaX,version=0.5.0.2,processorArchitecture=amd64,type=win32</AssemblyIdentity>
+      <AssemblyIdentity>PtokaX,version=0.5.0.3,processorArchitecture=amd64,type=win32</AssemblyIdentity>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -336,6 +338,7 @@
       <OpenMPSupport>false</OpenMPSupport>
       <CallingConvention>FastCall</CallingConvention>
       <CompileAs>CompileAsCpp</CompileAs>
+      <AdditionalOptions>/Zc:inline /cgthreads4 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0409</Culture>
@@ -366,7 +369,7 @@
       <TerminalServerAware>false</TerminalServerAware>
     </Link>
     <Manifest>
-      <AssemblyIdentity>PtokaX,version=0.5.0.2,processorArchitecture=amd64,type=win32</AssemblyIdentity>
+      <AssemblyIdentity>PtokaX,version=0.5.0.3,processorArchitecture=amd64,type=win32</AssemblyIdentity>
     </Manifest>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -397,6 +400,7 @@
       <OpenMPSupport>false</OpenMPSupport>
       <CallingConvention>FastCall</CallingConvention>
       <CompileAs>CompileAsCpp</CompileAs>
+      <AdditionalOptions>/Zc:inline /cgthreads4 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0409</Culture>
@@ -427,7 +431,7 @@
       <TerminalServerAware>false</TerminalServerAware>
     </Link>
     <Manifest>
-      <AssemblyIdentity>PtokaX,version=0.5.0.2,processorArchitecture=amd64,type=win32</AssemblyIdentity>
+      <AssemblyIdentity>PtokaX,version=0.5.0.3,processorArchitecture=amd64,type=win32</AssemblyIdentity>
     </Manifest>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>

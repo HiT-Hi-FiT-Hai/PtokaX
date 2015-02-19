@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2014  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -42,6 +42,9 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
+#ifdef _WITH_POSTGRES
+	#include "DB-PostgreSQL.h"
+#endif
 #include "LuaScript.h"
 #include "RegThread.h"
 //---------------------------------------------------------------------------
@@ -742,6 +745,9 @@ void clsServiceLoop::ReceiveLoop() {
                 }
 #endif
 //                if(sqldb) sqldb->AddVisit(curUser);
+#ifdef _WITH_POSTGRES
+				DBPostgreSQL::mPtr->UpdateRecord(curUser);
+#endif
 
                 // PPK ... change to NoHello supports
             	int imsgLen = sprintf(msg, "$Hello %s|", curUser->sNick);

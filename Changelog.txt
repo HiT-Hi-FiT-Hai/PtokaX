@@ -5,9 +5,14 @@ PtokaX DC hub software - PPK (c) 2006/2014
 
 
 ----------------------------------------Next Release...---------------------------------------
+
+----------------------------------------0.5.0.3 20 February 2015-----------------------------
 Added: install part to makefile including setcap allowing PtokaX to listen on ports below 1024 without running as privileged user (require capabilities support, libcap2-bin in debian).
 Added: hublist.te-home.net and dc.gwhublist.com to default hublist register addresses.
 Added: init script for *nix.
+Added: Port validity checking in commands to disallow exploit that can be used to ddos in dc++ core.
+Added: Tables with definitions for SetMan booleans, numbers and strings identificators.
+Added: Table with definitions for ProfMan permissions identificators.
 Fixed: User profile is set after correct password is received to disable possible exploit in scripts (thx Alexey for report).
 Fixed: Missing hub bot key after nick change when opchat have same nick.
 Fixed: Possible crash on closing some gui windows (thx Alex82 for report).
@@ -20,6 +25,7 @@ Fixed: User who was allowed to kick can ban and tempban user without permissions
 Fixed: Range ban and range temp ban command was not working for IPv6 addresses longer than 15 characters (thx Alexey for report).
 Fixed: Few possible memory leaks when memory allocation fail.
 Fixed: On !rangeban command when range was already banned was sent wrong second message (thx Alexey for report).
+Fixed: Active search character counting for ipv6 request when ip is very short.
 Other: Some minor performance improvements.
 
 

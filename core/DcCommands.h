@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2014  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -76,8 +76,9 @@ private:
 	PassBf * Find(const uint8_t * ui128IpHash);
 	void Remove(PassBf * PassBfItem);
 
-    static bool CheckIP(const User * curUser, const char * sIP);
-    char * GetPort(char * sData, char cPortEnd, size_t &szPortLen);
+    static bool CheckIPPort(const User * pUser, char * sIP, bool &bWrongPort, uint16_t &ui16Port, uint8_t &ui8AfterPortLen, char cPortEnd);
+    static bool GetPort(char * sData, uint16_t &ui16Port, uint8_t &ui8AfterPortLen, char cPortEnd);
+    void SendIncorrectPortMsg(User * pUser, const bool &bCTM);
     void SendIncorrectIPMsg(User * curUser, char * sBadIP, const bool &bCTM);
     static void SendIPFixedMsg(User * pUser, char * sBadIP, char * sRealIP);
 

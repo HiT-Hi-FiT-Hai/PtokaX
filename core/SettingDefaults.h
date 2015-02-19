@@ -1,8 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2014  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -198,6 +197,9 @@ int16_t SetShortDef[] = {
     60, //SEARCH_INTERVAL_TIME, 
     5, //MAX_CONN_SAME_IP
     10, //MIN_RECONN_TIME
+#ifdef _WITH_POSTGRES
+    0, //DB_REMOVE_OLD_RECORDS
+#endif
     0, //SETSHORT_MAX_USERS_PEAK
 };
 
@@ -239,6 +241,14 @@ const char* SetTxtDef[] = {
     "", //LANGUAGE
     "", //IPV4_ADDRESS
     "", //IPV6_ADDRESS
+#ifdef _WITH_POSTGRES
+	"", //ENCODING
+	"localhost", //POSTGRES_HOST
+	"5432", //POSTGRES_PORT
+	"ptokax", //POSTGRES_DBNAME
+	"ptokax", //POSTGRES_USER
+	"", //POSTGRES_PASS
+#endif
 };
 //---------------------------------------------------------------------------
 
