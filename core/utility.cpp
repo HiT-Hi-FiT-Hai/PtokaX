@@ -1452,7 +1452,7 @@ void ReduceGlobalBuffer() {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-bool HashPassword(char * sPassword, size_t &szPassLen, uint8_t * ui8PassHash) {
+bool HashPassword(char * sPassword, const size_t &szPassLen, uint8_t * ui8PassHash) {
     Skein1024_Ctxt_t ctx1024;
 
     if(Skein1024_Init(&ctx1024, 512) == SKEIN_SUCCESS) {

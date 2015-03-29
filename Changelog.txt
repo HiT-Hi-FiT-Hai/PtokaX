@@ -5,6 +5,8 @@ PtokaX DC hub software - PPK (c) 2006/2014
 
 
 ----------------------------------------Next Release...---------------------------------------
+Fixed: Missing settings and profiles identificator tables with Lua 5.1.
+
 
 ----------------------------------------0.5.0.3 20 February 2015-----------------------------
 Added: install part to makefile including setcap allowing PtokaX to listen on ports below 1024 without running as privileged user (require capabilities support, libcap2-bin in debian).

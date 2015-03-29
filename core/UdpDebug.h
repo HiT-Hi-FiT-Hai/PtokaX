@@ -66,7 +66,7 @@ public:
 	bool Remove(User * u);
 	void Remove(char * sScriptName);
 	bool CheckUdpSub(User * u, bool bSndMess = false) const;
-	void Send(char * sScriptName, char * sMsg, const size_t &szLen) const;
+	void Send(const char * sScriptName, char * sMsg, const size_t &szLen) const;
 	void Cleanup();
 };
 //---------------------------------------------------------------------------

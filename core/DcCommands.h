@@ -68,7 +68,7 @@ private:
 	void Chat(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck);
 	void Close(User * curUser, char * sData, const uint32_t &iLen);
     
-    void Unknown(User * curUser, char * sData, const uint32_t &iLen);
+    void Unknown(User * curUser, char * sData, const uint32_t &iLen, const bool &bMyNick = false);
     void MyNick(User * pUser, char * sData, const uint32_t &ui32Len);
     
     bool ValidateUserNick(User * curUser, char * Nick, const size_t &szNickLen, const bool &ValidateNick);

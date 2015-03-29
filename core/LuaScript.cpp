@@ -304,47 +304,11 @@ static int OsExit(lua_State * /* L*/) {
 }
 //------------------------------------------------------------------------------
 
-bool ScriptStart(Script * cur) {
-	cur->ui16Functions = 65535;
-	cur->ui32DataArrivals = 4294967295U;
+static void AddSettingIds(lua_State * L) {
+	int iTable = lua_gettop(L);
 
-	cur->pPrev = NULL;
-	cur->pNext = NULL;
-
-#ifdef _WIN32
-	cur->pLUA = lua_newstate(LuaAlocator, NULL);
-#else
-    cur->pLUA = luaL_newstate();
-#endif
-
-    if(cur->pLUA == NULL) {
-        return false;
-    }
-
-	luaL_openlibs(cur->pLUA);
-
-	lua_atpanic(cur->pLUA, ScriptPanic);
-
-    // replace internal lua os.exit with correct shutdown
-    lua_getglobal(cur->pLUA, "os");
-
-    if(lua_istable(cur->pLUA, -1)) {
-        lua_pushcfunction(cur->pLUA, OsExit);
-        lua_setfield(cur->pLUA, -2, "exit");
-
-        lua_pop(cur->pLUA, 1);
-    }
-
-#if LUA_VERSION_NUM > 501
-    luaL_requiref(cur->pLUA, "Core", RegCore, 1);
-	lua_pop(cur->pLUA, 1);
-
-    luaL_requiref(cur->pLUA, "SetMan", RegSetMan, 1);
-
-	int iTable = lua_gettop(cur->pLUA);
-
-	lua_newtable(cur->pLUA);
-	int iNewTable = lua_gettop(cur->pLUA);
+	lua_newtable(L);
+	int iNewTable = lua_gettop(L);
 
 	const uint8_t ui8Bools[] = { SETBOOL_ANTI_MOGLO, SETBOOL_AUTO_START, SETBOOL_REDIRECT_ALL, SETBOOL_REDIRECT_WHEN_HUB_FULL, SETBOOL_AUTO_REG, SETBOOL_REG_ONLY, 
 		SETBOOL_REG_ONLY_REDIR, SETBOOL_SHARE_LIMIT_REDIR, SETBOOL_SLOTS_LIMIT_REDIR, SETBOOL_HUB_SLOT_RATIO_REDIR, SETBOOL_MAX_HUBS_LIMIT_REDIR, 
@@ -373,14 +337,14 @@ bool ScriptStart(Script * cur) {
 	};
 
 	for(uint8_t ui8i = 0; ui8i < sizeof(ui8Bools); ui8i++) {
-		lua_pushinteger(cur->pLUA, ui8Bools[ui8i]);
-		lua_setfield(cur->pLUA, iNewTable, pBoolsNames[ui8i]);
+		lua_pushinteger(L, ui8Bools[ui8i]);
+		lua_setfield(L, iNewTable, pBoolsNames[ui8i]);
 	}
 
-	lua_setfield(cur->pLUA, iTable, "tBooleans");
+	lua_setfield(L, iTable, "tBooleans");
 
-	lua_newtable(cur->pLUA);
-	iNewTable = lua_gettop(cur->pLUA);
+	lua_newtable(L);
+	iNewTable = lua_gettop(L);
 
 	const uint8_t ui8Numbers[] = { SETSHORT_MAX_USERS, SETSHORT_MIN_SHARE_LIMIT, SETSHORT_MIN_SHARE_UNITS, SETSHORT_MAX_SHARE_LIMIT, SETSHORT_MAX_SHARE_UNITS, 
 		SETSHORT_MIN_SLOTS_LIMIT, SETSHORT_MAX_SLOTS_LIMIT, SETSHORT_HUB_SLOT_RATIO_HUBS, SETSHORT_HUB_SLOT_RATIO_SLOTS, SETSHORT_MAX_HUBS_LIMIT, 
@@ -439,14 +403,14 @@ bool ScriptStart(Script * cur) {
 	};
 
 	for(uint8_t ui8i = 0; ui8i < sizeof(ui8Numbers); ui8i++) {
-		lua_pushinteger(cur->pLUA, ui8Numbers[ui8i]);
-		lua_setfield(cur->pLUA, iNewTable, pNumbersNames[ui8i]);
+		lua_pushinteger(L, ui8Numbers[ui8i]);
+		lua_setfield(L, iNewTable, pNumbersNames[ui8i]);
 	}
 
-	lua_setfield(cur->pLUA, iTable, "tNumbers");
+	lua_setfield(L, iTable, "tNumbers");
 
-	lua_newtable(cur->pLUA);
-	iNewTable = lua_gettop(cur->pLUA);
+	lua_newtable(L);
+	iNewTable = lua_gettop(L);
 
 	const uint8_t ui8Strings[] = { SETTXT_HUB_NAME, SETTXT_ADMIN_NICK, SETTXT_HUB_ADDRESS, SETTXT_TCP_PORTS, SETTXT_UDP_PORT, SETTXT_HUB_DESCRIPTION, SETTXT_REDIRECT_ADDRESS, 
 		SETTXT_REGISTER_SERVERS, SETTXT_REG_ONLY_MSG, SETTXT_REG_ONLY_REDIR_ADDRESS, SETTXT_HUB_TOPIC, SETTXT_SHARE_LIMIT_MSG, SETTXT_SHARE_LIMIT_REDIR_ADDRESS, 
@@ -473,26 +437,21 @@ bool ScriptStart(Script * cur) {
 	};
 
 	for(uint8_t ui8i = 0; ui8i < sizeof(ui8Strings); ui8i++) {
-		lua_pushinteger(cur->pLUA, ui8Strings[ui8i]);
-		lua_setfield(cur->pLUA, iNewTable, pStringsNames[ui8i]);
+		lua_pushinteger(L, ui8Strings[ui8i]);
+		lua_setfield(L, iNewTable, pStringsNames[ui8i]);
 	}
 
-	lua_setfield(cur->pLUA, iTable, "tStrings");
+	lua_setfield(L, iTable, "tStrings");
 
-    lua_pop(cur->pLUA, 1);
+    lua_pop(L, 1);
+}
+//------------------------------------------------------------------------------
 
-    luaL_requiref(cur->pLUA, "RegMan", RegRegMan, 1);
-    lua_pop(cur->pLUA, 1);
+static void AddPermissionsIds(lua_State * L) {
+	int iTable = lua_gettop(L);
 
-    luaL_requiref(cur->pLUA, "BanMan", RegBanMan, 1);
-    lua_pop(cur->pLUA, 1);
-
-    luaL_requiref(cur->pLUA, "ProfMan", RegProfMan, 1);
-
-	iTable = lua_gettop(cur->pLUA);
-
-	lua_newtable(cur->pLUA);
-	iNewTable = lua_gettop(cur->pLUA);
+	lua_newtable(L);
+	int iNewTable = lua_gettop(L);
 
 	const uint8_t ui8Permissions[] = { clsProfileManager::HASKEYICON, clsProfileManager::NODEFLOODGETNICKLIST, clsProfileManager::NODEFLOODMYINFO, clsProfileManager::NODEFLOODSEARCH, clsProfileManager::NODEFLOODPM,
 		clsProfileManager::NODEFLOODMAINCHAT, clsProfileManager::MASSMSG, clsProfileManager::TOPIC, clsProfileManager::TEMP_BAN, clsProfileManager::REFRESHTXT,
@@ -521,13 +480,62 @@ bool ScriptStart(Script * cur) {
 	};
 
 	for(uint8_t ui8i = 0; ui8i < sizeof(ui8Permissions); ui8i++) {
-		lua_pushinteger(cur->pLUA, ui8Permissions[ui8i]);
-		lua_setfield(cur->pLUA, iNewTable, pPermissionsNames[ui8i]);
+		lua_pushinteger(L, ui8Permissions[ui8i]);
+		lua_setfield(L, iNewTable, pPermissionsNames[ui8i]);
 	}
 
-	lua_setfield(cur->pLUA, iTable, "tPermissions");
+	lua_setfield(L, iTable, "tPermissions");
 
+    lua_pop(L, 1);
+}
+//------------------------------------------------------------------------------
+
+bool ScriptStart(Script * cur) {
+	cur->ui16Functions = 65535;
+	cur->ui32DataArrivals = 4294967295U;
+
+	cur->pPrev = NULL;
+	cur->pNext = NULL;
+
+#ifdef _WIN32
+	cur->pLUA = lua_newstate(LuaAlocator, NULL);
+#else
+    cur->pLUA = luaL_newstate();
+#endif
+
+    if(cur->pLUA == NULL) {
+        return false;
+    }
+
+	luaL_openlibs(cur->pLUA);
+
+	lua_atpanic(cur->pLUA, ScriptPanic);
+
+    // replace internal lua os.exit with correct shutdown
+    lua_getglobal(cur->pLUA, "os");
+
+    if(lua_istable(cur->pLUA, -1)) {
+        lua_pushcfunction(cur->pLUA, OsExit);
+        lua_setfield(cur->pLUA, -2, "exit");
+
+        lua_pop(cur->pLUA, 1);
+    }
+
+#if LUA_VERSION_NUM > 501
+    luaL_requiref(cur->pLUA, "Core", RegCore, 1);
+	lua_pop(cur->pLUA, 1);
+
+    luaL_requiref(cur->pLUA, "SetMan", RegSetMan, 1);
+	AddSettingIds(cur->pLUA);
+
+    luaL_requiref(cur->pLUA, "RegMan", RegRegMan, 1);
     lua_pop(cur->pLUA, 1);
+
+    luaL_requiref(cur->pLUA, "BanMan", RegBanMan, 1);
+    lua_pop(cur->pLUA, 1);
+
+    luaL_requiref(cur->pLUA, "ProfMan", RegProfMan, 1);
+	AddPermissionsIds(cur->pLUA);
 
     luaL_requiref(cur->pLUA, "TmrMan", RegTmrMan, 1);
     lua_pop(cur->pLUA, 1);
@@ -542,10 +550,26 @@ bool ScriptStart(Script * cur) {
     lua_pop(cur->pLUA, 1);
 #else
 	RegCore(cur->pLUA);
+
 	RegSetMan(cur->pLUA);
+
+    lua_getglobal(cur->pLUA, "SetMan");
+
+    if(lua_istable(cur->pLUA, -1)) {
+        AddSettingIds(cur->pLUA);
+    }
+
 	RegRegMan(cur->pLUA);
 	RegBanMan(cur->pLUA);
+
 	RegProfMan(cur->pLUA);
+
+    lua_getglobal(cur->pLUA, "ProfMan");
+
+    if(lua_istable(cur->pLUA, -1)) {
+        AddPermissionsIds(cur->pLUA);
+    }
+
 	RegTmrMan(cur->pLUA);
 	RegUDPDbg(cur->pLUA);
 	RegScriptMan(cur->pLUA);

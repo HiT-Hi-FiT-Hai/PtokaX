@@ -550,7 +550,7 @@ bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) const {
 }
 //---------------------------------------------------------------------------
 
-void clsUdpDebug::Send(char * sScriptName, char * sMessage, const size_t &szMsgLen) const {
+void clsUdpDebug::Send(const char * sScriptName, char * sMessage, const size_t &szMsgLen) const {
     UdpDbgItem * cur = NULL,
         * next = pScriptList;
 

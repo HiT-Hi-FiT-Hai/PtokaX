@@ -3328,7 +3328,7 @@ void clsDcCommands::Close(User * curUser, char * sData, const uint32_t &iLen) {
 }
 //---------------------------------------------------------------------------
 
-void clsDcCommands::Unknown(User * curUser, char * sData, const uint32_t &iLen) {
+void clsDcCommands::Unknown(User * curUser, char * sData, const uint32_t &iLen, const bool &/*bMyNick = false*/) {
     iStatCmdUnknown++;
 
     #ifdef _DBG
@@ -3348,7 +3348,11 @@ void clsDcCommands::Unknown(User * curUser, char * sData, const uint32_t &iLen) 
         if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::Unknown1") == true) {
             clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
         }
-
+/*
+		if(bMyNick == true) {
+			curUser->SendCharDelayed("$Error CTM2HUB|", 15);
+		}
+*/
         curUser->Close();
     }
 }
@@ -4037,7 +4041,7 @@ void clsDcCommands::MyNick(User * pUser, char * sData, const uint32_t &ui32Len) 
             clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
         }
 
-        Unknown(pUser, sData, ui32Len);
+        Unknown(pUser, sData, ui32Len, true);
         return;
     }
 
@@ -4047,7 +4051,7 @@ void clsDcCommands::MyNick(User * pUser, char * sData, const uint32_t &ui32Len) 
             clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
         }
 
-        Unknown(pUser, sData, ui32Len);
+        Unknown(pUser, sData, ui32Len, true);
         return;
     }
 
@@ -4061,7 +4065,7 @@ void clsDcCommands::MyNick(User * pUser, char * sData, const uint32_t &ui32Len) 
             clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
         }
 
-        Unknown(pUser, sData, ui32Len);
+        Unknown(pUser, sData, ui32Len, true);
         return;
     }
 

@@ -528,46 +528,46 @@ SetMan.tBooleans.HashPasswords			-	Hash registered users passwords.
 
 Setting number IDs for SetMan.(G/S)etNumber
 -------------------
-SetMan.tNumbers.MaxUsers	-	Max users limit
-SetMan.tNumbers.MinShareLimit	-	Min share limit. Max 9999.
-SetMan.tNumbers.MinShareUnits	-	Min share units. 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB. Max 4.
-SetMan.tNumbers.MaxShareLimit	-	Max share limit. Max 9999.
-SetMan.tNumbers.MaxShareUnits	-	Max share units. 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB. Max 4.
-SetMan.tNumbers.MinSlotsLimit	-	Min slots limit.
-SetMan.tNumbers.MaxSlotsLimt	-	Max slots limit.
-SetMan.tNumbers.HubSlotRatioHubs	-	Hubs for hub/slot ratio.
-SetMan.tNumbers.HubSlotRatioSlots	-	Slots for hub/slot ratio.
-SetMan.tNumbers.MaxHubsLimit	-	Max hubs limit.
-SetMan.tNumbers.NoTagOption	-	No tag option. 0 = accept, 1 = reject, 2 = redirect. Max 2.
-SetMan.tNumbers.LongMyinfoOption	-	Send full MyINFO to... 0 = to all, 1 = to profile, 2 = to none. Max 2.
-SetMan.tNumbers.MaxChatLen	-	Max chat length limit.
-SetMan.tNumbers.MaxChatLines	-	Max chat lines limit.
-SetMan.tNumbers.MaxPmLen	-	Max private message length limit.
-SetMan.tNumbers.MaxPmLines	-	Max private message lines limit.
-SetMan.tNumbers.DefaultTempBanTime	-	Default tempban time. Must be higher than 0.
-SetMan.tNumbers.MaxPasiveSr	-	Max passive search replys limit.
-SetMan.tNumbers.MyInfoDelay	-	Time before new MyINFO from user is accepted for broadcast.
-SetMan.tNumbers.MainChatMessages	-	Main chat deflood messages count. Higher than 0, max 29999.
-SetMan.tNumbers.MainChatTime	-	Main chat deflood time. Higher than 0, max 29999.
-SetMan.tNumbers.MainChatAction	-	Main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-SetMan.tNumbers.SameMainChatMessages	-	Same main chat deflood messages count. Higher than 0, max 29999.
-SetMan.tNumbers.SameMainChatTime	-	Same main chat deflood time. Higher than 0, max 29999.
-SetMan.tNumbers.SameMainChatAction	-	Same main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-SetMan.tNumbers.SameMultiMainChatMessages	-	Same multiline main chat deflood messages count. Min 2, max 999.
-SetMan.tNumbers.SameMultiMainChatLines	-	Same multiline main chat deflood lines. Min 2, max 999.
-SetMan.tNumbers.SameMultiMainChatAction	-	Same multiline main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-SetMan.tNumbers.PmMessages	-	Private message deflood messages count. Higher than 0, max 29999.
-SetMan.tNumbers.PmTime	-	Private message deflood time. Higher than 0, max 29999.
-SetMan.tNumbers.PmAction	-	Private message deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-SetMan.tNumbers.SamePmMessages	-	Same private message deflood messages count. Higher than 0, max 29999.
-SetMan.tNumbers.SamePmTime	-	Same private message deflood time. Higher than 0, max 29999.
-SetMan.tNumbers.SamePmAction	-	Same private message deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-SetMan.tNumbers.SameMultiPmMessages	-	Same multiline private message deflood messages count. Min 2, max 999.
-SetMan.tNumbers.SameMultiPmLines	-	Same multiline private message deflood lines. Min 2, max 999.
-SetMan.tNumbers.SameMultiPmAction	-	Same multiline private message action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
-SetMan.tNumbers.SearchMessages	-	Search deflood messages count. Higher than 0, max 29999.
-SetMan.tNumbers.SearchTime	-	Search deflood time. Higher than 0, max 29999.
-SetMan.tNumbers.SearchAction	-	Search deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.MaxUsers							-	Max users limit
+SetMan.tNumbers.MinShareLimit						-	Min share limit. Max 9999.
+SetMan.tNumbers.MinShareUnits						-	Min share units. 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB. Max 4.
+SetMan.tNumbers.MaxShareLimit						-	Max share limit. Max 9999.
+SetMan.tNumbers.MaxShareUnits						-	Max share units. 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB. Max 4.
+SetMan.tNumbers.MinSlotsLimit						-	Min slots limit.
+SetMan.tNumbers.MaxSlotsLimt						-	Max slots limit.
+SetMan.tNumbers.HubSlotRatioHubs					-	Hubs for hub/slot ratio.
+SetMan.tNumbers.HubSlotRatioSlots					-	Slots for hub/slot ratio.
+SetMan.tNumbers.MaxHubsLimit						-	Max hubs limit.
+SetMan.tNumbers.NoTagOption							-	No tag option. 0 = accept, 1 = reject, 2 = redirect. Max 2.
+SetMan.tNumbers.LongMyinfoOption					-	Send full MyINFO to... 0 = to all, 1 = to profile, 2 = to none. Max 2.
+SetMan.tNumbers.MaxChatLen							-	Max chat length limit.
+SetMan.tNumbers.MaxChatLines						-	Max chat lines limit.
+SetMan.tNumbers.MaxPmLen							-	Max private message length limit.
+SetMan.tNumbers.MaxPmLines							-	Max private message lines limit.
+SetMan.tNumbers.DefaultTempBanTime					-	Default tempban time. Must be higher than 0.
+SetMan.tNumbers.MaxPasiveSr							-	Max passive search replys limit.
+SetMan.tNumbers.MyInfoDelay							-	Time before new MyINFO from user is accepted for broadcast.
+SetMan.tNumbers.MainChatMessages					-	Main chat deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.MainChatTime						-	Main chat deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.MainChatAction						-	Main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.SameMainChatMessages				-	Same main chat deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.SameMainChatTime					-	Same main chat deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.SameMainChatAction					-	Same main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.SameMultiMainChatMessages			-	Same multiline main chat deflood messages count. Min 2, max 999.
+SetMan.tNumbers.SameMultiMainChatLines				-	Same multiline main chat deflood lines. Min 2, max 999.
+SetMan.tNumbers.SameMultiMainChatAction				-	Same multiline main chat deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.PmMessages							-	Private message deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.PmTime								-	Private message deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.PmAction							-	Private message deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.SamePmMessages						-	Same private message deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.SamePmTime							-	Same private message deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.SamePmAction						-	Same private message deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.SameMultiPmMessages					-	Same multiline private message deflood messages count. Min 2, max 999.
+SetMan.tNumbers.SameMultiPmLines					-	Same multiline private message deflood lines. Min 2, max 999.
+SetMan.tNumbers.SameMultiPmAction					-	Same multiline private message action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
+SetMan.tNumbers.SearchMessages						-	Search deflood messages count. Higher than 0, max 29999.
+SetMan.tNumbers.SearchTime							-	Search deflood time. Higher than 0, max 29999.
+SetMan.tNumbers.SearchAction						-	Search deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
 SetMan.tNumbers.SameSearchMessages					-	Same search deflood messages count. Higher than 0, max 29999.
 SetMan.tNumbers.SameSearchTime						-	Same search deflood time. Higher than 0, max 29999.
 SetMan.tNumbers.SameSearchAction					-	Same search deflood action. 0 = disabled, 1 = ignore, 2 = warn, 3 = disconnect, 4 = kick, 5 = tempban, 6 = permban. Max 6.
