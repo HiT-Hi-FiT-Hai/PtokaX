@@ -796,6 +796,7 @@ enum LangIds {
     LAN_YOUR_CLIENT_SEND_INCORRECT_PORT_IN_SEARCH,
     LAN_NOT_FOUND, 
 	LAN_OFFLINE_FROM, 
+	LAN_DISPLAY_INFO_GIVEN_IP,
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------

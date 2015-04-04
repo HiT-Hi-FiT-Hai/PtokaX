@@ -2734,6 +2734,14 @@ void clsDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen)
                 }
                 break;
             }
+            case 'T': {
+            	if(szDataLen == 4) {
+                    if(((curUser->ui32SupportBits & User::SUPPORTBIT_TLS2) == User::SUPPORTBIT_TLS2) == false && *((uint32_t *)sSupport) == *((uint32_t *)"TLS2")) {
+                        curUser->ui32SupportBits |= User::SUPPORTBIT_TLS2;
+                    }
+            	}
+				break;
+			}
             case '\0': {
                 // PPK ... corrupted $Supports ???
                 int imsgLen = sprintf(msg, "[SYS] Bad $Supports from %s (%s) - user closed.", curUser->sNick, curUser->sIP);

@@ -86,7 +86,7 @@
 #include "pxstring.h"
 //---------------------------------------------------------------------------
 #define PtokaXVersionString "0.5.0.3"
-#define BUILD_NUMBER "483"
+#define BUILD_NUMBER "484"
 
 #ifdef _WIN32
     #define PRIu64 "I64u"

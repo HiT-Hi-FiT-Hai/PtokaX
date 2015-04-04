@@ -525,7 +525,7 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 
                     int iret = sprintf(msg+imsgLen, "<%s> *** %s %cgetipinfo <%s>. %s.|", 
                         clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SNTX_ERR_IN_CMD],
-                        clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], clsLanguageManager::mPtr->sTexts[LAN_NICK_LWR],
+                        clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], clsLanguageManager::mPtr->sTexts[LAN_IP],
                         clsLanguageManager::mPtr->sTexts[LAN_NO_PARAM_GIVEN]);
                     imsgLen += iret;
                     if(CheckSprintf1(iret, imsgLen, 1024, "clsHubCommands::DoCommand19-1") == true) {
@@ -539,7 +539,7 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 
                     int iret = sprintf(msg+imsgLen, "<%s> *** %s %cgetipinfo <%s>. %s!|",
                         clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SNTX_ERR_IN_CMD],
-                        clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], clsLanguageManager::mPtr->sTexts[LAN_NICK_LWR],
+                        clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], clsLanguageManager::mPtr->sTexts[LAN_IP],
                         clsLanguageManager::mPtr->sTexts[LAN_MAX_ALWD_NICK_LEN_64_CHARS]);
                     imsgLen += iret;
                     if(CheckSprintf1(iret, imsgLen, 1024, "clsHubCommands::DoCommand20-1") == true) {
@@ -550,23 +550,21 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 
                 sCommand += 10;
 
-                User *user = clsHashManager::mPtr->FindUser(sCommand, dlen-10);
-                if(user == NULL) {
-					if(DBPostgreSQL::mPtr->SearchIP(sCommand, curUser, fromPM) == true) {
-						UncountDeflood(curUser, fromPM);
-						return true;
-					}
+				if(DBPostgreSQL::mPtr->SearchIP(sCommand, curUser, fromPM) == true) {
+					UncountDeflood(curUser, fromPM);
+					return true;
+				}
 
-                    int imsgLen = CheckFromPm(curUser, fromPM);
+                int imsgLen = CheckFromPm(curUser, fromPM);
 
-                    int iret = sprintf(msg+imsgLen, "<%s> *** %s: %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
+                int iret = sprintf(msg+imsgLen, "<%s> *** %s: %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
                         clsLanguageManager::mPtr->sTexts[LAN_ERROR], sCommand, clsLanguageManager::mPtr->sTexts[LAN_NOT_FOUND]);
-                    imsgLen += iret;
-                    if(CheckSprintf1(iret, imsgLen, 1024, "clsHubCommands::DoCommand21-1") == true) {
-                        curUser->SendCharDelayed(msg, imsgLen);
-                    }
-                    return true;
+                imsgLen += iret;
+                if(CheckSprintf1(iret, imsgLen, 1024, "clsHubCommands::DoCommand21-1") == true) {
+                    curUser->SendCharDelayed(msg, imsgLen);
                 }
+
+                return true;
             }
 #endif
             // Hub commands: !gettempbans
@@ -4503,6 +4501,15 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                         return true;
                     }
 					help += msg;
+
+#ifdef _WITH_POSTGRES
+                    imsglen = sprintf(msg, "\t%cgetipinfo <%s> - %s.\n", clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], clsLanguageManager::mPtr->sTexts[LAN_IP],
+                        clsLanguageManager::mPtr->sTexts[LAN_DISPLAY_INFO_GIVEN_IP]);
+                    if(CheckSprintf(imsglen, 1024, "clsHubCommands::DoCommand368-1") == false) {
+                        return true;
+                    }
+					help += msg;
+#endif
                 }
 
                 if(clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::TEMPOP)) {

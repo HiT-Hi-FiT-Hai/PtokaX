@@ -2318,9 +2318,10 @@ bool User::GenerateMyInfoLong() { // true == changed
     // add magicbyte
     uint8_t ui8Magic = ui8MagicByte;
 
-    if((ui32BoolBits & BIT_QUACK_SUPPORTS) == BIT_QUACK_SUPPORTS) {
-        ui8Magic &= ~0x10; // TLSv1 support
-        ui8Magic &= ~0x20; // TLSv1 support
+    if(((ui32BoolBits & User::SUPPORTBIT_TLS2) == User::SUPPORTBIT_TLS2) == false) {
+    	// should not be set if user not have TLS2 support
+        ui8Magic &= ~0x10;
+        ui8Magic &= ~0x20;
     }
 
     if((ui32BoolBits & BIT_IPV4) == BIT_IPV4) {
@@ -2481,9 +2482,10 @@ bool User::GenerateMyInfoShort() { // true == changed
     // add magicbyte
     uint8_t ui8Magic = ui8MagicByte;
 
-    if((ui32BoolBits & BIT_QUACK_SUPPORTS) == BIT_QUACK_SUPPORTS) {
-        ui8Magic &= ~0x10; // TLSv1 support
-        ui8Magic &= ~0x20; // TLSv1 support
+    if(((ui32BoolBits & User::SUPPORTBIT_TLS2) == User::SUPPORTBIT_TLS2) == false) {
+    	// should not be set if user not have TLS2 support
+        ui8Magic &= ~0x10;
+        ui8Magic &= ~0x20;
     }
 
     if((ui32BoolBits & BIT_IPV4) == BIT_IPV4) {

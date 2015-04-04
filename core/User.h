@@ -197,7 +197,7 @@ struct User {
     	BIT_WAITING_FOR_PASS           = 0x2000000,
     	BIT_WARNED_WRONG_IP            = 0x4000000,
     	BIT_IPV6_ACTIVE                = 0x8000000,
-    	BIT_CHAT_INSERT                = 0x10000000,
+    	BIT_CHAT_INSERT                = 0x10000000
     };
 
     enum UserInfoBits {
@@ -227,6 +227,7 @@ struct User {
     	SUPPORTBIT_ZPIPE                   = 0x20,
     	SUPPORTBIT_IP64                    = 0x40,
     	SUPPORTBIT_IPV4                    = 0x80,
+    	SUPPORTBIT_TLS2                    = 0x100
     };
 
     uint64_t ui64SharedSize, ui64ChangedSharedSizeShort, ui64ChangedSharedSizeLong;

@@ -5,7 +5,10 @@ PtokaX DC hub software - PPK (c) 2006/2014
 
 
 ----------------------------------------Next Release...---------------------------------------
+Added: Support for PostgreSQL database to store info about users.
+Added: Chat command !getipinfo to get info about ip(s) from PostgreSQL.
 Fixed: Missing settings and profiles identificator tables with Lua 5.1.
+Changed: Chat command !getinfo to get info about offline user(s) from PostgreSQL.
 
 
 ----------------------------------------0.5.0.3 20 February 2015-----------------------------
