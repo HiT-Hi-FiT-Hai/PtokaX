@@ -127,73 +127,73 @@ bool MainWindowPageStats::CreateMainWindowPage(HWND hOwner) {
     hWndPageItems[BTN_START_STOP] = ::CreateWindowEx(0, WC_BUTTON, clsServerManager::bServerRunning == false ? clsLanguageManager::mPtr->sTexts[LAN_START_HUB] : clsLanguageManager::mPtr->sTexts[LAN_STOP_HUB],
         WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON, 4, 3, rcMain.right-8, ScaleGui(40), m_hWnd, (HMENU)BTN_START_STOP, clsServerManager::hInstance, NULL);
 
-    int iPosX = ScaleGui(40);
+    int iPosY = ScaleGui(40);
 
     hWndPageItems[GB_STATS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, "", WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        5, iPosX, rcMain.right-10, clsGuiSettingManager::iGroupBoxMargin + (8 * clsGuiSettingManager::iTextHeight) + 2, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        5, iPosY, rcMain.right-10, clsGuiSettingManager::iGroupBoxMargin + (8 * clsGuiSettingManager::iTextHeight) + 2, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_STATUS] = ::CreateWindowEx(0, WC_STATIC, (string(clsLanguageManager::mPtr->sTexts[LAN_STATUS], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_STATUS])+":").c_str(),
-        WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP, 13, iPosX + (clsGuiSettingManager::iGroupBoxMargin - 5), ScaleGui(150), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP, 13, iPosY + (clsGuiSettingManager::iGroupBoxMargin - 5), ScaleGui(150), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_STATUS_VALUE] = ::CreateWindowEx(0, WC_STATIC, (string(clsLanguageManager::mPtr->sTexts[LAN_READY], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_READY])+".").c_str(),
-        WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP, ScaleGui(150) + 18, iPosX + (clsGuiSettingManager::iGroupBoxMargin - 5), rcMain.right - (ScaleGui(150) + 31), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | SS_LEFTNOWORDWRAP, ScaleGui(150) + 18, iPosY + (clsGuiSettingManager::iGroupBoxMargin - 5), rcMain.right - (ScaleGui(150) + 31), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_JOINS] = ::CreateWindowEx(0, WC_STATIC,
         (string(clsLanguageManager::mPtr->sTexts[LAN_ACCEPTED_CONNECTIONS], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ACCEPTED_CONNECTIONS])+":").c_str(),
-        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosX + (clsGuiSettingManager::iGroupBoxMargin - 5) + clsGuiSettingManager::iTextHeight, ScaleGui(150), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosY + (clsGuiSettingManager::iGroupBoxMargin - 5) + clsGuiSettingManager::iTextHeight, ScaleGui(150), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_JOINS_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-        ScaleGui(150) + 18, iPosX + (clsGuiSettingManager::iGroupBoxMargin - 5) + clsGuiSettingManager::iTextHeight, rcMain.right - (ScaleGui(150) + 31), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        ScaleGui(150) + 18, iPosY + (clsGuiSettingManager::iGroupBoxMargin - 5) + clsGuiSettingManager::iTextHeight, rcMain.right - (ScaleGui(150) + 31), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_PARTS] = ::CreateWindowEx(0, WC_STATIC,
         (string(clsLanguageManager::mPtr->sTexts[LAN_CLOSED_CONNECTIONS], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_CLOSED_CONNECTIONS])+":").c_str(),
-        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosX + (clsGuiSettingManager::iGroupBoxMargin - 5) + (2 * clsGuiSettingManager::iTextHeight), ScaleGui(150), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosY + (clsGuiSettingManager::iGroupBoxMargin - 5) + (2 * clsGuiSettingManager::iTextHeight), ScaleGui(150), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_PARTS_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-        ScaleGui(150) + 18, iPosX + (clsGuiSettingManager::iGroupBoxMargin - 5) + (2 * clsGuiSettingManager::iTextHeight), rcMain.right - (ScaleGui(150) + 31), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        ScaleGui(150) + 18, iPosY + (clsGuiSettingManager::iGroupBoxMargin - 5) + (2 * clsGuiSettingManager::iTextHeight), rcMain.right - (ScaleGui(150) + 31), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_ACTIVE] = ::CreateWindowEx(0, WC_STATIC,
         (string(clsLanguageManager::mPtr->sTexts[LAN_ACTIVE_CONNECTIONS], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ACTIVE_CONNECTIONS])+":").c_str(),
-        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosX + (clsGuiSettingManager::iGroupBoxMargin - 5) + (3 * clsGuiSettingManager::iTextHeight), ScaleGui(150), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosY + (clsGuiSettingManager::iGroupBoxMargin - 5) + (3 * clsGuiSettingManager::iTextHeight), ScaleGui(150), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_ACTIVE_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-        ScaleGui(150) + 18, iPosX + (clsGuiSettingManager::iGroupBoxMargin - 5) + (3 * clsGuiSettingManager::iTextHeight), rcMain.right - (ScaleGui(150) + 31), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        ScaleGui(150) + 18, iPosY + (clsGuiSettingManager::iGroupBoxMargin - 5) + (3 * clsGuiSettingManager::iTextHeight), rcMain.right - (ScaleGui(150) + 31), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_ONLINE] = ::CreateWindowEx(0, WC_STATIC,
         (string(clsLanguageManager::mPtr->sTexts[LAN_USERS_ONLINE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_USERS_ONLINE])+":").c_str(),
-        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosX + (clsGuiSettingManager::iGroupBoxMargin - 5) + (4 * clsGuiSettingManager::iTextHeight), ScaleGui(150), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosY + (clsGuiSettingManager::iGroupBoxMargin - 5) + (4 * clsGuiSettingManager::iTextHeight), ScaleGui(150), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_ONLINE_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-        ScaleGui(150) + 18, iPosX + (clsGuiSettingManager::iGroupBoxMargin - 5) + (4 * clsGuiSettingManager::iTextHeight), rcMain.right - (ScaleGui(150) + 31), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        ScaleGui(150) + 18, iPosY + (clsGuiSettingManager::iGroupBoxMargin - 5) + (4 * clsGuiSettingManager::iTextHeight), rcMain.right - (ScaleGui(150) + 31), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_PEAK] = ::CreateWindowEx(0, WC_STATIC,
         (string(clsLanguageManager::mPtr->sTexts[LAN_USERS_PEAK], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_USERS_PEAK])+":").c_str(),
-        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosX + (clsGuiSettingManager::iGroupBoxMargin - 5) + (5 * clsGuiSettingManager::iTextHeight), ScaleGui(150), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosY + (clsGuiSettingManager::iGroupBoxMargin - 5) + (5 * clsGuiSettingManager::iTextHeight), ScaleGui(150), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_PEAK_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-        ScaleGui(150) + 18, iPosX + (clsGuiSettingManager::iGroupBoxMargin - 5) + (5 * clsGuiSettingManager::iTextHeight), rcMain.right - (ScaleGui(150) + 31), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        ScaleGui(150) + 18, iPosY + (clsGuiSettingManager::iGroupBoxMargin - 5) + (5 * clsGuiSettingManager::iTextHeight), rcMain.right - (ScaleGui(150) + 31), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_RECEIVED] = ::CreateWindowEx(0, WC_STATIC,
         (string(clsLanguageManager::mPtr->sTexts[LAN_RECEIVED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RECEIVED])+":").c_str(),
-        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosX + (clsGuiSettingManager::iGroupBoxMargin - 5) + (6 * clsGuiSettingManager::iTextHeight), ScaleGui(150), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosY + (clsGuiSettingManager::iGroupBoxMargin - 5) + (6 * clsGuiSettingManager::iTextHeight), ScaleGui(150), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_RECEIVED_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0 B (0 B/s)", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-        ScaleGui(150) + 18, iPosX + (clsGuiSettingManager::iGroupBoxMargin - 5) + (6 * clsGuiSettingManager::iTextHeight), rcMain.right - (ScaleGui(150) + 31), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        ScaleGui(150) + 18, iPosY + (clsGuiSettingManager::iGroupBoxMargin - 5) + (6 * clsGuiSettingManager::iTextHeight), rcMain.right - (ScaleGui(150) + 31), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_SENT] = ::CreateWindowEx(0, WC_STATIC,
         (string(clsLanguageManager::mPtr->sTexts[LAN_SENT], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SENT])+":").c_str(),
-        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosX + (clsGuiSettingManager::iGroupBoxMargin - 5) + (7 * clsGuiSettingManager::iTextHeight), ScaleGui(150), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP, 13, iPosY + (clsGuiSettingManager::iGroupBoxMargin - 5) + (7 * clsGuiSettingManager::iTextHeight), ScaleGui(150), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_SENT_VALUE] = ::CreateWindowEx(0, WC_STATIC, "0 B (0 B/s)", WS_CHILD | WS_VISIBLE | WS_DISABLED | SS_LEFTNOWORDWRAP,
-        ScaleGui(150) + 18, iPosX + (clsGuiSettingManager::iGroupBoxMargin - 5) + (7 * clsGuiSettingManager::iTextHeight), rcMain.right - (ScaleGui(150) + 31), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        ScaleGui(150) + 18, iPosY + (clsGuiSettingManager::iGroupBoxMargin - 5) + (7 * clsGuiSettingManager::iTextHeight), rcMain.right - (ScaleGui(150) + 31), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
-    iPosX += clsGuiSettingManager::iGroupBoxMargin + (8 * clsGuiSettingManager::iTextHeight) + 1;
+    iPosY += clsGuiSettingManager::iGroupBoxMargin + (8 * clsGuiSettingManager::iTextHeight) + 1;
 
     hWndPageItems[BTN_REDIRECT_ALL] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_REDIRECT_ALL_USERS], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_TABSTOP | BS_PUSHBUTTON,
-        4, iPosX + 5, rcMain.right-8, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)BTN_REDIRECT_ALL, clsServerManager::hInstance, NULL);
+        4, iPosY + 5, rcMain.right-8, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)BTN_REDIRECT_ALL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[BTN_MASS_MSG] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_MASS_MSG], WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_TABSTOP | BS_PUSHBUTTON,
-        4, iPosX + clsGuiSettingManager::iEditHeight + 8, rcMain.right-8, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)BTN_MASS_MSG, clsServerManager::hInstance, NULL);
+        4, iPosY + clsGuiSettingManager::iEditHeight + 8, rcMain.right-8, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)BTN_MASS_MSG, clsServerManager::hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {

@@ -119,7 +119,7 @@ bool clsServerManager::bServerRunning = false, clsServerManager::bServerTerminat
 	bool clsServerManager::bDaemon = false;
 #endif
 
-char clsServerManager::sHubIP[16], clsServerManager::sHubIP6[46];
+char clsServerManager::sHubIP[16], clsServerManager::sHubIP6[40];
 
 uint8_t clsServerManager::ui8SrCntr = 0, clsServerManager::ui8MinTick = 0;
 //---------------------------------------------------------------------------
@@ -548,9 +548,9 @@ bool clsServerManager::Start() {
                             }
                         } else if(next->ai_family == AF_INET6) {
 #ifdef _WIN32
-                            win_inet_ntop(&((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, sHubIP6, 46);
+                            win_inet_ntop(&((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, sHubIP6, 40);
 #else
-                            inet_ntop(AF_INET6, &((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, sHubIP6, 46);
+                            inet_ntop(AF_INET6, &((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, sHubIP6, 40);
 #endif
                         }
 

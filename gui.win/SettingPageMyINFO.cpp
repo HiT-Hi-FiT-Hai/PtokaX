@@ -161,10 +161,10 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
     int iGBinGBinGB = (rcThis.right - rcThis.left) - 25;
     int iGBinGBinGBEDT = (rcThis.right - rcThis.left) - 41;
 
-    int iPosX = (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + 1 + clsGuiSettingManager::iEditHeight + (2 * clsGuiSettingManager::iOneLineGB) + 12;
+    int iPosY = (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + 1 + clsGuiSettingManager::iEditHeight + (2 * clsGuiSettingManager::iOneLineGB) + 12;
 
     hWndPageItems[GB_DESCRIPTION_TAG] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_DESCRIPTION_TAG], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, 0, iFullGB, iPosX, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        0, 0, iFullGB, iPosY, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[BTN_REPORT_SUSPICIOUS_TAG] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_REPORT_BAD_TAGS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
         8, clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
@@ -196,13 +196,13 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
     AddToolTip(hWndPageItems[EDT_NO_TAG_REDIRECT], clsLanguageManager::mPtr->sTexts[LAN_REDIRECT_HINT]);
 
     hWndPageItems[GB_MYINFO_PROCESSING] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_MYINFO_PROCESSING], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, iPosX, iFullGB, (2 * clsGuiSettingManager::iGroupBoxMargin) + (2 * clsGuiSettingManager::iEditHeight) + 10 + (6 * clsGuiSettingManager::iCheckHeight) + 28, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        0, iPosY, iFullGB, (2 * clsGuiSettingManager::iGroupBoxMargin) + (2 * clsGuiSettingManager::iEditHeight) + 10 + (6 * clsGuiSettingManager::iCheckHeight) + 28, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[LBL_ORIGINAL_MYINFO] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_SEND_LONG_MYINFO], WS_CHILD | WS_VISIBLE | SS_LEFT,
-        8, iPosX + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ((rcThis.right - rcThis.left) - 21) / 2, clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        8, iPosY + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ((rcThis.right - rcThis.left) - 21) / 2, clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[CB_ORIGINAL_MYINFO_ACTION] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
-        (((rcThis.right - rcThis.left) - 21) / 2) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin, (rcThis.right - rcThis.left) - ((((rcThis.right - rcThis.left) - 21) / 2) + 26), clsGuiSettingManager::iEditHeight,
+        (((rcThis.right - rcThis.left) - 21) / 2) + 13, iPosY + clsGuiSettingManager::iGroupBoxMargin, (rcThis.right - rcThis.left) - ((((rcThis.right - rcThis.left) - 21) / 2) + 26), clsGuiSettingManager::iEditHeight,
         m_hWnd, (HMENU)CB_ORIGINAL_MYINFO_ACTION, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[CB_ORIGINAL_MYINFO_ACTION], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_FULL_MYINFO_ALL]);
     ::SendMessage(hWndPageItems[CB_ORIGINAL_MYINFO_ACTION], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_FULL_MYINFO_PROFILE]);
@@ -210,46 +210,46 @@ bool SettingPageMyINFO::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[CB_ORIGINAL_MYINFO_ACTION], CB_SETCURSEL, clsSettingManager::mPtr->i16Shorts[SETSHORT_FULL_MYINFO_OPTION], 0);
     AddToolTip(hWndPageItems[CB_ORIGINAL_MYINFO_ACTION], clsLanguageManager::mPtr->sTexts[LAN_MYINFO_TO_HINT]);
 
-    iPosX += clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 2;
+    iPosY += clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 2;
 
     hWndPageItems[GB_MODIFIED_MYINFO_OPTIONS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_OPTIONS_FOR_SHORT_MYINFO], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        5, iPosX, iGBinGB, clsGuiSettingManager::iGroupBoxMargin + (6 * clsGuiSettingManager::iCheckHeight) + 15 + 8, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        5, iPosY, iGBinGB, clsGuiSettingManager::iGroupBoxMargin + (6 * clsGuiSettingManager::iCheckHeight) + 15 + 8, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[BTN_REMOVE_DESCRIPTION] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_REMOVE_DESCRIPTION], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        13, iPosX + clsGuiSettingManager::iGroupBoxMargin, iGBinGBEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        13, iPosY + clsGuiSettingManager::iGroupBoxMargin, iGBinGBEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_REMOVE_DESCRIPTION], BM_SETCHECK, (clsSettingManager::mPtr->bBools[SETBOOL_STRIP_DESCRIPTION] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[BTN_REMOVE_TAG] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_REMOVE_TAG], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        13, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + 3, iGBinGBEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        13, iPosY + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + 3, iGBinGBEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_REMOVE_TAG], BM_SETCHECK, (clsSettingManager::mPtr->bBools[SETBOOL_STRIP_TAG] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[BTN_REMOVE_CONNECTION] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_REMOVE_CONNECTION], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        13, iPosX + clsGuiSettingManager::iGroupBoxMargin + (2 * clsGuiSettingManager::iCheckHeight) + 6, iGBinGBEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        13, iPosY + clsGuiSettingManager::iGroupBoxMargin + (2 * clsGuiSettingManager::iCheckHeight) + 6, iGBinGBEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_REMOVE_CONNECTION], BM_SETCHECK, (clsSettingManager::mPtr->bBools[SETBOOL_STRIP_CONNECTION] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[BTN_REMOVE_EMAIL] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_REMOVE_EMAIL], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        13, iPosX + clsGuiSettingManager::iGroupBoxMargin + (3 * clsGuiSettingManager::iCheckHeight) + 9, iGBinGBEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        13, iPosY + clsGuiSettingManager::iGroupBoxMargin + (3 * clsGuiSettingManager::iCheckHeight) + 9, iGBinGBEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_REMOVE_EMAIL], BM_SETCHECK, (clsSettingManager::mPtr->bBools[SETBOOL_STRIP_EMAIL] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[BTN_MODE_TO_MYINFO] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_MODE_TO_MYINFO], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        13, iPosX + clsGuiSettingManager::iGroupBoxMargin + (4 * clsGuiSettingManager::iCheckHeight) + 12, iGBinGBEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        13, iPosY + clsGuiSettingManager::iGroupBoxMargin + (4 * clsGuiSettingManager::iCheckHeight) + 12, iGBinGBEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_MODE_TO_MYINFO], BM_SETCHECK, (clsSettingManager::mPtr->bBools[SETBOOL_MODE_TO_MYINFO] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[BTN_MODE_TO_DESCRIPTION] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_MODE_TO_DESCR], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        13, iPosX + clsGuiSettingManager::iGroupBoxMargin + (5 * clsGuiSettingManager::iCheckHeight) + 15, iGBinGBEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        13, iPosY + clsGuiSettingManager::iGroupBoxMargin + (5 * clsGuiSettingManager::iCheckHeight) + 15, iGBinGBEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_MODE_TO_DESCRIPTION], BM_SETCHECK, (clsSettingManager::mPtr->bBools[SETBOOL_MODE_TO_DESCRIPTION] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    iPosX += clsGuiSettingManager::iGroupBoxMargin + (6 * clsGuiSettingManager::iCheckHeight) + 15 + 8;
+    iPosY += clsGuiSettingManager::iGroupBoxMargin + (6 * clsGuiSettingManager::iCheckHeight) + 15 + 8;
 
     hWndPageItems[LBL_MINUTES_BEFORE_ACCEPT_NEW_MYINFO] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_DONT_SEND_MYINFO_CHANGES], WS_CHILD | WS_VISIBLE | SS_LEFT,
-        8, iPosX + 5 + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(320), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        8, iPosY + 5 + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(320), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
-        ScaleGui(320) + 13, iPosX + 5, (rcThis.right - rcThis.left) - (ScaleGui(320) + clsGuiSettingManager::iUpDownWidth + 26), clsGuiSettingManager::iEditHeight,
+        ScaleGui(320) + 13, iPosY + 5, (rcThis.right - rcThis.left) - (ScaleGui(320) + clsGuiSettingManager::iUpDownWidth + 26), clsGuiSettingManager::iEditHeight,
          m_hWnd, (HMENU)EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO], EM_SETLIMITTEXT, 3, 0);
 
-    AddUpDown(hWndPageItems[UD_MINUTES_BEFORE_ACCEPT_NEW_MYINFO], (rcThis.right - rcThis.left) - clsGuiSettingManager::iUpDownWidth - 13, iPosX + 5, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight,
+    AddUpDown(hWndPageItems[UD_MINUTES_BEFORE_ACCEPT_NEW_MYINFO], (rcThis.right - rcThis.left) - clsGuiSettingManager::iUpDownWidth - 13, iPosY + 5, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight,
         (LPARAM)MAKELONG(999, 0), (WPARAM)hWndPageItems[EDT_MINUTES_BEFORE_ACCEPT_NEW_MYINFO], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MYINFO_DELAY], 0));
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {

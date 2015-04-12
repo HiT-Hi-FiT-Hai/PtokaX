@@ -202,7 +202,7 @@ clsServiceLoop::~clsServiceLoop() {
 void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
     bool bIPv6 = false;
 
-    char sIP[46];
+    char sIP[40];
 
     uint8_t ui128IpHash[16];
     memset(ui128IpHash, 0, 16);
@@ -221,9 +221,9 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
         } else {
             bIPv6 = true;
 #ifdef _WIN32
-            win_inet_ntop(&((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr, sIP, 46);
+            win_inet_ntop(&((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr, sIP, 40);
 #else
-            inet_ntop(AF_INET6, &((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr, sIP, 46);
+            inet_ntop(AF_INET6, &((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr, sIP, 40);
 #endif
             ui16IpTableIdx = GetIpTableIdx(ui128IpHash);
         }

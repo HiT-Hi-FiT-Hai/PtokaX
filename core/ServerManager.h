@@ -95,7 +95,7 @@ public:
 
     static bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bUseIPv4, bUseIPv6, bIPv6DualStack;
 
-    static char sHubIP[16], sHubIP6[46];
+    static char sHubIP[16], sHubIP6[40];
 
     static uint8_t ui8SrCntr, ui8MinTick;
 };

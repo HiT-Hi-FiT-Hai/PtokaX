@@ -137,18 +137,19 @@ void Cout(const string &/*msg*/) {
 //---------------------------------------------------------------------------
 
 char * Lock2Key(char * sLock) {
+	static const uint8_t ui8LockSize = 46;
     static char cKey[128];
     cKey[0] = '\0';
 
     // $Lock EXTENDEDPROTOCOL33MTL6@h5AIad^P2UoPv?fZU]ivM6 Pk=PtokaX|
 
     sLock = sLock+6; // set begin after $Lock_
-    sLock[46] = '\0'; // set end before Pk
+    sLock[ui8LockSize] = '\0'; // set end before Pk
     
     uint8_t v;
     
 	// first make the crypting stuff
-	for(uint8_t ui8i = 0; ui8i < 46; ui8i++) {
+	for(uint8_t ui8i = 0; ui8i < ui8LockSize; ui8i++) {
         if(ui8i == 0) {
             v = (uint8_t)(sLock[0] ^ sLock[45] ^ sLock[44] ^ 5);
         } else {

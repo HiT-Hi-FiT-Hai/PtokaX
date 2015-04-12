@@ -348,10 +348,10 @@ bool SettingPageBots::CreateSettingPage(HWND hOwner) {
         return false;
     }
 
-    int iPosX = clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + clsGuiSettingManager::iOneLineOneChecksGB + (2 * clsGuiSettingManager::iOneLineGB) + 1 + 5;
+    int iPosY = clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + clsGuiSettingManager::iOneLineOneChecksGB + (2 * clsGuiSettingManager::iOneLineGB) + 1 + 5;
 
     hWndPageItems[GB_HUB_BOT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_HUB_BOT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, 0, iFullGB, iPosX, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        0, 0, iFullGB, iPosY, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[BTN_HUB_BOT_ENABLE] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_ENABLE_AND_REG_BOT_ON_HUB], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
         8, clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, (HMENU)BTN_HUB_BOT_ENABLE, clsServerManager::hInstance, NULL);
@@ -383,31 +383,31 @@ bool SettingPageBots::CreateSettingPage(HWND hOwner) {
     ::SendMessage(hWndPageItems[EDT_HUB_BOT_EMAIL], EM_SETLIMITTEXT, 64, 0);
 
     hWndPageItems[GB_OP_CHAT_BOT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_OP_CHAT_BOT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, iPosX, iFullGB, clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + (3 * clsGuiSettingManager::iOneLineGB) + 1 + 5, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        0, iPosY, iFullGB, clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + (3 * clsGuiSettingManager::iOneLineGB) + 1 + 5, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[BTN_OP_CHAT_BOT_ENABLE] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_ENABLE_AND_REG_BOT_ON_HUB], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, iPosX + clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, (HMENU)BTN_OP_CHAT_BOT_ENABLE, clsServerManager::hInstance, NULL);
+        8, iPosY + clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, (HMENU)BTN_OP_CHAT_BOT_ENABLE, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_OP_CHAT_BOT_ENABLE], BM_SETCHECK, (clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     hWndPageItems[GB_OP_CHAT_BOT_NICK] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_NICK], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        5, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + 1, iGBinGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        5, iPosY + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + 1, iGBinGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_OP_CHAT_BOT_NICK] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        13, iPosX + (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + 1, iGBinGBEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_NICK, clsServerManager::hInstance, NULL);
+        13, iPosY + (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + 1, iGBinGBEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_NICK, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_OP_CHAT_BOT_NICK], EM_SETLIMITTEXT, 64, 0);
 
     hWndPageItems[GB_OP_CHAT_BOT_DESCRIPTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_DESCRIPTION], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        5, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + 1 + clsGuiSettingManager::iOneLineGB, iGBinGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        5, iPosY + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + 1 + clsGuiSettingManager::iOneLineGB, iGBinGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_DESCRIPTION], WS_CHILD | WS_VISIBLE | WS_TABSTOP |
-        ES_AUTOHSCROLL, 13, iPosX + (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + 1 + clsGuiSettingManager::iOneLineGB, iGBinGBEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_DESCRIPTION, clsServerManager::hInstance, NULL);
+        ES_AUTOHSCROLL, 13, iPosY + (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + 1 + clsGuiSettingManager::iOneLineGB, iGBinGBEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_DESCRIPTION, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_OP_CHAT_BOT_DESCRIPTION], EM_SETLIMITTEXT, 64, 0);
 
     hWndPageItems[GB_OP_CHAT_BOT_EMAIL] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_EMAIL], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        5, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + 1 + (2 * clsGuiSettingManager::iOneLineGB), iGBinGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        5, iPosY + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + 1 + (2 * clsGuiSettingManager::iOneLineGB), iGBinGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_OP_CHAT_BOT_EMAIL] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_EMAIL], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        13, iPosX + (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + 1 + (2 * clsGuiSettingManager::iOneLineGB), iGBinGBEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_EMAIL, clsServerManager::hInstance, NULL);
+        13, iPosY + (2 * clsGuiSettingManager::iGroupBoxMargin) + clsGuiSettingManager::iCheckHeight + 1 + (2 * clsGuiSettingManager::iOneLineGB), iGBinGBEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_OP_CHAT_BOT_EMAIL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_OP_CHAT_BOT_EMAIL], EM_SETLIMITTEXT, 64, 0);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {

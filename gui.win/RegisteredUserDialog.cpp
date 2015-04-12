@@ -216,30 +216,30 @@ void clsRegisteredUserDialog::DoModal(HWND hWndParent, RegUser * pReg/* = NULL*/
         11, clsGuiSettingManager::iGroupBoxMargin, rcParent.right - 22, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)(EDT_NICK+100), clsServerManager::hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_NICK], EM_SETLIMITTEXT, 64, 0);
 
-    int iPosX = clsGuiSettingManager::iOneLineGB;
+    int iPosY = clsGuiSettingManager::iOneLineGB;
 
     hWndWindowItems[GB_PASSWORD] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_PASSWORD], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, iPosX, rcParent.right - 6, clsGuiSettingManager::iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
+        3, iPosY, rcParent.right - 6, clsGuiSettingManager::iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
 
     hWndWindowItems[EDT_PASSWORD] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        11, iPosX + clsGuiSettingManager::iGroupBoxMargin, (rcParent.right-rcParent.left)-22, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)EDT_PASSWORD, clsServerManager::hInstance, NULL);
+        11, iPosY + clsGuiSettingManager::iGroupBoxMargin, (rcParent.right-rcParent.left)-22, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)EDT_PASSWORD, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndWindowItems[EDT_PASSWORD], EM_SETLIMITTEXT, 64, 0);
 
-    iPosX += clsGuiSettingManager::iOneLineGB;
+    iPosY += clsGuiSettingManager::iOneLineGB;
 
     hWndWindowItems[GB_PROFILE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_PROFILE], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        3, iPosX, rcParent.right - 6, clsGuiSettingManager::iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
+        3, iPosY, rcParent.right - 6, clsGuiSettingManager::iOneLineGB, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
 
     hWndWindowItems[CB_PROFILE] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
-        11, iPosX + clsGuiSettingManager::iGroupBoxMargin, (rcParent.right-rcParent.left)-22, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)CB_PROFILE, clsServerManager::hInstance, NULL);
+        11, iPosY + clsGuiSettingManager::iGroupBoxMargin, (rcParent.right-rcParent.left)-22, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)CB_PROFILE, clsServerManager::hInstance, NULL);
 
-    iPosX += clsGuiSettingManager::iOneLineGB + 4;
+    iPosY += clsGuiSettingManager::iOneLineGB + 4;
 
     hWndWindowItems[BTN_ACCEPT] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_ACCEPT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        2, iPosX, ((rcParent.right-rcParent.left)/2)-3, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDOK, clsServerManager::hInstance, NULL);
+        2, iPosY, ((rcParent.right-rcParent.left)/2)-3, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDOK, clsServerManager::hInstance, NULL);
 
     hWndWindowItems[BTN_DISCARD] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_DISCARD], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        ((rcParent.right-rcParent.left)/2)+2, iPosX, ((rcParent.right-rcParent.left)/2)-4, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDCANCEL, clsServerManager::hInstance, NULL);
+        ((rcParent.right-rcParent.left)/2)+2, iPosY, ((rcParent.right-rcParent.left)/2)-4, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], (HMENU)IDCANCEL, clsServerManager::hInstance, NULL);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndWindowItems) / sizeof(hWndWindowItems[0])); ui8i++) {
         if(hWndWindowItems[ui8i] == NULL) {

@@ -37,7 +37,7 @@ struct BanItem {
     BanItem * pHashIpTablePrev, * pHashIpTableNext;
 
     uint8_t ui8Bits;
-    char sIp[46];
+    char sIp[40];
 
     BanItem();
     ~BanItem();
@@ -58,7 +58,7 @@ struct RangeBanItem {
 
     uint8_t ui8Bits;
 
-    char sIpFrom[46], sIpTo[46] ;
+    char sIpFrom[40], sIpTo[40] ;
 
     RangeBanItem();
     ~RangeBanItem();

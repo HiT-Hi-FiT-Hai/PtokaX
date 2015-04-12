@@ -268,7 +268,7 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
     iGBinGB = (rcThis.right - rcThis.left) - 15;
     iGBinGBEDT = (rcThis.right - rcThis.left) - 31;
 
-    int iPosX = clsGuiSettingManager::iOneLineGB;
+    int iPosY = clsGuiSettingManager::iOneLineGB;
 
     ::SetWindowPos(m_hWnd, NULL, 0, 0, rcThis.right, (3 * iOneLineTwoGroupGB) + clsGuiSettingManager::iOneLineGB + 3, SWP_NOMOVE | SWP_NOZORDER);
 
@@ -290,100 +290,100 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
         (WPARAM)hWndPageItems[EDT_MAX_USERS], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_USERS], 0));
 
     hWndPageItems[GB_HUB_NAME] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_HUB_NAME], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, iPosX, iFullGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        0, iPosY, iFullGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_HUB_NAME] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
         8, clsGuiSettingManager::iOneLineGB + clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_HUB_NAME, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_NAME], EM_SETLIMITTEXT, 256, 0);
 
-    iPosX += clsGuiSettingManager::iOneLineGB;
+    iPosY += clsGuiSettingManager::iOneLineGB;
 
     hWndPageItems[GB_HUB_TOPIC] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_HUB_TOPIC], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, iPosX, iFullGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        0, iPosY, iFullGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_HUB_TOPIC] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_HUB_TOPIC], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        8, iPosX + clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_HUB_TOPIC, clsServerManager::hInstance, NULL);
+        8, iPosY + clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_HUB_TOPIC, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_TOPIC], EM_SETLIMITTEXT, 256, 0);
 
-    iPosX += clsGuiSettingManager::iOneLineGB;
+    iPosY += clsGuiSettingManager::iOneLineGB;
 
     hWndPageItems[GB_HUB_DESCRIPTION] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_HUB_DESCRIPTION], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, iPosX, iFullGB, clsGuiSettingManager::iOneLineOneChecksGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        0, iPosY, iFullGB, clsGuiSettingManager::iOneLineOneChecksGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_HUB_DESCRIPTION] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_HUB_DESCRIPTION], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        8, iPosX + clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_HUB_DESCRIPTION, clsServerManager::hInstance, NULL);
+        8, iPosY + clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_HUB_DESCRIPTION, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_DESCRIPTION], EM_SETLIMITTEXT, 256, 0);
 
     hWndPageItems[BTN_ANTI_MOGLO] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_ANTI_MOGLO], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 4, iFullEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        8, iPosY + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 4, iFullEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_ANTI_MOGLO], BM_SETCHECK, (clsSettingManager::mPtr->bBools[SETBOOL_ANTI_MOGLO] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    iPosX += clsGuiSettingManager::iOneLineOneChecksGB;
+    iPosY += clsGuiSettingManager::iOneLineOneChecksGB;
 
     hWndPageItems[GB_HUB_ADDRESS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_HUB_ADDRESS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, iPosX, iFullGB, clsGuiSettingManager::iOneLineTwoChecksGB + clsGuiSettingManager::iOneLineGB + 3, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        0, iPosY, iFullGB, clsGuiSettingManager::iOneLineTwoChecksGB + clsGuiSettingManager::iOneLineGB + 3, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_HUB_ADDRESS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        8, iPosX + clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iEditHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        8, iPosY + clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iEditHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_ADDRESS], EM_SETLIMITTEXT, 256, 0);
 
     hWndPageItems[BTN_RESOLVE_ADDRESS] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_RESOLVE_HOSTNAME], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 4, iFullEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, (HMENU)BTN_RESOLVE_ADDRESS, clsServerManager::hInstance, NULL);
+        8, iPosY + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 4, iFullEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, (HMENU)BTN_RESOLVE_ADDRESS, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_RESOLVE_ADDRESS], BM_SETCHECK, (clsSettingManager::mPtr->bBools[SETBOOL_RESOLVE_TO_IP] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     int iFourtyPercent = (int)(iGBinGB * 0.4);
     hWndPageItems[GB_IPV4_ADDRESS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_IPV4_ADDRESS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        5, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + clsGuiSettingManager::iCheckHeight + 5, iFourtyPercent - 3, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        5, iPosY + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + clsGuiSettingManager::iCheckHeight + 5, iFourtyPercent - 3, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_IPV4_ADDRESS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->bBools[SETBOOL_RESOLVE_TO_IP] == true ? clsServerManager::sHubIP :
         (clsSettingManager::mPtr->sTexts[SETTXT_IPV4_ADDRESS] != NULL ? clsSettingManager::mPtr->sTexts[SETTXT_IPV4_ADDRESS] : ""),
-        WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL, 13, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + clsGuiSettingManager::iCheckHeight + 5 + clsGuiSettingManager::iGroupBoxMargin, iFourtyPercent - 19, clsGuiSettingManager::iEditHeight,
+        WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL, 13, iPosY + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + clsGuiSettingManager::iCheckHeight + 5 + clsGuiSettingManager::iGroupBoxMargin, iFourtyPercent - 19, clsGuiSettingManager::iEditHeight,
         m_hWnd, NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_IPV4_ADDRESS], EM_SETLIMITTEXT, 15, 0);
 
     hWndPageItems[GB_IPV6_ADDRESS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_IPV6_ADDRESS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        10 + (iFourtyPercent - 3), iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + clsGuiSettingManager::iCheckHeight + 5, (iGBinGB - (iFourtyPercent - 3)) - 5, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        10 + (iFourtyPercent - 3), iPosY + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + clsGuiSettingManager::iCheckHeight + 5, (iGBinGB - (iFourtyPercent - 3)) - 5, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_IPV6_ADDRESS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->bBools[SETBOOL_RESOLVE_TO_IP] == true ? clsServerManager::sHubIP6 :
         (clsSettingManager::mPtr->sTexts[SETTXT_IPV6_ADDRESS] != NULL ? clsSettingManager::mPtr->sTexts[SETTXT_IPV6_ADDRESS] : ""),
-        WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL, 18 + (iFourtyPercent - 3), iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + clsGuiSettingManager::iCheckHeight + 5 + clsGuiSettingManager::iGroupBoxMargin,
+        WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL, 18 + (iFourtyPercent - 3), iPosY + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + clsGuiSettingManager::iCheckHeight + 5 + clsGuiSettingManager::iGroupBoxMargin,
         (iGBinGB - (iFourtyPercent - 3)) - 21, clsGuiSettingManager::iEditHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_IPV6_ADDRESS], EM_SETLIMITTEXT, 39, 0);
 
     hWndPageItems[BTN_BIND_ADDRESS] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_BIND_ONLY_ADDRS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + clsGuiSettingManager::iCheckHeight + clsGuiSettingManager::iOneLineGB + 10, iFullEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        8, iPosY + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + clsGuiSettingManager::iCheckHeight + clsGuiSettingManager::iOneLineGB + 10, iFullEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_BIND_ADDRESS], BM_SETCHECK, (clsSettingManager::mPtr->bBools[SETBOOL_BIND_ONLY_SINGLE_IP] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
-    iPosX += clsGuiSettingManager::iOneLineTwoChecksGB + clsGuiSettingManager::iOneLineGB + 3;
+    iPosY += clsGuiSettingManager::iOneLineTwoChecksGB + clsGuiSettingManager::iOneLineGB + 3;
 
     hWndPageItems[GB_TCP_PORTS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_TCP_PORTS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, iPosX, ScaleGui(362), clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        0, iPosY, ScaleGui(362), clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_TCP_PORTS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_TCP_PORTS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        8, iPosX + clsGuiSettingManager::iGroupBoxMargin, ScaleGui(362) - 16, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_TCP_PORTS, clsServerManager::hInstance, NULL);
+        8, iPosY + clsGuiSettingManager::iGroupBoxMargin, ScaleGui(362) - 16, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_TCP_PORTS, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_TCP_PORTS], EM_SETLIMITTEXT, 64, 0);
     AddToolTip(hWndPageItems[EDT_TCP_PORTS], clsLanguageManager::mPtr->sTexts[LAN_TCP_PORTS_HINT]);
 
     hWndPageItems[GB_UDP_PORT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_UDP_PORT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        ScaleGui(362) + 5, iPosX, (rcThis.right - rcThis.left) - (ScaleGui(362) + 10), clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        ScaleGui(362) + 5, iPosY, (rcThis.right - rcThis.left) - (ScaleGui(362) + 10), clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_UDP_PORT] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_UDP_PORT], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL,
-        ScaleGui(362) + 13, iPosX + clsGuiSettingManager::iGroupBoxMargin, (rcThis.right - rcThis.left) - (ScaleGui(362) + 26), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_UDP_PORT, clsServerManager::hInstance, NULL);
+        ScaleGui(362) + 13, iPosY + clsGuiSettingManager::iGroupBoxMargin, (rcThis.right - rcThis.left) - (ScaleGui(362) + 26), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_UDP_PORT, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_UDP_PORT], EM_SETLIMITTEXT, 5, 0);
     AddToolTip(hWndPageItems[EDT_UDP_PORT], clsLanguageManager::mPtr->sTexts[LAN_ZERO_DISABLED]);
 
-    iPosX += clsGuiSettingManager::iOneLineGB;
+    iPosY += clsGuiSettingManager::iOneLineGB;
 
     hWndPageItems[GB_HUB_LISTS] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_HUB_REG_ADRS], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-        0, iPosX, iFullGB, clsGuiSettingManager::iOneLineOneChecksGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        0, iPosY, iFullGB, clsGuiSettingManager::iOneLineOneChecksGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_HUB_LISTS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_REGISTER_SERVERS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        8, iPosX + clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iEditHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        8, iPosY + clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iEditHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_LISTS], EM_SETLIMITTEXT, 1024, 0);
     AddToolTip(hWndPageItems[EDT_HUB_LISTS], clsLanguageManager::mPtr->sTexts[LAN_HUB_LIST_REGS_HINT]);
 
     hWndPageItems[BTN_HUBLIST_AUTO_REG] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_AUTO_REG], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-        8, iPosX + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 4, iFullEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        8, iPosY + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iEditHeight + 4, iFullEDT, clsGuiSettingManager::iCheckHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[BTN_HUBLIST_AUTO_REG], BM_SETCHECK, (clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG] == true ? BST_CHECKED : BST_UNCHECKED), 0);
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
