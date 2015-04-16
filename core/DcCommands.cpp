@@ -114,7 +114,15 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
     static const uint32_t ui32ick = *((uint32_t *)"ick ");
 
     switch(curUser->ui8State) {
-        case User::STATE_KEY_OR_SUP: {
+    	case User::STATE_SOCKET_ACCEPTED:
+            if(sData[0] == '$') {
+                if(memcmp(sData+1, "MyNick ", 7) == 0) {
+                    MyNick(curUser, sData, iLen);
+                    return;
+                }
+            }
+            break;
+        case User::STATE_KEY_OR_SUP:
             if(sData[0] == '$') {
                 if(memcmp(sData+1, "Supports ", 9) == 0) {
                     iStatCmdSupports++;
@@ -130,7 +138,6 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                 }
             }
             break;
-        }
         case User::STATE_VALIDATE: {
             if(sData[0] == '$') {
                 switch(sData[1]) {
@@ -3336,7 +3343,7 @@ void clsDcCommands::Close(User * curUser, char * sData, const uint32_t &iLen) {
 }
 //---------------------------------------------------------------------------
 
-void clsDcCommands::Unknown(User * curUser, char * sData, const uint32_t &iLen, const bool &/*bMyNick = false*/) {
+void clsDcCommands::Unknown(User * curUser, char * sData, const uint32_t &iLen, const bool &bMyNick/* = false*/) {
     iStatCmdUnknown++;
 
     #ifdef _DBG
@@ -3356,11 +3363,11 @@ void clsDcCommands::Unknown(User * curUser, char * sData, const uint32_t &iLen, 
         if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::Unknown1") == true) {
             clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
         }
-/*
+
 		if(bMyNick == true) {
 			curUser->SendCharDelayed("$Error CTM2HUB|", 15);
 		}
-*/
+
         curUser->Close();
     }
 }

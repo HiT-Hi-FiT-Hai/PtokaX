@@ -878,14 +878,21 @@ User::~User() {
 //---------------------------------------------------------------------------
 
 bool User::MakeLock() {
-    size_t szAllignLen = Allign1024(63);
+    size_t szAllignLen = Allign1024(ui32SendBufDataLen+63);
+
+	char * pOldBuf = pSendBuf;
 #ifdef _WIN32
-    pSendBuf = (char *)HeapAlloc(clsServerManager::hSendHeap, HEAP_NO_SERIALIZE, szAllignLen);
+    if(pSendBuf == NULL) {
+        pSendBuf = (char *)HeapAlloc(clsServerManager::hSendHeap, HEAP_NO_SERIALIZE, szAllignLen);
+    } else {
+    	pSendBuf = (char *)HeapReAlloc(clsServerManager::hSendHeap, HEAP_NO_SERIALIZE, (void *)pOldBuf, szAllignLen);
+	}
 #else
-	pSendBuf = (char *)malloc(szAllignLen);
+	pSendBuf = (char *)realloc(pOldBuf, szAllignLen);
 #endif
     if(pSendBuf == NULL) {
-        ui32SendBufDataLen = 0;
+    	pSendBuf = pOldBuf;
+		ui32BoolBits |= BIT_ERROR;
 
 		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in User::MakeLock\n", (uint64_t)szAllignLen);
 

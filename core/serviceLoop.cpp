@@ -426,7 +426,6 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 
     pUser->pLogInOut->ui64LogonTick = clsServerManager::ui64ActualTick;
     pUser->Sck = AccptSocket->s;
-    pUser->ui8State = User::STATE_KEY_OR_SUP;
 
     memcpy(pUser->ui128IpHash, ui128IpHash, 16);
     pUser->ui16IpTableIdx = ui16IpTableIdx;
@@ -437,18 +436,6 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
         pUser->ui32BoolBits |= User::BIT_IPV6;
     } else {
         pUser->ui32BoolBits |= User::BIT_IPV4;
-    }
-
-    if(pUser->MakeLock() == false) {
-#ifdef _WIN32
-		shutdown(AccptSocket->s, SD_SEND);
-		closesocket(AccptSocket->s);
-#else
-		shutdown(AccptSocket->s, SHUT_RDWR);
-		close(AccptSocket->s);
-#endif
-        delete pUser;
-        return;
     }
     
     if(Ban != NULL) {
@@ -615,6 +602,18 @@ void clsServiceLoop::ReceiveLoop() {
         //}
 
         switch(curUser->ui8State) {
+        	case User::STATE_SOCKET_ACCEPTED: {
+        		if(clsServerManager::ui64ActualTick != curUser->pLogInOut->ui64LogonTick) {
+    				if(curUser->MakeLock() == false) {
+                    	curUser->Close();
+                    	continue;
+    				}
+
+        			curUser->ui8State = User::STATE_KEY_OR_SUP;
+        		}
+
+				break;
+			}
             case User::STATE_KEY_OR_SUP:{
                 // check logon timeout for iState 1
                 if(clsServerManager::ui64ActualTick - curUser->pLogInOut->ui64LogonTick > 20) {
