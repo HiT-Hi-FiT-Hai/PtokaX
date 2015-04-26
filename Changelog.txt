@@ -9,6 +9,7 @@ Added: Support for PostgreSQL database to store info about users.
 Added: Chat command !getipinfo to get info about ip(s) from PostgreSQL.
 Added: Support for CTM2HUB.
 Added: Little time delay before $Lock is sent by hub. That way hub don't sending $Lock if new connection is CTM DDOS (idea from original NeoModus Direct Connect Hub 1.0.25).
+Added: -p command line param for pid file.
 Fixed: Missing settings and profiles identificator tables with Lua 5.1.
 Changed: Chat command !getinfo to get info about offline user(s) from PostgreSQL.
 

@@ -16,6 +16,7 @@ PTOKAX_USER=ptokax
 PTOKAX_GROUP=ptokax
 PTOKAX_BIN=/usr/local/bin/PtokaX
 PTOKAX_PATH=/home/$PTOKAX_USER/
+PTOKAX_PID=/home/$PTOKAX_USER/PtokaX.pid
 
 # Check that the package is still installed
 [ -x $PTOKAX_BIN ] || exit 0;
@@ -24,9 +25,9 @@ case "$1" in
         start)
                 log_begin_msg "Starting PtokaX...\n"
                 if start-stop-daemon --start \
-                --chuid $PTOKAX_USER:$PTOKAX_GROUP \
+                --chuid $PTOKAX_USER:$PTOKAX_GROUP --pidfile $PTOKAX_PID\
                 --exec $PTOKAX_BIN \
-                -- -d -c $PTOKAX_PATH; then
+                -- -d -c $PTOKAX_PATH -p $PTOKAX_PID; then
                         log_end_msg 0
                 else
                         log_end_msg $?
@@ -35,7 +36,7 @@ case "$1" in
 
         stop)
                 log_begin_msg "Stopping PtokaX...\n"
-                if start-stop-daemon --stop --exec $PTOKAX_BIN; then
+                if start-stop-daemon --stop --pidfile $PTOKAX_PID --exec $PTOKAX_BIN; then
                 log_end_msg 0
                 else
                 log_end_msg $?

@@ -245,7 +245,7 @@ const char* SetTxtXmlStr[] = {
 	"Encoding",
 	"PostgresHost",
 	"PostgresPort",
-	"PostgresDBNane",
+	"PostgresDBName",
 	"PostgresUser",
 	"PostgresPass",
 #endif
