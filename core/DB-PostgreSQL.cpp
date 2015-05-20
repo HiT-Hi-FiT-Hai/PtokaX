@@ -44,6 +44,11 @@ DBPostgreSQL * DBPostgreSQL::mPtr = NULL;
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 DBPostgreSQL::DBPostgreSQL() {
+	if(clsSettingManager::mPtr->sTexts[SETTXT_ENCODING] == NULL || clsSettingManager::mPtr->sTexts[SETTXT_POSTGRES_PASS] == NULL) {
+		bConnected = false;
+		return;
+	}
+
 	/*	PotsgreSQL expecting data in utf-8. But we receive data mostly in old windows code pages.
 		So first we need to check if received data are in utf-8.
 		iconv is used and to check utf-8 validity we simply try to convert from utf-8 to utf8 :)
@@ -55,7 +60,7 @@ DBPostgreSQL::DBPostgreSQL() {
 
 	/*	When received data are not in utf-8 then we convert them from our windows code page to utf-8.
 		iconv for that is created here */
-	iconvAsciiToUtf = iconv_open("utf8", clsSettingManager::mPtr->sTexts[SETTXT_ENCODING]);
+	iconvAsciiToUtf = iconv_open("utf8//TRANSLIT//IGNORE", clsSettingManager::mPtr->sTexts[SETTXT_ENCODING]);
 	if(iconvAsciiToUtf == (iconv_t)-1) {
 		AppendLog("DBPostgreSQL iconv_open for iconvAsciiToUtf failed");
 	}
@@ -150,8 +155,11 @@ char * DBPostgreSQL::DoIconv(char * sInput, const uint8_t &ui8InputLen, char * s
 				if(ui8OutputSize == 65) {
 					return NULL;
 				}
-			} else if(errno == EILSEQ || errno == EINVAL) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv EILSEQ or EINVAL for param: "+string(sInput, ui8InputLen));
+			} else if(errno == EILSEQ) {
+				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv EILSEQ for param: "+string(sInput, ui8InputLen));
+				return NULL;
+			} else if(errno == EINVAL) {
+				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv EINVAL for param: "+string(sInput, ui8InputLen));
 				return NULL;
 			}
 		}

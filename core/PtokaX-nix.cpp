@@ -289,6 +289,8 @@ int main(int argc, char* argv[]) {
 
 	if(clsServerManager::bDaemon == false) {
 	    printf("%s ending...\n", clsServerManager::sTitle.c_str());
+	} else if(sPidFile != NULL) {
+		unlink(sPidFile);
 	}
 
     return EXIT_SUCCESS;
