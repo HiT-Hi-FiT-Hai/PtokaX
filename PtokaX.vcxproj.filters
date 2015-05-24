@@ -118,6 +118,9 @@
     <ClCompile Include="core\PXBReader.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="core\DB-SQLite.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\eventqueue.h">
@@ -256,6 +259,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="core\PXBReader.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\DB-SQLite.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

@@ -197,7 +197,7 @@ const char* SetShortXmlStr[] = {
     "SearchIntervalTime", 
     "MaxConnSameIP", 
     "MinReConnTime", 
-#ifdef _WITH_POSTGRES
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES)
 	"DbRemoveOldRecords",
 #endif
     "MaxUsersPeak", 

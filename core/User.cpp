@@ -39,7 +39,9 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-#ifdef _WITH_POSTGRES
+#ifdef _WITH_SQLITE
+	#include "DB-SQLite.h"
+#elif _WITH_POSTGRES
 	#include "DB-PostgreSQL.h"
 #endif
 #include "DeFlood.h"
@@ -1877,7 +1879,9 @@ void User::Close(bool bNoQuit/* = false*/) {
 #endif
 
         //sqldb->FinalizeVisit(u);
-#ifdef _WITH_POSTGRES
+#ifdef _WITH_SQLITE
+		DBSQLite::mPtr->UpdateRecord(this);
+#elif _WITH_POSTGRES
 		DBPostgreSQL::mPtr->UpdateRecord(this);
 #endif
 

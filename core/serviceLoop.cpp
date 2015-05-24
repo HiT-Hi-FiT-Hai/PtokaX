@@ -42,7 +42,9 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-#ifdef _WITH_POSTGRES
+#ifdef _WITH_SQLITE
+	#include "DB-SQLite.h"
+#elif _WITH_POSTGRES
 	#include "DB-PostgreSQL.h"
 #endif
 #include "LuaScript.h"
@@ -744,7 +746,9 @@ void clsServiceLoop::ReceiveLoop() {
                 }
 #endif
 //                if(sqldb) sqldb->AddVisit(curUser);
-#ifdef _WITH_POSTGRES
+#ifdef _WITH_SQLITE
+				DBSQLite::mPtr->UpdateRecord(curUser);
+#elif _WITH_POSTGRES
 				DBPostgreSQL::mPtr->UpdateRecord(curUser);
 #endif
 

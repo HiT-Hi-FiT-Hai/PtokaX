@@ -197,7 +197,7 @@ int16_t SetShortDef[] = {
     60, //SEARCH_INTERVAL_TIME, 
     5, //MAX_CONN_SAME_IP
     10, //MIN_RECONN_TIME
-#ifdef _WITH_POSTGRES
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES)
     0, //DB_REMOVE_OLD_RECORDS
 #endif
     0, //SETSHORT_MAX_USERS_PEAK

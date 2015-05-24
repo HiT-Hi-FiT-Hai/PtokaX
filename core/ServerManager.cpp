@@ -61,7 +61,9 @@
     #include "regtmrinc.h"
 #endif
 //---------------------------------------------------------------------------
-#ifdef _WITH_POSTGRES
+#ifdef _WITH_SQLITE
+	#include "DB-SQLite.h"
+#elif _WITH_POSTGRES
 	#include "DB-PostgreSQL.h"
 #endif
 //---------------------------------------------------------------------------
@@ -626,7 +628,13 @@ bool clsServerManager::Start() {
         }*/
 //  }
 
-#ifdef _WITH_POSTGRES
+#ifdef _WITH_SQLITE
+    DBSQLite::mPtr = new (std::nothrow) DBSQLite();
+    if(DBSQLite::mPtr == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate DBSQLite::mPtr in ServerStart\n", 0);
+    	exit(EXIT_FAILURE);
+    }
+#elif _WITH_POSTGRES
     DBPostgreSQL::mPtr = new (std::nothrow) DBPostgreSQL();
     if(DBPostgreSQL::mPtr == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate DBPostgreSQL::mPtr in ServerStart\n", 0);
@@ -865,7 +873,10 @@ void clsServerManager::FinalStop(const bool &bDeleteServiceLoop) {
 	delete clsIpP2Country::mPtr;
     clsIpP2Country::mPtr = NULL;
 
-#ifdef _WITH_POSTGRES
+#ifdef _WITH_SQLITE
+	delete DBSQLite::mPtr;
+    DBSQLite::mPtr = NULL;
+#elif _WITH_POSTGRES
 	delete DBPostgreSQL::mPtr;
     DBPostgreSQL::mPtr = NULL;
 #endif
