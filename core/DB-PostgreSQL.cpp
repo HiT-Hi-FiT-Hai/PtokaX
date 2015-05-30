@@ -156,8 +156,34 @@ char * DBPostgreSQL::DoIconv(char * sInput, const uint8_t &ui8InputLen, char * s
 					return NULL;
 				}
 			} else if(errno == EILSEQ) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv EILSEQ for param: "+string(sInput, ui8InputLen));
-				return NULL;
+				sInBuf++;
+				szInbufLeft--;
+
+				while(szInbufLeft != 0) {
+					szRet = iconv(iconvAsciiToUtf, &sInBuf, &szInbufLeft, &sOutBuf, &szOutbufLeft);
+					if(szRet == (size_t)-1) {
+						if(errno == E2BIG) {
+							clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv E2BIG in EILSEQ for param: "+string(sInput, ui8InputLen));
+
+							if(ui8OutputSize == 65) {
+								return NULL;
+							}
+						} else if(errno == EINVAL) {
+							clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv EINVAL in EILSEQ for param: "+string(sInput, ui8InputLen));
+							return NULL;
+						} else if(errno == EILSEQ) {
+							sInBuf++;
+							szInbufLeft--;
+
+							continue;
+						}
+					}
+				}
+
+				if(szOutbufLeft == size_t(ui8OutputSize-1)) {
+					clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv EILSEQ for param: "+string(sInput, ui8InputLen));
+					return NULL;
+				}
 			} else if(errno == EINVAL) {
 				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv EINVAL for param: "+string(sInput, ui8InputLen));
 				return NULL;
