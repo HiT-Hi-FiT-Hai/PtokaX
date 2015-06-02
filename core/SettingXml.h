@@ -197,7 +197,7 @@ const char* SetShortXmlStr[] = {
     "SearchIntervalTime", 
     "MaxConnSameIP", 
     "MinReConnTime", 
-#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES)
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
 	"DbRemoveOldRecords",
 #endif
     "MaxUsersPeak", 
@@ -248,6 +248,12 @@ const char* SetTxtXmlStr[] = {
 	"PostgresDBName",
 	"PostgresUser",
 	"PostgresPass",
+#elif _WITH_MYSQL
+	"MySQLHost",
+	"MySQLPort",
+	"MySQLDBName",
+	"MySQLUser",
+	"MySQLPass",
 #endif
 };
 //---------------------------------------------------------------------------

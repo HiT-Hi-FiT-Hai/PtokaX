@@ -65,6 +65,8 @@
 	#include "DB-SQLite.h"
 #elif _WITH_POSTGRES
 	#include "DB-PostgreSQL.h"
+#elif _WITH_MYSQL
+	#include "DB-MySQL.h"
 #endif
 //---------------------------------------------------------------------------
 static ServerThread * pServersE = NULL;
@@ -640,6 +642,12 @@ bool clsServerManager::Start() {
 		AppendDebugLog("%s - [MEM] Cannot allocate DBPostgreSQL::mPtr in ServerStart\n", 0);
     	exit(EXIT_FAILURE);
     }
+#elif _WITH_MYSQL
+    DBMySQL::mPtr = new (std::nothrow) DBMySQL();
+    if(DBMySQL::mPtr == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate DBMySQL::mPtr in ServerStart\n", 0);
+    	exit(EXIT_FAILURE);
+    }
 #endif
 
     clsIpP2Country::mPtr = new (std::nothrow) clsIpP2Country();
@@ -879,6 +887,9 @@ void clsServerManager::FinalStop(const bool &bDeleteServiceLoop) {
 #elif _WITH_POSTGRES
 	delete DBPostgreSQL::mPtr;
     DBPostgreSQL::mPtr = NULL;
+#elif _WITH_MYSQL
+	delete DBMySQL::mPtr;
+    DBMySQL::mPtr = NULL;
 #endif
 
 /*	if(TLSManager != NULL) {

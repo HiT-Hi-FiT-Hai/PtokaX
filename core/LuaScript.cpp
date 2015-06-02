@@ -369,7 +369,7 @@ static void AddSettingIds(lua_State * L) {
 		SETSHORT_MAX_DOWN_ACTION, SETSHORT_MAX_DOWN_KB, SETSHORT_MAX_DOWN_TIME, SETSHORT_MAX_DOWN_ACTION2, SETSHORT_MAX_DOWN_KB2, 
 		SETSHORT_MAX_DOWN_TIME2, SETSHORT_CHAT_INTERVAL_MESSAGES, SETSHORT_CHAT_INTERVAL_TIME, SETSHORT_PM_INTERVAL_MESSAGES, SETSHORT_PM_INTERVAL_TIME, 
 		SETSHORT_SEARCH_INTERVAL_MESSAGES, SETSHORT_SEARCH_INTERVAL_TIME, SETSHORT_MAX_CONN_SAME_IP, SETSHORT_MIN_RECONN_TIME,
-#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES)
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
 		SETSHORT_DB_REMOVE_OLD_RECORDS,
 #endif
 	};
@@ -397,7 +397,7 @@ static void AddSettingIds(lua_State * L) {
 		"MaxDownAction", "MaxDownKB", "MaxDownTime", "MaxDownAction2", "MaxDownKB2",
 		"MaxDownTime2", "ChatIntervalMessages", "ChatIntervalTime", "PmIntervalMessages", "PmIntervalTime",
 		"SearchIntervalMessages", "SearchIntervalTime", "MaxConnsSameIp", "MinReconnTime",
-#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES)
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
 		"DbRemoveOldRecords",
 #endif
 	};
@@ -421,6 +421,8 @@ static void AddSettingIds(lua_State * L) {
 		SETTXT_LANGUAGE, SETTXT_IPV4_ADDRESS, SETTXT_IPV6_ADDRESS,
 #ifdef _WITH_POSTGRES
 		SETTXT_ENCODING, SETTXT_POSTGRES_HOST, SETTXT_POSTGRES_PORT, SETTXT_POSTGRES_DBNAME, SETTXT_POSTGRES_USER, SETTXT_POSTGRES_PASS,
+#elif _WITH_MYSQL
+		SETTXT_MYSQL_HOST, SETTXT_MYSQL_PORT, SETTXT_MYSQL_DBNAME, SETTXT_MYSQL_USER, SETTXT_MYSQL_PASS,
 #endif
 	};
 
@@ -433,6 +435,8 @@ static void AddSettingIds(lua_State * L) {
 		"Language", "IPv4Address", "IPv6Address",
 #ifdef _WITH_POSTGRES
 		"Encoding", "PostgresHost", "PostgresPort", "PostgresDBNane", "PostgresUser", "PostgresPass",
+#elif _WITH_MYSQL
+		"MySQLHost", "MySQLPort", "MySQLDBNane", "MySQLUser", "MySQLPass",
 #endif
 	};
 

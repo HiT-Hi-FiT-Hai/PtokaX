@@ -48,6 +48,8 @@
 	#include "DB-SQLite.h"
 #elif _WITH_POSTGRES
 	#include "DB-PostgreSQL.h"
+#elif _WITH_MYSQL
+	#include "DB-MySQL.h"
 #endif
 #include "IP2Country.h"
 #include "LuaScript.h"
@@ -404,6 +406,11 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 						UncountDeflood(curUser, fromPM);
 						return true;
 					}
+#elif _WITH_MYSQL
+					if(DBMySQL::mPtr->SearchNick(sCommand, dlen-8, curUser, fromPM) == true) {
+						UncountDeflood(curUser, fromPM);
+						return true;
+					}
 #endif
                     int imsgLen = CheckFromPm(curUser, fromPM);
 
@@ -522,7 +529,7 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 
             // Hub commands: !getipinfo
 			if(strncasecmp(sCommand+1, "etipinfo ", 9) == 0) {
-#if !defined(_WITH_SQLITE) && !defined(_WITH_POSTGRES)
+#if !defined(_WITH_SQLITE) && !defined(_WITH_POSTGRES) && !defined(_WITH_MYSQL)
 				return false;
 #endif
                 if(clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::GETINFO) == false) {
@@ -566,6 +573,11 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 				}
 #elif _WITH_POSTGRES
 				if(DBPostgreSQL::mPtr->SearchIP(sCommand, curUser, fromPM) == true) {
+					UncountDeflood(curUser, fromPM);
+					return true;
+				}
+#elif _WITH_MYSQL
+				if(DBMySQL::mPtr->SearchIP(sCommand, curUser, fromPM) == true) {
 					UncountDeflood(curUser, fromPM);
 					return true;
 				}
@@ -4517,7 +4529,7 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                     }
 					help += msg;
 
-#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES)
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
                     imsglen = sprintf(msg, "\t%cgetipinfo <%s> - %s.\n", clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], clsLanguageManager::mPtr->sTexts[LAN_IP],
                         clsLanguageManager::mPtr->sTexts[LAN_DISPLAY_INFO_GIVEN_IP]);
                     if(CheckSprintf(imsglen, 1024, "clsHubCommands::DoCommand368-1") == false) {

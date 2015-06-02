@@ -46,6 +46,8 @@
 	#include "DB-SQLite.h"
 #elif _WITH_POSTGRES
 	#include "DB-PostgreSQL.h"
+#elif _WITH_MYSQL
+	#include "DB-MySQL.h"
 #endif
 #include "LuaScript.h"
 #include "RegThread.h"
@@ -750,6 +752,8 @@ void clsServiceLoop::ReceiveLoop() {
 				DBSQLite::mPtr->UpdateRecord(curUser);
 #elif _WITH_POSTGRES
 				DBPostgreSQL::mPtr->UpdateRecord(curUser);
+#elif _WITH_MYSQL
+				DBMySQL::mPtr->UpdateRecord(curUser);
 #endif
 
                 // PPK ... change to NoHello supports

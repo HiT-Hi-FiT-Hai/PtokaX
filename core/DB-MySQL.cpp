@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "stdinc.h"
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "DB-PostgreSQL.h"
+#include "DB-MySQL.h"
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "hashRegManager.h"
 #include "hashUsrManager.h"
@@ -37,283 +37,149 @@
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "IP2Country.h"
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include <iconv.h>
-#include <libpq-fe.h>
+#include <mysql.h>
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-DBPostgreSQL * DBPostgreSQL::mPtr = NULL;
+DBMySQL * DBMySQL::mPtr = NULL;
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-DBPostgreSQL::DBPostgreSQL() {
-	if(clsSettingManager::mPtr->sTexts[SETTXT_ENCODING] == NULL || clsSettingManager::mPtr->sTexts[SETTXT_POSTGRES_PASS] == NULL) {
+DBMySQL::DBMySQL() {
+	if(clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_PASS] == NULL) {
 		bConnected = false;
 		return;
 	}
 
-	/*	PotsgreSQL expecting data in utf-8. But we receive data mostly in old windows code pages.
-		So first we need to check if received data are in utf-8.
-		iconv is used and to check utf-8 validity we simply try to convert from utf-8 to utf8 :)
-		iconv for that is created here */
-	iconvUtfCheck = iconv_open("utf8", "utf8");
-	if(iconvUtfCheck == (iconv_t)-1) {
-		AppendLog("DBPostgreSQL iconv_open for iconvUtfCheck failed");
-	}
-
-	/*	When received data are not in utf-8 then we convert them from our windows code page to utf-8.
-		iconv for that is created here */
-	iconvAsciiToUtf = iconv_open("utf8//TRANSLIT//IGNORE", clsSettingManager::mPtr->sTexts[SETTXT_ENCODING]);
-	if(iconvAsciiToUtf == (iconv_t)-1) {
-		AppendLog("DBPostgreSQL iconv_open for iconvAsciiToUtf failed");
-	}
-
-	// Connect to PostgreSQL with our settings.
-    const char * sKeyWords[] = { "host", "port", "dbname", "user", "password", NULL };
-    const char * sValues[] = { clsSettingManager::mPtr->sTexts[SETTXT_POSTGRES_HOST], clsSettingManager::mPtr->sTexts[SETTXT_POSTGRES_PORT], clsSettingManager::mPtr->sTexts[SETTXT_POSTGRES_DBNAME], clsSettingManager::mPtr->sTexts[SETTXT_POSTGRES_USER], clsSettingManager::mPtr->sTexts[SETTXT_POSTGRES_PASS], NULL };
-    
-	pDBConn = PQconnectdbParams(sKeyWords, sValues, 0);
+	pDBHandle = mysql_init(NULL);
 	
-	if(PQstatus(pDBConn) == CONNECTION_BAD) { // Connection to PostgreSQL failed. Save error to log and give up.
+	if(pDBHandle == NULL) {
+		AppendLog("DBMySQL init failed");
+	}
+
+
+	if(mysql_real_connect(pDBHandle, clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_HOST], clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_USER], clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_PASS], clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_DBNAME], atoi(clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_PORT]), NULL, 0) == NULL) {
 		bConnected = false;
-		AppendLog(string("DBPostgreSQL connection failed: ")+PQerrorMessage(pDBConn));
+		AppendLog(string("DBMySQL connection failed: ")+mysql_error(pDBHandle));
 
 		return;
 	}
 
-	/*	Connection to PostgreSQL was created.
-		Now we check if our table exist in database.
-		If not then we create table.
-		Then we created unique index for column nick based on lower(nick). That will make it case insensitive. */
-	PGresult * pResult = PQexec(pDBConn,
-		"DO $$\n"
-			"BEGIN\n"
-				"IF NOT EXISTS ("
-					"SELECT * FROM pg_catalog.pg_tables WHERE tableowner = 'ptokax' AND tablename = 'userinfo'"
-				") THEN\n"
-					"CREATE TABLE userinfo ("
-						"nick VARCHAR(64) NOT NULL PRIMARY KEY,"
-						"last_updated TIMESTAMPTZ NOT NULL,"
-						"ip_address VARCHAR(39) NOT NULL,"
-						"share VARCHAR(24) NOT NULL,"
-						"description VARCHAR(192),"
-						"tag VARCHAR(192),"
-						"connection VARCHAR(32),"
-						"email VARCHAR(96)"
-					");"
-					"CREATE UNIQUE INDEX nick_unique ON userinfo(LOWER(nick));"
-				"END IF;"
-			"END;"
-		"$$;"
-	);
-
-	if(PQresultStatus(pResult) != PGRES_COMMAND_OK) { // Table exist or was succesfully created.
+	if(mysql_query(pDBHandle, 
+		"CREATE TABLE IF NOT EXISTS userinfo ("
+			"nick VARCHAR(64) NOT NULL PRIMARY KEY,"
+			"last_updated DATETIME NOT NULL,"
+			"ip_address VARCHAR(39) NOT NULL,"
+			"share VARCHAR(24) NOT NULL,"
+			"description VARCHAR(192),"
+			"tag VARCHAR(192),"
+			"connection VARCHAR(32),"
+			"email VARCHAR(96),"
+			"UNIQUE (nick)"
+		")"
+	) != 0) {
 		bConnected = false;
-		AppendLog(string("DBPostgreSQL check/create table failed: ")+PQresultErrorMessage(pResult));
-		PQclear(pResult);
+		AppendLog(string("DBMySQL check/create table failed: ")+mysql_error(pDBHandle));
 
 		return;
 	}
-
-	PQclear(pResult);
 
 	bConnected = true;
+
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	
-DBPostgreSQL::~DBPostgreSQL() {
+DBMySQL::~DBMySQL() {
 	// When user don't want to save data in database forever then he can set to remove records older than X days.
 	if(clsSettingManager::mPtr->i16Shorts[SETSHORT_DB_REMOVE_OLD_RECORDS] != 0) {
 		RemoveOldRecords(clsSettingManager::mPtr->i16Shorts[SETSHORT_DB_REMOVE_OLD_RECORDS]);
 	}
 
-	iconv_close(iconvUtfCheck);
-	iconv_close(iconvAsciiToUtf);
-	
-	PQfinish(pDBConn);
-}
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-// Function to check if data are in utf-8 and if not then they are converted. Both using iconvs that are created in constructor.
-char * DBPostgreSQL::DoIconv(char * sInput, const uint8_t &ui8InputLen, char * sOutput, const uint8_t &ui8OutputSize) {
-	char * sInBuf = sInput;
-	size_t szInbufLeft = ui8InputLen;
-
-	char * sOutBuf = sOutput;
-	size_t szOutbufLeft = ui8OutputSize-1;
-
-	size_t szRet = iconv(iconvUtfCheck, &sInBuf, &szInbufLeft, &sOutBuf, &szOutbufLeft);
-	if(szRet == (size_t)-1) {
-		sInBuf = sInput;
-		szInbufLeft = ui8InputLen;
-
-		sOutBuf = sOutput;
-		szOutbufLeft = ui8OutputSize-1;
-
-		szRet = iconv(iconvAsciiToUtf, &sInBuf, &szInbufLeft, &sOutBuf, &szOutbufLeft);
-		if(szRet == (size_t)-1) {
-			if(errno == E2BIG) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv E2BIG for param: "+string(sInput, ui8InputLen));
-
-				if(ui8OutputSize == 65) {
-					return NULL;
-				}
-			} else if(errno == EILSEQ) {
-				sInBuf++;
-				szInbufLeft--;
-
-				while(szInbufLeft != 0) {
-					szRet = iconv(iconvAsciiToUtf, &sInBuf, &szInbufLeft, &sOutBuf, &szOutbufLeft);
-					if(szRet == (size_t)-1) {
-						if(errno == E2BIG) {
-							clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv E2BIG in EILSEQ for param: "+string(sInput, ui8InputLen));
-
-							if(ui8OutputSize == 65) {
-								return NULL;
-							}
-						} else if(errno == EINVAL) {
-							clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv EINVAL in EILSEQ for param: "+string(sInput, ui8InputLen));
-							return NULL;
-						} else if(errno == EILSEQ) {
-							sInBuf++;
-							szInbufLeft--;
-
-							continue;
-						}
-					}
-				}
-
-				if(szOutbufLeft == size_t(ui8OutputSize-1)) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv EILSEQ for param: "+string(sInput, ui8InputLen));
-					return NULL;
-				}
-			} else if(errno == EINVAL) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv EINVAL for param: "+string(sInput, ui8InputLen));
-				return NULL;
-			}
-		}
-
-		sOutput[(ui8OutputSize-szOutbufLeft)-1] = '\0';
-		return sOutput;
-	} else {
-		sOutput[ui8InputLen] = '\0';
-		return sOutput;
+	if(pDBHandle != NULL) {
+		mysql_close(pDBHandle);
 	}
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // Now that important part. Function to update or insert user to database.
-void DBPostgreSQL::UpdateRecord(User * pUser) {
+void DBMySQL::UpdateRecord(User * pUser) {
 	if(bConnected == false) {
 		return;
 	}
 
-	/*	Prepare params for PQexecParams.
-		With this function params are separated from command string and we don't need to do annoying quoting and escaping for them.
-		Of course we do conversion to utf-8 when needed. */
-	char * paramValues[7];
-	memset(&paramValues, 0, sizeof(paramValues));
-
-
-	char sNick[65];
-	paramValues[0] = DoIconv(pUser->sNick, pUser->ui8NickLen, sNick, 65);
-	if(paramValues[0] == NULL) {
+	char sNick[129];
+	if(mysql_real_escape_string(pDBHandle, sNick, pUser->sNick, pUser->ui8NickLen < 65 ? pUser->ui8NickLen : 64) == 0) {
 		return;
 	}
-
-	paramValues[1] = pUser->sIP;
 
 	char sShare[24];
 	sprintf(sShare, "%0.02f GB", (double)pUser->ui64SharedSize/1073741824);
 
-	paramValues[2] = sShare;
-
-	char sDescription[193];
+	char sDescription[385];
 	if(pUser->sDescription != NULL) {
-		paramValues[3] = DoIconv(pUser->sDescription, pUser->ui8DescriptionLen, sDescription, 193);
+		mysql_real_escape_string(pDBHandle, sDescription, pUser->sDescription, pUser->ui8DescriptionLen < 193 ? pUser->ui8DescriptionLen : 192);
+	} else {
+		sDescription[0] = '\0';
 	}
 
-	char sTag[193];
+	char sTag[385];
 	if(pUser->sTag != NULL) {
-		paramValues[4] = DoIconv(pUser->sTag, pUser->ui8TagLen, sTag, 193);
+		mysql_real_escape_string(pDBHandle, sTag, pUser->sTag, pUser->ui8TagLen < 193 ? pUser->ui8TagLen : 192);
+	} else {
+		sTag[0] = '\0';
 	}
 
-	char sConnection[33];
+	char sConnection[65];
 	if(pUser->sConnection != NULL) {
-		paramValues[5] = DoIconv(pUser->sConnection, pUser->ui8ConnectionLen, sConnection, 33);
+		mysql_real_escape_string(pDBHandle, sConnection, pUser->sConnection, pUser->ui8ConnectionLen < 33 ? pUser->ui8ConnectionLen : 32);
+	} else {
+		sConnection[0] = '\0';
 	}
 
-	char sEmail[97];
+	char sEmail[193];
 	if(pUser->sEmail != NULL) {
-		paramValues[6] = DoIconv(pUser->sEmail, pUser->ui8EmailLen, sEmail, 97);
+		mysql_real_escape_string(pDBHandle, sEmail, pUser->sEmail, pUser->ui8EmailLen < 97 ? pUser->ui8EmailLen : 96);
+	} else {
+		sEmail[0] = '\0';
 	}
 
-	/*	PostgreSQL don't support UPSERT.
-		So we need to do it hard way.
-		First try UPDATE.
-		Timestamp is truncated to seconds. */
-	PGresult * pResult = PQexecParams(pDBConn,
-		"UPDATE userinfo SET "
-		"last_updated = DATE_TRUNC('second', NOW())," // last_updated
-		"ip_address = $2," // ip
-		"share = $3," // share
-		"description = $4," // description
-		"tag = $5," // tag
-		"connection = $6," // connection
-		"email = $7" // email
-		"WHERE LOWER(nick) = LOWER($1);", // nick
-		7,
-		NULL,
-		paramValues,
-		NULL,
-		NULL,
-		0
+	char sSQLCommand[4096];
+	sprintf(sSQLCommand,
+		"INSERT INTO userinfo (nick, last_updated, ip_address, share, description, tag, connection, email) VALUES ("
+			"'%s', NOW(), '%s', '%s', '%s', '%s', '%s', '%s'"
+		")  ON DUPLICATE KEY UPDATE "
+			"last_updated = NOW(), ip_address = '%s', share = '%s',"
+			"description = '%s', tag = '%s', connection = '%s', email = '%s'",
+		sNick, pUser->sIP, sShare, sDescription, sTag, sConnection, sEmail,
+		pUser->sIP, sShare, sDescription, sTag, sConnection, sEmail
 	);
 
-	if(PQresultStatus(pResult) != PGRES_COMMAND_OK) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBPostgreSQL update record failed: ")+PQresultErrorMessage(pResult));
-	}
+	if(mysql_query(pDBHandle, sSQLCommand) != 0) {
+		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL insert/update record failed: ")+mysql_error(pDBHandle));
 
-	char * sRows = PQcmdTuples(pResult);
-
-	/*	UPDATE should always return OK, but that not mean anything was changed.
-		We need to check how much rows was changed.
-		When 0 then it means that user not exist in table. */
-	if(sRows[0] != '0' || sRows[1] != '\0') {
-		PQclear(pResult);
 		return;
 	}
-	
-	PQclear(pResult);
-
-	// When update changed 0 rows then we need to insert user to table.
-	pResult = PQexecParams(pDBConn,
-		"INSERT INTO userinfo (nick, last_updated, ip_address, share, description, tag, connection, email) VALUES ("
-		"$1," // nick
-		"DATE_TRUNC('second', NOW())," // last_updated
-		"$2," // ip
-		"$3," // share
-		"$4," // description
-		"$5," // tag
-		"$6," // connection
-		"$7" // email
-		");",
-		7,
-		NULL,
-		paramValues,
-		NULL,
-		NULL,
-		0
-	);
-
-	if(PQresultStatus(pResult) != PGRES_COMMAND_OK) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBPostgreSQL insert record failed: ")+PQresultErrorMessage(pResult));
-	}
-
-	PQclear(pResult);
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // Function to send data returned by SELECT to Operator who requested them.
-bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int &iTuples) {
-	if(iTuples == 1) { // When we have only one result then we send whole info about user.
+bool DBMySQL::SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pResult, uint64_t &ui64Rows) {
+	unsigned int uiCount = mysql_num_fields(pResult);
+	if(uiCount != 8) {
+		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL mysql_num_fields wrong fields count: ")+string(uiCount));
+		return false;
+	}
+
+	if(ui64Rows == 1) { // When we have only one result then we send whole info about user.
+		MYSQL_ROW mRow = mysql_fetch_row(pResult);
+		if(mRow == NULL) {
+			clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL mysql_fetch_row failed: ")+mysql_error(pDBHandle));
+			return false;
+		}
+
+		unsigned long * pLengths = mysql_fetch_lengths(pResult);
+		if(pLengths == NULL) {
+			clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL mysql_fetch_lengths failed: ")+mysql_error(pDBHandle));
+			return false;
+		}
+
 		int iMsgLen = 0;
 
 		if(bFromPM == true) {
@@ -323,20 +189,18 @@ bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int
     		}
     	}
 
-		int iLength = PQgetlength(pResult, 0, 0);
-		if(iLength <= 0 || iLength > 64) {
-			clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid nick length: "+string(iLength));
+		if(pLengths[0] <= 0 || pLengths[0] > 64) {
+			clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid nick length: "+string(pLengths[0]));
 			return false;
 		}
 
-		char * sValue = PQgetvalue(pResult, 0, 0);
-        int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> \n%s: %s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_NICK], sValue);
+        int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> \n%s: %s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_NICK], mRow[0]);
         iMsgLen += iRet;
         if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "SendQueryResults2") == false) {
 			return false;
         }
 
-		RegUser * pReg = clsRegManager::mPtr->Find(sValue, iLength);
+		RegUser * pReg = clsRegManager::mPtr->Find(mRow[0], pLengths[0]);
         if(pReg != NULL) {
             iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_PROFILE], clsProfileManager::mPtr->ppProfilesTable[pReg->ui16Profile]->sName);
         	iMsgLen += iRet;
@@ -346,7 +210,7 @@ bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int
         }
 
 		// In case when SQL wildcards were used is possible that user is online. Then we don't use data from database, but data that are in server memory.
-		User * pOnlineUser = clsHashManager::mPtr->FindUser(sValue, iLength);
+		User * pOnlineUser = clsHashManager::mPtr->FindUser(mRow[0], pLengths[0]);
 		if(pOnlineUser != NULL) {
             iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s ", clsLanguageManager::mPtr->sTexts[LAN_STATUS], clsLanguageManager::mPtr->sTexts[LAN_ONLINE_FROM]);
         	iMsgLen += iRet;
@@ -437,9 +301,9 @@ bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int
         		return false;
             }
 #ifdef _WIN32
-        	time_t tTime = (time_t)_strtoui64(PQgetvalue(pResult, 0, 1), NULL, 10);
+        	time_t tTime = (time_t)_strtoui64(mRow[1], NULL, 10);
 #else
-			time_t tTime = (time_t)strtoull(PQgetvalue(pResult, 0, 1), NULL, 10);
+			time_t tTime = (time_t)strtoull(mRow[1], NULL, 10);
 #endif
             struct tm *tm = localtime(&tTime);
             iRet = (int)strftime(clsServerManager::pGlobalBuffer+iMsgLen, 256, "%c", tm);
@@ -448,35 +312,32 @@ bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int
         		return false;
             }
 
-			iLength = PQgetlength(pResult, 0, 2);
-			if(iLength <= 0 || iLength > 39) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid ip length: "+string(iLength));
+			if(pLengths[2] <= 0 || pLengths[2] > 39) {
+				clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid ip length: "+string(pLengths[2]));
 				return false;
 			}
 
-			iLength = PQgetlength(pResult, 0, 3);
-			if(iLength <= 0 || iLength > 24) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid share length: "+string(iLength));
+			if(pLengths[3] <= 0 || pLengths[3] > 24) {
+				clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid share length: "+string(pLengths[3]));
 				return false;
 			}
 
-			char * sIP = PQgetvalue(pResult, 0, 2);
+			char * sIP = mRow[2];
 
-			iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_IP], sIP, clsLanguageManager::mPtr->sTexts[LAN_SHARE_SIZE], PQgetvalue(pResult, 0, 3));
+			iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_IP], sIP, clsLanguageManager::mPtr->sTexts[LAN_SHARE_SIZE], mRow[3]);
             iMsgLen += iRet;
             if(CheckSprintf1(iRet, iMsgLen, 1024, "SendQueryResults15") == false) {
         		return false;
 			}
 
-            if(PQgetisnull(pResult, 0, 4) == 0) {
-				iLength = PQgetlength(pResult, 0, 4);
-				if(iLength > 192) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid description length: "+string(iLength));
+            if(mRow[4] != NULL) {
+				if(pLengths[4] > 192) {
+					clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid description length: "+string(pLengths[4]));
 					return  false;
 				}
 
-				if(iLength > 0) {
-                	iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_DESCRIPTION], PQgetvalue(pResult, 0, 4));
+				if(pLengths[4] > 0) {
+                	iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_DESCRIPTION], mRow[4]);
             		iMsgLen += iRet;
             		if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "SendQueryResults16") == false) {
         				return false;
@@ -484,15 +345,14 @@ bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int
                 }
             }
 
-            if(PQgetisnull(pResult, 0, 5) == 0) {
-				iLength = PQgetlength(pResult, 0, 5);
-				if(iLength > 192) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid tag length: "+string(iLength));
+            if(mRow[5] != NULL) {
+				if(pLengths[5] > 192) {
+					clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid tag length: "+string(pLengths[5]));
 					return false;
 				}
 
-				if(iLength > 0) {
-                	iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_TAG], PQgetvalue(pResult, 0, 5));
+				if(pLengths[5] > 0) {
+                	iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_TAG], mRow[5]);
             		iMsgLen += iRet;
             		if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "SendQueryResults17") == false) {
                     	return false;
@@ -500,15 +360,14 @@ bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int
                 }
             }
                     
-            if(PQgetisnull(pResult, 0, 6) == 0) {
-				iLength = PQgetlength(pResult, 0, 6);
-				if(iLength > 32) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid connection length: "+string(iLength));
+            if(mRow[6] != NULL) {
+				if(pLengths[6] > 32) {
+					clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid connection length: "+string(pLengths[6]));
 					return false;
 				}
 
-				if(iLength > 0) {
-                	iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_CONNECTION], PQgetvalue(pResult, 0, 6));
+				if(pLengths[6] > 0) {
+                	iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_CONNECTION], mRow[6]);
             		iMsgLen += iRet;
             		if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "SendQueryResults18") == false) {
                     	return false;
@@ -516,15 +375,14 @@ bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int
                 }
             }
 
-            if(PQgetisnull(pResult, 0, 7) == 0) {
-				iLength = PQgetlength(pResult, 0, 7);
-				if(iLength > 96) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid email length: "+string(iLength));
+            if(mRow[7] != NULL) {
+				if(pLengths[7] > 96) {
+					clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid email length: "+string(pLengths[7]));
 					return false;
 				}
 
-				if(iLength > 0) {
-                	iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_EMAIL], PQgetvalue(pResult, 0, 7));
+				if(pLengths[7] > 0) {
+                	iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_EMAIL], mRow[7]);
             		iMsgLen += iRet;
             		if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "SendQueryResults19") == false) {
                     	return false;
@@ -568,20 +426,30 @@ bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int
     		}
 		}
 
-		for(int iActualTuple = 0; iActualTuple < iTuples; iActualTuple++) {
-			int iLength = PQgetlength(pResult, iActualTuple, 0);
-			if(iLength <= 0 || iLength > 64) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid nick length: "+string(iLength));
+		for(uint64_t ui64ActualRow = 0; ui64ActualRow < ui64Rows; ui64ActualRow++) {
+			MYSQL_ROW mRow = mysql_fetch_row(pResult);
+			if(mRow == NULL) {
+				clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL mysql_fetch_row failed: ")+mysql_error(pDBHandle));
+				return false;
+			}
+	
+			unsigned long * pLengths = mysql_fetch_lengths(pResult);
+			if(pLengths == NULL) {
+				clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL mysql_fetch_lengths failed: ")+mysql_error(pDBHandle));
 				return false;
 			}
 
-			iLength = PQgetlength(pResult, iActualTuple, 2);
-			if(iLength <= 0 || iLength > 39) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid ip length: "+string(iLength));
+			if(pLengths[0] <= 0 || pLengths[0] > 64) {
+				clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid nick length: "+string(pLengths[0]));
 				return false;
 			}
 
-        	int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s\t\t%s: %s", clsLanguageManager::mPtr->sTexts[LAN_NICK], PQgetvalue(pResult, iActualTuple, 0), clsLanguageManager::mPtr->sTexts[LAN_IP], PQgetvalue(pResult, iActualTuple, 2));
+			if(pLengths[2] <= 0 || pLengths[2] > 39) {
+				clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid ip length: "+string(pLengths[2]));
+				return false;
+			}
+
+        	int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s\t\t%s: %s", clsLanguageManager::mPtr->sTexts[LAN_NICK], mRow[0], clsLanguageManager::mPtr->sTexts[LAN_IP], mRow[2]);
         	iMsgLen += iRet;
         	if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "SendQueryResults23") == false) {
 				return false;
@@ -595,125 +463,121 @@ bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int
         return true;
 	}
 }
+
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // First of two functions to search data in database. Nick will be probably most used.
-bool DBPostgreSQL::SearchNick(char * sNick, const uint8_t &ui8NickLen, User * pUser, const bool &bFromPM) {
+bool DBMySQL::SearchNick(char * sNick, const uint8_t &ui8NickLen, User * pUser, const bool &bFromPM) {
 	if(bConnected == false) {
 		return false;
 	}
 
-	// Prepare param for PQexecParams.
-	char * paramValues[1] = { NULL };
-
-	char sUtfNick[65];
-	paramValues[0] = DoIconv(sNick, ui8NickLen, sUtfNick, 65);
-	if(paramValues[0] == NULL) {
+	char sEscapedNick[129];
+	if(mysql_real_escape_string(pDBHandle, sEscapedNick, sNick, ui8NickLen < 65 ? ui8NickLen : 64) == 0) {
 		return false;
 	}
 
-	/*	Run SELECT command.
-		We need timestamp as epoch.
-		That allow us to use that result for standard C date/time formating functions and send result to user correctly formated using system locales.
-		LIKE allow us to use SQL wildcards. Very usefull :)
-		And we will return max 50 results sorted by timestamp from newest. */		
-	PGresult * pResult = PQexecParams(pDBConn, "SELECT nick, EXTRACT(EPOCH FROM last_updated), ip_address, share, description, tag, connection, email FROM userinfo WHERE LOWER(nick) LIKE LOWER($1) ORDER BY last_updated DESC LIMIT 50;", 1, NULL, paramValues, NULL, NULL, 0);
+	char sSQLCommand[256];
+	sprintf(sSQLCommand, "SELECT nick, UNIX_TIMESTAMP(last_updated), ip_address, share, description, tag, connection, email FROM userinfo WHERE LOWER(nick) LIKE LOWER('%s') ORDER BY last_updated DESC LIMIT 50", sEscapedNick);
 
-	if(PQresultStatus(pResult) != PGRES_TUPLES_OK) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBPostgreSQL search for nick failed: ")+PQresultErrorMessage(pResult));
-		PQclear(pResult);
+	if(mysql_query(pDBHandle, sSQLCommand) != 0) {
+		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL search for nick failed: ")+mysql_error(pDBHandle));
 
 		return false;
 	}
 
-	int iTuples = PQntuples(pResult);
+	MYSQL_RES * pResult = mysql_store_result(pDBHandle);
 
-	if(iTuples == 0) {
-		PQclear(pResult);
-        return false;
+	if(pResult == NULL) {
+		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL search for nick store result failed: ")+mysql_error(pDBHandle));
+
+		return false;
 	}
 
-	bool bResult = SendQueryResults(pUser, bFromPM, pResult, iTuples);
+	uint64_t ui64Rows = (uint64_t)mysql_num_rows(pResult);
 
-	PQclear(pResult);
+	bool bResult = false;
+
+	if(ui64Rows != 0) {
+		bResult = SendQueryResults(pUser, bFromPM, pResult, ui64Rows);
+	}
+
+	mysql_free_result(pResult);
 
 	return bResult;
+
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // Second of two fnctions to search data in database. Now using IP.
-bool DBPostgreSQL::SearchIP(char * sIP, User * pUser, const bool &bFromPM) {
+bool DBMySQL::SearchIP(char * sIP, User * pUser, const bool &bFromPM) {
 	if(bConnected == false) {
 		return false;
 	}
 
-	// Prepare param for PQexecParams.
-	char * paramValues[1] = { sIP };
+	size_t szLen = strlen(sIP);
 
-	//	Run SELECT command. Similar as in SearchNick.
-	PGresult * pResult = PQexecParams(pDBConn, "SELECT nick, EXTRACT(EPOCH FROM last_updated), ip_address, share, description, tag, connection, email FROM userinfo WHERE ip_address LIKE $1 ORDER BY last_updated DESC LIMIT 50;", 1, NULL, paramValues, NULL, NULL, 0);
+	char sEscapedIP[79];
+	if(mysql_real_escape_string(pDBHandle, sEscapedIP, sIP, szLen < 40 ? szLen : 39) == 0) {
+		return false;
+	}
 
-	if(PQresultStatus(pResult) != PGRES_TUPLES_OK) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBPostgreSQL search for IP failed: ")+PQresultErrorMessage(pResult));
-		PQclear(pResult);
+	char sSQLCommand[256];
+	sprintf(sSQLCommand, "SELECT nick, UNIX_TIMESTAMP(last_updated), ip_address, share, description, tag, connection, email FROM userinfo WHERE ip_address LIKE '%s' ORDER BY last_updated DESC LIMIT 50", sEscapedIP);
+
+	if(mysql_query(pDBHandle, sSQLCommand) != 0) {
+		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL search for IP failed: ")+mysql_error(pDBHandle));
+
+		return false;
+	}
+	
+	my_ulonglong mullRows = mysql_affected_rows(pDBHandle);
+
+	if(mullRows == 0) {
+        return false;
+	}
+
+	MYSQL_RES * pResult = mysql_store_result(pDBHandle);
+
+	if(pResult == NULL) {
+		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL search for IP store result failed: ")+mysql_error(pDBHandle));
 
 		return false;
 	}
 
-	int iTuples = PQntuples(pResult);
+	uint64_t ui64Rows = (uint64_t)mysql_num_rows(pResult);
 
-	if(iTuples == 0) {
-		PQclear(pResult);
-        return false;
+	bool bResult = false;
+
+	if(ui64Rows != 0) {
+		bResult = SendQueryResults(pUser, bFromPM, pResult, ui64Rows);
 	}
 
-	bool bResult = SendQueryResults(pUser, bFromPM, pResult, iTuples);
-
-	PQclear(pResult);
+	mysql_free_result(pResult);
 
 	return bResult;
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // Function to remove X days old records from database.
-void DBPostgreSQL::RemoveOldRecords(const uint16_t &ui16Days) {
+void DBMySQL::RemoveOldRecords(const uint16_t &ui16Days) {
 	if(bConnected == false) {
 		return;
 	}
 
-	// Prepare X days old time in C
-	time_t acc_time = 0;
-    time(&acc_time);
+	char sSQLCommand[256];
+	sprintf(sSQLCommand, "DELETE FROM userinfo WHERE last_updated < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL %hu DAY))", ui16Days);
 
-    struct tm *tm = localtime(&acc_time);
+	if(mysql_query(pDBHandle, sSQLCommand) != 0) {
+		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL remove old records failed: ")+mysql_error(pDBHandle));
 
-    tm->tm_mday -= ui16Days;
-    tm->tm_isdst = -1;
-
-    time_t tTime = mktime(tm);
-
-    if(tTime == (time_t)-1) {
-        return;
-    }
-
-	// Prepare param for PQexecParams.
-	string sTimeStamp = (uint64_t)tTime;
-	char * paramValues[1] = { sTimeStamp.c_str() };
-
-	// Run DELETE command. It is simple. We given timestamp in epoch and to_timestamp will convert it to PostgreSQL timestamp format.
-	PGresult * pResult = PQexecParams(pDBConn, "DELETE FROM userinfo WHERE last_updated < to_timestamp($1);", 1, NULL, paramValues, NULL, NULL, 0);
-
-	if(PQresultStatus(pResult) != PGRES_COMMAND_OK) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBPostgreSQL remove old records failed: ")+PQresultErrorMessage(pResult));
+		return;
 	}
 
-	char * sRows = PQcmdTuples(pResult);
+	uint64_t ui64Rows = (uint64_t)mysql_affected_rows(pDBHandle);
 
-	/*	When non-zero rows was affected then send info to UDP debug */
-	if(sRows[0] != '0' || sRows[1] != '\0') {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBPostgreSQL removed old records: ")+sRows);
+	if(ui64Rows != 0) {
+		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL removed old records: ")+string(ui64Rows));
 	}
-
-	PQclear(pResult);
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

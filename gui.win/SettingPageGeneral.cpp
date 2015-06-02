@@ -270,7 +270,12 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
 
     int iPosY = clsGuiSettingManager::iOneLineGB;
 
-    ::SetWindowPos(m_hWnd, NULL, 0, 0, rcThis.right, (3 * iOneLineTwoGroupGB) + clsGuiSettingManager::iOneLineGB + 3, SWP_NOMOVE | SWP_NOZORDER);
+	int iHeight = iTwoChecksGB + clsGuiSettingManager::iGroupBoxMargin + (2 * clsGuiSettingManager::iCheckHeight) + 4 + clsGuiSettingManager::iOneLineGB + 5 + clsGuiSettingManager::iOneLineTwoChecksGB + clsGuiSettingManager::iGroupBoxMargin + clsGuiSettingManager::iCheckHeight + (2 * clsGuiSettingManager::iOneLineGB) + 6 +
+		clsGuiSettingManager::iGroupBoxMargin + (3 * clsGuiSettingManager::iCheckHeight) + 14 + 3;
+	
+	iHeight = iHeight > ((3 * iOneLineTwoGroupGB) + clsGuiSettingManager::iOneLineGB + 3) ? iHeight : ((3 * iOneLineTwoGroupGB) + clsGuiSettingManager::iOneLineGB + 3);
+	
+    ::SetWindowPos(m_hWnd, NULL, 0, 0, rcThis.right, iHeight, SWP_NOMOVE | SWP_NOZORDER);
 
     hWndPageItems[GB_LANGUAGE] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_LANGUAGE], WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 0, 0, ScaleGui(297), clsGuiSettingManager::iOneLineGB,
         m_hWnd, NULL, clsServerManager::hInstance, NULL);

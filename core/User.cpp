@@ -43,6 +43,8 @@
 	#include "DB-SQLite.h"
 #elif _WITH_POSTGRES
 	#include "DB-PostgreSQL.h"
+#elif _WITH_MYSQL
+	#include "DB-MySQL.h"
 #endif
 #include "DeFlood.h"
 //---------------------------------------------------------------------------
@@ -1883,6 +1885,8 @@ void User::Close(bool bNoQuit/* = false*/) {
 		DBSQLite::mPtr->UpdateRecord(this);
 #elif _WITH_POSTGRES
 		DBPostgreSQL::mPtr->UpdateRecord(this);
+#elif _WITH_MYSQL
+		DBMySQL::mPtr->UpdateRecord(this);
 #endif
 
 		if(((ui32BoolBits & BIT_HAVE_SHARECOUNTED) == BIT_HAVE_SHARECOUNTED) == true) {

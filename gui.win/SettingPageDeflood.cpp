@@ -375,49 +375,54 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
     RECT rcThis = { 0 };
     ::GetWindowRect(m_hWnd, &rcThis);
 
+	int iGMCWidth = (rcThis.right - rcThis.left) - 21 - (3 * clsGuiSettingManager::iUpDownWidth) - 35;
+	int iGMCEditWidth = int(iGMCWidth * 0.08);
+	int iGMCTriCharTxtWidth = int(iGMCWidth * 0.07);
+
     hWndPageItems[GB_GLOBAL_MAIN_CHAT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_GLOBAL_MAIN_CHAT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
         0, 0, iFullGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_GLOBAL_MAIN_CHAT_MSGS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
-        8, clsGuiSettingManager::iGroupBoxMargin, ScaleGui(30), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_GLOBAL_MAIN_CHAT_MSGS, clsServerManager::hInstance, NULL);
+        8, clsGuiSettingManager::iGroupBoxMargin, iGMCEditWidth, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_GLOBAL_MAIN_CHAT_MSGS, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_GLOBAL_MAIN_CHAT_MSGS], EM_SETLIMITTEXT, 3, 0);
 
-    AddUpDown(hWndPageItems[UD_GLOBAL_MAIN_CHAT_MSGS], ScaleGui(30) + 8, clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_GLOBAL_MAIN_CHAT_MSGS],
+    AddUpDown(hWndPageItems[UD_GLOBAL_MAIN_CHAT_MSGS], iGMCEditWidth + 8, clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_GLOBAL_MAIN_CHAT_MSGS],
         (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_MESSAGES], 0));
 
     hWndPageItems[LBL_GLOBAL_MAIN_CHAT_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER,
-        ScaleGui(30) + clsGuiSettingManager::iUpDownWidth + 13, clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(10), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        iGMCEditWidth + clsGuiSettingManager::iUpDownWidth + 13, clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), int(iGMCWidth * 0.04), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
-        ScaleGui(40) + clsGuiSettingManager::iUpDownWidth + 18, clsGuiSettingManager::iGroupBoxMargin, ScaleGui(30), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_GLOBAL_MAIN_CHAT_SECS, clsServerManager::hInstance, NULL);
+        iGMCEditWidth + int(iGMCWidth * 0.04) + clsGuiSettingManager::iUpDownWidth + 18, clsGuiSettingManager::iGroupBoxMargin, iGMCEditWidth, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_GLOBAL_MAIN_CHAT_SECS, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS], EM_SETLIMITTEXT, 3, 0);
 
-    AddUpDown(hWndPageItems[UD_GLOBAL_MAIN_CHAT_SECS], ScaleGui(70) + clsGuiSettingManager::iUpDownWidth + 18, clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1),
+    AddUpDown(hWndPageItems[UD_GLOBAL_MAIN_CHAT_SECS], (2 * iGMCEditWidth) + int(iGMCWidth * 0.04) +  clsGuiSettingManager::iUpDownWidth + 18, clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1),
         (WPARAM)hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_TIME], 0));
 
     hWndPageItems[LBL_GLOBAL_MAIN_CHAT_SEC] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_SEC_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
-        ScaleGui(70) + (2 * clsGuiSettingManager::iUpDownWidth) + 23, clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(25), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        (2 * iGMCEditWidth) + int(iGMCWidth * 0.04) + (2 * clsGuiSettingManager::iUpDownWidth) + 23, clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), iGMCTriCharTxtWidth, clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[CB_GLOBAL_MAIN_CHAT] = ::CreateWindowEx(0, WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST,
-        ScaleGui(95) + (2 * clsGuiSettingManager::iUpDownWidth) + 28, clsGuiSettingManager::iGroupBoxMargin, ScaleGui(175), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)CB_GLOBAL_MAIN_CHAT, clsServerManager::hInstance, NULL);
+        (2 * iGMCEditWidth) + int(iGMCWidth * 0.04) + iGMCTriCharTxtWidth + (2 * clsGuiSettingManager::iUpDownWidth) + 28, clsGuiSettingManager::iGroupBoxMargin, int(iGMCWidth * 0.51), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)CB_GLOBAL_MAIN_CHAT, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[CB_GLOBAL_MAIN_CHAT], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_DISABLED]);
     ::SendMessage(hWndPageItems[CB_GLOBAL_MAIN_CHAT], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_LOCK_CHAT]);
     ::SendMessage(hWndPageItems[CB_GLOBAL_MAIN_CHAT], CB_ADDSTRING, 0, (LPARAM)clsLanguageManager::mPtr->sTexts[LAN_ONLY_TO_OPS_WITH_IP]);
     ::SendMessage(hWndPageItems[CB_GLOBAL_MAIN_CHAT], CB_SETCURSEL, clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION], 0);
 
     hWndPageItems[LBL_GLOBAL_MAIN_CHAT_FOR] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_FOR], WS_CHILD | WS_VISIBLE | SS_CENTER,
-        ScaleGui(270) + (2 * clsGuiSettingManager::iUpDownWidth) + 33, clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(20), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        (2 * iGMCEditWidth) + int(iGMCWidth * 0.04) + iGMCTriCharTxtWidth + int(iGMCWidth * 0.51) + (2 * clsGuiSettingManager::iUpDownWidth) + 33, clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), iGMCTriCharTxtWidth, clsGuiSettingManager::iTextHeight, 
+		m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS2] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
-        ScaleGui(290) + (2 * clsGuiSettingManager::iUpDownWidth) + 38, clsGuiSettingManager::iGroupBoxMargin, ScaleGui(30), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_GLOBAL_MAIN_CHAT_SECS2, clsServerManager::hInstance, NULL);
+        (2 * iGMCEditWidth) + int(iGMCWidth * 0.04) + (2 * iGMCTriCharTxtWidth) + int(iGMCWidth * 0.51) + (2 * clsGuiSettingManager::iUpDownWidth) + 38, clsGuiSettingManager::iGroupBoxMargin, iGMCEditWidth, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_GLOBAL_MAIN_CHAT_SECS2, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS2], EM_SETLIMITTEXT, 3, 0);
 
-    AddUpDown(hWndPageItems[UD_GLOBAL_MAIN_CHAT_SECS2], ScaleGui(320) + (2 * clsGuiSettingManager::iUpDownWidth) + 38, clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1),
+    AddUpDown(hWndPageItems[UD_GLOBAL_MAIN_CHAT_SECS2], (3 * iGMCEditWidth) + int(iGMCWidth * 0.04) + (2 * iGMCTriCharTxtWidth) + int(iGMCWidth * 0.51) + (2 * clsGuiSettingManager::iUpDownWidth) + 38, clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1),
         (WPARAM)hWndPageItems[EDT_GLOBAL_MAIN_CHAT_SECS2], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_TIMEOUT], 0));
 
     hWndPageItems[LBL_GLOBAL_MAIN_CHAT_SEC2] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_SEC_LWR], WS_CHILD | WS_VISIBLE | SS_LEFT,
-        (rcThis.right - rcThis.left) - (ScaleGui(25) + 13), clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), ScaleGui(25), clsGuiSettingManager::iTextHeight,
-        m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        (3 * iGMCEditWidth) + int(iGMCWidth * 0.04) + (2 * iGMCTriCharTxtWidth) + int(iGMCWidth * 0.51) + (3 * clsGuiSettingManager::iUpDownWidth) + 43, clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), 
+		iFullEDT - ((3 * iGMCEditWidth) + int(iGMCWidth * 0.04) + (2 * iGMCTriCharTxtWidth) + int(iGMCWidth * 0.51) + (3 * clsGuiSettingManager::iUpDownWidth) + 35), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     int iPosY = clsGuiSettingManager::iOneLineGB;
 

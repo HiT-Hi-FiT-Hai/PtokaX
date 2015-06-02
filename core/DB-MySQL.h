@@ -17,32 +17,29 @@
  */
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#ifndef DBPostgreSQLH
-#define DBPostgreSQLH
+#ifndef DBMySQLH
+#define DBMySQLH
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 struct User;
-typedef struct pg_conn PGconn;
-typedef void * iconv_t;
+typedef struct st_mysql MYSQL;
+typedef struct st_mysql_res MYSQL_RES;
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-class DBPostgreSQL {
+class DBMySQL {
 private:
-	PGconn * pDBConn;
-
-	iconv_t iconvUtfCheck;
-	iconv_t iconvAsciiToUtf;
+	MYSQL * pDBHandle;
 
 	bool bConnected;
 
-    DBPostgreSQL(const DBPostgreSQL&);
-    const DBPostgreSQL& operator=(const DBPostgreSQL&);
+    DBMySQL(const DBMySQL&);
+    const DBMySQL& operator=(const DBMySQL&);
 
-	char * DoIconv(char * sInput, const uint8_t &ui8InputLen, char * sOutput, const uint8_t &ui8OutputSize);
+	bool SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pResult, uint64_t &ui64Rows);
 public:
-    static DBPostgreSQL * mPtr;
+    static DBMySQL * mPtr;
 
-	DBPostgreSQL();
-	~DBPostgreSQL();
+	DBMySQL();
+	~DBMySQL();
 
 	void UpdateRecord(User * pUser);
 
