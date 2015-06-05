@@ -241,8 +241,8 @@ const char* SetTxtDef[] = {
     "", //LANGUAGE
     "", //IPV4_ADDRESS
     "", //IPV6_ADDRESS
-#ifdef _WITH_POSTGRES
 	"cp1252", //ENCODING
+#ifdef _WITH_POSTGRES
 	"localhost", //POSTGRES_HOST
 	"5432", //POSTGRES_PORT
 	"ptokax", //POSTGRES_DBNAME

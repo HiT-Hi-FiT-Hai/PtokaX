@@ -22,22 +22,17 @@
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 struct User;
 typedef struct pg_conn PGconn;
-typedef void * iconv_t;
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class DBPostgreSQL {
 private:
 	PGconn * pDBConn;
 
-	iconv_t iconvUtfCheck;
-	iconv_t iconvAsciiToUtf;
-
 	bool bConnected;
 
     DBPostgreSQL(const DBPostgreSQL&);
     const DBPostgreSQL& operator=(const DBPostgreSQL&);
 
-	char * DoIconv(char * sInput, const uint8_t &ui8InputLen, char * sOutput, const uint8_t &ui8OutputSize);
 public:
     static DBPostgreSQL * mPtr;
 

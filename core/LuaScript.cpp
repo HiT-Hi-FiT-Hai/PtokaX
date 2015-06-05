@@ -418,9 +418,9 @@ static void AddSettingIds(lua_State * L) {
 		SETTXT_MAX_HUBS_LIMIT_REDIR_ADDRESS, SETTXT_NO_TAG_MSG, SETTXT_NO_TAG_REDIR_ADDRESS, SETTXT_BOT_NICK, SETTXT_BOT_DESCRIPTION, SETTXT_BOT_EMAIL, 
 		SETTXT_OP_CHAT_NICK, SETTXT_OP_CHAT_DESCRIPTION, SETTXT_OP_CHAT_EMAIL, SETTXT_TEMP_BAN_REDIR_ADDRESS, SETTXT_PERM_BAN_REDIR_ADDRESS, 
 		SETTXT_CHAT_COMMANDS_PREFIXES, SETTXT_HUB_OWNER_EMAIL, SETTXT_NICK_LIMIT_MSG, SETTXT_NICK_LIMIT_REDIR_ADDRESS, SETTXT_MSG_TO_ADD_TO_BAN_MSG, 
-		SETTXT_LANGUAGE, SETTXT_IPV4_ADDRESS, SETTXT_IPV6_ADDRESS,
+		SETTXT_LANGUAGE, SETTXT_IPV4_ADDRESS, SETTXT_IPV6_ADDRESS, SETTXT_ENCODING, 
 #ifdef _WITH_POSTGRES
-		SETTXT_ENCODING, SETTXT_POSTGRES_HOST, SETTXT_POSTGRES_PORT, SETTXT_POSTGRES_DBNAME, SETTXT_POSTGRES_USER, SETTXT_POSTGRES_PASS,
+		SETTXT_POSTGRES_HOST, SETTXT_POSTGRES_PORT, SETTXT_POSTGRES_DBNAME, SETTXT_POSTGRES_USER, SETTXT_POSTGRES_PASS,
 #elif _WITH_MYSQL
 		SETTXT_MYSQL_HOST, SETTXT_MYSQL_PORT, SETTXT_MYSQL_DBNAME, SETTXT_MYSQL_USER, SETTXT_MYSQL_PASS,
 #endif
@@ -432,9 +432,9 @@ static void AddSettingIds(lua_State * L) {
 		"MaxHubsLimitRedirAddress", "NoTagMessage", "NoTagRedirAddress", "HubBotNick", "HubBotDescription", "HubBotEmail", 
 		"OpChatNick", "OpChatDescription", "OpChatEmail", "TempBanRedirAddress", "PermBanRedirAddress", 
 		"ChatCommandsPrefixes", "HubOwnerEmail", "NickLimitMessage", "NickLimitRedirAddress", "MessageToAddToBanMessage",
-		"Language", "IPv4Address", "IPv6Address",
+		"Language", "IPv4Address", "IPv6Address", "Encoding", 
 #ifdef _WITH_POSTGRES
-		"Encoding", "PostgresHost", "PostgresPort", "PostgresDBNane", "PostgresUser", "PostgresPass",
+		"PostgresHost", "PostgresPort", "PostgresDBNane", "PostgresUser", "PostgresPass",
 #elif _WITH_MYSQL
 		"MySQLHost", "MySQLPort", "MySQLDBNane", "MySQLUser", "MySQLPass",
 #endif

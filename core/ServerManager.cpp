@@ -48,6 +48,7 @@
 #include "RegThread.h"
 #include "ResNickManager.h"
 #include "ServerThread.h"
+#include "TextConverter.h"
 #include "TextFileManager.h"
 //#include "TLSManager.h"
 #include "UDPThread.h"
@@ -348,6 +349,12 @@ void clsServerManager::Initialize() {
 	clsSettingManager::mPtr = new (std::nothrow) clsSettingManager();
     if(clsSettingManager::mPtr == NULL) {
     	AppendDebugLog("%s - [MEM] Cannot allocate clsSettingManager::mPtr in ServerInitialize\n", 0);
+    	exit(EXIT_FAILURE);
+    }
+
+	TextConverter::mPtr = new (std::nothrow) TextConverter();
+    if(TextConverter::mPtr == NULL) {
+    	AppendDebugLog("%s - [MEM] Cannot allocate TextConverter::mPtr in ServerInitialize\n", 0);
     	exit(EXIT_FAILURE);
     }
 
@@ -980,6 +987,9 @@ void clsServerManager::FinalClose() {
 
     delete clsLanguageManager::mPtr;
     clsLanguageManager::mPtr = NULL;
+
+    delete TextConverter::mPtr;
+    TextConverter::mPtr = NULL;
 
     delete clsSettingManager::mPtr;
     clsSettingManager::mPtr = NULL;

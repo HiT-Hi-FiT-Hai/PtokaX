@@ -36,33 +36,17 @@
 #endif
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "IP2Country.h"
+#include "TextConverter.h"
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include <iconv.h>
 #include <libpq-fe.h>
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 DBPostgreSQL * DBPostgreSQL::mPtr = NULL;
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 DBPostgreSQL::DBPostgreSQL() {
-	if(clsSettingManager::mPtr->sTexts[SETTXT_ENCODING] == NULL || clsSettingManager::mPtr->sTexts[SETTXT_POSTGRES_PASS] == NULL) {
+	if(clsSettingManager::mPtr->sTexts[SETTXT_POSTGRES_PASS] == NULL) {
 		bConnected = false;
 		return;
-	}
-
-	/*	PotsgreSQL expecting data in utf-8. But we receive data mostly in old windows code pages.
-		So first we need to check if received data are in utf-8.
-		iconv is used and to check utf-8 validity we simply try to convert from utf-8 to utf8 :)
-		iconv for that is created here */
-	iconvUtfCheck = iconv_open("utf8", "utf8");
-	if(iconvUtfCheck == (iconv_t)-1) {
-		AppendLog("DBPostgreSQL iconv_open for iconvUtfCheck failed");
-	}
-
-	/*	When received data are not in utf-8 then we convert them from our windows code page to utf-8.
-		iconv for that is created here */
-	iconvAsciiToUtf = iconv_open("utf8//TRANSLIT//IGNORE", clsSettingManager::mPtr->sTexts[SETTXT_ENCODING]);
-	if(iconvAsciiToUtf == (iconv_t)-1) {
-		AppendLog("DBPostgreSQL iconv_open for iconvAsciiToUtf failed");
 	}
 
 	// Connect to PostgreSQL with our settings.
@@ -123,79 +107,8 @@ DBPostgreSQL::~DBPostgreSQL() {
 	if(clsSettingManager::mPtr->i16Shorts[SETSHORT_DB_REMOVE_OLD_RECORDS] != 0) {
 		RemoveOldRecords(clsSettingManager::mPtr->i16Shorts[SETSHORT_DB_REMOVE_OLD_RECORDS]);
 	}
-
-	iconv_close(iconvUtfCheck);
-	iconv_close(iconvAsciiToUtf);
 	
 	PQfinish(pDBConn);
-}
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-// Function to check if data are in utf-8 and if not then they are converted. Both using iconvs that are created in constructor.
-char * DBPostgreSQL::DoIconv(char * sInput, const uint8_t &ui8InputLen, char * sOutput, const uint8_t &ui8OutputSize) {
-	char * sInBuf = sInput;
-	size_t szInbufLeft = ui8InputLen;
-
-	char * sOutBuf = sOutput;
-	size_t szOutbufLeft = ui8OutputSize-1;
-
-	size_t szRet = iconv(iconvUtfCheck, &sInBuf, &szInbufLeft, &sOutBuf, &szOutbufLeft);
-	if(szRet == (size_t)-1) {
-		sInBuf = sInput;
-		szInbufLeft = ui8InputLen;
-
-		sOutBuf = sOutput;
-		szOutbufLeft = ui8OutputSize-1;
-
-		szRet = iconv(iconvAsciiToUtf, &sInBuf, &szInbufLeft, &sOutBuf, &szOutbufLeft);
-		if(szRet == (size_t)-1) {
-			if(errno == E2BIG) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv E2BIG for param: "+string(sInput, ui8InputLen));
-
-				if(ui8OutputSize == 65) {
-					return NULL;
-				}
-			} else if(errno == EILSEQ) {
-				sInBuf++;
-				szInbufLeft--;
-
-				while(szInbufLeft != 0) {
-					szRet = iconv(iconvAsciiToUtf, &sInBuf, &szInbufLeft, &sOutBuf, &szOutbufLeft);
-					if(szRet == (size_t)-1) {
-						if(errno == E2BIG) {
-							clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv E2BIG in EILSEQ for param: "+string(sInput, ui8InputLen));
-
-							if(ui8OutputSize == 65) {
-								return NULL;
-							}
-						} else if(errno == EINVAL) {
-							clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv EINVAL in EILSEQ for param: "+string(sInput, ui8InputLen));
-							return NULL;
-						} else if(errno == EILSEQ) {
-							sInBuf++;
-							szInbufLeft--;
-
-							continue;
-						}
-					}
-				}
-
-				if(szOutbufLeft == size_t(ui8OutputSize-1)) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv EILSEQ for param: "+string(sInput, ui8InputLen));
-					return NULL;
-				}
-			} else if(errno == EINVAL) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL iconv EINVAL for param: "+string(sInput, ui8InputLen));
-				return NULL;
-			}
-		}
-
-		sOutput[(ui8OutputSize-szOutbufLeft)-1] = '\0';
-		return sOutput;
-	} else {
-		sOutput[ui8InputLen] = '\0';
-		return sOutput;
-	}
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -213,8 +126,8 @@ void DBPostgreSQL::UpdateRecord(User * pUser) {
 
 
 	char sNick[65];
-	paramValues[0] = DoIconv(pUser->sNick, pUser->ui8NickLen, sNick, 65);
-	if(paramValues[0] == NULL) {
+	paramValues[0] = TextConverter::mPtr->CheckUtf8AndConvert(pUser->sNick, pUser->ui8NickLen, sNick, 65);
+	if(paramValues[0][0] == '\0') {
 		return;
 	}
 
@@ -227,22 +140,22 @@ void DBPostgreSQL::UpdateRecord(User * pUser) {
 
 	char sDescription[193];
 	if(pUser->sDescription != NULL) {
-		paramValues[3] = DoIconv(pUser->sDescription, pUser->ui8DescriptionLen, sDescription, 193);
+		paramValues[3] = TextConverter::mPtr->CheckUtf8AndConvert(pUser->sDescription, pUser->ui8DescriptionLen, sDescription, 193);
 	}
 
 	char sTag[193];
 	if(pUser->sTag != NULL) {
-		paramValues[4] = DoIconv(pUser->sTag, pUser->ui8TagLen, sTag, 193);
+		paramValues[4] = TextConverter::mPtr->CheckUtf8AndConvert(pUser->sTag, pUser->ui8TagLen, sTag, 193);
 	}
 
 	char sConnection[33];
 	if(pUser->sConnection != NULL) {
-		paramValues[5] = DoIconv(pUser->sConnection, pUser->ui8ConnectionLen, sConnection, 33);
+		paramValues[5] = TextConverter::mPtr->CheckUtf8AndConvert(pUser->sConnection, pUser->ui8ConnectionLen, sConnection, 33);
 	}
 
 	char sEmail[97];
 	if(pUser->sEmail != NULL) {
-		paramValues[6] = DoIconv(pUser->sEmail, pUser->ui8EmailLen, sEmail, 97);
+		paramValues[6] = TextConverter::mPtr->CheckUtf8AndConvert(pUser->sEmail, pUser->ui8EmailLen, sEmail, 97);
 	}
 
 	/*	PostgreSQL don't support UPSERT.
@@ -607,8 +520,8 @@ bool DBPostgreSQL::SearchNick(char * sNick, const uint8_t &ui8NickLen, User * pU
 	char * paramValues[1] = { NULL };
 
 	char sUtfNick[65];
-	paramValues[0] = DoIconv(sNick, ui8NickLen, sUtfNick, 65);
-	if(paramValues[0] == NULL) {
+	paramValues[0] = TextConverter::mPtr->CheckUtf8AndConvert(sNick, ui8NickLen, sUtfNick, 65);
+	if(paramValues[0][0] == '\0') {
 		return false;
 	}
 

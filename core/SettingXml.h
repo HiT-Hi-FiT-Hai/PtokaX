@@ -241,8 +241,8 @@ const char* SetTxtXmlStr[] = {
     "Language", 
     "IPv4Address",
     "IPv6Address",
+    "Encoding",
 #ifdef _WITH_POSTGRES
-	"Encoding",
 	"PostgresHost",
 	"PostgresPort",
 	"PostgresDBName",

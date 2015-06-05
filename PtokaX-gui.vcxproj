@@ -485,6 +485,7 @@
     <ClInclude Include="core\SettingManager.h" />
     <ClInclude Include="core\SettingXml.h" />
     <ClInclude Include="core\stdinc.h" />
+    <ClInclude Include="core\TextConverter.h" />
     <ClInclude Include="core\TextFileManager.h" />
     <ClInclude Include="core\UdpDebug.h" />
     <ClInclude Include="core\UDPThread.h" />
@@ -573,6 +574,7 @@
     <ClCompile Include="core\ServerThread.cpp" />
     <ClCompile Include="core\serviceLoop.cpp" />
     <ClCompile Include="core\SettingManager.cpp" />
+    <ClCompile Include="core\TextConverter.cpp" />
     <ClCompile Include="core\TextFileManager.cpp" />
     <ClCompile Include="core\UdpDebug.cpp" />
     <ClCompile Include="core\UDPThread.cpp" />

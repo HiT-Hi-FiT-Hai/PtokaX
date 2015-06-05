@@ -36,6 +36,7 @@
 #endif
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "IP2Country.h"
+#include "TextConverter.h"
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include <mysql.h>
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -74,6 +75,7 @@ DBMySQL::DBMySQL() {
 			"email VARCHAR(96),"
 			"UNIQUE (nick)"
 		")"
+		"DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 	) != 0) {
 		bConnected = false;
 		AppendLog(string("DBMySQL check/create table failed: ")+mysql_error(pDBHandle));
@@ -104,38 +106,68 @@ void DBMySQL::UpdateRecord(User * pUser) {
 		return;
 	}
 
+	char sUtfNick[65];
+	TextConverter::mPtr->CheckUtf8AndConvert(pUser->sNick, pUser->ui8NickLen, sUtfNick, 65);
+	if(sUtfNick[0] == '\0') {
+		return;
+	}
+
 	char sNick[129];
-	if(mysql_real_escape_string(pDBHandle, sNick, pUser->sNick, pUser->ui8NickLen < 65 ? pUser->ui8NickLen : 64) == 0) {
+	if(mysql_real_escape_string(pDBHandle, sNick, sUtfNick, strlen(sUtfNick)) == 0) {
 		return;
 	}
 
 	char sShare[24];
 	sprintf(sShare, "%0.02f GB", (double)pUser->ui64SharedSize/1073741824);
 
+	char sUtfDescription[193];
 	char sDescription[385];
 	if(pUser->sDescription != NULL) {
-		mysql_real_escape_string(pDBHandle, sDescription, pUser->sDescription, pUser->ui8DescriptionLen < 193 ? pUser->ui8DescriptionLen : 192);
+		TextConverter::mPtr->CheckUtf8AndConvert(pUser->sDescription, pUser->ui8DescriptionLen, sUtfDescription, 193);
+		if(sUtfDescription[0] != '\0') {
+			mysql_real_escape_string(pDBHandle, sDescription, sUtfDescription, strlen(sUtfDescription));
+		} else {
+			sDescription[0] = '\0';
+		}
 	} else {
 		sDescription[0] = '\0';
 	}
 
+	char sUtfTag[193];
 	char sTag[385];
 	if(pUser->sTag != NULL) {
-		mysql_real_escape_string(pDBHandle, sTag, pUser->sTag, pUser->ui8TagLen < 193 ? pUser->ui8TagLen : 192);
+		TextConverter::mPtr->CheckUtf8AndConvert(pUser->sTag, pUser->ui8TagLen, sUtfTag, 193);
+		if(sUtfTag[0] != '\0') {
+			mysql_real_escape_string(pDBHandle, sTag, sUtfTag, strlen(sUtfTag));
+		} else {
+			sTag[0] = '\0';
+		}
 	} else {
 		sTag[0] = '\0';
 	}
 
+	char sUtfConnection[33];
 	char sConnection[65];
 	if(pUser->sConnection != NULL) {
-		mysql_real_escape_string(pDBHandle, sConnection, pUser->sConnection, pUser->ui8ConnectionLen < 33 ? pUser->ui8ConnectionLen : 32);
+		TextConverter::mPtr->CheckUtf8AndConvert(pUser->sConnection, pUser->ui8ConnectionLen, sUtfConnection, 33);
+		if(sUtfConnection[0] != '\0') {
+			mysql_real_escape_string(pDBHandle, sConnection, sUtfConnection, strlen(sUtfConnection));
+		} else {
+			sConnection[0] = '\0';
+		}
 	} else {
 		sConnection[0] = '\0';
 	}
 
+	char sUtfEmail[97];
 	char sEmail[193];
 	if(pUser->sEmail != NULL) {
-		mysql_real_escape_string(pDBHandle, sEmail, pUser->sEmail, pUser->ui8EmailLen < 97 ? pUser->ui8EmailLen : 96);
+		TextConverter::mPtr->CheckUtf8AndConvert(pUser->sEmail, pUser->ui8EmailLen, sUtfEmail, 97);
+		if(sUtfEmail[0] != '\0') {
+			mysql_real_escape_string(pDBHandle, sEmail, sUtfEmail, strlen(sUtfEmail));
+		} else {
+			sEmail[0] = '\0';
+		}
 	} else {
 		sEmail[0] = '\0';
 	}
@@ -472,8 +504,14 @@ bool DBMySQL::SearchNick(char * sNick, const uint8_t &ui8NickLen, User * pUser, 
 		return false;
 	}
 
+	char sUtfNick[65];
+	TextConverter::mPtr->CheckUtf8AndConvert(sNick, ui8NickLen, sUtfNick, 65);
+	if(sUtfNick[0] == '\0') {
+		return false;
+	}
+
 	char sEscapedNick[129];
-	if(mysql_real_escape_string(pDBHandle, sEscapedNick, sNick, ui8NickLen < 65 ? ui8NickLen : 64) == 0) {
+	if(mysql_real_escape_string(pDBHandle, sEscapedNick, sUtfNick, strlen(sUtfNick)) == 0) {
 		return false;
 	}
 

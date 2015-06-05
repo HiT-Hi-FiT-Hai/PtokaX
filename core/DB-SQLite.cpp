@@ -36,6 +36,7 @@
 #endif
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "IP2Country.h"
+#include "TextConverter.h"
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include <sqlite3.h>
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -43,8 +44,11 @@ DBSQLite * DBSQLite::mPtr = NULL;
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 DBSQLite::DBSQLite() {
+#ifdef _WIN32
 	int iRet = sqlite3_open((clsServerManager::sPath + "\\cfg\\users.sqlite").c_str(), &pDB);
-	
+#else
+	int iRet = sqlite3_open((clsServerManager::sPath + "/cfg/users.sqlite").c_str(), &pDB);
+#endif
 	if(iRet != SQLITE_OK) {
 		bConnected = false;
 		AppendLog(string("DBSQLite connection failed: ")+sqlite3_errmsg(pDB));
@@ -97,43 +101,33 @@ void DBSQLite::UpdateRecord(User * pUser) {
 		return;
 	}
 
+	char sNick[65];
+	TextConverter::mPtr->CheckUtf8AndConvert(pUser->sNick, pUser->ui8NickLen, sNick, 65);
+	if(sNick[0] == '\0') {
+		return;
+	}
+
 	char sShare[24];
 	sprintf(sShare, "%0.02f GB", (double)pUser->ui64SharedSize/1073741824);
 
 	char sDescription[193];
 	if(pUser->sDescription != NULL) {
-		uint8_t ui8Len = pUser->ui8DescriptionLen > 192 ? 192 : pUser->ui8DescriptionLen;
-		memcpy(sDescription, pUser->sDescription, ui8Len);
-		sDescription[ui8Len] = '\0';
-	} else {
-		sDescription[0] = '\0';
+		TextConverter::mPtr->CheckUtf8AndConvert(pUser->sDescription, pUser->ui8DescriptionLen, sDescription, 193);
 	}
 
 	char sTag[193];
 	if(pUser->sTag != NULL) {
-		uint8_t ui8Len = pUser->ui8TagLen > 192 ? 192 : pUser->ui8TagLen;
-		memcpy(sTag, pUser->sTag, ui8Len);
-		sTag[ui8Len] = '\0';
-	} else {
-		sTag[0] = '\0';
+		TextConverter::mPtr->CheckUtf8AndConvert(pUser->sTag, pUser->ui8TagLen, sTag, 193);
 	}
 
 	char sConnection[33];
 	if(pUser->sConnection != NULL) {
-		uint8_t ui8Len = pUser->ui8ConnectionLen > 32 ? 32 : pUser->ui8ConnectionLen;
-		memcpy(sConnection, pUser->sConnection, ui8Len);
-		sConnection[ui8Len] = '\0';
-	} else {
-		sConnection[0] = '\0';
+		TextConverter::mPtr->CheckUtf8AndConvert(pUser->sConnection, pUser->ui8ConnectionLen, sConnection, 33);
 	}
 
 	char sEmail[97];
 	if(pUser->sEmail != NULL) {
-		uint8_t ui8Len = pUser->ui8EmailLen > 96 ? 96 : pUser->ui8EmailLen;
-		memcpy(sEmail, pUser->sEmail, ui8Len);
-		sEmail[ui8Len] = '\0';
-	} else {
-		sEmail[0] = '\0';
+		TextConverter::mPtr->CheckUtf8AndConvert(pUser->sEmail, pUser->ui8EmailLen, sEmail, 97);
 	}
 
 	char sSQLCommand[1024];
@@ -148,7 +142,7 @@ void DBSQLite::UpdateRecord(User * pUser) {
 		"connection = %Q," // connection
 		"email = %Q" // email
 		"WHERE LOWER(nick) = LOWER(%Q);", // nick
-		pUser->sNick, pUser->sIP, sShare, sDescription, sTag, sConnection, sEmail, pUser->sNick
+		sNick, pUser->sIP, sShare, sDescription, sTag, sConnection, sEmail, sNick
 	);
 
 	char * sErrMsg = NULL;
@@ -176,7 +170,7 @@ void DBSQLite::UpdateRecord(User * pUser) {
 		"%Q," // connection
 		"%Q" // email
 		");",
-		pUser->sNick, pUser->sIP, sShare, sDescription, sTag, sConnection, sEmail
+		sNick, pUser->sIP, sShare, sDescription, sTag, sConnection, sEmail
 	);
 
 	iRet = sqlite3_exec(pDB, sSQLCommand, NULL, NULL, &sErrMsg);
@@ -478,8 +472,14 @@ static int SelectCallBack(void *, int iArgCount, char ** ppArgSTrings, char **) 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // First of two functions to search data in database. Nick will be probably most used.
-bool DBSQLite::SearchNick(char * sNick, const uint8_t &/*ui8NickLen*/, User * pUser, const bool &bFromPM) {
+bool DBSQLite::SearchNick(char * sNick, const uint8_t &ui8NickLen, User * pUser, const bool &bFromPM) {
 	if(bConnected == false) {
+		return false;
+	}
+
+	char sUtfNick[65];
+	TextConverter::mPtr->CheckUtf8AndConvert(sNick, ui8NickLen, sUtfNick, 65);
+	if(sUtfNick[0] == '\0') {
 		return false;
 	}
 
@@ -502,7 +502,7 @@ bool DBSQLite::SearchNick(char * sNick, const uint8_t &/*ui8NickLen*/, User * pU
 	bSecond = false;
 
 	char sSQLCommand[256];
-	sqlite3_snprintf(256, sSQLCommand, "SELECT nick, %s, ip_address, share, description, tag, connection, email FROM userinfo WHERE LOWER(nick) LIKE LOWER(%Q) ORDER BY last_updated DESC LIMIT 50;", "strftime('%s', last_updated)", sNick);
+	sqlite3_snprintf(256, sSQLCommand, "SELECT nick, %s, ip_address, share, description, tag, connection, email FROM userinfo WHERE LOWER(nick) LIKE LOWER(%Q) ORDER BY last_updated DESC LIMIT 50;", "strftime('%s', last_updated)", sUtfNick);
 
 	char * sErrMsg = NULL;
 

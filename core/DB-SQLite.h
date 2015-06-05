@@ -40,7 +40,7 @@ public:
 
 	void UpdateRecord(User * pUser);
 
-	bool SearchNick(char * sNick, const uint8_t &/*ui8NickLen*/, User * pUser, const bool &bFromPM);
+	bool SearchNick(char * sNick, const uint8_t &ui8NickLen, User * pUser, const bool &bFromPM);
 	bool SearchIP(char * sIP, User * pUser, const bool &bFromPM);
 
 	void RemoveOldRecords(const uint16_t &ui16Days);
