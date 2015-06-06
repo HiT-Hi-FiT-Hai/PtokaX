@@ -55,7 +55,8 @@ DBMySQL::DBMySQL() {
 		AppendLog("DBMySQL init failed");
 	}
 
-
+	mysql_options(pDBHandle, MYSQL_SET_CHARSET_NAME, "utf8mb4");
+	
 	if(mysql_real_connect(pDBHandle, clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_HOST], clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_USER], clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_PASS], clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_DBNAME], atoi(clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_PORT]), NULL, 0) == NULL) {
 		bConnected = false;
 		AppendLog(string("DBMySQL connection failed: ")+mysql_error(pDBHandle));

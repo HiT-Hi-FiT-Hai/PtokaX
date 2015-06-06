@@ -27,7 +27,7 @@ CXXFLAGS = -O -g -Wall -Wextra -D_WITH_MYSQL
 #*******************************************************************************
 # Include
 #*******************************************************************************
-INCLUDE = -Itinyxml -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.1 -I/usr/include/mysql
+INCLUDE = -Itinyxml -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.1 -I/usr/include/mysql -I/usr/include/mariadb
 
 #*******************************************************************************
 # Files to compile and link
@@ -52,12 +52,12 @@ OBJS = $(CURDIR)/obj/colUsers.o $(CURDIR)/obj/DB-MySQL.o $(CURDIR)/obj/DcCommand
 # then remove -llua5.1 and after tinyxml/tinyxml.a add /usr/local/lib/liblua.a (default path when is Lua compiled from sources).
 #*******************************************************************************
 
-PtokaX: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.1 -I/usr/include/mysql
+PtokaX: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.1 -I/usr/include/mysql -I/usr/include/mariadb
 PtokaX: $(OBJS)
 	cd skein; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -llua5.1 -lrt -ltinyxml -lz -lmysqlclient
 
-lua52: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.2 -I/usr/include/mysql
+lua52: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.2 -I/usr/include/mysql -I/usr/include/mariadb
 lua52: $(OBJS)
 	cd skein; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -llua5.2 -lrt -ltinyxml -lz -lmysqlclient
@@ -77,7 +77,7 @@ centos6: $(OBJS)
 	cd tinyxml; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -llua-5.1 -lrt -lz -lmysqlclient
 
-freebsd: INCLUDE = -Itinyxml -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include/lua51 -I/usr/include/mysql
+freebsd: INCLUDE = -Itinyxml -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include/lua51 -I/usr/include/mysql -I/usr/include/mariadb
 freebsd: $(OBJS)
 	cd skein; $(MAKE)
 	cd tinyxml; $(MAKE)
