@@ -136,6 +136,7 @@ public:
     void UpdateLanguage();
     void UpdateUDPPort();
     void UpdateScripting() const;
+    void UpdateDatabase();
 };
 //---------------------------------------------------------------------------
 

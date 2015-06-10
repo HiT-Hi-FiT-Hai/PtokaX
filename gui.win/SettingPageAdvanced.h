@@ -43,7 +43,11 @@ public:
     char * GetPageName();
     void FocusLastItem();
 private:
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
+	HWND hWndPageItems[26];
+#else
     HWND hWndPageItems[21];
+#endif
     
     enum enmPageItems {
         GB_HUB_STARTUP_AND_TRAY,
@@ -67,6 +71,13 @@ private:
         BTN_SEND_STATUS_MESSAGES_IN_PM,
         GB_ADMIN_NICK,
         EDT_ADMIN_NICK,
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
+        GB_DATABASE_SUPPORT,
+        CHK_ENABLE_DATABASE,
+        LBL_REMOVE_OLD_RECORDS,
+        EDT_REMOVE_OLD_RECORDS,
+        UD_REMOVE_OLD_RECORDS,
+#endif
     };
 
     SettingPageAdvanced(const SettingPageAdvanced&);

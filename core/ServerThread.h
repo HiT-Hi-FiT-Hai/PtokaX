@@ -25,7 +25,7 @@
 class ServerThread {
 private:
     struct AntiConFlood {
-        AntiConFlood(const uint8_t * pIpHash);
+        explicit AntiConFlood(const uint8_t * pIpHash);
 
         AntiConFlood(const AntiConFlood&);
         const AntiConFlood& operator=(const AntiConFlood&);

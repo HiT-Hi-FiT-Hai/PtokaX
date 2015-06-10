@@ -524,6 +524,7 @@ SetMan.tBooleans.CheckIpInCommands		-	Check IP in commands.
 SetMan.tBooleans.LogScriptErrors		-	Save script errors to log.
 SetMan.tBooleans.DisallowBadSupports	-	Disallow clients sending buggy supports.
 SetMan.tBooleans.HashPasswords			-	Hash registered users passwords.
+SetMan.tBooleans.EnableDatabase			-	Enable/Disable database support.
 
 
 Setting number IDs for SetMan.(G/S)etNumber
@@ -642,6 +643,7 @@ SetMan.tNumbers.SearchIntervalMessages				-	Search interval count. Higher than 0
 SetMan.tNumbers.SearchIntervalTime					-	Search interval time. Higher than 0, max 29999.
 SetMan.tNumbers.MaxConnsSameIp						-	Maximum users from same IP. Higher than 0, max 256.
 SetMan.tNumbers.MinReconnTime						-	Minimum reconnect time in seconds. Higher than 0, max 256.
+SetMan.tNumbers.DbRemoveOldRecords					-	Remove records older than x days from database.
 
 
 Setting string IDs for SetMan.(G/S)etString (| is not allowed in all strings, if max length is not specified then is max 4096)
@@ -683,6 +685,17 @@ SetMan.tStrings.MessageToAddToBanMessage	-	Additional message to ban message. Ma
 SetMan.tStrings.Language					-	Language. When language is default then return nil.
 SetMan.tStrings.IPv4Address					-	TCP/IP version 4 address.
 SetMan.tStrings.IPv6Address					-	TCP/IP version 6 address.
+SetMan.tStrings.Encoding					-	Character encoding for non-unicode texts.
+SetMan.tStrings.PostgresHost					-	PostgreSQL host.
+SetMan.tStrings.PostgresPort					-	PostgreSQL port.
+SetMan.tStrings.PostgresDBName					-	PostgreSQL database name.
+SetMan.tStrings.PostgresUser					-	PostgreSQL database user.
+SetMan.tStrings.PostgresPass					-	PostgreSQL database password.
+SetMan.tStrings.MySQLHost					-	MySQL host.
+SetMan.tStrings.MySQLPort					-	MySQL port.
+SetMan.tStrings.MySQLDBName					-	MySQL database name.
+SetMan.tStrings.MySQLUser					-	MySQL database user.
+SetMan.tStrings.MySQLPass					-	MySQL database password.
 
 
 User data IDs for Core.GetUserData and Core.GetUserValue call.

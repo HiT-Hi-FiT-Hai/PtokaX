@@ -797,6 +797,9 @@ enum LangIds {
     LAN_NOT_FOUND, 
 	LAN_OFFLINE_FROM, 
 	LAN_DISPLAY_INFO_GIVEN_IP,
+	LAN_DATABASE_SUPPORT,
+	LAN_ENABLE_DATABASE,
+	LAN_REMOVE_OLD_RECORDS,
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------

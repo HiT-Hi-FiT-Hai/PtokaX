@@ -27,8 +27,29 @@
 //---------------------------------------------------------------------------
 #include "GuiSettingManager.h"
 #include "GuiUtil.h"
+#include "SettingDialog.h"
 //---------------------------------------------------------------------------
-#pragma hdrstop
+
+LRESULT CALLBACK EnableDbCheckProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if(uMsg == WM_GETDLGCODE && wParam == VK_TAB) {
+        return DLGC_WANTTAB;
+    } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
+        if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
+			if(::SendMessage(hWnd, BM_GETCHECK, 0, 0) == BST_CHECKED) {
+				::SetFocus(::GetNextDlgTabItem(clsSettingDialog::mPtr->hWndWindowItems[clsSettingDialog::WINDOW_HANDLE], hWnd, FALSE));
+			} else {
+				::SetFocus(clsSettingDialog::mPtr->hWndWindowItems[clsSettingDialog::TV_TREE]);
+			}
+
+            return 0;
+        } else {
+			::SetFocus(::GetNextDlgTabItem(clsSettingDialog::mPtr->hWndWindowItems[clsSettingDialog::WINDOW_HANDLE], hWnd, TRUE));
+            return 0;
+        }
+    }
+
+    return ::CallWindowProc(clsGuiSettingManager::wpOldButtonProc, hWnd, uMsg, wParam, lParam);
+}
 //---------------------------------------------------------------------------
 
 SettingPageAdvanced::SettingPageAdvanced() : bUpdateSysTray(false), bUpdateScripting(false) {
@@ -121,6 +142,26 @@ LRESULT SettingPageAdvanced::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lP
                 }
 
                 break;
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
+            case CHK_ENABLE_DATABASE:
+                if(HIWORD(wParam) == BN_CLICKED) {
+                	BOOL bEnabled = ::SendMessage(hWndPageItems[CHK_ENABLE_DATABASE], BM_GETCHECK, 0, 0) == BST_CHECKED ? TRUE : FALSE;
+
+                    ::EnableWindow(hWndPageItems[LBL_REMOVE_OLD_RECORDS], bEnabled);
+                    ::EnableWindow(hWndPageItems[EDT_REMOVE_OLD_RECORDS], bEnabled);
+                    ::EnableWindow(hWndPageItems[UD_REMOVE_OLD_RECORDS], bEnabled);
+                }
+
+                break;
+            case EDT_REMOVE_OLD_RECORDS:
+                if(HIWORD(wParam) == EN_CHANGE) {
+                    MinMaxCheck((HWND)lParam, 0, 32767);
+
+                    return 0;
+                }
+
+                break;
+#endif
         }
     }
 
@@ -165,6 +206,21 @@ void SettingPageAdvanced::Save() {
 
     iLen = ::GetWindowText(hWndPageItems[EDT_ADMIN_NICK], buf, 1025);
     clsSettingManager::mPtr->SetText(SETTXT_ADMIN_NICK, buf, iLen);
+
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
+	bool bOldDbState = clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_DATABASE];
+
+	clsSettingManager::mPtr->SetBool(SETBOOL_ENABLE_DATABASE, ::SendMessage(hWndPageItems[CHK_ENABLE_DATABASE], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
+
+	if(bOldDbState != clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_DATABASE]) {
+		clsSettingManager::mPtr->UpdateDatabase();
+	}
+
+    LRESULT lResult = ::SendMessage(hWndPageItems[UD_REMOVE_OLD_RECORDS], UDM_GETPOS, 0, 0);
+    if(HIWORD(lResult) == 0) {
+        clsSettingManager::mPtr->SetShort(SETSHORT_DB_REMOVE_OLD_RECORDS, LOWORD(lResult));
+    }
+#endif
 }
 //------------------------------------------------------------------------------
 
@@ -282,6 +338,26 @@ bool SettingPageAdvanced::CreateSettingPage(HWND hOwner) {
         8, iPosY + clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_ADMIN_NICK, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_ADMIN_NICK], EM_SETLIMITTEXT, 64, 0);
 
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
+	iPosY += clsGuiSettingManager::iOneLineGB;
+
+    hWndPageItems[GB_DATABASE_SUPPORT] = ::CreateWindowEx(WS_EX_TRANSPARENT, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_DATABASE_SUPPORT], WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+        0, iPosY, iFullGB, clsGuiSettingManager::iOneLineGB, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+
+    hWndPageItems[CHK_ENABLE_DATABASE] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_ENABLE_DATABASE], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+        8, iPosY + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iCheckHeight) / 2), int(iFullEDT * 0.4) - 2, clsGuiSettingManager::iCheckHeight, m_hWnd, (HMENU)CHK_ENABLE_DATABASE, clsServerManager::hInstance, NULL);
+
+    hWndPageItems[LBL_REMOVE_OLD_RECORDS] = ::CreateWindowEx(0, WC_STATIC, clsLanguageManager::mPtr->sTexts[LAN_REMOVE_OLD_RECORDS], WS_CHILD | WS_VISIBLE | SS_RIGHT, int(iFullEDT * 0.4)+10, iPosY + clsGuiSettingManager::iGroupBoxMargin + ((clsGuiSettingManager::iEditHeight - clsGuiSettingManager::iTextHeight) / 2), 
+		((iFullEDT - (int((iFullEDT/2)*0.2) + clsGuiSettingManager::iUpDownWidth)) + 8) - (int(iFullEDT * 0.4)+15), clsGuiSettingManager::iTextHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+
+    hWndPageItems[EDT_REMOVE_OLD_RECORDS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, NULL, WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_NUMBER | ES_AUTOHSCROLL | ES_RIGHT,
+        (iFullEDT - (int((iFullEDT/2)*0.2) + clsGuiSettingManager::iUpDownWidth)) + 8, iPosY + clsGuiSettingManager::iGroupBoxMargin, int((iFullEDT/2) * 0.2), clsGuiSettingManager::iEditHeight,
+        m_hWnd, (HMENU)EDT_REMOVE_OLD_RECORDS, clsServerManager::hInstance, NULL);
+
+    AddUpDown(hWndPageItems[UD_REMOVE_OLD_RECORDS], (iFullEDT-clsGuiSettingManager::iUpDownWidth) + 8, iPosY + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(32767, 0),
+        (WPARAM)hWndPageItems[EDT_REMOVE_OLD_RECORDS], (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_DB_REMOVE_OLD_RECORDS], 0));
+#endif
+
     for(uint8_t ui8i = 0; ui8i < (sizeof(hWndPageItems) / sizeof(hWndPageItems[0])); ui8i++) {
         if(hWndPageItems[ui8i] == NULL) {
             return false;
@@ -299,8 +375,31 @@ bool SettingPageAdvanced::CreateSettingPage(HWND hOwner) {
 
     ::EnableWindow(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM], clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true ? TRUE : FALSE);
 
-    clsGuiSettingManager::wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_ADMIN_NICK], GWLP_WNDPROC, (LONG_PTR)EditProc);
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
+	if(clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_DATABASE] == true) {
+		::SendMessage(hWndPageItems[CHK_ENABLE_DATABASE], BM_SETCHECK, BST_CHECKED, 0);
 
+		::EnableWindow(hWndPageItems[LBL_REMOVE_OLD_RECORDS], TRUE);
+		::EnableWindow(hWndPageItems[EDT_REMOVE_OLD_RECORDS], TRUE);
+		::EnableWindow(hWndPageItems[UD_REMOVE_OLD_RECORDS], TRUE);
+	} else {
+		::SendMessage(hWndPageItems[CHK_ENABLE_DATABASE], BM_SETCHECK, BST_UNCHECKED, 0);
+
+		::EnableWindow(hWndPageItems[LBL_REMOVE_OLD_RECORDS], FALSE);
+		::EnableWindow(hWndPageItems[EDT_REMOVE_OLD_RECORDS], FALSE);
+		::EnableWindow(hWndPageItems[UD_REMOVE_OLD_RECORDS], FALSE);
+	}
+
+	::SendMessage(hWndPageItems[EDT_REMOVE_OLD_RECORDS], EM_SETLIMITTEXT, 5, 0);
+	AddToolTip(hWndPageItems[EDT_REMOVE_OLD_RECORDS], clsLanguageManager::mPtr->sTexts[LAN_ZERO_DISABLED]);
+#endif
+
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
+	clsGuiSettingManager::wpOldButtonProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[CHK_ENABLE_DATABASE], GWLP_WNDPROC, (LONG_PTR)EnableDbCheckProc);
+	clsGuiSettingManager::wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_REMOVE_OLD_RECORDS], GWLP_WNDPROC, (LONG_PTR)EditProc);
+#else
+    clsGuiSettingManager::wpOldEditProc = (WNDPROC)::SetWindowLongPtr(hWndPageItems[EDT_ADMIN_NICK], GWLP_WNDPROC, (LONG_PTR)EditProc);
+#endif
 	return true;
 }
 //------------------------------------------------------------------------------
@@ -311,6 +410,14 @@ char * SettingPageAdvanced::GetPageName() {
 //------------------------------------------------------------------------------
 
 void SettingPageAdvanced::FocusLastItem() {
-    ::SetFocus(hWndPageItems[BTN_SEND_STATUS_MESSAGES_IN_PM]);
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
+	if(::SendMessage(hWndPageItems[CHK_ENABLE_DATABASE], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+		::SetFocus(hWndPageItems[EDT_REMOVE_OLD_RECORDS]);
+	} else {
+		::SetFocus(hWndPageItems[CHK_ENABLE_DATABASE]);
+	}
+#else
+    ::SetFocus(hWndPageItems[EDT_ADMIN_NICK]);
+#endif
 }
 //------------------------------------------------------------------------------

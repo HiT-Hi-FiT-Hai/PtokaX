@@ -23,20 +23,15 @@
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "hashRegManager.h"
 #include "hashUsrManager.h"
+#include "IP2Country.h"
 #include "LanguageManager.h"
 #include "ProfileManager.h"
 #include "ServerManager.h"
 #include "SettingManager.h"
+#include "TextConverter.h"
 #include "UdpDebug.h"
 #include "User.h"
 #include "utility.h"
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "IP2Country.h"
-#include "TextConverter.h"
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include <mysql.h>
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -44,15 +39,19 @@ DBMySQL * DBMySQL::mPtr = NULL;
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 DBMySQL::DBMySQL() {
-	if(clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_PASS] == NULL) {
+	if(clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_DATABASE] == false || clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_PASS] == NULL) {
 		bConnected = false;
+
 		return;
 	}
 
 	pDBHandle = mysql_init(NULL);
 	
 	if(pDBHandle == NULL) {
+		bConnected = false;
 		AppendLog("DBMySQL init failed");
+
+		return;
 	}
 
 	mysql_options(pDBHandle, MYSQL_SET_CHARSET_NAME, "utf8mb4");
@@ -60,6 +59,7 @@ DBMySQL::DBMySQL() {
 	if(mysql_real_connect(pDBHandle, clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_HOST], clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_USER], clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_PASS], clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_DBNAME], atoi(clsSettingManager::mPtr->sTexts[SETTXT_MYSQL_PORT]), NULL, 0) == NULL) {
 		bConnected = false;
 		AppendLog(string("DBMySQL connection failed: ")+mysql_error(pDBHandle));
+		mysql_close(pDBHandle);
 
 		return;
 	}
@@ -80,6 +80,7 @@ DBMySQL::DBMySQL() {
 	) != 0) {
 		bConnected = false;
 		AppendLog(string("DBMySQL check/create table failed: ")+mysql_error(pDBHandle));
+		mysql_close(pDBHandle);
 
 		return;
 	}
@@ -95,7 +96,7 @@ DBMySQL::~DBMySQL() {
 		RemoveOldRecords(clsSettingManager::mPtr->i16Shorts[SETSHORT_DB_REMOVE_OLD_RECORDS]);
 	}
 
-	if(pDBHandle != NULL) {
+	if(bConnected == true) {
 		mysql_close(pDBHandle);
 	}
 }
@@ -108,25 +109,26 @@ void DBMySQL::UpdateRecord(User * pUser) {
 	}
 
 	char sUtfNick[65];
-	TextConverter::mPtr->CheckUtf8AndConvert(pUser->sNick, pUser->ui8NickLen, sUtfNick, 65);
-	if(sUtfNick[0] == '\0') {
+	size_t szLen = TextConverter::mPtr->CheckUtf8AndConvert(pUser->sNick, pUser->ui8NickLen, sUtfNick, 65);
+	if(szLen == 0) {
 		return;
 	}
 
 	char sNick[129];
-	if(mysql_real_escape_string(pDBHandle, sNick, sUtfNick, strlen(sUtfNick)) == 0) {
+	if(mysql_real_escape_string(pDBHandle, sNick, sUtfNick, szLen) == 0) {
 		return;
 	}
 
 	char sShare[24];
 	sprintf(sShare, "%0.02f GB", (double)pUser->ui64SharedSize/1073741824);
 
-	char sUtfDescription[193];
 	char sDescription[385];
 	if(pUser->sDescription != NULL) {
-		TextConverter::mPtr->CheckUtf8AndConvert(pUser->sDescription, pUser->ui8DescriptionLen, sUtfDescription, 193);
-		if(sUtfDescription[0] != '\0') {
-			mysql_real_escape_string(pDBHandle, sDescription, sUtfDescription, strlen(sUtfDescription));
+		char sUtfDescription[193];
+
+		szLen = TextConverter::mPtr->CheckUtf8AndConvert(pUser->sDescription, pUser->ui8DescriptionLen, sUtfDescription, 193);
+		if(szLen != 0) {
+			mysql_real_escape_string(pDBHandle, sDescription, sUtfDescription, szLen);
 		} else {
 			sDescription[0] = '\0';
 		}
@@ -134,12 +136,13 @@ void DBMySQL::UpdateRecord(User * pUser) {
 		sDescription[0] = '\0';
 	}
 
-	char sUtfTag[193];
 	char sTag[385];
 	if(pUser->sTag != NULL) {
-		TextConverter::mPtr->CheckUtf8AndConvert(pUser->sTag, pUser->ui8TagLen, sUtfTag, 193);
-		if(sUtfTag[0] != '\0') {
-			mysql_real_escape_string(pDBHandle, sTag, sUtfTag, strlen(sUtfTag));
+		char sUtfTag[193];
+
+		szLen = TextConverter::mPtr->CheckUtf8AndConvert(pUser->sTag, pUser->ui8TagLen, sUtfTag, 193);
+		if(szLen != 0) {
+			mysql_real_escape_string(pDBHandle, sTag, sUtfTag, szLen);
 		} else {
 			sTag[0] = '\0';
 		}
@@ -147,12 +150,13 @@ void DBMySQL::UpdateRecord(User * pUser) {
 		sTag[0] = '\0';
 	}
 
-	char sUtfConnection[33];
 	char sConnection[65];
 	if(pUser->sConnection != NULL) {
-		TextConverter::mPtr->CheckUtf8AndConvert(pUser->sConnection, pUser->ui8ConnectionLen, sUtfConnection, 33);
-		if(sUtfConnection[0] != '\0') {
-			mysql_real_escape_string(pDBHandle, sConnection, sUtfConnection, strlen(sUtfConnection));
+		char sUtfConnection[33];
+
+		szLen = TextConverter::mPtr->CheckUtf8AndConvert(pUser->sConnection, pUser->ui8ConnectionLen, sUtfConnection, 33);
+		if(szLen != 0) {
+			mysql_real_escape_string(pDBHandle, sConnection, sUtfConnection, szLen);
 		} else {
 			sConnection[0] = '\0';
 		}
@@ -160,12 +164,13 @@ void DBMySQL::UpdateRecord(User * pUser) {
 		sConnection[0] = '\0';
 	}
 
-	char sUtfEmail[97];
 	char sEmail[193];
 	if(pUser->sEmail != NULL) {
-		TextConverter::mPtr->CheckUtf8AndConvert(pUser->sEmail, pUser->ui8EmailLen, sUtfEmail, 97);
-		if(sUtfEmail[0] != '\0') {
-			mysql_real_escape_string(pDBHandle, sEmail, sUtfEmail, strlen(sUtfEmail));
+		char sUtfEmail[97];
+
+		szLen = TextConverter::mPtr->CheckUtf8AndConvert(pUser->sEmail, pUser->ui8EmailLen, sUtfEmail, 97);
+		if(szLen != 0) {
+			mysql_real_escape_string(pDBHandle, sEmail, sUtfEmail, szLen);
 		} else {
 			sEmail[0] = '\0';
 		}
@@ -506,13 +511,13 @@ bool DBMySQL::SearchNick(char * sNick, const uint8_t &ui8NickLen, User * pUser, 
 	}
 
 	char sUtfNick[65];
-	TextConverter::mPtr->CheckUtf8AndConvert(sNick, ui8NickLen, sUtfNick, 65);
-	if(sUtfNick[0] == '\0') {
+	size_t szLen = TextConverter::mPtr->CheckUtf8AndConvert(sNick, ui8NickLen, sUtfNick, 65);
+	if(szLen == 0) {
 		return false;
 	}
 
 	char sEscapedNick[129];
-	if(mysql_real_escape_string(pDBHandle, sEscapedNick, sUtfNick, strlen(sUtfNick)) == 0) {
+	if(mysql_real_escape_string(pDBHandle, sEscapedNick, sUtfNick, szLen) == 0) {
 		return false;
 	}
 

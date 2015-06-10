@@ -44,6 +44,13 @@
 #ifdef _BUILD_GUI
 	#include "../gui.win/MainWindow.h"
 #endif
+#ifdef _WITH_SQLITE
+	#include "DB-SQLite.h"
+#elif _WITH_POSTGRES
+	#include "DB-PostgreSQL.h"
+#elif _WITH_MYSQL
+	#include "DB-MySQL.h"
+#endif
 //---------------------------------------------------------------------------
 static const char* sMin = "[min]";
 static const char* sMax = "[max]";
@@ -603,6 +610,14 @@ void clsSettingManager::SetBool(const size_t &szBoolId, const bool &bValue) {
         case SETBOOL_ENABLE_SCRIPTING:
             UpdateScripting();
             break;
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
+        case SETBOOL_ENABLE_DATABASE:
+        	if(bUpdateLocked == false) {
+        		UpdateDatabase();
+        	}
+
+        	break;
+#endif
         default:
             break;
     }
@@ -2631,3 +2646,43 @@ void clsSettingManager::UpdateScripting() const {
     }
 }
 //---------------------------------------------------------------------------
+
+void clsSettingManager::UpdateDatabase() {
+#ifdef _WITH_SQLITE
+	if(DBSQLite::mPtr == NULL) {
+		return;
+	}
+
+	delete DBSQLite::mPtr;
+
+	DBSQLite::mPtr = new (std::nothrow) DBSQLite();
+	if(DBSQLite::mPtr == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate DBSQLite::mPtr in clsSettingManager::SetBool\n", 0);
+		exit(EXIT_FAILURE);
+	}
+#elif _WITH_POSTGRES
+	if(DBPostgreSQL::mPtr == NULL) {
+		return;
+	}
+
+	delete DBPostgreSQL::mPtr;
+	
+	DBPostgreSQL::mPtr = new (std::nothrow) DBPostgreSQL();
+	if(DBPostgreSQL::mPtr == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate DBPostgreSQL::mPtr in clsSettingManager::SetBool\n", 0);
+		exit(EXIT_FAILURE);
+	}
+#elif _WITH_MYSQL
+	if(DBMySQL::mPtr == NULL) {
+		return;
+	}
+
+	delete DBMySQL::mPtr;
+	
+	DBMySQL::mPtr = new (std::nothrow) DBMySQL();
+	if(DBMySQL::mPtr == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate DBMySQL::mPtr in clsSettingManager::SetBool\n", 0);
+		exit(EXIT_FAILURE);
+	}
+#endif
+}

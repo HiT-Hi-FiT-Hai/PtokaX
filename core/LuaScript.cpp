@@ -320,7 +320,10 @@ static void AddSettingIds(lua_State * L) {
 		SETBOOL_REPLY_TO_HUB_COMMANDS_AS_PM, SETBOOL_DISABLE_MOTD, SETBOOL_DONT_ALLOW_PINGERS, SETBOOL_REPORT_PINGERS, SETBOOL_REPORT_3X_BAD_PASS, 
 		SETBOOL_ADVANCED_PASS_PROTECTION, SETBOOL_BIND_ONLY_SINGLE_IP, SETBOOL_RESOLVE_TO_IP, SETBOOL_NICK_LIMIT_REDIR, SETBOOL_BAN_MSG_SHOW_IP, 
 		SETBOOL_BAN_MSG_SHOW_RANGE, SETBOOL_BAN_MSG_SHOW_NICK, SETBOOL_BAN_MSG_SHOW_REASON, SETBOOL_BAN_MSG_SHOW_BY, SETBOOL_REPORT_SUSPICIOUS_TAG, 
-		SETBOOL_CHECK_IP_IN_COMMANDS, SETBOOL_LOG_SCRIPT_ERRORS, SETBOOL_NO_QUACK_SUPPORTS, SETBOOL_HASH_PASSWORDS
+		SETBOOL_CHECK_IP_IN_COMMANDS, SETBOOL_LOG_SCRIPT_ERRORS, SETBOOL_NO_QUACK_SUPPORTS, SETBOOL_HASH_PASSWORDS,
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
+		SETBOOL_ENABLE_DATABASE,
+#endif
 	};
 
 	const char * pBoolsNames[] = { "AntiMoGlo", "AutoStart", "RedirectAll", "RedirectWhenHubFull", "AutoReg", "RegOnly",
@@ -333,7 +336,10 @@ static void AddSettingIds(lua_State * L) {
 		"ReplyToHubCommandsAsPm", "DisableMotd", "DontAllowPingers", "ReportPingers", "Report3xBadPass",
 		"AdvancedPassProtection", "ListenOnlySingleIp", "ResolveToIp", "NickLimitRedir", "BanMsgShowIp",
 		"BanMsgShowRange", "BanMsgShowNick", "BanMsgShowReason", "BanMsgShowBy", "ReportSuspiciousTag",
-		"CheckIpInCommands", "LogScriptErrors", "DisallowBadSupports", "HashPasswords"
+		"CheckIpInCommands", "LogScriptErrors", "DisallowBadSupports", "HashPasswords", 
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
+		"EnableDatabase",
+#endif
 	};
 
 	for(uint8_t ui8i = 0; ui8i < sizeof(ui8Bools); ui8i++) {
@@ -434,9 +440,9 @@ static void AddSettingIds(lua_State * L) {
 		"ChatCommandsPrefixes", "HubOwnerEmail", "NickLimitMessage", "NickLimitRedirAddress", "MessageToAddToBanMessage",
 		"Language", "IPv4Address", "IPv6Address", "Encoding", 
 #ifdef _WITH_POSTGRES
-		"PostgresHost", "PostgresPort", "PostgresDBNane", "PostgresUser", "PostgresPass",
+		"PostgresHost", "PostgresPort", "PostgresDBName", "PostgresUser", "PostgresPass",
 #elif _WITH_MYSQL
-		"MySQLHost", "MySQLPort", "MySQLDBNane", "MySQLUser", "MySQLPass",
+		"MySQLHost", "MySQLPort", "MySQLDBName", "MySQLUser", "MySQLPass",
 #endif
 	};
 

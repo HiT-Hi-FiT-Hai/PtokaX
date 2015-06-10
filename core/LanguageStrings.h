@@ -797,6 +797,9 @@ const char* LangStr[] = {
     "not found", 
 	"Offline from", 
 	"displays basic info on given ip",
+	"Database support (used to store user and ip information)",
+	"Enable database",
+	"Remove records older than (days)",
 };
 //---------------------------------------------------------------------------
 

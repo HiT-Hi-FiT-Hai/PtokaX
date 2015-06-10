@@ -80,6 +80,9 @@ const char* SetBoolXmlStr[] = {
     "LogScriptErrors", 
     "NoQuackSupports", 
     "HashPasswords",
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
+	"EnableDatabase",
+#endif
 };
 
 const char* SetShortXmlStr[] = {

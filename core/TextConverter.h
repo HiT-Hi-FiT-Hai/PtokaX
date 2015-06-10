@@ -42,7 +42,7 @@ public:
 	TextConverter();
 	~TextConverter();
 
-	char * CheckUtf8AndConvert(char * sInput, const uint8_t &ui8InputLen, char * sOutput, const uint8_t &ui8OutputSize);
+	size_t CheckUtf8AndConvert(char * sInput, const uint8_t &ui8InputLen, char * sOutput, const uint8_t &ui8OutputSize);
 };
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

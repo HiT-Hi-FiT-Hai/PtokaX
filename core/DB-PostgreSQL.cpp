@@ -23,20 +23,15 @@
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "hashRegManager.h"
 #include "hashUsrManager.h"
+#include "IP2Country.h"
 #include "LanguageManager.h"
 #include "ProfileManager.h"
 #include "ServerManager.h"
 #include "SettingManager.h"
+#include "TextConverter.h"
 #include "UdpDebug.h"
 #include "User.h"
 #include "utility.h"
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "IP2Country.h"
-#include "TextConverter.h"
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include <libpq-fe.h>
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -44,8 +39,9 @@ DBPostgreSQL * DBPostgreSQL::mPtr = NULL;
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 DBPostgreSQL::DBPostgreSQL() {
-	if(clsSettingManager::mPtr->sTexts[SETTXT_POSTGRES_PASS] == NULL) {
+	if(clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_DATABASE] == false || clsSettingManager::mPtr->sTexts[SETTXT_POSTGRES_PASS] == NULL) {
 		bConnected = false;
+
 		return;
 	}
 
@@ -58,6 +54,7 @@ DBPostgreSQL::DBPostgreSQL() {
 	if(PQstatus(pDBConn) == CONNECTION_BAD) { // Connection to PostgreSQL failed. Save error to log and give up.
 		bConnected = false;
 		AppendLog(string("DBPostgreSQL connection failed: ")+PQerrorMessage(pDBConn));
+		PQfinish(pDBConn);
 
 		return;
 	}
@@ -92,6 +89,7 @@ DBPostgreSQL::DBPostgreSQL() {
 		bConnected = false;
 		AppendLog(string("DBPostgreSQL check/create table failed: ")+PQresultErrorMessage(pResult));
 		PQclear(pResult);
+		PQfinish(pDBConn);
 
 		return;
 	}
@@ -107,8 +105,10 @@ DBPostgreSQL::~DBPostgreSQL() {
 	if(clsSettingManager::mPtr->i16Shorts[SETSHORT_DB_REMOVE_OLD_RECORDS] != 0) {
 		RemoveOldRecords(clsSettingManager::mPtr->i16Shorts[SETSHORT_DB_REMOVE_OLD_RECORDS]);
 	}
-	
-	PQfinish(pDBConn);
+
+	if(bConnected == true) {
+		PQfinish(pDBConn);
+	}
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -126,8 +126,8 @@ void DBPostgreSQL::UpdateRecord(User * pUser) {
 
 
 	char sNick[65];
-	paramValues[0] = TextConverter::mPtr->CheckUtf8AndConvert(pUser->sNick, pUser->ui8NickLen, sNick, 65);
-	if(paramValues[0][0] == '\0') {
+	paramValues[0] = sNick;
+	if(TextConverter::mPtr->CheckUtf8AndConvert(pUser->sNick, pUser->ui8NickLen, sNick, 65) == 0) {
 		return;
 	}
 
@@ -139,23 +139,23 @@ void DBPostgreSQL::UpdateRecord(User * pUser) {
 	paramValues[2] = sShare;
 
 	char sDescription[193];
-	if(pUser->sDescription != NULL) {
-		paramValues[3] = TextConverter::mPtr->CheckUtf8AndConvert(pUser->sDescription, pUser->ui8DescriptionLen, sDescription, 193);
+	if(pUser->sDescription != NULL && TextConverter::mPtr->CheckUtf8AndConvert(pUser->sDescription, pUser->ui8DescriptionLen, sDescription, 193) != 0) {
+		paramValues[3] = sDescription;
 	}
 
 	char sTag[193];
-	if(pUser->sTag != NULL) {
-		paramValues[4] = TextConverter::mPtr->CheckUtf8AndConvert(pUser->sTag, pUser->ui8TagLen, sTag, 193);
+	if(pUser->sTag != NULL && TextConverter::mPtr->CheckUtf8AndConvert(pUser->sTag, pUser->ui8TagLen, sTag, 193) != 0) {
+		paramValues[4] = sTag;
 	}
 
 	char sConnection[33];
-	if(pUser->sConnection != NULL) {
-		paramValues[5] = TextConverter::mPtr->CheckUtf8AndConvert(pUser->sConnection, pUser->ui8ConnectionLen, sConnection, 33);
+	if(pUser->sConnection != NULL && TextConverter::mPtr->CheckUtf8AndConvert(pUser->sConnection, pUser->ui8ConnectionLen, sConnection, 33) != 0) {
+		paramValues[5] = sConnection;
 	}
 
 	char sEmail[97];
-	if(pUser->sEmail != NULL) {
-		paramValues[6] = TextConverter::mPtr->CheckUtf8AndConvert(pUser->sEmail, pUser->ui8EmailLen, sEmail, 97);
+	if(pUser->sEmail != NULL && TextConverter::mPtr->CheckUtf8AndConvert(pUser->sEmail, pUser->ui8EmailLen, sEmail, 97) != 0) {
+		paramValues[6] = sEmail;
 	}
 
 	/*	PostgreSQL don't support UPSERT.
@@ -520,8 +520,8 @@ bool DBPostgreSQL::SearchNick(char * sNick, const uint8_t &ui8NickLen, User * pU
 	char * paramValues[1] = { NULL };
 
 	char sUtfNick[65];
-	paramValues[0] = TextConverter::mPtr->CheckUtf8AndConvert(sNick, ui8NickLen, sUtfNick, 65);
-	if(paramValues[0][0] == '\0') {
+	paramValues[0] = sUtfNick;
+	if(TextConverter::mPtr->CheckUtf8AndConvert(sNick, ui8NickLen, sUtfNick, 65) == 0) {
 		return false;
 	}
 

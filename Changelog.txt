@@ -11,7 +11,7 @@ Added: Support for CTM2HUB.
 Added: Little time delay before $Lock is sent by hub. That way hub don't sending $Lock if new connection is CTM DDOS (idea from original NeoModus Direct Connect Hub 1.0.25).
 Added: -p command line param for pid file.
 Added: Support for SQLite database to store info about users.
-Added: Support for MySQL database to store info about users.
+Added: Support for MySQL/MariaDB database to store info about users.
 Fixed: Missing settings and profiles identificator tables with Lua 5.1.
 Fixed: Few bad possitions of gui items in settings window (thx keep_clear for report).
 Changed: Chat command !getinfo to get info about offline user(s) from Database.

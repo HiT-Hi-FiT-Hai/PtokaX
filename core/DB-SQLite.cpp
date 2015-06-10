@@ -23,20 +23,15 @@
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "hashRegManager.h"
 #include "hashUsrManager.h"
+#include "IP2Country.h"
 #include "LanguageManager.h"
 #include "ProfileManager.h"
 #include "ServerManager.h"
 #include "SettingManager.h"
+#include "TextConverter.h"
 #include "UdpDebug.h"
 #include "User.h"
 #include "utility.h"
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "IP2Country.h"
-#include "TextConverter.h"
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include <sqlite3.h>
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -44,6 +39,12 @@ DBSQLite * DBSQLite::mPtr = NULL;
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 DBSQLite::DBSQLite() {
+	if(clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_DATABASE] == false) {
+		bConnected = false;
+
+		return;
+	}
+
 #ifdef _WIN32
 	int iRet = sqlite3_open((clsServerManager::sPath + "\\cfg\\users.sqlite").c_str(), &pDB);
 #else
@@ -58,6 +59,19 @@ DBSQLite::DBSQLite() {
 	}
 
 	char * sErrMsg = NULL;
+
+	iRet = sqlite3_exec(pDB, "PRAGMA synchronous = NORMAL;"
+		"PRAGMA journal_mode = WAL;",
+		NULL, NULL, &sErrMsg);
+
+	if(iRet != SQLITE_OK) {
+		bConnected = false;
+		AppendLog(string("DBSQLite PRAGMA set failed: ")+sErrMsg);
+		sqlite3_free(sErrMsg);
+		sqlite3_close(pDB);
+
+		return;
+	}
 
 	iRet = sqlite3_exec(pDB, 
 		"CREATE TABLE IF NOT EXISTS userinfo ("
@@ -90,8 +104,10 @@ DBSQLite::~DBSQLite() {
 	if(clsSettingManager::mPtr->i16Shorts[SETSHORT_DB_REMOVE_OLD_RECORDS] != 0) {
 		RemoveOldRecords(clsSettingManager::mPtr->i16Shorts[SETSHORT_DB_REMOVE_OLD_RECORDS]);
 	}
-	
-	sqlite3_close(pDB);
+
+	if(bConnected == true) {
+		sqlite3_close(pDB);
+	}
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -102,8 +118,7 @@ void DBSQLite::UpdateRecord(User * pUser) {
 	}
 
 	char sNick[65];
-	TextConverter::mPtr->CheckUtf8AndConvert(pUser->sNick, pUser->ui8NickLen, sNick, 65);
-	if(sNick[0] == '\0') {
+	if(TextConverter::mPtr->CheckUtf8AndConvert(pUser->sNick, pUser->ui8NickLen, sNick, 65) == 0) {
 		return;
 	}
 
@@ -208,7 +223,7 @@ static int SelectCallBack(void *, int iArgCount, char ** ppArgSTrings, char **) 
 		sFirstIP[szLength] = '\0';
 
 		szLength = strlen(ppArgSTrings[0]);
-		if(szLength <= 0 || szLength > 64) {
+		if(szLength == 0 || szLength > 64) {
 			clsUdpDebug::mPtr->Broadcast("[LOG] DBSQLite search returned invalid nick length: "+string(szLength));
 			return 0;
 		}
@@ -328,13 +343,13 @@ static int SelectCallBack(void *, int iArgCount, char ** ppArgSTrings, char **) 
             }
 
 			szLength = strlen(ppArgSTrings[2]);
-			if(szLength <= 0 || szLength > 39) {
+			if(szLength == 0 || szLength > 39) {
 				clsUdpDebug::mPtr->Broadcast("[LOG] DBSQLite search returned invalid ip length: "+string(szLength));
 				return 0;
 			}
 
 			szLength = strlen(ppArgSTrings[3]);
-			if(szLength <= 0 || szLength > 24) {
+			if(szLength == 0 || szLength > 24) {
 				clsUdpDebug::mPtr->Broadcast("[LOG] DBSQLite search returned invalid share length: "+string(szLength));
 				return 0;
 			}
@@ -431,13 +446,13 @@ static int SelectCallBack(void *, int iArgCount, char ** ppArgSTrings, char **) 
 		bSecond = false;
 
 		size_t szLength = strlen(sFirstNick);
-		if(szLength <= 0 || szLength > 64) {
+		if(szLength == 0 || szLength > 64) {
 			clsUdpDebug::mPtr->Broadcast("[LOG] DBSQLite search returned invalid nick length: "+string(szLength));
 			return 0;
 		}
 	
 		szLength = strlen(sFirstIP);
-		if(szLength <= 0 || szLength > 39) {
+		if(szLength == 0 || szLength > 39) {
 			clsUdpDebug::mPtr->Broadcast("[LOG] DBSQLite search returned invalid ip length: "+string(szLength));
 			return 0;
 		}
@@ -450,13 +465,13 @@ static int SelectCallBack(void *, int iArgCount, char ** ppArgSTrings, char **) 
 	}
 
 	size_t szLength = strlen(ppArgSTrings[0]);
-	if(szLength <= 0 || szLength > 64) {
+	if(szLength == 0 || szLength > 64) {
 		clsUdpDebug::mPtr->Broadcast("[LOG] DBSQLite search returned invalid nick length: "+string(szLength));
 		return 0;
 	}
 
 	szLength = strlen(ppArgSTrings[2]);
-	if(szLength <= 0 || szLength > 39) {
+	if(szLength == 0 || szLength > 39) {
 		clsUdpDebug::mPtr->Broadcast("[LOG] DBSQLite search returned invalid ip length: "+string(szLength));
 		return 0;
 	}
@@ -478,8 +493,7 @@ bool DBSQLite::SearchNick(char * sNick, const uint8_t &ui8NickLen, User * pUser,
 	}
 
 	char sUtfNick[65];
-	TextConverter::mPtr->CheckUtf8AndConvert(sNick, ui8NickLen, sUtfNick, 65);
-	if(sUtfNick[0] == '\0') {
+	if(TextConverter::mPtr->CheckUtf8AndConvert(sNick, ui8NickLen, sUtfNick, 65) == 0) {
 		return false;
 	}
 
@@ -511,10 +525,11 @@ bool DBSQLite::SearchNick(char * sNick, const uint8_t &ui8NickLen, User * pUser,
 	if(iRet != SQLITE_OK) {
 		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBSQLite search for nick failed: ")+sErrMsg);
 		sqlite3_free(sErrMsg);
+
+		return false;
 	}
 
-	iRet = sqlite3_changes(pDB);
-	if(iRet == 0) {
+	if(iMsgLen == iAfterHubSecMsgLen) {
 		return false;
 	} else {
 		clsServerManager::pGlobalBuffer[iMsgLen] = '|';
@@ -560,10 +575,11 @@ bool DBSQLite::SearchIP(char * sIP, User * pUser, const bool &bFromPM) {
 	if(iRet != SQLITE_OK) {
 		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBSQLite search for nick failed: ")+sErrMsg);
 		sqlite3_free(sErrMsg);
+
+		return false;
 	}
 
-	iRet = sqlite3_changes(pDB);
-	if(iRet == 0) {
+	if(iMsgLen == iAfterHubSecMsgLen) {
 		return false;
 	} else {
         clsServerManager::pGlobalBuffer[iMsgLen] = '|';

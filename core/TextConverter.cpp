@@ -26,10 +26,6 @@
 #include "UdpDebug.h"
 #include "utility.h"
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #ifndef _WIN32
 	#include <iconv.h>
 #endif
@@ -92,19 +88,19 @@ bool TextConverter::CheckUtf8Validity(char * sInput, const uint8_t &ui8InputLen,
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-char * TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8InputLen, char * sOutput, const uint8_t &ui8OutputSize) {
+size_t TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8InputLen, char * sOutput, const uint8_t &ui8OutputSize) {
 #ifdef _WIN32
 	if(CheckUtf8Validity(sInput, ui8InputLen, sOutput, ui8OutputSize) == true) {
 		memcpy(sOutput, sInput, ui8InputLen);
 		sOutput[ui8InputLen] = '\0';
 
-		return sOutput;
+		return ui8InputLen;
 	}
 
 	int iMtoWRegLen = MultiByteToWideChar(CP_ACP, 0, sInput, ui8InputLen, NULL, 0);
 	if(iMtoWRegLen == 0) {
 		sOutput[0] = '\0';
-		return sOutput;
+		return 0;
 	}
 
 	wchar_t * wcTemp = 	wcTempBuf;
@@ -112,7 +108,7 @@ char * TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 		wcTemp = (wchar_t *)::HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iMtoWRegLen * sizeof(wchar_t));
 		if(wcTemp == NULL) {	
 			sOutput[0] = '\0';
-			return sOutput;
+			return 0;
 		}
 	}
 
@@ -122,7 +118,7 @@ char * TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 		}
 				
 		sOutput[0] = '\0';
-		return sOutput;
+		return 0;
 	}
 
 	int iWtoMRegLen = ::WideCharToMultiByte(CP_UTF8, 0, wcTemp, iMtoWRegLen, NULL, 0, NULL, NULL);
@@ -131,7 +127,7 @@ char * TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 			::HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)wcTemp);
 		}
 		sOutput[0] = '\0';
-		return sOutput;
+		return 0;
 	}
 
 	if(iWtoMRegLen > (ui8OutputSize-1)) {
@@ -146,8 +142,8 @@ char * TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 				::HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)wcTemp);
 			}
 
-			sOutput[ui8InputLen] = '\0';
-			return sOutput;
+			sOutput[0] = '\0';
+			return 0;
 		}
 	}
 
@@ -156,8 +152,8 @@ char * TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 			::HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)wcTemp);
 		}
 
-		sOutput[ui8InputLen] = '\0';
-		return sOutput;
+		sOutput[0] = '\0';
+		return 0;
 	}
 
 	if(wcTemp != wcTempBuf) {
@@ -165,11 +161,11 @@ char * TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 	}
 
 	sOutput[iWtoMRegLen] = '\0';
-	return sOutput;
+	return iWtoMRegLen;
 #else
 	if(CheckUtf8Validity(sInput, ui8InputLen, sOutput, ui8OutputSize) == true) {
 		sOutput[ui8InputLen] = '\0';
-		return sOutput;
+		return ui8InputLen;
 	}
 
 	char * sInBuf = sInput;
@@ -193,8 +189,8 @@ char * TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 						clsUdpDebug::mPtr->Broadcast("[LOG] TextConverter::DoIconv iconv E2BIG in EILSEQ for param: "+string(sInput, ui8InputLen));
 					} else if(errno == EINVAL) {
 						clsUdpDebug::mPtr->Broadcast("[LOG] TextConverter::DoIconv iconv EINVAL in EILSEQ for param: "+string(sInput, ui8InputLen));
-						sOutput[ui8InputLen] = '\0';
-						return sOutput;
+						sOutput[0] = '\0';
+						return 0;
 					} else if(errno == EILSEQ) {
 						sInBuf++;
 						szInbufLeft--;
@@ -206,18 +202,18 @@ char * TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 
 			if(szOutbufLeft == size_t(ui8OutputSize-1)) {
 				clsUdpDebug::mPtr->Broadcast("[LOG] TextConverter::DoIconv iconv EILSEQ for param: "+string(sInput, ui8InputLen));
-				sOutput[ui8InputLen] = '\0';
-				return sOutput;
+				sOutput[0] = '\0';
+				return 0;
 			}
 		} else if(errno == EINVAL) {
 			clsUdpDebug::mPtr->Broadcast("[LOG] TextConverter::DoIconv iconv EINVAL for param: "+string(sInput, ui8InputLen));
-			sOutput[ui8InputLen] = '\0';
-			return sOutput;
+			sOutput[0] = '\0';
+			return 0;
 		}
 	}
 
 	sOutput[(ui8OutputSize-szOutbufLeft)-1] = '\0';
-	return sOutput;
+	return (ui8OutputSize-szOutbufLeft)-1;
 #endif
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

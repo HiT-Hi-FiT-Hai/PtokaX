@@ -797,6 +797,9 @@ const char* LangXmlStr[] = {
     "NotFound", 
 	"OfflineFrom", 
 	"DisplaysInfoOnGivenIP",
+	"DatabaseSupport",
+	"EnableDatabase",
+	"RemoveOldRecords",
 };
 //---------------------------------------------------------------------------
 

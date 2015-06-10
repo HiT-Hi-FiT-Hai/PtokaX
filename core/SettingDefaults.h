@@ -80,6 +80,9 @@ bool SetBoolDef[] = {
     false, //LOG_SCRIPT_ERRORS
     false, //NO_QUACK_SUPPORTS
     false, //HASH_PASSWORDS
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
+    true, //ENABLE_DATABASE,
+#endif
 };
 
 int16_t SetShortDef[] = {
