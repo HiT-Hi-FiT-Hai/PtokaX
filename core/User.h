@@ -227,7 +227,8 @@ struct User {
     	SUPPORTBIT_ZPIPE                   = 0x20,
     	SUPPORTBIT_IP64                    = 0x40,
     	SUPPORTBIT_IPV4                    = 0x80,
-    	SUPPORTBIT_TLS2                    = 0x100
+    	SUPPORTBIT_TLS2                    = 0x100,
+    	SUPPORTBIT_ZPIPE0                  = 0x200
     };
 
     uint64_t ui64SharedSize, ui64ChangedSharedSizeShort, ui64ChangedSharedSizeLong;

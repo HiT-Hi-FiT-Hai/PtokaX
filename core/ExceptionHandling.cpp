@@ -21,13 +21,20 @@
 //---------------------------------------------------------------------------
 #include "ExceptionHandling.h"
 //---------------------------------------------------------------------------
+#include "LuaInc.h"
 #include "ServerManager.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
-#pragma hdrstop
-//---------------------------------------------------------------------------
 #include <Dbghelp.h>
 #include <delayimp.h>
+//---------------------------------------------------------------------------
+#ifdef _WITH_SQLITE
+	#include <sqlite3.h>
+#elif _WITH_POSTGRES
+	#include <libpq-fe.h>
+#elif _WITH_MYSQL
+	#include <mysql.h>
+#endif
 //---------------------------------------------------------------------------
 LPTOP_LEVEL_EXCEPTION_FILTER pOldTLEF = NULL;
 string sLogPath = "", sDebugSymbolsFile = "";
@@ -201,7 +208,19 @@ LONG WINAPI PtokaX_UnhandledExceptionFilter(LPEXCEPTION_POINTERS ExceptionInfo) 
 #ifdef _M_X64
         " (x64)"
 #endif
-        "\nException Code: %x\n", ExceptionInfo->ExceptionRecord->ExceptionCode);
+		"\nLua: " LUA_RELEASE
+#ifdef _WITH_SQLITE
+		"\nSQLite: " SQLITE_VERSION
+#elif _WITH_POSTGRES
+		"\nPostgreSQL: %d"
+#elif _WITH_MYSQL
+		"\nMySQL: " MYSQL_SERVER_VERSION
+#endif
+        "\nException Code: %x\n",
+#ifdef _WITH_POSTGRES
+		PQlibVersion(),
+#endif
+		ExceptionInfo->ExceptionRecord->ExceptionCode);
 
     {
         // Write windoze version where we crashed if is possible

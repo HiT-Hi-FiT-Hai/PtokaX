@@ -2724,10 +2724,15 @@ void clsDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen)
                 break;
             }
             case 'Z': {
-                if(((curUser->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false && ((szDataLen == 5 && *((uint32_t *)(sSupport+1)) == *((uint32_t *)"Pipe")) ||
-                    (szDataLen == 6 && memcmp(sSupport+1, "Pipe0", 5) == 0))) {
-                    curUser->ui32SupportBits |= User::SUPPORTBIT_ZPIPE;
-                    iStatZPipe++;
+                if(((curUser->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == false) {
+                	if(szDataLen == 6 && memcmp(sSupport+1, "Pipe0", 5) == 0) {
+                		curUser->ui32SupportBits |= User::SUPPORTBIT_ZPIPE0;
+                		curUser->ui32SupportBits |= User::SUPPORTBIT_ZPIPE;
+                    	iStatZPipe++;
+					} else if(szDataLen == 5 && *((uint32_t *)(sSupport+1)) == *((uint32_t *)"Pipe")) {
+                    	curUser->ui32SupportBits |= User::SUPPORTBIT_ZPIPE;
+                    	iStatZPipe++;
+                    }
                 }
                 break;
             }
@@ -3731,11 +3736,14 @@ void clsDcCommands::ProcessCmds(User * curUser) {
                 memcpy(msg, "$Supports", 9);
                 uint32_t iSupportsLen = 9;
                 
-                // PPK ... why to send it if client don't need it =)
-                /*if(((curUser->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == true) {
+                // PPK ... why dc++ have that 0 on end ? that was not in original documentation.. stupid duck...
+                if(((curUser->ui32SupportBits & User::SUPPORTBIT_ZPIPE0) == User::SUPPORTBIT_ZPIPE0) == true) {
+                    memcpy(msg+iSupportsLen, " ZPipe0", 7);
+                    iSupportsLen += 7;
+                } else if(((curUser->ui32SupportBits & User::SUPPORTBIT_ZPIPE) == User::SUPPORTBIT_ZPIPE) == true) {
                     memcpy(msg+iSupportsLen, " ZPipe", 6);
                     iSupportsLen += 6;
-                }*/
+                }
                 
                 // PPK ... yes yes yes finally QuickList support in PtokaX !!! ;))
                 if((curUser->ui32SupportBits & User::SUPPORTBIT_QUICKLIST) == User::SUPPORTBIT_QUICKLIST) {
@@ -3750,11 +3758,6 @@ void clsDcCommands::ProcessCmds(User * curUser) {
                     memcpy(msg+iSupportsLen, " NoGetINFO", 10);
                     iSupportsLen += 10;
                 }
-            
-                if((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) {
-                    memcpy(msg+iSupportsLen, " BotINFO HubINFO", 16);
-                    iSupportsLen += 16;
-                }
 
                 if((curUser->ui32SupportBits & User::SUPPORTBIT_IP64) == User::SUPPORTBIT_IP64) {
                     memcpy(msg+iSupportsLen, " IP64", 5);
@@ -3765,6 +3768,26 @@ void clsDcCommands::ProcessCmds(User * curUser) {
                     // Only client connected with IPv6 sending this, so only that client is getting reply
                     memcpy(msg+iSupportsLen, " IPv4", 5);
                     iSupportsLen += 5;
+                }
+
+                if((curUser->ui32SupportBits & User::SUPPORTBIT_USERCOMMAND) == User::SUPPORTBIT_USERCOMMAND) {
+                    memcpy(msg+iSupportsLen, " UserCommand", 12);
+                    iSupportsLen += 12;
+                }
+
+                if((curUser->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2 && ((curUser->ui32BoolBits & User::BIT_QUACK_SUPPORTS) == User::BIT_QUACK_SUPPORTS) == false) {
+                    memcpy(msg+iSupportsLen, " UserIP2", 8);
+                    iSupportsLen += 8;
+                }
+
+                if((curUser->ui32SupportBits & User::SUPPORTBIT_TLS2) == User::SUPPORTBIT_TLS2) {
+                    memcpy(msg+iSupportsLen, " TLS2", 5);
+                    iSupportsLen += 5;
+                }
+
+                if((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) {
+                    memcpy(msg+iSupportsLen, " BotINFO HubINFO", 16);
+                    iSupportsLen += 16;
                 }
 
                 memcpy(msg+iSupportsLen, "|\0", 2);

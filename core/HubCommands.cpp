@@ -28,6 +28,7 @@
 #include "hashRegManager.h"
 #include "hashUsrManager.h"
 #include "LanguageManager.h"
+#include "LuaInc.h"
 #include "LuaScriptManager.h"
 #include "ProfileManager.h"
 #include "ServerManager.h"
@@ -38,18 +39,17 @@
 #include "utility.h"
 //#include "ZlibUtility.h"
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
-//---------------------------------------------------------------------------
 #include "HubCommands.h"
 //---------------------------------------------------------------------------
 #ifdef _WITH_SQLITE
 	#include "DB-SQLite.h"
+	#include <sqlite3.h>
 #elif _WITH_POSTGRES
 	#include "DB-PostgreSQL.h"
+	#include <libpq-fe.h>
 #elif _WITH_MYSQL
 	#include "DB-MySQL.h"
+	#include <mysql.h>
 #endif
 #include "IP2Country.h"
 #include "LuaScript.h"
@@ -4752,7 +4752,15 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 #ifdef _PtokaX_TESTING_
                 " [build " BUILD_NUMBER "]"
 #endif
-                " built on " __DATE__ " " __TIME__ "\n";
+                " built on " __DATE__ " " __TIME__ "\n"
+                "Lua: " LUA_RELEASE "\n";
+#ifdef _WITH_SQLITE
+				Statinfo+="SQLite: " SQLITE_VERSION "\n";
+#elif _WITH_POSTGRES
+				Statinfo+="PostgreSQL: "+string(PQlibVersion())+"\n";
+#elif _WITH_MYSQL
+				Statinfo+="MySQL: " MYSQL_SERVER_VERSION "\n";
+#endif
 #ifdef _WIN32
 				Statinfo+="OS: "+clsServerManager::sOS+"\r\n";
 #else
