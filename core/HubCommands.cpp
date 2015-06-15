@@ -4753,7 +4753,7 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                 " [build " BUILD_NUMBER "]"
 #endif
                 " built on " __DATE__ " " __TIME__ "\n"
-                "Lua: " LUA_RELEASE "\n";
+                "Lua: " LUA_VERSION_MAJOR "." LUA_VERSION_MINOR "." LUA_VERSION_RELEASE "\n";
 #ifdef _WITH_SQLITE
 				Statinfo+="SQLite: " SQLITE_VERSION "\n";
 #elif _WITH_POSTGRES

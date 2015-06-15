@@ -208,7 +208,7 @@ LONG WINAPI PtokaX_UnhandledExceptionFilter(LPEXCEPTION_POINTERS ExceptionInfo) 
 #ifdef _M_X64
         " (x64)"
 #endif
-		"\nLua: " LUA_RELEASE
+		"\nLua: " LUA_VERSION_MAJOR "." LUA_VERSION_MINOR "." LUA_VERSION_RELEASE
 #ifdef _WITH_SQLITE
 		"\nSQLite: " SQLITE_VERSION
 #elif _WITH_POSTGRES
