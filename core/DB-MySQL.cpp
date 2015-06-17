@@ -228,7 +228,7 @@ bool DBMySQL::SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pR
     	}
 
 		if(pLengths[0] <= 0 || pLengths[0] > 64) {
-			clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid nick length: "+string(pLengths[0]));
+			clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid nick length: "+string((uint64_t)pLengths[0]));
 			return false;
 		}
 
@@ -351,12 +351,12 @@ bool DBMySQL::SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pR
             }
 
 			if(pLengths[2] <= 0 || pLengths[2] > 39) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid ip length: "+string(pLengths[2]));
+				clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid ip length: "+string((uint64_t)pLengths[2]));
 				return false;
 			}
 
 			if(pLengths[3] <= 0 || pLengths[3] > 24) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid share length: "+string(pLengths[3]));
+				clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid share length: "+string((uint64_t)pLengths[3]));
 				return false;
 			}
 
@@ -370,7 +370,7 @@ bool DBMySQL::SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pR
 
             if(mRow[4] != NULL) {
 				if(pLengths[4] > 192) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid description length: "+string(pLengths[4]));
+					clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid description length: "+string((uint64_t)pLengths[4]));
 					return  false;
 				}
 
@@ -385,7 +385,7 @@ bool DBMySQL::SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pR
 
             if(mRow[5] != NULL) {
 				if(pLengths[5] > 192) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid tag length: "+string(pLengths[5]));
+					clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid tag length: "+string((uint64_t)pLengths[5]));
 					return false;
 				}
 
@@ -400,7 +400,7 @@ bool DBMySQL::SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pR
                     
             if(mRow[6] != NULL) {
 				if(pLengths[6] > 32) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid connection length: "+string(pLengths[6]));
+					clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid connection length: "+string((uint64_t)pLengths[6]));
 					return false;
 				}
 
@@ -415,7 +415,7 @@ bool DBMySQL::SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pR
 
             if(mRow[7] != NULL) {
 				if(pLengths[7] > 96) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid email length: "+string(pLengths[7]));
+					clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid email length: "+string((uint64_t)pLengths[7]));
 					return false;
 				}
 
@@ -478,12 +478,12 @@ bool DBMySQL::SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pR
 			}
 
 			if(pLengths[0] <= 0 || pLengths[0] > 64) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid nick length: "+string(pLengths[0]));
+				clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid nick length: "+string((uint64_t)pLengths[0]));
 				return false;
 			}
 
 			if(pLengths[2] <= 0 || pLengths[2] > 39) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid ip length: "+string(pLengths[2]));
+				clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid ip length: "+string((uint64_t)pLengths[2]));
 				return false;
 			}
 
