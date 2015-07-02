@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1251" standalone="yes" ?>
-<Language Name="Russian Language" Author="dmvn, WAJIM, Alexey" Version="0.5.0.2 build 457">
+<Language Name="Russian Language" Author="dmvn, WAJIM, Alexey" Version="0.5.1.0 build 498">
     <String Name="ThisHubIsRunning">Этот хаб работает под управлением</String>
     <String Name="HubName">Название хаба</String>
     <String Name="MOTD(motd)">MOTD (сообщение дня, отправляется при входе в хаб)</String>
@@ -395,7 +395,7 @@
     <String Name="DisplayBansFoundForGivenIp">показать бан(ы) для IP-адреса</String>
     <String Name="DisplayRangeBanFoundForGivenRange">показать диапазон банов для текущего диапазона</String>
     <String Name="DisconnectWithTempban">отключение с последующим временным баном</String>
-    <String Name="DisplaysInfoOnUserWithGivenNick">показать базовую информацию об онлайн-пользователе с таким ником</String>
+    <String Name="DisplaysInfoOnUserWithGivenNick">показать основную информацию о пользователе с указанным ником</String>
     <String Name="GiveTempOp">дать пользователю статус оператора до перезахода</String>
     <String Name="DisallowUserToPostInMainchat">запретить пользователю писать в главном чате</String>
     <String Name="UserCanPostToMainchatAgain">вернуть пользователю возможность писать в главном чате</String>
@@ -409,7 +409,7 @@
     <String Name="ReloadAllTextfiles">перечитать все текстовые файлы</String>
     <String Name="AddRegUserWithSpecifiedProfile">зарегистрировать пользователя с профилем</String>
     <String Name="RemoveRegisteredUser">удалить регистрацию пользователя</String>
-    <String Name="SetNewTopicOr">Установить новый топик. Или</String>
+    <String Name="SetNewTopicOr">установить новый топик. Или</String>
     <String Name="ClearTopic">чтобы очистить топик</String>
     <String Name="SendPrivateMessageToAllUsers">отправить личное сообщение всем пользователям</String>
     <String Name="SendPrivateMessageToAllOPs">отправить личное сообщение всем операторам</String>
@@ -696,8 +696,9 @@
     <String Name="QuackSupports">Хаб не допускает работу с клиентами, отправляющими команду $Supports с ошибками</String>
     <String Name="ClientsBuggySupports">Обработка команд $Supports нестандартного формата</String>
     <String Name="DisallowBuggySupports">Отключать клиентов с командой $Supports нестандартного формата</String>
-    <String Name="MaxAlwdTopicLen256Chars">Максимальная разрешённая длина топика - 256 символов.</String>
-    <String Name="MaxAlwdScriptNameLen256Chars">Максимальная разрешённая длина имени скрипта - 256 символов</String>
+    <String Name="MaxAlwdTopicLen256Chars">Максимальная допустимая длина топика - 256 символов.</String>
+    <String Name="MaxAlwdScriptNameLen256Chars">Максимальная допустимая длина имени скрипта - 256 символов</String>
+    <String Name="MaxAlwdIPLen39Chars">Максимальная допустимая длина IP - 39 символов</String>
     <String Name="View">&amp;Вид</String>
     <String Name="Help">&amp;Справка</String>
     <String Name="Exit">Выход</String>
@@ -762,12 +763,20 @@
     <String Name="Register">предложил зарегистрироваться пользователю</String>
     <String Name="As">зарегистрироваться с профилем</String>
     <String Name="Registered">предложил пользователю</String>
-    <String Name="YouWereRegisteredPleaseEnterYourPassword">Вас приглашают зарегистрироваться. Пожалуйста, введите ваш пароль</String>
+    <String Name="YouWereRegisteredPleaseEnterYourPassword">Вам предлагают зарегистрироваться. Пожалуйста, введите ваш пароль</String>
     <String Name="SorryYouAreAlreadyRegistered">Sorry you are already registered</String>
-    <String Name="ThankYouForPasswordYouAreNowRegisteredAs">Благодарим за ввод пароля, теперь вы зарегистрированы в хабе с профилем</String>
+    <String Name="ThankYouForPasswordYouAreNowRegisteredAs">Теперь вы зарегистрированы в хабе с профилем</String>
     <String Name="RegisterUserWithSpecifiedProfile">зарегистрировать онлайн-пользователя с указанным профилем. Хаб запросит у пользователя пароль и зарегистрирует его</String>
-    <String Name="InCommandHubReplacedItWithYourRealIP">в параметрах команды, сервер заменил его на Ваш настоящий IP</String>
+    <String Name="InCommandHubReplacedItWithYourRealIP">в параметрах команды, сервер заменил его на IP вашего соединения</String>
     <String Name="YourNickContainsIllegalWhiteCharacter">Ваш ник содержит запрещённые управляющие символы</String>
     <String Name="PasswordIsHashed">Эта графа пуста, так-как пароль зашифрован</String>
-    <String Name="StoreRegPassHashed">Сохранять пароли пользователей в виде их хэшей</String>
+    <String Name="StoreRegPassHashed">Хранить пароли пользователей в виде хэшей</String>
+    <String Name="YourClientSentIncorrectPortInCTM">Ваш клиент отправил недопустимый номер порта в запросе на соединение</String>
+    <String Name="YourClientSentIncorrectPortInSearch">Ваш клиент отправил недопустимый номер порта в поисковом запросе</String>
+    <String Name="NotFound">не найден</String>
+    <String Name="OfflineFrom">Офлайн с</String>
+    <String Name="DisplaysInfoOnGivenIP">показать основную информацию по указанному IP-адресу</String>
+    <String Name="DatabaseSupport">Работа с базой данных (используется для хранения основной информации о пользователях)</String>
+    <String Name="EnableDatabase">Использовать базу данных</String>
+    <String Name="RemoveOldRecords">Удалять записи старше чем (дней)</String>
 </Language>

@@ -26,10 +26,6 @@
 #include "UdpDebug.h"
 #include "utility.h"
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#ifndef _WIN32
-	#include <iconv.h>
-#endif
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 TextConverter * TextConverter::mPtr = NULL;
 #ifdef _WIN32
 	static wchar_t wcTempBuf[2048];
@@ -43,13 +39,13 @@ TextConverter::TextConverter() {
 		exit(EXIT_FAILURE);
 	}
 
-	iconvUtfCheck = iconv_open("utf8", "utf8");
+	iconvUtfCheck = iconv_open("utf-8", "utf-8");
 	if(iconvUtfCheck == (iconv_t)-1) {
 		AppendLog("TextConverter iconv_open for iconvUtfCheck failed!");
 		exit(EXIT_FAILURE);
 	}
 
-	iconvAsciiToUtf = iconv_open("utf8//TRANSLIT//IGNORE", clsSettingManager::mPtr->sTexts[SETTXT_ENCODING]);
+	iconvAsciiToUtf = iconv_open("utf-8//TRANSLIT//IGNORE", clsSettingManager::mPtr->sTexts[SETTXT_ENCODING]);
 	if(iconvAsciiToUtf == (iconv_t)-1) {
 		AppendLog("TextConverter iconv_open for iconvAsciiToUtf failed!");
 		exit(EXIT_FAILURE);

@@ -77,11 +77,23 @@ centos6: $(OBJS)
 	cd tinyxml; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.1 -lpq
 
-freebsd: INCLUDE = -Itinyxml -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include/lua51 -I/usr/include/postgresql
+freebsd: CXX = clang
+freebsd: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua53 -I/usr/local/include/postgresql
 freebsd: $(OBJS)
 	cd skein; $(MAKE)
-	cd tinyxml; $(MAKE)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a /usr/local/lib/lua51/liblua.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -lpq
+	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.3 -ltinyxml -liconv -lpq
+
+freebsd51: CXX = clang
+freebsd51: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua51 -I/usr/local/include/postgresql
+freebsd51: $(OBJS)
+	cd skein; $(MAKE)
+	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.1 -ltinyxml -liconv -lpq
+
+freebsd52: CXX = clang
+freebsd52: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua52 -I/usr/local/include/postgresql
+freebsd52: $(OBJS)
+	cd skein; $(MAKE)
+	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.2 -ltinyxml -liconv -lpq
 
 install:
 	@if test -d $(INSTDIR); then \

@@ -785,7 +785,7 @@ bool clsScriptManager::Arrival(User * u, char * sData, const size_t &szLen, cons
 
             lua_getglobal(cur->pLUA, arrival[uiType]);
             iTop = lua_gettop(cur->pLUA);
-            if(lua_isnil(cur->pLUA, iTop)) {
+            if(lua_isfunction(cur->pLUA, iTop) == 0) {
                 cur->ui32DataArrivals &= ~iLuaArrivalBits[uiType];
 
                 lua_settop(cur->pLUA, 0);
@@ -875,7 +875,7 @@ bool clsScriptManager::UserConnected(User * u) {
 
             lua_getglobal(cur->pLUA, ConnectedFunction[ui8Type]);
             iTop = lua_gettop(cur->pLUA);
-			if(lua_isnil(cur->pLUA, iTop)) {
+			if(lua_isfunction(cur->pLUA, iTop) == 0) {
 				switch(ui8Type) {
 					case 0:
 						cur->ui16Functions &= ~Script::USERCONNECTED;
@@ -980,7 +980,7 @@ void clsScriptManager::UserDisconnected(User * u, Script * pScript/* = NULL*/) {
 
             lua_getglobal(cur->pLUA, DisconnectedFunction[ui8Type]);
             iTop = lua_gettop(cur->pLUA);
-            if(lua_isnil(cur->pLUA, iTop)) {
+            if(lua_isfunction(cur->pLUA, iTop) == 0) {
 				switch(ui8Type) {
 					case 0:
 						cur->ui16Functions &= ~Script::USERDISCONNECTED;

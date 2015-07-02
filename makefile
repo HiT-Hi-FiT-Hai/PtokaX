@@ -77,11 +77,23 @@ centos6: $(OBJS)
 	cd tinyxml; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.1
 
-freebsd: INCLUDE = -Itinyxml -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include/lua51
+freebsd: CXX = clang
+freebsd: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua53
 freebsd: $(OBJS)
 	cd skein; $(MAKE)
-	cd tinyxml; $(MAKE)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a /usr/local/lib/lua51/liblua.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz
+	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.3 -ltinyxml -liconv
+
+freebsd51: CXX = clang
+freebsd51: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua51
+freebsd51: $(OBJS)
+	cd skein; $(MAKE)
+	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.1 -ltinyxml -liconv
+
+freebsd52: CXX = clang
+freebsd52: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua52
+freebsd52: $(OBJS)
+	cd skein; $(MAKE)
+	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.2 -ltinyxml -liconv
 
 haiku: CXXFLAGS = -O -g -Wall
 haiku: $(OBJS)

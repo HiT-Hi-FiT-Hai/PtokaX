@@ -99,7 +99,6 @@ static int Unreg(lua_State * L) {
 
 	Script * cur = clsScriptManager::mPtr->FindScript(L);
 	if(cur == NULL || cur->bRegUDP == false) {
-        lua_settop(L, 0);
         return 0;
     }
 
@@ -146,6 +145,7 @@ static int Send(lua_State * L) {
 
     clsUdpDebug::mPtr->Send(cur->sName, sMsg, szLen);
 
+	lua_settop(L, 0);
     lua_pushboolean(L, 1);
     return 1;
 }

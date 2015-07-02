@@ -505,8 +505,7 @@ static int GetHubSecAlias(lua_State * L) {
         return 1;
     }
     
-    lua_pushlstring(L, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
-        (size_t)clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_HUB_SEC]);
+    lua_pushlstring(L, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], (size_t)clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_HUB_SEC]);
 
     return 1;
 }
@@ -1981,18 +1980,17 @@ static int SendToAll(lua_State * L) {
         return 0;
     }
 
-    if(lua_gettop(L) == 1) {
-        size_t szLen;
-        char * sData = (char *)lua_tolstring(L, 1, &szLen);
-        if(sData[0] != '\0' && szLen < 128001) {
-			if(sData[szLen-1] != '|') {
-                memcpy(clsServerManager::pGlobalBuffer, sData, szLen);
-                clsServerManager::pGlobalBuffer[szLen] = '|';
-                clsServerManager::pGlobalBuffer[szLen+1] = '\0';
-				clsGlobalDataQueue::mPtr->AddQueueItem(clsServerManager::pGlobalBuffer, szLen+1, NULL, 0, clsGlobalDataQueue::CMD_LUA);
-			} else {
-				clsGlobalDataQueue::mPtr->AddQueueItem(sData, szLen, NULL, 0, clsGlobalDataQueue::CMD_LUA);
-            }
+    size_t szLen;
+    char * sData = (char *)lua_tolstring(L, 1, &szLen);
+
+    if(sData[0] != '\0' && szLen < 128001) {
+		if(sData[szLen-1] != '|') {
+            memcpy(clsServerManager::pGlobalBuffer, sData, szLen);
+            clsServerManager::pGlobalBuffer[szLen] = '|';
+            clsServerManager::pGlobalBuffer[szLen+1] = '\0';
+			clsGlobalDataQueue::mPtr->AddQueueItem(clsServerManager::pGlobalBuffer, szLen+1, NULL, 0, clsGlobalDataQueue::CMD_LUA);
+		} else {
+			clsGlobalDataQueue::mPtr->AddQueueItem(sData, szLen, NULL, 0, clsGlobalDataQueue::CMD_LUA);
         }
     }
 

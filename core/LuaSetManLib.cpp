@@ -300,9 +300,10 @@ static int SetString(lua_State * L) {
     size_t szId = (size_t)lua_tointeger(L, 1);
 #endif
 
+	lua_settop(L, 0);
+
     if(szId >= SETTXT_IDS_END) {
         luaL_error(L, "bad argument #1 to 'SetString' (it's not valid id)");
-        lua_settop(L, 0);
         return 0;
     }  
 
@@ -311,7 +312,6 @@ static int SetString(lua_State * L) {
 
     clsSettingManager::mPtr->SetText(szId, sValue, szLen);
 
-    lua_settop(L, 0);
     return 0;
 }
 //------------------------------------------------------------------------------
@@ -479,8 +479,8 @@ static int SetHubSlotRatio(lua_State * L) {
 	clsSettingManager::mPtr->bUpdateLocked = true;
 
 #if LUA_VERSION_NUM < 503
-		clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_HUBS, (int16_t)lua_tonumber(L, 1));
-		clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_SLOTS, (int16_t)lua_tonumber(L, 2));
+	clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_HUBS, (int16_t)lua_tonumber(L, 1));
+	clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_SLOTS, (int16_t)lua_tonumber(L, 2));
 #else
     clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_HUBS, (int16_t)lua_tointeger(L, 1));
 	clsSettingManager::mPtr->SetShort(SETSHORT_HUB_SLOT_RATIO_SLOTS, (int16_t)lua_tointeger(L, 2));
@@ -769,6 +769,7 @@ static int SetHubBot(lua_State * L) {
         clsSettingManager::mPtr->UpdateBot((bBotHaveNewNick == true || bRegStateChange == true));
     }
 
+	lua_settop(L, 0);
     return 0;
 }
 //------------------------------------------------------------------------------

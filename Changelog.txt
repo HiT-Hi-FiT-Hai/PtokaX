@@ -1,10 +1,13 @@
 PtokaX DC hub software - Ptaczek/Frontline3k/aMutex (c) 2oo2/2oo3
 PtokaX DC hub software - Ptaczek/PPK (c) 2004/2005
-PtokaX DC hub software - PPK (c) 2006/2014
+PtokaX DC hub software - PPK (c) 2006/2015
 ------------------------------------------------------------------------------
 
 
 ----------------------------------------Next Release...---------------------------------------
+
+
+-------------------------------------0.5.1.0 30 June 2015-------------------------------------
 Added: Support for PostgreSQL database to store info about users.
 Added: Chat command !getipinfo to get info about ip(s) from Database.
 Added: Support for CTM2HUB.
@@ -15,6 +18,7 @@ Added: Support for MySQL/MariaDB database to store info about users.
 Fixed: Missing settings and profiles identificator tables with Lua 5.1.
 Fixed: Few bad possitions of gui items in settings window (thx keep_clear for report).
 Changed: Chat command !getinfo to get info about offline user(s) from Database.
+Updated: Lua 5.3 to 5.3.1.
 
 
 ----------------------------------------0.5.0.3 20 February 2015-----------------------------

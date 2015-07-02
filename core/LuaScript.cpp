@@ -689,7 +689,7 @@ void ScriptOnStartup(Script * cur) {
     lua_getglobal(cur->pLUA, "OnStartup");
     int i = lua_gettop(cur->pLUA);
 
-    if(lua_isnil(cur->pLUA, i)) {
+    if(lua_isfunction(cur->pLUA, i) == 0) {
 		cur->ui16Functions &= ~Script::ONSTARTUP;
 		lua_settop(cur->pLUA, 0);
         return;
@@ -713,7 +713,7 @@ void ScriptOnExit(Script * cur) {
 
     lua_getglobal(cur->pLUA, "OnExit");
     int i = lua_gettop(cur->pLUA);
-    if(lua_isnil(cur->pLUA, i)) {
+    if(lua_isfunction(cur->pLUA, i) == 0) {
 		cur->ui16Functions &= ~Script::ONEXIT;
 		lua_settop(cur->pLUA, 0);
         return;
@@ -737,7 +737,7 @@ static bool ScriptOnError(Script * cur, char * sErrorMsg, const size_t &szMsgLen
 
 	lua_getglobal(cur->pLUA, "OnError");
     int i = lua_gettop(cur->pLUA);
-    if(lua_isnil(cur->pLUA, i)) {
+    if(lua_isfunction(cur->pLUA, i) == 0) {
 		cur->ui16Functions &= ~Script::ONERROR;
 		lua_settop(cur->pLUA, 0);
         return true;
@@ -1218,6 +1218,12 @@ void ScriptError(Script * cur) {
 
                 if(tmr->sFunctionName != NULL) {
 					lua_getglobal(cur->pLUA, tmr->sFunctionName);
+					int i = lua_gettop(cur->pLUA);
+
+					if(lua_isfunction(cur->pLUA, i) == 0) {
+						lua_settop(cur->pLUA, 0);
+				        return;
+				    }
 				} else {
                     lua_rawgeti(cur->pLUA, LUA_REGISTRYINDEX, tmr->iFunctionRef);
                 }
@@ -1269,10 +1275,11 @@ int ScriptTraceback(lua_State *L) {
     }
 
     lua_getfield(L, -1, "traceback");
-    if(!lua_isfunction(L, -1)) {
+    if(lua_isfunction(L, -1) == 0) {
         lua_pop(L, 2);
         return 1;
     }
+
     lua_pushvalue(L, 1);
     lua_pushinteger(L, 2);
     lua_call(L, 2, 1);

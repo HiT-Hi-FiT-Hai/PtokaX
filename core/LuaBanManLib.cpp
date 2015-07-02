@@ -1399,9 +1399,11 @@ static int BanNick(lua_State * L) {
                 clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
             }
             curUser->Close();
+            lua_settop(L, 0);
             lua_pushboolean(L, 1);
         } else {
             curUser->Close();
+            lua_settop(L, 0);
             lua_pushnil(L);
         }
     } else {
@@ -1410,8 +1412,10 @@ static int BanNick(lua_State * L) {
             if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "NickBan1") == true) {
                 clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
             }
+            lua_settop(L, 0);
             lua_pushboolean(L, 1);
         } else {
+        	lua_settop(L, 0);
             lua_pushnil(L);
         }
     }
@@ -1542,6 +1546,7 @@ static int TempBanIP(lua_State * L) {
     return 1;
 }
 //------------------------------------------------------------------------------
+
 // NickTempBan(Nick, iTime, sReason, sBy) and user:NickTempBan(iTime, sReason, sBy)
 static int TempBanNick(lua_State * L) {
 	if(lua_gettop(L) != 4) {
@@ -1595,9 +1600,11 @@ static int TempBanNick(lua_State * L) {
                 clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
             }
             curUser->Close();
+            lua_settop(L, 0);
             lua_pushboolean(L, 1);
         } else {
             curUser->Close();
+            lua_settop(L, 0);
             lua_pushnil(L);
         }
     } else {
@@ -1606,8 +1613,10 @@ static int TempBanNick(lua_State * L) {
             if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "NickTempBan3") == true) {
                 clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
             }
+            lua_settop(L, 0);
             lua_pushboolean(L, 1);
         } else {
+        	lua_settop(L, 0);
             lua_pushnil(L);
         }
     }

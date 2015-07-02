@@ -62,8 +62,8 @@ static int AddTimer(lua_State * L) {
             sFunctionName = (char *)lua_tolstring(L, 2, &szLen);
 
             if(szLen == 0) {
-    		  lua_settop(L, 0);
-    		  lua_pushnil(L);
+				lua_settop(L, 0);
+				lua_pushnil(L);
                 return 1;
             }
         } else if(lua_type(L, 2) == LUA_TFUNCTION) {
@@ -93,7 +93,7 @@ static int AddTimer(lua_State * L) {
     if(sFunctionName != NULL) {
         lua_getglobal(L, sFunctionName);
         int i = lua_gettop(L);
-        if(lua_isnil(L, i)) {
+        if(lua_isfunction(L, i) == 0) {
             lua_settop(L, 0);
             lua_pushnil(L);
 			return 1;
@@ -123,6 +123,7 @@ static int AddTimer(lua_State * L) {
         KillTimer(NULL, timer);
 #endif
         AppendDebugLog("%s - [MEM] Cannot allocate pNewtimer in TmrMan.AddTimer\n", 0);
+        lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
     }

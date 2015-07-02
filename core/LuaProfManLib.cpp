@@ -375,12 +375,10 @@ static int RemoveProfile(lua_State * L) {
         }
 
         if(clsProfileManager::mPtr->RemoveProfile(idx) == false) {
-            lua_settop(L, 0);
             lua_pushnil(L);
             return 1;
         }
 
-        lua_settop(L, 0);
         lua_pushboolean(L, 1);
         return 1;
     }
@@ -413,17 +411,17 @@ static int MoveDown(lua_State * L) {
 #else
 	uint16_t iProfile = (uint16_t)lua_tointeger(L, 1);
 #endif
-    
+
+    lua_settop(L, 0);
+
     // if the requested index is out of bounds return nil
     if(iProfile >= clsProfileManager::mPtr->ui16ProfileCount-1) {
-		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
 	}
 
     clsProfileManager::mPtr->MoveProfileDown(iProfile);
 
-    lua_settop(L, 0);
     lua_pushboolean(L, 1);
     return 1;
 }
@@ -450,17 +448,17 @@ static int MoveUp(lua_State * L) {
 #else
 	uint16_t iProfile = (uint16_t)lua_tointeger(L, 1);
 #endif
-    
+
+	lua_settop(L, 0);
+
     // if the requested index is out of bounds return nil
     if(iProfile == 0 || iProfile >= clsProfileManager::mPtr->ui16ProfileCount) {
-		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
 	}
 
     clsProfileManager::mPtr->MoveProfileUp(iProfile);
 
-    lua_settop(L, 0);
     lua_pushboolean(L, 1);
     return 1;
 }
@@ -479,6 +477,7 @@ static int GetProfile(lua_State * L) {
         char *profName = (char *)lua_tolstring(L, 1, &szLen);
 
         if(szLen == 0) {
+        	lua_settop(L, 0);
             lua_pushnil(L);
             return 1;
         }
@@ -610,10 +609,11 @@ static int GetProfilePermissions(lua_State * L) {
 #else
 	uint16_t iProfile = (uint16_t)lua_tointeger(L, 1);
 #endif
-    
+
+	lua_settop(L, 0);
+
     // if the requested index is out of bounds return nil
     if(iProfile >= clsProfileManager::mPtr->ui16ProfileCount) {
-		lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;
 	}
@@ -646,8 +646,9 @@ static int SetProfileName(lua_State * L) {
     uint16_t iProfile = (uint16_t)lua_tointeger(L, 1);
 #endif
 
+	lua_settop(L, 0);
+
     if(iProfile >= clsProfileManager::mPtr->ui16ProfileCount) {
-        lua_settop(L, 0);
         lua_pushnil(L);
         return 1;
     }
@@ -656,14 +657,12 @@ static int SetProfileName(lua_State * L) {
 	char * sName = (char *)lua_tolstring(L, 2, &szLen);
 
     if(szLen == 0 || szLen > 64) {
-        lua_settop(L, 0);
         lua_pushnil(L);
         return 1;
     }
 
 	clsProfileManager::mPtr->ChangeProfileName(iProfile, sName, szLen);
 
-    lua_settop(L, 0);
     lua_pushboolean(L, 1);
     return 1;
 }
