@@ -37,7 +37,9 @@
     #include "../gui.win/MainWindowPageUsersChat.h"
 #endif
 //---------------------------------------------------------------------------
-#include <skein.h>
+#ifndef _WITHOUT_SKEIN
+	#include <skein.h>
+#endif
 //---------------------------------------------------------------------------
 /*
 static const int MAX_PAT_SIZE = 64;
@@ -1456,6 +1458,7 @@ void ReduceGlobalBuffer() {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 bool HashPassword(char * sPassword, const size_t &szPassLen, uint8_t * ui8PassHash) {
+#ifndef _WITHOUT_SKEIN
     Skein1024_Ctxt_t ctx1024;
 
     if(Skein1024_Init(&ctx1024, 512) == SKEIN_SUCCESS) {
@@ -1465,7 +1468,7 @@ bool HashPassword(char * sPassword, const size_t &szPassLen, uint8_t * ui8PassHa
             }
         }
     }
-
+#endif
     return false;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -649,6 +649,11 @@ void clsRegManager::Load(void) {
                     pNewUser = RegUser::CreateReg((char *)pxbRegs.pItemDatas[0], pxbRegs.ui16ItemLengths[0], (char *)pxbRegs.pItemDatas[3], pxbRegs.ui16ItemLengths[3], NULL, iProfile);
                 }
             } else if(pxbRegs.ui16ItemLengths[1] == 64) {
+#ifdef _WITHOUT_SKEIN
+				AppendDebugLog("%s - [ERR] Hashed password found in RegisteredUsers, but PtokaX is compiled without hashing support!\n", 0);
+
+                exit(EXIT_FAILURE);
+#endif
                 pNewUser = RegUser::CreateReg((char *)pxbRegs.pItemDatas[0], pxbRegs.ui16ItemLengths[0], NULL, 0, (uint8_t *)pxbRegs.pItemDatas[1], iProfile);
             }
 

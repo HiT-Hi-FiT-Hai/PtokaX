@@ -4772,7 +4772,13 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
 
 				struct utsname osname;
 				if(uname(&osname) >= 0) {
-					Statinfo+="OS: "+string(osname.sysname)+" "+string(osname.release)+" ("+string(osname.machine)+")\n";
+					Statinfo+="OS: "+string(osname.sysname)+" "+string(osname.release)+" ("+string(osname.machine)+")"
+#ifdef __clang__
+						" / Clang " __clang_version__
+#elif __GNUC__
+						" / GCC " __VERSION__
+#endif
+						"\n";
 				}
 #endif
 				Statinfo+="Users (Max/Actual Peak (Max Peak)/Logged): "+string(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_USERS])+" / "+string(clsServerManager::ui32Peak)+" ("+

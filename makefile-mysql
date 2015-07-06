@@ -7,7 +7,7 @@
 #*******************************************************************************
 # Compiler
 #*******************************************************************************
-CXX = g++
+CXX = c++
 
 #*******************************************************************************
 # Path where install
@@ -62,34 +62,21 @@ lua52: $(OBJS)
 	cd skein; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua5.2 -ltinyxml -lmysqlclient
 
-centos5-32: $(OBJS)
+centos: $(OBJS)
 	cd skein; $(MAKE)
 	cd tinyxml; $(MAKE)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a /usr/lib/liblua.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -lmysqlclient
+	$(CXX) $(OBJS) -L/usr/lib64/mysql $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.1 -lmysqlclient
 
-centos5-64: $(OBJS)
-	cd skein; $(MAKE)
-	cd tinyxml; $(MAKE)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a /usr/lib64/liblua.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -lmysqlclient
-
-centos6: $(OBJS)
-	cd skein; $(MAKE)
-	cd tinyxml; $(MAKE)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.1 -lmysqlclient
-
-freebsd: CXX = clang
 freebsd: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua53 -I/usr/local/include/mysql
 freebsd: $(OBJS)
 	cd skein; $(MAKE)
 	$(CXX) $(OBJS) -L/usr/local/lib -L/usr/local/lib/mysql $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.3 -ltinyxml -liconv -lmysqlclient
 
-freebsd51: CXX = clang
 freebsd51: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua51 -I/usr/local/include/mysql
 freebsd51: $(OBJS)
 	cd skein; $(MAKE)
 	$(CXX) $(OBJS) -L/usr/local/lib -L/usr/local/lib/mysql $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.1 -ltinyxml -liconv -lmysqlclient
 
-freebsd52: CXX = clang
 freebsd52: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua52 -I/usr/local/include/mysql
 freebsd52: $(OBJS)
 	cd skein; $(MAKE)

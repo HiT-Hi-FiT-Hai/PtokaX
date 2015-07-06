@@ -7,7 +7,7 @@
 #*******************************************************************************
 # Compiler
 #*******************************************************************************
-CXX = g++
+CXX = c++
 
 #*******************************************************************************
 # Path where install
@@ -62,44 +62,30 @@ lua52: $(OBJS)
 	cd skein; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua5.2 -ltinyxml
 
-centos5-32: $(OBJS)
-	cd skein; $(MAKE)
-	cd tinyxml; $(MAKE)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a /usr/lib/liblua.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz
-
-centos5-64: $(OBJS)
-	cd skein; $(MAKE)
-	cd tinyxml; $(MAKE)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a /usr/lib64/liblua.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz
-
-centos6: $(OBJS)
+centos: $(OBJS)
 	cd skein; $(MAKE)
 	cd tinyxml; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.1
 
-freebsd: CXX = clang
 freebsd: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua53
 freebsd: $(OBJS)
 	cd skein; $(MAKE)
 	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.3 -ltinyxml -liconv
 
-freebsd51: CXX = clang
 freebsd51: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua51
 freebsd51: $(OBJS)
 	cd skein; $(MAKE)
 	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.1 -ltinyxml -liconv
 
-freebsd52: CXX = clang
 freebsd52: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua52
 freebsd52: $(OBJS)
 	cd skein; $(MAKE)
 	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.2 -ltinyxml -liconv
 
-haiku: CXXFLAGS = -O -g -Wall
+haiku: CXXFLAGS = -O -g -Wall -D_WITHOUT_SKEIN
 haiku: $(OBJS)
-	cd skein; $(MAKE)
-	cd tinyxml; $(MAKE)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lnetwork -llua -lz
+	cd tinyxml; $(MAKE) haiku
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a -o PtokaX -lnetwork -llua -lz -liconv
 
 install:
 	@if test -d $(INSTDIR); then \
