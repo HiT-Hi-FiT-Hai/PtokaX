@@ -214,6 +214,8 @@ static int RemoveTimer(lua_State * L) {
 
 #ifdef _WIN32
     UINT_PTR timer = (UINT_PTR)lua_touserdata(L, 1);
+#elif defined(__sun) && defined(__SVR4)
+	timer_t timer = (timer_t)(size_t)lua_touserdata(L, 1);
 #else
 	timer_t timer = (timer_t)lua_touserdata(L, 1);
 #endif

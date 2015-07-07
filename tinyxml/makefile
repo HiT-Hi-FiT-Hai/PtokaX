@@ -25,8 +25,8 @@ CXXFLAGS = -O -Wall -DTIXML_USE_STL
 tinyxml.a: $(CURDIR)/obj/tinystr.o $(CURDIR)/obj/tinyxml.o $(CURDIR)/obj/tinyxmlerror.o $(CURDIR)/obj/tinyxmlparser.o
 	$(AR) $(ARFLAGS) tinyxml.a $(CURDIR)/obj/tinystr.o $(CURDIR)/obj/tinyxml.o $(CURDIR)/obj/tinyxmlerror.o $(CURDIR)/obj/tinyxmlparser.o
 
-haiku: CXXFLAGS = -O -Wall
-haiku: $(CURDIR)/obj/tinystr.o $(CURDIR)/obj/tinyxml.o $(CURDIR)/obj/tinyxmlerror.o $(CURDIR)/obj/tinyxmlparser.o
+nostl: CXXFLAGS = -O -Wall
+nostl: $(CURDIR)/obj/tinystr.o $(CURDIR)/obj/tinyxml.o $(CURDIR)/obj/tinyxmlerror.o $(CURDIR)/obj/tinyxmlparser.o
 	$(AR) $(ARFLAGS) tinyxml.a $(CURDIR)/obj/tinystr.o $(CURDIR)/obj/tinyxml.o $(CURDIR)/obj/tinyxmlerror.o $(CURDIR)/obj/tinyxmlparser.o
 #*******************************************************************************
 # Files to compile

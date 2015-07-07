@@ -3464,11 +3464,8 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
             time_t acc_time;
             time(&acc_time);
 
-#ifdef _WIN32
-			uint32_t iMinutes2Wait = (uint32_t)pow((float)2, Reg->ui8BadPassCount-1);
-#else
-			uint32_t iMinutes2Wait = (uint32_t)pow(2, Reg->ui8BadPassCount-1);
-#endif
+			uint32_t iMinutes2Wait = (uint32_t)pow(2.0, (double)Reg->ui8BadPassCount-1);
+
             if(acc_time < (time_t)(Reg->tLastBadPass+(60*iMinutes2Wait))) {
                 int imsgLen = sprintf(msg, "<%s> %s %s %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_LAST_PASS_WAS_WRONG_YOU_NEED_WAIT],
                     formatSecTime((Reg->tLastBadPass+(60*iMinutes2Wait))-acc_time), clsLanguageManager::mPtr->sTexts[LAN_BEFORE_YOU_TRY_AGAIN]);
