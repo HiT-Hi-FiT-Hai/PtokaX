@@ -65,7 +65,12 @@ lua52: $(OBJS)
 centos: $(OBJS)
 	cd skein; $(MAKE)
 	cd tinyxml; $(MAKE)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.1 -lpq
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua -lpq
+
+fedora: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/postgresql
+fedora: $(OBJS)
+	cd skein; $(MAKE)
+	$(CXX) $(OBJS) -L/usr/lib64/mysql $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua -ltinyxml -lpq
 
 freebsd: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua53 -I/usr/local/include/postgresql
 freebsd: $(OBJS)

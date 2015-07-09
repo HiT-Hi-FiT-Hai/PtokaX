@@ -1,4 +1,4 @@
-PtokaX DC hub software - Ptaczek/Frontline3k/aMutex (c) 2oo2/2oo3
+﻿PtokaX DC hub software - Ptaczek/Frontline3k/aMutex (c) 2oo2/2oo3
 PtokaX DC hub software - Ptaczek/PPK (c) 2004/2005
 PtokaX DC hub software - PPK (c) 2006/2015
 ------------------------------------------------------------------------------
@@ -6,10 +6,9 @@ PtokaX DC hub software - PPK (c) 2006/2015
 
 ----------------------------------------Next Release...---------------------------------------
 Added: Support to compile PtokaX on FreeBSD with Lua 5.2 and 5.3.
-Added: Support to compile PtokaX on Solaris.
+Added: Support to compile PtokaX on Solaris and Fedora.
 Fixed: Few minor issues in Lua api.
-Fixed: Compile on FreeBSD 10.1 and Haiku.
-Fixed: Compile on Solaris and illumos.
+Fixed: Compile on FreeBSD 10.1, Haiku, Solaris and illumos.
 
 
 -------------------------------------0.5.1.0 30 June 2015-------------------------------------

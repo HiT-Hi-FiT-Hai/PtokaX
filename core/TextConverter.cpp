@@ -29,12 +29,14 @@
 TextConverter * TextConverter::mPtr = NULL;
 #ifdef _WIN32
 	static wchar_t wcTempBuf[2048];
-#endif
-#if defined(__sun) && defined(__SVR4)
-	#define ICONV_CONST const
-#endif
-#ifndef ICONV_CONST
-	#define ICONV_CONST
+#else
+	#ifndef ICONV_CONST
+		#if defined(__sun) && defined(__SVR4)
+			#define ICONV_CONST const
+		#else
+			#define ICONV_CONST
+		#endif
+	#endif
 #endif
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

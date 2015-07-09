@@ -79,44 +79,12 @@ clsReservedNicksManager::ReservedNick * clsReservedNicksManager::ReservedNick::C
 
 clsReservedNicksManager::clsReservedNicksManager() : pReservedNicks(NULL) {
 	TiXmlDocument doc;
-#ifdef _WIN32
-	if(doc.LoadFile((clsServerManager::sPath+"\\cfg\\ReservedNicks.xml").c_str()) == false && (doc.ErrorId() == TiXmlBase::TIXML_ERROR_OPENING_FILE || doc.ErrorId() == TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY)) {
-		TiXmlDocument doc((clsServerManager::sPath+"\\cfg\\ReservedNicks.xml").c_str());
-#else
-	if(doc.LoadFile((clsServerManager::sPath+"/cfg/ReservedNicks.xml").c_str()) == false && (doc.ErrorId() == TiXmlBase::TIXML_ERROR_OPENING_FILE || doc.ErrorId() == TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY)) {
-		TiXmlDocument doc((clsServerManager::sPath+"/cfg/ReservedNicks.xml").c_str());
-#endif
-		doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
-		TiXmlElement reservednicks("ReservedNicks");
-		const char* Nicks[] = { "Hub-Security", "Admin", "Client", "PtokaX", "OpChat" };
-		for(uint8_t ui8i = 0; ui8i < 5; ui8i++) {
-			AddReservedNick(Nicks[ui8i]);
-			TiXmlElement reservednick("ReservedNick");
-			reservednick.InsertEndChild(TiXmlText(Nicks[ui8i]));
-
-			reservednicks.InsertEndChild(reservednick);
-		}
-		doc.InsertEndChild(reservednicks);
-		doc.SaveFile();
-    }
 
 #ifdef _WIN32
-	if(doc.LoadFile((clsServerManager::sPath+"\\cfg\\ReservedNicks.xml").c_str()) == false) {
+	if(doc.LoadFile((clsServerManager::sPath+"\\cfg\\ReservedNicks.xml").c_str()) == true) {
 #else
-	if(doc.LoadFile((clsServerManager::sPath+"/cfg/ReservedNicks.xml").c_str()) == false) {
+	if(doc.LoadFile((clsServerManager::sPath+"/cfg/ReservedNicks.xml").c_str()) == true) {
 #endif
-        if(doc.ErrorId() != TiXmlBase::TIXML_ERROR_OPENING_FILE && doc.ErrorId() != TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY) {
-            char msg[2048];
-            int imsgLen = sprintf(msg, "Error loading file ReservedNicks.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
-			CheckSprintf(imsgLen, 2048, "clsReservedNicksManager::clsReservedNicksManager");
-#ifdef _BUILD_GUI
-			::MessageBox(NULL, msg, clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
-#else
-			AppendLog(msg);
-#endif
-            exit(EXIT_FAILURE);
-        }
-    } else {
 		TiXmlHandle cfg(&doc);
 		TiXmlNode *reservednicks = cfg.FirstChild("ReservedNicks").Node();
 		if(reservednicks != NULL) {
@@ -132,6 +100,36 @@ clsReservedNicksManager::clsReservedNicksManager() : pReservedNicks(NULL) {
                     
 				AddReservedNick(sNick);
 			}
+        }
+    } else {
+        if(doc.ErrorId() == TiXmlBase::TIXML_ERROR_OPENING_FILE || doc.ErrorId() == TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY) {
+#ifdef _WIN32
+			TiXmlDocument newdoc((clsServerManager::sPath+"\\cfg\\ReservedNicks.xml").c_str());
+#else
+			TiXmlDocument newdoc((clsServerManager::sPath+"/cfg/ReservedNicks.xml").c_str());
+#endif
+			newdoc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
+			TiXmlElement reservednicks("ReservedNicks");
+			const char* Nicks[] = { "Hub-Security", "Admin", "Client", "PtokaX", "OpChat" };
+			for(uint8_t ui8i = 0; ui8i < 5; ui8i++) {
+				AddReservedNick(Nicks[ui8i]);
+				TiXmlElement reservednick("ReservedNick");
+				reservednick.InsertEndChild(TiXmlText(Nicks[ui8i]));
+	
+				reservednicks.InsertEndChild(reservednick);
+			}
+			newdoc.InsertEndChild(reservednicks);
+			newdoc.SaveFile();
+        } else {
+            char msg[2048];
+            int imsgLen = sprintf(msg, "Error loading file ReservedNicks.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
+			CheckSprintf(imsgLen, 2048, "clsReservedNicksManager::clsReservedNicksManager");
+#ifdef _BUILD_GUI
+			::MessageBox(NULL, msg, clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
+#else
+			AppendLog(msg);
+#endif
+            exit(EXIT_FAILURE);
         }
     }
 }
