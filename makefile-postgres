@@ -55,37 +55,53 @@ OBJS = $(CURDIR)/obj/colUsers.o $(CURDIR)/obj/DB-PostgreSQL.o $(CURDIR)/obj/DcCo
 PtokaX: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.1 -I/usr/include/postgresql
 PtokaX: $(OBJS)
 	cd skein; $(MAKE)
-	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua5.1 -ltinyxml -lpq
+	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.1 -ltinyxml -lpq
 
 lua52: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.2 -I/usr/include/postgresql
 lua52: $(OBJS)
 	cd skein; $(MAKE)
-	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua5.2 -ltinyxml -lpq
+	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.2 -ltinyxml -lpq
 
+centos: CXXFLAGS = -O -g -Wall -Wextra -DTIXML_USE_STL -D_WITH_POSTGRES
 centos: $(OBJS)
 	cd skein; $(MAKE)
 	cd tinyxml; $(MAKE)
-	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua -lpq
+	$(CXX) $(OBJS) $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua -lpq
 
-fedora: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/postgresql
+fedora: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/postgresql -I/usr/include/pgsql
 fedora: $(OBJS)
 	cd skein; $(MAKE)
-	$(CXX) $(OBJS) -L/usr/lib64/mysql $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua -ltinyxml -lpq
+	$(CXX) $(OBJS) -L/usr/lib64/mysql $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua -ltinyxml -lpq
 
 freebsd: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua53 -I/usr/local/include/postgresql
 freebsd: $(OBJS)
 	cd skein; $(MAKE)
-	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.3 -ltinyxml -liconv -lpq
+	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua-5.3 -ltinyxml -liconv -lpq
 
 freebsd51: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua51 -I/usr/local/include/postgresql
 freebsd51: $(OBJS)
 	cd skein; $(MAKE)
-	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.1 -ltinyxml -liconv -lpq
+	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua-5.1 -ltinyxml -liconv -lpq
 
-freebsd52: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua52 -I/usr/local/include/postgresql
-freebsd52: $(OBJS)
+openbsd: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua-5.3 -I/usr/local/include/postgresql
+openbsd: $(OBJS)
 	cd skein; $(MAKE)
-	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua-5.2 -ltinyxml -liconv -lpq
+	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.3 -ltinyxml -liconv -lpq
+
+openbsd51: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua-5.1 -I/usr/local/include/postgresql
+openbsd51: $(OBJS)
+	cd skein; $(MAKE)
+	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.1 -ltinyxml -liconv -lpq
+
+netbsd: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/pkg/include -I/usr/pkg/include/lua-5.2 -I/usr/pkg/include/postgresql
+netbsd: $(OBJS)
+	cd skein; $(MAKE)
+	$(CXX) $(OBJS) -L/usr/pkg/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.2 -ltinyxml -liconv -lpq
+
+netbsd51: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/pkg/include -I/usr/pkg/include/lua-5.1 -I/usr/pkg/include/postgresql
+netbsd51: $(OBJS)
+	cd skein; $(MAKE)
+	$(CXX) $(OBJS) -L/usr/pkg/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.1 -ltinyxml -liconv -lpq
 
 install:
 	@if test -d $(INSTDIR); then \
@@ -219,7 +235,7 @@ $(CURDIR)/obj/LuaSetManLib.o: $(CURDIR)/core/LuaSetManLib.cpp $(CURDIR)/core/std
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $(CURDIR)/core/LuaSetManLib.cpp -o $(CURDIR)/obj/LuaSetManLib.o
 
 $(CURDIR)/obj/LuaTmrManLib.o: $(CURDIR)/core/LuaTmrManLib.cpp $(CURDIR)/core/stdinc.h $(CURDIR)/core/pxstring.h $(CURDIR)/core/LuaInc.h \
-  $(CURDIR)/core/LuaTmrManLib.h $(CURDIR)/core/LuaScriptManager.h $(CURDIR)/core/utility.h $(CURDIR)/core/LuaScript.h $(CURDIR)/core/scrtmrinc.h 
+  $(CURDIR)/core/LuaTmrManLib.h $(CURDIR)/core/LuaScriptManager.h $(CURDIR)/core/utility.h $(CURDIR)/core/LuaScript.h 
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $(CURDIR)/core/LuaTmrManLib.cpp -o $(CURDIR)/obj/LuaTmrManLib.o
 
 $(CURDIR)/obj/LuaUDPDbgLib.o: $(CURDIR)/core/LuaUDPDbgLib.cpp $(CURDIR)/core/stdinc.h $(CURDIR)/core/pxstring.h $(CURDIR)/core/LuaInc.h \
@@ -233,7 +249,7 @@ $(CURDIR)/obj/ProfileManager.o: $(CURDIR)/core/ProfileManager.cpp $(CURDIR)/core
 
 $(CURDIR)/obj/PtokaX-nix.o: $(CURDIR)/core/PtokaX-nix.cpp $(CURDIR)/core/stdinc.h $(CURDIR)/core/pxstring.h $(CURDIR)/core/eventqueue.h $(CURDIR)/core/GlobalDataQueue.h \
   $(CURDIR)/core/LanguageManager.h $(CURDIR)/core/LanguageIds.h $(CURDIR)/core/LuaScriptManager.h $(CURDIR)/core/ServerManager.h $(CURDIR)/core/serviceLoop.h $(CURDIR)/core/SettingManager.h \
-  $(CURDIR)/core/SettingIds.h $(CURDIR)/core/utility.h $(CURDIR)/core/regtmrinc.h $(CURDIR)/core/scrtmrinc.h
+  $(CURDIR)/core/SettingIds.h $(CURDIR)/core/utility.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $(CURDIR)/core/PtokaX-nix.cpp -o $(CURDIR)/obj/PtokaX-nix.o
 
 $(CURDIR)/obj/PXBReader.o: $(CURDIR)/core/PXBReader.cpp $(CURDIR)/core/stdinc.h $(CURDIR)/core/PXBReader.h $(CURDIR)/core/ServerManager.h
@@ -256,7 +272,7 @@ $(CURDIR)/obj/ServerManager.o: $(CURDIR)/core/ServerManager.cpp $(CURDIR)/core/s
   $(CURDIR)/core/LuaScriptManager.h $(CURDIR)/core/ProfileManager.h $(CURDIR)/core/serviceLoop.h $(CURDIR)/core/SettingManager.h \
   $(CURDIR)/core/SettingIds.h $(CURDIR)/core/UdpDebug.h $(CURDIR)/core/utility.h $(CURDIR)/core/ZlibUtility.h $(CURDIR)/core/HubCommands.h \
   $(CURDIR)/core/IP2Country.h $(CURDIR)/core/LuaScript.h $(CURDIR)/core/RegThread.h $(CURDIR)/core/ResNickManager.h $(CURDIR)/core/ServerThread.h \
-  $(CURDIR)/core/TextConverter.h $(CURDIR)/core/TextFileManager.h $(CURDIR)/core/UDPThread.h $(CURDIR)/core/regtmrinc.h
+  $(CURDIR)/core/TextConverter.h $(CURDIR)/core/TextFileManager.h $(CURDIR)/core/UDPThread.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $(CURDIR)/core/ServerManager.cpp -o $(CURDIR)/obj/ServerManager.o
 
 $(CURDIR)/obj/ServerThread.o: $(CURDIR)/core/ServerThread.cpp $(CURDIR)/core/stdinc.h $(CURDIR)/core/pxstring.h $(CURDIR)/core/eventqueue.h \
@@ -268,7 +284,7 @@ $(CURDIR)/obj/serviceLoop.o: $(CURDIR)/core/serviceLoop.cpp $(CURDIR)/core/stdin
   $(CURDIR)/core/colUsers.h $(CURDIR)/core/eventqueue.h $(CURDIR)/core/GlobalDataQueue.h $(CURDIR)/core/hashBanManager.h $(CURDIR)/core/hashRegManager.h $(CURDIR)/core/hashUsrManager.h \
   $(CURDIR)/core/LanguageManager.h $(CURDIR)/core/LanguageIds.h $(CURDIR)/core/LuaScriptManager.h $(CURDIR)/core/ProfileManager.h \
   $(CURDIR)/core/ServerManager.h $(CURDIR)/core/SettingManager.h $(CURDIR)/core/SettingIds.h $(CURDIR)/core/UdpDebug.h $(CURDIR)/core/User.h \
-  $(CURDIR)/core/utility.h $(CURDIR)/core/ZlibUtility.h $(CURDIR)/core/LuaScript.h $(CURDIR)/core/RegThread.h $(CURDIR)/core/regtmrinc.h $(CURDIR)/core/scrtmrinc.h
+  $(CURDIR)/core/utility.h $(CURDIR)/core/ZlibUtility.h $(CURDIR)/core/LuaScript.h $(CURDIR)/core/RegThread.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $(CURDIR)/core/serviceLoop.cpp -o $(CURDIR)/obj/serviceLoop.o
 
 $(CURDIR)/obj/SettingManager.o: $(CURDIR)/core/SettingManager.cpp $(CURDIR)/core/stdinc.h $(CURDIR)/core/pxstring.h $(CURDIR)/core/SettingXml.h \

@@ -24,6 +24,7 @@
 #include "LuaTmrManLib.h"
 //---------------------------------------------------------------------------
 #include "LuaScriptManager.h"
+#include "ServerManager.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
 #ifdef _WIN32
@@ -31,9 +32,6 @@
 #endif
 //---------------------------------------------------------------------------
 #include "LuaScript.h"
-#ifndef _WIN32
-	#include "scrtmrinc.h"
-#endif
 //---------------------------------------------------------------------------
 
 static int AddTimer(lua_State * L) {
@@ -113,9 +111,9 @@ static int AddTimer(lua_State * L) {
         return 1;
     }
 
-	ScriptTimer * pNewtimer = ScriptTimer::CreateScriptTimer(timer, sFunctionName, szLen, iRef);
+	ScriptTimer * pNewtimer = ScriptTimer::CreateScriptTimer(timer, sFunctionName, szLen, iRef, cur->pLUA);
 #else
-	ScriptTimer * pNewtimer = ScriptTimer::CreateScriptTimer(sFunctionName, szLen, iRef);
+	ScriptTimer * pNewtimer = ScriptTimer::CreateScriptTimer(sFunctionName, szLen, iRef, cur->pLUA);
 #endif
 
     if(pNewtimer == NULL) {
@@ -129,45 +127,20 @@ static int AddTimer(lua_State * L) {
     }
 
 #ifndef _WIN32
-    timer_t scrtimer;
-
-    struct sigevent sigev;
-    sigev.sigev_notify = SIGEV_SIGNAL;
-    sigev.sigev_signo = SIGSCRTMR;
-    sigev.sigev_value.sival_ptr = pNewtimer;
-
-    int iRet = timer_create(CLOCK_REALTIME, &sigev, &scrtimer);
-
-	if(iRet == -1) {
-        lua_settop(L, 0);
-		lua_pushnil(L);
-        return 1;
-    }
-
-    pNewtimer->TimerId = scrtimer;
-
 #if LUA_VERSION_NUM < 503
-	uint32_t ui32Milis = (uint32_t)lua_tonumber(L, 1);// ms
+	pNewtimer->ui64Interval = (uint64_t)lua_tonumber(L, 1);// ms
 #else
-    uint32_t ui32Milis = (uint32_t)lua_tointeger(L, 1);// ms
+    pNewtimer->ui64Interval = (uint64_t)lua_tointeger(L, 1);// ms
 #endif
-
-    uint32_t ui32Sec = ui32Milis / 1000;
-	ui32Milis = (ui32Milis-(ui32Sec*1000))*1000;
-
-    struct itimerspec scrtmrspec;
-    scrtmrspec.it_interval.tv_sec = ui32Sec;
-    scrtmrspec.it_interval.tv_nsec = ui32Milis;
-    scrtmrspec.it_value.tv_sec = ui32Sec;
-    scrtmrspec.it_value.tv_nsec = ui32Milis;
-
-    iRet = timer_settime(scrtimer, 0, &scrtmrspec, NULL);
-    if(iRet == -1) {
-        timer_delete(scrtimer);
-        lua_settop(L, 0);
-		lua_pushnil(L);
-        return 1;
-    }
+	#ifdef __MACH__
+		mach_timespec_t mts;
+		clock_get_time(clsServerManager::csMachClock, &mts);
+		pNewtimer->ui64LastTick = (uint64_t(mts.tv_sec) * 1000) + (uint64_t(mts.tv_nsec) / 1000000);
+	#else
+		timespec ts;
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		pNewtimer->ui64LastTick = (uint64_t(ts.tv_sec) * 1000) + (uint64_t(ts.tv_nsec) / 1000000);
+	#endif
 #endif
 
     lua_settop(L, 0);
@@ -175,19 +148,17 @@ static int AddTimer(lua_State * L) {
 #ifdef _WIN32
     lua_pushlightuserdata(L, (void *)pNewtimer->uiTimerId);
 #else
-    lua_pushlightuserdata(L, (void *)pNewtimer->TimerId);
+    lua_pushlightuserdata(L, (void *)pNewtimer);
 #endif
 
-    pNewtimer->pPrev = NULL;
-
-    if(cur->pTimerList == NULL) {
-        pNewtimer->pNext = NULL;
+    if(clsScriptManager::mPtr->pTimerListS == NULL) {
+        clsScriptManager::mPtr->pTimerListS = pNewtimer;
+        clsScriptManager::mPtr->pTimerListE = pNewtimer;
     } else {
-        pNewtimer->pNext = cur->pTimerList;
-        cur->pTimerList->pPrev = pNewtimer;
+    	pNewtimer->pPrev = clsScriptManager::mPtr->pTimerListE;
+    	clsScriptManager::mPtr->pTimerListE->pNext = pNewtimer;
+    	clsScriptManager::mPtr->pTimerListE = pNewtimer;
     }
-
-    cur->pTimerList = pNewtimer;
 
     return 1;
 }
@@ -214,46 +185,45 @@ static int RemoveTimer(lua_State * L) {
 
 #ifdef _WIN32
     UINT_PTR timer = (UINT_PTR)lua_touserdata(L, 1);
-#elif defined(__sun) && defined(__SVR4)
-	timer_t timer = (timer_t)(size_t)lua_touserdata(L, 1);
 #else
-	timer_t timer = (timer_t)lua_touserdata(L, 1);
+	ScriptTimer * timer = (ScriptTimer *)lua_touserdata(L, 1);
 #endif
 
-    ScriptTimer * tmr = NULL,
-        * next = cur->pTimerList;
-    
-    while(next != NULL) {
-        tmr = next;
-        next = tmr->pNext;
+    ScriptTimer * pCurTmr = NULL,
+        * pNextTmr = clsScriptManager::mPtr->pTimerListS;
+
+    while(pNextTmr != NULL) {
+        pCurTmr = pNextTmr;
+        pNextTmr = pCurTmr->pNext;
 
 #ifdef _WIN32
-        if(tmr->uiTimerId == timer) {
-            KillTimer(NULL, tmr->uiTimerId);
+        if(pCurTmr->uiTimerId == timer) {
+            KillTimer(NULL, pCurTmr->uiTimerId);
 #else
-        if(tmr->TimerId == timer) {
-            timer_delete(tmr->TimerId);
+        if(pCurTmr == timer) {
 #endif
+			if(pCurTmr->pPrev == NULL) {
+				if(pCurTmr->pNext == NULL) {
+					clsScriptManager::mPtr->pTimerListS = NULL;
+					clsScriptManager::mPtr->pTimerListE = NULL;
+				} else {
+					clsScriptManager::mPtr->pTimerListS = pCurTmr->pNext;
+					clsScriptManager::mPtr->pTimerListS->pPrev = NULL;
+				}
+			} else if(pCurTmr->pNext == NULL) {
+				clsScriptManager::mPtr->pTimerListE = pCurTmr->pPrev;
+				clsScriptManager::mPtr->pTimerListE->pNext = NULL;
+			} else {
+				pCurTmr->pPrev->pNext = pCurTmr->pNext;
+				pCurTmr->pNext->pPrev = pCurTmr->pPrev;
+			}
 
-            if(tmr->pPrev == NULL) {
-                if(tmr->pNext == NULL) {
-                    cur->pTimerList = NULL;
-                } else {
-                    tmr->pNext->pPrev = NULL;
-                    cur->pTimerList = tmr->pNext;
-                }
-            } else if(tmr->pNext == NULL) {
-                tmr->pPrev->pNext = NULL;
-            } else {
-                tmr->pPrev->pNext = tmr->pNext;
-                tmr->pNext->pPrev = tmr->pPrev;
+            if(pCurTmr->sFunctionName == NULL) {
+                luaL_unref(L, LUA_REGISTRYINDEX, pCurTmr->iFunctionRef);
             }
 
-            if(tmr->sFunctionName == NULL) {
-                luaL_unref(L, LUA_REGISTRYINDEX, tmr->iFunctionRef);
-            }
+            delete pCurTmr;
 
-            delete tmr;
             break;
         }
     }

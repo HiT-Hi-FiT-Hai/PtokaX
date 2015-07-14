@@ -67,6 +67,8 @@ public:
     Script ** ppScriptTable;
 	User * pActualUser;
 
+	ScriptTimer * pTimerListS, * pTimerListE;
+
     uint8_t ui8ScriptCount, ui8BotsCount;
 
     bool bMoved;

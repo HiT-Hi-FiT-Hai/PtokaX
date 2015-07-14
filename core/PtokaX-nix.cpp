@@ -28,9 +28,6 @@
 #include "SettingManager.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
-#include "regtmrinc.h"
-#include "scrtmrinc.h"
-//---------------------------------------------------------------------------
 static bool bTerminatedBySignal = false;
 static int iSignal = 0;
 //---------------------------------------------------------------------------
@@ -189,8 +186,6 @@ int main(int argc, char* argv[]) {
 	sigaddset(&sst, SIGPIPE);
 	sigaddset(&sst, SIGURG);
 	sigaddset(&sst, SIGALRM);
-	sigaddset(&sst, SIGSCRTMR);
-	sigaddset(&sst, SIGREGTMR);
 	
 	if(clsServerManager::bDaemon == true) {
 	    sigaddset(&sst, SIGHUP);

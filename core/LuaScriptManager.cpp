@@ -41,7 +41,7 @@
 clsScriptManager * clsScriptManager::mPtr = NULL;
 //------------------------------------------------------------------------------
 
-clsScriptManager::clsScriptManager() : pRunningScriptE(NULL), pRunningScriptS(NULL), ppScriptTable(NULL), pActualUser(NULL), ui8ScriptCount(0), ui8BotsCount(0), bMoved(false) {
+clsScriptManager::clsScriptManager() : pRunningScriptE(NULL), pRunningScriptS(NULL), ppScriptTable(NULL), pActualUser(NULL), pTimerListS(NULL), pTimerListE(NULL), ui8ScriptCount(0), ui8BotsCount(0), bMoved(false) {
 #ifdef _WIN32
     clsServerManager::hLuaHeap = ::HeapCreate(HEAP_NO_SERIALIZE, 0x80000, 0);
 #endif

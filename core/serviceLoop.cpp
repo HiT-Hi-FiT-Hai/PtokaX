@@ -56,11 +56,6 @@
     #include "../gui.win/MainWindowPageUsersChat.h"
 #endif
 //---------------------------------------------------------------------------
-#ifndef _WIN32
-	#include "regtmrinc.h"
-	#include "scrtmrinc.h"
-#endif
-//---------------------------------------------------------------------------
 clsServiceLoop * clsServiceLoop::mPtr = NULL;
 #ifdef _WIN32
     UINT_PTR clsServiceLoop::srvLoopTimer = 0;
@@ -76,33 +71,6 @@ clsServiceLoop::AcceptedSocket::AcceptedSocket() :
     pNext(NULL) {
     // ...
 };
-//---------------------------------------------------------------------------
-
-#ifndef _WIN32
-static void RegTimerHandler() {
-    if(clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG] == true && clsSettingManager::mPtr->sTexts[SETTXT_REGISTER_SERVERS] != NULL) {
-		// First destroy old hublist reg thread if any
-        if(clsRegisterThread::mPtr != NULL) {
-            clsRegisterThread::mPtr->Close();
-            clsRegisterThread::mPtr->WaitFor();
-            delete clsRegisterThread::mPtr;
-        }
-        
-        // Create hublist reg thread
-        clsRegisterThread::mPtr = new (std::nothrow) clsRegisterThread();
-        if(clsRegisterThread::mPtr == NULL) {
-        	AppendDebugLog("%s - [MEM] Cannot allocate clsRegisterThread::mPtr in RegTimerHandler\n", 0);
-        	return;
-        }
-        
-        // Setup hublist reg thread
-        clsRegisterThread::mPtr->Setup(clsSettingManager::mPtr->sTexts[SETTXT_REGISTER_SERVERS], clsSettingManager::mPtr->ui16TextsLens[SETTXT_REGISTER_SERVERS]);
-        
-        // Start the hublist reg thread
-    	clsRegisterThread::mPtr->Resume();
-    }
-}
-#endif
 //---------------------------------------------------------------------------
 
 void clsServiceLoop::Looper() {
@@ -148,8 +116,6 @@ clsServiceLoop::clsServiceLoop() : ui64LstUptmTck(clsServerManager::ui64ActualTi
 #ifdef _WIN32
     InitializeCriticalSection(&csAcceptQueue);
 #else
-	iSIG = 0;
-
 	pthread_mutex_init(&mtxAcceptQueue, NULL);
 #endif
 
@@ -163,12 +129,17 @@ clsServiceLoop::clsServiceLoop() : ui64LstUptmTck(clsServerManager::ui64ActualTi
     	exit(EXIT_FAILURE);
     }
 #else
-    sigemptyset(&sst);
-    sigaddset(&sst, SIGSCRTMR);
-    sigaddset(&sst, SIGREGTMR);
-
-    zerotime.tv_sec = 0;
-    zerotime.tv_nsec = 0;
+	#ifdef __MACH__
+		mach_timespec_t mts;
+		clock_get_time(clsServerManager::csMachClock, &mts);
+		ui64LastSecond = mts.tv_sec;
+		ui64LastRegToHublist =  mts.tv_sec;
+	#else
+		timespec ts;
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		ui64LastSecond = ts.tv_sec;
+		ui64LastRegToHublist = ts.tv_sec;
+	#endif
 #endif
 }
 //---------------------------------------------------------------------------
@@ -493,13 +464,31 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 
 void clsServiceLoop::ReceiveLoop() {
 #ifndef _WIN32
-    while((iSIG = sigtimedwait(&sst, &info, &zerotime)) != -1) {
-        if(iSIG == SIGSCRTMR) {
-            ScriptOnTimer((ScriptTimer *)info.si_value.sival_ptr);
-        } else if(iSIG == SIGREGTMR) {
-            RegTimerHandler();
-        }
-    }
+	timespec ts;
+	#ifdef __MACH__
+		mach_timespec_t mts;
+		clock_get_time(clsServerManager::csMachClock, &mts);
+		ts.tv_sec = mts.tv_sec;
+		ts.tv_nsec = mts.tv_nsec;
+	#else
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+	#endif
+
+	if((uint64_t)ts.tv_sec != ui64LastSecond) {
+		ui64LastSecond = ts.tv_sec;
+
+		clsServerManager::OnSecTimer();
+	}
+
+	if(clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG] == true) {
+		if(((uint64_t)ts.tv_sec - ui64LastRegToHublist) >= 901) { // 15 min 1 sec is hublist register interval
+			ui64LastRegToHublist = ts.tv_sec;
+
+			clsServerManager::OnRegTimer();
+		}
+	}
+
+	ScriptOnTimer((uint64_t(ts.tv_sec) * 1000) + (uint64_t(ts.tv_nsec) / 1000000));
 #endif
 
     // Receiving loop for process all incoming data and store in queues

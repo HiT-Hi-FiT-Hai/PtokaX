@@ -26,10 +26,8 @@ class ServerThread;
 
 class clsServerManager {
 public:
-#ifdef _WIN32
-    static void OnSecTimer();
+	static void OnSecTimer();
     static void OnRegTimer();
-#endif
 
     static void Initialize();
 
@@ -56,6 +54,10 @@ public:
 
 #ifdef _WIN32
 	static HANDLE hConsole, hLuaHeap, hPtokaXHeap, hRecvHeap, hSendHeap;
+#endif
+
+#ifdef __MACH__
+	static clock_serv_t csMachClock;
 #endif
 
     static double daCpuUsage[60], dCpuUsage;

@@ -86,10 +86,14 @@
 	#include <io.h>
 	#include <Iphlpapi.h>
 #endif
+#ifdef __MACH__
+	#include <mach/clock.h>
+	#include <mach/mach.h>
+#endif 
 #include "pxstring.h"
 //---------------------------------------------------------------------------
 #define PtokaXVersionString "0.5.1.0"
-#define BUILD_NUMBER "502"
+#define BUILD_NUMBER "507"
 
 #ifdef _WIN32
     #define PRIu64 "I64u"

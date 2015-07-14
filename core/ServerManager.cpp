@@ -58,10 +58,6 @@
     #include "../gui.win/MainWindowPageScripts.h"
 #endif
 //---------------------------------------------------------------------------
-#ifndef _WIN32
-    #include "regtmrinc.h"
-#endif
-//---------------------------------------------------------------------------
 #ifdef _WITH_SQLITE
 	#include "DB-SQLite.h"
 #elif _WITH_POSTGRES
@@ -79,9 +75,10 @@ static ServerThread * pServersE = NULL;
 
 	HANDLE clsServerManager::hConsole = NULL, clsServerManager::hLuaHeap = NULL, clsServerManager::hPtokaXHeap = NULL, clsServerManager::hRecvHeap = NULL, clsServerManager::hSendHeap = NULL;
 	string clsServerManager::sLuaPath = "", clsServerManager::sOS = "";
-#else
-    static int SIGSECTMR = SIGRTMIN+1;
-	static timer_t sectimer, regtimer;
+#endif
+
+#ifdef __MACH__
+	clock_serv_t clsServerManager::csMachClock;
 #endif
 
 string clsServerManager::sPath = "", clsServerManager::sScriptPath = "", clsServerManager::sTitle = "";
@@ -129,8 +126,8 @@ char clsServerManager::sHubIP[16], clsServerManager::sHubIP6[40];
 uint8_t clsServerManager::ui8SrCntr = 0, clsServerManager::ui8MinTick = 0;
 //---------------------------------------------------------------------------
 
-#ifdef _WIN32
 void clsServerManager::OnSecTimer() {
+#ifdef _WIN32
 	FILETIME tmpa, tmpb, kernelTimeFT, userTimeFT;
 	GetProcessTimes(GetCurrentProcess(), &tmpa, &tmpb, &kernelTimeFT, &userTimeFT);
 	int64_t kernelTime = kernelTimeFT.dwLowDateTime | (((int64_t)kernelTimeFT.dwHighDateTime) << 32);
@@ -139,7 +136,6 @@ void clsServerManager::OnSecTimer() {
 	dCpuUsage = dcpuSec - daCpuUsage[ui8MinTick];
 	daCpuUsage[ui8MinTick] = dcpuSec;
 #else
-static void SecTimerHandler(int /*sig*/) {
     struct rusage rs;
 
     getrusage(RUSAGE_SELF, &rs);
@@ -183,39 +179,38 @@ static void SecTimerHandler(int /*sig*/) {
 }
 //---------------------------------------------------------------------------
 
-#ifdef _WIN32
-    void clsServerManager::OnRegTimer() {
-	    if(clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG] == true && clsSettingManager::mPtr->sTexts[SETTXT_REGISTER_SERVERS] != NULL) {
-			// First destroy old hublist reg thread if any
-	        if(clsRegisterThread::mPtr != NULL) {
-	            clsRegisterThread::mPtr->Close();
-	            clsRegisterThread::mPtr->WaitFor();
-	            delete clsRegisterThread::mPtr;
-	            clsRegisterThread::mPtr = NULL;
-	        }
-	        
-	        // Create hublist reg thread
-	        clsRegisterThread::mPtr = new (std::nothrow) clsRegisterThread();
-	        if(clsRegisterThread::mPtr == NULL) {
-	        	AppendDebugLog("%s - [MEM] Cannot allocate clsRegisterThread::mPtr in ServerOnRegTimer\n", 0);
-	        	return;
-	        }
-	        
-	        // Setup hublist reg thread
-	        clsRegisterThread::mPtr->Setup(clsSettingManager::mPtr->sTexts[SETTXT_REGISTER_SERVERS], clsSettingManager::mPtr->ui16TextsLens[SETTXT_REGISTER_SERVERS]);
-	        
-	        // Start the hublist reg thread
-	    	clsRegisterThread::mPtr->Resume();
+void clsServerManager::OnRegTimer() {
+	if(clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG] == true && clsSettingManager::mPtr->sTexts[SETTXT_REGISTER_SERVERS] != NULL) {
+		// First destroy old hublist reg thread if any
+	    if(clsRegisterThread::mPtr != NULL) {
+	        clsRegisterThread::mPtr->Close();
+	        clsRegisterThread::mPtr->WaitFor();
+	        delete clsRegisterThread::mPtr;
+	        clsRegisterThread::mPtr = NULL;
 	    }
+	        
+	    // Create hublist reg thread
+	    clsRegisterThread::mPtr = new (std::nothrow) clsRegisterThread();
+	    if(clsRegisterThread::mPtr == NULL) {
+	        AppendDebugLog("%s - [MEM] Cannot allocate clsRegisterThread::mPtr in ServerOnRegTimer\n", 0);
+	        return;
+	    }
+	        
+	    // Setup hublist reg thread
+	    clsRegisterThread::mPtr->Setup(clsSettingManager::mPtr->sTexts[SETTXT_REGISTER_SERVERS], clsSettingManager::mPtr->ui16TextsLens[SETTXT_REGISTER_SERVERS]);
+	        
+	    // Start the hublist reg thread
+	    clsRegisterThread::mPtr->Resume();
 	}
-#endif
+}
 //---------------------------------------------------------------------------
 
 void clsServerManager::Initialize() {
     setlocale(LC_ALL, "");
-#ifdef _WIN32
+
 	time_t acctime;
 	time(&acctime);
+#ifdef _WIN32
 	srand((uint32_t)acctime);
 
 	WSADATA wsaData;
@@ -249,8 +244,6 @@ void clsServerManager::Initialize() {
 
     SetupOsVersion();
 #else
-    time_t acctime;
-    time(&acctime);
     srandom(acctime);
 
 	if(DirExist((clsServerManager::sPath+"/logs").c_str()) == false) {
@@ -300,6 +293,12 @@ void clsServerManager::Initialize() {
     CreateGlobalBuffer();
 
     CheckForIPv6();
+
+#ifdef __MACH__
+	mach_port_t mpMachHost = mach_host_self();
+	host_get_clock_service(mpMachHost, SYSTEM_CLOCK, &clsServerManager::csMachClock);
+	mach_port_deallocate(mach_task_self(), mpMachHost);
+#endif
 
 	clsReservedNicksManager::mPtr = new (std::nothrow) clsReservedNicksManager();
 	if(clsReservedNicksManager::mPtr == NULL) {
@@ -428,58 +427,12 @@ void clsServerManager::Initialize() {
     }
 
     regtimer = 0;
-#else
-    struct sigaction sigactsec;
-    sigactsec.sa_handler = SecTimerHandler;
-    sigemptyset(&sigactsec.sa_mask);
-    sigactsec.sa_flags = 0;
-
-    if(sigaction(SIGSECTMR, &sigactsec, NULL) == -1) {
-		AppendDebugLog("%s - [ERR] Cannot create sigaction SIGSECTMR in ServerInitialize\n", 0);
-        exit(EXIT_FAILURE);
-    }
-
-    struct sigevent sigevsec;
-    sigevsec.sigev_notify = SIGEV_SIGNAL;
-    sigevsec.sigev_signo = SIGSECTMR;
-
-    int iRet = timer_create(CLOCK_REALTIME, &sigevsec, &sectimer);
-    
-	if(iRet == -1) {
-		AppendDebugLog("%s - [ERR] Cannot create sectimer in ServerInitialize\n", 0);
-        exit(EXIT_FAILURE);
-    }
-
-    struct sigevent sigevreg;
-    sigevreg.sigev_notify = SIGEV_SIGNAL;
-    sigevreg.sigev_signo = SIGREGTMR;
-
-    iRet = timer_create(CLOCK_REALTIME, &sigevreg, &regtimer);
-    
-	if(iRet == -1) {
-		AppendDebugLog("%s - [ERR] Cannot create regtimer in ServerInitialize\n", 0);
-        exit(EXIT_FAILURE);
-    }
 #endif
 }
 //---------------------------------------------------------------------------
 
 bool clsServerManager::Start() {
     time(&tStartTime);
-
-#ifndef _WIN32
-    struct itimerspec sectmrspec;
-    sectmrspec.it_interval.tv_sec = 1;
-    sectmrspec.it_interval.tv_nsec = 0;
-    sectmrspec.it_value.tv_sec = 1;
-    sectmrspec.it_value.tv_nsec = 0;
-
-    int iRet = timer_settime(sectimer, 0, &sectmrspec, NULL);
-    if(iRet == -1) {
-		AppendDebugLog("%s - [ERR] Cannot start sectimer in ServerStart\n", 0);
-    	exit(EXIT_FAILURE);
-    }
-#endif
 
     clsSettingManager::mPtr->UpdateAll();
 
@@ -754,20 +707,10 @@ bool clsServerManager::Start() {
 		regtimer = SetTimer(NULL, 0, 901000, NULL);
 
         if(regtimer == 0) {
-#else
-        struct itimerspec regtmrspec;
-        regtmrspec.it_interval.tv_sec = 901;
-        regtmrspec.it_interval.tv_nsec = 0;
-        regtmrspec.it_value.tv_sec = 901;
-        regtmrspec.it_value.tv_nsec = 0;
-    
-        iRet = timer_settime(regtimer, 0, &regtmrspec, NULL);
-        if(iRet == -1) {
-#endif
-
 			AppendDebugLog("%s - [ERR] Cannot start regtimer in ServerStart\n", 0);
         	exit(EXIT_FAILURE);
         }
+#endif
     }
 
     return true;
@@ -777,19 +720,6 @@ bool clsServerManager::Start() {
 void clsServerManager::Stop() {
 #ifdef _BUILD_GUI
     clsMainWindow::mPtr->EnableStartButton(FALSE);
-#endif
-#ifndef _WIN32
-    struct itimerspec sectmrspec;
-    sectmrspec.it_interval.tv_sec = 0;
-    sectmrspec.it_interval.tv_nsec = 0;
-    sectmrspec.it_value.tv_sec = 0;
-    sectmrspec.it_value.tv_nsec = 0;
-
-    int iRet = timer_settime(sectimer, 0, &sectmrspec, NULL);
-    if(iRet == -1) {
-		AppendDebugLog("%s - [ERR] Cannot stop sectimer in ServerStop\n", 0);
-    	exit(EXIT_FAILURE);
-    }
 #endif
 
     char msg[1024];
@@ -802,19 +732,10 @@ void clsServerManager::Stop() {
 	if(clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG] == true) {
 #ifdef _WIN32
         if(KillTimer(NULL, regtimer) == 0) {
-#else
-        struct itimerspec regtmrspec;
-        regtmrspec.it_interval.tv_sec = 0;
-        regtmrspec.it_interval.tv_nsec = 0;
-        regtmrspec.it_value.tv_sec = 0;
-        regtmrspec.it_value.tv_nsec = 0;
-    
-        iRet = timer_settime(regtimer, 0, &regtmrspec, NULL);
-        if(iRet == -1) {
-#endif
     		AppendDebugLog("%s - [ERR] Cannot stop regtimer in ServerStop\n", 0);
         	exit(EXIT_FAILURE);
         }
+#endif
     }
 
     ServerThread * cur = NULL,
@@ -949,9 +870,6 @@ void clsServerManager::FinalStop(const bool &bDeleteServiceLoop) {
 void clsServerManager::FinalClose() {
 #ifdef _WIN32
     KillTimer(NULL, sectimer);
-#else
-    timer_delete(sectimer);
-    timer_delete(regtimer);
 #endif
 
 	clsBanManager::mPtr->Save(true);
@@ -999,6 +917,10 @@ void clsServerManager::FinalClose() {
 
 #ifdef _BUILD_GUI
     clsMainWindow::mPtr->SaveGuiSettings();
+#endif
+
+#ifdef __MACH__
+	mach_port_deallocate(mach_task_self(), clsServerManager::csMachClock);
 #endif
 
     DeleteGlobalBuffer();
@@ -1146,35 +1068,27 @@ void clsServerManager::UpdateAutoRegState() {
         regtimer = SetTimer(NULL, 0, 901000, NULL);
 
         if(regtimer == 0) {
-#else
-        struct itimerspec regtmrspec;
-        regtmrspec.it_interval.tv_sec = 901;
-        regtmrspec.it_interval.tv_nsec = 0;
-        regtmrspec.it_value.tv_sec = 901;
-        regtmrspec.it_value.tv_nsec = 0;
-    
-        int iRet = timer_settime(regtimer, 0, &regtmrspec, NULL);
-        if(iRet == -1) {
-#endif
 			AppendDebugLog("%s - [ERR] Cannot start regtimer in ServerUpdateAutoRegState\n", 0);
             exit(EXIT_FAILURE);
         }
+#else
+	#ifdef __MACH__
+		mach_timespec_t mts;
+		clock_get_time(clsServerManager::csMachClock, &mts);
+		clsServiceLoop::mPtr->ui64LastRegToHublist = mts.tv_sec;
+	#else
+		timespec ts;
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		clsServiceLoop::mPtr->ui64LastRegToHublist = ts.tv_sec;
+	#endif
+#endif
     } else {
 #ifdef _WIN32
         if(KillTimer(NULL, regtimer) == 0) {
-#else
-        struct itimerspec regtmrspec;
-        regtmrspec.it_interval.tv_sec = 0;
-        regtmrspec.it_interval.tv_nsec = 0;
-        regtmrspec.it_value.tv_sec = 0;
-        regtmrspec.it_value.tv_nsec = 0;
-    
-        int iRet = timer_settime(regtimer, 0, &regtmrspec, NULL);
-        if(iRet == -1) {
-#endif
     		AppendDebugLog("%s - [ERR] Cannot stop regtimer in ServerUpdateAutoRegState\n", 0);
         	exit(EXIT_FAILURE);
         }
+#endif
     }
 }
 //---------------------------------------------------------------------------

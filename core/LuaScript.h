@@ -48,14 +48,17 @@ struct ScriptTimer {
 #ifdef _WIN32
     UINT_PTR uiTimerId;
 #else
-	timer_t TimerId;
+	uint64_t ui64Interval;
+	uint64_t ui64LastTick;
 #endif
+
+	lua_State * pLua;
 
     char * sFunctionName;
 
-    int iFunctionRef;
-
     ScriptTimer * pPrev, * pNext;
+
+    int iFunctionRef;
 
     ScriptTimer();
     ~ScriptTimer();
@@ -64,9 +67,9 @@ struct ScriptTimer {
     const ScriptTimer& operator=(const ScriptTimer&);
 
 #ifdef _WIN32
-    static ScriptTimer * CreateScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &szLen, const int &iRef);
+    static ScriptTimer * CreateScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &szLen, const int &iRef, lua_State * pLuaState);
 #else
-	static ScriptTimer * CreateScriptTimer(char * sFunctName, const size_t &szLen, const int &iRef);
+	static ScriptTimer * CreateScriptTimer(char * sFunctName, const size_t &szLen, const int &iRef, lua_State * pLuaState);
 #endif
 };
 //------------------------------------------------------------------------------
@@ -93,8 +96,6 @@ struct Script {
     Script * pPrev, * pNext;
 
     ScriptBot * pBotList;
-
-    ScriptTimer * pTimerList;
 
 	uint16_t ui16Functions;
 
@@ -128,7 +129,7 @@ void ScriptError(Script * cur);
 #ifdef _WIN32
     void ScriptOnTimer(const UINT_PTR &uiTimerId);
 #else
-	void ScriptOnTimer(ScriptTimer * AccTimer);
+	void ScriptOnTimer(const uint64_t &ui64ActualMillis);
 #endif
 
 int ScriptTraceback(lua_State * L);

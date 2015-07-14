@@ -54,13 +54,7 @@ private:
 	AcceptedSocket * pAcceptedSocketsS, * pAcceptedSocketsE;
 
 #ifndef _WIN32
-    int iSIG;
-
-    siginfo_t info;
-
-    sigset_t sst;
-
-    struct timespec zerotime;
+    uint64_t ui64LastSecond;
 #endif
 
 	char msg[1024];
@@ -78,6 +72,8 @@ public:
 
 #ifdef _WIN32
     static UINT_PTR srvLoopTimer;
+#else
+	uint64_t ui64LastRegToHublist;
 #endif
 
     double dLoggedUsers, dActualSrvLoopLogins;
