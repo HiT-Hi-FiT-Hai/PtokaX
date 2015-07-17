@@ -44,6 +44,9 @@
 //---------------------------------------------------------------------------
 clsRegManager * clsRegManager::mPtr = NULL;
 //---------------------------------------------------------------------------
+static const char sPtokaXRegiteredUsers[] = "PtokaX Registered Users";
+static const size_t szPtokaXRegiteredUsersLen = sizeof(sPtokaXRegiteredUsers)-1;
+//---------------------------------------------------------------------------
 
 RegUser::RegUser() : sNick(NULL), pPrev(NULL), pNext(NULL), pHashTablePrev(NULL), pHashTableNext(NULL), tLastBadPass(0), ui32Hash(0), ui16Profile(0),
 	ui8BadPassCount(0), bPassHash(false){
@@ -601,7 +604,7 @@ void clsRegManager::Load(void) {
     }
 
     // Check header if we have correct file
-    if(pxbRegs.ui16ItemLengths[0] != 23 || strncmp((char *)pxbRegs.pItemDatas[0], "PtokaX Registered Users", 23) != 0) {
+    if(pxbRegs.ui16ItemLengths[0] != szPtokaXRegiteredUsersLen || strncmp((char *)pxbRegs.pItemDatas[0], sPtokaXRegiteredUsers, szPtokaXRegiteredUsersLen) != 0) {
         return;
     }
 
@@ -686,7 +689,7 @@ void clsRegManager::LoadXML() {
             int imsgLen = sprintf(msg, "Error loading file RegisteredUsers.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
 			CheckSprintf(imsgLen, 2048, "clsRegManager::LoadXML");
 #ifdef _BUILD_GUI
-			::MessageBox(NULL, msg, clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
+			::MessageBox(NULL, msg, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
 			AppendLog(msg);
 #endif
@@ -729,7 +732,7 @@ void clsRegManager::LoadXML() {
 					CheckSprintf(imsgLen, 1024, "clsRegManager::Load");
 
 #ifdef _BUILD_GUI
-					::MessageBox(NULL, msg, clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+					::MessageBox(NULL, msg, g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 #else
 					AppendLog(msg);
 #endif
@@ -753,7 +756,7 @@ void clsRegManager::LoadXML() {
 					CheckSprintf(imsgLen, 1024, "clsRegManager::Load1");
 
 #ifdef _BUILD_GUI
-					::MessageBox(NULL, msg, clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+					::MessageBox(NULL, msg, g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 #else
 					AppendLog(msg);
 #endif
@@ -795,8 +798,8 @@ void clsRegManager::Save(const bool &bSaveOnChange/* = false*/, const bool &bSav
     // Write file header
     pxbRegs.sItemIdentifiers[0][0] = 'F';
     pxbRegs.sItemIdentifiers[0][1] = 'I';
-    pxbRegs.ui16ItemLengths[0] = 23;
-    pxbRegs.pItemDatas[0] = (void *)"PtokaX Registered Users";
+    pxbRegs.ui16ItemLengths[0] = (uint16_t)szPtokaXRegiteredUsersLen;
+    pxbRegs.pItemDatas[0] = (void *)sPtokaXRegiteredUsers;
     pxbRegs.ui8ItemValues[0] = PXBReader::PXB_STRING;
 
     pxbRegs.sItemIdentifiers[1][0] = 'F';

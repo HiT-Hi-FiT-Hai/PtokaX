@@ -190,7 +190,7 @@ void DBMySQL::UpdateRecord(User * pUser) {
 	);
 
 	if(mysql_query(pDBHandle, sSQLCommand) != 0) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL insert/update record failed: ")+mysql_error(pDBHandle));
+		clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL insert/update record failed: %s", mysql_error(pDBHandle));
 
 		return;
 	}
@@ -201,20 +201,20 @@ void DBMySQL::UpdateRecord(User * pUser) {
 bool DBMySQL::SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pResult, uint64_t &ui64Rows) {
 	unsigned int uiCount = mysql_num_fields(pResult);
 	if(uiCount != 8) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL mysql_num_fields wrong fields count: ")+string(uiCount));
+		clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL mysql_num_fields wrong fields count: %u", uiCount);
 		return false;
 	}
 
 	if(ui64Rows == 1) { // When we have only one result then we send whole info about user.
 		MYSQL_ROW mRow = mysql_fetch_row(pResult);
 		if(mRow == NULL) {
-			clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL mysql_fetch_row failed: ")+mysql_error(pDBHandle));
+			clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL mysql_fetch_row failed: %s", mysql_error(pDBHandle));
 			return false;
 		}
 
 		unsigned long * pLengths = mysql_fetch_lengths(pResult);
 		if(pLengths == NULL) {
-			clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL mysql_fetch_lengths failed: ")+mysql_error(pDBHandle));
+			clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL mysql_fetch_lengths failed: %s", mysql_error(pDBHandle));
 			return false;
 		}
 
@@ -228,7 +228,7 @@ bool DBMySQL::SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pR
     	}
 
 		if(pLengths[0] <= 0 || pLengths[0] > 64) {
-			clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid nick length: "+string((uint64_t)pLengths[0]));
+			clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL search returned invalid nick length: " PRIu64, (uint64_t)pLengths[0]);
 			return false;
 		}
 
@@ -351,12 +351,12 @@ bool DBMySQL::SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pR
             }
 
 			if(pLengths[2] <= 0 || pLengths[2] > 39) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid ip length: "+string((uint64_t)pLengths[2]));
+				clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL search returned invalid ip length: " PRIu64, (uint64_t)pLengths[2]);
 				return false;
 			}
 
 			if(pLengths[3] <= 0 || pLengths[3] > 24) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid share length: "+string((uint64_t)pLengths[3]));
+				clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL search returned invalid share length: " PRIu64, (uint64_t)pLengths[3]);
 				return false;
 			}
 
@@ -370,7 +370,7 @@ bool DBMySQL::SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pR
 
             if(mRow[4] != NULL) {
 				if(pLengths[4] > 192) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid description length: "+string((uint64_t)pLengths[4]));
+					clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL search returned invalid description length: " PRIu64, (uint64_t)pLengths[4]);
 					return  false;
 				}
 
@@ -385,7 +385,7 @@ bool DBMySQL::SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pR
 
             if(mRow[5] != NULL) {
 				if(pLengths[5] > 192) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid tag length: "+string((uint64_t)pLengths[5]));
+					clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL search returned invalid tag length: " PRIu64, (uint64_t)pLengths[5]);
 					return false;
 				}
 
@@ -400,7 +400,7 @@ bool DBMySQL::SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pR
                     
             if(mRow[6] != NULL) {
 				if(pLengths[6] > 32) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid connection length: "+string((uint64_t)pLengths[6]));
+					clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL search returned invalid connection length: " PRIu64, (uint64_t)pLengths[6]);
 					return false;
 				}
 
@@ -415,7 +415,7 @@ bool DBMySQL::SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pR
 
             if(mRow[7] != NULL) {
 				if(pLengths[7] > 96) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid email length: "+string((uint64_t)pLengths[7]));
+					clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL search returned invalid email length: " PRIu64, (uint64_t)pLengths[7]);
 					return false;
 				}
 
@@ -467,23 +467,23 @@ bool DBMySQL::SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pR
 		for(uint64_t ui64ActualRow = 0; ui64ActualRow < ui64Rows; ui64ActualRow++) {
 			MYSQL_ROW mRow = mysql_fetch_row(pResult);
 			if(mRow == NULL) {
-				clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL mysql_fetch_row failed: ")+mysql_error(pDBHandle));
+				clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL mysql_fetch_row failed: %s", mysql_error(pDBHandle));
 				return false;
 			}
 	
 			unsigned long * pLengths = mysql_fetch_lengths(pResult);
 			if(pLengths == NULL) {
-				clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL mysql_fetch_lengths failed: ")+mysql_error(pDBHandle));
+				clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL mysql_fetch_lengths failed: %s", mysql_error(pDBHandle));
 				return false;
 			}
 
 			if(pLengths[0] <= 0 || pLengths[0] > 64) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid nick length: "+string((uint64_t)pLengths[0]));
+				clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL search returned invalid nick length: " PRIu64, (uint64_t)pLengths[0]);
 				return false;
 			}
 
 			if(pLengths[2] <= 0 || pLengths[2] > 39) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBMySQL search returned invalid ip length: "+string((uint64_t)pLengths[2]));
+				clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL search returned invalid ip length: " PRIu64, (uint64_t)pLengths[2]);
 				return false;
 			}
 
@@ -525,7 +525,7 @@ bool DBMySQL::SearchNick(char * sNick, const uint8_t &ui8NickLen, User * pUser, 
 	sprintf(sSQLCommand, "SELECT nick, UNIX_TIMESTAMP(last_updated), ip_address, share, description, tag, connection, email FROM userinfo WHERE LOWER(nick) LIKE LOWER('%s') ORDER BY last_updated DESC LIMIT 50", sEscapedNick);
 
 	if(mysql_query(pDBHandle, sSQLCommand) != 0) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL search for nick failed: ")+mysql_error(pDBHandle));
+		clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL search for nick failed: %s", mysql_error(pDBHandle));
 
 		return false;
 	}
@@ -533,7 +533,7 @@ bool DBMySQL::SearchNick(char * sNick, const uint8_t &ui8NickLen, User * pUser, 
 	MYSQL_RES * pResult = mysql_store_result(pDBHandle);
 
 	if(pResult == NULL) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL search for nick store result failed: ")+mysql_error(pDBHandle));
+		clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL search for nick store result failed: %s", mysql_error(pDBHandle));
 
 		return false;
 	}
@@ -570,7 +570,7 @@ bool DBMySQL::SearchIP(char * sIP, User * pUser, const bool &bFromPM) {
 	sprintf(sSQLCommand, "SELECT nick, UNIX_TIMESTAMP(last_updated), ip_address, share, description, tag, connection, email FROM userinfo WHERE ip_address LIKE '%s' ORDER BY last_updated DESC LIMIT 50", sEscapedIP);
 
 	if(mysql_query(pDBHandle, sSQLCommand) != 0) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL search for IP failed: ")+mysql_error(pDBHandle));
+		clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL search for IP failed: %s", mysql_error(pDBHandle));
 
 		return false;
 	}
@@ -584,7 +584,7 @@ bool DBMySQL::SearchIP(char * sIP, User * pUser, const bool &bFromPM) {
 	MYSQL_RES * pResult = mysql_store_result(pDBHandle);
 
 	if(pResult == NULL) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL search for IP store result failed: ")+mysql_error(pDBHandle));
+		clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL search for IP store result failed: %s", mysql_error(pDBHandle));
 
 		return false;
 	}
@@ -613,7 +613,7 @@ void DBMySQL::RemoveOldRecords(const uint16_t &ui16Days) {
 	sprintf(sSQLCommand, "DELETE FROM userinfo WHERE last_updated < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL %hu DAY))", ui16Days);
 
 	if(mysql_query(pDBHandle, sSQLCommand) != 0) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL remove old records failed: ")+mysql_error(pDBHandle));
+		clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL remove old records failed: %s", mysql_error(pDBHandle));
 
 		return;
 	}
@@ -621,7 +621,7 @@ void DBMySQL::RemoveOldRecords(const uint16_t &ui16Days) {
 	uint64_t ui64Rows = (uint64_t)mysql_affected_rows(pDBHandle);
 
 	if(ui64Rows != 0) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBMySQL removed old records: ")+string(ui64Rows));
+		clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBMySQL removed old records: " PRIu64, ui64Rows);
 	}
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

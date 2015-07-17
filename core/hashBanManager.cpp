@@ -1107,7 +1107,7 @@ void clsBanManager::Load(void) {
             int imsgLen = sprintf(msg, "Error loading file BanList.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
 			CheckSprintf(imsgLen, 2048, "clsBanManager::Load");
 #ifdef _BUILD_GUI
-			::MessageBox(NULL, msg, clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
+			::MessageBox(NULL, msg, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
 			AppendLog(msg);
 #endif

@@ -181,7 +181,7 @@ void DBPostgreSQL::UpdateRecord(User * pUser) {
 	);
 
 	if(PQresultStatus(pResult) != PGRES_COMMAND_OK) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBPostgreSQL update record failed: ")+PQresultErrorMessage(pResult));
+		clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBPostgreSQL update record failed: %s", PQresultErrorMessage(pResult));
 	}
 
 	char * sRows = PQcmdTuples(pResult);
@@ -217,7 +217,7 @@ void DBPostgreSQL::UpdateRecord(User * pUser) {
 	);
 
 	if(PQresultStatus(pResult) != PGRES_COMMAND_OK) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBPostgreSQL insert record failed: ")+PQresultErrorMessage(pResult));
+		clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBPostgreSQL insert record failed: %s", PQresultErrorMessage(pResult));
 	}
 
 	PQclear(pResult);
@@ -238,7 +238,7 @@ bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int
 
 		int iLength = PQgetlength(pResult, 0, 0);
 		if(iLength <= 0 || iLength > 64) {
-			clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid nick length: "+string(iLength));
+			clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBPostgreSQL search returned invalid nick length: %d", iLength);
 			return false;
 		}
 
@@ -363,13 +363,13 @@ bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int
 
 			iLength = PQgetlength(pResult, 0, 2);
 			if(iLength <= 0 || iLength > 39) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid ip length: "+string(iLength));
+				clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBPostgreSQL search returned invalid ip length: %d", iLength);
 				return false;
 			}
 
 			iLength = PQgetlength(pResult, 0, 3);
 			if(iLength <= 0 || iLength > 24) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid share length: "+string(iLength));
+				clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBPostgreSQL search returned invalid share length: %d", iLength);
 				return false;
 			}
 
@@ -384,7 +384,7 @@ bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int
             if(PQgetisnull(pResult, 0, 4) == 0) {
 				iLength = PQgetlength(pResult, 0, 4);
 				if(iLength > 192) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid description length: "+string(iLength));
+					clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBPostgreSQL search returned invalid description length: %d", iLength);
 					return  false;
 				}
 
@@ -400,7 +400,7 @@ bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int
             if(PQgetisnull(pResult, 0, 5) == 0) {
 				iLength = PQgetlength(pResult, 0, 5);
 				if(iLength > 192) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid tag length: "+string(iLength));
+					clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBPostgreSQL search returned invalid tag length: %d", iLength);
 					return false;
 				}
 
@@ -416,7 +416,7 @@ bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int
             if(PQgetisnull(pResult, 0, 6) == 0) {
 				iLength = PQgetlength(pResult, 0, 6);
 				if(iLength > 32) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid connection length: "+string(iLength));
+					clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBPostgreSQL search returned invalid connection length: %d", iLength);
 					return false;
 				}
 
@@ -432,7 +432,7 @@ bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int
             if(PQgetisnull(pResult, 0, 7) == 0) {
 				iLength = PQgetlength(pResult, 0, 7);
 				if(iLength > 96) {
-					clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid email length: "+string(iLength));
+					clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBPostgreSQL search returned invalid email length: %d", iLength);
 					return false;
 				}
 
@@ -484,13 +484,13 @@ bool SendQueryResults(User * pUser, const bool &bFromPM, PGresult * pResult, int
 		for(int iActualTuple = 0; iActualTuple < iTuples; iActualTuple++) {
 			int iLength = PQgetlength(pResult, iActualTuple, 0);
 			if(iLength <= 0 || iLength > 64) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid nick length: "+string(iLength));
+				clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBPostgreSQL search returned invalid nick length: %d", iLength);
 				return false;
 			}
 
 			iLength = PQgetlength(pResult, iActualTuple, 2);
 			if(iLength <= 0 || iLength > 39) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] DBPostgreSQL search returned invalid ip length: "+string(iLength));
+				clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBPostgreSQL search returned invalid ip length: %d", iLength);
 				return false;
 			}
 
@@ -533,7 +533,7 @@ bool DBPostgreSQL::SearchNick(char * sNick, const uint8_t &ui8NickLen, User * pU
 	PGresult * pResult = PQexecParams(pDBConn, "SELECT nick, EXTRACT(EPOCH FROM last_updated), ip_address, share, description, tag, connection, email FROM userinfo WHERE LOWER(nick) LIKE LOWER($1) ORDER BY last_updated DESC LIMIT 50;", 1, NULL, paramValues, NULL, NULL, 0);
 
 	if(PQresultStatus(pResult) != PGRES_TUPLES_OK) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBPostgreSQL search for nick failed: ")+PQresultErrorMessage(pResult));
+		clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBPostgreSQL search for nick failed: %s", PQresultErrorMessage(pResult));
 		PQclear(pResult);
 
 		return false;
@@ -567,7 +567,7 @@ bool DBPostgreSQL::SearchIP(char * sIP, User * pUser, const bool &bFromPM) {
 	PGresult * pResult = PQexecParams(pDBConn, "SELECT nick, EXTRACT(EPOCH FROM last_updated), ip_address, share, description, tag, connection, email FROM userinfo WHERE ip_address LIKE $1 ORDER BY last_updated DESC LIMIT 50;", 1, NULL, paramValues, NULL, NULL, 0);
 
 	if(PQresultStatus(pResult) != PGRES_TUPLES_OK) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBPostgreSQL search for IP failed: ")+PQresultErrorMessage(pResult));
+		clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBPostgreSQL search for IP failed: %s", PQresultErrorMessage(pResult));
 		PQclear(pResult);
 
 		return false;
@@ -617,14 +617,14 @@ void DBPostgreSQL::RemoveOldRecords(const uint16_t &ui16Days) {
 	PGresult * pResult = PQexecParams(pDBConn, "DELETE FROM userinfo WHERE last_updated < to_timestamp($1);", 1, NULL, paramValues, NULL, NULL, 0);
 
 	if(PQresultStatus(pResult) != PGRES_COMMAND_OK) {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBPostgreSQL remove old records failed: ")+PQresultErrorMessage(pResult));
+		clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBPostgreSQL remove old records failed: %s", PQresultErrorMessage(pResult));
 	}
 
 	char * sRows = PQcmdTuples(pResult);
 
 	/*	When non-zero rows was affected then send info to UDP debug */
 	if(sRows[0] != '0' || sRows[1] != '\0') {
-		clsUdpDebug::mPtr->Broadcast(string("[LOG] DBPostgreSQL removed old records: ")+sRows);
+		clsUdpDebug::mPtr->BroadcastFormat("[LOG] DBPostgreSQL removed old records: %s", sRows);
 	}
 
 	PQclear(pResult);

@@ -48,12 +48,6 @@ static void SigHandler(int sig) {
 //---------------------------------------------------------------------------
 
 int main(int argc, char* argv[]) {
-	clsServerManager::sTitle = "PtokaX DC Hub " + string(PtokaXVersionString);
-	
-#ifdef _DEBUG
-	clsServerManager::sTitle += " [debug]";
-#endif
-
 	char * sPidFile = NULL;
 
 	for(int i = 0; i < argc; i++) {
@@ -87,7 +81,7 @@ int main(int argc, char* argv[]) {
 	            }
             }
 	    } else if(strcasecmp(argv[i], "-v") == 0) {
-	        printf("%s built on %s %s\n", clsServerManager::sTitle.c_str(), __DATE__, __TIME__);
+	        printf("%s built on %s %s\n", g_sPtokaXTitle, __DATE__, __TIME__);
 	        return EXIT_SUCCESS;
 	    } else if(strcasecmp(argv[i], "-h") == 0) {
 	        printf("PtokaX [-d] [-c <configdir>] [-p <pidfile>] [-v]\n");
@@ -124,7 +118,7 @@ int main(int argc, char* argv[]) {
 	}
 	
 	if(clsServerManager::bDaemon == true) {
-	    printf("Starting %s as daemon using %s as config directory.\n", clsServerManager::sTitle.c_str(), clsServerManager::sPath.c_str());
+	    printf("Starting %s as daemon using %s as config directory.\n", g_sPtokaXTitle, clsServerManager::sPath.c_str());
 	
 	    pid_t pid1 = fork();
 	    if(pid1 == -1) {
@@ -228,7 +222,7 @@ int main(int argc, char* argv[]) {
 	    }
 	    return EXIT_FAILURE;
 	} else if(clsServerManager::bDaemon == false) {
-	    printf("%s running...\n", clsServerManager::sTitle.c_str());
+	    printf("%s running...\n", g_sPtokaXTitle);
 	}
 
     struct timespec sleeptime;
@@ -283,7 +277,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	if(clsServerManager::bDaemon == false) {
-	    printf("%s ending...\n", clsServerManager::sTitle.c_str());
+	    printf("%s ending...\n", g_sPtokaXTitle);
 	} else if(sPidFile != NULL) {
 		unlink(sPidFile);
 	}

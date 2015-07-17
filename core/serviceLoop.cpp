@@ -217,15 +217,12 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
     int32_t bufsize = 8192;
     if(setsockopt(AccptSocket->s, SOL_SOCKET, SO_RCVBUF, (char *) &bufsize, sizeof(bufsize)) == SOCKET_ERROR) {
     	int iError = WSAGetLastError();
-    	int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_RCVBUF. IP: %s Err: %s (%d)",  sIP, WSErrorStr(iError), iError);
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] setsockopt failed on attempt to set SO_RCVBUF. IP: %s Err: %s (%d)",  sIP, WSErrorStr(iError), iError);
 #else
     int bufsize = 8192;
     if(setsockopt(AccptSocket->s, SOL_SOCKET, SO_RCVBUF, &bufsize, sizeof(bufsize)) == -1) {
-    	int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_RCVBUF. IP: %s Err: %d", sIP, errno);
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] setsockopt failed on attempt to set SO_RCVBUF. IP: %s Err: %s (%d)", sIP, ErrnoStr(errno), errno);
 #endif
-        if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::AcceptUser1") == true) {
-    	   clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
 #ifdef _WIN32
     	shutdown(AccptSocket->s, SD_SEND);
         closesocket(AccptSocket->s);
@@ -241,14 +238,11 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 #ifdef _WIN32
     if(setsockopt(AccptSocket->s, SOL_SOCKET, SO_SNDBUF, (char *) &bufsize, sizeof(bufsize)) == SOCKET_ERROR) {
         int iError = WSAGetLastError();
-        int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_SNDBUF. IP: %s Err: %s (%d)", sIP, WSErrorStr(iError), iError);
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] setsockopt failed on attempt to set SO_SNDBUF. IP: %s Err: %s (%d)", sIP, WSErrorStr(iError), iError);
 #else
     if(setsockopt(AccptSocket->s, SOL_SOCKET, SO_SNDBUF, &bufsize, sizeof(bufsize)) == -1) {
-        int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_SNDBUF. IP: %s Err: %d", sIP, errno);
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] setsockopt failed on attempt to set SO_SNDBUF. IP: %s Err: %s (%d)", sIP, ErrnoStr(errno), errno);
 #endif
-        if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::AcceptUser2") == true) {
-	       clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
 #ifdef _WIN32
 	    shutdown(AccptSocket->s, SD_SEND);
         closesocket(AccptSocket->s);
@@ -266,12 +260,11 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 #else
     int iKeepAlive = 1;
     if(setsockopt(AccptSocket->s, SOL_SOCKET, SO_KEEPALIVE, &iKeepAlive, sizeof(iKeepAlive)) == -1) {
-        int imsgLen = sprintf(msg, "[SYS] setsockopt failed on attempt to set SO_KEEPALIVE. IP: %s Err: %d", sIP, errno);
-        if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::AcceptUser3") == true) {
-	       clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] setsockopt failed on attempt to set SO_KEEPALIVE. IP: %s Err: %s (%d)", sIP, ErrnoStr(errno), errno);
+
 	    shutdown(AccptSocket->s, SHUT_RDWR);
         close(AccptSocket->s);
+
         return;
     }
 #endif
@@ -281,15 +274,12 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
     uint32_t block = 1;
 	if(ioctlsocket(AccptSocket->s, FIONBIO, (unsigned long *)&block) == SOCKET_ERROR) {
     	int iError = WSAGetLastError();
-    	int imsgLen = sprintf(msg, "[SYS] ioctlsocket failed on attempt to set FIONBIO. IP: %s Err: %s (%d)", sIP, WSErrorStr(iError), iError);
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] ioctlsocket failed on attempt to set FIONBIO. IP: %s Err: %s (%d)", sIP, WSErrorStr(iError), iError);
 #else
     int oldFlag = fcntl(AccptSocket->s, F_GETFL, 0);
     if(fcntl(AccptSocket->s, F_SETFL, oldFlag | O_NONBLOCK) == -1) {
-    	int imsgLen = sprintf(msg, "[SYS] fcntl failed on attempt to set O_NONBLOCK. IP: %s Err: %d", sIP, errno);
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] fcntl failed on attempt to set O_NONBLOCK. IP: %s Err: %s (%d)", sIP, ErrnoStr(errno), errno);
 #endif
-        if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::AcceptUser3") == true) {
-		  clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-		}
 #ifdef _WIN32
 		shutdown(AccptSocket->s, SD_SEND);
 		closesocket(AccptSocket->s);
@@ -336,10 +326,8 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
             shutdown(AccptSocket->s, SHUT_RD);
             close(AccptSocket->s);
 #endif
-/*            int imsgLen = sprintf(msg, "[SYS] Banned ip %s - connection closed.", sIP);
-            if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::AcceptUser5") == true) {
-                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-            }*/
+//			clsUdpDebug::mPtr->BroadcastFormat("[SYS] Banned ip %s - connection closed.", sIP);
+
             return;
         }
     }
@@ -358,10 +346,8 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
             shutdown(AccptSocket->s, SHUT_RD);
             close(AccptSocket->s);
 #endif
-/*            int imsgLen = sprintf(msg, "[SYS] Range Banned ip %s - connection closed.", sIP);
-            if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::AcceptUser6") == true) {
-                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-            }*/
+//            clsUdpDebug::mPtr->BroadcastFormat("[SYS] Range Banned ip %s - connection closed.", sIP);
+
             return;
         }
     }
@@ -610,10 +596,8 @@ void clsServiceLoop::ReceiveLoop() {
             case User::STATE_KEY_OR_SUP:{
                 // check logon timeout for iState 1
                 if(clsServerManager::ui64ActualTick - curUser->pLogInOut->ui64LogonTick > 20) {
-                    int imsgLen = sprintf(msg, "[SYS] Login timeout 1 for %s - user disconnected.", curUser->sIP);
-                    if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::ReceiveLoop3") == true) {
-                        clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                    }
+					clsUdpDebug::mPtr->BroadcastFormat("[SYS] Login timeout 1 for %s - user disconnected.", curUser->sIP);
+
                     curUser->Close();
                     continue;
                 }
@@ -622,10 +606,8 @@ void clsServiceLoop::ReceiveLoop() {
             case User::STATE_IPV4_CHECK: {
                 // check IPv4Check timeout
                 if((clsServerManager::ui64ActualTick - curUser->pLogInOut->ui64IPv4CheckTick) > 10) {
-                    int imsgLen = sprintf(msg, "[SYS] IPv4Check timeout for %s (%s).", curUser->sNick, curUser->sIP);
-                    if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::ReceiveLoop31") == true) {
-                        clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                    }
+					clsUdpDebug::mPtr->BroadcastFormat("[SYS] IPv4Check timeout for %s (%s).", curUser->sNick, curUser->sIP);
+
                     curUser->ui8State = User::STATE_ADDME;
                     continue;
                 }
@@ -647,10 +629,8 @@ void clsServiceLoop::ReceiveLoop() {
                 // PPK ... added login delay.
                 if(dLoggedUsers >= dActualSrvLoopLogins && ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
                     if(clsServerManager::ui64ActualTick - curUser->pLogInOut->ui64LogonTick > 300) {
-                        int imsgLen = sprintf(msg, "[SYS] Login timeout (%d) 3 for %s (%s) - user disconnected.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                        if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::ReceiveLoop4") == true) {
-                            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                        }
+						clsUdpDebug::mPtr->BroadcastFormat("[SYS] Login timeout (%d) 3 for %s (%s) - user disconnected.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                         curUser->Close();
                     }
                     continue;
@@ -987,10 +967,8 @@ void clsServiceLoop::ReceiveLoop() {
             default: {
                 // check logon timeout
                 if(clsServerManager::ui64ActualTick - curUser->pLogInOut->ui64LogonTick > 60) {
-                    int imsgLen = sprintf(msg, "[SYS] Login timeout (%d) 2 for %s (%s) - user disconnected.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                    if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::ReceiveLoop7") == true) {
-                        clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                    }
+					clsUdpDebug::mPtr->BroadcastFormat("[SYS] Login timeout (%d) 2 for %s (%s) - user disconnected.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                     curUser->Close();
                     continue;
                 }

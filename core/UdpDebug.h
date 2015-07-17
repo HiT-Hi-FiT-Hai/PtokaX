@@ -26,6 +26,8 @@ struct User;
 
 class clsUdpDebug {
 private:
+	char * sDebugBuffer, * sDebugHead;
+
     struct UdpDbgItem {
         UdpDbgItem();
         ~UdpDbgItem();
@@ -45,29 +47,32 @@ private:
         char * sNick;
 
         UdpDbgItem * pPrev, * pNext;
-        bool bIsScript;
+        bool bIsScript, bAllData;
     };
 
     clsUdpDebug(const clsUdpDebug&);
     const clsUdpDebug& operator=(const clsUdpDebug&);
+
+	void CreateBuffer();
+	void DeleteBuffer();
 public:
     static clsUdpDebug * mPtr;
 
-    UdpDbgItem * pList, * pScriptList;
+    UdpDbgItem * pDbgItemList;
 
 	clsUdpDebug();
 	~clsUdpDebug();
 
-	void Broadcast(const char * msg) const;
 	void Broadcast(const char * msg, const size_t &szLen) const;
-    void Broadcast(const string & msg) const;
-	bool New(User *u, const int32_t &port);
-	bool New(char * sIP, const uint16_t &usPort, const bool &bAllData, char * sScriptName);
+    void BroadcastFormat(const char * sFormatMsg, ...) const;
+	bool New(User *u, const uint16_t &ui16Port);
+	bool New(char * sIP, const uint16_t &ui16Port, const bool &bAllData, char * sScriptName);
 	bool Remove(User * u);
 	void Remove(char * sScriptName);
 	bool CheckUdpSub(User * u, bool bSndMess = false) const;
 	void Send(const char * sScriptName, char * sMsg, const size_t &szLen) const;
 	void Cleanup();
+	void UpdateHubName();
 };
 //---------------------------------------------------------------------------
 

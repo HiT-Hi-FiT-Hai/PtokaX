@@ -102,10 +102,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                 Memo(msg);
             }
         #endif
-        int imsgLen = sprintf(msg, "[SYS] Garbage DATA from %s (%s) -> %s", curUser->sNick, curUser->sIP, sData);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData3") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Garbage DATA from %s (%s) -> %s", curUser->sNick, curUser->sIP, sData);
+
         curUser->Close();
         return;
     }
@@ -171,10 +170,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                         Memo(msg);
                                     }
                                 #endif
-                                int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $MyINFO %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData5") == true) {
-                                    clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                                }
+
+								clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $MyINFO %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                                 curUser->Close();
                                 return;
                             }
@@ -190,10 +188,7 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                     sData[65000] = '\0';
                                 }
 
-                                int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Attempt to validate empty nick  from %s (%s) - user closed. (QuickList -> %s)", curUser->sNick, curUser->sIP, sData);
-                                if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::PreProcessData6") == true) {
-                                    clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-                                }
+								clsUdpDebug::mPtr->BroadcastFormat("[SYS] Attempt to validate empty nick  from %s (%s) - user closed. (QuickList -> %s)", curUser->sNick, curUser->sIP, sData);
 
                                 curUser->Close();
                                 return;
@@ -227,11 +222,10 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                         Memo(msg);
                                     }
                                 #endif
-                                int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $GetNickList %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData9") == true) {
-                                    clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                                }
-                                curUser->Close();
+
+								clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $GetNickList %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
+								curUser->Close();
                                 return;
                             }
                             GetNickList(curUser, sData, iLen, bCheck);
@@ -279,10 +273,7 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                         sData[65000] = '\0';
                                     }
 
-                                    int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Nick spoofing in myinfo from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-                                    if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::PreProcessData10") == true) {
-                                        clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-                                    }
+									clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in myinfo from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
                                     curUser->Close();
                                     return;
@@ -329,10 +320,7 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                             sData[65000] = '\0';
                         }
 
-                        int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Nick spoofing in myinfo from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-                        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::PreProcessData12") == true) {
-                            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-                        }
+						clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in myinfo from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
                         curUser->Close();
                         return;
@@ -377,10 +365,7 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                     sData[65000] = '\0';
                                 }
 
-                                int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Nick spoofing in myinfo from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-                                if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::PreProcessData14") == true) {
-                                    clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-                                }
+								clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in myinfo from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
                                 curUser->Close();
                                 return;
@@ -462,10 +447,7 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                     sData[65000] = '\0';
                                 }
 
-                                int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Nick spoofing in myinfo from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-                                if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::PreProcessData16") == true) {
-                                    clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-                                }
+								clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in myinfo from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
                                 curUser->Close();
                                 return;
@@ -645,10 +627,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $ConnectToMe %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData19") == true) {
-                            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                        }
+
+						clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $ConnectToMe %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                         curUser->Close();
                         return;
                     } else if(memcmp(sData+2, "lose ", 5) == 0) {
@@ -659,10 +640,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Close %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData21") == true) {
-                            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                        }
+
+						clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $Close %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                         curUser->Close();
                         return;
                     }
@@ -677,10 +657,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                     Memo(msg);
                                 }
                             #endif
-                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $GetINFO %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData23") == true) {
-                                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                            }
+
+							clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $GetINFO %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                             curUser->Close();
                             return;
                         } else if(iLen == 13 && *((uint64_t *)(sData+4)) == *((uint64_t *)"NickList")) {
@@ -691,10 +670,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                     Memo(msg);
                                 }
                             #endif
-                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $GetNickList %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData25") == true) {
-                                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                            }
+
+							clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $GetNickList %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                             curUser->Close();
                             return;
                         }
@@ -710,10 +688,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Key %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData27") == true) {
-                            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                        }
+
+						clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $Key %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                         curUser->Close();
                         return;
                     } else if(*((uint32_t *)(sData+2)) == ui32ick) {
@@ -724,10 +701,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Kick %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData29") == true) {
-                            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                        }
+
+						clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $Kick %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                         curUser->Close();
                         return;
                     }
@@ -742,10 +718,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                     Memo(msg);
                                 }
                             #endif
-                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $MultiConnectToMe %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData31") == true) {
-                                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                            }
+
+							clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $MultiConnectToMe %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                             curUser->Close();
                             return;
                         } else if(memcmp(sData+6, "Search ", 7) == 0) {
@@ -756,10 +731,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                     Memo(msg);
                                 }
                             #endif
-                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $MultiSearch %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData33") == true) {
-                                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                            }
+
+							clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $MultiSearch %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                             curUser->Close();
                             return;
                         }
@@ -772,10 +746,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                     Memo(msg);
                                 }
                             #endif
-                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $MyINFO %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData35") == true) {
-                                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                            }
+
+							clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $MyINFO %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                             curUser->Close();
                             return;
                         } else if(memcmp(sData+3, "Pass ", 5) == 0) {
@@ -786,10 +759,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                     Memo(msg);
                                 }
                             #endif
-                            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $MyPass %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData37") == true) {
-                                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                            }
+
+							clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $MyPass %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                             curUser->Close();
                             return;
                         }
@@ -804,10 +776,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $OpForceMove %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData39") == true) {
-                            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                        }
+
+						clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $OpForceMove %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                         curUser->Close();
                         return;
                     }
@@ -821,10 +792,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $RevConnectToMe %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData41") == true) {
-                            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                        }
+
+						clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $RevConnectToMe %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
 						curUser->Close();
                         return;
                     }
@@ -840,10 +810,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                         Memo(msg);
                                     }
                                 #endif
-                                int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Search %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData43") == true) {
-                                    clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                                }
+
+								clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $Search %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                                 curUser->Close();
                                 return;
                             }
@@ -858,11 +827,10 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                         Memo(msg);
                                     }
                                 #endif
-                                int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $SR %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData45") == true) {
-                                    clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                                }
-                                curUser->Close();
+
+								clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $SR %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
+								curUser->Close();
                                 return;
                             }
                             break;
@@ -875,10 +843,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                         Memo(msg);
                                     }
                                 #endif
-                                int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Supports %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData47") == true) {
-                                    clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                                }
+
+								clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $Supports %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                                 curUser->Close();
                                 return;
                             }
@@ -897,10 +864,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $To %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData49") == true) {
-                            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                        }
+
+						clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $To %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                         curUser->Close();
                         return;
                     }
@@ -914,10 +880,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $ValidateNick %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData51") == true) {
-                            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                        }
+
+						clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $ValidateNick %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
                         curUser->Close();
                         return;
                     } else if(memcmp(sData+2, "ersion ", 7) == 0) {
@@ -928,11 +893,10 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                 Memo(msg);
                             }
                         #endif
-                        int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in $Version %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-                        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData53") == true) {
-                            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                        }
-                        curUser->Close();
+
+						clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in $Version %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
+						curUser->Close();
                         return;
                     }
                     break;
@@ -948,10 +912,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                     Memo(msg);
                 }
             #endif
-            int imsgLen = sprintf(msg, "[SYS] Bad state (%d) in Chat %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
-            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData55") == true) {
-                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-            }
+
+			clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad state (%d) in Chat %s (%s) - user closed.", (int)curUser->ui8State, curUser->sNick, curUser->sIP);
+
             curUser->Close();
             return;
         }
@@ -973,19 +936,16 @@ void clsDcCommands::BotINFO(User * curUser, char * sData, const uint32_t &iLen) 
                 Memo(msg);
             }
         #endif
-        int imsgLen = sprintf(msg, "[SYS] Not pinger $BotINFO or $BotINFO flood from %s (%s)", curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::BotINFO2") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Not pinger $BotINFO or $BotINFO flood from %s (%s)", curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return;
     }
 
     if(iLen < 9) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $BotINFO (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::BotINFO3") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $BotINFO (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return;
     }
@@ -1015,10 +975,8 @@ void clsDcCommands::BotINFO(User * curUser, char * sData, const uint32_t &iLen) 
 // $MultiConnectToMe <nick> <ownip:port> <hub[:port]>
 void clsDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck, const bool &bMulti) {
     if((bMulti == false && iLen < 23) || (bMulti == true && iLen < 28)) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $%sConnectToMe (%s) from %s (%s) - user closed.", bMulti == false ? "" : "Multi", sData, curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ConnectToMe1") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $%sConnectToMe (%s) from %s (%s) - user closed.", bMulti == false ? "" : "Multi", sData, curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return;
     }
@@ -1052,10 +1010,7 @@ void clsDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iL
             sData[65000] = '\0';
         }
 
-        imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Long $ConnectToMe from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::ConnectToMe3") == true) {
-            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Long $ConnectToMe from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
         curUser->Close();
 		return;
@@ -1099,10 +1054,7 @@ void clsDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iL
             sData[65000] = '\0';
         }
 
-        int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Bad Port in %sCTM from %s (%s). (%s)", bMulti == false ? "" : "M", curUser->sNick, curUser->sIP, sData);
-        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::ConnectToMe4") == true) {
-            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad Port in %sCTM from %s (%s). (%s)", bMulti == false ? "" : "M", curUser->sNick, curUser->sIP, sData);
 
         curUser->Close();
         return;
@@ -1148,10 +1100,7 @@ void clsDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iL
             sData[65000] = '\0';
         }
 
-        int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Bad IP in %sCTM from %s (%s). (%s)", bMulti == false ? "" : "M", curUser->sNick, curUser->sIP, sData);
-        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::ConnectToMe6") == true) {
-            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad IP in %sCTM from %s (%s). (%s)", bMulti == false ? "" : "M", curUser->sNick, curUser->sIP, sData);
 
         curUser->Close();
         return;
@@ -1167,13 +1116,9 @@ void clsDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iL
 
 // $GetINFO <nickname> <ownnickname>
 void clsDcCommands::GetINFO(User * curUser, char * sData, const uint32_t &iLen) {
-	if(((curUser->ui32SupportBits & User::SUPPORTBIT_NOGETINFO) == User::SUPPORTBIT_NOGETINFO) == true ||
-        ((curUser->ui32SupportBits & User::SUPPORTBIT_NOHELLO) == User::SUPPORTBIT_NOHELLO) == true ||
-        ((curUser->ui32SupportBits & User::SUPPORTBIT_QUICKLIST) == User::SUPPORTBIT_QUICKLIST) == true) {
-        int imsgLen = sprintf(msg, "[SYS] Not allowed user %s (%s) send $GetINFO - user closed.", curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::GetINFO1") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+	if(((curUser->ui32SupportBits & User::SUPPORTBIT_NOGETINFO) == User::SUPPORTBIT_NOGETINFO) == true || ((curUser->ui32SupportBits & User::SUPPORTBIT_NOHELLO) == User::SUPPORTBIT_NOHELLO) == true || ((curUser->ui32SupportBits & User::SUPPORTBIT_QUICKLIST) == User::SUPPORTBIT_QUICKLIST) == true) {
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Not allowed user %s (%s) send $GetINFO - user closed.", curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return;
     }
@@ -1185,10 +1130,7 @@ void clsDcCommands::GetINFO(User * curUser, char * sData, const uint32_t &iLen) 
             sData[65000] = '\0';
         }
 
-        int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Bad $GetINFO from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::GetINFO2") == true) {
-            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $GetINFO from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
         curUser->Close();
         return;
@@ -1225,10 +1167,9 @@ bool clsDcCommands::GetNickList(User * curUser, char * sData, const uint32_t &iL
                	Memo(msg);
             }
         #endif
-        int imsgLen = sprintf(msg, "[SYS] Bad $GetNickList request %s (%s) - user closed.", curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::GetNickList2") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $GetNickList request %s (%s) - user closed.", curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return false;
     } else if(((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true) {
@@ -1327,10 +1268,8 @@ bool clsDcCommands::GetNickList(User * curUser, char * sData, const uint32_t &iL
                     if(CheckSprintf(imsgLen, 1024, "clsDcCommands::GetNickList3") == true) {
 						clsGlobalDataQueue::mPtr->SingleItemStore(msg, imsgLen, NULL, 0, clsGlobalDataQueue::SI_PM2OPS);
                     }
-                    imsgLen = sprintf(msg, "<%s> *** Pinger from IP: %s with nick: %s detected.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], curUser->sIP, curUser->sNick);
-                    if(CheckSprintf(imsgLen, 1024, "clsDcCommands::GetNickList4") == true) {
-                        clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                    }
+
+					clsUdpDebug::mPtr->BroadcastFormat("<%s> *** Pinger from IP: %s with nick: %s detected.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], curUser->sIP, curUser->sNick);
                 } else {
                     int imsgLen = sprintf(msg, "<%s> *** %s: %s %s: %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_PINGER_FROM_IP], curUser->sIP,
                         clsLanguageManager::mPtr->sTexts[LAN_WITH_NICK], curUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_DETECTED_LWR]);
@@ -1345,10 +1284,8 @@ bool clsDcCommands::GetNickList(User * curUser, char * sData, const uint32_t &iL
             }
 			return false;
 		} else {
-			int imsgLen = sprintf(msg, "[SYS] $GetNickList flood from pinger %s (%s) - user closed.", curUser->sNick, curUser->sIP);
-			if(CheckSprintf(imsgLen, 1024, "clsDcCommands::GetNickList6") == true) {
-                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-            }
+			clsUdpDebug::mPtr->BroadcastFormat("[SYS] $GetNickList flood from pinger %s (%s) - user closed.", curUser->sNick, curUser->sIP);
+
 			curUser->Close();
 			return false;
 		}
@@ -1379,10 +1316,8 @@ bool clsDcCommands::GetNickList(User * curUser, char * sData, const uint32_t &iL
 // $Key
 void clsDcCommands::Key(User * curUser, char * sData, const uint32_t &iLen) {
     if(((curUser->ui32BoolBits & User::BIT_HAVE_KEY) == User::BIT_HAVE_KEY) == true) {
-        int imsgLen = sprintf(msg, "[SYS] $Key flood from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Key1") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] $Key flood from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return;
     }
@@ -1396,10 +1331,7 @@ void clsDcCommands::Key(User * curUser, char * sData, const uint32_t &iLen) {
             sData[65000] = '\0';
         }
 
-        int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Bad $Key from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::Key2") == true) {
-            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $Key from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
         curUser->Close();
         return;
@@ -1430,10 +1362,8 @@ void clsDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
     } 
 
     if(iLen < 8) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $Kick (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Kick2") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $Kick (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return;
     }
@@ -1560,10 +1490,8 @@ void clsDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
                 }
 
         		// disconnect the user
-        		int imsgLen = sprintf(msg, "[SYS] User %s (%s) kicked by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
-                	if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Kick8") == true) {
-					clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-				}
+				clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) kicked by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
+
 				OtherUser->Close();
 
                 return;
@@ -1623,10 +1551,8 @@ void clsDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
                 	}
     
                     // disconnect the user
-                    int imsgLen = sprintf(msg, "[SYS] User %s (%s) kicked by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
-                    if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Kick12") == true) {
-                        clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                    }
+					clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) kicked by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
+
 					OtherUser->Close();
 
 					return;
@@ -1664,10 +1590,8 @@ void clsDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
         }
 
         // disconnect the user
-        int imsgLen = sprintf(msg, "[SYS] User %s (%s) kicked by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Kick16") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) kicked by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
+
         OtherUser->Close();
     }
 }
@@ -1719,20 +1643,16 @@ void clsDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const boo
     uint32_t iAfterCmd;
     if(bMulti == false) {
         if(iLen < 10) {
-            int imsgLen = sprintf(msg, "[SYS] Bad $Search (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
-            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Search1") == true) {
-                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-            }
+			clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $Search (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
+
             curUser->Close();
 			return;
         }
         iAfterCmd = 8;
     } else {
         if(iLen < 15) {
-            int imsgLen = sprintf(msg, "[SYS] Bad $MultiSearch (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
-            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Search2") == true) {
-                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-            }
+			clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $MultiSearch (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
+
             curUser->Close();
             return;
         }
@@ -1765,10 +1685,7 @@ void clsDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const boo
                 sData[65000] = '\0';
             }
 
-            int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Nick spoofing in search from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-            if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::Search3") == true) {
-                clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-            }
+			clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in search from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
             curUser->Close();
             return;
@@ -1863,10 +1780,7 @@ void clsDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const boo
                 sData[65000] = '\0';
             }
 
-            int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Bad Port in Search from %s (%s). (%s)", curUser->sNick, curUser->sIP, sData);
-            if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::Search12") == true) {
-                clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-            }
+			clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad Port in Search from %s (%s). (%s)", curUser->sNick, curUser->sIP, sData);
 
             curUser->Close();
             return;
@@ -1975,10 +1889,8 @@ void clsDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const boo
 // $MyINFO $ALL  $ $$$$|
 bool clsDcCommands::MyINFODeflood(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {
     if(iLen < (22u+curUser->ui8NickLen)) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $MyINFO (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::MyINFODeflood1") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $MyINFO (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return false;
     }
@@ -2012,10 +1924,7 @@ bool clsDcCommands::MyINFODeflood(User * curUser, char * sData, const uint32_t &
             sData[65000] = '\0';
         }
 
-        imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Bad $MyINFO from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::MyINFODeflood3") == true) {
-            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $MyINFO from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
         curUser->Close();
 		return false;
@@ -2074,11 +1983,9 @@ void clsDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
     if(pReg != NULL && (curUser->ui32BoolBits & User::BIT_WAITING_FOR_PASS) == User::BIT_WAITING_FOR_PASS) {
         curUser->ui32BoolBits &= ~User::BIT_WAITING_FOR_PASS;
     } else {
-        // no password required
-        int imsgLen = sprintf(msg, "[SYS] $MyPass without request from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::MyPass1") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+        // We don't send $GetPass!
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] $MyPass without request from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return;
     }
@@ -2088,10 +1995,7 @@ void clsDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
             sData[65000] = '\0';
         }
 
-        int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Bad $MyPass from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::MyPass2") == true) {
-            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $MyPass from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
         curUser->Close();
         return;
@@ -2183,10 +2087,7 @@ void clsDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
                         sData[65000] = '\0';
                     }
 
-                    int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Bad 3x password from %s (%s) - user banned. (%s)", curUser->sNick, curUser->sIP, sData);
-                    if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::MyPass10") == true) {
-                        clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-                    }
+					clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad 3x password from %s (%s) - user banned. (%s)", curUser->sNick, curUser->sIP, sData);
 
                     curUser->Close();
                     return;
@@ -2205,10 +2106,7 @@ void clsDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
             sData[65000] = '\0';
         }
 
-        imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Bad password from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::MyPass13") == true) {
-            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad password from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
         curUser->Close();
         return;
@@ -2241,10 +2139,8 @@ void clsDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
         if(((curUser->ui32BoolBits & User::BIT_HASHED) == User::BIT_HASHED) == false) {
             User *OtherUser = clsHashManager::mPtr->FindUser(curUser->sNick, curUser->ui8NickLen);
             if(OtherUser != NULL) {
-                int imsgLen = sprintf(msg, "[SYS] Ghost %s (%s) closed.", OtherUser->sNick, OtherUser->sIP);
-                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::MyPass12") == true) {
-                    clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                }
+				clsUdpDebug::mPtr->BroadcastFormat("[SYS] Ghost %s (%s) closed.", OtherUser->sNick, OtherUser->sIP);
+
                 if(((curUser->ui32SupportBits & User::SUPPORTBIT_QUICKLIST) == User::SUPPORTBIT_QUICKLIST) == false) {
            	        OtherUser->Close();
                 } else {
@@ -2294,10 +2190,8 @@ void clsDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iL
     }
 
     if(iLen < 31) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $OpForceMove (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::OpForceMove2") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $OpForceMove (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return;
     }
@@ -2358,10 +2252,8 @@ void clsDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iL
             }
 
             // PPK ... close user !!!
-            imsgLen = sprintf(msg, "[SYS] User %s (%s) redirected by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
-            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::OpForceMove13") == true) {
-                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-            }
+			clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) redirected by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
+
             OtherUser->Close();
 
             if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
@@ -2396,10 +2288,8 @@ void clsDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iL
 // $RevConnectToMe <ownnick> <nickname>
 void clsDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {
     if(iLen < 19) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $RevConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::RevConnectToMe1") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $RevConnectToMe (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return;
     }
@@ -2410,10 +2300,7 @@ void clsDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t 
             sData[65000] = '\0';
         }
 
-        int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Nick spoofing in RCTM from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::RevConnectToMe5") == true) {
-            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in RCTM from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
         curUser->Close();
         return;
@@ -2448,10 +2335,7 @@ void clsDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t 
             sData[65000] = '\0';
         }
 
-        imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Long $RevConnectToMe from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::RevConnectToMe3") == true) {
-            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Long $RevConnectToMe from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
         curUser->Close();
         return;
@@ -2481,10 +2365,8 @@ void clsDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t 
 // $SR <nickname> - Search Respond for passive users
 void clsDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const bool &bCheck) {
     if(iLen < 6u+curUser->ui8NickLen) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $SR (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::SR1") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $SR (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return;
     }
@@ -2518,10 +2400,8 @@ void clsDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const
             sData[65000] = '\0';
         }
 
-        imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Long $SR from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::SR3") == true) {
-            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Long $SR from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
+
 
         curUser->Close();
 		return;
@@ -2534,38 +2414,11 @@ void clsDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const
             sData[65000] = '\0';
         }
 
-        int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Nick spoofing in SR from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::SR5") == true) {
-            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in SR from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
         curUser->Close();
         return;
     }
-
-    // is this response on SlotFetch request ?
-    /*if(strcmp(towho, "SlotFetch") == 0) {
-        int s,c=0;
-        char *slash;
-        slash = strchr(sData, '/');
-        if(slash == NULL) return;
-
-        s = atoi(slash);
-        curUser->Slots = s;
-        if(s < hubForm->UpDownMinSlots->Position) {
-            if(clsProfileManager::mPtr->IsAllowed(curUser, ProfileMan::NOSLOTCHECK) == true) return; // Applies for OPs ?
-            int imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s|", curUser->Nick, HubBotName->Text.c_str(), HubBotName->Text.c_str(), MinSlotsCheckMessage->Text.c_str());
-            UserSendChar(curUser, msg, imsgLen);
-            if(hubForm->MinShareRedir->Checked) {
-                imsgLen = sprintf(msg, "<%s> %s|$ForceMove %s|", hubForm->HubBotName->Text.c_str(), hubForm->ShareLimitMessage->Text.c_str(), hubForm->MinShareRedirAddr->Text.c_str());
-               	UserSendChar(curUser, msg, imsgLen);
-            }
-            int imsgLen = sprintf(msg, "[SYS] SlotFetch %s (%s) - user closed.", curUser->Nick, curUser->IP);
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-            curUser->Close();
-        }
-        return;
-    }*/
 
     // past SR to script only if it's not a data for SlotFetcher
 	if(clsScriptManager::mPtr->Arrival(curUser, sData, iLen, clsScriptManager::SR_ARRIVAL) == true ||
@@ -2610,10 +2463,8 @@ void clsDcCommands::SRFromUDP(User * curUser, char * sData, const size_t &szLen)
 // $Supports item item item... PPK $Supports UserCommand NoGetINFO NoHello UserIP2 QuickList|
 void clsDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen) {
     if(((curUser->ui32BoolBits & User::BIT_HAVE_SUPPORTS) == User::BIT_HAVE_SUPPORTS) == true) {
-        int imsgLen = sprintf(msg, "[SYS] $Supports flood from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Supports1") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] $Supports flood from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return;
     }
@@ -2621,10 +2472,8 @@ void clsDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen)
     curUser->ui32BoolBits |= User::BIT_HAVE_SUPPORTS;
     
     if(iLen < 13) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $Supports (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Supports2") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $Supports (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return;
     }
@@ -2637,12 +2486,9 @@ void clsDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen)
                 sData[65000] = '\0';
             }
 
-            int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Quack $Supports from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-            if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::Supports3") == true) {
-                clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-            }
+			clsUdpDebug::mPtr->BroadcastFormat("[SYS] Quack $Supports from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
-       		imsgLen = sprintf(msg, "<%s> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_QUACK_SUPPORTS]);
+       		int imsgLen = sprintf(msg, "<%s> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_QUACK_SUPPORTS]);
 			if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Supports5") == true) {
 				curUser->SendCharDelayed(msg, imsgLen);
 			}
@@ -2756,10 +2602,8 @@ void clsDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen)
 			}
             case '\0': {
                 // PPK ... corrupted $Supports ???
-                int imsgLen = sprintf(msg, "[SYS] Bad $Supports from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
-                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Supports8") == true) {
-                    clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                }
+				clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $Supports from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
+
                 curUser->Close();
                 return;
             }
@@ -2786,10 +2630,7 @@ void clsDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const
             sData[65000] = '\0';
         }
 
-        int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Bad To from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::To1") == true) {
-            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad To from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
         curUser->Close();
         return;
@@ -2814,10 +2655,7 @@ void clsDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const
                 sData[65000] = '\0';
             }
 
-            int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Nick spoofing in To from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-            if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::To5") == true) {
-                clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-            }
+			clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in To from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
             curUser->Close();
             return;
@@ -3000,19 +2838,15 @@ void clsDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const
 // $ValidateNick
 void clsDcCommands::ValidateNick(User * curUser, char * sData, const uint32_t &iLen) {
     if(((curUser->ui32SupportBits & User::SUPPORTBIT_QUICKLIST) == User::SUPPORTBIT_QUICKLIST) == true) {
-        int imsgLen = sprintf(msg, "[SYS] $ValidateNick with QuickList support from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateNick1") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] $ValidateNick with QuickList support from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return;
     }
 
     if(iLen < 16) {
-        int imsgLen = sprintf(msg, "[SYS] Attempt to Validate empty nick (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateNick3") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Attempt to Validate empty nick (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return;
     }
@@ -3029,10 +2863,8 @@ void clsDcCommands::ValidateNick(User * curUser, char * sData, const uint32_t &i
 // $Version
 void clsDcCommands::Version(User * curUser, char * sData, const uint32_t &iLen) {
     if(iLen < 11) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $Version (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Version3") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $Version (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return;
     }
@@ -3066,10 +2898,7 @@ bool clsDcCommands::ChatDeflood(User * curUser, char * sData, const uint32_t &iL
             sData[65000] = '\0';
         }
 
-        int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Nick spoofing in chat from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::ChatDeflood1") == true) {
-            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in chat from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
 		curUser->Close();
 		return false;
@@ -3280,10 +3109,8 @@ void clsDcCommands::Close(User * curUser, char * sData, const uint32_t &iLen) {
     } 
 
     if(iLen < 9) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $Close (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Close2") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $Close (%s) from %s (%s) - user closed.", sData, curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return;
     }
@@ -3315,10 +3142,8 @@ void clsDcCommands::Close(User * curUser, char * sData, const uint32_t &iLen) {
         }
 
         // disconnect the user
-        int imsgLen = sprintf(msg, "[SYS] User %s (%s) closed by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Close5") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) closed by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
+
         OtherUser->Close();
         
         if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
@@ -3364,10 +3189,7 @@ void clsDcCommands::Unknown(User * curUser, char * sData, const uint32_t &iLen, 
             sData[65000] = '\0';
         }
 
-        int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Unknown command from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
-        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::Unknown1") == true) {
-            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Unknown command from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
 		if(bMyNick == true) {
 			curUser->SendCharDelayed("$Error CTM2HUB|", 15);
@@ -3390,8 +3212,9 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
                 if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick1") == true) {
                     curUser->SendChar(msg, imsgLen);
                 }
-//                int imsgLen = sprintf(msg, "[SYS] Nick with bad chars (%s) from %s (%s) - user closed.", Nick, curUser->Nick, curUser->IP);
-//                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
+
+//				clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick with bad chars (%s) from %s (%s) - user closed.", Nick, curUser->sNick, curUser->sIP);
+
                 curUser->Close();
                 return false;
             }
@@ -3402,8 +3225,9 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
                     if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick1-1") == true) {
                         curUser->SendChar(msg, imsgLen);
                     }
-//                    int imsgLen = sprintf(msg, "[SYS] Nick with white chars (%s) from %s (%s) - user closed.", Nick, curUser->Nick, curUser->IP);
-//                    clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
+
+//					clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick with white chars (%s) from %s (%s) - user closed.", Nick, curUser->sNick, curUser->sIP);
+
                     curUser->Close();
                     return false;
                 }
@@ -3421,8 +3245,9 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
         if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick2") == true) {
        	    curUser->SendChar(msg, imsgLen);
         }
-//       	int imsgLen = sprintf(msg, "[SYS] Reserved nick (%s) from %s (%s) - user closed.", Nick, curUser->Nick, curUser->IP);
-//       	clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
+
+//		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Reserved nick (%s) from %s (%s) - user closed.", Nick, curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return false;
     }
@@ -3433,10 +3258,8 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
     // PPK ... check if we already have ban for this user
     if(curUser->pLogInOut->pBan != NULL && curUser->ui32NickHash == curUser->pLogInOut->pBan->ui32NickHash) {
         curUser->SendChar(curUser->pLogInOut->pBan->sMessage, curUser->pLogInOut->pBan->ui32Len);
-        int imsgLen = sprintf(msg, "[SYS] Banned user %s (%s) - user closed.", curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick3") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Banned user %s (%s) - user closed.", curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return false;
     }
@@ -3447,10 +3270,9 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
         int imsgLen;
         char *messg = GenerateBanMessage(pBan, imsgLen, acc_time);
         curUser->SendChar(messg, imsgLen);
-        imsgLen = sprintf(msg, "[SYS] Banned user %s (%s) - user closed.", curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick4") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Banned user %s (%s) - user closed.", curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return false;
     }
@@ -3473,11 +3295,8 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
                     curUser->SendChar(msg, imsgLen);
                 }
 
-				imsgLen = sprintf(msg, "[SYS] User %s (%s) not allowed to send password (%" PRIu64 ") - user closed.", curUser->sNick, curUser->sIP, 
-                    (uint64_t)((Reg->tLastBadPass+(60*iMinutes2Wait))-acc_time));
-                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick6") == true) {
-                    clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                }
+				clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) not allowed to send password (%" PRIu64 ") - user closed.", curUser->sNick, curUser->sIP, (uint64_t)((Reg->tLastBadPass+(60*iMinutes2Wait))-acc_time));
+
                 curUser->Close();
                 return false;
             }
@@ -3491,10 +3310,9 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
         // PPK ... check if we already have ban for this user
         if(curUser->pLogInOut->pBan != NULL) {
             curUser->SendChar(curUser->pLogInOut->pBan->sMessage, curUser->pLogInOut->pBan->ui32Len);
-            int imsgLen = sprintf(msg, "[SYS] uBanned user %s (%s) - user closed.", curUser->sNick, curUser->sIP);
-            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick7") == true) {
-                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-            }
+
+			clsUdpDebug::mPtr->BroadcastFormat("[SYS] uBanned user %s (%s) - user closed.", curUser->sNick, curUser->sIP);
+
             curUser->Close();
             return false;
         }
@@ -3523,8 +3341,9 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
                 msg[imsgLen] = '\0';
             }
             curUser->SendChar(msg, imsgLen);
-//            int imsgLen = sprintf(msg, "[SYS] Hub full for %s (%s) - user closed.", curUser->Nick, curUser->IP);
-//            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
+
+//			clsUdpDebug::mPtr->BroadcastFormat("[SYS] Hub full for %s (%s) - user closed.", curUser->sNick, curUser->sIP);
+
             curUser->Close();
             return false;
         }
@@ -3563,7 +3382,7 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
                 tmp += " "+string(cur->sNick, cur->ui8NickLen);
             }
 
-            clsUdpDebug::mPtr->Broadcast(tmp);
+            clsUdpDebug::mPtr->Broadcast(tmp.c_str(), tmp.size());
 
             curUser->Close();
             return false;
@@ -3571,12 +3390,9 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
     }
 
     // Check for reconnect time
-    if(clsProfileManager::mPtr->IsProfileAllowed(i32Profile, clsProfileManager::NORECONNTIME) == false &&
-        clsUsers::mPtr->CheckRecTime(curUser) == true) {
-        int imsgLen = sprintf(msg, "[SYS] Fast reconnect from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick11") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+    if(clsProfileManager::mPtr->IsProfileAllowed(i32Profile, clsProfileManager::NORECONNTIME) == false && clsUsers::mPtr->CheckRecTime(curUser) == true) {
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Fast reconnect from %s (%s) - user closed.", curUser->sNick, curUser->sIP);
+
         curUser->Close();
         return false;
     }
@@ -3599,10 +3415,9 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
 			if((iRet == -1 && errno != EAGAIN) || iRet == 0) {
 #endif
                 OtherUser->ui32BoolBits |= User::BIT_ERROR;
-                int imsgLen = sprintf(msg, "[SYS] Ghost in validate nick %s (%s) - user closed.", OtherUser->sNick, OtherUser->sIP);
-                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick13") == true) {
-                    clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                }
+
+				clsUdpDebug::mPtr->BroadcastFormat("[SYS] Ghost in validate nick %s (%s) - user closed.", OtherUser->sNick, OtherUser->sIP);
+
                 OtherUser->Close();
                 return false;
             } else {
@@ -3613,10 +3428,7 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
                     }
 
                     if(strcmp(OtherUser->sIP, curUser->sIP) != 0 || strcmp(OtherUser->sNick, curUser->sNick) != 0) {
-                        imsgLen = sprintf(msg, "[SYS] Nick taken [%s (%s)] %s (%s) - user closed.", OtherUser->sNick, OtherUser->sIP, curUser->sNick, curUser->sIP);
-                        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick15") == true) {
-                            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                        }
+						clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick taken [%s (%s)] %s (%s) - user closed.", OtherUser->sNick, OtherUser->sIP, curUser->sNick, curUser->sIP);
                     }
 
                     curUser->Close();
@@ -3636,23 +3448,21 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
         // user is NOT registered
         
         // nick length check
-        if((clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_NICK_LEN] != 0 && szNickLen < (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_NICK_LEN]) ||
-            (clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_NICK_LEN] != 0 && szNickLen > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_NICK_LEN])) {
-            curUser->SendChar(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_NICK_LIMIT_MSG],
-                clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_NICK_LIMIT_MSG]);
-            int imsgLen = sprintf(msg, "[SYS] Bad nick length (%d) from %s (%s) - user closed.", (int)szNickLen, curUser->sNick, curUser->sIP);
-            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick16") == true) {
-                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-            }
+        if((clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_NICK_LEN] != 0 && szNickLen < (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_NICK_LEN]) || 
+			(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_NICK_LEN] != 0 && szNickLen > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_NICK_LEN]))
+		{
+            curUser->SendChar(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_NICK_LIMIT_MSG], clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_NICK_LIMIT_MSG]);
+			clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad nick length (%d) from %s (%s) - user closed.", (int)szNickLen, curUser->sNick, curUser->sIP);
+
             curUser->Close();
             return false;
         }
 
         if(clsSettingManager::mPtr->bBools[SETBOOL_REG_ONLY] == true && ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == false) {
-            curUser->SendChar(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REG_ONLY_MSG],
-                clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_REG_ONLY_MSG]);
-//            imsgLen = sprintf(msg, "[SYS] Hub for reg only %s (%s) - user closed.", curUser->Nick, curUser->IP);
-//            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
+            curUser->SendChar(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REG_ONLY_MSG], clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_REG_ONLY_MSG]);
+
+//			clsUdpDebug::mPtr->BroadcastFormat("[SYS] Hub for reg only %s (%s) - user closed.", curUser->sNick, curUser->sIP);
+
             curUser->Close();
             return false;
         } else {
@@ -4071,20 +3881,14 @@ void clsDcCommands::SendIPFixedMsg(User * pUser, char * sBadIP, char * sRealIP) 
 
 void clsDcCommands::MyNick(User * pUser, char * sData, const uint32_t &ui32Len) {
     if((pUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
-        int imsgLen = sprintf(msg, "[SYS] IPv6 $MyNick (%s) from %s (%s) - user closed.", sData, pUser->sNick, pUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::MyNick") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] IPv6 $MyNick (%s) from %s (%s) - user closed.", sData, pUser->sNick, pUser->sIP);
 
         Unknown(pUser, sData, ui32Len, true);
         return;
     }
 
     if(ui32Len < 10) {
-        int imsgLen = sprintf(msg, "[SYS] Short $MyNick (%s) from %s (%s) - user closed.", sData, pUser->sNick, pUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::MyNick1") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Short $MyNick (%s) from %s (%s) - user closed.", sData, pUser->sNick, pUser->sIP);
 
         Unknown(pUser, sData, ui32Len, true);
         return;
@@ -4095,10 +3899,7 @@ void clsDcCommands::MyNick(User * pUser, char * sData, const uint32_t &ui32Len) 
     User * pOtherUser = clsHashManager::mPtr->FindUser(sData+8, ui32Len-9);
 
     if(pOtherUser == NULL || pOtherUser->ui8State != User::STATE_IPV4_CHECK) {
-        int imsgLen = sprintf(msg, "[SYS] Bad $MyNick (%s) from %s (%s) - user closed.", sData, pUser->sNick, pUser->sIP);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::MyNick2") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $MyNick (%s) from %s (%s) - user closed.", sData, pUser->sNick, pUser->sIP);
 
         Unknown(pUser, sData, ui32Len, true);
         return;

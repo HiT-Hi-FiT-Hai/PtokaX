@@ -181,7 +181,8 @@ size_t TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 	size_t szRet = iconv(iconvAsciiToUtf, (ICONV_CONST char**)&sInBuf, &szInbufLeft, &sOutBuf, &szOutbufLeft);
 	if(szRet == (size_t)-1) {
 		if(errno == E2BIG) {
-			clsUdpDebug::mPtr->Broadcast("[LOG] TextConverter::DoIconv iconv E2BIG for param: "+string(sInput, ui8InputLen));
+			string sMsg = "[LOG] TextConverter::DoIconv iconv E2BIG for param: " + string(sInput, ui8InputLen);
+			clsUdpDebug::mPtr->Broadcast(sMsg.c_str(), sMsg.size());
 		} else if(errno == EILSEQ) {
 			sInBuf++;
 			szInbufLeft--;
@@ -190,9 +191,11 @@ size_t TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 				szRet = iconv(iconvAsciiToUtf, (ICONV_CONST char**)&sInBuf, &szInbufLeft, &sOutBuf, &szOutbufLeft);
 				if(szRet == (size_t)-1) {
 					if(errno == E2BIG) {
-						clsUdpDebug::mPtr->Broadcast("[LOG] TextConverter::DoIconv iconv E2BIG in EILSEQ for param: "+string(sInput, ui8InputLen));
+						string sMsg = "[LOG] TextConverter::DoIconv iconv E2BIG in EILSEQ for param: "+string(sInput, ui8InputLen);
+						clsUdpDebug::mPtr->Broadcast(sMsg.c_str(), sMsg.size());
 					} else if(errno == EINVAL) {
-						clsUdpDebug::mPtr->Broadcast("[LOG] TextConverter::DoIconv iconv EINVAL in EILSEQ for param: "+string(sInput, ui8InputLen));
+						string sMsg = "[LOG] TextConverter::DoIconv iconv EINVAL in EILSEQ for param: "+string(sInput, ui8InputLen);
+						clsUdpDebug::mPtr->Broadcast(sMsg.c_str(), sMsg.size());
 						sOutput[0] = '\0';
 						return 0;
 					} else if(errno == EILSEQ) {
@@ -205,12 +208,14 @@ size_t TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 			}
 
 			if(szOutbufLeft == size_t(ui8OutputSize-1)) {
-				clsUdpDebug::mPtr->Broadcast("[LOG] TextConverter::DoIconv iconv EILSEQ for param: "+string(sInput, ui8InputLen));
+				string sMsg = "[LOG] TextConverter::DoIconv iconv EILSEQ for param: "+string(sInput, ui8InputLen);
+				clsUdpDebug::mPtr->Broadcast(sMsg.c_str(), sMsg.size());
 				sOutput[0] = '\0';
 				return 0;
 			}
 		} else if(errno == EINVAL) {
-			clsUdpDebug::mPtr->Broadcast("[LOG] TextConverter::DoIconv iconv EINVAL for param: "+string(sInput, ui8InputLen));
+			string sMsg = "[LOG] TextConverter::DoIconv iconv EINVAL for param: "+string(sInput, ui8InputLen);
+			clsUdpDebug::mPtr->Broadcast(sMsg.c_str(), sMsg.size());
 			sOutput[0] = '\0';
 			return 0;
 		}

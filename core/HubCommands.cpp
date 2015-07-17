@@ -1193,10 +1193,8 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                    	OtherUser->SendChar(msg, imsgLen);
 
                     if(clsBanManager::mPtr->NickBan(OtherUser, NULL, reason, curUser->sNick) == true) {
-                        imsgLen = sprintf(msg, "[SYS] User %s (%s) nickbanned by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
-                        if(CheckSprintf(imsgLen, 1024, "clsHubCommands::DoCommand53") == true) {
-                            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                        }
+						clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) nickbanned by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
+
                         OtherUser->Close();
                     } else {
                         OtherUser->Close();
@@ -1439,10 +1437,7 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                         curUser->SendCharDelayed(msg, imsgLen);
                     }
 
-                    imsgLen = sprintf(msg, "[SYS] Already temp banned user %s (%s) disconnected by %s", utempban->sNick, utempban->sIP, curUser->sNick);
-                    if(CheckSprintf(imsgLen, 1024, "clsHubCommands::DoCommand78") == true) {
-                        clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                    }
+					clsUdpDebug::mPtr->BroadcastFormat("[SYS] Already temp banned user %s (%s) disconnected by %s", utempban->sNick, utempban->sIP, curUser->sNick);
 
                     // Kick user
                     utempban->Close();
@@ -1560,15 +1555,11 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                     }
 
                     curUser->SendCharDelayed(msg, imsgLen);
-                 }
+				}
 
-                imsgLen = sprintf(msg, "[SYS] User %s (%s) tempbanned by %s", utempban->sNick, utempban->sIP, curUser->sNick);
-                utempban->Close();
-                if(CheckSprintf(imsgLen, 1024, "clsHubCommands::DoCommand86") == false) {
-                    return true;
-                }
+				clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) tempbanned by %s", utempban->sNick, utempban->sIP, curUser->sNick);
 
-                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
+				utempban->Close();
                 return true;
             }
 
@@ -3203,10 +3194,8 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
         				        curUser->SendCharDelayed(msg, imsgLen);
                             }
 
-                            imsgLen = sprintf(msg, "[SYS] Debug subscription cancelled: %s (%s)", curUser->sNick, curUser->sIP);
-                            if(CheckSprintf(imsgLen, 1024, "clsHubCommands::DoCommand228") == true) {
-                                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                            }
+							clsUdpDebug::mPtr->BroadcastFormat("[SYS] Debug subscription cancelled: %s (%s)", curUser->sNick, curUser->sIP);
+
                             return true;
                         } else {
                             int imsgLen = CheckFromPm(curUser, fromPM);
@@ -3245,7 +3234,7 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                     }
 
                     int dbg_port = atoi(sCommand);
-                    if(dbg_port <= 0) {
+                    if(dbg_port <= 0 || dbg_port > 65535) {
                         int imsgLen = CheckFromPm(curUser, fromPM);
 
                         int iret = sprintf(msg+imsgLen, "<%s> *** %s %cdebug <%s>, %cdebug off.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
@@ -3258,7 +3247,7 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
                         return true;
                     }
 
-                    if(clsUdpDebug::mPtr->New(curUser, dbg_port) == true) {
+                    if(clsUdpDebug::mPtr->New(curUser, (uint16_t)dbg_port) == true) {
 						UncountDeflood(curUser, fromPM);
 
                         int imsgLen = CheckFromPm(curUser, fromPM);
@@ -3271,10 +3260,7 @@ bool clsHubCommands::DoCommand(User * curUser, char * sCommand, const size_t &sz
         				    curUser->SendCharDelayed(msg, imsgLen);
                         }
 
-        				imsgLen = sprintf(msg, "[SYS] New Debug subscriber: %s (%s)", curUser->sNick, curUser->sIP);
-        				if(CheckSprintf(imsgLen, 1024, "clsHubCommands::DoCommand239") == true) {
-                            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                        }
+						clsUdpDebug::mPtr->BroadcastFormat("[SYS] New Debug subscriber: %s (%s)", curUser->sNick, curUser->sIP);
                         return true;
                     } else {
                         int imsgLen = CheckFromPm(curUser, fromPM);
@@ -5643,10 +5629,8 @@ bool clsHubCommands::Ban(User * curUser, char * sCommand, bool fromPM, bool bFul
         }
 
         // Finish him !
-        imsgLen = sprintf(msg, "[SYS] User %s (%s) %sbanned by %s", uban->sNick, uban->sIP, bFull == true ? clsLanguageManager::mPtr->sTexts[LAN_FULL_LWR] : "", curUser->sNick);
-        if(CheckSprintf(imsgLen, 1024, "clsHubCommands::DoCommand476") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) %sbanned by %s", uban->sNick, uban->sIP, bFull == true ? clsLanguageManager::mPtr->sTexts[LAN_FULL_LWR] : "", curUser->sNick);
+
         uban->Close();
         return true;
     } else if(bFull == true) {
@@ -5743,10 +5727,8 @@ bool clsHubCommands::BanIp(User * curUser, char * sCommand, bool fromPM, bool bF
 
                 cur->SendChar(msg, imsgLen);
 
-                imsgLen = sprintf(msg, "[SYS] User %s (%s) ipbanned by %s", cur->sNick, cur->sIP, curUser->sNick);
-                if(CheckSprintf(imsgLen, 1024, "clsHubCommands::BanIp3") == true) {
-                    clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                }
+				clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) ipbanned by %s", cur->sNick, cur->sIP, curUser->sNick);
+
                 cur->Close();
             }
 
@@ -5877,10 +5859,7 @@ bool clsHubCommands::NickBan(User * curUser, char * sNick, char * sReason, bool 
     }
 
     if(clsBanManager::mPtr->NickBan(NULL, sNick, sReason, curUser->sNick) == true) {
-        int imsgLen = sprintf(msg, "[SYS] User %s nickbanned by %s", sNick, curUser->sNick);
-        if(CheckSprintf(imsgLen, 1024, "clsHubCommands::NickBan1") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s nickbanned by %s", sNick, curUser->sNick);
     } else {
         int imsgLen = CheckFromPm(curUser, bFromPM);
 
@@ -6171,10 +6150,8 @@ bool clsHubCommands::TempBan(User * curUser, char * sCommand, const size_t &dlen
         }
 
         // Finish him !
-        imsgLen = sprintf(msg, "[SYS] User %s (%s) %stemp banned by %s", utempban->sNick, utempban->sIP, bFull == true ? "full " : "", curUser->sNick);
-        if(CheckSprintf(imsgLen, 1024, "clsHubCommands::DoCommand504") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) %stemp banned by %s", utempban->sNick, utempban->sIP, bFull == true ? "full " : "", curUser->sNick);
+
         utempban->Close();
         return true;
     } else if(bFull == true) {
@@ -6308,10 +6285,8 @@ bool clsHubCommands::TempBanIp(User * curUser, char * sCommand, const size_t &dl
 
                 cur->SendChar(msg, imsgLen);
 
-                imsgLen = sprintf(msg, "[SYS] User %s (%s) tempipbanned by %s", cur->sNick, cur->sIP, curUser->sNick);
-                if(CheckSprintf(imsgLen, 1024, "clsHubCommands::TempBanIp3") == true) {
-                    clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-                }
+				clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) tempipbanned by %s", cur->sNick, cur->sIP, curUser->sNick);
+
                 cur->Close();
             }
             break;
@@ -6431,10 +6406,8 @@ bool clsHubCommands::TempBanIp(User * curUser, char * sCommand, const size_t &dl
         curUser->SendCharDelayed(msg, imsgLen);
     }
 
-    int imsgLen = sprintf(msg, "[SYS] IP %s %stemp banned by %s", sCmdParts[0], bFull == true ? "full " : "", curUser->sNick);
-    if(CheckSprintf(imsgLen, 1024, "clsHubCommands::DoCommand517") == true) {
-        clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-    }
+	clsUdpDebug::mPtr->BroadcastFormat("[SYS] IP %s %stemp banned by %s", sCmdParts[0], bFull == true ? "full " : "", curUser->sNick);
+
     return true;
 }
 //---------------------------------------------------------------------------
@@ -6558,12 +6531,7 @@ bool clsHubCommands::TempNickBan(User * curUser, char * sNick, char * sTime, con
         curUser->SendCharDelayed(msg, imsgLen);
     }
 
-    int imsgLen = sprintf(msg, "[SYS] Nick %s tempbanned by %s", sNick, curUser->sNick);
-    if(CheckSprintf(imsgLen, 1024, "clsHubCommands::TempNickBan9") == false) {
-        return true;
-    }
-
-    clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
+    clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick %s tempbanned by %s", sNick, curUser->sNick);
     return true;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

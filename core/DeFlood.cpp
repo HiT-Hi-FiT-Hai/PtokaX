@@ -462,10 +462,7 @@ void DeFloodReport(User * u, const uint8_t ui8DefloodType, char *sAction) {
         }
     }
 
-	int imsgLen = sprintf(msg, "[SYS] Flood type %hu from %s (%s) - user closed.", (uint16_t)ui8DefloodType, u->sNick, u->sIP);
-    if(CheckSprintf(imsgLen, 1024, "DeFloodReport3") == true) {
-        clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-    }
+	clsUdpDebug::mPtr->BroadcastFormat("[SYS] Flood type %hu from %s (%s) - user closed.", (uint16_t)ui8DefloodType, u->sNick, u->sIP);
 }
 //---------------------------------------------------------------------------
 

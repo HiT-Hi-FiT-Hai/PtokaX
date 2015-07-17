@@ -1748,8 +1748,8 @@ static int Disconnect(lua_State * L) {
         return 1;
     }
 
-//    int imsgLen = sprintf(g_sBuffer, "[SYS] User %s (%s) disconnected by script.", u->Nick, u->IP);
-//    UdpDebug->Broadcast(g_sBuffer, imsgLen);
+
+//    UdpDebug->BroadcastFormat("[SYS] User %s (%s) disconnected by script.", u->sNick, u->sIP);
     u->Close();
 
     lua_settop(L, 0);
@@ -1821,10 +1821,7 @@ static int Kick(lua_State * L) {
     }
 
     // disconnect the user
-    imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] User %s (%s) kicked by script.", u->sNick, u->sIP);
-    if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "Kick8") == true) {
-        clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-    }
+	clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) kicked by script.", u->sNick, u->sIP);
 
     u->Close();
     
@@ -1877,8 +1874,8 @@ static int Redirect(lua_State * L) {
         u->SendChar(clsServerManager::pGlobalBuffer, imsgLen);
     }
 
-    //int imsgLen = sprintf(g_sBuffer, "[SYS] User %s (%s) redirected by script.", u->Nick, u->IP);
-    //clsUdpDebug::mPtr->Broadcast(g_sBuffer, imsgLen);
+
+//	clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) redirected by script.", u->sNick, u->sIP);
 
     u->Close();
     
@@ -1952,10 +1949,7 @@ static int DefloodWarn(lua_State * L) {
             }
         }
 
-        imsgLen = sprintf(clsServerManager::pGlobalBuffer, "[SYS] Flood from %s (%s) - user closed by script.", u->sNick, u->sIP);
-        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "DefloodWarn3") == true) {
-            clsUdpDebug::mPtr->Broadcast(clsServerManager::pGlobalBuffer, imsgLen);
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Flood from %s (%s) - user closed by script.", u->sNick, u->sIP);
 
         u->Close();
     }

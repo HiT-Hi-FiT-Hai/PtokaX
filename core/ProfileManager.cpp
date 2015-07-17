@@ -72,7 +72,7 @@ clsProfileManager::clsProfileManager() : ui16ProfileCount(0), ppProfilesTable(NU
             CreateDefaultProfiles();
             if(doc.LoadFile() == false) {
 #ifdef _BUILD_GUI
-                ::MessageBox(NULL, clsLanguageManager::mPtr->sTexts[LAN_PROFILES_LOAD_FAIL], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
+                ::MessageBox(NULL, clsLanguageManager::mPtr->sTexts[LAN_PROFILES_LOAD_FAIL], g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
                 AppendLog(clsLanguageManager::mPtr->sTexts[LAN_PROFILES_LOAD_FAIL]);
 #endif
@@ -83,7 +83,7 @@ clsProfileManager::clsProfileManager() : ui16ProfileCount(0), ppProfilesTable(NU
             int imsgLen = sprintf(msg, "Error loading file Profiles.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
 			CheckSprintf(imsgLen, 2048, "clsProfileManager::clsProfileManager()");
 #ifdef _BUILD_GUI
-			::MessageBox(NULL, msg, clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
+			::MessageBox(NULL, msg, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
 			AppendLog(msg);
 #endif
@@ -136,7 +136,7 @@ clsProfileManager::clsProfileManager() : ui16ProfileCount(0), ppProfilesTable(NU
 		}
 	} else {
 #ifdef _BUILD_GUI
-		::MessageBox(NULL, clsLanguageManager::mPtr->sTexts[LAN_PROFILES_LOAD_FAIL], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
+		::MessageBox(NULL, clsLanguageManager::mPtr->sTexts[LAN_PROFILES_LOAD_FAIL], g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
 		AppendLog(clsLanguageManager::mPtr->sTexts[LAN_PROFILES_LOAD_FAIL]);
 #endif

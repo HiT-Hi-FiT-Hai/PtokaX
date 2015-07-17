@@ -218,11 +218,6 @@ int __cdecl main(int argc, char* argv[]) {
     ::FreeLibrary(hKernel32);
 #endif
 
-	clsServerManager::sTitle = "PtokaX DC Hub " + string(PtokaXVersionString);
-#ifdef _DEBUG
-	clsServerManager::sTitle += " [debug]";
-#endif
-
 #ifdef _DEBUG
 //    AllocConsole();
 //    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -291,7 +286,7 @@ int __cdecl main(int argc, char* argv[]) {
 	    	sServiceName = argv[i];
 	    	return UninstallService(sServiceName);
 	    } else if(stricmp(argv[i], "-v") == NULL || stricmp(argv[i], "/version") == NULL) {
-	    	printf("%s built on %s %s\n", clsServerManager::sTitle.c_str(), __DATE__, __TIME__);
+	    	printf("%s built on %s %s\n", g_sPtokaXTitle, __DATE__, __TIME__);
 	    	return EXIT_SUCCESS;
 	    } else if(stricmp(argv[i], "-h") == NULL || stricmp(argv[i], "/help") == NULL) {
 	    	printf("PtokaX [-c <configdir>] [-i <servicename>] [-u <servicename>] [-v]");
@@ -322,7 +317,7 @@ int __cdecl main(int argc, char* argv[]) {
 
 	        return EXIT_FAILURE;
 	    } else {
-	        printf("%s running...\n", clsServerManager::sTitle.c_str());
+	        printf("%s running...\n", g_sPtokaXTitle);
 	    }
 
 	    MSG msg = { 0 };

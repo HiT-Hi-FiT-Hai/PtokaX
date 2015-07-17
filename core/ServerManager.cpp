@@ -81,7 +81,7 @@ static ServerThread * pServersE = NULL;
 	clock_serv_t clsServerManager::csMachClock;
 #endif
 
-string clsServerManager::sPath = "", clsServerManager::sScriptPath = "", clsServerManager::sTitle = "";
+string clsServerManager::sPath = "", clsServerManager::sScriptPath = "";
 size_t clsServerManager::szGlobalBufferSize = 0;
 char * clsServerManager::pGlobalBuffer = NULL;
 bool clsServerManager::bCmdAutoStart = false, clsServerManager::bCmdNoAutoStart = false, clsServerManager::bCmdNoTray = false, clsServerManager::bUseIPv4 = true,
@@ -1035,15 +1035,16 @@ void clsServerManager::ResumeAccepts() {
 }
 //---------------------------------------------------------------------------
 
-void clsServerManager::SuspendAccepts(const uint32_t &iTime) {
+void clsServerManager::SuspendAccepts(const uint32_t &ui32Time) {
 	if(bServerRunning == false) {
         return;
     }
 
-    if(iTime != 0) {
-        clsUdpDebug::mPtr->Broadcast("[SYS] Suspending listening threads to " + string(iTime) + " seconds.");
+    if(ui32Time != 0) {
+        clsUdpDebug::mPtr->BroadcastFormat("[SYS] Suspending listening threads to %u seconds.", ui32Time);
     } else {
-        clsUdpDebug::mPtr->Broadcast("[SYS] Suspending listening threads.");
+		const char sSuspendMsg[] = "[SYS] Suspending listening threads.";
+        clsUdpDebug::mPtr->Broadcast(sSuspendMsg, sizeof(sSuspendMsg)-1);
     }
 
     ServerThread * cur = NULL,
@@ -1053,7 +1054,7 @@ void clsServerManager::SuspendAccepts(const uint32_t &iTime) {
         cur = next;
         next = cur->pNext;
 
-        cur->SuspendSck(iTime);
+        cur->SuspendSck(ui32Time);
     }
 }
 //---------------------------------------------------------------------------

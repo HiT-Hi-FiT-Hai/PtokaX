@@ -78,7 +78,7 @@ static bool UserProcessLines(User * u, const uint32_t &iStrtLen) {
             u->pRecvBuf[ui32i+1] = '\0';
             uint32_t ui32iCommandLen = (uint32_t)(((u->pRecvBuf+ui32i)-buffer)+1);
             if(buffer[0] == '|') {
-                //UdpDebug->Broadcast("[SYS] heartbeat from " + string(u->Nick, u->NickLen));
+                //UdpDebug->BroadcastFormat("[SYS] heartbeat from %s (%s).", u->Nick, u->sIP);
                 //send(Sck, "|", 1, 0);
             } else if(ui32iCommandLen < (u->ui8State < User::STATE_ADDME ? 1024U : 65536U)) {
         		clsDcCommands::mPtr->PreProcessData(u, buffer, true, ui32iCommandLen);
@@ -88,7 +88,7 @@ static bool UserProcessLines(User * u, const uint32_t &iStrtLen) {
                     u->SendCharDelayed(msg, imsgLen);
                 }
 				u->Close();
-				clsUdpDebug::mPtr->Broadcast("[SYS] " + string(u->sNick, u->ui8NickLen) + " (" + string(u->sIP, u->ui8IpLen) + ") Received command too long. User disconnected.");
+				clsUdpDebug::mPtr->BroadcastFormat("[SYS] %s (%s): Received command too long. User disconnected.", u->sNick, u->sIP);
                 return false;
             }
         	u->pRecvBuf[ui32i+1] = c;
@@ -117,7 +117,7 @@ static bool UserProcessLines(User * u, const uint32_t &iStrtLen) {
                 u->SendCharDelayed(msg, imsgLen);
             }
             u->Close();
-			clsUdpDebug::mPtr->Broadcast("[SYS] " + string(u->sNick, u->ui8NickLen) + " (" + string(u->sIP, u->ui8IpLen) +") RecvBuffer overflow. User disconnected.");
+			clsUdpDebug::mPtr->BroadcastFormat("[SYS] %s (%s): RecvBuffer overflow. User disconnected.", u->sNick, u->sIP);
         	return false;
         }
         clsDcCommands::mPtr->ProcessCmds(u);
@@ -161,10 +161,7 @@ static void UserSetBadTag(User * u, char * Descr, uint8_t DescrLen) {
     u->ui8ClientLen = 8;
 
     // PPK ... send report to udp debug
-    int imsgLen = sprintf(msg, "[SYS] User %s (%s) have bad TAG (%s) ?!?.", u->sNick, u->sIP, u->sMyInfoOriginal);
-    if(CheckSprintf(imsgLen, 1024, "SetBadTag") == true) {
-        clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-    }
+	clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) have bad TAG (%s) ?!?", u->sNick, u->sIP, u->sMyInfoOriginal);
 }
 //---------------------------------------------------------------------------
 
@@ -200,10 +197,9 @@ static void UserParseMyInfo(User * u) {
         if(CheckSprintf(imsgLen, 1024, "UserParseMyInfo1") == true) {
             u->SendChar(msg, imsgLen);
         }
-        imsgLen = sprintf(msg, "[SYS] User %s (%s) with bad MyINFO (%s) disconnected.", u->sNick, u->sIP, u->sMyInfoOriginal);
-        if(CheckSprintf(imsgLen, 1024, "UserParseMyInfo2") == true) {
-            clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-        }
+
+		clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) with bad MyINFO (%s) disconnected.", u->sNick, u->sIP, u->sMyInfoOriginal);
+
         u->Close();
         return;
     }
@@ -222,7 +218,7 @@ static void UserParseMyInfo(User * u) {
     // share
     // PPK ... check for valid numeric share, kill fakers !
     if(HaveOnlyNumbers(sMyINFOParts[4], iMyINFOPartsLen[4]) == false) {
-        //clsUdpDebug::mPtr->Broadcast("[SYS] User " + string(u->Nick, u->NickLen) + " (" + string(u->IP, u->ui8IpLen) + ") with non-numeric sharesize disconnected.");
+        //clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) with non-numeric sharesize disconnected.", u->Nick, u->IP);
         u->Close();
         return;
     }
@@ -412,11 +408,10 @@ static void UserParseMyInfo(User * u) {
                             if(CheckSprintf(imsgLen, 1024, "UserParseMyInfo3") == true) {
                                 u->SendChar(msg, imsgLen);
                             }
-                            imsgLen = sprintf(msg, "[SYS] User %s (%s) with fake Tag disconnected: ", u->sNick, u->sIP);
-                            if(CheckSprintf(imsgLen, 1024, "UserParseMyInfo4") == true) {
-                                memcpy(msg+imsgLen, u->sTag, u->ui8TagLen);
-                                clsUdpDebug::mPtr->Broadcast(msg, imsgLen+(int)u->ui8TagLen);
-                            }
+
+							u->sTag[u->ui8TagLen] = '\0';
+							clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) with fake Tag disconnected: %s", u->sNick, u->sIP, u->sTag);
+
                             u->Close();
                             return;
                         }
@@ -461,7 +456,7 @@ static void UserParseMyInfo(User * u) {
                             u->DLimit = atoi(sTagPart+2);
                             break;
                         default:
-                            //clsUdpDebug::mPtr->Broadcast("[SYS] "+string(u->Nick, u->NickLen)+": Extra info in DC tag: "+string(sTag));
+                            //clsUdpDebug::mPtr->BroadcastFormat("[SYS] %s (%s): Extra info in DC tag: %s", u->Nick, u->sIP, sTag);
                             break;
                     }
                     sTagPart = DCTag+szi+1;
@@ -882,7 +877,33 @@ User::~User() {
 //---------------------------------------------------------------------------
 
 bool User::MakeLock() {
-    size_t szAllignLen = Allign1024(ui32SendBufDataLen+63);
+    // This code computes the valid Lock string including the Pk= string
+    // For maximum speed we just find two random numbers - start and step
+    // Step is added each cycle to the start and the ascii 122 boundary is
+    // checked. If overflow occurs then the overflowed value is added to the
+    // ascii 48 value ("0") and continues.
+	// The lock has fixed length 63 bytes
+
+#ifdef _WIN32
+	#ifdef _BUILD_GUI
+	    #ifndef _M_X64
+	        static const char sLock[] = "$Lock EXTENDEDPROTOCOL                           win Pk=PtokaX|";
+	    #else
+	        static const char sLock[] = "$Lock EXTENDEDPROTOCOL                           wg6 Pk=PtokaX|";
+	    #endif
+	#else
+	    #ifndef _M_X64
+	        static const char sLock[] = "$Lock EXTENDEDPROTOCOL                           wis Pk=PtokaX|";
+	    #else
+	        static const char sLock[] = "$Lock EXTENDEDPROTOCOL                           ws6 Pk=PtokaX|";
+	    #endif
+	#endif
+#else
+	static const char sLock[] = "$Lock EXTENDEDPROTOCOL                           nix Pk=PtokaX|";
+#endif
+	static const size_t szLockLen = sizeof(sLock)-1;
+
+    size_t szAllignLen = Allign1024(ui32SendBufDataLen+szLockLen);
 
 	char * pOldBuf = pSendBuf;
 #ifdef _WIN32
@@ -905,34 +926,9 @@ bool User::MakeLock() {
     ui32SendBufLen = (uint32_t)(szAllignLen-1);
 	pSendBufHead = pSendBuf;
 
-    // This code computes the valid Lock string including the Pk= string
-    // For maximum speed we just find two random numbers - start and step
-    // Step is added each cycle to the start and the ascii 122 boundary is
-    // checked. If overflow occurs then the overflowed value is added to the
-    // ascii 48 value ("0") and continues.
-	// The lock has fixed length 63 bytes
-
-#ifdef _WIN32
-	#ifdef _BUILD_GUI
-	    #ifndef _M_X64
-	        static const char * sLock = "$Lock EXTENDEDPROTOCOL                           win Pk=PtokaX|"; // 63
-	    #else
-	        static const char * sLock = "$Lock EXTENDEDPROTOCOL                           wg6 Pk=PtokaX|"; // 63
-	    #endif
-	#else
-	    #ifndef _M_X64
-	        static const char * sLock = "$Lock EXTENDEDPROTOCOL                           wis Pk=PtokaX|"; // 63
-	    #else
-	        static const char * sLock = "$Lock EXTENDEDPROTOCOL                           ws6 Pk=PtokaX|"; // 63
-	    #endif
-	#endif
-#else
-	static const char * sLock = "$Lock EXTENDEDPROTOCOL                           nix Pk=PtokaX|"; // 63
-#endif
-
     // append data to the buffer
-    memcpy(pSendBuf, sLock, 63);
-    ui32SendBufDataLen += 63;
+    memcpy(pSendBuf, sLock, szLockLen);
+    ui32SendBufDataLen += szLockLen;
     pSendBuf[ui32SendBufDataLen] = '\0';
 
 	for(uint8_t ui8i = 22; ui8i < 49; ui8i++) {
@@ -955,8 +951,8 @@ bool User::MakeLock() {
 		return false;
     }
     
-    memcpy(pLogInOut->pBuffer, pSendBuf, 63);
-	pLogInOut->pBuffer[63] = '\0';
+    memcpy(pLogInOut->pBuffer, pSendBuf, szLockLen);
+	pLogInOut->pBuffer[szLockLen] = '\0';
 
     return true;
 }
@@ -974,11 +970,11 @@ bool User::DoRecv() {
 	int iAvailBytes = 0;
 	if(ioctl(Sck, FIONREAD, &iAvailBytes) == -1) {
 #endif
-		clsUdpDebug::mPtr->Broadcast("[ERR] " + string(sNick, ui8NickLen) + " (" + string(sIP, ui8IpLen) +
+		clsUdpDebug::mPtr->BroadcastFormat("[ERR] %s (%s): ioctlsocket(FIONREAD) error %s (%d). User is being closed.", sNick, sIP,
 #ifdef _WIN32
-			" ): ioctlsocket(FIONREAD) error " + string(WSErrorStr(iError)) + " (" + string(iError) + "). User is being closed.");
+			WSErrorStr(iError), iError);
 #else
-			" ): ioctlsocket(FIONREAD) error " + string(ErrnoStr(errno)) + " (" + string(errno) + "). User is being closed.");
+			ErrnoStr(errno), errno);
 #endif
         ui32BoolBits |= BIT_ERROR;
 		Close();
@@ -1082,11 +1078,11 @@ bool User::DoRecv() {
     if(recvlen == -1) {
         if(errno != EAGAIN) {
 #endif
-			clsUdpDebug::mPtr->Broadcast("[ERR] " + string(sNick, ui8NickLen) + " (" + string(sIP, ui8IpLen) + "): recv() error " + 
+			clsUdpDebug::mPtr->BroadcastFormat("[ERR] %s (%s): recv() error %s (%d). User is being closed.", sNick, sIP,
 #ifdef _WIN32
-                string(WSErrorStr(iError)) + ". User is being closed.");
+                WSErrorStr(iError), iError);
 #else
-				string(ErrnoStr(errno)) + " (" + string(errno) + "). User is being closed.");
+				ErrnoStr(errno), errno);
 #endif
 			ui32BoolBits |= BIT_ERROR;
             Close();
@@ -1096,13 +1092,6 @@ bool User::DoRecv() {
         }
     } else if(recvlen == 0) { // regular close
 #ifdef _WIN32
-        int iError = WSAGetLastError();
-	    if(iError != 0) {
-			Memo("[SYS] recvlen == 0 and iError == "+string(iError)+"! User: "+string(sNick, ui8NickLen)+" ("+string(sIP, ui8IpLen)+")");
-			clsUdpDebug::mPtr->Broadcast("[SYS] recvlen == 0 and iError == " + string(iError) + " ! User: " + string(sNick, ui8NickLen) +
-				" (" + string(sIP, ui8IpLen) + ").");
-		}
-
 	#ifdef _BUILD_GUI
         if(::SendMessage(clsMainWindowPageUsersChat::mPtr->hWndPageItems[clsMainWindowPageUsersChat::BTN_SHOW_COMMANDS], BM_GETCHECK, 0, 0) == BST_CHECKED) {
 			int iret = sprintf(msg, "- User has closed the connection: %s (%s)", sNick, sIP);
@@ -1226,13 +1215,12 @@ bool User::PutInSendBuf(const char * Text, const size_t &szTxtLen) {
                         ui32BoolBits |= BIT_ERROR;
                         Close();
 
-                        clsUdpDebug::mPtr->Broadcast("[SYS] " + string(sNick, ui8NickLen) + " (" + string(sIP, ui8IpLen) +") SendBuffer overflow (AL:"+string((uint64_t)szAllignLen)+
-                            "[SL:"+string(ui32SendBufDataLen)+"|NL:"+string((uint64_t)szTxtLen)+"|FL:"+string((uint64_t)(pSendBufHead-pSendBuf))+"]/ML:"+string((uint64_t)szMaxBufLen)+"). User disconnected.");
+                        clsUdpDebug::mPtr->BroadcastFormat("[SYS] %s (%s) SendBuffer overflow (AL:" PRIu64 "[SL:%u|NL:" PRIu64 "|FL:" PRIu64 "]/ML:" PRIu64 "). User disconnected.", 
+							sNick, sIP, (uint64_t)szAllignLen, ui32SendBufDataLen, (uint64_t)szTxtLen, (uint64_t)(pSendBufHead-pSendBuf), (uint64_t)szMaxBufLen);
                         return false;
                     } else {
-    				    clsUdpDebug::mPtr->Broadcast("[SYS] " + string(sNick, ui8NickLen) + " (" + string(sIP, ui8IpLen) +") SendBuffer overflow (AL:"+string((uint64_t)szAllignLen)+
-                            "[SL:"+string(ui32SendBufDataLen)+"|NL:"+string((uint64_t)szTxtLen)+"|FL:"+string((uint64_t)(pSendBufHead-pSendBuf))+"]/ML:"+string((uint64_t)szMaxBufLen)+
-                            "). Buffer cleared - user stays online.");
+    				    clsUdpDebug::mPtr->BroadcastFormat("[SYS] %s (%s) SendBuffer overflow (AL:" PRIu64 "[SL:%u|NL:" PRIu64 "|FL:" PRIu64 "]/ML:" PRIu64 "). Buffer cleared - user stays online.", 
+							sNick, sIP, (uint64_t)szAllignLen, ui32SendBufDataLen, (uint64_t)szTxtLen, (uint64_t)(pSendBufHead-pSendBuf), (uint64_t)szMaxBufLen);
                     }
 
                     // we want to keep the slow user online
@@ -1371,11 +1359,11 @@ bool User::Try2Send() {
 	if(n == -1) {
         if(errno != EAGAIN) {
 #endif
-			clsUdpDebug::mPtr->Broadcast("[ERR] " + string(sNick, ui8NickLen) + " (" + string(sIP, ui8IpLen) +
+			clsUdpDebug::mPtr->BroadcastFormat("[ERR] %s (%s): send() error %s (%d). User is being closed.", sNick, sIP,
 #ifdef _WIN32
-				"): send() error " + string(WSErrorStr(iError)) + ". User is being closed.");
+				WSErrorStr(iError), iError);
 #else
-				"): send() error " + string(ErrnoStr(errno)) + " (" + string(errno) + "). User is being closed.");
+				ErrnoStr(errno), errno);
 #endif
 			ui32BoolBits |= BIT_ERROR;
             Close();
@@ -2608,7 +2596,7 @@ bool User::ProcessRules() {
         if((clsSettingManager::mPtr->ui64MinShare != 0 && ui64SharedSize < clsSettingManager::mPtr->ui64MinShare) ||
             (clsSettingManager::mPtr->ui64MaxShare != 0 && ui64SharedSize > clsSettingManager::mPtr->ui64MaxShare)) {
             SendChar(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_SHARE_LIMIT_MSG], clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_SHARE_LIMIT_MSG]);
-            //clsUdpDebug::mPtr->Broadcast("[SYS] User with low or high share " + Nick + " (" + IP + ") disconnected.");
+            //clsUdpDebug::mPtr->BroadcastFormat("[SYS] User with low or high share %s (%s) disconnected.", sNick, sIP);
             return false;
         }
     }
@@ -2618,7 +2606,7 @@ bool User::ProcessRules() {
         if(clsProfileManager::mPtr->IsAllowed(this, clsProfileManager::NOTAGCHECK) == false) {
             if(clsSettingManager::mPtr->i16Shorts[SETSHORT_NO_TAG_OPTION] != 0) {
                 SendChar(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_NO_TAG_MSG], clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_NO_TAG_MSG]);
-                //clsUdpDebug::mPtr->Broadcast("[SYS] User without Tag " + Nick + (" + IP + ") redirected.");
+                //clsUdpDebug::mPtr->BroadcastFormat("[SYS] User without Tag %s (%s) redirected.", sNick, sIP);
                 return false;
             }
         }
@@ -2630,7 +2618,7 @@ bool User::ProcessRules() {
 			if((clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SLOTS_LIMIT] != 0 && Slots < (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SLOTS_LIMIT]) ||
 				(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SLOTS_LIMIT] != 0 && Slots > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SLOTS_LIMIT])) {
                 SendChar(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_SLOTS_LIMIT_MSG], clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_SLOTS_LIMIT_MSG]);
-                //clsUdpDebug::mPtr->Broadcast("[SYS] User with bad slots " + Nick + " (" + IP + ") disconnected.");
+                //clsUdpDebug::mPtr->BroadcastFormat("[SYS] User with bad slots %s (%s) disconnected.", sNick, sIP);
                 return false;
             }
         }
@@ -2642,7 +2630,7 @@ bool User::ProcessRules() {
             uint32_t hubs = Hubs > 0 ? Hubs : 1;
         	if(((double)slots / hubs) < ((double)clsSettingManager::mPtr->i16Shorts[SETSHORT_HUB_SLOT_RATIO_SLOTS] / clsSettingManager::mPtr->i16Shorts[SETSHORT_HUB_SLOT_RATIO_HUBS])) {
         	    SendChar(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SLOT_RATIO_MSG], clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_HUB_SLOT_RATIO_MSG]);
-                //clsUdpDebug::mPtr->Broadcast("[SYS] User with bad hub/slot ratio " + Nick + " (" + IP + ") disconnected.");
+                //clsUdpDebug::mPtr->BroadcastFormat("[SYS] User with bad hub/slot ratio %s (%s) disconnected.", sNick, sIP);
                 return false;
             }
         }
@@ -2651,7 +2639,7 @@ bool User::ProcessRules() {
         if(clsProfileManager::mPtr->IsAllowed(this, clsProfileManager::NOMAXHUBCHECK) == false && clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_HUBS_LIMIT] != 0) {
             if(Hubs > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_HUBS_LIMIT]) {
                 SendChar(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_MAX_HUBS_LIMIT_MSG], clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_MAX_HUBS_LIMIT_MSG]);
-                //clsUdpDebug::mPtr->Broadcast("[SYS] User with bad hubs count " + Nick + " (" + IP + ") disconnected.");
+                //clsUdpDebug::mPtr->BroadcastFormat("[SYS] User with bad hubs count %s (%s) disconnected.", sNick, sIP);
                 return false;
             }
         }

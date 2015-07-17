@@ -36,6 +36,7 @@
 #include <math.h>
 #include <new>
 #include <stdint.h>
+#include <stdarg.h>
 #ifdef _WIN32
 	#include <dos.h>
 
@@ -93,7 +94,14 @@
 #include "pxstring.h"
 //---------------------------------------------------------------------------
 #define PtokaXVersionString "0.5.1.0"
-#define BUILD_NUMBER "507"
+#define BUILD_NUMBER "510"
+const char g_sPtokaXTitle[] = "PtokaX DC Hub " PtokaXVersionString
+#ifdef _PtokaX_TESTING_
+	" [build " BUILD_NUMBER "]";
+#else
+	;
+#endif
+
 
 #ifdef _WIN32
     #define PRIu64 "I64u"

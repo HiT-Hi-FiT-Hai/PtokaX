@@ -587,7 +587,7 @@ bool ScriptStart(Script * cur) {
             (string(clsLanguageManager::mPtr->sTexts[LAN_SYNTAX], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
 #endif
 
-		clsUdpDebug::mPtr->Broadcast("[LUA] "+sMsg);
+		clsUdpDebug::mPtr->BroadcastFormat("[LUA] %s", sMsg.c_str());
 
         if(clsSettingManager::mPtr->bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true) {
             AppendLog(sMsg, true);
@@ -1170,7 +1170,7 @@ void ScriptError(Script * cur) {
         (string(clsLanguageManager::mPtr->sTexts[LAN_SYNTAX], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
 #endif
 
-	clsUdpDebug::mPtr->Broadcast("[LUA] " + sMsg);
+	clsUdpDebug::mPtr->BroadcastFormat("[LUA] %s", sMsg.c_str());
 
     if(clsSettingManager::mPtr->bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true) {
         AppendLog(sMsg, true);

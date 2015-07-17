@@ -260,11 +260,9 @@ bool ServerThread::Listen(bool bSilent/* = false*/) {
 #endif
 		} else {
 #ifdef _BUILD_GUI
-            ::MessageBox(NULL, (string(clsLanguageManager::mPtr->sTexts[LAN_UNB_CRT_SRVR_SCK], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_UNB_CRT_SRVR_SCK]) + " " +
-				string(ui16Port) + " ! " + clsLanguageManager::mPtr->sTexts[LAN_ERROR_CODE] + " " + string(WSAGetLastError())).c_str(), clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
+            ::MessageBox(NULL, (string(clsLanguageManager::mPtr->sTexts[LAN_UNB_CRT_SRVR_SCK], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_UNB_CRT_SRVR_SCK]) + " " + string(ui16Port) + " ! " + clsLanguageManager::mPtr->sTexts[LAN_ERROR_CODE] + " " + string(WSAGetLastError())).c_str(), g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
-            AppendLog(string(clsLanguageManager::mPtr->sTexts[LAN_UNB_CRT_SRVR_SCK], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_UNB_CRT_SRVR_SCK]) + " " +
-				string(ui16Port) + " ! " + clsLanguageManager::mPtr->sTexts[LAN_ERROR_CODE] + " " + string(errno));
+            AppendLog(string(clsLanguageManager::mPtr->sTexts[LAN_UNB_CRT_SRVR_SCK], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_UNB_CRT_SRVR_SCK]) + " " + string(ui16Port) + " ! " + clsLanguageManager::mPtr->sTexts[LAN_ERROR_CODE] + " " + string(errno));
 #endif
         }
         return false;
@@ -343,8 +341,8 @@ bool ServerThread::Listen(bool bSilent/* = false*/) {
 #endif
 		} else {
 #ifdef _BUILD_GUI
-			::MessageBox(NULL, (string(clsLanguageManager::mPtr->sTexts[LAN_SRV_BIND_ERR], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SRV_BIND_ERR]) +
-				": " + string(WSErrorStr(err)) + " (" + string(err) + ") " + clsLanguageManager::mPtr->sTexts[LAN_FOR_PORT_LWR] + ": " + string(ui16Port)).c_str(), clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
+			::MessageBox(NULL, (string(clsLanguageManager::mPtr->sTexts[LAN_SRV_BIND_ERR], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SRV_BIND_ERR]) + ": " + string(WSErrorStr(err)) + " (" + string(err) + ") " + clsLanguageManager::mPtr->sTexts[LAN_FOR_PORT_LWR] + ": " + string(ui16Port)).c_str(), 
+				g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
             AppendLog(string(clsLanguageManager::mPtr->sTexts[LAN_SRV_BIND_ERR], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SRV_BIND_ERR])+
 #ifdef _WIN32
@@ -379,12 +377,10 @@ bool ServerThread::Listen(bool bSilent/* = false*/) {
 #endif
         } else {
 #ifdef _BUILD_GUI
-            ::MessageBox(NULL, (string(clsLanguageManager::mPtr->sTexts[LAN_SRV_LISTEN_ERR], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SRV_LISTEN_ERR]) +
-				": " + string(WSErrorStr(err)) + " (" + string(err) + ") " + clsLanguageManager::mPtr->sTexts[LAN_FOR_PORT_LWR] + ": " + string(ui16Port)).c_str(), clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
+            ::MessageBox(NULL, (string(clsLanguageManager::mPtr->sTexts[LAN_SRV_LISTEN_ERR], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SRV_LISTEN_ERR]) + ": " + string(WSErrorStr(err)) + " (" + string(err) + ") " + clsLanguageManager::mPtr->sTexts[LAN_FOR_PORT_LWR] + ": " + string(ui16Port)).c_str(), 
+				g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
-            AppendLog(string(clsLanguageManager::mPtr->sTexts[LAN_SRV_LISTEN_ERR], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SRV_LISTEN_ERR])+
-				": " + string(errno)+" "+
-				string(clsLanguageManager::mPtr->sTexts[LAN_FOR_PORT_LWR], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+string(ui16Port));
+            AppendLog(string(clsLanguageManager::mPtr->sTexts[LAN_SRV_LISTEN_ERR], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SRV_LISTEN_ERR])+": " + string(errno)+" "+string(clsLanguageManager::mPtr->sTexts[LAN_FOR_PORT_LWR], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_FOR_PORT_LWR])+": "+string(ui16Port));
 #endif
         }
 #ifdef _WIN32

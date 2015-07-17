@@ -33,7 +33,7 @@ public:
 
     static void FinalStop(const bool &bDeleteServiceLoop);
     static void ResumeAccepts();
-    static void SuspendAccepts(const uint32_t &iTime);
+    static void SuspendAccepts(const uint32_t &ui32Time);
     static void UpdateAutoRegState();
 
     static bool Start();
@@ -42,7 +42,7 @@ public:
     static void FinalClose();
     static void CreateServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber, const bool &bResume = false);
 
-    static string sPath, sScriptPath, sTitle;
+    static string sPath, sScriptPath;
 
 #ifdef _WIN32
 	static string sLuaPath, sOS;

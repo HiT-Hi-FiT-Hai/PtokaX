@@ -29,6 +29,7 @@
 #include "LuaScriptManager.h"
 #include "ProfileManager.h"
 #include "ServerManager.h"
+#include "UdpDebug.h"
 #include "User.h"
 #include "utility.h"
 //---------------------------------------------------------------------------
@@ -274,7 +275,7 @@ void clsSettingManager::Load() {
             int imsgLen = sprintf(msg, "Error loading file Settings.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
 			CheckSprintf(imsgLen, 2048, "clsSettingManager::Load");
 #ifdef _BUILD_GUI
-			::MessageBox(NULL, msg, clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
+			::MessageBox(NULL, msg, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
 			AppendLog(msg);
 #endif
@@ -1150,6 +1151,10 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
 #endif
             UpdateHubNameWelcome();
             UpdateHubName();
+
+			if(clsUdpDebug::mPtr != NULL) {
+				clsUdpDebug::mPtr->UpdateHubName();
+			}
             break;
         case SETTXT_LANGUAGE:
             UpdateLanguage();
@@ -1367,7 +1372,7 @@ void clsSettingManager::UpdateHubNameWelcome() {
         return;
     }
 
-    size_t szNeededMem = 19 + ui16TextsLens[SETTXT_HUB_NAME] + ui16PreTextsLens[SETPRETXT_HUB_SEC] + clsLanguageManager::mPtr->ui16TextsLens[LAN_THIS_HUB_IS_RUNNING] + clsServerManager::sTitle.size() +
+    size_t szNeededMem = 19 + ui16TextsLens[SETTXT_HUB_NAME] + ui16PreTextsLens[SETPRETXT_HUB_SEC] + clsLanguageManager::mPtr->ui16TextsLens[LAN_THIS_HUB_IS_RUNNING] + (sizeof(g_sPtokaXTitle)-1) +
         clsLanguageManager::mPtr->ui16TextsLens[LAN_UPTIME];
 
     if(sTexts[SETTXT_HUB_TOPIC] != NULL) {
@@ -1404,14 +1409,13 @@ void clsSettingManager::UpdateHubNameWelcome() {
 #ifdef _PtokaX_TESTING_
             " [build " BUILD_NUMBER "]"
 #endif
-            " (%s: ", sTexts[SETTXT_HUB_NAME], sPreTexts[SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THIS_HUB_IS_RUNNING], clsServerManager::sTitle.c_str(), clsLanguageManager::mPtr->sTexts[LAN_UPTIME]);
+            " (%s: ", sTexts[SETTXT_HUB_NAME], sPreTexts[SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THIS_HUB_IS_RUNNING], g_sPtokaXTitle, clsLanguageManager::mPtr->sTexts[LAN_UPTIME]);
     } else {
         iMsgLen =  sprintf(sPreTexts[SETPRETXT_HUB_NAME_WLCM], "$HubName %s - %s|<%s> %s %s"
 #ifdef _PtokaX_TESTING_
             " [build " BUILD_NUMBER "]"
 #endif
-            " (%s: ", sTexts[SETTXT_HUB_NAME], sTexts[SETTXT_HUB_TOPIC], sPreTexts[SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THIS_HUB_IS_RUNNING], clsServerManager::sTitle.c_str(),
-            clsLanguageManager::mPtr->sTexts[LAN_UPTIME]);
+            " (%s: ", sTexts[SETTXT_HUB_NAME], sTexts[SETTXT_HUB_TOPIC], sPreTexts[SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THIS_HUB_IS_RUNNING], g_sPtokaXTitle, clsLanguageManager::mPtr->sTexts[LAN_UPTIME]);
     }
     
     if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateHubNameWelcome") == false) {

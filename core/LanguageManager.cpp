@@ -105,7 +105,7 @@ void clsLanguageManager::Load() {
                 int imsgLen = sprintf(msg, "Error loading file %s.xml. %s (Col: %d, Row: %d)", clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE], doc.ErrorDesc(), doc.Column(), doc.Row());
                 CheckSprintf(imsgLen, 2048, "clsLanguageManager::Load");
 #ifdef _BUILD_GUI
-                ::MessageBox(NULL, msg, clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
+                ::MessageBox(NULL, msg, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
                 AppendLog(msg);
 #endif

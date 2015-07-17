@@ -960,36 +960,7 @@ void AppendLog(const string & sData, const bool &bScript/* == false*/) {
 	}
 
     if(clsUdpDebug::mPtr != NULL && bScript == false) {
-        if(sData.size() < 1000) {
-            static char msg[1024];
-            int imsgLen = sprintf(msg, "[LOG] %s", sData.c_str());
-            if(CheckSprintf(imsgLen, 1024, "AppendLog1") == true) {
-                clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
-            }
-        } else {
-#ifdef _WIN32
-            char * sMSG = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, sData.size()+64);
-#else
-			char * sMSG = (char *)malloc(sData.size()+64);
-#endif
-            if(sMSG == NULL) {
-    			AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMSG in AppendLog\n", (uint64_t)(sData.size()+64));
-                return;
-            }
-
-            int imsgLen = sprintf(sMSG, "[LOG] %s", sData.c_str());
-            if(CheckSprintf(imsgLen, sData.size()+64, "AppendLog2") == true) {
-                clsUdpDebug::mPtr->Broadcast(sMSG, imsgLen);
-            }
-
-#ifdef _WIN32
-            if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMSG) == 0) {
-    			AppendDebugLog("%s - [MEM] Cannot deallocate MSG in AppendLog\n", 0);
-            }
-#else
-			free(sMSG);
-#endif
-        }
+		clsUdpDebug::mPtr->BroadcastFormat("[LOG] %s", sData.c_str());
     }
 }
 //---------------------------------------------------------------------------

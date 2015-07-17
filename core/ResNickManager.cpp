@@ -125,7 +125,7 @@ clsReservedNicksManager::clsReservedNicksManager() : pReservedNicks(NULL) {
             int imsgLen = sprintf(msg, "Error loading file ReservedNicks.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
 			CheckSprintf(imsgLen, 2048, "clsReservedNicksManager::clsReservedNicksManager");
 #ifdef _BUILD_GUI
-			::MessageBox(NULL, msg, clsServerManager::sTitle.c_str(), MB_OK | MB_ICONERROR);
+			::MessageBox(NULL, msg, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
 			AppendLog(msg);
 #endif
