@@ -111,8 +111,7 @@ bool clsTextFilesManager::ProcessTextFilesCmd(User * u, char * cmd, bool fromPM/
             }
 
             if(bInPM == true) {
-                int iret = sprintf(sMSG, "$To: %s From: %s $<%s> %s", u->sNick, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
-                    cur->sText);
+                int iret = sprintf(sMSG, "$To: %s From: %s $<%s> %s", u->sNick, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], cur->sText);
                 if(CheckSprintf(iret, szChatLen, "clsTextFilesManager::ProcessTextFilesCmd1") == false) {
                     free(sMSG);
                     return true;

@@ -294,14 +294,8 @@ bool clsRegManager::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfil
                                 clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_OP_CHAT_HELLO]);
                         }
 
-                        AddedUser->SendCharDelayed(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_OP_CHAT_MYINFO],
-                            clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_OP_CHAT_MYINFO]);
-
-						char msg[128];
-						int imsgLen = sprintf(msg, "$OpList %s$$|", clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]);
-                        if(CheckSprintf(imsgLen, 128, "clsRegManager::AddNew") == true) {
-                            AddedUser->SendCharDelayed(msg, imsgLen);
-                        }
+                        AddedUser->SendCharDelayed(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_OP_CHAT_MYINFO], clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_OP_CHAT_MYINFO]);
+                        AddedUser->SendFormat("clsRegManager::AddNew", true, "$OpList %s$$|", clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]);
                     }
                 }
             }
@@ -390,22 +384,12 @@ void clsRegManager::ChangeReg(RegUser * pReg, char * sNewPasswd, const uint16_t 
                         clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_OP_CHAT_HELLO]);
                     }
 
-                    ChangedUser->SendCharDelayed(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_OP_CHAT_MYINFO],
-                        clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_OP_CHAT_MYINFO]);
-
-                    char msg[128];
-                    int imsgLen = sprintf(msg, "$OpList %s$$|", clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]);
-                    if(CheckSprintf(imsgLen, 128, "clsRegManager::ChangeReg1") == true) {
-                        ChangedUser->SendCharDelayed(msg, imsgLen);
-                    }
+                    ChangedUser->SendCharDelayed(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_OP_CHAT_MYINFO], clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_OP_CHAT_MYINFO]);
+                    ChangedUser->SendFormat("clsRegManager::ChangeReg1", true, "$OpList %s$$|", clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]);
                 }
             } else {
                 if(clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] == true && (clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] == false || clsSettingManager::mPtr->bBotsSameNick == false)) {
-                    char msg[128];
-                    int imsgLen = sprintf(msg, "$Quit %s|", clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]);
-                    if(CheckSprintf(imsgLen, 128, "clsRegManager::ChangeReg2") == true) {
-                        ChangedUser->SendCharDelayed(msg, imsgLen);
-                    }
+                    ChangedUser->SendFormat("clsRegManager::ChangeReg2", true, "$Quit %s|", clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]);
                 }
             }
         }
@@ -434,11 +418,7 @@ void clsRegManager::Delete(RegUser * pReg, const bool &/*bFromGui = false*/) {
                 pRemovedUser->ui32BoolBits &= ~User::BIT_OPERATOR;
 
                 if(clsSettingManager::mPtr->bBools[SETBOOL_REG_OP_CHAT] == true && (clsSettingManager::mPtr->bBools[SETBOOL_REG_BOT] == false || clsSettingManager::mPtr->bBotsSameNick == false)) {
-                    char msg[128];
-                    int imsgLen = sprintf(msg, "$Quit %s|", clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]);
-                    if(CheckSprintf(imsgLen, 128, "clsRegManager::Delete") == true) {
-                        pRemovedUser->SendCharDelayed(msg, imsgLen);
-                    }
+                    pRemovedUser->SendFormat("clsRegManager::Delete", true, "$Quit %s|", clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]);
                 }
             }
         }

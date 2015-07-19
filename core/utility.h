@@ -59,23 +59,18 @@ uint32_t HashNick(const char * sNick, const size_t &szNickLen);
 bool HashIP(const char * sIP, uint8_t * ui128IpHash);
 uint16_t GetIpTableIdx(const uint8_t * ui128IpHash);
 
-char * GenerateBanMessage(BanItem * Ban, int32_t &iMsgLen, const time_t &acc_time);
-char * GenerateRangeBanMessage(RangeBanItem * RangeBan, int32_t &iMsgLen, const time_t &acc_time);
+int GenerateBanMessage(BanItem * pBan, const time_t &tmAccTime);
+int GenerateRangeBanMessage(RangeBanItem * pRangeBan, const time_t &tmAccTime);
 
 bool GenerateTempBanTime(const char &cMultiplyer, const uint32_t &iTime, time_t &acc_time, time_t &ban_time);
 
 bool HaveOnlyNumbers(char *sData, const uint16_t &ui16Len);
-int GetWlcmMsg(char * sWlcmMsg);
 
 inline size_t Allign256(size_t n) { return ((n+1) & 0xFFFFFF00) + 0x100; }
 inline size_t Allign512(size_t n) { return ((n+1) & 0xFFFFFE00) + 0x200; }
 inline size_t Allign1024(size_t n) { return ((n+1) & 0xFFFFFC00) + 0x400; }
 inline size_t Allign16K(size_t n) { return ((n+1) & 0xFFFFC000) + 0x4000; }
 inline size_t Allign128K(size_t n) { return ((n+1) & 0xFFFE0000) + 0x20000; }
-
-#ifdef _WIN32
-	string GetMemStat();
-#endif
 
 bool CheckSprintf(const int &iRetVal, const size_t &szMax, const char * sMsg); // CheckSprintf(imsgLen, 64, "UdpDebug::New");
 bool CheckSprintf1(const int &iRetVal, const size_t &szLenVal, const size_t &szMax, const char * sMsg); // CheckSprintf1(iret, imsgLen, 64, "UdpDebug::New");

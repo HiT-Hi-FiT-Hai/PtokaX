@@ -1777,9 +1777,9 @@ static int Kick(lua_State * L) {
         return 1;
     }
 
-    User *u = ScriptGetUser(L, 3, "Kick");
+    User * pUser = ScriptGetUser(L, 3, "Kick");
 
-    if(u == NULL) {
+    if(pUser == NULL) {
 		lua_settop(L, 0);
         lua_pushnil(L);
         return 1;
@@ -1796,24 +1796,21 @@ static int Kick(lua_State * L) {
         return 1;
     }
 
-    clsBanManager::mPtr->TempBan(u, sReason, sKicker, 0, 0, false);
+    clsBanManager::mPtr->TempBan(pUser, sReason, sKicker, 0, 0, false);
 
-    int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> %s: %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_BEING_KICKED_BCS], sReason);
-    if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "Kick5") == true) {
-    	u->SendCharDelayed(clsServerManager::pGlobalBuffer, imsgLen);
-    }
+    pUser->SendFormat("Core.Kick", false, "<%s> %s: %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_BEING_KICKED_BCS], sReason);
 
     if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
     	if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-    	    imsgLen = sprintf(clsServerManager::pGlobalBuffer, "%s $<%s> *** %s %s IP %s %s %s %s: %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
-                clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], u->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_LWR], u->sIP, clsLanguageManager::mPtr->sTexts[LAN_WAS_KICKED_BY], sKicker,
+    	    int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "%s $<%s> *** %s %s IP %s %s %s %s: %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
+                clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], pUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_LWR], pUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_WAS_KICKED_BY], sKicker,
                 clsLanguageManager::mPtr->sTexts[LAN_BECAUSE_LWR], sReason);
             if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "Kick6") == true) {
 				clsGlobalDataQueue::mPtr->SingleItemStore(clsServerManager::pGlobalBuffer, imsgLen, NULL, 0, clsGlobalDataQueue::SI_PM2OPS);
             }
     	} else {
-    	    imsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> *** %s %s IP %s %s %s %s: %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], u->sNick,
-                clsLanguageManager::mPtr->sTexts[LAN_WITH_LWR], u->sIP, clsLanguageManager::mPtr->sTexts[LAN_WAS_KICKED_BY], sKicker, clsLanguageManager::mPtr->sTexts[LAN_BECAUSE_LWR], sReason);
+    	    int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> *** %s %s IP %s %s %s %s: %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], pUser->sNick,
+                clsLanguageManager::mPtr->sTexts[LAN_WITH_LWR], pUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_WAS_KICKED_BY], sKicker, clsLanguageManager::mPtr->sTexts[LAN_BECAUSE_LWR], sReason);
             if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "Kick7") == true) {
                 clsGlobalDataQueue::mPtr->AddQueueItem(clsServerManager::pGlobalBuffer, imsgLen, NULL, 0, clsGlobalDataQueue::CMD_OPS);
             }
@@ -1821,9 +1818,9 @@ static int Kick(lua_State * L) {
     }
 
     // disconnect the user
-	clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) kicked by script.", u->sNick, u->sIP);
+	clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) kicked by script.", pUser->sNick, pUser->sIP);
 
-    u->Close();
+    pUser->Close();
     
     lua_settop(L, 0);
 
@@ -1849,9 +1846,9 @@ static int Redirect(lua_State * L) {
         return 1;
     }
 
-    User *u = ScriptGetUser(L, 3, "Redirect");
+    User * pUser = ScriptGetUser(L, 3, "Redirect");
 
-    if(u == NULL) {
+    if(pUser == NULL) {
 		lua_settop(L, 0);
         lua_pushnil(L);
         return 1;
@@ -1868,16 +1865,12 @@ static int Redirect(lua_State * L) {
         return 1;
     }
 
-    int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> %s %s. %s: %s|$ForceMove %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_REDIR_TO],
-        sAddress, clsLanguageManager::mPtr->sTexts[LAN_MESSAGE], sReason, sAddress);
-    if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "Redirect2") == true) {
-        u->SendChar(clsServerManager::pGlobalBuffer, imsgLen);
-    }
+    pUser->SendFormat("Core.Redirect", false, "<%s> %s %s. %s: %s|$ForceMove %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_REDIR_TO], sAddress, clsLanguageManager::mPtr->sTexts[LAN_MESSAGE], sReason, sAddress);
 
 
-//	clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) redirected by script.", u->sNick, u->sIP);
+//	clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) redirected by script.", pUser->sNick, pUser->sIP);
 
-    u->Close();
+    pUser->Close();
     
     lua_settop(L, 0);
 
@@ -2240,12 +2233,9 @@ static int SendPmToNick(lua_State * L) {
         return 0;
     }
 
-    User *u = clsHashManager::mPtr->FindUser(sTo, szToLen);
-    if(u != NULL) {
-        int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "$To: %s From: %s $<%s> %s|", sTo, sFrom, sFrom, sData);
-        if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "SendPmToNick") == true) {
-            u->SendCharDelayed(clsServerManager::pGlobalBuffer, iMsgLen);
-        }
+    User * pUser = clsHashManager::mPtr->FindUser(sTo, szToLen);
+    if(pUser != NULL) {
+        pUser->SendFormat("Core.SendPmToNick", true, "$To: %s From: %s $<%s> %s|", sTo, sFrom, sFrom, sData);
     }
 
     lua_settop(L, 0);
@@ -2337,9 +2327,9 @@ static int SendPmToUser(lua_State * L) {
         return 0;
     }
 
-    User *u = ScriptGetUser(L, 3, "SendPmToUser");
+    User * pUser = ScriptGetUser(L, 3, "SendPmToUser");
 
-    if(u == NULL) {
+    if(pUser == NULL) {
 		lua_settop(L, 0);
         return 0;
     }
@@ -2353,10 +2343,7 @@ static int SendPmToUser(lua_State * L) {
         return 0;
     }
 
-    int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "$To: %s From: %s $<%s> %s|", u->sNick, sFrom, sFrom, sData);
-    if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "SendPmToUser") == true) {
-        u->SendCharDelayed(clsServerManager::pGlobalBuffer, imsgLen);
-    }
+    pUser->SendFormat("Core.SendPmToUser", true, "$To: %s From: %s $<%s> %s|", pUser->sNick, sFrom, sFrom, sData);
 
     lua_settop(L, 0);
     return 0;

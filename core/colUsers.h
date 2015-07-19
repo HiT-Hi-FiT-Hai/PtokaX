@@ -95,7 +95,7 @@ public:
 	void Add2UserIP(User * cur);
 	void DelFromUserIP(User * cur);
 	void Add2RecTimes(User * curUser);
-	bool CheckRecTime(User * curUser);
+	bool CheckRecTime(User * pUser);
 };
 //---------------------------------------------------------------------------
 

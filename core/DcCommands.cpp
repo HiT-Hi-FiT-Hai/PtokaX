@@ -478,10 +478,7 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                 if(curUser->pLogInOut != NULL && curUser->pLogInOut->pBuffer != NULL) {
                                     int iProfile = clsProfileManager::mPtr->GetProfileIndex(curUser->pLogInOut->pBuffer);
                                     if(iProfile == -1) {
-               	                        int iMsgLen = sprintf(msg, "<%s> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_ERR_NO_PROFILE_GIVEN_NAME_EXIST]);
-                                        if(CheckSprintf(iMsgLen, 1024, "clsDcCommands::PreProcessData::MyPass->RegUser") == true) {
-                                            curUser->SendCharDelayed(msg, iMsgLen);
-                                        }
+                                        curUser->SendFormat("clsDcCommands::PreProcessData::MyPass->RegUser1", true, "<%s> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_ERR_NO_PROFILE_GIVEN_NAME_EXIST]);
 
                                         delete curUser->pLogInOut;
                                         curUser->pLogInOut = NULL;
@@ -490,10 +487,7 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                     }
                                     
                                     if(iLen > 73) {
-                                        int iMsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_MAX_ALWD_PASS_LEN_64_CHARS]);
-                                        if(CheckSprintf(iMsgLen, 1024, "clsDcCommands::PreProcessData::MyPass->RegUser1") == true) {
-                                            curUser->SendCharDelayed(msg, iMsgLen);
-                                        }
+                                        curUser->SendFormat("clsDcCommands::PreProcessData::MyPass->RegUser2", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_MAX_ALWD_PASS_LEN_64_CHARS]);
 
                                         delete curUser->pLogInOut;
                                         curUser->pLogInOut = NULL;
@@ -504,17 +498,9 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                     sData[iLen-1] = '\0'; // cutoff pipe
 
                                     if(clsRegManager::mPtr->AddNew(curUser->sNick, sData+8, (uint16_t)iProfile) == false) {
-                                        int iMsgLen = sprintf(msg, "<%s> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
-                                            clsLanguageManager::mPtr->sTexts[LAN_SORRY_YOU_ARE_ALREADY_REGISTERED]);
-                                        if(CheckSprintf(iMsgLen, 1024, "clsDcCommands::PreProcessData::MyPass->RegUser2") == true) {
-                                            curUser->SendCharDelayed(msg, iMsgLen);
-                                        }
+                                        curUser->SendFormat("clsDcCommands::PreProcessData::MyPass->RegUser3", true, "<%s> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_YOU_ARE_ALREADY_REGISTERED]);
                                     } else {
-                                        int iMsgLen = sprintf(msg, "<%s> %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
-                                            clsLanguageManager::mPtr->sTexts[LAN_THANK_YOU_FOR_PASSWORD_YOU_ARE_NOW_REGISTERED_AS], curUser->pLogInOut->pBuffer);
-                                        if(CheckSprintf(iMsgLen, 1024, "clsDcCommands::PreProcessData::MyPass->RegUser2") == true) {
-                                            curUser->SendCharDelayed(msg, iMsgLen);
-                                        }
+                                        curUser->SendFormat("clsDcCommands::PreProcessData::MyPass->RegUser4", true, "<%s> %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THANK_YOU_FOR_PASSWORD_YOU_ARE_NOW_REGISTERED_AS], curUser->pLogInOut->pBuffer);
                                     }
 
                                     delete curUser->pLogInOut;
@@ -540,12 +526,8 @@ void clsDcCommands::PreProcessData(User * curUser, char * sData, const bool &bCh
                                                         clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_OP_CHAT_HELLO]);
                                                 }
 
-                                                curUser->SendCharDelayed(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_OP_CHAT_MYINFO],
-                                                    clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_OP_CHAT_MYINFO]);
-                                                int imsgLen = sprintf(msg, "$OpList %s$$|", clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]);
-                                                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::PreProcessData::MyPass->RegUser3") == true) {
-                                                    curUser->SendCharDelayed(msg, imsgLen);
-                                                }
+                                                curUser->SendCharDelayed(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_OP_CHAT_MYINFO], clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_OP_CHAT_MYINFO]);
+                                                curUser->SendFormat("clsDcCommands::PreProcessData::MyPass->RegUser5", true, "$OpList %s$$|", clsSettingManager::mPtr->sTexts[SETTXT_OP_CHAT_NICK]);
                                             }
                                         }
                                     }
@@ -957,13 +939,9 @@ void clsDcCommands::BotINFO(User * curUser, char * sData, const uint32_t &iLen) 
 		return;
 	}
 
-	int imsgLen = sprintf(msg, "$HubINFO %s$%s:%hu$%s.px.$%hd$%" PRIu64 "$%hd$%hd$PtokaX$%s|", clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS],
-        clsSettingManager::mPtr->ui16PortNumbers[0], clsSettingManager::mPtr->sTexts[SETTXT_HUB_DESCRIPTION] == NULL ? "" : clsSettingManager::mPtr->sTexts[SETTXT_HUB_DESCRIPTION],
-        clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_USERS], clsSettingManager::mPtr->ui64MinShare, clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SLOTS_LIMIT], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_HUBS_LIMIT],
-		clsSettingManager::mPtr->sTexts[SETTXT_HUB_OWNER_EMAIL] == NULL ? "" : clsSettingManager::mPtr->sTexts[SETTXT_HUB_OWNER_EMAIL]);
-	if(CheckSprintf(imsgLen, 1024, "clsDcCommands::BotINFO4") == true) {
-        curUser->SendCharDelayed(msg, imsgLen);
-    }
+    curUser->SendFormat("clsDcCommands::BotINFO", true, "$HubINFO %s$%s:%hu$%s.px.$%hd$%" PRIu64 "$%hd$%hd$PtokaX$%s|", clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS], clsSettingManager::mPtr->ui16PortNumbers[0], 
+		clsSettingManager::mPtr->sTexts[SETTXT_HUB_DESCRIPTION] == NULL ? "" : clsSettingManager::mPtr->sTexts[SETTXT_HUB_DESCRIPTION], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_USERS], clsSettingManager::mPtr->ui64MinShare, clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SLOTS_LIMIT], 
+		clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_HUBS_LIMIT], clsSettingManager::mPtr->sTexts[SETTXT_HUB_OWNER_EMAIL] == NULL ? "" : clsSettingManager::mPtr->sTexts[SETTXT_HUB_OWNER_EMAIL]);
 
 	if(((curUser->ui32BoolBits & User::BIT_HAVE_GETNICKLIST) == User::BIT_HAVE_GETNICKLIST) == true) {
 		curUser->Close();
@@ -1001,10 +979,7 @@ void clsDcCommands::ConnectToMe(User * curUser, char * sData, const uint32_t &iL
     }
 
     if(iLen > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_CTM_LEN]) {
-        int imsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_CTM_TOO_LONG]);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ConnectToMe2") == true) {
-            curUser->SendCharDelayed(msg, imsgLen);
-        }
+        curUser->SendFormat("clsDcCommands::ConnectToMe", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_CTM_TOO_LONG]);
 
         if(iLen > 65000) {
             sData[65000] = '\0';
@@ -1140,19 +1115,6 @@ void clsDcCommands::GetINFO(User * curUser, char * sData, const uint32_t &iLen) 
 		curUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
-
-	// PPK ... for now this is disabled, used by flooders... change later
-/*    sData[iLen-curUser->NickLen-2] = '\0';
-    sData += 9;
-    User *OtherUser = clsHashManager::mPtr->FindUser(sData);
-    if(OtherUser == NULL) {
-        // if the user is not here then send $Quit user| !!!
-        // so the client can remove him from nicklist :)
-        if(ReservedNicks->IndexOf(sData) == -1) {
-            int imsgLen = sprintf(msg, "$Quit %s|", OtherUser->Nick);
-            curUser->SendCharDelayed(msg, imsgLen);
-        }
-    }*/
 }
 //---------------------------------------------------------------------------
 
@@ -1354,10 +1316,7 @@ void clsDcCommands::Key(User * curUser, char * sData, const uint32_t &iLen) {
 // $Kick <name>
 void clsDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
     if(clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::KICK) == false) {
-        int iLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALWD_TO_USE_THIS_CMD]);
-        if(CheckSprintf(iLen, 1024, "clsDcCommands::Kick1") == true) {
-            curUser->SendCharDelayed(msg, iLen);
-        }
+        curUser->SendFormat("clsDcCommands::Kick1", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALWD_TO_USE_THIS_CMD]);
         return;
     } 
 
@@ -1379,18 +1338,12 @@ void clsDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
     if(OtherUser != NULL) {
         // Self-kick
         if(OtherUser == curUser) {
-        	int imsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_CANT_KICK_YOURSELF]);
-        	if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Kick3") == true) {
-                curUser->SendCharDelayed(msg, imsgLen);
-            }
+            curUser->SendFormat("clsDcCommands::Kick2", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_CANT_KICK_YOURSELF]);
             return;
     	}
     	
         if(OtherUser->i32Profile != -1 && curUser->i32Profile > OtherUser->i32Profile) {
-        	int imsgLen = sprintf(msg, "<%s> %s %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALLOWED_TO_KICK], OtherUser->sNick);
-        	if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Kick4") == true) {
-                curUser->SendCharDelayed(msg, imsgLen);
-            }
+            curUser->SendFormat("clsDcCommands::Kick3", true, "<%s> %s %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALLOWED_TO_KICK], OtherUser->sNick);
         	return;
         }
 
@@ -1451,11 +1404,7 @@ void clsDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
 
 			if(sBanTime[5] == '\0' || sBanTime[5] == ' ') { // permban
                 if(clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::BAN) == false) {
-                    int imsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALWD_TO_USE_THIS_CMD]);
-                    if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Kick->_BAN_") == true) {
-                        curUser->SendCharDelayed(msg, imsgLen);
-                    }
-
+					curUser->SendFormat("clsDcCommands::Kick4", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALWD_TO_USE_THIS_CMD]);
                     return;
                 }
 
@@ -1482,11 +1431,8 @@ void clsDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
                 }
 
                 if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES] == false || ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
-                    int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], OtherUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP],
-                        OtherUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_HAS_BEEN], clsLanguageManager::mPtr->sTexts[LAN_BANNED_LWR]);
-					if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Kick7") == true) {
-                        curUser->SendCharDelayed(msg, imsgLen);
-                    }
+                    curUser->SendFormat("clsDcCommands::Kick5", true, "<%s> *** %s %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], OtherUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], OtherUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_HAS_BEEN], 
+						clsLanguageManager::mPtr->sTexts[LAN_BANNED_LWR]);
                 }
 
         		// disconnect the user
@@ -1497,11 +1443,7 @@ void clsDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
                 return;
 			} else if(isdigit(sBanTime[5]) != 0) { // tempban
                 if(clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::TEMP_BAN) == false) {
-                    int imsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALWD_TO_USE_THIS_CMD]);
-                    if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Kick->_BAN_2") == true) {
-                        curUser->SendCharDelayed(msg, imsgLen);
-                    }
-
+                    curUser->SendFormat("clsDcCommands::Kick6", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALWD_TO_USE_THIS_CMD]);
                     return;
                 }
 
@@ -1542,12 +1484,8 @@ void clsDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
                     }
                 
                     if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES] == false || ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
-                        int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s %s: %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], OtherUser->sNick,
-                            clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], OtherUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_HAS_BEEN], clsLanguageManager::mPtr->sTexts[LAN_TEMP_BANNED],
-                            clsLanguageManager::mPtr->sTexts[LAN_TO_LWR], sTime);
-                        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Kick11") == true) {
-                            curUser->SendCharDelayed(msg, imsgLen);
-                        }
+                        curUser->SendFormat("clsDcCommands::Kick7", true, "<%s> *** %s %s %s %s %s %s: %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], OtherUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], OtherUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_HAS_BEEN], 
+							clsLanguageManager::mPtr->sTexts[LAN_TEMP_BANNED], clsLanguageManager::mPtr->sTexts[LAN_TO_LWR], sTime);
                 	}
     
                     // disconnect the user
@@ -1582,11 +1520,7 @@ void clsDcCommands::Kick(User * curUser, char * sData, const uint32_t &iLen) {
         }
 
         if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES] == false || ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
-            int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], OtherUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], OtherUser->sIP,
-                clsLanguageManager::mPtr->sTexts[LAN_WAS_KICKED]);
-            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Kick15") == true) {
-                curUser->SendCharDelayed(msg, imsgLen);
-            }
+            curUser->SendFormat("clsDcCommands::Kick8", true, "<%s> *** %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], OtherUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], OtherUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_WAS_KICKED]);
         }
 
         // disconnect the user
@@ -1708,19 +1642,11 @@ void clsDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const boo
             iCount = iLen-2-iChar;
 
             if(iCount < (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SEARCH_LEN]) {
-                int imsgLen = sprintf(msg, "<%s> %s %hd.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_MIN_SEARCH_LEN_IS],
-                    clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SEARCH_LEN]);
-                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Search5") == true) {
-                    curUser->SendCharDelayed(msg, imsgLen);
-                }
+                curUser->SendFormat("clsDcCommands::Search1", true, "<%s> %s %hd.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_MIN_SEARCH_LEN_IS], clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SEARCH_LEN]);
                 return;
             }
             if(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN] != 0 && iCount > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN]) {
-                int imsgLen = sprintf(msg, "<%s> %s %hd.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_MAX_SEARCH_LEN_IS],
-                    clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN]);
-                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Search6") == true) {
-                    curUser->SendCharDelayed(msg, imsgLen);
-                }
+                curUser->SendFormat("clsDcCommands::Search2", true, "<%s> %s %hd.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_MAX_SEARCH_LEN_IS], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN]);
                 return;
             }
         }
@@ -1751,19 +1677,11 @@ void clsDcCommands::Search(User *curUser, char * sData, uint32_t iLen, const boo
             iCount = iLen-2-iChar;
 
             if(iCount < (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SEARCH_LEN]) {
-                int imsgLen = sprintf(msg, "<%s> %s %hd.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_MIN_SEARCH_LEN_IS],
-                    clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SEARCH_LEN]);
-                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Search10") == true) {
-                    curUser->SendCharDelayed(msg, imsgLen);
-                }
+                curUser->SendFormat("clsDcCommands::Search3", true, "<%s> %s %hd.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_MIN_SEARCH_LEN_IS], clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SEARCH_LEN]);
                 return;
             }
             if(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN] != 0 && iCount > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN]) {
-                int imsgLen = sprintf(msg, "<%s> %s %hd.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_MAX_SEARCH_LEN_IS],
-                    clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN]);
-                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Search11") == true) {
-                    curUser->SendCharDelayed(msg, imsgLen);
-                }
+                curUser->SendFormat("clsDcCommands::Search4", true, "<%s> %s %hd.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_MAX_SEARCH_LEN_IS], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN]);
                 return;
             }
         }
@@ -1915,10 +1833,7 @@ bool clsDcCommands::MyINFODeflood(User * curUser, char * sData, const uint32_t &
     }
 
     if(iLen > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_MYINFO_LEN]) {
-        int imsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_MYINFO_TOO_LONG]);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::MyINFODeflood2") == true) {
-            curUser->SendCharDelayed(msg, imsgLen);
-        }
+        curUser->SendFormat("clsDcCommands::MyINFODeflood", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_MYINFO_TOO_LONG]);
 
         if(iLen > 65000) {
             sData[65000] = '\0';
@@ -2057,15 +1972,10 @@ void clsDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
                             clsBanManager::mPtr->TempBanIp(curUser, NULL, msg, NULL, clsSettingManager::mPtr->i16Shorts[SETSHORT_BRUTE_FORCE_PASS_PROTECT_TEMP_BAN_TIME]*60, 0, true);
                         }
                         Remove(PassBfItem);
-                        int imsgLen = sprintf(msg, "<%s> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOUR_IP_BANNED_BRUTE_FORCE_ATTACK]);
-                        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::MyPass5") == true) {
-                            curUser->SendChar(msg, imsgLen);
-                        }
+
+                        curUser->SendFormat("clsDcCommands::MyPass1", false, "<%s> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOUR_IP_BANNED_BRUTE_FORCE_ATTACK]);
                     } else {
-                        int imsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOUR_IS_BANNED]);
-                        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::MyPass6") == true) {
-                            curUser->SendChar(msg, imsgLen);
-                        }
+                        curUser->SendFormat("clsDcCommands::MyPass2", false, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOUR_IS_BANNED]);
                     }
                     if(clsSettingManager::mPtr->bBools[SETBOOL_REPORT_3X_BAD_PASS] == true) {
                         if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
@@ -2097,10 +2007,7 @@ void clsDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
             }
         }
 
-        int imsgLen = sprintf(msg, "$BadPass|<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_INCORRECT_PASSWORD]);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::MyPass12") == true) {
-            curUser->SendChar(msg, imsgLen);
-        }
+        curUser->SendFormat("clsDcCommands::MyPass3", false, "$BadPass|<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_INCORRECT_PASSWORD]);
 
         if(iLen > 65000) {
             sData[65000] = '\0';
@@ -2156,19 +2063,12 @@ void clsDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
             // welcome the new user
             // PPK ... fixed bad DC protocol implementation, $LogedIn is only for OPs !!!
             // registered DC1 users have enabled OP menu :)))))))))
-            int imsgLen;
             if(((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == true) {
-                imsgLen = sprintf(msg, "$Hello %s|$LogedIn %s|", curUser->sNick, curUser->sNick);
-                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::MyPass15") == false) {
-                    return;
-                }
+                curUser->SendFormat("clsDcCommands::MyPass4", true, "$Hello %s|$LogedIn %s|", curUser->sNick, curUser->sNick);
             } else {
-                imsgLen = sprintf(msg, "$Hello %s|", curUser->sNick);
-                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::MyPass16") == false) {
-                    return;
-                }
+                curUser->SendFormat("clsDcCommands::MyPass5", true, "$Hello %s|", curUser->sNick);
             }
-            curUser->SendCharDelayed(msg, imsgLen);
+
             return;
         } else {
             if(((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == false) {
@@ -2182,10 +2082,7 @@ void clsDcCommands::MyPass(User * curUser, char * sData, const uint32_t &iLen) {
 // $OpForceMove $Who:<nickname>$Where:<iptoredirect>$Msg:<a message>
 void clsDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iLen) {
     if(clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::REDIRECT) == false) {
-        int iLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALWD_TO_USE_THIS_CMD]);
-        if(CheckSprintf(iLen, 1024, "clsDcCommands::OpForceMove1") == true) {
-            curUser->SendCharDelayed(msg, iLen);
-        }
+        curUser->SendFormat("clsDcCommands::OpForceMove1", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALWD_TO_USE_THIS_CMD]);
         return;
     }
 
@@ -2234,22 +2131,11 @@ void clsDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iL
     User *OtherUser = clsHashManager::mPtr->FindUser(sCmdParts[0], iCmdPartsLen[0]);
     if(OtherUser) {
    	    if(OtherUser->i32Profile != -1 && curUser->i32Profile > OtherUser->i32Profile) {
-            int imsgLen = sprintf(msg, "<%s> %s %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALLOWED_TO_REDIRECT], OtherUser->sNick);
-            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::OpForceMove3") == true) {
-                curUser->SendCharDelayed(msg, imsgLen);
-            }
+            curUser->SendFormat("clsDcCommands::OpForceMove2", true, "<%s> %s %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALLOWED_TO_REDIRECT], OtherUser->sNick);
             return;
         } else {
-            int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> %s %s %s %s. %s: %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_REDIRECTED_TO],
-                sCmdParts[1]+6, clsLanguageManager::mPtr->sTexts[LAN_BY_LWR], curUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
-            if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::OpForceMove4") == true) {
-                OtherUser->SendCharDelayed(clsServerManager::pGlobalBuffer, imsgLen);
-            }
-
-            imsgLen = sprintf(clsServerManager::pGlobalBuffer, "$ForceMove %s|", sCmdParts[1]+6);
-            if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::OpForceMove6") == true) {
-                OtherUser->SendChar(clsServerManager::pGlobalBuffer, imsgLen);
-            }
+            OtherUser->SendFormat("clsDcCommands::OpForceMove3", false, "<%s> %s %s %s %s. %s: %s|$ForceMove %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_REDIRECTED_TO], sCmdParts[1]+6, clsLanguageManager::mPtr->sTexts[LAN_BY_LWR], curUser->sNick, 
+				clsLanguageManager::mPtr->sTexts[LAN_MESSAGE], sCmdParts[2]+4, sCmdParts[1]+6);
 
             // PPK ... close user !!!
 			clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) redirected by %s", OtherUser->sNick, OtherUser->sIP, curUser->sNick);
@@ -2258,14 +2144,14 @@ void clsDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iL
 
             if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
                 if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-                    imsgLen = sprintf(clsServerManager::pGlobalBuffer, "%s $<%s> *** %s %s %s %s %s. %s: %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
+                    int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "%s $<%s> *** %s %s %s %s %s. %s: %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
                         clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], OtherUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_IS_REDIRECTED_TO], sCmdParts[1]+6,
                         clsLanguageManager::mPtr->sTexts[LAN_BY_LWR], curUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
                     if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::OpForceMove7") == true) {
 						clsGlobalDataQueue::mPtr->SingleItemStore(clsServerManager::pGlobalBuffer, imsgLen, NULL, 0, clsGlobalDataQueue::SI_PM2OPS);
                     }
                 } else {
-                    imsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> *** %s %s %s %s %s. %s: %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], OtherUser->sNick,
+                    int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> *** %s %s %s %s %s. %s: %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], OtherUser->sNick,
                         clsLanguageManager::mPtr->sTexts[LAN_IS_REDIRECTED_TO], sCmdParts[1]+6, clsLanguageManager::mPtr->sTexts[LAN_BY_LWR], curUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
                     if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::OpForceMove9") == true) {
 						clsGlobalDataQueue::mPtr->AddQueueItem(clsServerManager::pGlobalBuffer, imsgLen, NULL, 0, clsGlobalDataQueue::CMD_OPS);
@@ -2274,11 +2160,7 @@ void clsDcCommands::OpForceMove(User * curUser, char * sData, const uint32_t &iL
             }
 
             if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES] == false || ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
-                imsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> *** %s %s %s. %s: %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], OtherUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_IS_REDIRECTED_TO],
-                    sCmdParts[1]+6, clsLanguageManager::mPtr->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
-                if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::OpForceMove11") == true) {
-                    curUser->SendCharDelayed(clsServerManager::pGlobalBuffer, imsgLen);
-                }
+                curUser->SendFormat("clsDcCommands::OpForceMove4", true, "<%s> *** %s %s %s. %s: %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], OtherUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_IS_REDIRECTED_TO], sCmdParts[1]+6, clsLanguageManager::mPtr->sTexts[LAN_MESSAGE], sCmdParts[2]+4);
             }
         }
     }
@@ -2326,10 +2208,7 @@ void clsDcCommands::RevConnectToMe(User * curUser, char * sData, const uint32_t 
     }
 
     if(iLen > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_RCTM_LEN]) {
-        int imsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_RCTM_TOO_LONG]);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::RevConnectToMe2") == true) {
-            curUser->SendCharDelayed(msg, imsgLen);
-        }
+        curUser->SendFormat("clsDcCommands::RevConnectToMe", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_RCTM_TOO_LONG]);
 
         if(iLen > 65000) {
             sData[65000] = '\0';
@@ -2391,10 +2270,7 @@ void clsDcCommands::SR(User * curUser, char * sData, const uint32_t &iLen, const
     }
 
     if(iLen > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SR_LEN]) {
-        int imsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SR_TOO_LONG]);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::SR2") == true) {
-            curUser->SendCharDelayed(msg, imsgLen);
-        }
+        curUser->SendFormat("clsDcCommands::SR", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SR_TOO_LONG]);
 
         if(iLen > 65000) {
             sData[65000] = '\0';
@@ -2488,10 +2364,7 @@ void clsDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen)
 
 			clsUdpDebug::mPtr->BroadcastFormat("[SYS] Quack $Supports from %s (%s) - user closed. (%s)", curUser->sNick, curUser->sIP, sData);
 
-       		int imsgLen = sprintf(msg, "<%s> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_QUACK_SUPPORTS]);
-			if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Supports5") == true) {
-				curUser->SendCharDelayed(msg, imsgLen);
-			}
+			curUser->SendFormat("clsDcCommands::Supports1", false, "<%s> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_QUACK_SUPPORTS]);
 
 			curUser->Close();
 			return;
@@ -2548,23 +2421,17 @@ void clsDcCommands::Supports(User * curUser, char * sData, const uint32_t &iLen)
             case 'B': {
                 if(((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == false && szDataLen == 7 && memcmp(sSupport+1, "otINFO", 6) == 0) {
                     if(clsSettingManager::mPtr->bBools[SETBOOL_DONT_ALLOW_PINGERS] == true) {
-                        int imsgLen = sprintf(msg, "<%s> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_THIS_HUB_NOT_ALLOW_PINGERS]);
-                        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Supports6") == true) {
-                            curUser->SendChar(msg, imsgLen);
-                        }
+                        curUser->SendFormat("clsDcCommands::Supports2", false, "<%s> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_THIS_HUB_NOT_ALLOW_PINGERS]);
                         curUser->Close();
                         return;
                     } else if(clsSettingManager::mPtr->bBools[SETBOOL_CHECK_IP_IN_COMMANDS] == false) {
-                        int imsgLen = sprintf(msg, "<%s> Sorry, this hub banned yourself from hublist because allow CTM exploit.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
-                        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Supports7") == true) {
-                            curUser->SendChar(msg, imsgLen);
-                        }
+                        curUser->SendFormat("clsDcCommands::Supports3", false, "<%s> Sorry, this hub don't want to be in hublist because allow CTM exploit.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
                         curUser->Close();
                         return;
                     } else {
                         curUser->ui32BoolBits |= User::BIT_PINGER;
-                        int imsgLen = GetWlcmMsg(msg);
-                        curUser->SendCharDelayed(msg, imsgLen);
+						curUser->SendFormat("clsDcCommands::Supports4", true, "%s%" PRIu64 " %s, %" PRIu64 " %s, %" PRIu64 " %s / %s: %u)|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_NAME_WLCM], clsServerManager::ui64Days, clsLanguageManager::mPtr->sTexts[LAN_DAYS_LWR], 
+							clsServerManager::ui64Hours, clsLanguageManager::mPtr->sTexts[LAN_HOURS_LWR], clsServerManager::ui64Mins, clsLanguageManager::mPtr->sTexts[LAN_MINUTES_LWR], clsLanguageManager::mPtr->sTexts[LAN_USERS], clsServerManager::ui32Logged);
                     }
                 }
                 break;
@@ -2639,10 +2506,7 @@ void clsDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const
     size_t szNickLen = cTemp-(sData+5);
 
     if(szNickLen > 64) {
-        int imsgLen = sprintf(msg, "<%s> *** %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_MAX_ALWD_NICK_LEN_64_CHARS]);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::To3") == true) {
-            curUser->SendCharDelayed(msg, imsgLen);
-        }
+        curUser->SendFormat("clsDcCommands::To1", true, "<%s> *** %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_MAX_ALWD_NICK_LEN_64_CHARS]);
         return;
     }
 
@@ -2710,11 +2574,7 @@ void clsDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const
         if(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_PM_LEN] != 0 && szMessLen > (size_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_PM_LEN]) {
        	    // PPK ... hubsec alias
        	    cTemp[0] = '\0';
-       	   	int imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s!|", curUser->sNick, sData+5, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
-                clsLanguageManager::mPtr->sTexts[LAN_THE_MESSAGE_WAS_TOO_LONG]);
-            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::To14") == true) {
-               	curUser->SendCharDelayed(msg, imsgLen);
-            }
+            curUser->SendFormat("clsDcCommands::To2", true, "$To: %s From: %s $<%s> %s!|", curUser->sNick, sData+5, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THE_MESSAGE_WAS_TOO_LONG]);
             return;
         }
 
@@ -2747,11 +2607,7 @@ void clsDcCommands::To(User * curUser, char * sData, const uint32_t &iLen, const
 
             if(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_PM_LINES] != 0 && curUser->ui16LastPmLines > clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_PM_LINES]) {
                 cTemp[0] = '\0';
-                int imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s!|", curUser->sNick, sData+5, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
-                    clsLanguageManager::mPtr->sTexts[LAN_THE_MESSAGE_WAS_TOO_LONG]);
-                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::To15") == true) {
-                    curUser->SendCharDelayed(msg, imsgLen);
-                }
+                curUser->SendFormat("clsDcCommands::To3", true, "$To: %s From: %s $<%s> %s!|", curUser->sNick, sData+5, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THE_MESSAGE_WAS_TOO_LONG]);
                 return;
             }
         }
@@ -2952,11 +2808,7 @@ void clsDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, con
     if(bCheck == true && clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::NOCHATLIMITS) == false) {
     	// PPK ... check for message limit length
  	    if(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_CHAT_LEN] != 0 && (iLen-curUser->ui8NickLen-4) > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_CHAT_LEN]) {
-     		// PPK ... hubsec alias
-	   		int imsgLen = sprintf(msg, "<%s> %s !|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THE_MESSAGE_WAS_TOO_LONG]);
-	   		if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Chat1") == true) {
-                curUser->SendCharDelayed(msg, imsgLen);
-            }
+            curUser->SendFormat("clsDcCommands::Chat1", true, "<%s> %s !|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THE_MESSAGE_WAS_TOO_LONG]);
 	        return;
  	    }
 
@@ -2990,10 +2842,7 @@ void clsDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, con
 			}
 
 			if(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_CHAT_LINES] != 0 && curUser->ui16LastChatLines > clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_CHAT_LINES]) {
-                int imsgLen = sprintf(msg, "<%s> %s !|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THE_MESSAGE_WAS_TOO_LONG]);
-                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Chat2") == true) {
-                    curUser->SendCharDelayed(msg, imsgLen);
-                }
+                curUser->SendFormat("clsDcCommands::Chat2", true, "<%s> %s !|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THE_MESSAGE_WAS_TOO_LONG]);
                 return;
 			}
 		}
@@ -3101,10 +2950,7 @@ void clsDcCommands::Chat(User * curUser, char * sData, const uint32_t &iLen, con
 // $Close nick|
 void clsDcCommands::Close(User * curUser, char * sData, const uint32_t &iLen) {
     if(clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::CLOSE) == false) {
-        int iLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALWD_TO_USE_THIS_CMD]);
-        if(CheckSprintf(iLen, 1024, "clsDcCommands::Close1") == true) {
-            curUser->SendCharDelayed(msg, iLen);
-        }
+        curUser->SendFormat("clsDcCommands::Close1", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALWD_TO_USE_THIS_CMD]);
         return;
     } 
 
@@ -3126,18 +2972,12 @@ void clsDcCommands::Close(User * curUser, char * sData, const uint32_t &iLen) {
     if(OtherUser != NULL) {
         // Self-kick
         if(OtherUser == curUser) {
-        	int imsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_CANT_CLOSE_YOURSELF]);
-        	if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Close3") == true) {
-                curUser->SendCharDelayed(msg, imsgLen);
-            }
+            curUser->SendFormat("clsDcCommands::Close2", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_CANT_CLOSE_YOURSELF]);
             return;
     	}
     	
         if(OtherUser->i32Profile != -1 && curUser->i32Profile > OtherUser->i32Profile) {
-        	int imsgLen = sprintf(msg, "<%s> %s %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALLOWED_TO_CLOSE], OtherUser->sNick);
-        	if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Close4") == true) {
-                curUser->SendCharDelayed(msg, imsgLen);
-            }
+            curUser->SendFormat("clsDcCommands::Close3", true, "<%s> %s %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_NOT_ALLOWED_TO_CLOSE], OtherUser->sNick);
         	return;
         }
 
@@ -3163,11 +3003,7 @@ void clsDcCommands::Close(User * curUser, char * sData, const uint32_t &iLen) {
         }
         
         if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES] == false || ((curUser->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR) == false) {
-        	int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], OtherUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], OtherUser->sIP,
-                clsLanguageManager::mPtr->sTexts[LAN_WAS_CLOSED]);
-            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::Close8") == true) {
-                curUser->SendCharDelayed(msg, imsgLen);
-            }
+            curUser->SendFormat("clsDcCommands::Close4", true, "<%s> *** %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], OtherUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], OtherUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_WAS_CLOSED]);
         }
     }
 }
@@ -3207,11 +3043,7 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
             case ' ':
             case '$':
             case '|': {
-           	    int imsgLen = sprintf(msg, "<%s> %s '%c' ! %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOUR_NICK_CONTAINS_ILLEGAL_CHARACTER],
-                    Nick[ui32i], clsLanguageManager::mPtr->sTexts[LAN_PLS_CORRECT_IT_AND_GET_BACK_AGAIN]);
-                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick1") == true) {
-                    curUser->SendChar(msg, imsgLen);
-                }
+                curUser->SendFormat("clsDcCommands::ValidateUserNick1", false, "<%s> %s '%c' ! %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOUR_NICK_CONTAINS_ILLEGAL_CHARACTER], Nick[ui32i], clsLanguageManager::mPtr->sTexts[LAN_PLS_CORRECT_IT_AND_GET_BACK_AGAIN]);
 
 //				clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick with bad chars (%s) from %s (%s) - user closed.", Nick, curUser->sNick, curUser->sIP);
 
@@ -3220,11 +3052,7 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
             }
             default:
                 if((unsigned char)Nick[ui32i] < 32) {
-           	        int imsgLen = sprintf(msg, "<%s> %s! %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOUR_NICK_CONTAINS_ILLEGAL_WHITE_CHARACTER],
-                        clsLanguageManager::mPtr->sTexts[LAN_PLS_CORRECT_IT_AND_GET_BACK_AGAIN]);
-                    if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick1-1") == true) {
-                        curUser->SendChar(msg, imsgLen);
-                    }
+                    curUser->SendFormat("clsDcCommands::ValidateUserNick2", false, "<%s> %s! %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOUR_NICK_CONTAINS_ILLEGAL_WHITE_CHARACTER], clsLanguageManager::mPtr->sTexts[LAN_PLS_CORRECT_IT_AND_GET_BACK_AGAIN]);
 
 //					clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick with white chars (%s) from %s (%s) - user closed.", Nick, curUser->sNick, curUser->sIP);
 
@@ -3240,11 +3068,7 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
     
     // check for reserved nicks
     if(clsReservedNicksManager::mPtr->CheckReserved(curUser->sNick, curUser->ui32NickHash) == true) {
-   	    int imsgLen = sprintf(msg, "<%s> %s. %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THE_NICK_IS_RESERVED_FOR_SOMEONE_OTHER],
-            clsLanguageManager::mPtr->sTexts[LAN_CHANGE_YOUR_NICK_AND_GET_BACK_AGAIN]);
-        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick2") == true) {
-       	    curUser->SendChar(msg, imsgLen);
-        }
+        curUser->SendFormat("clsDcCommands::ValidateUserNick3", false, "<%s> %s. %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THE_NICK_IS_RESERVED_FOR_SOMEONE_OTHER], clsLanguageManager::mPtr->sTexts[LAN_CHANGE_YOUR_NICK_AND_GET_BACK_AGAIN]);
 
 //		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Reserved nick (%s) from %s (%s) - user closed.", Nick, curUser->sNick, curUser->sIP);
 
@@ -3267,9 +3091,10 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
     // check for banned nicks
     BanItem * pBan = clsBanManager::mPtr->FindNick(curUser);
     if(pBan != NULL) {
-        int imsgLen;
-        char *messg = GenerateBanMessage(pBan, imsgLen, acc_time);
-        curUser->SendChar(messg, imsgLen);
+        int iMsgLen = GenerateBanMessage(pBan, acc_time);
+        if(iMsgLen != 0) {
+        	curUser->SendChar(clsServerManager::pGlobalBuffer, iMsgLen);
+        }
 
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Banned user %s (%s) - user closed.", curUser->sNick, curUser->sIP);
 
@@ -3289,11 +3114,8 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
 			uint32_t iMinutes2Wait = (uint32_t)pow(2.0, (double)Reg->ui8BadPassCount-1);
 
             if(acc_time < (time_t)(Reg->tLastBadPass+(60*iMinutes2Wait))) {
-                int imsgLen = sprintf(msg, "<%s> %s %s %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_LAST_PASS_WAS_WRONG_YOU_NEED_WAIT],
-                    formatSecTime((Reg->tLastBadPass+(60*iMinutes2Wait))-acc_time), clsLanguageManager::mPtr->sTexts[LAN_BEFORE_YOU_TRY_AGAIN]);
-                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick5") == true) {
-                    curUser->SendChar(msg, imsgLen);
-                }
+                curUser->SendFormat("clsDcCommands::ValidateUserNick4", false, "<%s> %s %s %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_LAST_PASS_WAS_WRONG_YOU_NEED_WAIT], formatSecTime((Reg->tLastBadPass+(60*iMinutes2Wait))-acc_time), 
+					clsLanguageManager::mPtr->sTexts[LAN_BEFORE_YOU_TRY_AGAIN]);
 
 				clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) not allowed to send password (%" PRIu64 ") - user closed.", curUser->sNick, curUser->sIP, (uint64_t)((Reg->tLastBadPass+(60*iMinutes2Wait))-acc_time));
 
@@ -3328,20 +3150,8 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
     if(clsProfileManager::mPtr->IsProfileAllowed(i32Profile, clsProfileManager::ENTERFULLHUB) == false && ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == false) {
         // user is NOT allowed enter full hub, check for maxClients
         if(clsServerManager::ui32Joins-clsServerManager::ui32Parts > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_USERS]) {
-			int imsgLen = sprintf(msg, "$HubIsFull|<%s> %s. %u %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THIS_HUB_IS_FULL], clsServerManager::ui32Logged,
-                clsLanguageManager::mPtr->sTexts[LAN_USERS_ONLINE_LWR]);
-            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick8") == false) {
-                return false;
-            }
-            if(clsSettingManager::mPtr->bBools[SETBOOL_REDIRECT_WHEN_HUB_FULL] == true &&
-                clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS] != NULL) {
-                memcpy(msg+imsgLen, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS],
-                    (size_t)clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS]);
-                imsgLen += clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS];
-                msg[imsgLen] = '\0';
-            }
-            curUser->SendChar(msg, imsgLen);
-
+            curUser->SendFormat("clsDcCommands::ValidateUserNick5", false, "$HubIsFull|<%s> %s. %u %s.|%s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THIS_HUB_IS_FULL], clsServerManager::ui32Logged, clsLanguageManager::mPtr->sTexts[LAN_USERS_ONLINE_LWR],
+				(clsSettingManager::mPtr->bBools[SETBOOL_REDIRECT_WHEN_HUB_FULL] == true && clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS] != NULL) ? clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS] : "");
 //			clsUdpDebug::mPtr->BroadcastFormat("[SYS] Hub full for %s (%s) - user closed.", curUser->sNick, curUser->sIP);
 
             curUser->Close();
@@ -3353,19 +3163,10 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
     if(clsProfileManager::mPtr->IsProfileAllowed(i32Profile, clsProfileManager::NOUSRSAMEIP) == false) {
         uint32_t ui32Count = clsHashManager::mPtr->GetUserIpCount(curUser);
         if(ui32Count >= (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_CONN_SAME_IP]) {
-            int imsgLen = sprintf(msg, "<%s> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_ALREADY_MAX_IP_CONNS]);
-            if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick9") == false) {
-                return false;
-            }
-            if(clsSettingManager::mPtr->bBools[SETBOOL_REDIRECT_WHEN_HUB_FULL] == true &&
-                clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS] != NULL) {
-                   memcpy(msg+imsgLen, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS],
-                    (size_t)clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS]);
-                imsgLen += clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS];
-                msg[imsgLen] = '\0';
-            }
-            curUser->SendChar(msg, imsgLen);
-			imsgLen = sprintf(msg, "[SYS] Max connections from same IP (%u) for %s (%s) - user closed. ", ui32Count, curUser->sNick, curUser->sIP);
+            curUser->SendFormat("clsDcCommands::ValidateUserNick6", false, "<%s> %s.|%s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_ALREADY_MAX_IP_CONNS],
+				(clsSettingManager::mPtr->bBools[SETBOOL_REDIRECT_WHEN_HUB_FULL] == true && clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS] != NULL) ? clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS] : "");
+
+			int imsgLen = sprintf(msg, "[SYS] Max connections from same IP (%u) for %s (%s) - user closed. ", ui32Count, curUser->sNick, curUser->sIP);
             string tmp;
             if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick10") == true) {
                 //clsUdpDebug::mPtr->Broadcast(msg, imsgLen);
@@ -3422,10 +3223,7 @@ bool clsDcCommands::ValidateUserNick(User * curUser, char * Nick, const size_t &
                 return false;
             } else {
                 if(Reg == NULL) {
-           	        int imsgLen = sprintf(msg, "$ValidateDenide %s|", Nick);
-           	        if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ValidateUserNick14") == true) {
-                        curUser->SendChar(msg, imsgLen);
-                    }
+                    curUser->SendFormat("clsDcCommands::ValidateUserNick7", false, "$ValidateDenide %s|", Nick);
 
                     if(strcmp(OtherUser->sIP, curUser->sIP) != 0 || strcmp(OtherUser->sNick, curUser->sNick) != 0) {
 						clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick taken [%s (%s)] %s (%s) - user closed.", OtherUser->sNick, OtherUser->sIP, curUser->sNick, curUser->sIP);
@@ -3602,10 +3400,7 @@ void clsDcCommands::ProcessCmds(User * curUser) {
                 break;
             }
             case PrcsdUsrCmd::LOGINHELLO: {
-                int imsgLen = sprintf(msg, "$Hello %s|", curUser->sNick);
-                if(CheckSprintf(imsgLen, 1024, "clsDcCommands::ProcessCmds1") == true) {
-                    curUser->SendCharDelayed(msg, imsgLen);
-                }
+                curUser->SendFormat("clsDcCommands::ProcessCmds", true, "$Hello %s|", curUser->sNick);
                 break;
             }
             case PrcsdUsrCmd::GETPASS: {
@@ -3807,12 +3602,7 @@ bool clsDcCommands::GetPort(char * sData, uint16_t &ui16Port, uint8_t &ui8AfterP
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void clsDcCommands::SendIncorrectPortMsg(User * pUser, const bool &bCTM) {
-	int iMsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], 
-		bCTM == true ? clsLanguageManager::mPtr->sTexts[LAN_YOUR_CLIENT_SEND_INCORRECT_PORT_IN_CTM] : clsLanguageManager::mPtr->sTexts[LAN_YOUR_CLIENT_SEND_INCORRECT_PORT_IN_SEARCH]);
-	
-	if(CheckSprintf(iMsgLen, 1024, "SendIncorrectPortMsg") == true) {
-		pUser->SendCharDelayed(msg, iMsgLen);
-	}
+	pUser->SendFormat("clsDcCommands::SendIncorrectPortMsg", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], bCTM == true ? clsLanguageManager::mPtr->sTexts[LAN_YOUR_CLIENT_SEND_INCORRECT_PORT_IN_CTM] : clsLanguageManager::mPtr->sTexts[LAN_YOUR_CLIENT_SEND_INCORRECT_PORT_IN_SEARCH]);
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -3869,11 +3659,8 @@ void clsDcCommands::SendIPFixedMsg(User * pUser, char * sBadIP, char * sRealIP) 
         return;
     }
 
-    int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> %s %s %s %s !|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOUR_CLIENT_SEND_INCORRECT_IP], sBadIP,
+    pUser->SendFormat("clsDcCommands::SendIPFixedMsg", true, "<%s> %s %s %s %s !|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOUR_CLIENT_SEND_INCORRECT_IP], sBadIP,
         clsLanguageManager::mPtr->sTexts[LAN_IN_COMMAND_HUB_REPLACED_IT_WITH_YOUR_REAL_IP], sRealIP);
-    if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "SendIncorrectIPMsg1") == true) {
-        pUser->SendCharDelayed(clsServerManager::pGlobalBuffer, imsgLen);
-    }
 
     pUser->ui32BoolBits |= User::BIT_WARNED_WRONG_IP;
 }
@@ -3912,12 +3699,6 @@ void clsDcCommands::MyNick(User * pUser, char * sData, const uint32_t &ui32Len) 
     pOtherUser->ui8State = User::STATE_ADDME;
 
     pUser->Close();
-/*
-	int imsgLen = sprintf(msg, "<%s> Found IPv4: %s =)|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], pOtherUser->sIPv4);
-	if(CheckSprintf(imsgLen, 1024, "clsDcCommands::MyNick3") == true) {
-        UserSendCharDelayed(pOtherUser, msg, imsgLen);
-	}
-*/
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

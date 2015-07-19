@@ -292,8 +292,7 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
     
     if(clsSettingManager::mPtr->bBools[SETBOOL_REDIRECT_ALL] == true) {
         if(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS] != NULL) {
-       	    int imsgLen = sprintf(msg, "<%s> %s %s|%s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_REDIR_TO],
-               clsSettingManager::mPtr->sTexts[SETTXT_REDIRECT_ADDRESS], clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS]);
+       	    int imsgLen = sprintf(msg, "<%s> %s %s|%s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_REDIR_TO], clsSettingManager::mPtr->sTexts[SETTXT_REDIRECT_ADDRESS], clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS]);
             if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::AcceptUser4") == true) {
                 send(AccptSocket->s, msg, imsgLen, 0);
                 clsServerManager::ui64BytesSent += imsgLen;
@@ -316,9 +315,10 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 
 	if(Ban != NULL) {
         if(((Ban->ui8Bits & clsBanManager::FULL) == clsBanManager::FULL) == true) {
-            int imsglen;
-            char *messg = GenerateBanMessage(Ban, imsglen, acc_time);
-            send(AccptSocket->s, messg, imsglen, 0);
+            int iMsgLen = GenerateBanMessage(Ban, acc_time);
+            if(iMsgLen != 0) {
+            	send(AccptSocket->s, clsServerManager::pGlobalBuffer, iMsgLen, 0);
+            }
 #ifdef _WIN32
             shutdown(AccptSocket->s, SD_SEND);
             closesocket(AccptSocket->s);
@@ -336,9 +336,10 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 
 	if(RangeBan != NULL) {
         if(((RangeBan->ui8Bits & clsBanManager::FULL) == clsBanManager::FULL) == true) {
-            int imsglen;
-            char *messg = GenerateRangeBanMessage(RangeBan, imsglen, acc_time);
-            send(AccptSocket->s, messg, imsglen, 0);
+            int iMsgLen = GenerateRangeBanMessage(RangeBan, acc_time);
+            if(iMsgLen != 0) {
+            	send(AccptSocket->s, clsServerManager::pGlobalBuffer, iMsgLen, 0);
+            }
 #ifdef _WIN32
             shutdown(AccptSocket->s, SD_SEND);
             closesocket(AccptSocket->s);
@@ -404,9 +405,8 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
         if(((Ban->ui8Bits & clsBanManager::NICK) == clsBanManager::NICK) == true) {
             hash = Ban->ui32NickHash;
         }
-        int imsglen;
-        char *messg = GenerateBanMessage(Ban, imsglen, acc_time);
-        pUser->pLogInOut->pBan = UserBan::CreateUserBan(messg, imsglen, hash);
+        int iMsglen = GenerateBanMessage(Ban, acc_time);
+        pUser->pLogInOut->pBan = UserBan::CreateUserBan(clsServerManager::pGlobalBuffer, iMsglen, hash);
         if(pUser->pLogInOut->pBan == NULL) {
 #ifdef _WIN32
             shutdown(AccptSocket->s, SD_SEND);
@@ -423,9 +423,8 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
             return;
         }
     } else if(RangeBan != NULL) {
-        int imsglen;
-        char *messg = GenerateRangeBanMessage(RangeBan, imsglen, acc_time);
-        pUser->pLogInOut->pBan = UserBan::CreateUserBan(messg, imsglen, 0);
+        int iMsgLen = GenerateRangeBanMessage(RangeBan, acc_time);
+        pUser->pLogInOut->pBan = UserBan::CreateUserBan(clsServerManager::pGlobalBuffer, iMsgLen, 0);
         if(pUser->pLogInOut->pBan == NULL) {
 #ifdef _WIN32
             shutdown(AccptSocket->s, SD_SEND);
@@ -620,8 +619,8 @@ void clsServiceLoop::ReceiveLoop() {
                     ((curUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == true)
                     continue;
 
-                int imsgLen = GetWlcmMsg(msg);
-                curUser->SendCharDelayed(msg, imsgLen);
+                curUser->SendFormat("clsServiceLoop::ReceiveLoop->User::STATE_ADDME", true, "%s%" PRIu64 " %s, %" PRIu64 " %s, %" PRIu64 " %s / %s: %u)|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_NAME_WLCM], clsServerManager::ui64Days, clsLanguageManager::mPtr->sTexts[LAN_DAYS_LWR], 
+					clsServerManager::ui64Hours, clsLanguageManager::mPtr->sTexts[LAN_HOURS_LWR], clsServerManager::ui64Mins, clsLanguageManager::mPtr->sTexts[LAN_MINUTES_LWR], clsLanguageManager::mPtr->sTexts[LAN_USERS], clsServerManager::ui32Logged);
                 curUser->ui8State = User::STATE_ADDME_1LOOP;
                 continue;
             }
@@ -779,22 +778,13 @@ void clsServiceLoop::ReceiveLoop() {
                                             cur->pTo->iReceivedPmTick = clsServerManager::ui64ActualTick;
                                             cur->pTo->iReceivedPmCount = 0;
                                         } else {
-                                            bool bSprintfCheck;
-                                            int imsgLen;
                                             if(cur->ui32PmCount == 1) {
-                                                imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s %s %s!|", curUser->sNick, cur->sToNick, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC],
-                                                    clsLanguageManager::mPtr->sTexts[LAN_SRY_LST_MSG_BCS], cur->sToNick, clsLanguageManager::mPtr->sTexts[LAN_EXC_MSG_LIMIT]);
-                                                bSprintfCheck = CheckSprintf(imsgLen, 1024, "clsServiceLoop::ReceiveLoop1");
+                                                curUser->SendFormat("clsServiceLoop::ReceiveLoop->User::STATE_ADDED1", true, "$To: %s From: %s $<%s> %s %s %s!|", curUser->sNick, cur->sToNick, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SRY_LST_MSG_BCS], 
+													cur->sToNick, clsLanguageManager::mPtr->sTexts[LAN_EXC_MSG_LIMIT]);
                                             } else {
-                                                imsgLen = sprintf(msg, "$To: %s From: %s $<%s> %s %lu %s %s %s!|", curUser->sNick, cur->sToNick,
-                                                    clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_LAST], (unsigned long)cur->ui32PmCount,
-                                                    clsLanguageManager::mPtr->sTexts[LAN_MSGS_NOT_SENT], cur->sToNick, clsLanguageManager::mPtr->sTexts[LAN_EXC_MSG_LIMIT]);
-                                                bSprintfCheck = CheckSprintf(imsgLen, 1024, "clsServiceLoop::ReceiveLoop2");
+                                                curUser->SendFormat("clsServiceLoop::ReceiveLoop->User::STATE_ADDED2", true, "$To: %s From: %s $<%s> %s %u %s %s %s!|", curUser->sNick, cur->sToNick, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_LAST], 
+													cur->ui32PmCount, clsLanguageManager::mPtr->sTexts[LAN_MSGS_NOT_SENT], cur->sToNick, clsLanguageManager::mPtr->sTexts[LAN_EXC_MSG_LIMIT]);
                                             }
-                                            if(bSprintfCheck == true) {
-                                                curUser->SendCharDelayed(msg, imsgLen);
-                                            }
-
 #ifdef _WIN32
                                             if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sCommand) == 0) {
 												AppendDebugLog("%s - [MEM] Cannot deallocate cur->sCommand in clsServiceLoop::ReceiveLoop\n", 0);
@@ -1019,13 +1009,8 @@ void clsServiceLoop::SendLoop() {
                 curUser->AddUserList();
                 
                 // PPK ... UserIP2 supports
-                if(((curUser->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true &&
-                    ((curUser->ui32BoolBits & User::BIT_QUACK_SUPPORTS) == User::BIT_QUACK_SUPPORTS) == false &&
-                    clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::SENDALLUSERIP) == false) {
-            		int imsgLen = sprintf(msg, "$UserIP %s %s|", curUser->sNick, (curUser->sIPv4[0] == '\0' ? curUser->sIP : curUser->sIPv4));
-            		if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::SendLoop1") == true) {
-                        curUser->SendCharDelayed(msg, imsgLen);
-                    }
+                if(((curUser->ui32SupportBits & User::SUPPORTBIT_USERIP2) == User::SUPPORTBIT_USERIP2) == true && ((curUser->ui32BoolBits & User::BIT_QUACK_SUPPORTS) == User::BIT_QUACK_SUPPORTS) == false && clsProfileManager::mPtr->IsAllowed(curUser, clsProfileManager::SENDALLUSERIP) == false) {
+                    curUser->SendFormat("clsServiceLoop::SendLoop->User::STATE_ADDME_2LOOP1", true, "$UserIP %s %s|", curUser->sNick, (curUser->sIPv4[0] == '\0' ? curUser->sIP : curUser->sIPv4));
                 }
                 
                 curUser->ui32BoolBits &= ~User::BIT_GETNICKLIST;
@@ -1033,13 +1018,9 @@ void clsServiceLoop::SendLoop() {
                 // PPK ... send motd ???
                 if(clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_MOTD] != 0) {
                     if(clsSettingManager::mPtr->bBools[SETBOOL_MOTD_AS_PM] == true) {
-                        int imsgLen = sprintf(clsServerManager::pGlobalBuffer, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_MOTD], curUser->sNick);
-                        if(CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsServiceLoop::SendLoop2") == true) {
-                            curUser->SendCharDelayed(clsServerManager::pGlobalBuffer, imsgLen);
-                        }
+                        curUser->SendFormat("clsServiceLoop::SendLoop->User::STATE_ADDME_2LOOP2", true, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_MOTD], curUser->sNick);
                     } else {
-                        curUser->SendCharDelayed(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_MOTD],
-                            clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_MOTD]);
+                        curUser->SendCharDelayed(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_MOTD], clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_MOTD]);
                     }
                 }
 

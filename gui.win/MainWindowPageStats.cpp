@@ -269,7 +269,8 @@ void OnRedirectAllOk(char * sLine, const int &iLen) {
 //---------------------------------------------------------------------------
 
 void MainWindowPageStats::OnRedirectAll() {
-    clsUdpDebug::mPtr->Broadcast("[SYS] Redirect All.");
+	const char sRedirectAll[] = "[SYS] Redirect All.";
+    clsUdpDebug::mPtr->Broadcast(sRedirectAll, sizeof(sRedirectAll)-1);
 
 	LineDialog * pRedirectAllDlg = new (std::nothrow) LineDialog(&OnRedirectAllOk);
 

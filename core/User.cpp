@@ -80,13 +80,11 @@ static bool UserProcessLines(User * u, const uint32_t &iStrtLen) {
             if(buffer[0] == '|') {
                 //UdpDebug->BroadcastFormat("[SYS] heartbeat from %s (%s).", u->Nick, u->sIP);
                 //send(Sck, "|", 1, 0);
-            } else if(ui32iCommandLen < (u->ui8State < User::STATE_ADDME ? 1024U : 65536U)) {
+            } else if(ui32iCommandLen <= (u->ui8State < User::STATE_ADDME ? 1024U : 65536U)) {
         		clsDcCommands::mPtr->PreProcessData(u, buffer, true, ui32iCommandLen);
         	} else {
-                int imsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_CMD_TOO_LONG]);
-                if(CheckSprintf(imsgLen, 1024, "UserProcessLines1") == true) {
-                    u->SendCharDelayed(msg, imsgLen);
-                }
+                u->SendFormat("UserProcessLines1", false, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_CMD_TOO_LONG]);
+
 				u->Close();
 				clsUdpDebug::mPtr->BroadcastFormat("[SYS] %s (%s): Received command too long. User disconnected.", u->sNick, u->sIP);
                 return false;
@@ -110,12 +108,10 @@ static bool UserProcessLines(User * u, const uint32_t &iStrtLen) {
         u->pRecvBuf[0] = '\0';
         return false;
     } else if(u->ui32RecvBufDataLen != 1) {
-        if(u->ui32RecvBufDataLen > unsigned (u->ui8State < User::STATE_ADDME ? 1024 : 65536)) {
+        if(u->ui32RecvBufDataLen > (u->ui8State < User::STATE_ADDME ? 1024U : 65536U)) {
             // PPK ... we don't want commands longer than 64 kB, drop this user !
-            int imsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_CMD_TOO_LONG]);
-            if(CheckSprintf(imsgLen, 1024, "UserProcessLines2") == true) {
-                u->SendCharDelayed(msg, imsgLen);
-            }
+			u->SendFormat("UserProcessLines2", false, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_CMD_TOO_LONG]);
+
             u->Close();
 			clsUdpDebug::mPtr->BroadcastFormat("[SYS] %s (%s): RecvBuffer overflow. User disconnected.", u->sNick, u->sIP);
         	return false;
@@ -191,12 +187,8 @@ static void UserParseMyInfo(User * u) {
     }
 
     // check if we have all myinfo parts, connection and sharesize must have length more than 0 !
-    if(sMyINFOParts[0] == NULL || sMyINFOParts[1] == NULL || iMyINFOPartsLen[1] != 1 || sMyINFOParts[2] == NULL || iMyINFOPartsLen[2] == 0 ||
-        sMyINFOParts[3] == NULL || sMyINFOParts[4] == NULL || iMyINFOPartsLen[4] == 0) {
-        int imsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_MyINFO_IS_CORRUPTED]);
-        if(CheckSprintf(imsgLen, 1024, "UserParseMyInfo1") == true) {
-            u->SendChar(msg, imsgLen);
-        }
+    if(sMyINFOParts[0] == NULL || sMyINFOParts[1] == NULL || iMyINFOPartsLen[1] != 1 || sMyINFOParts[2] == NULL || iMyINFOPartsLen[2] == 0 || sMyINFOParts[3] == NULL || sMyINFOParts[4] == NULL || iMyINFOPartsLen[4] == 0) {
+        u->SendFormat("UserParseMyInfo1", false, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_MyINFO_IS_CORRUPTED]);
 
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) with bad MyINFO (%s) disconnected.", u->sNick, u->sIP, u->sMyInfoOriginal);
 
@@ -404,10 +396,8 @@ static void UserParseMyInfo(User * u) {
                                 u->ui32BoolBits |= User::BIT_OLDHUBSTAG;
                                 break;
                             }
-                            int imsgLen = sprintf(msg, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_FAKE_TAG]);
-                            if(CheckSprintf(imsgLen, 1024, "UserParseMyInfo3") == true) {
-                                u->SendChar(msg, imsgLen);
-                            }
+
+                            u->SendFormat("UserParseMyInfo2", false, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_FAKE_TAG]);
 
 							u->sTag[u->ui8TagLen] = '\0';
 							clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) with fake Tag disconnected: %s", u->sNick, u->sIP, u->sTag);
@@ -1167,22 +1157,91 @@ void User::SendCharDelayed(const char * cText, const size_t &szTextLen) {
 }
 //---------------------------------------------------------------------------
 
-void User::SendTextDelayed(const string &sText) {
-	if(ui8State >= STATE_CLOSING || sText.size() == 0) {
+void User::SendFormat(const char * sFrom, const bool &bDelayed, const char * sFormatMsg, ...) {
+	if(ui8State >= STATE_CLOSING) {
         return;
     }
-      
-    if(((ui32SupportBits & SUPPORTBIT_ZPIPE) == SUPPORTBIT_ZPIPE) == false || sText.size() < ZMINDATALEN) {
-        PutInSendBuf(sText.c_str(), sText.size());
+
+	va_list vlArgs;
+	va_start(vlArgs, sFormatMsg);
+
+	int iRet = vsprintf(clsServerManager::pGlobalBuffer, sFormatMsg, vlArgs);
+
+	va_end(vlArgs);
+
+	if(iRet < 0 || (size_t)iRet >= clsServerManager::szGlobalBufferSize) {
+		string sMsg = "%s - [ERR] vsprintf wrong value "+string(iRet)+" in User::SendFormatDelayed from: "+sFrom+"\n";
+		AppendDebugLog(sMsg.c_str(), 0);
+
+		return;
+	}
+
+    if(((ui32SupportBits & SUPPORTBIT_ZPIPE) == SUPPORTBIT_ZPIPE) == false || (size_t)iRet < ZMINDATALEN) {
+        if(PutInSendBuf(clsServerManager::pGlobalBuffer, iRet) == true && bDelayed == false) {
+        	Try2Send();
+		}
     } else {
         uint32_t iLen = 0;
-        char *sData = clsZlibUtility::mPtr->CreateZPipe(sText.c_str(), sText.size(), iLen);
+        char *sData = clsZlibUtility::mPtr->CreateZPipe(clsServerManager::pGlobalBuffer, iRet, iLen);
             
         if(iLen == 0) {
-            PutInSendBuf(sText.c_str(), sText.size());
+            if(PutInSendBuf(clsServerManager::pGlobalBuffer, iRet) == true && bDelayed == false) {
+        		Try2Send();
+			}
+        } else {
+            if(PutInSendBuf(sData, iLen) == true && bDelayed == false) {
+	        	Try2Send();
+			}
+            clsServerManager::ui64BytesSentSaved += iRet-iLen;
+        }
+    }
+}
+//---------------------------------------------------------------------------
+
+void User::SendFormatCheckPM(const char * sFrom, const bool &bFromPM, const char * sFormatMsg, ...) {
+	if(ui8State >= STATE_CLOSING) {
+        return;
+    }
+
+	int iMsgLen = 0;
+
+	if(bFromPM == true) {
+	    iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "$To: %s From: %s $", sNick, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
+		if(iMsgLen < 0) {
+			string sMsg = "%s - [ERR] sprintf wrong value "+string(iMsgLen)+" in User::SendFormatCheckPM from: "+sFrom+"\n";
+			AppendDebugLog(sMsg.c_str(), 0);
+	
+			return;
+		}
+	}
+
+	va_list vlArgs;
+	va_start(vlArgs, sFormatMsg);
+
+	int iRet = vsprintf(clsServerManager::pGlobalBuffer+iMsgLen, sFormatMsg, vlArgs);
+
+	va_end(vlArgs);
+
+	if(iRet < 0 || size_t(iRet+iMsgLen) >= clsServerManager::szGlobalBufferSize) {
+		string sMsg = "%s - [ERR] vsprintf wrong value "+string(iRet)+" in User::SendFormatCheckPM from: "+sFrom+"\n";
+		AppendDebugLog(sMsg.c_str(), 0);
+
+		return;
+	}
+
+	iMsgLen += iRet;
+
+    if(((ui32SupportBits & SUPPORTBIT_ZPIPE) == SUPPORTBIT_ZPIPE) == false || (size_t)iMsgLen < ZMINDATALEN) {
+        PutInSendBuf(clsServerManager::pGlobalBuffer, iMsgLen);
+    } else {
+        uint32_t iLen = 0;
+        char *sData = clsZlibUtility::mPtr->CreateZPipe(clsServerManager::pGlobalBuffer, iMsgLen, iLen);
+            
+        if(iLen == 0) {
+            PutInSendBuf(clsServerManager::pGlobalBuffer, iMsgLen);
         } else {
             PutInSendBuf(sData, iLen);
-            clsServerManager::ui64BytesSentSaved += sText.size()-iLen;
+            clsServerManager::ui64BytesSentSaved += iMsgLen-iLen;
         }
     }
 }
@@ -2805,15 +2864,9 @@ void User::AddPrcsdCmd(const uint8_t &ui8Type, char * sCommand, const size_t &sz
 void User::AddMeOrIPv4Check() {
     if(((ui32BoolBits & BIT_IPV6) == BIT_IPV6) && ((ui32SupportBits & SUPPORTBIT_IPV4) == SUPPORTBIT_IPV4) && clsServerManager::sHubIP[0] != '\0' && clsServerManager::bUseIPv4 == true) {
         ui8State = STATE_IPV4_CHECK;
-
-        int imsgLen = sprintf(msg, "$ConnectToMe %s %s:%s|", sNick, clsServerManager::sHubIP, string(clsSettingManager::mPtr->ui16PortNumbers[0]).c_str());
-        if(CheckSprintf(imsgLen, 1024, "User::AddMeOrIPv4Check") == false) {
-            return;
-        }
-
         pLogInOut->ui64IPv4CheckTick = clsServerManager::ui64ActualTick;
 
-        SendCharDelayed(msg, imsgLen);
+        SendFormat("AddMeOrIPv4Check", true, "$ConnectToMe %s %s:%hu|", sNick, clsServerManager::sHubIP, clsSettingManager::mPtr->ui16PortNumbers[0]);
     } else {
         ui8State = STATE_ADDME;
     }

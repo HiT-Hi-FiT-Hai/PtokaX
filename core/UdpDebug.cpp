@@ -130,7 +130,7 @@ void clsUdpDebug::BroadcastFormat(const char * sFormatMsg, ...) const {
 
 	va_end(vlArgs);
 
-	if(iRet < 0 || iRet > 65535) {
+	if(iRet < 0 || iRet >= 65535) {
 		string sMsg = "%s - [ERR] vsprintf wrong value "+string(iRet)+" in clsUdpDebug::Broadcast\n";
 		AppendDebugLog(sMsg.c_str(), 0);
 
@@ -176,7 +176,7 @@ void clsUdpDebug::CreateBuffer() {
 }
 //---------------------------------------------------------------------------
 
-bool clsUdpDebug::New(User * u, const uint16_t &ui16Port) {
+bool clsUdpDebug::New(User * pUser, const uint16_t &ui16Port) {
 	UdpDbgItem * pNewDbg = new (std::nothrow) UdpDbgItem();
     if(pNewDbg == NULL) {
 		AppendDebugLog("%s - [MEM] Cannot allocate pNewDbg in clsUdpDebug::New\n", 0);
@@ -185,53 +185,52 @@ bool clsUdpDebug::New(User * u, const uint16_t &ui16Port) {
 
     // initialize dbg item
 #ifdef _WIN32
-    pNewDbg->sNick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, u->ui8NickLen+1);
+    pNewDbg->sNick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, pUser->ui8NickLen+1);
 #else
-	pNewDbg->sNick = (char *)malloc(u->ui8NickLen+1);
+	pNewDbg->sNick = (char *)malloc(pUser->ui8NickLen+1);
 #endif
     if(pNewDbg->sNick == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in clsUdpDebug::New\n", (uint64_t)(u->ui8NickLen+1));
+		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in clsUdpDebug::New\n", (uint64_t)(pUser->ui8NickLen+1));
 
 		delete pNewDbg;
         return false;
     }
 
-    memcpy(pNewDbg->sNick, u->sNick, u->ui8NickLen);
-    pNewDbg->sNick[u->ui8NickLen] = '\0';
+    memcpy(pNewDbg->sNick, pUser->sNick, pUser->ui8NickLen);
+    pNewDbg->sNick[pUser->ui8NickLen] = '\0';
 
-    pNewDbg->ui32Hash = u->ui32NickHash;
+    pNewDbg->ui32Hash = pUser->ui32NickHash;
 
     struct in6_addr i6addr;
-    memcpy(&i6addr, &u->ui128IpHash, 16);
+    memcpy(&i6addr, &pUser->ui128IpHash, 16);
 
     bool bIPv6 = (IN6_IS_ADDR_V4MAPPED(&i6addr) == 0);
 
     if(bIPv6 == true) {
         ((struct sockaddr_in6 *)&pNewDbg->sas_to)->sin6_family = AF_INET6;
         ((struct sockaddr_in6 *)&pNewDbg->sas_to)->sin6_port = htons(ui16Port);
-        memcpy(((struct sockaddr_in6 *)&pNewDbg->sas_to)->sin6_addr.s6_addr, u->ui128IpHash, 16);
+        memcpy(((struct sockaddr_in6 *)&pNewDbg->sas_to)->sin6_addr.s6_addr, pUser->ui128IpHash, 16);
         pNewDbg->sas_len = sizeof(struct sockaddr_in6);
     } else {
         ((struct sockaddr_in *)&pNewDbg->sas_to)->sin_family = AF_INET;
         ((struct sockaddr_in *)&pNewDbg->sas_to)->sin_port = htons(ui16Port);
-        ((struct sockaddr_in *)&pNewDbg->sas_to)->sin_addr.s_addr = inet_addr(u->sIP);
+        ((struct sockaddr_in *)&pNewDbg->sas_to)->sin_addr.s_addr = inet_addr(pUser->sIP);
         pNewDbg->sas_len = sizeof(struct sockaddr_in);
     }
 
     pNewDbg->s = socket((bIPv6 == true ? AF_INET6 : AF_INET), SOCK_DGRAM, IPPROTO_UDP);
 #ifdef _WIN32
     if(pNewDbg->s == INVALID_SOCKET) {
-        int err = WSAGetLastError();
+        int iErr = WSAGetLastError();
 #else
     if(pNewDbg->s == -1) {
 #endif
-		string Txt = "*** [ERR] "+string(clsLanguageManager::mPtr->sTexts[LAN_UDP_SCK_CREATE_ERR], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_UDP_SCK_CREATE_ERR])+
+        pUser->SendFormat("clsUdpDebug::New1", true, "*** [ERR] %s: %s (%d).|", clsLanguageManager::mPtr->sTexts[LAN_UDP_SCK_CREATE_ERR],
 #ifdef _WIN32
-			": "+string(WSErrorStr(err))+" ("+string(err)+")";
+			WSErrorStr(iErr), iErr);
 #else
-			": "+string(errno);
+			ErrnoStr(errno), errno);
 #endif
-        u->SendTextDelayed(Txt);
         delete pNewDbg;
         return false;
     }
@@ -240,18 +239,17 @@ bool clsUdpDebug::New(User * u, const uint16_t &ui16Port) {
 #ifdef _WIN32
     uint32_t block = 1;
 	if(SOCKET_ERROR == ioctlsocket(pNewDbg->s, FIONBIO, (unsigned long *)&block)) {
-        int err = WSAGetLastError();
+        int iErr = WSAGetLastError();
 #else
     int oldFlag = fcntl(pNewDbg->s, F_GETFL, 0);
     if(fcntl(pNewDbg->s, F_SETFL, oldFlag | O_NONBLOCK) == -1) {
 #endif
-		string Txt = "*** [ERR] "+string(clsLanguageManager::mPtr->sTexts[LAN_UDP_NON_BLOCK_FAIL], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_UDP_NON_BLOCK_FAIL])+
+		pUser->SendFormat("clsUdpDebug::New2", true, "*** [ERR] %s: %s (%d).|", clsLanguageManager::mPtr->sTexts[LAN_UDP_NON_BLOCK_FAIL],
 #ifdef _WIN32
-			": "+string(WSErrorStr(err))+" ("+string(err)+")";
+			WSErrorStr(iErr), iErr);
 #else
-			": "+string(errno);
+			ErrnoStr(errno), errno);
 #endif
-		u->SendTextDelayed(Txt);
         delete pNewDbg;
         return false;
     }
@@ -413,7 +411,7 @@ void clsUdpDebug::DeleteBuffer() {
 }
 //---------------------------------------------------------------------------
 
-bool clsUdpDebug::Remove(User * u) {
+bool clsUdpDebug::Remove(User * pUser) {
     UdpDbgItem * pCur = NULL,
         * pNext = pDbgItemList;
 
@@ -421,7 +419,7 @@ bool clsUdpDebug::Remove(User * u) {
         pCur = pNext;
         pNext = pCur->pNext;
 
-		if(pCur->bIsScript == false && pCur->ui32Hash == u->ui32NickHash && strcasecmp(pCur->sNick, u->sNick) == 0) {
+		if(pCur->bIsScript == false && pCur->ui32Hash == pUser->ui32NickHash && strcasecmp(pCur->sNick, pUser->sNick) == 0) {
             if(pCur->pPrev == NULL) {
                 if(pCur->pNext == NULL) {
                     pDbgItemList = NULL;
@@ -476,7 +474,7 @@ void clsUdpDebug::Remove(char * sScriptName) {
 }
 //---------------------------------------------------------------------------
 
-bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) const {
+bool clsUdpDebug::CheckUdpSub(User * pUser, bool bSndMess/* = false*/) const {
     UdpDbgItem * pCur = NULL,
         * pNext = pDbgItemList;
 
@@ -484,13 +482,10 @@ bool clsUdpDebug::CheckUdpSub(User * u, bool bSndMess/* = false*/) const {
         pCur = pNext;
         pNext = pCur->pNext;
 
-		if(pCur->bIsScript == false && pCur->ui32Hash == u->ui32NickHash && strcasecmp(pCur->sNick, u->sNick) == 0) {
+		if(pCur->bIsScript == false && pCur->ui32Hash == pUser->ui32NickHash && strcasecmp(pCur->sNick, pUser->sNick) == 0) {
             if(bSndMess == true) {
-				string Txt = "<"+string(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], (size_t)clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_HUB_SEC])+
-					"> *** "+string(clsLanguageManager::mPtr->sTexts[LAN_YOU_SUBSCRIBED_UDP_DBG], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_YOU_SUBSCRIBED_UDP_DBG])+
-					" "+string(ntohs(pCur->sas_to.ss_family == AF_INET6 ? ((struct sockaddr_in6 *)&pCur->sas_to)->sin6_port : ((struct sockaddr_in *)&pCur->sas_to)->sin_port))+". "+
-                    string(clsLanguageManager::mPtr->sTexts[LAN_TO_UNSUB_UDP_DBG], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_TO_UNSUB_UDP_DBG])+".|";
-				u->SendTextDelayed(Txt);
+				pUser->SendFormat("clsUdpDebug::CheckUdpSub", true, "<%s> *** %s %hu. %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_SUBSCRIBED_UDP_DBG], 
+					ntohs(pCur->sas_to.ss_family == AF_INET6 ? ((struct sockaddr_in6 *)&pCur->sas_to)->sin6_port : ((struct sockaddr_in *)&pCur->sas_to)->sin_port), clsLanguageManager::mPtr->sTexts[LAN_TO_UNSUB_UDP_DBG]);
             }
                 
             return true;

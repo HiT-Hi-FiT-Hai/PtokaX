@@ -115,7 +115,8 @@ struct User {
 
 	void SendChar(const char * cText, const size_t &szTextLen);
 	void SendCharDelayed(const char * cText, const size_t &szTextLen);
-	void SendTextDelayed(const string & sText);
+	void SendFormat(const char * sFrom, const bool &bDelayed, const char * sFormatMsg, ...);
+	void SendFormatCheckPM(const char * sFrom, const bool &bFromPM, const char * sFormatMsg, ...);
 
     bool PutInSendBuf(const char * Text, const size_t &szTxtLen);
     bool Try2Send();

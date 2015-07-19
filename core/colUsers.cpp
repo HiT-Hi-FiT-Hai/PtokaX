@@ -966,50 +966,48 @@ void clsUsers::Add2RecTimes(User * curUser) {
 }
 //---------------------------------------------------------------------------
 
-bool clsUsers::CheckRecTime(User * curUser) {
-    RecTime * cur = NULL,
-        * next = pRecTimeList;
+bool clsUsers::CheckRecTime(User * pUser) {
+    RecTime * pCur = NULL,
+        * pNext = pRecTimeList;
 
-    while(next != NULL) {
-        cur = next;
-        next = cur->pNext;
+    while(pNext != NULL) {
+        pCur = pNext;
+        pNext = pCur->pNext;
 
         // check expires...
-        if(cur->ui64DisConnTick+clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_RECONN_TIME] <= clsServerManager::ui64ActualTick) {
+        if(pCur->ui64DisConnTick+clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_RECONN_TIME] <= clsServerManager::ui64ActualTick) {
 #ifdef _WIN32
-            if(cur->sNick != NULL) {
-                if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sNick) == 0) {
-                    AppendDebugLog("%s - [MEM] Cannot deallocate cur->sNick in clsUsers::CheckRecTime\n", 0);
+            if(pCur->sNick != NULL) {
+                if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCur->sNick) == 0) {
+                    AppendDebugLog("%s - [MEM] Cannot deallocate pCur->sNick in clsUsers::CheckRecTime\n", 0);
                 }
             }
 #else
-			free(cur->sNick);
+			free(pCur->sNick);
 #endif
 
-            if(cur->pPrev == NULL) {
-                if(cur->pNext == NULL) {
+            if(pCur->pPrev == NULL) {
+                if(pCur->pNext == NULL) {
                     pRecTimeList = NULL;
                 } else {
-                    cur->pNext->pPrev = NULL;
-                    pRecTimeList = cur->pNext;
+                    pCur->pNext->pPrev = NULL;
+                    pRecTimeList = pCur->pNext;
                 }
-            } else if(cur->pNext == NULL) {
-                cur->pPrev->pNext = NULL;
+            } else if(pCur->pNext == NULL) {
+                pCur->pPrev->pNext = NULL;
             } else {
-                cur->pPrev->pNext = cur->pNext;
-                cur->pNext->pPrev = cur->pPrev;
+                pCur->pPrev->pNext = pCur->pNext;
+                pCur->pNext->pPrev = pCur->pPrev;
             }
 
-            delete cur;
+            delete pCur;
             continue;
         }
 
-        if(cur->ui32NickHash == curUser->ui32NickHash && memcmp(cur->ui128IpHash, curUser->ui128IpHash, 16) == 0 && strcasecmp(cur->sNick, curUser->sNick) == 0) {
-            int imsgLen = sprintf(msg, "<%s> %s %" PRIu64 " %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_PLEASE_WAIT],
-                (cur->ui64DisConnTick+clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_RECONN_TIME])-clsServerManager::ui64ActualTick, clsLanguageManager::mPtr->sTexts[LAN_SECONDS_BEFORE_RECONN]);
-            if(CheckSprintf(imsgLen, 1024, "clsUsers::CheckRecTime1") == true) {
-                curUser->SendChar(msg, imsgLen);
-            }
+        if(pCur->ui32NickHash == pUser->ui32NickHash && memcmp(pCur->ui128IpHash, pUser->ui128IpHash, 16) == 0 && strcasecmp(pCur->sNick, pUser->sNick) == 0) {
+            pUser->SendFormat("clsUsers::CheckRecTime", false, "<%s> %s %" PRIu64 " %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_PLEASE_WAIT],
+                (pCur->ui64DisConnTick+clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_RECONN_TIME])-clsServerManager::ui64ActualTick, clsLanguageManager::mPtr->sTexts[LAN_SECONDS_BEFORE_RECONN]);
+
             return true;
         }
     }

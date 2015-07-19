@@ -287,10 +287,10 @@ bool clsRangeBanDialog::OnAccept() {
     memset(ui128FromIpHash, 0, 16);
 
 	if(iIpFromLen == 0) {
-		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_NO_VALID_IP_SPECIFIED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_NO_VALID_IP_SPECIFIED], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	} else if(HashIP(sFromIP, ui128FromIpHash) == false) {
-		::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(sFromIP) + " " + clsLanguageManager::mPtr->sTexts[LAN_IS_NOT_VALID_IP_ADDRESS]).c_str(), clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(sFromIP) + " " + clsLanguageManager::mPtr->sTexts[LAN_IS_NOT_VALID_IP_ADDRESS]).c_str(), g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	}
 
@@ -303,15 +303,15 @@ bool clsRangeBanDialog::OnAccept() {
     memset(ui128ToIpHash, 0, 16);
 
 	if(iIpToLen == 0) {
-		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_NO_VALID_IP_SPECIFIED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_NO_VALID_IP_SPECIFIED], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	} else if(HashIP(sToIP, ui128ToIpHash) == false) {
-		::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(sToIP) + " " + clsLanguageManager::mPtr->sTexts[LAN_IS_NOT_VALID_IP_ADDRESS]).c_str(), clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(sToIP) + " " + clsLanguageManager::mPtr->sTexts[LAN_IS_NOT_VALID_IP_ADDRESS]).c_str(), g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	}
 
     if(memcmp(ui128ToIpHash, ui128FromIpHash, 16) <= 0) {
-		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_NO_VALID_IP_RANGE_SPECIFIED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_NO_VALID_IP_RANGE_SPECIFIED], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 		return false;
     }
 
@@ -326,9 +326,8 @@ bool clsRangeBanDialog::OnAccept() {
         SYSTEMTIME stDate = { 0 };
         SYSTEMTIME stTime = { 0 };
 
-        if(::SendMessage(hWndWindowItems[DT_TEMP_BAN_EXPIRE_DATE], DTM_GETSYSTEMTIME, 0, (LPARAM)&stDate) != GDT_VALID ||
-            ::SendMessage(hWndWindowItems[DT_TEMP_BAN_EXPIRE_TIME], DTM_GETSYSTEMTIME, 0, (LPARAM)&stTime) != GDT_VALID) {
-            ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_BAD_TIME_SPECIFIED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+        if(::SendMessage(hWndWindowItems[DT_TEMP_BAN_EXPIRE_DATE], DTM_GETSYSTEMTIME, 0, (LPARAM)&stDate) != GDT_VALID || ::SendMessage(hWndWindowItems[DT_TEMP_BAN_EXPIRE_TIME], DTM_GETSYSTEMTIME, 0, (LPARAM)&stTime) != GDT_VALID) {
+            ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_BAD_TIME_SPECIFIED], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 
             return false;
         }
@@ -348,7 +347,7 @@ bool clsRangeBanDialog::OnAccept() {
 		ban_time = mktime(tm);
 
 		if(ban_time <= acc_time || ban_time == (time_t)-1) {
-			::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_BAD_TIME_SPECIFIED_BAN_EXPIRED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+			::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_BAD_TIME_SPECIFIED_BAN_EXPIRED], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 
 			return false;
         }
@@ -396,7 +395,7 @@ bool clsRangeBanDialog::OnAccept() {
 			if(memcmp(curBan->ui128FromIpHash, pRangeBan->ui128FromIpHash, 16) == 0 && memcmp(curBan->ui128ToIpHash, pRangeBan->ui128ToIpHash, 16) == 0) {
 				delete pRangeBan;
 
-				::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_SIMILAR_BAN_EXIST], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+				::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_SIMILAR_BAN_EXIST], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 				return false;
 			}
 		}
@@ -550,6 +549,6 @@ void clsRangeBanDialog::RangeBanDeleted(RangeBanItem * pRangeBan) {
         return;
     }
 
-    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_RANGE_BAN_DELETED_ACCEPT_TO_NEW], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_RANGE_BAN_DELETED_ACCEPT_TO_NEW], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 }
 //------------------------------------------------------------------------------

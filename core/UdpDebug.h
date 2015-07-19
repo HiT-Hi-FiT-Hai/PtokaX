@@ -65,11 +65,11 @@ public:
 
 	void Broadcast(const char * msg, const size_t &szLen) const;
     void BroadcastFormat(const char * sFormatMsg, ...) const;
-	bool New(User *u, const uint16_t &ui16Port);
+	bool New(User * pUser, const uint16_t &ui16Port);
 	bool New(char * sIP, const uint16_t &ui16Port, const bool &bAllData, char * sScriptName);
-	bool Remove(User * u);
+	bool Remove(User * pUser);
 	void Remove(char * sScriptName);
-	bool CheckUdpSub(User * u, bool bSndMess = false) const;
+	bool CheckUdpSub(User * pUser, bool bSndMess = false) const;
 	void Send(const char * sScriptName, char * sMsg, const size_t &szLen) const;
 	void Cleanup();
 	void UpdateHubName();

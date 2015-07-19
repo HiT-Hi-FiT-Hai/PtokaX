@@ -340,10 +340,7 @@ static int AddReg(lua_State * L) {
         pUser->SetBuffer(clsProfileManager::mPtr->ppProfilesTable[ui16Profile]->sName);
         pUser->ui32BoolBits |= User::BIT_WAITING_FOR_PASS;
 
-        int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> %s.|$GetPass|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_WERE_REGISTERED_PLEASE_ENTER_YOUR_PASSWORD]);
-        if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "RegMan.AddReg1") == true) {
-            pUser->SendCharDelayed(clsServerManager::pGlobalBuffer, iMsgLen);
-        }
+        pUser->SendFormat("RegMan.AddReg", true, "<%s> %s.|$GetPass|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_WERE_REGISTERED_PLEASE_ENTER_YOUR_PASSWORD]);
 
         lua_settop(L, 0);
         lua_pushboolean(L, 1);

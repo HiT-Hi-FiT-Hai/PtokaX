@@ -55,7 +55,7 @@ bool DeFloodCheckForDataFlood(User * u, const uint8_t &ui8DefloodType, const int
     const int16_t &ui16DefloodCount, const uint32_t &ui32DefloodTime);
 void DeFloodDoAction(User * u, const uint8_t &ui8DefloodType, const int16_t &ui16Action,
     uint16_t &ui16Count, char * sOtherNick);
-bool DeFloodCheckForWarn(User * u, const uint8_t &ui8DefloodType, char * sOtherNick);
+bool DeFloodCheckForWarn(User * pUser, const uint8_t &ui8DefloodType, char * sOtherNick);
 const char * DeFloodGetMessage(const uint8_t ui8DefloodType, const uint8_t ui8MsgId);
 void DeFloodReport(User * u, const uint8_t ui8DefloodType, char *sAction);
 bool DeFloodCheckInterval(User * u, const uint8_t &ui8DefloodType, 
