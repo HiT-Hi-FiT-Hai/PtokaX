@@ -108,8 +108,7 @@ LRESULT clsRangeBansDialog::RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM
 
                     break;
                 case BTN_CLEAR_RANGE_TEMP_BANS:
-                    if(::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(clsLanguageManager::mPtr->sTexts[LAN_ARE_YOU_SURE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(),
-                        clsServerManager::sTitle.c_str(), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO) {
+                    if(::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(clsLanguageManager::mPtr->sTexts[LAN_ARE_YOU_SURE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(), g_sPtokaXTitle, MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO) {
                         return 0;
                     }
 
@@ -118,8 +117,7 @@ LRESULT clsRangeBansDialog::RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM
 
                     return 0;
                 case BTN_CLEAR_RANGE_PERM_BANS:
-                    if(::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(clsLanguageManager::mPtr->sTexts[LAN_ARE_YOU_SURE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(),
-                        clsServerManager::sTitle.c_str(), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO) {
+                    if(::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(clsLanguageManager::mPtr->sTexts[LAN_ARE_YOU_SURE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(), g_sPtokaXTitle, MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO) {
                         return 0;
                     }
 
@@ -454,8 +452,7 @@ int CALLBACK clsRangeBansDialog::SortCompareRangeBans(LPARAM lParam1, LPARAM lPa
 //------------------------------------------------------------------------------
 
 void clsRangeBansDialog::RemoveRangeBans() {
-    if(::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(clsLanguageManager::mPtr->sTexts[LAN_ARE_YOU_SURE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(), clsServerManager::sTitle.c_str(),
-        MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO) {
+    if(::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(clsLanguageManager::mPtr->sTexts[LAN_ARE_YOU_SURE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(), g_sPtokaXTitle, MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO) {
         return;
     }
 

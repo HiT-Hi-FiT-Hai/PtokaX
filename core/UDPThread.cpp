@@ -156,7 +156,7 @@ void UDPThread::Resume() {
 	int iRet = pthread_create(&threadId, NULL, ExecuteUDP, this);
 	if(iRet != 0) {
 #endif
-		AppendDebugLog("%s - [ERR] Failed to create new UDPThread\n", 0);
+		AppendDebugLog("%s - [ERR] Failed to create new UDPThread\n");
     }
 }
 //---------------------------------------------------------------------------
@@ -207,7 +207,7 @@ void UDPThread::WaitFor() {
 UDPThread * UDPThread::Create(const int &iAddressFamily) {
     UDPThread * pUDPThread = new (std::nothrow) UDPThread();
     if(pUDPThread == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate pUDPThread in UDPThread::Create\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate pUDPThread in UDPThread::Create\n");
         return NULL;
     }
 

@@ -120,7 +120,7 @@ static int AddTimer(lua_State * L) {
 #ifdef _WIN32
         KillTimer(NULL, timer);
 #endif
-        AppendDebugLog("%s - [MEM] Cannot allocate pNewtimer in TmrMan.AddTimer\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate pNewtimer in TmrMan.AddTimer\n");
         lua_settop(L, 0);
 		lua_pushnil(L);
         return 1;

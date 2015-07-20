@@ -646,8 +646,7 @@ int GenerateBanMessage(BanItem * pBan, const time_t &tmAccTime) {
     }
 
 	if(iMsgLen < 0) {
-		string sMsg = "%s - [ERR] sprintf wrong value "+string(iMsgLen)+" in GenerateBanMessage1\n";
-		AppendDebugLog(sMsg.c_str(), 0);
+		AppendDebugLogFormat("[ERR] sprintf wrong value %d in GenerateBanMessage1\n", iMsgLen);
 
 		return 0;
 	}
@@ -656,8 +655,7 @@ int GenerateBanMessage(BanItem * pBan, const time_t &tmAccTime) {
     if(clsSettingManager::mPtr->bBools[SETBOOL_BAN_MSG_SHOW_IP] == true && pBan->sIp[0] != '\0') {
         int iLen = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_IP], pBan->sIp);
 		if(iLen < 0) {
-			string sMsg = "%s - [ERR] sprintf wrong value "+string(iLen)+" in GenerateBanMessage2\n";
-			AppendDebugLog(sMsg.c_str(), 0);
+			AppendDebugLogFormat("[ERR] sprintf wrong value %d in GenerateBanMessage2\n", iLen);
 	
 			return 0;
 		}
@@ -668,8 +666,7 @@ int GenerateBanMessage(BanItem * pBan, const time_t &tmAccTime) {
     if(clsSettingManager::mPtr->bBools[SETBOOL_BAN_MSG_SHOW_NICK] == true && pBan->sNick != NULL) {
         int iLen = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_NICK], pBan->sNick);
 		if(iLen < 0) {
-			string sMsg = "%s - [ERR] sprintf wrong value "+string(iLen)+" in GenerateBanMessage3\n";
-			AppendDebugLog(sMsg.c_str(), 0);
+			AppendDebugLogFormat("[ERR] sprintf wrong value %d in GenerateBanMessage3\n", iLen);
 	
 			return 0;
 		}
@@ -680,8 +677,7 @@ int GenerateBanMessage(BanItem * pBan, const time_t &tmAccTime) {
     if(clsSettingManager::mPtr->bBools[SETBOOL_BAN_MSG_SHOW_REASON] == true && pBan->sReason != NULL) {
         int iLen = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_REASON], pBan->sReason);
 		if(iLen < 0) {
-			string sMsg = "%s - [ERR] sprintf wrong value "+string(iLen)+" in GenerateBanMessage4\n";
-			AppendDebugLog(sMsg.c_str(), 0);
+			AppendDebugLogFormat("[ERR] sprintf wrong value %d in GenerateBanMessage4\n", iLen);
 	
 			return 0;
 		}
@@ -692,8 +688,7 @@ int GenerateBanMessage(BanItem * pBan, const time_t &tmAccTime) {
     if(clsSettingManager::mPtr->bBools[SETBOOL_BAN_MSG_SHOW_BY] == true && pBan->sBy != NULL) {
         int iLen = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_BANNED_BY], pBan->sBy);
 		if(iLen < 0) {
-			string sMsg = "%s - [ERR] sprintf wrong value "+string(iLen)+" in GenerateBanMessage5\n";
-			AppendDebugLog(sMsg.c_str(), 0);
+			AppendDebugLogFormat("[ERR] sprintf wrong value %d in GenerateBanMessage5\n", iLen);
 	
 			return 0;
 		}
@@ -704,8 +699,7 @@ int GenerateBanMessage(BanItem * pBan, const time_t &tmAccTime) {
     if(clsSettingManager::mPtr->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG] != NULL) {
         int iLen = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s|", clsSettingManager::mPtr->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG]);
 		if(iLen < 0) {
-			string sMsg = "%s - [ERR] sprintf wrong value "+string(iLen)+" in GenerateBanMessage6\n";
-			AppendDebugLog(sMsg.c_str(), 0);
+			AppendDebugLogFormat("[ERR] sprintf wrong value %d in GenerateBanMessage6\n", iLen);
 	
 			return 0;
 		}
@@ -743,8 +737,7 @@ int GenerateRangeBanMessage(RangeBanItem * pRangeBan, const time_t &tmAccTime) {
     }
 
 	if(iMsgLen < 0) {
-		string sMsg = "%s - [ERR] sprintf wrong value "+string(iMsgLen)+" in GenerateRangeBanMessage1\n";
-		AppendDebugLog(sMsg.c_str(), 0);
+		AppendDebugLogFormat("[ERR] sprintf wrong value %d in GenerateRangeBanMessage1\n", iMsgLen);
 
 		return 0;
 	}
@@ -752,8 +745,7 @@ int GenerateRangeBanMessage(RangeBanItem * pRangeBan, const time_t &tmAccTime) {
     if(clsSettingManager::mPtr->bBools[SETBOOL_BAN_MSG_SHOW_RANGE] == true) {
         int iLen = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s-%s", clsLanguageManager::mPtr->sTexts[LAN_RANGE], pRangeBan->sIpFrom, pRangeBan->sIpTo);
 		if(iLen < 0) {
-			string sMsg = "%s - [ERR] sprintf wrong value "+string(iLen)+" in GenerateRangeBanMessage2\n";
-			AppendDebugLog(sMsg.c_str(), 0);
+			AppendDebugLogFormat("[ERR] sprintf wrong value %d in GenerateRangeBanMessage2\n", iLen);
 	
 			return 0;
 		}
@@ -764,8 +756,7 @@ int GenerateRangeBanMessage(RangeBanItem * pRangeBan, const time_t &tmAccTime) {
     if(clsSettingManager::mPtr->bBools[SETBOOL_BAN_MSG_SHOW_REASON] == true && pRangeBan->sReason != NULL) {
         int iLen = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_REASON], pRangeBan->sReason);
 		if(iLen < 0) {
-			string sMsg = "%s - [ERR] sprintf wrong value "+string(iLen)+" in GenerateRangeBanMessage3\n";
-			AppendDebugLog(sMsg.c_str(), 0);
+			AppendDebugLogFormat("[ERR] sprintf wrong value %d in GenerateRangeBanMessage3\n", iLen);
 	
 			return 0;
 		}
@@ -776,8 +767,7 @@ int GenerateRangeBanMessage(RangeBanItem * pRangeBan, const time_t &tmAccTime) {
     if(clsSettingManager::mPtr->bBools[SETBOOL_BAN_MSG_SHOW_BY] == true && pRangeBan->sBy != NULL) {
         int iLen = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_BANNED_BY], pRangeBan->sBy);
 		if(iLen < 0) {
-			string sMsg = "%s - [ERR] sprintf wrong value "+string(iLen)+" in GenerateRangeBanMessage4\n";
-			AppendDebugLog(sMsg.c_str(), 0);
+			AppendDebugLogFormat("[ERR] sprintf wrong value %d in GenerateRangeBanMessage4\n", iLen);
 	
 			return 0;
 		}
@@ -788,8 +778,7 @@ int GenerateRangeBanMessage(RangeBanItem * pRangeBan, const time_t &tmAccTime) {
     if(clsSettingManager::mPtr->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG] != NULL) {
         int iLen = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s|", clsSettingManager::mPtr->sTexts[SETTXT_MSG_TO_ADD_TO_BAN_MSG]);
 		if(iLen < 0) {
-			string sMsg = "%s - [ERR] sprintf wrong value "+string(iLen)+" in GenerateRangeBanMessage5\n";
-			AppendDebugLog(sMsg.c_str(), 0);
+			AppendDebugLogFormat("[ERR] sprintf wrong value %d in GenerateRangeBanMessage5\n", iLen);
 	
 			return 0;
 		}
@@ -868,13 +857,11 @@ bool HaveOnlyNumbers(char *sData, const uint16_t &ui16Len) {
 bool CheckSprintf(const int &iRetVal, const size_t &szMax, const char * sMsg) {
     if(iRetVal > 0) {
 		if(szMax != 0 && iRetVal >= (int)szMax) {
-			string sDbgstr = "%s - [ERR] sprintf high value "+string(iRetVal)+"/"+string((uint64_t)szMax)+" in "+string(sMsg)+"\n";
-            AppendDebugLog(sDbgstr.c_str(), 0);
+            AppendDebugLogFormat("[ERR] sprintf high value %d/%" PRIu64 " in %s\n", iRetVal, (uint64_t)szMax, sMsg);
             return false;
         }
     } else {
-		string sDbgstr = "%s - [ERR] sprintf low value "+string(iRetVal)+" in "+string(sMsg)+"\n";
-		AppendDebugLog(sDbgstr.c_str(), 0);
+		AppendDebugLogFormat("[ERR] sprintf low value %d in %s\n", iRetVal, sMsg);
         return false;
     }
     return true;
@@ -884,13 +871,11 @@ bool CheckSprintf(const int &iRetVal, const size_t &szMax, const char * sMsg) {
 bool CheckSprintf1(const int &iRetVal, const size_t &szLenVal, const size_t &szMax, const char * sMsg) {
     if(iRetVal > 0) {
         if(szMax != 0 && szLenVal >= szMax) {
-			string sDbgstr = "%s - [ERR] sprintf high value "+string((uint64_t)szLenVal)+"/"+string((uint64_t)szMax)+" in "+string(sMsg)+"\n";
-			AppendDebugLog(sDbgstr.c_str(), 0);
+			AppendDebugLogFormat("[ERR] sprintf high value %" PRIu64 "/%" PRIu64 " in %s\n", (uint64_t)szLenVal, (uint64_t)szMax, sMsg);
             return false;
         }
     } else {
-		string sDbgstr = "%s - [ERR] sprintf low value "+string(iRetVal)+" in "+string(sMsg)+"\n";
-		AppendDebugLog(sDbgstr.c_str(), 0);
+		AppendDebugLogFormat("[ERR] sprintf low value %d in %s\n", iRetVal, sMsg);
         return false;
     }
     return true;
@@ -935,7 +920,7 @@ void AppendLog(const string & sData, const bool &bScript/* == false*/) {
 }
 //---------------------------------------------------------------------------
 
-void AppendDebugLog(const char * sData, const uint64_t ui64Value) {
+void AppendDebugLog(const char * sData) {
 #ifdef _WIN32
 	FILE * fw = fopen((clsServerManager::sPath + "\\logs\\debug.log").c_str(), "a");
 #else
@@ -955,12 +940,42 @@ void AppendDebugLog(const char * sData, const uint64_t ui64Value) {
 	char sBuf[64];
 	strftime(sBuf, 64, "%c", acc_tm);
 
-    fprintf(fw, sData, sBuf, ui64Value); // "%s - %" PRIu64 "\n"
+    fprintf(fw, sData, sBuf); // "%s - xxx\n"
 
 	fclose(fw);
 }
 //---------------------------------------------------------------------------
 
+void AppendDebugLogFormat(const char * sFormatMsg, ...) {
+#ifdef _WIN32
+	FILE * fw = fopen((clsServerManager::sPath + "\\logs\\debug.log").c_str(), "a");
+#else
+	FILE * fw = fopen((clsServerManager::sPath + "/logs/debug.log").c_str(), "a");
+#endif
+
+	if(fw == NULL) {
+		return;
+	}
+
+	time_t tmAccTime;
+	time(&tmAccTime);
+
+	size_t szLen = strftime(clsServerManager::pGlobalBuffer, clsServerManager::szGlobalBufferSize, "%c - ", localtime(&tmAccTime));
+
+	if(szLen != 0) {
+		fwrite(clsServerManager::pGlobalBuffer, 1, szLen, fw);
+	}
+
+	va_list vlArgs;
+	va_start(vlArgs, sFormatMsg);
+
+	vfprintf(fw, sFormatMsg, vlArgs);
+
+	va_end(vlArgs);
+
+	fclose(fw);
+}
+//---------------------------------------------------------------------------
 #ifdef _WIN32
 	void GetHeapStats(void *hHeap, DWORD &dwCommitted, DWORD &dwUnCommitted) {
 	    PROCESS_HEAP_ENTRY *lpEntry;
@@ -1325,7 +1340,7 @@ void CreateGlobalBuffer() {
     clsServerManager::pGlobalBuffer = (char *)calloc(clsServerManager::szGlobalBufferSize, 1);
 #endif
     if(clsServerManager::pGlobalBuffer == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot create clsServerManager::pGlobalBuffer\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot create clsServerManager::pGlobalBuffer\n");
 		exit(EXIT_FAILURE);
     }
 }
@@ -1335,7 +1350,7 @@ void DeleteGlobalBuffer() {
 #ifdef _WIN32
     if(clsServerManager::pGlobalBuffer != NULL) {
         if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)clsServerManager::pGlobalBuffer) == 0) {
-            AppendDebugLog("%s - [MEM] Cannot deallocate clsServerManager::pGlobalBuffer\n", 0);
+            AppendDebugLog("%s - [MEM] Cannot deallocate clsServerManager::pGlobalBuffer\n");
         }
     }
 #else
@@ -1362,7 +1377,7 @@ bool CheckAndResizeGlobalBuffer(const size_t &szWantedSize) {
     if(clsServerManager::pGlobalBuffer == NULL) {
         clsServerManager::pGlobalBuffer = sOldBuf;
 
-		AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in CheckAndResizeGlobalBuffer for clsServerManager::pGlobalBuffer\n", (uint64_t)clsServerManager::szGlobalBufferSize);
+		AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in CheckAndResizeGlobalBuffer for clsServerManager::pGlobalBuffer\n", (uint64_t)clsServerManager::szGlobalBufferSize);
 
         clsServerManager::szGlobalBufferSize = szOldSize;
         return false;
@@ -1390,7 +1405,7 @@ void ReduceGlobalBuffer() {
     if(clsServerManager::pGlobalBuffer == NULL) {
         clsServerManager::pGlobalBuffer = sOldBuf;
 
-		AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in ReduceGlobalBuffer for clsServerManager::pGlobalBuffer\n", (uint64_t)clsServerManager::szGlobalBufferSize);
+		AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in ReduceGlobalBuffer for clsServerManager::pGlobalBuffer\n", (uint64_t)clsServerManager::szGlobalBufferSize);
 
         clsServerManager::szGlobalBufferSize = szOldSize;
         return;

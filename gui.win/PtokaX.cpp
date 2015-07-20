@@ -53,11 +53,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 
     clsServerManager::hInstance = hInstance;
 
-	clsServerManager::sTitle = "PtokaX DC Hub " + string(PtokaXVersionString);
-#ifdef _DEBUG
-	clsServerManager::sTitle += " [debug]";
-#endif
-
 #ifdef _DEBUG
 //    AllocConsole();
 //    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);

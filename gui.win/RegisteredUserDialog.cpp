@@ -305,12 +305,12 @@ void clsRegisteredUserDialog::UpdateProfiles() {
 
 bool clsRegisteredUserDialog::OnAccept() {
     if(::GetWindowTextLength(hWndWindowItems[EDT_NICK]) == 0) {
-        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_NICK_MUST_SPECIFIED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_NICK_MUST_SPECIFIED], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
         return false;
     }
 
     if(pRegToChange == NULL && ::GetWindowTextLength(hWndWindowItems[EDT_PASSWORD]) == 0) {
-        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_PASS_MUST_SPECIFIED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_PASS_MUST_SPECIFIED], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
         return false;
     }
 
@@ -325,7 +325,7 @@ bool clsRegisteredUserDialog::OnAccept() {
 
     if(pRegToChange == NULL) {
         if(clsRegManager::mPtr->AddNew(sNick, sPassword, ui16Profile) == false) {
-            ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_USER_IS_ALREDY_REG], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+            ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_USER_IS_ALREDY_REG], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
             return false;
         }
 
@@ -349,7 +349,7 @@ void clsRegisteredUserDialog::RegChanged(RegUser * pReg) {
 
     ::SendMessage(hWndWindowItems[CB_PROFILE], CB_SETCURSEL, pRegToChange->ui16Profile, 0);
 
-    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_USER_CHANGED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_USER_CHANGED], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 }
 //------------------------------------------------------------------------------
 
@@ -358,6 +358,6 @@ void clsRegisteredUserDialog::RegDeleted(RegUser * pReg) {
         return;
     }
 
-    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_USER_DELETED_ACCEPT_TO_NEW], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_USER_DELETED_ACCEPT_TO_NEW], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 }
 //------------------------------------------------------------------------------

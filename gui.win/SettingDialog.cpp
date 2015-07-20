@@ -80,9 +80,7 @@ clsSettingDialog::clsSettingDialog() {
 
 clsSettingDialog::~clsSettingDialog() {
     for(uint8_t ui8i = 0; ui8i < 12; ui8i++) {
-        if(SettingPages[ui8i] != NULL) {
-            delete SettingPages[ui8i];
-        }
+        delete SettingPages[ui8i];
     }
 
     clsSettingDialog::mPtr = NULL;

@@ -106,7 +106,7 @@ void ServerThread::Resume() {
     int iRet = pthread_create(&threadId, NULL, ExecuteServerThread, this);
     if(iRet != 0) {
 #endif
-		AppendDebugLog("%s - [ERR] Failed to create new ServerThread\n", 0);
+		AppendDebugLog("%s - [ERR] Failed to create new ServerThread\n");
     }
 }
 //---------------------------------------------------------------------------
@@ -442,7 +442,7 @@ bool ServerThread::isFlooder(const int &s, const sockaddr_storage &addr) {
 
     AntiConFlood * pNewItem = new (std::nothrow) AntiConFlood(ui128IpHash);
     if(pNewItem == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem  in theLoop::isFlooder\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewItem  in theLoop::isFlooder\n");
     	return true;
     }
 

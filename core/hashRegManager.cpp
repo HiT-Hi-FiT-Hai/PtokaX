@@ -57,7 +57,7 @@ RegUser::RegUser() : sNick(NULL), pPrev(NULL), pNext(NULL), pHashTablePrev(NULL)
 RegUser::~RegUser() {
 #ifdef _WIN32
     if(sNick != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
-		AppendDebugLog("%s - [MEM] Cannot deallocate sNick in RegUser::~RegUser\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot deallocate sNick in RegUser::~RegUser\n");
     }
 #else
 	free(sNick);
@@ -66,7 +66,7 @@ RegUser::~RegUser() {
     if(bPassHash == true) {
 #ifdef _WIN32
         if(ui8PassHash != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ui8PassHash) == 0) {
-		  AppendDebugLog("%s - [MEM] Cannot deallocate ui8PassHash in RegUser::~RegUser\n", 0);
+		  AppendDebugLog("%s - [MEM] Cannot deallocate ui8PassHash in RegUser::~RegUser\n");
         }
 #else
 	   free(ui8PassHash);
@@ -74,7 +74,7 @@ RegUser::~RegUser() {
     } else {
 #ifdef _WIN32
         if(sPass != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sPass) == 0) {
-		  AppendDebugLog("%s - [MEM] Cannot deallocate sPass in RegUser::~RegUser\n", 0);
+		  AppendDebugLog("%s - [MEM] Cannot deallocate sPass in RegUser::~RegUser\n");
         }
 #else
 	   free(sPass);
@@ -87,7 +87,7 @@ RegUser * RegUser::CreateReg(char * sRegNick, size_t szRegNickLen, char * sRegPa
     RegUser * pReg = new (std::nothrow) RegUser();
 
     if(pReg == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate new Reg in RegUser::CreateReg\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate new Reg in RegUser::CreateReg\n");
 
         return NULL;
     }
@@ -98,7 +98,7 @@ RegUser * RegUser::CreateReg(char * sRegNick, size_t szRegNickLen, char * sRegPa
 	pReg->sNick = (char *)malloc(szRegNickLen+1);
 #endif
     if(pReg->sNick == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in RegUser::RegUser\n", (uint64_t)(szRegNickLen+1));
+        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sNick in RegUser::RegUser\n", (uint64_t)(szRegNickLen+1));
 
         delete pReg;
         return NULL;
@@ -113,7 +113,7 @@ RegUser * RegUser::CreateReg(char * sRegNick, size_t szRegNickLen, char * sRegPa
         pReg->ui8PassHash = (uint8_t *)malloc(64);
 #endif
         if(pReg->ui8PassHash == NULL) {
-            AppendDebugLog("%s - [MEM] Cannot allocate 64 bytes for ui8PassHash in RegUser::RegUser\n", 0);
+            AppendDebugLog("%s - [MEM] Cannot allocate 64 bytes for ui8PassHash in RegUser::RegUser\n");
 
             delete pReg;
             return NULL;
@@ -127,7 +127,7 @@ RegUser * RegUser::CreateReg(char * sRegNick, size_t szRegNickLen, char * sRegPa
         pReg->sPass = (char *)malloc(szRegPassLen+1);
 #endif
         if(pReg->sPass == NULL) {
-            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sPass in RegUser::RegUser\n", (uint64_t)(szRegPassLen+1));
+            AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sPass in RegUser::RegUser\n", (uint64_t)(szRegPassLen+1));
 
             delete pReg;
             return NULL;
@@ -155,7 +155,7 @@ bool RegUser::UpdatePassword(char * sNewPass, size_t &szNewLen) {
             if(sPass == NULL) {
                 ui8PassHash = (uint8_t *)sOldBuf;
 
-                AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for ui8PassHash->sPass in RegUser::UpdatePassword\n", (uint64_t)(szNewLen+1));
+                AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes for ui8PassHash->sPass in RegUser::UpdatePassword\n", (uint64_t)(szNewLen+1));
 
                 return false;
             }
@@ -173,7 +173,7 @@ bool RegUser::UpdatePassword(char * sNewPass, size_t &szNewLen) {
             if(sPass == NULL) {
                 sPass = sOldPass;
 
-                AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sPass in RegUser::UpdatePassword\n", (uint64_t)(szNewLen+1));
+                AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes for sPass in RegUser::UpdatePassword\n", (uint64_t)(szNewLen+1));
 
                 return false;
             }
@@ -193,7 +193,7 @@ bool RegUser::UpdatePassword(char * sNewPass, size_t &szNewLen) {
             if(ui8PassHash == NULL) {
                 sPass = sOldPass;
 
-                AppendDebugLog("%s - [MEM] Cannot reallocate 64 bytes for sPass->ui8PassHash in RegUser::UpdatePassword\n", 0);
+                AppendDebugLog("%s - [MEM] Cannot reallocate 64 bytes for sPass->ui8PassHash in RegUser::UpdatePassword\n");
 
                 return false;
             }
@@ -250,7 +250,7 @@ bool clsRegManager::AddNew(char * sNick, char * sPasswd, const uint16_t &iProfil
     }
 
     if(pNewUser == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in clsRegManager::AddNew\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in clsRegManager::AddNew\n");
  
         return false;
     }
@@ -641,7 +641,7 @@ void clsRegManager::Load(void) {
             }
 
             if(pNewUser == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in clsRegManager::Load\n", 0);
+				AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in clsRegManager::Load\n");
 
                 exit(EXIT_FAILURE);
             }
@@ -665,13 +665,12 @@ void clsRegManager::LoadXML() {
 
     if(doc.LoadFile() == false) {
         if(doc.ErrorId() != TiXmlBase::TIXML_ERROR_OPENING_FILE && doc.ErrorId() != TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY) {
-            char msg[2048];
-            int imsgLen = sprintf(msg, "Error loading file RegisteredUsers.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
-			CheckSprintf(imsgLen, 2048, "clsRegManager::LoadXML");
+            int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "Error loading file RegisteredUsers.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
+			CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsRegManager::LoadXML");
 #ifdef _BUILD_GUI
-			::MessageBox(NULL, msg, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
+			::MessageBox(NULL, clsServerManager::pGlobalBuffer, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
-			AppendLog(msg);
+			AppendLog(clsServerManager::pGlobalBuffer);
 #endif
             exit(EXIT_FAILURE);
         }
@@ -706,15 +705,14 @@ void clsRegManager::LoadXML() {
 				uint16_t iProfile = (uint16_t)atoi(registereduser->Value());
 
 				if(iProfile > iProfilesCount) {
-                    char msg[1024];
-                    int imsgLen = sprintf(msg, "%s %s %s! %s %s.", clsLanguageManager::mPtr->sTexts[LAN_USER], nick, clsLanguageManager::mPtr->sTexts[LAN_HAVE_NOT_EXIST_PROFILE],
+                    int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "%s %s %s! %s %s.", clsLanguageManager::mPtr->sTexts[LAN_USER], nick, clsLanguageManager::mPtr->sTexts[LAN_HAVE_NOT_EXIST_PROFILE],
                         clsLanguageManager::mPtr->sTexts[LAN_CHANGED_PROFILE_TO], clsProfileManager::mPtr->ppProfilesTable[iProfilesCount]->sName);
-					CheckSprintf(imsgLen, 1024, "clsRegManager::Load");
+					CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsRegManager::Load");
 
 #ifdef _BUILD_GUI
-					::MessageBox(NULL, msg, g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
+					::MessageBox(NULL, clsServerManager::pGlobalBuffer, g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 #else
-					AppendLog(msg);
+					AppendLog(clsServerManager::pGlobalBuffer);
 #endif
 
                     iProfile = iProfilesCount;
@@ -724,21 +722,20 @@ void clsRegManager::LoadXML() {
                 if(Find((char*)nick, strlen(nick)) == NULL) {
                     RegUser * pNewUser = RegUser::CreateReg(nick, strlen(nick), pass, strlen(pass), NULL, iProfile);
                     if(pNewUser == NULL) {
-						AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in clsRegManager::LoadXML\n", 0);
+						AppendDebugLog("%s - [MEM] Cannot allocate pNewUser in clsRegManager::LoadXML\n");
 
                     	exit(EXIT_FAILURE);
                     }
 					Add(pNewUser);
                 } else {
-                    char msg[1024];
-                    int imsgLen = sprintf(msg, "%s %s %s! %s.", clsLanguageManager::mPtr->sTexts[LAN_USER], nick, clsLanguageManager::mPtr->sTexts[LAN_IS_ALREADY_IN_REGS], 
+                    int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "%s %s %s! %s.", clsLanguageManager::mPtr->sTexts[LAN_USER], nick, clsLanguageManager::mPtr->sTexts[LAN_IS_ALREADY_IN_REGS], 
                         clsLanguageManager::mPtr->sTexts[LAN_USER_DELETED]);
-					CheckSprintf(imsgLen, 1024, "clsRegManager::Load1");
+					CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsRegManager::Load1");
 
 #ifdef _BUILD_GUI
-					::MessageBox(NULL, msg, g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
+					::MessageBox(NULL, clsServerManager::pGlobalBuffer, g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 #else
-					AppendLog(msg);
+					AppendLog(clsServerManager::pGlobalBuffer);
 #endif
 
                     bIsBuggy = true;
@@ -860,7 +857,7 @@ void clsRegManager::HashPasswords() {
             if(pCurReg->ui8PassHash == NULL) {
                 pCurReg->sPass = sOldPass;
 
-                AppendDebugLog("%s - [MEM] Cannot reallocate 64bytes for sPass->ui8PassHash in clsRegManager::HashPasswords\n", 64);
+                AppendDebugLog("%s - [MEM] Cannot reallocate 64 bytes for sPass->ui8PassHash in clsRegManager::HashPasswords\n");
 
                 continue;
             }
@@ -872,7 +869,7 @@ void clsRegManager::HashPasswords() {
 
 #ifdef _WIN32
                 if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldPass) == 0) {
-                    AppendDebugLog("%s - [MEM] Cannot deallocate sOldPass in clsRegManager::HashPasswords\n", 0);
+                    AppendDebugLog("%s - [MEM] Cannot deallocate sOldPass in clsRegManager::HashPasswords\n");
                 }
 #else
                 free(sOldPass);
@@ -880,7 +877,7 @@ void clsRegManager::HashPasswords() {
             } else {
 #ifdef _WIN32
                 if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pCurReg->ui8PassHash) == 0) {
-                    AppendDebugLog("%s - [MEM] Cannot deallocate pCurReg->ui8PassHash in clsRegManager::HashPasswords\n", 0);
+                    AppendDebugLog("%s - [MEM] Cannot deallocate pCurReg->ui8PassHash in clsRegManager::HashPasswords\n");
                 }
 #else
                 free(pCurReg->ui8PassHash);

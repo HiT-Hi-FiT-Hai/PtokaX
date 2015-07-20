@@ -192,7 +192,7 @@ void clsServerManager::OnRegTimer() {
 	    // Create hublist reg thread
 	    clsRegisterThread::mPtr = new (std::nothrow) clsRegisterThread();
 	    if(clsRegisterThread::mPtr == NULL) {
-	        AppendDebugLog("%s - [MEM] Cannot allocate clsRegisterThread::mPtr in ServerOnRegTimer\n", 0);
+	        AppendDebugLog("%s - [MEM] Cannot allocate clsRegisterThread::mPtr in ServerOnRegTimer\n");
 	        return;
 	    }
 	        
@@ -302,7 +302,7 @@ void clsServerManager::Initialize() {
 
 	clsReservedNicksManager::mPtr = new (std::nothrow) clsReservedNicksManager();
 	if(clsReservedNicksManager::mPtr == NULL) {
-	    AppendDebugLog("%s - [MEM] Cannot allocate clsReservedNicksManager::mPtr in ServerInitialize\n", 0);
+	    AppendDebugLog("%s - [MEM] Cannot allocate clsReservedNicksManager::mPtr in ServerInitialize\n");
 	    exit(EXIT_FAILURE);
 	}
 
@@ -329,7 +329,7 @@ void clsServerManager::Initialize() {
 
     clsZlibUtility::mPtr = new (std::nothrow) clsZlibUtility();
     if(clsZlibUtility::mPtr == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate clsZlibUtility::mPtr in ServerInitialize\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate clsZlibUtility::mPtr in ServerInitialize\n");
     	exit(EXIT_FAILURE);
     }
 
@@ -347,19 +347,19 @@ void clsServerManager::Initialize() {
 
 	clsSettingManager::mPtr = new (std::nothrow) clsSettingManager();
     if(clsSettingManager::mPtr == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate clsSettingManager::mPtr in ServerInitialize\n", 0);
+    	AppendDebugLog("%s - [MEM] Cannot allocate clsSettingManager::mPtr in ServerInitialize\n");
     	exit(EXIT_FAILURE);
     }
 
 	TextConverter::mPtr = new (std::nothrow) TextConverter();
     if(TextConverter::mPtr == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate TextConverter::mPtr in ServerInitialize\n", 0);
+    	AppendDebugLog("%s - [MEM] Cannot allocate TextConverter::mPtr in ServerInitialize\n");
     	exit(EXIT_FAILURE);
     }
 
     clsLanguageManager::mPtr = new (std::nothrow) clsLanguageManager();
     if(clsLanguageManager::mPtr == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate clsLanguageManager::mPtr in ServerInitialize\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate clsLanguageManager::mPtr in ServerInitialize\n");
         exit(EXIT_FAILURE);
     }
 
@@ -367,13 +367,13 @@ void clsServerManager::Initialize() {
 
     clsProfileManager::mPtr = new (std::nothrow) clsProfileManager();
     if(clsProfileManager::mPtr == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate clsProfileManager::mPtr in ServerInitialize\n", 0);
+    	AppendDebugLog("%s - [MEM] Cannot allocate clsProfileManager::mPtr in ServerInitialize\n");
     	exit(EXIT_FAILURE);
     }
 
     clsRegManager::mPtr = new (std::nothrow) clsRegManager();
     if(clsRegManager::mPtr == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate clsRegManager::mPtr in ServerInitialize\n", 0);
+    	AppendDebugLog("%s - [MEM] Cannot allocate clsRegManager::mPtr in ServerInitialize\n");
     	exit(EXIT_FAILURE);
     }
 
@@ -382,7 +382,7 @@ void clsServerManager::Initialize() {
 
     clsBanManager::mPtr = new (std::nothrow) clsBanManager();
     if(clsBanManager::mPtr == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate clsBanManager::mPtr in ServerInitialize\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate clsBanManager::mPtr in ServerInitialize\n");
         exit(EXIT_FAILURE);
     }
 
@@ -391,19 +391,19 @@ void clsServerManager::Initialize() {
 
     clsTextFilesManager::mPtr = new (std::nothrow) clsTextFilesManager();
     if(clsTextFilesManager::mPtr == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate clsTextFilesManager::mPtr in ServerInitialize\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate clsTextFilesManager::mPtr in ServerInitialize\n");
         exit(EXIT_FAILURE);
     }
 
     clsUdpDebug::mPtr = new (std::nothrow) clsUdpDebug();
     if(clsUdpDebug::mPtr == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate clsUdpDebug::mPtr in ServerInitialize\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate clsUdpDebug::mPtr in ServerInitialize\n");
         exit(EXIT_FAILURE);
     }
 
     clsScriptManager::mPtr = new (std::nothrow) clsScriptManager();
     if(clsScriptManager::mPtr == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate clsScriptManager::mPtr in ServerInitialize\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate clsScriptManager::mPtr in ServerInitialize\n");
         exit(EXIT_FAILURE);
     }
 
@@ -411,7 +411,7 @@ void clsServerManager::Initialize() {
     clsMainWindow::mPtr = new (std::nothrow) clsMainWindow();
 
     if(clsMainWindow::mPtr == NULL || clsMainWindow::mPtr->CreateEx() == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate clsMainWindow::mPtr in ServerInitialize\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate clsMainWindow::mPtr in ServerInitialize\n");
         exit(EXIT_FAILURE);
     }
 #endif
@@ -422,7 +422,7 @@ void clsServerManager::Initialize() {
     sectimer = SetTimer(NULL, 0, 1000, NULL);
 
 	if(sectimer == 0) {
-		AppendDebugLog("%s - [ERR] Cannot startsectimer in ServerInitialize\n", 0);
+		AppendDebugLog("%s - [ERR] Cannot startsectimer in ServerInitialize\n");
         exit(EXIT_FAILURE);
     }
 
@@ -593,56 +593,56 @@ bool clsServerManager::Start() {
 #ifdef _WITH_SQLITE
     DBSQLite::mPtr = new (std::nothrow) DBSQLite();
     if(DBSQLite::mPtr == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate DBSQLite::mPtr in ServerStart\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate DBSQLite::mPtr in ServerStart\n");
     	exit(EXIT_FAILURE);
     }
 #elif _WITH_POSTGRES
     DBPostgreSQL::mPtr = new (std::nothrow) DBPostgreSQL();
     if(DBPostgreSQL::mPtr == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate DBPostgreSQL::mPtr in ServerStart\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate DBPostgreSQL::mPtr in ServerStart\n");
     	exit(EXIT_FAILURE);
     }
 #elif _WITH_MYSQL
     DBMySQL::mPtr = new (std::nothrow) DBMySQL();
     if(DBMySQL::mPtr == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate DBMySQL::mPtr in ServerStart\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate DBMySQL::mPtr in ServerStart\n");
     	exit(EXIT_FAILURE);
     }
 #endif
 
     clsIpP2Country::mPtr = new (std::nothrow) clsIpP2Country();
     if(clsIpP2Country::mPtr == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate clsIpP2Country::mPtr in ServerStart\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate clsIpP2Country::mPtr in ServerStart\n");
     	exit(EXIT_FAILURE);
     }
 
     clsEventQueue::mPtr = new (std::nothrow) clsEventQueue();
     if(clsEventQueue::mPtr == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate clsEventQueue::mPtr in ServerStart\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate clsEventQueue::mPtr in ServerStart\n");
     	exit(EXIT_FAILURE);
     }
 
     clsHashManager::mPtr = new (std::nothrow) clsHashManager();
     if(clsHashManager::mPtr == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate clsHashManager::mPtr in ServerStart\n", 0);
+    	AppendDebugLog("%s - [MEM] Cannot allocate clsHashManager::mPtr in ServerStart\n");
         exit(EXIT_FAILURE);
     }
 
     clsUsers::mPtr = new (std::nothrow) clsUsers();
 	if(clsUsers::mPtr == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate clsUsers::mPtr in ServerStart\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate clsUsers::mPtr in ServerStart\n");
     	exit(EXIT_FAILURE);
     }
 
     clsGlobalDataQueue::mPtr = new (std::nothrow) clsGlobalDataQueue();
     if(clsGlobalDataQueue::mPtr == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate clsGlobalDataQueue::mPtr in ServerStart\n", 0);
+    	AppendDebugLog("%s - [MEM] Cannot allocate clsGlobalDataQueue::mPtr in ServerStart\n");
     	exit(EXIT_FAILURE);
     }
 
     clsDcCommands::mPtr = new (std::nothrow) clsDcCommands();
     if(clsDcCommands::mPtr == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate clsDcCommands::mPtr in ServerStart\n", 0);
+    	AppendDebugLog("%s - [MEM] Cannot allocate clsDcCommands::mPtr in ServerStart\n");
     	exit(EXIT_FAILURE);
     }
 
@@ -674,7 +674,7 @@ bool clsServerManager::Start() {
 
     clsServiceLoop::mPtr = new (std::nothrow) clsServiceLoop();
     if(clsServiceLoop::mPtr == NULL) {
-    	AppendDebugLog("%s - [MEM] Cannot allocate clsServiceLoop::mPtr in ServerStart\n", 0);
+    	AppendDebugLog("%s - [MEM] Cannot allocate clsServiceLoop::mPtr in ServerStart\n");
     	exit(EXIT_FAILURE);
     }
 
@@ -707,7 +707,7 @@ bool clsServerManager::Start() {
 		regtimer = SetTimer(NULL, 0, 901000, NULL);
 
         if(regtimer == 0) {
-			AppendDebugLog("%s - [ERR] Cannot start regtimer in ServerStart\n", 0);
+			AppendDebugLog("%s - [ERR] Cannot start regtimer in ServerStart\n");
         	exit(EXIT_FAILURE);
         }
 #endif
@@ -722,17 +722,16 @@ void clsServerManager::Stop() {
     clsMainWindow::mPtr->EnableStartButton(FALSE);
 #endif
 
-    char msg[1024];
-    int iret = sprintf(msg, "Serving stopped (UL: %" PRIu64 " [%" PRIu64 "], DL: %" PRIu64 ")", ui64BytesSent, ui64BytesSentSaved, ui64BytesRead);
-    if(CheckSprintf(iret, 1024, "ServerMan::StopServer") == true) {
-        AppendLog(msg);
+    int iret = sprintf(clsServerManager::pGlobalBuffer, "Serving stopped (UL: %" PRIu64 " [%" PRIu64 "], DL: %" PRIu64 ")", ui64BytesSent, ui64BytesSentSaved, ui64BytesRead);
+    if(CheckSprintf(iret, clsServerManager::szGlobalBufferSize, "ServerMan::StopServer") == true) {
+        AppendLog(clsServerManager::pGlobalBuffer);
     }
 
 	//Stop the HubRegistration timer
 	if(clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG] == true) {
 #ifdef _WIN32
         if(KillTimer(NULL, regtimer) == 0) {
-    		AppendDebugLog("%s - [ERR] Cannot stop regtimer in ServerStop\n", 0);
+    		AppendDebugLog("%s - [ERR] Cannot stop regtimer in ServerStop\n");
         	exit(EXIT_FAILURE);
         }
 #endif
@@ -1069,7 +1068,7 @@ void clsServerManager::UpdateAutoRegState() {
         regtimer = SetTimer(NULL, 0, 901000, NULL);
 
         if(regtimer == 0) {
-			AppendDebugLog("%s - [ERR] Cannot start regtimer in ServerUpdateAutoRegState\n", 0);
+			AppendDebugLog("%s - [ERR] Cannot start regtimer in ServerUpdateAutoRegState\n");
             exit(EXIT_FAILURE);
         }
 #else
@@ -1086,7 +1085,7 @@ void clsServerManager::UpdateAutoRegState() {
     } else {
 #ifdef _WIN32
         if(KillTimer(NULL, regtimer) == 0) {
-    		AppendDebugLog("%s - [ERR] Cannot stop regtimer in ServerUpdateAutoRegState\n", 0);
+    		AppendDebugLog("%s - [ERR] Cannot stop regtimer in ServerUpdateAutoRegState\n");
         	exit(EXIT_FAILURE);
         }
 #endif
@@ -1097,7 +1096,7 @@ void clsServerManager::UpdateAutoRegState() {
 void clsServerManager::CreateServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber, const bool &bResume/* = false*/) {
 	ServerThread * pServer = new (std::nothrow) ServerThread(iAddrFamily, ui16PortNumber);
     if(pServer == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pServer in ServerCreateServerThread\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate pServer in ServerCreateServerThread\n");
         exit(EXIT_FAILURE);
     }
 

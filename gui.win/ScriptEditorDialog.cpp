@@ -427,7 +427,7 @@ void ScriptEditorDialog::OnCheckSyntax() {
     }
 
 	if(luaL_dostring(L, sBuf) == 0) {
-		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_NO_SYNERR_IN_SCRIPT], clsServerManager::sTitle.c_str(), MB_OK);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_NO_SYNERR_IN_SCRIPT], g_sPtokaXTitle, MB_OK);
 		lua_close(L);
 	} else {
 		size_t szLen = 0;

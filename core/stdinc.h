@@ -52,13 +52,13 @@
 #endif
 #include <locale.h>
 #include <time.h>
+#include <inttypes.h>
 #ifdef _WIN32
 	#include <process.h>
 #else
 	#include <unistd.h>
 	#include <errno.h>
 	#include <dirent.h>
-	#include <inttypes.h>
 	#include <limits.h>
 	#include <netdb.h>
 	#include <arpa/inet.h>
@@ -94,7 +94,7 @@
 #include "pxstring.h"
 //---------------------------------------------------------------------------
 #define PtokaXVersionString "0.5.1.0"
-#define BUILD_NUMBER "511"
+#define BUILD_NUMBER "512"
 const char g_sPtokaXTitle[] = "PtokaX DC Hub " PtokaXVersionString
 #ifdef _PtokaX_TESTING_
 	" [build " BUILD_NUMBER "]";
@@ -102,9 +102,7 @@ const char g_sPtokaXTitle[] = "PtokaX DC Hub " PtokaXVersionString
 	;
 #endif
 
-
 #ifdef _WIN32
-    #define PRIu64 "I64u"
     #define strcasecmp stricmp
     #define strncasecmp strnicmp
 #endif

@@ -57,8 +57,6 @@ private:
     uint64_t ui64LastSecond;
 #endif
 
-	char msg[1024];
-
 	clsServiceLoop(const clsServiceLoop&);
 	const clsServiceLoop& operator=(const clsServiceLoop&);
 

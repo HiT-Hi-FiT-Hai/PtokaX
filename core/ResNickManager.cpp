@@ -39,7 +39,7 @@ clsReservedNicksManager::ReservedNick::ReservedNick() : sNick(NULL), pPrev(NULL)
 clsReservedNicksManager::ReservedNick::~ReservedNick() {
 #ifdef _WIN32
 	if(sNick != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
-        AppendDebugLog("%s - [MEM] Cannot deallocate sNick in clsReservedNicksManager::ReservedNick::~ReservedNick\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot deallocate sNick in clsReservedNicksManager::ReservedNick::~ReservedNick\n");
     }
 #else
 	free(sNick);
@@ -51,7 +51,7 @@ clsReservedNicksManager::ReservedNick * clsReservedNicksManager::ReservedNick::C
     ReservedNick * pReservedNick = new (std::nothrow) ReservedNick();
 
     if(pReservedNick == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate new pReservedNick in ReservedNick::CreateReservedNick\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate new pReservedNick in ReservedNick::CreateReservedNick\n");
 
         return NULL;
     }
@@ -63,7 +63,7 @@ clsReservedNicksManager::ReservedNick * clsReservedNicksManager::ReservedNick::C
 	pReservedNick->sNick = (char *)malloc(szNickLen+1);
 #endif
     if(pReservedNick->sNick == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in ReservedNick::CreateReservedNick\n", (uint64_t)(szNickLen+1));
+        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes in ReservedNick::CreateReservedNick\n", (uint64_t)(szNickLen+1));
 
         delete pReservedNick;
         return NULL;
@@ -121,13 +121,12 @@ clsReservedNicksManager::clsReservedNicksManager() : pReservedNicks(NULL) {
 			newdoc.InsertEndChild(reservednicks);
 			newdoc.SaveFile();
         } else {
-            char msg[2048];
-            int imsgLen = sprintf(msg, "Error loading file ReservedNicks.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
-			CheckSprintf(imsgLen, 2048, "clsReservedNicksManager::clsReservedNicksManager");
+            int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "Error loading file ReservedNicks.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
+			CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsReservedNicksManager::clsReservedNicksManager");
 #ifdef _BUILD_GUI
-			::MessageBox(NULL, msg, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
+			::MessageBox(NULL, clsServerManager::pGlobalBuffer, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
-			AppendLog(msg);
+			AppendLog(clsServerManager::pGlobalBuffer);
 #endif
             exit(EXIT_FAILURE);
         }
@@ -172,7 +171,7 @@ void clsReservedNicksManager::AddReservedNick(const char * sNick, const bool &bF
     if(CheckReserved(sNick, ulHash) == false) {
         ReservedNick * pNewNick = ReservedNick::CreateReservedNick(sNick, ulHash);
         if(pNewNick == NULL) {
-			AppendDebugLog("%s - [MEM] Cannot allocate pNewNick in clsReservedNicksManager::AddReservedNick\n", 0);
+			AppendDebugLog("%s - [MEM] Cannot allocate pNewNick in clsReservedNicksManager::AddReservedNick\n");
         	return;
         }
 

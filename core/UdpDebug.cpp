@@ -50,7 +50,7 @@ clsUdpDebug::UdpDbgItem::~UdpDbgItem() {
 #ifdef _WIN32
     if(sNick != NULL) {
         if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
-            AppendDebugLog("%s - [MEM] Cannot deallocate sNick in clsUdpDebug::UdpDbgItem::~UdpDbgItem\n", 0);
+            AppendDebugLog("%s - [MEM] Cannot deallocate sNick in clsUdpDebug::UdpDbgItem::~UdpDbgItem\n");
         }
     }
 #else
@@ -74,7 +74,7 @@ clsUdpDebug::~clsUdpDebug() {
 #ifdef _WIN32
 	if(sDebugBuffer != NULL) {
 	    if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sDebugBuffer) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sDebugBuffer in clsUdpDebug::~clsUdpDebug\n", 0);
+			AppendDebugLog("%s - [MEM] Cannot deallocate sDebugBuffer in clsUdpDebug::~clsUdpDebug\n");
 		}
 	}
 #else
@@ -131,8 +131,7 @@ void clsUdpDebug::BroadcastFormat(const char * sFormatMsg, ...) const {
 	va_end(vlArgs);
 
 	if(iRet < 0 || iRet >= 65535) {
-		string sMsg = "%s - [ERR] vsprintf wrong value "+string(iRet)+" in clsUdpDebug::Broadcast\n";
-		AppendDebugLog(sMsg.c_str(), 0);
+		AppendDebugLogFormat("[ERR] vsprintf wrong value %d in clsUdpDebug::Broadcast\n", iRet);
 
 		return;
 	}
@@ -167,7 +166,7 @@ void clsUdpDebug::CreateBuffer() {
 	sDebugBuffer = (char *)malloc(4+256+65535);
 #endif
     if(sDebugBuffer == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate 4+256+65535 bytes for sDebugBuffer in clsUdpDebug::CreateBuffer\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate 4+256+65535 bytes for sDebugBuffer in clsUdpDebug::CreateBuffer\n");
 
         exit(EXIT_FAILURE);
     }
@@ -179,7 +178,7 @@ void clsUdpDebug::CreateBuffer() {
 bool clsUdpDebug::New(User * pUser, const uint16_t &ui16Port) {
 	UdpDbgItem * pNewDbg = new (std::nothrow) UdpDbgItem();
     if(pNewDbg == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewDbg in clsUdpDebug::New\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewDbg in clsUdpDebug::New\n");
     	return false;
     }
 
@@ -190,7 +189,7 @@ bool clsUdpDebug::New(User * pUser, const uint16_t &ui16Port) {
 	pNewDbg->sNick = (char *)malloc(pUser->ui8NickLen+1);
 #endif
     if(pNewDbg->sNick == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in clsUdpDebug::New\n", (uint64_t)(pUser->ui8NickLen+1));
+		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu8 " bytes for sNick in clsUdpDebug::New\n", pUser->ui8NickLen+1);
 
 		delete pNewDbg;
         return false;
@@ -270,8 +269,7 @@ bool clsUdpDebug::New(User * pUser, const uint16_t &ui16Port) {
 
 	int iLen = sprintf(sDebugHead, "[HUB] Subscribed, users online: %u", clsServerManager::ui32Logged);
 	if(iLen < 0 || iLen > 65535) {
-		string sMsg = "%s - [ERR] sprintf wrong value "+string(iLen)+" in clsUdpDebug::New\n";
-		AppendDebugLog(sMsg.c_str(), 0);
+		AppendDebugLogFormat("[ERR] sprintf wrong value %d in clsUdpDebug::New\n", iLen);
 
 		return true;
 	}
@@ -293,7 +291,7 @@ bool clsUdpDebug::New(User * pUser, const uint16_t &ui16Port) {
 bool clsUdpDebug::New(char * sIP, const uint16_t &ui16Port, const bool &bAllData, char * sScriptName) {
 	UdpDbgItem * pNewDbg = new (std::nothrow) UdpDbgItem();
     if(pNewDbg == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewDbg in clsUdpDebug::New\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewDbg in clsUdpDebug::New\n");
     	return false;
     }
 
@@ -305,7 +303,7 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &ui16Port, const bool &bAllData
 	pNewDbg->sNick = (char *)malloc(szNameLen+1);
 #endif
     if(pNewDbg->sNick == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sNick in clsUdpDebug::New\n", (uint64_t)(szNameLen+1));
+		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sNick in clsUdpDebug::New\n", (uint64_t)(szNameLen+1));
 
         delete pNewDbg;
         return false;
@@ -376,8 +374,7 @@ bool clsUdpDebug::New(char * sIP, const uint16_t &ui16Port, const bool &bAllData
 
 	int iLen = sprintf(sDebugHead, "[HUB] Subscribed, users online: %u", clsServerManager::ui32Logged);
 	if(iLen < 0 || iLen > 65535) {
-		string sMsg = "%s - [ERR] sprintf wrong value "+string(iLen)+" in clsUdpDebug::New2\n";
-		AppendDebugLog(sMsg.c_str(), 0);
+		AppendDebugLogFormat("[ERR] sprintf wrong value %d in clsUdpDebug::New2\n", iLen);
 
 		return true;
 	}
@@ -400,7 +397,7 @@ void clsUdpDebug::DeleteBuffer() {
 #ifdef _WIN32
 	if(sDebugBuffer != NULL) {
 	    if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sDebugBuffer) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sDebugBuffer in clsUdpDebug::DeleteBuffer\n", 0);
+			AppendDebugLog("%s - [MEM] Cannot deallocate sDebugBuffer in clsUdpDebug::DeleteBuffer\n");
 		}
 	}
 #else

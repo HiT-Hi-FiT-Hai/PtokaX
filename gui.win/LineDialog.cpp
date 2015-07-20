@@ -75,8 +75,9 @@ LRESULT LineDialog::LineDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                         if(sBuf != NULL) {
                             ::GetWindowText(hWndWindowItems[EDT_LINE], sBuf, iLen + 1);
                             (*pOnOk)(sBuf, iLen);
-                            delete [] sBuf;
                         }
+
+                        delete [] sBuf;
                     }
                 }
                 case IDCANCEL:

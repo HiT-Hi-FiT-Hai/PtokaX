@@ -54,13 +54,12 @@ clsScriptManager::clsScriptManager() : pRunningScriptE(NULL), pRunningScriptS(NU
 #endif
 	if(doc.LoadFile() == false) {
         if(doc.ErrorId() != TiXmlBase::TIXML_ERROR_OPENING_FILE && doc.ErrorId() != TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY) {
-            char msg[2048];
-            int imsgLen = sprintf(msg, "Error loading file Scripts.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
-			CheckSprintf(imsgLen, 2048, "clsScriptManager::clsScriptManager");
+            int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "Error loading file Scripts.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
+			CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsScriptManager::clsScriptManager");
 #ifdef _BUILD_GUI
-			::MessageBox(NULL, msg, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
+			::MessageBox(NULL, clsServerManager::pGlobalBuffer, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
-			AppendLog(msg);
+			AppendLog(clsServerManager::pGlobalBuffer);
 #endif
             exit(EXIT_FAILURE);
         }
@@ -110,7 +109,7 @@ clsScriptManager::~clsScriptManager() {
 
 #ifdef _WIN32
 	if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ppScriptTable) == 0) {
-		AppendDebugLog("%s - [MEM] Cannot deallocate ScriptTable in clsScriptManager::~clsScriptManager\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot deallocate ScriptTable in clsScriptManager::~clsScriptManager\n");
 	}
 #else
 	free(ppScriptTable);
@@ -178,14 +177,14 @@ bool clsScriptManager::AddScript(char * sName, const bool &bEnabled, const bool 
 	if(ppScriptTable == NULL) {
         ppScriptTable = oldbuf;
 
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate ppScriptTable in clsScriptManager::AddScript\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate ppScriptTable in clsScriptManager::AddScript\n");
         return false;
     }
 
     ppScriptTable[ui8ScriptCount] = Script::CreateScript(sName, bEnabled);
 
     if(ppScriptTable[ui8ScriptCount] == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate new Script in clsScriptManager::AddScript\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate new Script in clsScriptManager::AddScript\n");
 
         return false;
     }

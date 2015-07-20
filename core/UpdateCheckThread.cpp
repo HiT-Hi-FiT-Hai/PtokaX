@@ -71,7 +71,7 @@ unsigned __stdcall ExecuteUpdateCheck(void * /*pArguments*/) {
 void clsUpdateCheckThread::Resume() {
 	hThread = (HANDLE)_beginthreadex(NULL, 0, ExecuteUpdateCheck, NULL, 0, NULL);
 	if(hThread == 0) {
-		AppendDebugLog("%s - [ERR] Failed to create new UpdateCheckThread\n", 0);
+		AppendDebugLog("%s - [ERR] Failed to create new UpdateCheckThread\n");
     }
 }
 //---------------------------------------------------------------------------
@@ -227,7 +227,7 @@ void clsUpdateCheckThread::Run() {
 
     sRecvBuf = (char *)malloc(512);
     if(sRecvBuf == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate 512 bytes for sRecvBuf in clsUpdateCheckThread::Run\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate 512 bytes for sRecvBuf in clsUpdateCheckThread::Run\n");
 
 		::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
@@ -269,7 +269,7 @@ void clsUpdateCheckThread::WaitFor() {
 void clsUpdateCheckThread::Message(char * sMessage, const size_t &szLen) {
 	char *sMess = (char *)malloc(szLen + 1);
 	if(sMess == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMess in clsUpdateCheckThread::Message\n", (uint64_t)(szLen+1));
+		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sMess in clsUpdateCheckThread::Message\n", (uint64_t)(szLen+1));
 
 		return;
 	}
@@ -338,7 +338,7 @@ bool clsUpdateCheckThread::Receive() {
         if(sRecvBuf == NULL) {
             sRecvBuf = pOldBuf;
 
-            AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sRecvBuf in clsUpdateCheckThread::Receive\n", (uint64_t)szAllignLen);
+            AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes for sRecvBuf in clsUpdateCheckThread::Receive\n", (uint64_t)szAllignLen);
 
             return false;
         }
@@ -431,7 +431,7 @@ bool clsUpdateCheckThread::Receive() {
 		if(ui32RecvBufLen == (uint32_t)ui32FileLen) {
 			char *sMess = (char *)malloc(ui32RecvBufLen + 1);
 			if(sMess == NULL) {
-				AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sMess in clsUpdateCheckThread::Receive\n", (uint64_t)(ui32RecvBufLen+1));
+				AppendDebugLogFormat("[MEM] Cannot allocate %u bytes for sMess in clsUpdateCheckThread::Receive\n", ui32RecvBufLen+1);
 
 				return false;
 			}

@@ -43,7 +43,7 @@ clsLanguageManager::clsLanguageManager(void) {
 		sTexts[szi] = (char *)malloc(szTextLen+1);
 #endif
         if(sTexts[szi] == NULL) {
-            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in clsLanguageManager::clsLanguageManager\n", (uint64_t)(szTextLen+1));
+            AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes in clsLanguageManager::clsLanguageManager\n", (uint64_t)(szTextLen+1));
 
             exit(EXIT_FAILURE);
         }
@@ -58,7 +58,7 @@ clsLanguageManager::~clsLanguageManager(void) {
     for(size_t szi = 0; szi < LANG_IDS_END; szi++) {
 #ifdef _WIN32
         if(sTexts[szi] != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sTexts[szi]) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sTexts[szi] in clsLanguageManager::~clsLanguageManager\n", 0);
+			AppendDebugLog("%s - [MEM] Cannot deallocate sTexts[szi] in clsLanguageManager::~clsLanguageManager\n");
         }
 #else
 		free(sTexts[szi]);
@@ -81,7 +81,7 @@ void clsLanguageManager::Load() {
             if(sTexts[szi] == NULL) {
                 sTexts[szi] = sOldText;
 
-				AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsLanguageManager::Load\n", (uint64_t)(szTextLen+1));
+				AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in clsLanguageManager::Load\n", (uint64_t)(szTextLen+1));
 
                 continue;
             }
@@ -101,13 +101,12 @@ void clsLanguageManager::Load() {
         TiXmlDocument doc(sLanguageFile.c_str());
         if(doc.LoadFile() == false) {
             if(doc.ErrorId() != TiXmlBase::TIXML_ERROR_OPENING_FILE && doc.ErrorId() != TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY) {
-                char msg[2048];
-                int imsgLen = sprintf(msg, "Error loading file %s.xml. %s (Col: %d, Row: %d)", clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE], doc.ErrorDesc(), doc.Column(), doc.Row());
-                CheckSprintf(imsgLen, 2048, "clsLanguageManager::Load");
+                int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "Error loading file %s.xml. %s (Col: %d, Row: %d)", clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE], doc.ErrorDesc(), doc.Column(), doc.Row());
+                CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsLanguageManager::Load");
 #ifdef _BUILD_GUI
-                ::MessageBox(NULL, msg, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
+                ::MessageBox(NULL, clsServerManager::pGlobalBuffer, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
-                AppendLog(msg);
+                AppendLog(clsServerManager::pGlobalBuffer);
 #endif
             }
         } else {
@@ -135,7 +134,7 @@ void clsLanguageManager::Load() {
                                 if(sTexts[szi] == NULL) {
                                     sTexts[szi] = sOldText;
 
-									AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsLanguageManager::Load1\n", (uint64_t)(szLen+1));
+									AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in clsLanguageManager::Load1\n", (uint64_t)(szLen+1));
 
                                     break;
                                 }

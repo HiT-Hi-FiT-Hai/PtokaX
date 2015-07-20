@@ -26,8 +26,6 @@ struct User;
 
 class clsHubCommands {
 private:
-    static char msg[1024];
-
     static bool Ban(User * pUser, char * sCommand, bool bFromPM, bool bFull);
     static bool BanIp(User * pUser, char * sCommand, bool bFromPM, bool bFull);
     static bool NickBan(User * pUser, char * sNick, char * sReason, bool bFromPM);

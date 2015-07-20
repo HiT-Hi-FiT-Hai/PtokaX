@@ -76,7 +76,8 @@ bool CheckSprintf(const int &iRetVal, const size_t &szMax, const char * sMsg); /
 bool CheckSprintf1(const int &iRetVal, const size_t &szLenVal, const size_t &szMax, const char * sMsg); // CheckSprintf1(iret, imsgLen, 64, "UdpDebug::New");
 
 void AppendLog(const string & sData, const bool &bScript = false);
-void AppendDebugLog(const char * sData, const uint64_t ui64Value);
+void AppendDebugLog(const char * sData);
+void AppendDebugLogFormat(const char * sFormatMsg, ...);
 
 #ifdef _WIN32
 	void GetHeapStats(void *hHeap, DWORD &dwCommitted, DWORD &dwUnCommitted);

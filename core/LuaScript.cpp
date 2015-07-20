@@ -80,7 +80,7 @@ ScriptBot::ScriptBot() : sNick(NULL), sMyINFO(NULL), pPrev(NULL), pNext(NULL), b
 ScriptBot::~ScriptBot() {
 #ifdef _WIN32
     if(sNick != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
-		AppendDebugLog("%s - [MEM] Cannot deallocate sNick in ScriptBot::~ScriptBot\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot deallocate sNick in ScriptBot::~ScriptBot\n");
     }
 #else
 	free(sNick);
@@ -88,7 +88,7 @@ ScriptBot::~ScriptBot() {
 
 #ifdef _WIN32
     if(sMyINFO != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMyINFO) == 0) {
-		AppendDebugLog("%s - [MEM] Cannot deallocate sMyINFO in ScriptBot::~ScriptBot\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot deallocate sMyINFO in ScriptBot::~ScriptBot\n");
     }
 #else
 	free(sMyINFO);
@@ -102,7 +102,7 @@ ScriptBot * ScriptBot::CreateScriptBot(char * sBotNick, const size_t &szNickLen,
     ScriptBot * pScriptBot = new (std::nothrow) ScriptBot();
 
     if(pScriptBot == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate new pScriptBot in ScriptBot::CreateScriptBot\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate new pScriptBot in ScriptBot::CreateScriptBot\n");
 
         return NULL;
     }
@@ -113,7 +113,7 @@ ScriptBot * ScriptBot::CreateScriptBot(char * sBotNick, const size_t &szNickLen,
 	pScriptBot->sNick = (char *)malloc(szNickLen+1);
 #endif
     if(pScriptBot->sNick == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pScriptBot->sNick in ScriptBot::CreateScriptBot\n", (uint64_t)(szNickLen+1));
+		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pScriptBot->sNick in ScriptBot::CreateScriptBot\n", (uint64_t)(szNickLen+1));
 
         delete pScriptBot;
 		return NULL;
@@ -131,7 +131,7 @@ ScriptBot * ScriptBot::CreateScriptBot(char * sBotNick, const size_t &szNickLen,
 	pScriptBot->sMyINFO = (char *)malloc(szWantLen);
 #endif
     if(pScriptBot->sMyINFO == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pScriptBot->sMyINFO in ScriptBot::CreateScriptBot\n", (uint64_t)szWantLen);
+		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pScriptBot->sMyINFO in ScriptBot::CreateScriptBot\n", (uint64_t)szWantLen);
 
         delete pScriptBot;
 		return NULL;
@@ -160,7 +160,7 @@ ScriptTimer::~ScriptTimer() {
 #ifdef _WIN32
 	if(sFunctionName != NULL && sFunctionName != sDefaultTimerFunc) {
         if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sFunctionName) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sFunctionName in ScriptTimer::~ScriptTimer\n", 0);
+			AppendDebugLog("%s - [MEM] Cannot deallocate sFunctionName in ScriptTimer::~ScriptTimer\n");
         }
 #else
     if(sFunctionName != sDefaultTimerFunc) {
@@ -178,7 +178,7 @@ ScriptTimer * ScriptTimer::CreateScriptTimer(char * sFunctName, const size_t &sz
     ScriptTimer * pScriptTimer = new (std::nothrow) ScriptTimer();
 
     if(pScriptTimer == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate new pScriptTimer in ScriptTimer::CreateScriptTimer\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate new pScriptTimer in ScriptTimer::CreateScriptTimer\n");
 
         return NULL;
     }
@@ -193,7 +193,7 @@ ScriptTimer * ScriptTimer::CreateScriptTimer(char * sFunctName, const size_t &sz
             pScriptTimer->sFunctionName = (char *)malloc(szLen+1);
 #endif
             if(pScriptTimer->sFunctionName == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for pScriptTimer->sFunctionName in ScriptTimer::CreateScriptTimer\n", (uint64_t)(szLen+1));
+                AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pScriptTimer->sFunctionName in ScriptTimer::CreateScriptTimer\n", (uint64_t)(szLen+1));
 
                 delete pScriptTimer;
                 return NULL;
@@ -234,7 +234,7 @@ Script::~Script() {
 
 #ifdef _WIN32
 	if(sName != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sName) == 0) {
-        AppendDebugLog("%s - [MEM] Cannot deallocate sName in Script::~Script\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot deallocate sName in Script::~Script\n");
     }
 #else
 	free(sName);
@@ -246,7 +246,7 @@ Script * Script::CreateScript(char * Name, const bool &enabled) {
     Script * pScript = new (std::nothrow) Script();
 
     if(pScript == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate new pScript in Script::CreateScript\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate new pScript in Script::CreateScript\n");
 
         return NULL;
     }
@@ -262,7 +262,7 @@ Script * Script::CreateScript(char * Name, const bool &enabled) {
     pScript->sName = (char *)malloc(szNameLen+1);
 #endif
     if(pScript->sName == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in Script::CreateScript\n", (uint64_t)szNameLen+1);
+        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes in Script::CreateScript\n", (uint64_t)szNameLen+1);
 
         delete pScript;
         return NULL;

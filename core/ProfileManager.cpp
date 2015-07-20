@@ -53,7 +53,7 @@ ProfileItem::ProfileItem() : sName(NULL) {
 ProfileItem::~ProfileItem() {
 #ifdef _WIN32
     if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sName) == 0) {
-        AppendDebugLog("%s - [MEM] Cannot deallocate sName in ProfileItem::~ProfileItem\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot deallocate sName in ProfileItem::~ProfileItem\n");
     }
 #else
 	free(sName);
@@ -79,13 +79,12 @@ clsProfileManager::clsProfileManager() : ui16ProfileCount(0), ppProfilesTable(NU
                 exit(EXIT_FAILURE);
             }
 		} else {
-            char msg[2048];
-            int imsgLen = sprintf(msg, "Error loading file Profiles.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
-			CheckSprintf(imsgLen, 2048, "clsProfileManager::clsProfileManager()");
+            int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "Error loading file Profiles.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
+			CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsProfileManager::clsProfileManager()");
 #ifdef _BUILD_GUI
-			::MessageBox(NULL, msg, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
+			::MessageBox(NULL, clsServerManager::pGlobalBuffer, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
-			AppendLog(msg);
+			AppendLog(clsServerManager::pGlobalBuffer);
 #endif
             exit(EXIT_FAILURE);
         }
@@ -154,7 +153,7 @@ clsProfileManager::~clsProfileManager() {
 
 #ifdef _WIN32
     if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ppProfilesTable) == 0) {
-        AppendDebugLog("%s - [MEM] Cannot deallocate ProfilesTable in clsProfileManager::~clsProfileManager\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot deallocate ProfilesTable in clsProfileManager::~clsProfileManager\n");
     }
 #else
 	free(ppProfilesTable);
@@ -391,7 +390,7 @@ bool clsProfileManager::RemoveProfile(const uint16_t &iProfile) {
     if(ppProfilesTable == NULL) {
         ppProfilesTable = pOldTable;
 
-		AppendDebugLog("%s - [MEM] Cannot reallocate ProfilesTable in clsProfileManager::RemoveProfile\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot reallocate ProfilesTable in clsProfileManager::RemoveProfile\n");
     }
 
 #ifdef _BUILD_GUI
@@ -425,13 +424,13 @@ ProfileItem * clsProfileManager::CreateProfile(const char * name) {
 #else
         free(pOldTable);
 #endif
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate ProfilesTable in clsProfileManager::CreateProfile\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate ProfilesTable in clsProfileManager::CreateProfile\n");
         exit(EXIT_FAILURE);
     }
 
     ProfileItem * pNewProfile = new (std::nothrow) ProfileItem();
     if(pNewProfile == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewProfile in clsProfileManager::CreateProfile\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewProfile in clsProfileManager::CreateProfile\n");
         exit(EXIT_FAILURE);
     }
  
@@ -442,7 +441,7 @@ ProfileItem * clsProfileManager::CreateProfile(const char * name) {
 	pNewProfile->sName = (char *)malloc(szLen+1);
 #endif
     if(pNewProfile->sName == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes in clsProfileManager::CreateProfile for pNewProfile->sName\n", (uint64_t)szLen);
+		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes in clsProfileManager::CreateProfile for pNewProfile->sName\n", (uint64_t)szLen);
 
         exit(EXIT_FAILURE);
     } 
@@ -582,7 +581,7 @@ void clsProfileManager::ChangeProfileName(const uint16_t &iProfile, char * sName
     if(ppProfilesTable[iProfile]->sName == NULL) {
         ppProfilesTable[iProfile]->sName = sOldName;
 
-		AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes in clsProfileManager::ChangeProfileName for ProfilesTable[iProfile]->sName\n", (uint64_t)szLen);
+		AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in clsProfileManager::ChangeProfileName for ProfilesTable[iProfile]->sName\n", (uint64_t)szLen);
 
         return;
     } 

@@ -74,7 +74,7 @@ bool clsHashManager::Add(User * u) {
             u->ui32BoolBits |= User::BIT_ERROR;
             u->Close();
 
-            AppendDebugLog("%s - [MEM] Cannot allocate IpTableItem in clsHashManager::Add\n", 0);
+            AppendDebugLog("%s - [MEM] Cannot allocate IpTableItem in clsHashManager::Add\n");
             return false;
         }
 
@@ -110,7 +110,7 @@ bool clsHashManager::Add(User * u) {
         u->ui32BoolBits |= User::BIT_ERROR;
         u->Close();
 
-		AppendDebugLog("%s - [MEM] Cannot allocate IpTableItem2 in clsHashManager::Add\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate IpTableItem2 in clsHashManager::Add\n");
 		return false;
     }
 

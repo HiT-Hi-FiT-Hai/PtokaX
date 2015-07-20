@@ -103,7 +103,7 @@ void clsRegisterThread::Setup(char * sListAddresses, const uint16_t &ui16AddrsLe
     // parse all addresses and create individul RegSockets
     char *sAddresses = (char *)malloc(ui16AddrsLen+1);
     if(sAddresses == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sAddresses in clsRegisterThread::Setup\n", (uint64_t)(ui16AddrsLen+1));
+        AppendDebugLogFormat("[MEM] Cannot allocate %hu bytes for sAddresses in clsRegisterThread::Setup\n", ui16AddrsLen+1);
 
         return;
     }
@@ -130,26 +130,26 @@ void clsRegisterThread::Setup(char * sListAddresses, const uint16_t &ui16AddrsLe
 }
 //---------------------------------------------------------------------------
 
-void clsRegisterThread::AddSock(char * sAddress, const size_t &ui32Len) {
+void clsRegisterThread::AddSock(char * sAddress, const size_t &szLen) {
     RegSocket * pNewSock = new (std::nothrow) RegSocket();
     if(pNewSock == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewSock in clsRegisterThread::AddSock\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewSock in clsRegisterThread::AddSock\n");
     	return;
     }
 
     pNewSock->pPrev = NULL;
     pNewSock->pNext = NULL;
 
-    pNewSock->sAddress = (char *)malloc(ui32Len+1);
+    pNewSock->sAddress = (char *)malloc(szLen+1);
     if(pNewSock->sAddress == NULL) {
 		delete pNewSock;
 
-		AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sAddress in clsRegisterThread::AddSock\n", (uint64_t)(ui32Len+1));
+		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sAddress in clsRegisterThread::AddSock\n", (uint64_t)(szLen+1));
 
         return;
     }
 
-    pNewSock->ui32AddrLen = (uint32_t)ui32Len;
+    pNewSock->ui32AddrLen = (uint32_t)szLen;
 
     memcpy(pNewSock->sAddress, sAddress, pNewSock->ui32AddrLen);
     pNewSock->sAddress[pNewSock->ui32AddrLen] = '\0';
@@ -158,7 +158,7 @@ void clsRegisterThread::AddSock(char * sAddress, const size_t &ui32Len) {
     if(pNewSock->pRecvBuf == NULL) {
         delete pNewSock;
 
-		AppendDebugLog("%s - [MEM] Cannot allocate 256 bytes for sRecvBuf in clsRegisterThread::AddSock\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate 256 bytes for sRecvBuf in clsRegisterThread::AddSock\n");
         return;
     }
 
@@ -204,7 +204,7 @@ void clsRegisterThread::Resume() {
     int iRet = pthread_create(&threadId, NULL, ExecuteRegisterThread, this);
     if(iRet != 0) {
 #endif
-		AppendDebugLog("%s - [ERR] Failed to create new RegisterThread\n", 0);
+		AppendDebugLog("%s - [ERR] Failed to create new RegisterThread\n");
     }
 }
 //---------------------------------------------------------------------------
@@ -507,7 +507,7 @@ bool clsRegisterThread::Receive(RegSocket * pSock) {
         if(pSock->pRecvBuf == NULL) {
             free(oldbuf);
 
-			AppendDebugLog("%s - [MEM] Cannot reallocate %" PRIu64 " bytes for sRecvBuf in clsRegisterThread::Receive\n", (uint64_t)szAllignLen);
+			AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes for sRecvBuf in clsRegisterThread::Receive\n", (uint64_t)szAllignLen);
 
             return false;
         }
@@ -719,7 +719,7 @@ void clsRegisterThread::Add2SendBuf(RegSocket * pSock, char * sData) {
     
     pSock->pSendBuf = (char *)malloc(szLen+1);
     if(pSock->pSendBuf == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sSendBuf in clsRegisterThread::Add2SendBuf\n", (uint64_t)(szLen+1));
+        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sSendBuf in clsRegisterThread::Add2SendBuf\n", (uint64_t)(szLen+1));
 
         return;
     }

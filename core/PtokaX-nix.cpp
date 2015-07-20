@@ -193,22 +193,22 @@ int main(int argc, char* argv[]) {
 	sigact.sa_flags = 0;
 	
 	if(sigaction(SIGINT, &sigact, NULL) == -1) {
-	    AppendDebugLog("%s - [ERR] Cannot create sigaction SIGINT in main\n", 0);
+	    AppendDebugLog("%s - [ERR] Cannot create sigaction SIGINT in main\n");
 	    exit(EXIT_FAILURE);
 	}
 	
 	if(sigaction(SIGTERM, &sigact, NULL) == -1) {
-	    AppendDebugLog("%s - [ERR] Cannot create sigaction SIGTERM in main\n", 0);
+	    AppendDebugLog("%s - [ERR] Cannot create sigaction SIGTERM in main\n");
 	    exit(EXIT_FAILURE);
 	}
 	
 	if(sigaction(SIGQUIT, &sigact, NULL) == -1) {
-	    AppendDebugLog("%s - [ERR] Cannot create sigaction SIGQUIT in main\n", 0);
+	    AppendDebugLog("%s - [ERR] Cannot create sigaction SIGQUIT in main\n");
 	    exit(EXIT_FAILURE);
 	}
 	
 	if(clsServerManager::bDaemon == false && sigaction(SIGHUP, &sigact, NULL) == -1) {
-	    AppendDebugLog("%s - [ERR] Cannot create sigaction SIGHUP in main\n", 0);
+	    AppendDebugLog("%s - [ERR] Cannot create sigaction SIGHUP in main\n");
 	    exit(EXIT_FAILURE);
 	}
 

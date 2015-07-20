@@ -51,6 +51,9 @@ WNDPROC clsGuiSettingManager::wpOldNumberEditProc = NULL;
 WNDPROC clsGuiSettingManager::wpOldTabsProc = NULL;
 WNDPROC clsGuiSettingManager::wpOldTreeProc = NULL;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+static const char sPtokaXGUISettings[] = "PtokaX GUI Settings";
+static const size_t szPtokaXGUISettingsLen = sizeof("PtokaX GUI Settings")-1;
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 clsGuiSettingManager::clsGuiSettingManager(void) {
     // Read default bools
@@ -89,7 +92,7 @@ void clsGuiSettingManager::Load() {
     }
 
     // Check header if we have correct file
-    if(pxbSetting.ui16ItemLengths[0] != 19 || strncmp((char *)pxbSetting.pItemDatas[0], "PtokaX GUI Settings", 19) != 0) {
+    if(pxbSetting.ui16ItemLengths[0] != szPtokaXGUISettingsLen || strncmp((char *)pxbSetting.pItemDatas[0], sPtokaXGUISettings, szPtokaXGUISettingsLen) != 0) {
         return;
     }
 
@@ -137,8 +140,8 @@ void clsGuiSettingManager::Save() const {
     // Write file header
     pxbSetting.sItemIdentifiers[0][0] = 'F';
     pxbSetting.sItemIdentifiers[0][1] = 'I';
-    pxbSetting.ui16ItemLengths[0] = 19;
-    pxbSetting.pItemDatas[0] = "PtokaX GUI Settings";
+    pxbSetting.ui16ItemLengths[0] = (uint16_t)szPtokaXGUISettingsLen;
+    pxbSetting.pItemDatas[0] = (void *)sPtokaXGUISettings;
     pxbSetting.ui8ItemValues[0] = PXBReader::PXB_STRING;
 
     pxbSetting.sItemIdentifiers[1][0] = 'F';

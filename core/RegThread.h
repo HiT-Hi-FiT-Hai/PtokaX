@@ -65,7 +65,7 @@ private:
 	clsRegisterThread(const clsRegisterThread&);
 	const clsRegisterThread& operator=(const clsRegisterThread&);
 
-	void AddSock(char * sAddress, const size_t &ui32Len);
+	void AddSock(char * sAddress, const size_t &szLen);
 	bool Receive(RegSocket * pSock);
     static void Add2SendBuf(RegSocket * pSock, char * sData);
     bool Send(RegSocket * pSock);

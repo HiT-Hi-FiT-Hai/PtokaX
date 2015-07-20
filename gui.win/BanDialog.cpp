@@ -343,14 +343,14 @@ bool clsBanDialog::OnAccept() {
     bool bIpBan = ::SendMessage(hWndWindowItems[BTN_IP_BAN], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false;
 
 	if(bNickBan == false && bIpBan == false) {
-		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_YOU_CANT_CREATE_BAN_WITHOUT_NICK_OR_IP], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_YOU_CANT_CREATE_BAN_WITHOUT_NICK_OR_IP], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	}
 
     int iNickLen = ::GetWindowTextLength(hWndWindowItems[EDT_NICK]);
 
 	if(bNickBan == true && iNickLen == 0) {
-		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_FOR_NICK_BAN_SPECIFY_NICK], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+		::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_FOR_NICK_BAN_SPECIFY_NICK], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 		return false;
 	}
 
@@ -364,10 +364,10 @@ bool clsBanDialog::OnAccept() {
 
 	if(bIpBan == true) {
 		if(iIpLen == 0) {
-			::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_FOR_IP_BAN_SPECIFY_IP], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+			::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_FOR_IP_BAN_SPECIFY_IP], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		} else if(HashIP(sIP, ui128IpHash) == false) {
-			::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(sIP) + " " + clsLanguageManager::mPtr->sTexts[LAN_IS_NOT_VALID_IP_ADDRESS]).c_str(), clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+			::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(sIP) + " " + clsLanguageManager::mPtr->sTexts[LAN_IS_NOT_VALID_IP_ADDRESS]).c_str(), g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 			return false;
         }
 	}
@@ -383,9 +383,8 @@ bool clsBanDialog::OnAccept() {
         SYSTEMTIME stDate = { 0 };
         SYSTEMTIME stTime = { 0 };
 
-        if(::SendMessage(hWndWindowItems[DT_TEMP_BAN_EXPIRE_DATE], DTM_GETSYSTEMTIME, 0, (LPARAM)&stDate) != GDT_VALID ||
-            ::SendMessage(hWndWindowItems[DT_TEMP_BAN_EXPIRE_TIME], DTM_GETSYSTEMTIME, 0, (LPARAM)&stTime) != GDT_VALID) {
-            ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_BAD_TIME_SPECIFIED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+        if(::SendMessage(hWndWindowItems[DT_TEMP_BAN_EXPIRE_DATE], DTM_GETSYSTEMTIME, 0, (LPARAM)&stDate) != GDT_VALID || ::SendMessage(hWndWindowItems[DT_TEMP_BAN_EXPIRE_TIME], DTM_GETSYSTEMTIME, 0, (LPARAM)&stTime) != GDT_VALID) {
+            ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_BAD_TIME_SPECIFIED], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 
             return false;
         }
@@ -404,8 +403,8 @@ bool clsBanDialog::OnAccept() {
 
 		ban_time = mktime(tm);
 
-		if(ban_time <= acc_time || ban_time == (time_t)-1) {
-			::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_BAD_TIME_SPECIFIED_BAN_EXPIRED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+		if(ban_time == (time_t)-1 || ban_time <= acc_time) {
+			::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_BAD_TIME_SPECIFIED_BAN_EXPIRED], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 
 			return false;
         }
@@ -460,7 +459,7 @@ bool clsBanDialog::OnAccept() {
                     // PPK ... same ban exist, delete new
                     delete pBan;
 
-                    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_SIMILAR_BAN_EXIST], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+                    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_SIMILAR_BAN_EXIST], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
                     return false;
                 }
 			}
@@ -473,7 +472,7 @@ bool clsBanDialog::OnAccept() {
                 // PPK ... same ban exist, delete new
                 delete pBan;
 
-                ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_SIMILAR_BAN_EXIST], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+                ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_SIMILAR_BAN_EXIST], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
                 return false;
             }
         }
@@ -829,6 +828,6 @@ void clsBanDialog::BanDeleted(BanItem * pBan) {
         return;
     }
 
-    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_BAN_DELETED_ACCEPT_TO_NEW], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
+    ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_BAN_DELETED_ACCEPT_TO_NEW], g_sPtokaXTitle, MB_OK | MB_ICONEXCLAMATION);
 }
 //------------------------------------------------------------------------------

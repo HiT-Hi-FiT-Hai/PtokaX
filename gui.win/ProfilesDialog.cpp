@@ -66,9 +66,9 @@ void OnNewProfileOk(char * sLine, const int &/*iLen*/) {
     int32_t iRet = clsProfileManager::mPtr->AddProfile(sLine);
 
     if(iRet == -1) {
-        ::MessageBox(clsProfilesDialog::mPtr->hWndWindowItems[clsProfilesDialog::WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_PROFILE_NAME_EXIST], clsServerManager::sTitle.c_str(), MB_OK);
+        ::MessageBox(clsProfilesDialog::mPtr->hWndWindowItems[clsProfilesDialog::WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_PROFILE_NAME_EXIST], g_sPtokaXTitle, MB_OK);
     } else if(iRet == -2) {
-        ::MessageBox(clsProfilesDialog::mPtr->hWndWindowItems[clsProfilesDialog::WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_CHARS_NOT_ALLOWED_IN_PROFILE], clsServerManager::sTitle.c_str(), MB_OK);
+        ::MessageBox(clsProfilesDialog::mPtr->hWndWindowItems[clsProfilesDialog::WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_CHARS_NOT_ALLOWED_IN_PROFILE], g_sPtokaXTitle, MB_OK);
     }
 }
 //---------------------------------------------------------------------------
@@ -125,13 +125,12 @@ LRESULT clsProfilesDialog::ProfilesDialogProc(UINT uMsg, WPARAM wParam, LPARAM l
                 case IDC_REMOVE_PROFILE: {
                     int iSel = (int)::SendMessage(hWndWindowItems[LV_PROFILES], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
 
-                    if(iSel == -1 || ::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(clsLanguageManager::mPtr->sTexts[LAN_ARE_YOU_SURE],
-                        (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(), clsServerManager::sTitle.c_str(), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO) {
+                    if(iSel == -1 || ::MessageBox(hWndWindowItems[WINDOW_HANDLE], (string(clsLanguageManager::mPtr->sTexts[LAN_ARE_YOU_SURE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(), g_sPtokaXTitle, MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDNO) {
                         return 0;
                     }
 
                     if(clsProfileManager::mPtr->RemoveProfile((uint16_t)iSel) == false) {
-                        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_PROFILE_DEL_FAIL], clsServerManager::sTitle.c_str(), MB_OK);
+                        ::MessageBox(hWndWindowItems[WINDOW_HANDLE], clsLanguageManager::mPtr->sTexts[LAN_PROFILE_DEL_FAIL], g_sPtokaXTitle, MB_OK);
                     }
 
                     return 0;

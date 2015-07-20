@@ -55,6 +55,8 @@ clsMainWindow * clsMainWindow::mPtr = NULL;
 //---------------------------------------------------------------------------
 static uint64_t (*GetActualTick)();
 //---------------------------------------------------------------------------
+static const char sPtokaXDash[] = "PtokaX - ";
+static const size_t szPtokaXDashLen = sizeof(sPtokaXDash)-1;
 
 uint64_t PXGetTickCount() {
 	return (uint64_t)(::GetTickCount() / 1000);
@@ -80,9 +82,7 @@ clsMainWindow::~clsMainWindow() {
     delete clsGuiSettingManager::mPtr;
 
     for(uint8_t ui8i = 0; ui8i < (sizeof(MainWindowPages) / sizeof(MainWindowPages[0])); ui8i++) {
-        if(MainWindowPages[ui8i] != NULL) {
-            delete MainWindowPages[ui8i];
-        }
+        delete MainWindowPages[ui8i];
     }
 
     NOTIFYICONDATA nid;
@@ -171,7 +171,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             for(uint8_t ui8i = 0; ui8i < (sizeof(MainWindowPages) / sizeof(MainWindowPages[0])); ui8i++) {
                 if(MainWindowPages[ui8i] != NULL) {
                     if(MainWindowPages[ui8i]->CreateMainWindowPage(m_hWnd) == false) {
-                        ::MessageBox(m_hWnd, "Main window creation failed!", clsServerManager::sTitle.c_str(), MB_OK);
+                        ::MessageBox(m_hWnd, "Main window creation failed!", g_sPtokaXTitle, MB_OK);
                     }
 
                     tcItem.pszText = MainWindowPages[ui8i]->GetPageName();
@@ -210,8 +210,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             return 0;
         }
         case WM_CLOSE:
-            if(::MessageBox(m_hWnd, (string(clsLanguageManager::mPtr->sTexts[LAN_ARE_YOU_SURE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(),
-                clsServerManager::sTitle.c_str(), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDYES) {
+            if(::MessageBox(m_hWnd, (string(clsLanguageManager::mPtr->sTexts[LAN_ARE_YOU_SURE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ARE_YOU_SURE])+" ?").c_str(), g_sPtokaXTitle, MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDYES) {
                 clsServerManager::bIsClose = true;
 
                 RECT rcMain;
@@ -268,13 +267,13 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 						nid.szTip[szSize-(iret+2)] = '.';
 						nid.szTip[szSize-(iret+3)] = '.';
 						nid.szTip[szSize-(iret+4)] = '.';
-						memcpy(nid.szTip+9, clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], szSize-(iret+13));
-						memcpy(nid.szTip, "PtokaX - ", 9);
+						memcpy(nid.szTip+szPtokaXDashLen, clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], szSize-(iret+13));
+						memcpy(nid.szTip, sPtokaXDash, szPtokaXDashLen);
 					} else {
-						memcpy(nid.szTip, "PtokaX - ", 9);
-						memcpy(nid.szTip+9, clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]);
-						memcpy(nid.szTip+9+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME], msg, iret);
-						nid.szTip[9+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+iret] = '\0';
+						memcpy(nid.szTip, sPtokaXDash, szPtokaXDashLen);
+						memcpy(nid.szTip+szPtokaXDashLen, clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]);
+						memcpy(nid.szTip+szPtokaXDashLen+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME], msg, iret);
+						nid.szTip[szPtokaXDashLen+clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]+iret] = '\0';
                     }
                     ::Shell_NotifyIcon(NIM_MODIFY, &nid);
 				}
@@ -336,7 +335,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                         }
 
                         if(tcItem.lParam == NULL) {
-                            ::MessageBox(m_hWnd, "Not implemented!", clsServerManager::sTitle.c_str(), MB_OK);
+                            ::MessageBox(m_hWnd, "Not implemented!", g_sPtokaXTitle, MB_OK);
                         }
 
                         MainWindowPage * curMainWindowPage = (MainWindowPage *)tcItem.lParam;
@@ -431,10 +430,10 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                         if(clsUpdateCheckThread::mPtr != NULL) {
                             clsUpdateCheckThread::mPtr->Close();
                             clsUpdateCheckThread::mPtr->WaitFor();
-
-                            delete clsUpdateCheckThread::mPtr;
-                            clsUpdateCheckThread::mPtr = NULL;
                         }
+
+                        delete clsUpdateCheckThread::mPtr;
+                        clsUpdateCheckThread::mPtr = NULL;
 
                         // Create update check thread
                         clsUpdateCheckThread::mPtr = new (std::nothrow) clsUpdateCheckThread();
@@ -456,14 +455,12 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                     clsScriptManager::mPtr->SaveScripts();
                     clsSettingManager::mPtr->Save();
 
-                    ::MessageBox(m_hWnd, clsLanguageManager::mPtr->sTexts[LAN_SETTINGS_SAVED], clsServerManager::sTitle.c_str(), MB_OK | MB_ICONINFORMATION);
+                    ::MessageBox(m_hWnd, clsLanguageManager::mPtr->sTexts[LAN_SETTINGS_SAVED], g_sPtokaXTitle, MB_OK | MB_ICONINFORMATION);
                     return 0;
                 case IDC_RELOAD_TXTS:
                     clsTextFilesManager::mPtr->RefreshTextFiles();
 
-                    ::MessageBox(m_hWnd,
-                        (string(clsLanguageManager::mPtr->sTexts[LAN_TXT_FILES_RELOADED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_TXT_FILES_RELOADED])+".").c_str(),
-                            clsServerManager::sTitle.c_str(), MB_OK | MB_ICONINFORMATION);
+                    ::MessageBox(m_hWnd, (string(clsLanguageManager::mPtr->sTexts[LAN_TXT_FILES_RELOADED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_TXT_FILES_RELOADED])+".").c_str(), g_sPtokaXTitle, MB_OK | MB_ICONINFORMATION);
 
                     return 0;
             }
@@ -512,10 +509,10 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             if(clsUpdateCheckThread::mPtr != NULL) {
                 clsUpdateCheckThread::mPtr->Close();
                 clsUpdateCheckThread::mPtr->WaitFor();
-
-                delete clsUpdateCheckThread::mPtr;
-                clsUpdateCheckThread::mPtr = NULL;
             }
+
+            delete clsUpdateCheckThread::mPtr;
+            clsUpdateCheckThread::mPtr = NULL;
 
             return 0;
         case WM_SETFOCUS:
@@ -619,7 +616,7 @@ HWND clsMainWindow::CreateEx() {
     m_wc.cbSize = sizeof(WNDCLASSEX);
     m_wc.lpfnWndProc = StaticMainWindowProc;
     m_wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
-    m_wc.lpszClassName = clsServerManager::sTitle.c_str();
+    m_wc.lpszClassName = g_sPtokaXTitle;
     m_wc.hInstance = clsServerManager::hInstance;
 	m_wc.hCursor = ::LoadCursor(m_wc.hInstance, IDC_ARROW);
 	m_wc.style = CS_HREDRAW | CS_VREDRAW;
@@ -628,11 +625,8 @@ HWND clsMainWindow::CreateEx() {
 
 	ATOM atom = ::RegisterClassEx(&m_wc);
 
-    m_hWnd = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE, MAKEINTATOM(atom),
-        (string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]) + " | " + clsServerManager::sTitle).c_str(),
-        WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-        CW_USEDEFAULT, CW_USEDEFAULT, ScaleGuiDefaultsOnly(GUISETINT_MAIN_WINDOW_WIDTH), ScaleGuiDefaultsOnly(GUISETINT_MAIN_WINDOW_HEIGHT),
-        NULL, hMainMenu, clsServerManager::hInstance, NULL);
+    m_hWnd = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE, MAKEINTATOM(atom), (string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]) + " | " + g_sPtokaXTitle).c_str(),
+        WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, CW_USEDEFAULT, CW_USEDEFAULT, ScaleGuiDefaultsOnly(GUISETINT_MAIN_WINDOW_WIDTH), ScaleGuiDefaultsOnly(GUISETINT_MAIN_WINDOW_HEIGHT), NULL, hMainMenu, clsServerManager::hInstance, NULL);
 
 	if(::GetVersionEx((OSVERSIONINFO*)&ver) != 0 && ver.dwPlatformId == VER_PLATFORM_WIN32_NT && ver.dwMajorVersion >= 6) {
         pGTC64 = (GTC64)::GetProcAddress(::GetModuleHandle("kernel32.dll"), "GetTickCount64");
@@ -690,7 +684,7 @@ void clsMainWindow::UpdateStats() const {
 //---------------------------------------------------------------------------
 
 void clsMainWindow::UpdateTitleBar() {
-    ::SetWindowText(m_hWnd, (string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]) + " | " + clsServerManager::sTitle).c_str());
+    ::SetWindowText(m_hWnd, (string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]) + " | " + g_sPtokaXTitle).c_str());
 }
 //---------------------------------------------------------------------------
 
@@ -787,7 +781,7 @@ void clsMainWindow::OnSelChanged() {
     }
 
     if(tcItem.lParam == NULL) {
-        ::MessageBox(m_hWnd, "Not implemented!", clsServerManager::sTitle.c_str(), MB_OK);
+        ::MessageBox(m_hWnd, "Not implemented!", g_sPtokaXTitle, MB_OK);
     }
 
     ::BringWindowToTop(((MainWindowPage *)tcItem.lParam)->m_hWnd);

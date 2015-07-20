@@ -95,8 +95,6 @@ private:
 
     GlobalQueue GlobalQueues[144];
 
-    char msg[128];
-
     clsGlobalDataQueue(const clsGlobalDataQueue&);
     const clsGlobalDataQueue& operator=(const clsGlobalDataQueue&);
 
@@ -165,6 +163,7 @@ public:
     void * GetFirstQueueItem();
     void * InsertBlankQueueItem(void * pAfterItem, const uint8_t &ui8CmdType);
     void FillBlankQueueItem(char * sCommand, const size_t &szLen, void * pQueueItem);
+    void StatusMessageFormat(const char * sFrom, const char * sFormatMsg, ...);
 };
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

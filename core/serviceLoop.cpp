@@ -93,7 +93,7 @@ void clsServiceLoop::Looper() {
         srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
 
 	    if(srvLoopTimer == 0) {
-	        AppendDebugLog("%s - [ERR] Cannot start Looper in clsServiceLoop::Looper\n", 0);
+	        AppendDebugLog("%s - [ERR] Cannot start Looper in clsServiceLoop::Looper\n");
 	        exit(EXIT_FAILURE);
 	    }
 #endif
@@ -109,10 +109,7 @@ void clsServiceLoop::Looper() {
 }
 //---------------------------------------------------------------------------
 
-clsServiceLoop::clsServiceLoop() : ui64LstUptmTck(clsServerManager::ui64ActualTick), pAcceptedSocketsS(NULL), pAcceptedSocketsE(NULL), dLoggedUsers(0), dActualSrvLoopLogins(0),
-	ui32LastSendRest(0), ui32SendRestsPeak(0), ui32LastRecvRest(0), ui32RecvRestsPeak(0), ui32LoopsForLogins(0), bRecv(true) {
-    msg[0] = '\0';
-
+clsServiceLoop::clsServiceLoop() : ui64LstUptmTck(clsServerManager::ui64ActualTick), pAcceptedSocketsS(NULL), pAcceptedSocketsE(NULL), dLoggedUsers(0), dActualSrvLoopLogins(0), ui32LastSendRest(0), ui32SendRestsPeak(0), ui32LastRecvRest(0), ui32RecvRestsPeak(0), ui32LoopsForLogins(0), bRecv(true) {
 #ifdef _WIN32
     InitializeCriticalSection(&csAcceptQueue);
 #else
@@ -125,7 +122,7 @@ clsServiceLoop::clsServiceLoop() : ui64LstUptmTck(clsServerManager::ui64ActualTi
 	srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
 
     if(srvLoopTimer == 0) {
-		AppendDebugLog("%s - [ERR] Cannot start Looper in clsServiceLoop::clsServiceLoop\n", 0);
+		AppendDebugLog("%s - [ERR] Cannot start Looper in clsServiceLoop::clsServiceLoop\n");
     	exit(EXIT_FAILURE);
     }
 #else
@@ -292,10 +289,10 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
     
     if(clsSettingManager::mPtr->bBools[SETBOOL_REDIRECT_ALL] == true) {
         if(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS] != NULL) {
-       	    int imsgLen = sprintf(msg, "<%s> %s %s|%s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_REDIR_TO], clsSettingManager::mPtr->sTexts[SETTXT_REDIRECT_ADDRESS], clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS]);
-            if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::AcceptUser4") == true) {
-                send(AccptSocket->s, msg, imsgLen, 0);
-                clsServerManager::ui64BytesSent += imsgLen;
+       	    int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> %s %s|%s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_REDIR_TO], clsSettingManager::mPtr->sTexts[SETTXT_REDIRECT_ADDRESS], clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS]);
+            if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsServiceLoop::AcceptUser4") == true) {
+                send(AccptSocket->s, clsServerManager::pGlobalBuffer, iMsgLen, 0);
+                clsServerManager::ui64BytesSent += iMsgLen;
             }
         }
 #ifdef _WIN32
@@ -366,7 +363,7 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 		shutdown(AccptSocket->s, SHUT_RDWR);
 		close(AccptSocket->s);
 #endif
-        AppendDebugLog("%s - [MEM] Cannot allocate pUser in clsServiceLoop::AcceptUser\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate pUser in clsServiceLoop::AcceptUser\n");
 		return;
 	}
 
@@ -382,7 +379,7 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
 #endif
         delete pUser;
 
-        AppendDebugLog("%s - [MEM] Cannot allocate pLogInOut in clsServiceLoop::AcceptUser\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate pLogInOut in clsServiceLoop::AcceptUser\n");
 		return;
     }
 
@@ -416,7 +413,7 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
             close(AccptSocket->s);
 #endif
 
-            AppendDebugLog("%s - [MEM] Cannot allocate new uBan in clsServiceLoop::AcceptUser\n", 0);
+            AppendDebugLog("%s - [MEM] Cannot allocate new uBan in clsServiceLoop::AcceptUser\n");
 
             delete pUser;
 
@@ -434,7 +431,7 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
             close(AccptSocket->s);
 #endif
 
-        	AppendDebugLog("%s - [MEM] Cannot allocate new uBan in clsServiceLoop::AcceptUser1\n", 0);
+        	AppendDebugLog("%s - [MEM] Cannot allocate new uBan in clsServiceLoop::AcceptUser1\n");
 
             delete pUser;
 
@@ -506,27 +503,27 @@ void clsServiceLoop::ReceiveLoop() {
             clsRegManager::mPtr->Save(false, true);
 #ifdef _WIN32
             if(HeapValidate(GetProcessHeap(), 0, 0) == 0) {
-                AppendDebugLog("%s - [ERR] Process memory heap corrupted\n", 0);
+                AppendDebugLog("%s - [ERR] Process memory heap corrupted\n");
             }
             HeapCompact(GetProcessHeap(), 0);
 
             if(HeapValidate(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, 0) == 0) {
-                AppendDebugLog("%s - [ERR] PtokaX memory heap corrupted\n", 0);
+                AppendDebugLog("%s - [ERR] PtokaX memory heap corrupted\n");
             }
             HeapCompact(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE);
 
             if(HeapValidate(clsServerManager::hRecvHeap, HEAP_NO_SERIALIZE, 0) == 0) {
-                AppendDebugLog("%s - [ERR] Recv memory heap corrupted\n", 0);
+                AppendDebugLog("%s - [ERR] Recv memory heap corrupted\n");
             }
             HeapCompact(clsServerManager::hRecvHeap, HEAP_NO_SERIALIZE);
 
             if(HeapValidate(clsServerManager::hSendHeap, HEAP_NO_SERIALIZE, 0) == 0) {
-                AppendDebugLog("%s - [ERR] Send memory heap corrupted\n", 0);
+                AppendDebugLog("%s - [ERR] Send memory heap corrupted\n");
             }
             HeapCompact(clsServerManager::hSendHeap, HEAP_NO_SERIALIZE);
 
             if(HeapValidate(clsServerManager::hLuaHeap, 0, 0) == 0) {
-                AppendDebugLog("%s - [ERR] Lua memory heap corrupted\n", 0);
+                AppendDebugLog("%s - [ERR] Lua memory heap corrupted\n");
             }
             HeapCompact(clsServerManager::hLuaHeap, 0);
 #endif
@@ -687,7 +684,7 @@ void clsServiceLoop::ReceiveLoop() {
                         curUser->ui32BoolBits |= User::BIT_ERROR;
                         curUser->Close();
 
-						AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sLockUsrConn in clsServiceLoop::ReceiveLoop\n", (uint64_t)(szNeededLen+1));
+						AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sLockUsrConn in clsServiceLoop::ReceiveLoop\n", (uint64_t)(szNeededLen+1));
 
                 		continue;
                     }
@@ -725,9 +722,9 @@ void clsServiceLoop::ReceiveLoop() {
 #endif
 
                 // PPK ... change to NoHello supports
-            	int imsgLen = sprintf(msg, "$Hello %s|", curUser->sNick);
-            	if(CheckSprintf(imsgLen, 1024, "clsServiceLoop::ReceiveLoop6") == true) {
-                    clsGlobalDataQueue::mPtr->AddQueueItem(msg, imsgLen, NULL, 0, clsGlobalDataQueue::CMD_HELLO);
+            	int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "$Hello %s|", curUser->sNick);
+            	if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsServiceLoop::ReceiveLoop6") == true) {
+                    clsGlobalDataQueue::mPtr->AddQueueItem(clsServerManager::pGlobalBuffer, iMsgLen, NULL, 0, clsGlobalDataQueue::CMD_HELLO);
                 }
 
                 clsGlobalDataQueue::mPtr->UserIPStore(curUser);
@@ -787,7 +784,7 @@ void clsServiceLoop::ReceiveLoop() {
                                             }
 #ifdef _WIN32
                                             if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sCommand) == 0) {
-												AppendDebugLog("%s - [MEM] Cannot deallocate cur->sCommand in clsServiceLoop::ReceiveLoop\n", 0);
+												AppendDebugLog("%s - [MEM] Cannot deallocate cur->sCommand in clsServiceLoop::ReceiveLoop\n");
                                             }
 #else
 											free(cur->sCommand);
@@ -796,7 +793,7 @@ void clsServiceLoop::ReceiveLoop() {
 
 #ifdef _WIN32
                                             if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sToNick) == 0) {
-												AppendDebugLog("%s - [MEM] Cannot deallocate cur->ToNick in clsServiceLoop::ReceiveLoop\n", 0);
+												AppendDebugLog("%s - [MEM] Cannot deallocate cur->ToNick in clsServiceLoop::ReceiveLoop\n");
                                             }
 #else
 											free(cur->sToNick);
@@ -827,7 +824,7 @@ void clsServiceLoop::ReceiveLoop() {
 
 #ifdef _WIN32
                         if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sCommand) == 0) {
-							AppendDebugLog("%s - [MEM] Cannot deallocate cur->sCommand1 in clsServiceLoop::ReceiveLoop\n", 0);
+							AppendDebugLog("%s - [MEM] Cannot deallocate cur->sCommand1 in clsServiceLoop::ReceiveLoop\n");
                         }
 #else
 						free(cur->sCommand);
@@ -836,7 +833,7 @@ void clsServiceLoop::ReceiveLoop() {
 
 #ifdef _WIN32
                         if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)cur->sToNick) == 0) {
-							AppendDebugLog("%s - [MEM] Cannot deallocate cur->ToNick1 in clsServiceLoop::ReceiveLoop\n", 0);
+							AppendDebugLog("%s - [MEM] Cannot deallocate cur->ToNick1 in clsServiceLoop::ReceiveLoop\n");
                         }
 #else
 						free(cur->sToNick);
@@ -888,7 +885,7 @@ void clsServiceLoop::ReceiveLoop() {
                         (curUser->ui64SameChatsTick+clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MAIN_CHAT_TIME]) < clsServerManager::ui64ActualTick) {
 #ifdef _WIN32
                         if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->sLastChat) == 0) {
-                            AppendDebugLog("%s - [MEM] Cannot deallocate curUser->sLastChat in clsServiceLoop::ReceiveLoop\n", 0);
+                            AppendDebugLog("%s - [MEM] Cannot deallocate curUser->sLastChat in clsServiceLoop::ReceiveLoop\n");
                         }
 #else
 						free(curUser->sLastChat);
@@ -903,7 +900,7 @@ void clsServiceLoop::ReceiveLoop() {
                         (curUser->ui64SamePMsTick+clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_PM_TIME]) < clsServerManager::ui64ActualTick) {
 #ifdef _WIN32
 						if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->sLastPM) == 0) {
-							AppendDebugLog("%s - [MEM] Cannot deallocate curUser->sLastPM in clsServiceLoop::ReceiveLoop\n", 0);
+							AppendDebugLog("%s - [MEM] Cannot deallocate curUser->sLastPM in clsServiceLoop::ReceiveLoop\n");
                         }
 #else
 						free(curUser->sLastPM);
@@ -917,7 +914,7 @@ void clsServiceLoop::ReceiveLoop() {
 					if(curUser->sLastSearch != NULL && (curUser->ui64SameSearchsTick+clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_SEARCH_TIME]) < clsServerManager::ui64ActualTick) {
 #ifdef _WIN32
                         if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)curUser->sLastSearch) == 0) {
-							AppendDebugLog("%s - [MEM] Cannot deallocate curUser->sLastSearch in clsServiceLoop::ReceiveLoop\n", 0);
+							AppendDebugLog("%s - [MEM] Cannot deallocate curUser->sLastSearch in clsServiceLoop::ReceiveLoop\n");
                         }
 #else
 						free(curUser->sLastSearch);
@@ -1113,7 +1110,7 @@ void clsServiceLoop::AcceptSocket(const int &s, const sockaddr_storage &addr) {
 		close(s);
 #endif
 
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewSocket in clsServiceLoop::AcceptSocket\n", 0);
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewSocket in clsServiceLoop::AcceptSocket\n");
     	return;
     }
 

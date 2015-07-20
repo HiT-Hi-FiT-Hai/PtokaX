@@ -330,7 +330,7 @@ static int AddReg(lua_State * L) {
                 pUser->ui32BoolBits |= User::BIT_ERROR;
                 pUser->Close();
 
-                AppendDebugLog("%s - [MEM] Cannot allocate new pUser->pLogInOut in RegMan.AddReg\n", 0);
+                AppendDebugLog("%s - [MEM] Cannot allocate new pUser->pLogInOut in RegMan.AddReg\n");
                 lua_settop(L, 0);
                 lua_pushnil(L);
                 return 1;
