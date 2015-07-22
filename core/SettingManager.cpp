@@ -1404,17 +1404,9 @@ void clsSettingManager::UpdateHubNameWelcome() {
     int iMsgLen = 0;
 
     if(sTexts[SETTXT_HUB_TOPIC] == NULL) {
-        iMsgLen = sprintf(sPreTexts[SETPRETXT_HUB_NAME_WLCM], "$HubName %s|<%s> %s %s"
-#ifdef _PtokaX_TESTING_
-            " [build " BUILD_NUMBER "]"
-#endif
-            " (%s: ", sTexts[SETTXT_HUB_NAME], sPreTexts[SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THIS_HUB_IS_RUNNING], g_sPtokaXTitle, clsLanguageManager::mPtr->sTexts[LAN_UPTIME]);
+        iMsgLen = sprintf(sPreTexts[SETPRETXT_HUB_NAME_WLCM], "$HubName %s|<%s> %s %s (%s: ", sTexts[SETTXT_HUB_NAME], sPreTexts[SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THIS_HUB_IS_RUNNING], g_sPtokaXTitle, clsLanguageManager::mPtr->sTexts[LAN_UPTIME]);
     } else {
-        iMsgLen =  sprintf(sPreTexts[SETPRETXT_HUB_NAME_WLCM], "$HubName %s - %s|<%s> %s %s"
-#ifdef _PtokaX_TESTING_
-            " [build " BUILD_NUMBER "]"
-#endif
-            " (%s: ", sTexts[SETTXT_HUB_NAME], sTexts[SETTXT_HUB_TOPIC], sPreTexts[SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THIS_HUB_IS_RUNNING], g_sPtokaXTitle, clsLanguageManager::mPtr->sTexts[LAN_UPTIME]);
+        iMsgLen =  sprintf(sPreTexts[SETPRETXT_HUB_NAME_WLCM], "$HubName %s - %s|<%s> %s %s (%s: ", sTexts[SETTXT_HUB_NAME], sTexts[SETTXT_HUB_TOPIC], sPreTexts[SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_THIS_HUB_IS_RUNNING], g_sPtokaXTitle, clsLanguageManager::mPtr->sTexts[LAN_UPTIME]);
     }
     
     if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateHubNameWelcome") == false) {

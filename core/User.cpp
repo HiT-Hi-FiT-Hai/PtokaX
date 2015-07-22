@@ -349,22 +349,22 @@ static void UserParseMyInfo(User * u) {
                             char *sHubsParts[] = { NULL, NULL, NULL };
                             uint16_t iHubsPartsLen[] = { 0, 0, 0 };
 
-                            uint8_t cPart = 0;
+                            uint8_t ui8Part = 0;
 
-                            sHubsParts[cPart] = sTagPart+2;
+                            sHubsParts[ui8Part] = sTagPart+2;
 
 
                             for(uint32_t ui32j = 3; ui32j < (uint32_t)((DCTag+szi+1)-sTagPart); ui32j++) {
                                 if(sTagPart[ui32j] == '/') {
                                     sTagPart[ui32j] = '\0';
-                                    iHubsPartsLen[cPart] = (uint16_t)((sTagPart+ui32j)-sHubsParts[cPart]);
+                                    iHubsPartsLen[ui8Part] = (uint16_t)((sTagPart+ui32j)-sHubsParts[ui8Part]);
 
                                     // are we on end of hubs tag part ???
-                                    if(cPart == 2)
+                                    if(ui8Part == 2)
                                         break;
 
-                                    cPart++;
-                                    sHubsParts[cPart] = sTagPart+ui32j+1;
+                                    ui8Part++;
+                                    sHubsParts[ui8Part] = sTagPart+ui32j+1;
                                 }
                             }
 

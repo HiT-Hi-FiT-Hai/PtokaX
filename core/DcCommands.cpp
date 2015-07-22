@@ -2817,9 +2817,6 @@ bool clsDcCommands::ValidateUserNick(User * pUser, char * sNick, const size_t &s
         return false;
     }
 
-    time_t acc_time;
-    time(&acc_time);
-
     // PPK ... check if we already have ban for this user
     if(pUser->pLogInOut->pBan != NULL && pUser->ui32NickHash == pUser->pLogInOut->pBan->ui32NickHash) {
         pUser->SendChar(pUser->pLogInOut->pBan->sMessage, pUser->pLogInOut->pBan->ui32Len);
@@ -2828,11 +2825,14 @@ bool clsDcCommands::ValidateUserNick(User * pUser, char * sNick, const size_t &s
         pUser->Close();
         return false;
     }
-    
+
+	time_t tmAccTime;
+	time(&tmAccTime);
+
     // check for banned nicks
     BanItem * pBan = clsBanManager::mPtr->FindNick(pUser);
     if(pBan != NULL) {
-        int iMsgLen = GenerateBanMessage(pBan, acc_time);
+        int iMsgLen = GenerateBanMessage(pBan, tmAccTime);
         if(iMsgLen != 0) {
         	pUser->SendChar(clsServerManager::pGlobalBuffer, iMsgLen);
         }
@@ -2849,16 +2849,13 @@ bool clsDcCommands::ValidateUserNick(User * pUser, char * sNick, const size_t &s
     RegUser *Reg = clsRegManager::mPtr->Find(pUser);
     if(Reg != NULL) {
         if(clsSettingManager::mPtr->bBools[SETBOOL_ADVANCED_PASS_PROTECTION] == true && Reg->ui8BadPassCount != 0) {
-            time_t acc_time;
-            time(&acc_time);
-
 			uint32_t iMinutes2Wait = (uint32_t)pow(2.0, (double)Reg->ui8BadPassCount-1);
 
-            if(acc_time < (time_t)(Reg->tLastBadPass+(60*iMinutes2Wait))) {
-                pUser->SendFormat("clsDcCommands::ValidateUserNick4", false, "<%s> %s %s %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_LAST_PASS_WAS_WRONG_YOU_NEED_WAIT], formatSecTime((Reg->tLastBadPass+(60*iMinutes2Wait))-acc_time), 
+            if(tmAccTime < (time_t)(Reg->tLastBadPass+(60*iMinutes2Wait))) {
+                pUser->SendFormat("clsDcCommands::ValidateUserNick4", false, "<%s> %s %s %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_LAST_PASS_WAS_WRONG_YOU_NEED_WAIT], formatSecTime((Reg->tLastBadPass+(60*iMinutes2Wait))- tmAccTime),
 					clsLanguageManager::mPtr->sTexts[LAN_BEFORE_YOU_TRY_AGAIN]);
 
-				clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) not allowed to send password (%" PRIu64 ") - user closed.", pUser->sNick, pUser->sIP, (uint64_t)((Reg->tLastBadPass+(60*iMinutes2Wait))-acc_time));
+				clsUdpDebug::mPtr->BroadcastFormat("[SYS] User %s (%s) not allowed to send password (%" PRIu64 ") - user closed.", pUser->sNick, pUser->sIP, (uint64_t)((Reg->tLastBadPass+(60*iMinutes2Wait))- tmAccTime));
 
                 pUser->Close();
                 return false;

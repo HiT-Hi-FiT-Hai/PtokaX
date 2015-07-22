@@ -235,10 +235,10 @@ void clsServerManager::Initialize() {
 
 	clsServerManager::sLuaPath = clsServerManager::sPath + "/";
 
-	char * sLuaPath = clsServerManager::sLuaPath.c_str();
+	char * sTempLuaPath = clsServerManager::sLuaPath.c_str();
 	for(size_t szi = 0; szi < clsServerManager::sPath.size(); szi++) {
-		if(sLuaPath[szi] == '\\') {
-			sLuaPath[szi] = '/';
+		if(sTempLuaPath[szi] == '\\') {
+			sTempLuaPath[szi] = '/';
 		}
 	}
 
@@ -938,12 +938,12 @@ void clsServerManager::UpdateServers() {
     bool bFound = false;
 
     // Remove servers for ports we don't want use anymore
-    ServerThread * cur = NULL,
-        * next = pServersS;
+    ServerThread * pCur = NULL,
+        * pNext = pServersS;
 
-    while(next != NULL) {
-        cur = next;
-        next = cur->pNext;
+    while(pNext != NULL) {
+		pCur = pNext;
+		pNext = pCur->pNext;
 
         bFound = false;
 
@@ -952,33 +952,33 @@ void clsServerManager::UpdateServers() {
                 break;
             }
 
-            if(cur->ui16Port == clsSettingManager::mPtr->ui16PortNumbers[ui8i]) {
+            if(pCur->ui16Port == clsSettingManager::mPtr->ui16PortNumbers[ui8i]) {
                 bFound = true;
                 break;
             }
         }
 
         if(bFound == false) {
-            if(cur->pPrev == NULL) {
-                if(cur->pNext == NULL) {
+            if(pCur->pPrev == NULL) {
+                if(pCur->pNext == NULL) {
                     pServersS = NULL;
                     pServersE = NULL;
                 } else {
-                    cur->pNext->pPrev = NULL;
-                    pServersS = cur->pNext;
+					pCur->pNext->pPrev = NULL;
+                    pServersS = pCur->pNext;
                 }
-            } else if(cur->pNext == NULL) {
-                cur->pPrev->pNext = NULL;
-                pServersE = cur->pPrev;
+            } else if(pCur->pNext == NULL) {
+				pCur->pPrev->pNext = NULL;
+                pServersE = pCur->pPrev;
             } else {
-                cur->pPrev->pNext = cur->pNext;
-                cur->pNext->pPrev = cur->pPrev;
+				pCur->pPrev->pNext = pCur->pNext;
+				pCur->pNext->pPrev = pCur->pPrev;
             }
 
-            cur->Close();
-        	cur->WaitFor();
+			pCur->Close();
+			pCur->WaitFor();
 
-        	delete cur;
+        	delete pCur;
         }
     }
 
@@ -990,14 +990,14 @@ void clsServerManager::UpdateServers() {
 
         bFound = false;
 
-        ServerThread * cur = NULL,
-            * next = pServersS;
+		pCur = NULL,
+			pNext = pServersS;
 
-        while(next != NULL) {
-            cur = next;
-            next = cur->pNext;
+        while(pNext != NULL) {
+			pCur = pNext;
+			pNext = pCur->pNext;
 
-            if(cur->ui16Port == clsSettingManager::mPtr->ui16PortNumbers[ui8i]) {
+            if(pCur->ui16Port == clsSettingManager::mPtr->ui16PortNumbers[ui8i]) {
                 bFound = true;
                 break;
             }

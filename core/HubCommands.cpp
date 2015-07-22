@@ -101,9 +101,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
 
                 int iMsgLen = CheckFromPm(pUser, bFromPM);
 
-                int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
-                iMsgLen += iret;
-                if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand2") == false) {
+                int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
+                iMsgLen += iRet;
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand2") == false) {
                     return true;
                 }
 
@@ -337,51 +337,51 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
 
                 int iMsgLen = CheckFromPm(pUser, bFromPM);
 
-                int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> \n%s: %s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_NICK], pOtherUser->sNick);
-                iMsgLen += iret;
-                if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand23") == false) {
+                int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> \n%s: %s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_NICK], pOtherUser->sNick);
+                iMsgLen += iRet;
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand23") == false) {
                     return true;
                 }
 
                 if(pOtherUser->i32Profile != -1) {
-                    int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_PROFILE], clsProfileManager::mPtr->ppProfilesTable[pOtherUser->i32Profile]->sName);
-                    iMsgLen += iret;
-                    if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand24") == false) {
+                    iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s", clsLanguageManager::mPtr->sTexts[LAN_PROFILE], clsProfileManager::mPtr->ppProfilesTable[pOtherUser->i32Profile]->sName);
+                    iMsgLen += iRet;
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand24") == false) {
                         return true;
                     }
                 }
 
-                iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s ", clsLanguageManager::mPtr->sTexts[LAN_STATUS], clsLanguageManager::mPtr->sTexts[LAN_ONLINE_FROM]);
-                iMsgLen += iret;
-                if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand25") == false) {
+                iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s ", clsLanguageManager::mPtr->sTexts[LAN_STATUS], clsLanguageManager::mPtr->sTexts[LAN_ONLINE_FROM]);
+                iMsgLen += iRet;
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand25") == false) {
                     return true;
                 }
 
                 struct tm *tm = localtime(&pOtherUser->tLoginTime);
-                iret = (int)strftime(clsServerManager::pGlobalBuffer+iMsgLen, 256, "%c", tm);
-                iMsgLen += iret;
-                if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand26") == false) {
+                iRet = (int)strftime(clsServerManager::pGlobalBuffer+iMsgLen, 256, "%c", tm);
+                iMsgLen += iRet;
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand26") == false) {
                     return true;
                 }
 
 				if(pOtherUser->sIPv4[0] != '\0') {
-					iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s / %s\n%s: %0.02f %s", clsLanguageManager::mPtr->sTexts[LAN_IP], pOtherUser->sIP, pOtherUser->sIPv4, clsLanguageManager::mPtr->sTexts[LAN_SHARE_SIZE], (double)pOtherUser->ui64SharedSize/1073741824, clsLanguageManager::mPtr->sTexts[LAN_GIGA_BYTES]);
-					iMsgLen += iret;
-					if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand27-1") == false) {
+					iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s / %s\n%s: %0.02f %s", clsLanguageManager::mPtr->sTexts[LAN_IP], pOtherUser->sIP, pOtherUser->sIPv4, clsLanguageManager::mPtr->sTexts[LAN_SHARE_SIZE], (double)pOtherUser->ui64SharedSize/1073741824, clsLanguageManager::mPtr->sTexts[LAN_GIGA_BYTES]);
+					iMsgLen += iRet;
+					if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand27-1") == false) {
 						return true;
 					}
 				} else {
-					iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s\n%s: %0.02f %s", clsLanguageManager::mPtr->sTexts[LAN_IP], pOtherUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_SHARE_SIZE], (double)pOtherUser->ui64SharedSize/1073741824, clsLanguageManager::mPtr->sTexts[LAN_GIGA_BYTES]);
-					iMsgLen += iret;
-					if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand27-2") == false) {
+					iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: %s\n%s: %0.02f %s", clsLanguageManager::mPtr->sTexts[LAN_IP], pOtherUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_SHARE_SIZE], (double)pOtherUser->ui64SharedSize/1073741824, clsLanguageManager::mPtr->sTexts[LAN_GIGA_BYTES]);
+					iMsgLen += iRet;
+					if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand27-2") == false) {
 						return true;
 					}
 				}
 
                 if(pOtherUser->sDescription != NULL) {
-                    int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: ", clsLanguageManager::mPtr->sTexts[LAN_DESCRIPTION]);
-                    iMsgLen += iret;
-                    if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand28") == false) {
+                    iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: ", clsLanguageManager::mPtr->sTexts[LAN_DESCRIPTION]);
+                    iMsgLen += iRet;
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand28") == false) {
                         return true;
                     }
                     memcpy(clsServerManager::pGlobalBuffer+iMsgLen, pOtherUser->sDescription, pOtherUser->ui8DescriptionLen);
@@ -389,9 +389,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
                 }
 
                 if(pOtherUser->sTag != NULL) {
-                    int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: ", clsLanguageManager::mPtr->sTexts[LAN_TAG]);
-                    iMsgLen += iret;
-                    if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand29") == false) {
+                    iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: ", clsLanguageManager::mPtr->sTexts[LAN_TAG]);
+                    iMsgLen += iRet;
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand29") == false) {
                         return true;
                     }
                     memcpy(clsServerManager::pGlobalBuffer+iMsgLen, pOtherUser->sTag, pOtherUser->ui8TagLen);
@@ -399,9 +399,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
                 }
                     
                 if(pOtherUser->sConnection != NULL) {
-                    int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: ", clsLanguageManager::mPtr->sTexts[LAN_CONNECTION]);
-                    iMsgLen += iret;
-                    if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand30") == false) {
+					iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: ", clsLanguageManager::mPtr->sTexts[LAN_CONNECTION]);
+                    iMsgLen += iRet;
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand30") == false) {
                         return true;
                     }
                     memcpy(clsServerManager::pGlobalBuffer+iMsgLen, pOtherUser->sConnection, pOtherUser->ui8ConnectionLen);
@@ -409,9 +409,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
                 }
 
                 if(pOtherUser->sEmail != NULL) {
-                    int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: ", clsLanguageManager::mPtr->sTexts[LAN_EMAIL]);
-                    iMsgLen += iret;
-                    if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand31") == false) {
+					iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: ", clsLanguageManager::mPtr->sTexts[LAN_EMAIL]);
+                    iMsgLen += iRet;
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand31") == false) {
                         return true;
                     }
                     memcpy(clsServerManager::pGlobalBuffer+iMsgLen, pOtherUser->sEmail, pOtherUser->ui8EmailLen);
@@ -419,9 +419,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
                 }
 
                 if(clsIpP2Country::mPtr->ui32Count != 0) {
-                    iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: ", clsLanguageManager::mPtr->sTexts[LAN_COUNTRY]);
-                    iMsgLen += iret;
-                    if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand32") == false) {
+					iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "\n%s: ", clsLanguageManager::mPtr->sTexts[LAN_COUNTRY]);
+                    iMsgLen += iRet;
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand32") == false) {
                         return true;
                     }
                     memcpy(clsServerManager::pGlobalBuffer+iMsgLen, clsIpP2Country::mPtr->GetCountry(pOtherUser->ui8Country, false), 2);
@@ -489,9 +489,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
 
                 int iMsgLen = CheckFromPm(pUser, bFromPM);
 
-                int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
-                iMsgLen += iret;
-                if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand33") == false) {
+                int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
+                iMsgLen += iRet;
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand33") == false) {
                     return true;
                 }
 
@@ -579,9 +579,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
 
                 int iMsgLen = CheckFromPm(pUser, bFromPM);
 
-                int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
-                iMsgLen += iret;
-                if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand35") == false) {
+                int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
+                iMsgLen += iRet;
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand35") == false) {
                     return true;
                 }
 
@@ -616,9 +616,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
 
                 int iMsgLen = CheckFromPm(pUser, bFromPM);
 
-                int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
-                iMsgLen += iret;
-                if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand37") == false) {
+                int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
+                iMsgLen += iRet;
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand37") == false) {
                     return true;
                 }
 
@@ -686,9 +686,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
 
                 int iMsgLen = CheckFromPm(pUser, bFromPM);
 
-                int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
-                iMsgLen += iret;
-                if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand39") == false) {
+                int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
+                iMsgLen += iRet;
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand39") == false) {
                     return true;
                 }
 
@@ -809,9 +809,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
 
                 int iMsgLen = CheckFromPm(pUser, bFromPM);
 
-                int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
-                iMsgLen += iret;
-                if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand41") == false) {
+                int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
+                iMsgLen += iRet;
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand41") == false) {
                     return true;
                 }
 
@@ -879,9 +879,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
 
                 int iMsgLen = CheckFromPm(pUser, bFromPM);
 
-                int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
-                iMsgLen += iret;
-                if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand43") == false) {
+                int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
+                iMsgLen += iRet;
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand43") == false) {
                     return true;
                 }
 
@@ -981,13 +981,13 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
                         sReason = NULL;
                     } else {
                         sReason++;
-                    }
 
-                    if(strlen(sReason) > 512) {
-                    	sReason[510] = '.';
-                    	sReason[511] = '.';
-                        sReason[512] = '.';
-                        sReason[513] = '\0';
+	                    if(strlen(sReason) > 512) {
+	                    	sReason[510] = '.';
+	                    	sReason[511] = '.';
+	                        sReason[512] = '.';
+	                        sReason[513] = '\0';
+	                    }
                     }
                 } else {
                     szNickLen = dlen-8;
@@ -1904,13 +1904,13 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
                         sReason = NULL;
                     } else {
                         sReason++;
-                    }
 
-                    if(strlen(sReason) > 512) {
-                    	sReason[510] = '.';
-                    	sReason[511] = '.';
-                        sReason[512] = '.';
-                        sReason[513] = '\0';
+	                    if(strlen(sReason) > 512) {
+	                    	sReason[510] = '.';
+	                    	sReason[511] = '.';
+	                        sReason[512] = '.';
+	                        sReason[513] = '\0';
+	                    }
                     }
                 } else {
                     szNickLen = dlen-5;
@@ -2205,52 +2205,52 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
 
                 int iMsgLen = CheckFromPm(pUser, bFromPM);                        
 
-                int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> %s: %s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_BANNED_NICK], pBan->sNick);
-           	    iMsgLen += iret;
-                if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand263") == false) {
+                int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> %s: %s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_BANNED_NICK], pBan->sNick);
+           	    iMsgLen += iRet;
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand263") == false) {
                     return true;
                 }
 
                 if(pBan->sIp[0] != '\0') {
                     if(((pBan->ui8Bits & clsBanManager::IP) == clsBanManager::IP) == true) {
-                        int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s", clsLanguageManager::mPtr->sTexts[LAN_BANNED]);
-               	        iMsgLen += iret;
-                        if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand264") == false) {
+						iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s", clsLanguageManager::mPtr->sTexts[LAN_BANNED]);
+               	        iMsgLen += iRet;
+                        if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand264") == false) {
                             return true;
                         }
                     }
-                    int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s: %s", clsLanguageManager::mPtr->sTexts[LAN_IP], pBan->sIp);
-           	        iMsgLen += iret;
-                    if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand265") == false) {
+					iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s: %s", clsLanguageManager::mPtr->sTexts[LAN_IP], pBan->sIp);
+           	        iMsgLen += iRet;
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand265") == false) {
                         return true;
                     }
                     if(((pBan->ui8Bits & clsBanManager::FULL) == clsBanManager::FULL) == true) {
-                        int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " (%s)", clsLanguageManager::mPtr->sTexts[LAN_FULL]);
-           	            iMsgLen += iret;
-                        if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand266") == false) {
+						iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " (%s)", clsLanguageManager::mPtr->sTexts[LAN_FULL]);
+           	            iMsgLen += iRet;
+                        if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand266") == false) {
                             return true;
                         }
                     }
                 }
 
                 if(pBan->sReason != NULL) {
-                    int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s: %s", clsLanguageManager::mPtr->sTexts[LAN_REASON], pBan->sReason);
-           	        iMsgLen += iret;
-                    if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand267") == false) {
+					iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s: %s", clsLanguageManager::mPtr->sTexts[LAN_REASON], pBan->sReason);
+           	        iMsgLen += iRet;
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand267") == false) {
                         return true;
                     }
                 }
 
                 if(pBan->sBy != NULL) {
-                    int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s: %s|", clsLanguageManager::mPtr->sTexts[LAN_BANNED_BY], pBan->sBy);
-           	        iMsgLen += iret;
-                    if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand268") == false) {
+                    iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s: %s|", clsLanguageManager::mPtr->sTexts[LAN_BANNED_BY], pBan->sBy);
+           	        iMsgLen += iRet;
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand268") == false) {
                         return true;
                     }
                 }
 
                 if(((pBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true) {
-                    int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s: ", clsLanguageManager::mPtr->sTexts[LAN_EXPIRE]);
+					iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s: ", clsLanguageManager::mPtr->sTexts[LAN_EXPIRE]);
            	        iMsgLen += iRet;
                     if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand269") == false) {
                         return true;
@@ -2303,9 +2303,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
                 if(pNextBan != NULL) {
                     int iMsgLen = CheckFromPm(pUser, bFromPM);
 
-                    int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
-                    iMsgLen += iret;
-                    if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand275") == false) {
+                    int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
+                    iMsgLen += iRet;
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand275") == false) {
                         return true;
                     }
 
@@ -2333,9 +2333,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
                             return true;
                         }
                         if(((pCurBan->ui8Bits & clsBanManager::FULL) == clsBanManager::FULL) == true) {
-                            int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " (%s)", clsLanguageManager::mPtr->sTexts[LAN_FULL]);
-                            iMsgLen += iret;
-                            if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand277") == false) {
+							iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " (%s)", clsLanguageManager::mPtr->sTexts[LAN_FULL]);
+                            iMsgLen += iRet;
+                            if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand277") == false) {
                                 return true;
                             }
                         }
@@ -2350,9 +2350,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
                                     return true;
                                 }
                             }
-                            int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s: %s", clsLanguageManager::mPtr->sTexts[LAN_NICK], pCurBan->sNick);
-                            iMsgLen += iret;
-                            if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand279") == false) {
+							iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s: %s", clsLanguageManager::mPtr->sTexts[LAN_NICK], pCurBan->sNick);
+                            iMsgLen += iRet;
+                            if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand279") == false) {
                                 return true;
                             }
 							Bans += clsServerManager::pGlobalBuffer;
@@ -2412,9 +2412,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
                                 return true;
                             }
                             if(((pCurRangeBan->ui8Bits & clsBanManager::FULL) == clsBanManager::FULL) == true) {
-                                int iret= sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " (%s)", clsLanguageManager::mPtr->sTexts[LAN_FULL]);
-                                iMsgLen += iret;
-                                if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand283") == false) {
+								iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " (%s)", clsLanguageManager::mPtr->sTexts[LAN_FULL]);
+                                iMsgLen += iRet;
+                                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand283") == false) {
                                     return true;
                                 }
                             }
@@ -2455,9 +2455,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
                     if(pNextRangeBan != NULL) {
                         int iMsgLen = CheckFromPm(pUser, bFromPM);
 
-                        int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
-                        iMsgLen += iret;
-                        if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand287") == false) {
+                        int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
+                        iMsgLen += iRet;
+                        if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand287") == false) {
                             return true;
                         }
 
@@ -2486,9 +2486,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
                                     return true;
                                 }
                                 if(((pCurRangeBan->ui8Bits & clsBanManager::FULL) == clsBanManager::FULL) == true) {
-                                    int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " (%s)", clsLanguageManager::mPtr->sTexts[LAN_FULL]);
-                                    iMsgLen += iret;
-                                    if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand289") == false) {
+									iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " (%s)", clsLanguageManager::mPtr->sTexts[LAN_FULL]);
+                                    iMsgLen += iRet;
+                                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand289") == false) {
                                         return true;
                                     }
                                 }
@@ -2585,38 +2585,38 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
                 
                 int iMsgLen = CheckFromPm(pUser, bFromPM);
 
-                int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> %s: %s-%s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_RANGE], pRangeBan->sIpFrom, pRangeBan->sIpTo);
-                iMsgLen += iret;
-                if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand305") == false) {
+                int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> %s: %s-%s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_RANGE], pRangeBan->sIpFrom, pRangeBan->sIpTo);
+                iMsgLen += iRet;
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand305") == false) {
                     return true;
                 }
                     
                 if(((pRangeBan->ui8Bits & clsBanManager::FULL) == clsBanManager::FULL) == true) {
-                    int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " (%s)", clsLanguageManager::mPtr->sTexts[LAN_FULL]);
-                    iMsgLen += iret;
-                    if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand306") == false) {
+                    iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " (%s)", clsLanguageManager::mPtr->sTexts[LAN_FULL]);
+                    iMsgLen += iRet;
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand306") == false) {
                         return true;
                     }
                 }
 
                 if(pRangeBan->sReason != NULL) {
-                    int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s: %s", clsLanguageManager::mPtr->sTexts[LAN_REASON], pRangeBan->sReason);
-                    iMsgLen += iret;
-                    if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand307") == false) {
+					iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s: %s", clsLanguageManager::mPtr->sTexts[LAN_REASON], pRangeBan->sReason);
+                    iMsgLen += iRet;
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand307") == false) {
                         return true;
                     }
                 }
 
                 if(pRangeBan->sBy != NULL) {
-                    int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s: %s", clsLanguageManager::mPtr->sTexts[LAN_BANNED_BY], pRangeBan->sBy);
-                    iMsgLen += iret;
-                    if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand308") == false) {
+					iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s: %s", clsLanguageManager::mPtr->sTexts[LAN_BANNED_BY], pRangeBan->sBy);
+                    iMsgLen += iRet;
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand308") == false) {
                         return true;
                     }
                 }
 
                 if(((pRangeBan->ui8Bits & clsBanManager::TEMP) == clsBanManager::TEMP) == true) {
-                    int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s: ", clsLanguageManager::mPtr->sTexts[LAN_EXPIRE]);
+					iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, " %s: ", clsLanguageManager::mPtr->sTexts[LAN_EXPIRE]);
                     iMsgLen += iRet;
                     if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand309") == false) {
                         return true;
@@ -2784,9 +2784,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
 			if(dlen == 4 && strncasecmp(sCommand+1, "elp", 3) == 0) {
                 int iMsgLen = CheckFromPm(pUser, bFromPM);
 
-                int iret  = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
-               	iMsgLen += iret;
-                if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand330") == false) {
+                int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s> ", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
+               	iMsgLen += iRet;
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand330") == false) {
                     return true;
                 }
 
@@ -3298,9 +3298,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
 			if((dlen == 4 && strncasecmp(sCommand+1, "tat", 3) == 0) || (dlen == 5 && strncasecmp(sCommand+1, "tats", 4) == 0)) {
 				int iMsgLen = CheckFromPm(pUser, bFromPM);
 
-				int iret = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s>", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
-				iMsgLen += iret;
-				if(CheckSprintf1(iret, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand391") == false) {
+				int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "<%s>", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
+				iMsgLen += iRet;
+				if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand391") == false) {
 					return true;
 				}
 
@@ -3834,14 +3834,14 @@ bool clsHubCommands::Ban(User * pUser, char * sCommand, bool bFromPM, bool bFull
             sReason = NULL;
         } else {
             sReason++;
-        }
 
-		if(strlen(sReason) > 512) {
-			sReason[510] = '.';
-			sReason[511] = '.';
-			sReason[512] = '.';
-			sReason[513] = '\0';
-		}
+			if(strlen(sReason) > 512) {
+				sReason[510] = '.';
+				sReason[511] = '.';
+				sReason[512] = '.';
+				sReason[513] = '\0';
+			}
+        }
     }
 
     if(sCommand[0] == '\0') {
@@ -3912,14 +3912,14 @@ bool clsHubCommands::BanIp(User * pUser, char * sCommand, bool bFromPM, bool bFu
             sReason = NULL;
         } else {
             sReason++;
-        }
 
-		if(strlen(sReason) > 512) {
-			sReason[510] = '.';
-			sReason[511] = '.';
-			sReason[512] = '.';
-			sReason[513] = '\0';
-		}
+			if(strlen(sReason) > 512) {
+				sReason[510] = '.';
+				sReason[511] = '.';
+				sReason[512] = '.';
+				sReason[513] = '\0';
+			}
+        }
     }
 
     if(sCommand[0] == '\0') {
