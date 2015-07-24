@@ -356,7 +356,7 @@ bool clsRangeBanDialog::OnAccept() {
 	if(pRangeBanToChange == NULL) {
 		RangeBanItem * pRangeBan = new (std::nothrow) RangeBanItem();
 		if(pRangeBan == NULL) {
-			AppendDebugLog("%s - [MEM] Cannot allocate pRangeBan in clsRangeBanDialog::OnAccept\n", 0);
+			AppendDebugLog("%s - [MEM] Cannot allocate pRangeBan in clsRangeBanDialog::OnAccept\n");
 			return false;
 		}
 
@@ -405,7 +405,7 @@ bool clsRangeBanDialog::OnAccept() {
 		if(iReasonLen != 0) {
             pRangeBan->sReason = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
             if(pRangeBan->sReason == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in clsRangeBanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
+                AppendDebugLogFormat("[MEM] Cannot allocate %d bytes for sReason in clsRangeBanDialog::OnAccept\n", iReasonLen+1);
 
                 delete pRangeBan;
 
@@ -420,7 +420,7 @@ bool clsRangeBanDialog::OnAccept() {
         if(iByLen != 0) {
             pRangeBan->sBy = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
             if(pRangeBan->sBy == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in clsRangeBanDialog::OnAccept\n", (uint64_t)(iByLen+1));
+                AppendDebugLogFormat("[MEM] Cannot allocate %d bytes for sBy in clsRangeBanDialog::OnAccept\n", iByLen+1);
 
                 delete pRangeBan;
 
@@ -463,7 +463,7 @@ bool clsRangeBanDialog::OnAccept() {
 		if(iReasonLen != 0) {
             sReason = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iReasonLen+1);
             if(sReason == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sReason in clsRangeBanDialog::OnAccept\n", (uint64_t)(iReasonLen+1));
+                AppendDebugLogFormat("[MEM] Cannot allocate %d bytes for sReason in clsRangeBanDialog::OnAccept\n", iReasonLen+1);
 
                 return false;
             }
@@ -475,7 +475,7 @@ bool clsRangeBanDialog::OnAccept() {
 			if(pRangeBanToChange->sReason == NULL || strcmp(pRangeBanToChange->sReason, sReason) != NULL) {
 				if(pRangeBanToChange->sReason != NULL) {
 					if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pRangeBanToChange->sReason) == 0) {
-						AppendDebugLog("%s - [MEM] Cannot deallocate sReason in clsRangeBanDialog::OnAccept\n", 0);
+						AppendDebugLog("%s - [MEM] Cannot deallocate sReason in clsRangeBanDialog::OnAccept\n");
 					}
 					pRangeBanToChange->sReason = NULL;
 				}
@@ -484,7 +484,7 @@ bool clsRangeBanDialog::OnAccept() {
 			}
 		} else if(pRangeBanToChange->sReason != NULL) {
 			if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pRangeBanToChange->sReason) == 0) {
-				AppendDebugLog("%s - [MEM] Cannot deallocate sReason in BanDialog::OnAccept\n", 0);
+				AppendDebugLog("%s - [MEM] Cannot deallocate sReason in BanDialog::OnAccept\n");
 			}
 
 			pRangeBanToChange->sReason = NULL;
@@ -492,7 +492,7 @@ bool clsRangeBanDialog::OnAccept() {
 
         if(sReason != NULL && (pRangeBanToChange->sReason != sReason)) {
 			if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sReason) == 0) {
-				AppendDebugLog("%s - [MEM] Cannot deallocate sReason in clsRangeBanDialog::OnAccept\n", 0);
+				AppendDebugLog("%s - [MEM] Cannot deallocate sReason in clsRangeBanDialog::OnAccept\n");
 			}
         }
 
@@ -502,7 +502,7 @@ bool clsRangeBanDialog::OnAccept() {
         if(iByLen != 0) {
             sBy = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iByLen+1);
             if(sBy == NULL) {
-                AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for sBy in clsRangeBanDialog::OnAccept\n", (uint64_t)(iByLen+1));
+                AppendDebugLogFormat("[MEM] Cannot allocate %d bytes for sBy in clsRangeBanDialog::OnAccept\n", iByLen+1);
 
     			return false;
             }
@@ -514,7 +514,7 @@ bool clsRangeBanDialog::OnAccept() {
 			if(pRangeBanToChange->sBy == NULL || strcmp(pRangeBanToChange->sBy, sBy) != NULL) {
 				if(pRangeBanToChange->sBy != NULL) {
 					if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pRangeBanToChange->sBy) == 0) {
-						AppendDebugLog("%s - [MEM] Cannot deallocate sBy in clsRangeBanDialog::OnAccept\n", 0);
+						AppendDebugLog("%s - [MEM] Cannot deallocate sBy in clsRangeBanDialog::OnAccept\n");
 					}
 					pRangeBanToChange->sBy = NULL;
 				}
@@ -523,14 +523,14 @@ bool clsRangeBanDialog::OnAccept() {
 			}
 		} else if(pRangeBanToChange->sBy != NULL) {
 			if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pRangeBanToChange->sBy) == 0) {
-				AppendDebugLog("%s - [MEM] Cannot deallocate sBy in clsRangeBanDialog::OnAccept\n", 0);
+				AppendDebugLog("%s - [MEM] Cannot deallocate sBy in clsRangeBanDialog::OnAccept\n");
 			}
 			pRangeBanToChange->sBy = NULL;
         }
 
         if(sBy != NULL && (pRangeBanToChange->sBy != sBy)) {
 			if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sBy) == 0) {
-				AppendDebugLog("%s - [MEM] Cannot deallocate sBy in clsRangeBanDialog::OnAccept\n", 0);
+				AppendDebugLog("%s - [MEM] Cannot deallocate sBy in clsRangeBanDialog::OnAccept\n");
 			}
         }
 

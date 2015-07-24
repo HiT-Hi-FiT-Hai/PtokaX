@@ -60,7 +60,7 @@ LRESULT SettingPageMOTD::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                 char * buf = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
 
                 if(buf == NULL) {
-                    AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for buf in SettingPageMOTD::PageMOTDProc\n", (uint64_t)(iLen+1));
+                    AppendDebugLogFormat("[MEM] Cannot allocate %d bytes for buf in SettingPageMOTD::PageMOTDProc\n", iLen+1);
                     return 0;
                 }
 
@@ -87,7 +87,7 @@ LRESULT SettingPageMOTD::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam
                 }
 
                 if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
-                    AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageMOTD::PageMOTDProc\n", 0);
+                    AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageMOTD::PageMOTDProc\n");
                 }
 
                 return 0;
@@ -118,7 +118,7 @@ void SettingPageMOTD::Save() {
     char * buf = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iAllocLen+1);
 
     if(buf == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for buf in SettingPageMOTD::Save\n", (uint64_t)(iAllocLen+1));
+        AppendDebugLogFormat("[MEM] Cannot allocate %d bytes for buf in SettingPageMOTD::Save\n", iAllocLen+1);
         return;
     }
 
@@ -132,7 +132,7 @@ void SettingPageMOTD::Save() {
     clsSettingManager::mPtr->SetMOTD(buf, iLen);
 
     if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
-        AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageMOTD::Save\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageMOTD::Save\n");
     }
 
     clsSettingManager::mPtr->SetBool(SETBOOL_MOTD_AS_PM, bMOTDAsPM);

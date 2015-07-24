@@ -3398,15 +3398,10 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
 				memset(&pmc, 0, sizeof(PROCESS_MEMORY_COUNTERS));
 				pmc.cb = sizeof(pmc);
 
-				typedef BOOL (WINAPI *PGPMI)(HANDLE, PPROCESS_MEMORY_COUNTERS, DWORD);
-				PGPMI pGPMI = (PGPMI)GetProcAddress(LoadLibrary("psapi.dll"), "GetProcessMemoryInfo");
+				::GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));
 
-                if(pGPMI != NULL) {
-					pGPMI(GetCurrentProcess(), &pmc, sizeof(pmc));
-
-					Statinfo+="Mem usage (Peak): "+string(formatBytes(pmc.WorkingSetSize))+ " ("+string(formatBytes(pmc.PeakWorkingSetSize))+")\r\n";
-					Statinfo+="VM size (Peak): "+string(formatBytes(pmc.PagefileUsage))+ " ("+string(formatBytes(pmc.PeakPagefileUsage))+")\r\n";
-                }
+				Statinfo+="Mem usage (Peak): "+string(formatBytes(pmc.WorkingSetSize))+ " ("+string(formatBytes(pmc.PeakWorkingSetSize))+")\r\n";
+				Statinfo+="VM size (Peak): "+string(formatBytes(pmc.PagefileUsage))+ " ("+string(formatBytes(pmc.PeakPagefileUsage))+")\r\n";
 #else // _WIN32
 				char cpuusage[32];
 				int iLen = sprintf(cpuusage, "%.2f%%\n", (clsServerManager::dCpuUsage/0.6)/(double)clsServerManager::ui32CpuCount);

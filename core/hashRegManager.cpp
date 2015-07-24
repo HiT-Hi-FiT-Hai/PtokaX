@@ -48,8 +48,7 @@ static const char sPtokaXRegiteredUsers[] = "PtokaX Registered Users";
 static const size_t szPtokaXRegiteredUsersLen = sizeof(sPtokaXRegiteredUsers)-1;
 //---------------------------------------------------------------------------
 
-RegUser::RegUser() : sNick(NULL), pPrev(NULL), pNext(NULL), pHashTablePrev(NULL), pHashTableNext(NULL), tLastBadPass(0), ui32Hash(0), ui16Profile(0),
-	ui8BadPassCount(0), bPassHash(false){
+RegUser::RegUser() : sNick(NULL), pPrev(NULL), pNext(NULL), pHashTablePrev(NULL), pHashTableNext(NULL), tLastBadPass(0), ui32Hash(0), ui16Profile(0), ui8BadPassCount(0), bPassHash(false){
     sPass = NULL;
 }
 //---------------------------------------------------------------------------

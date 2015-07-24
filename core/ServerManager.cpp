@@ -511,7 +511,7 @@ bool clsServerManager::Start() {
                                 strcpy(sHubIP, inet_ntoa(((sockaddr_in *)(next->ai_addr))->sin_addr));
                             }
                         } else if(next->ai_family == AF_INET6) {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN64)
                             win_inet_ntop(&((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, sHubIP6, 40);
 #else
                             inet_ntop(AF_INET6, &((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, sHubIP6, 40);

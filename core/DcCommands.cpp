@@ -1163,8 +1163,7 @@ void clsDcCommands::Kick(User * pUser, char * sData, const uint32_t &ui32Len) {
         return;
     }
 
-	if(clsScriptManager::mPtr->Arrival(pUser, sData, ui32Len, clsScriptManager::KICK_ARRIVAL) == true ||
-		pUser->ui8State >= User::STATE_CLOSING) {
+	if(clsScriptManager::mPtr->Arrival(pUser, sData, ui32Len, clsScriptManager::KICK_ARRIVAL) == true || pUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
 
@@ -2714,8 +2713,7 @@ void clsDcCommands::Close(User * pUser, char * sData, const uint32_t &ui32Len) {
         return;
     }
 
-	if(clsScriptManager::mPtr->Arrival(pUser, sData, ui32Len, clsScriptManager::CLOSE_ARRIVAL) == true ||
-		pUser->ui8State >= User::STATE_CLOSING) {
+	if(clsScriptManager::mPtr->Arrival(pUser, sData, ui32Len, clsScriptManager::CLOSE_ARRIVAL) == true || pUser->ui8State >= User::STATE_CLOSING) {
 		return;
 	}
 

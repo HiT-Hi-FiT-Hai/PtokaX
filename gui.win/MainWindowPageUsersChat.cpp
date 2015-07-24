@@ -179,7 +179,7 @@ LRESULT clsMainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam,
                         char * buf = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iLen+1);
 
                         if(buf == NULL) {
-                            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for buf in clsMainWindowPageUsersChat::MainWindowPageProc\n", (uint64_t)(iLen+1));
+                            AppendDebugLogFormat("[MEM] Cannot allocate %d bytes for buf in clsMainWindowPageUsersChat::MainWindowPageProc\n", iLen+1);
                             return 0;
                         }
 
@@ -206,7 +206,7 @@ LRESULT clsMainWindowPageUsersChat::MainWindowPageProc(UINT uMsg, WPARAM wParam,
                         }
 
                         if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
-                            AppendDebugLog("%s - [MEM] Cannot deallocate buf in clsMainWindowPageUsersChat::MainWindowPageProc\n", 0);
+                            AppendDebugLog("%s - [MEM] Cannot deallocate buf in clsMainWindowPageUsersChat::MainWindowPageProc\n");
                         }
 
                         return 0;
@@ -432,7 +432,7 @@ bool clsMainWindowPageUsersChat::OnEditEnter() {
     char * buf = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iAllocLen+4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_ADMIN_NICK]);
 
     if(buf == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for buf in clsMainWindowPageUsersChat::OnEditEnter\n", (uint64_t)(iAllocLen+4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_ADMIN_NICK]));
+        AppendDebugLogFormat("[MEM] Cannot allocate %d bytes for buf in clsMainWindowPageUsersChat::OnEditEnter\n", iAllocLen+4+clsSettingManager::mPtr->ui16TextsLens[SETTXT_ADMIN_NICK]);
         return false;
     }
 
@@ -450,7 +450,7 @@ bool clsMainWindowPageUsersChat::OnEditEnter() {
     RichEditAppendText(hWndPageItems[REDT_CHAT], buf);
 
     if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
-        AppendDebugLog("%s - [MEM] Cannot deallocate buf in clsMainWindowPageUsersChat::OnEditEnter\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot deallocate buf in clsMainWindowPageUsersChat::OnEditEnter\n");
     }
 
     ::SetWindowText(hWndPageItems[EDT_CHAT], "");

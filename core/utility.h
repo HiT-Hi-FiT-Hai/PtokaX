@@ -95,8 +95,10 @@ bool DirExist(char * sPath);
 #ifdef _WIN32
 	void SetupOsVersion();
 	void * LuaAlocator(void * pOld, void * pData, size_t szOldSize, size_t szNewSize);
-    INT win_inet_pton(PCTSTR pAddrString, PVOID pAddrBuf);
-    void win_inet_ntop(PVOID pAddr, PTSTR pStringBuf, size_t szStringBufSize);
+	#ifndef _WIN64
+    	INT win_inet_pton(PCTSTR pAddrString, PVOID pAddrBuf);
+    	void win_inet_ntop(PVOID pAddr, PTSTR pStringBuf, size_t szStringBufSize);
+    #endif
 #endif
 
 void CheckForIPv4();

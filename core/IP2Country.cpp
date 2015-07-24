@@ -385,7 +385,7 @@ void clsIpP2Country::LoadIPv6() {
 		for(size_t szi = 0; szi < szLineLen; szi++) {
             if(ui8d == 0 && sLine[szi] == '-') {
                 sLine[szi] = '\0';
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN64)
                 win_inet_pton(sStart, ui128IPv6RangeFrom + (ui32IPv6Count*16));
 #else
                 inet_pton(AF_INET6, sStart, ui128IPv6RangeFrom + (ui32IPv6Count*16));
@@ -393,7 +393,7 @@ void clsIpP2Country::LoadIPv6() {
             } else if(sLine[szi] == ',') {
                 sLine[szi] = '\0';
                 if(ui8d == 1) {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN64)
                     win_inet_pton(sStart, ui128IPv6RangeTo + (ui32IPv6Count*16));
 #else
                     inet_pton(AF_INET6, sStart, ui128IPv6RangeTo + (ui32IPv6Count*16));

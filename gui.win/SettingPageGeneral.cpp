@@ -200,7 +200,7 @@ void SettingPageGeneral::Save() {
         char * buf = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, ui32Len+1);
 
         if(buf == NULL) {
-            AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for buf in SettingPageGeneral::Save\n", (uint64_t)(ui32Len+1));
+            AppendDebugLogFormat("[MEM] Cannot allocate %u bytes for buf in SettingPageGeneral::Save\n", ui32Len+1);
             return;
         }
 
@@ -215,7 +215,7 @@ void SettingPageGeneral::Save() {
         clsSettingManager::mPtr->SetText(SETTXT_LANGUAGE, buf, ui32Len);
 
         if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
-            AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageGeneral::Save\n", 0);
+            AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageGeneral::Save\n");
         }
     }
 
@@ -429,7 +429,7 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
                 char * buf = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, ui32Len+1);
 
                 if(buf == NULL) {
-                    AppendDebugLog("%s - [MEM] Cannot allocate %" PRIu64 " bytes for buf in SettingPageGeneral::CreateSettingPage\n", (uint64_t)(ui32Len+1));
+                    AppendDebugLogFormat("[MEM] Cannot allocate %u bytes for buf in SettingPageGeneral::CreateSettingPage\n", ui32Len+1);
                     return false;
                 }
 
@@ -438,14 +438,14 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
                     ::SendMessage(hWndPageItems[CB_LANGUAGE], CB_SETCURSEL, ui32i, 0);
 
                     if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
-                        AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageGeneral::CreateSettingPage\n", 0);
+                        AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageGeneral::CreateSettingPage\n");
                     }
 
                     break;
                 }
 
                 if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
-                    AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageGeneral::CreateSettingPage\n", 0);
+                    AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageGeneral::CreateSettingPage\n");
                 }
             }
         }

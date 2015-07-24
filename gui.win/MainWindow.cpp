@@ -199,7 +199,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 // Create update check thread
                 clsUpdateCheckThread::mPtr = new (std::nothrow) clsUpdateCheckThread();
                 if(clsUpdateCheckThread::mPtr == NULL) {
-                    AppendDebugLog("%s - [MEM] Cannot allocate clsUpdateCheckThread::mPtr in MainWindow::MainWindowProc::WM_CREATE\n", 0);
+                    AppendDebugLog("%s - [MEM] Cannot allocate clsUpdateCheckThread::mPtr in MainWindow::MainWindowProc::WM_CREATE\n");
                     exit(EXIT_FAILURE);
                 }
 
@@ -438,7 +438,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                         // Create update check thread
                         clsUpdateCheckThread::mPtr = new (std::nothrow) clsUpdateCheckThread();
                         if(clsUpdateCheckThread::mPtr == NULL) {
-                            AppendDebugLog("%s - [MEM] Cannot allocate clsUpdateCheckThread::mPtr in MainWindow::MainWindowProc::IDC_UPDATE_CHECK\n", 0);
+                            AppendDebugLog("%s - [MEM] Cannot allocate clsUpdateCheckThread::mPtr in MainWindow::MainWindowProc::IDC_UPDATE_CHECK\n");
                             exit(EXIT_FAILURE);
                         }
 
@@ -533,7 +533,7 @@ HWND clsMainWindow::CreateEx() {
     clsGuiSettingManager::mPtr = new (std::nothrow) clsGuiSettingManager();
 
     if(clsGuiSettingManager::mPtr == NULL) {
-        AppendDebugLog("%s - [MEM] Cannot allocate clsGuiSettingManager::mPtr in clsMainWindow::clsMainWindow\n", 0);
+        AppendDebugLog("%s - [MEM] Cannot allocate clsGuiSettingManager::mPtr in clsMainWindow::clsMainWindow\n");
         exit(EXIT_FAILURE);
     }
 
@@ -547,7 +547,7 @@ HWND clsMainWindow::CreateEx() {
 
     for(uint8_t ui8i = 0; ui8i < 3; ui8i++) {
         if(MainWindowPages[ui8i] == NULL) {
-            AppendDebugLog("%s - [MEM] Cannot allocate MainWindowPage[%" PRIu64 "] in clsMainWindow::clsMainWindow\n", (uint64_t)ui8i);
+            AppendDebugLogFormat("[MEM] Cannot allocate MainWindowPage[%" PRIu8 "] in clsMainWindow::clsMainWindow\n", ui8i);
             exit(EXIT_FAILURE);
         }
     }
