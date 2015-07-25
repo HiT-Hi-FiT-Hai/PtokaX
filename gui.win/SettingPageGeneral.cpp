@@ -119,64 +119,64 @@ void SettingPageGeneral::Save() {
         return;
     }
 
-    char buf[1025];
-    int iLen = ::GetWindowText(hWndPageItems[EDT_HUB_NAME], buf, 1025);
+    char sBuf[1025];
+    int iLen = ::GetWindowText(hWndPageItems[EDT_HUB_NAME], sBuf, 1025);
 
-    if(strcmp(buf, clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME]) != NULL) {
+    if(strcmp(sBuf, clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME]) != NULL) {
         bUpdateHubNameWelcome = true;
         bUpdateHubName = true;
     }
 
-    clsSettingManager::mPtr->SetText(SETTXT_HUB_NAME, buf, iLen);
+    clsSettingManager::mPtr->SetText(SETTXT_HUB_NAME, sBuf, iLen);
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_HUB_TOPIC], buf, 1025);
+    iLen = ::GetWindowText(hWndPageItems[EDT_HUB_TOPIC], sBuf, 1025);
 
     if(bUpdateHubName == false && ((clsSettingManager::mPtr->sTexts[SETTXT_HUB_TOPIC] == NULL && iLen != 0) ||
-        (clsSettingManager::mPtr->sTexts[SETTXT_HUB_TOPIC] != NULL && strcmp(buf, clsSettingManager::mPtr->sTexts[SETTXT_HUB_TOPIC]) != NULL))) {
+        (clsSettingManager::mPtr->sTexts[SETTXT_HUB_TOPIC] != NULL && strcmp(sBuf, clsSettingManager::mPtr->sTexts[SETTXT_HUB_TOPIC]) != NULL))) {
         bUpdateHubNameWelcome = true;
         bUpdateHubName = true;
     }
 
-    clsSettingManager::mPtr->SetText(SETTXT_HUB_TOPIC, buf, iLen);
+    clsSettingManager::mPtr->SetText(SETTXT_HUB_TOPIC, sBuf, iLen);
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_HUB_DESCRIPTION], buf, 1025);
-    clsSettingManager::mPtr->SetText(SETTXT_HUB_DESCRIPTION, buf, iLen);
+    iLen = ::GetWindowText(hWndPageItems[EDT_HUB_DESCRIPTION], sBuf, 1025);
+    clsSettingManager::mPtr->SetText(SETTXT_HUB_DESCRIPTION, sBuf, iLen);
 
     clsSettingManager::mPtr->SetBool(SETBOOL_ANTI_MOGLO, ::SendMessage(hWndPageItems[BTN_ANTI_MOGLO], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_HUB_ADDRESS], buf, 1025);
-    clsSettingManager::mPtr->SetText(SETTXT_HUB_ADDRESS, buf, iLen);
+    iLen = ::GetWindowText(hWndPageItems[EDT_HUB_ADDRESS], sBuf, 1025);
+    clsSettingManager::mPtr->SetText(SETTXT_HUB_ADDRESS, sBuf, iLen);
 
     clsSettingManager::mPtr->SetBool(SETBOOL_RESOLVE_TO_IP, ::SendMessage(hWndPageItems[BTN_RESOLVE_ADDRESS], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 
     if(clsSettingManager::mPtr->bBools[SETBOOL_RESOLVE_TO_IP] == false) {
-        iLen = ::GetWindowText(hWndPageItems[EDT_IPV4_ADDRESS], buf, 1025);
-        clsSettingManager::mPtr->SetText(SETTXT_IPV4_ADDRESS, buf, iLen);
+        iLen = ::GetWindowText(hWndPageItems[EDT_IPV4_ADDRESS], sBuf, 1025);
+        clsSettingManager::mPtr->SetText(SETTXT_IPV4_ADDRESS, sBuf, iLen);
 
-        iLen = ::GetWindowText(hWndPageItems[EDT_IPV6_ADDRESS], buf, 1025);
-        clsSettingManager::mPtr->SetText(SETTXT_IPV6_ADDRESS, buf, iLen);
+        iLen = ::GetWindowText(hWndPageItems[EDT_IPV6_ADDRESS], sBuf, 1025);
+        clsSettingManager::mPtr->SetText(SETTXT_IPV6_ADDRESS, sBuf, iLen);
     }
 
     clsSettingManager::mPtr->SetBool(SETBOOL_BIND_ONLY_SINGLE_IP, ::SendMessage(hWndPageItems[BTN_BIND_ADDRESS], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_TCP_PORTS], buf, 1025);
+    iLen = ::GetWindowText(hWndPageItems[EDT_TCP_PORTS], sBuf, 1025);
 
-    if(strcmp(buf, clsSettingManager::mPtr->sTexts[SETTXT_TCP_PORTS]) != NULL) {
+    if(strcmp(sBuf, clsSettingManager::mPtr->sTexts[SETTXT_TCP_PORTS]) != NULL) {
         bUpdateTCPPorts = true;
     }
 
-    clsSettingManager::mPtr->SetText(SETTXT_TCP_PORTS, buf, iLen);
+    clsSettingManager::mPtr->SetText(SETTXT_TCP_PORTS, sBuf, iLen);
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_UDP_PORT], buf, 1025);
+    iLen = ::GetWindowText(hWndPageItems[EDT_UDP_PORT], sBuf, 1025);
 
-    if(strcmp(buf, clsSettingManager::mPtr->sTexts[SETTXT_UDP_PORT]) != NULL) {
+    if(strcmp(sBuf, clsSettingManager::mPtr->sTexts[SETTXT_UDP_PORT]) != NULL) {
         bUpdateUDPPort = true;
     }
 
-    clsSettingManager::mPtr->SetText(SETTXT_UDP_PORT, buf, iLen);
+    clsSettingManager::mPtr->SetText(SETTXT_UDP_PORT, sBuf, iLen);
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_HUB_LISTS], buf, 1025);
-    clsSettingManager::mPtr->SetText(SETTXT_REGISTER_SERVERS, buf, iLen);
+    iLen = ::GetWindowText(hWndPageItems[EDT_HUB_LISTS], sBuf, 1025);
+    clsSettingManager::mPtr->SetText(SETTXT_REGISTER_SERVERS, sBuf, iLen);
 
     if((::SendMessage(hWndPageItems[BTN_HUBLIST_AUTO_REG], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false) != clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG]) {
         bUpdateAutoReg = true;
@@ -188,7 +188,7 @@ void SettingPageGeneral::Save() {
 
     if(ui32CurSel == 0) {
         if((clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE] == NULL && ui32CurSel != 0) ||
-			(clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE] != NULL && (ui32CurSel == 0 || strcmp(buf, clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE]) != NULL))) {
+			(clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE] != NULL && (ui32CurSel == 0 || strcmp(sBuf, clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE]) != NULL))) {
             bUpdateLanguage = true;
             bUpdateHubNameWelcome = true;
         }
@@ -197,25 +197,25 @@ void SettingPageGeneral::Save() {
     } else {
         uint32_t ui32Len = (uint32_t)::SendMessage(hWndPageItems[CB_LANGUAGE], CB_GETLBTEXTLEN, ui32CurSel, 0);
 
-        char * buf = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, ui32Len+1);
+        char * sTempBuf = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, ui32Len+1);
 
-        if(buf == NULL) {
-            AppendDebugLogFormat("[MEM] Cannot allocate %u bytes for buf in SettingPageGeneral::Save\n", ui32Len+1);
+        if(sTempBuf == NULL) {
+            AppendDebugLogFormat("[MEM] Cannot allocate %u bytes for sTempBuf in SettingPageGeneral::Save\n", ui32Len+1);
             return;
         }
 
         if((clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE] == NULL && ui32CurSel != 0) ||
-			(clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE] != NULL && (ui32CurSel == 0 || strcmp(buf, clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE]) != NULL))) {
+			(clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE] != NULL && (ui32CurSel == 0 || strcmp(sTempBuf, clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE]) != NULL))) {
             bUpdateLanguage = true;
             bUpdateHubNameWelcome = true;
         }
 
-        ::SendMessage(hWndPageItems[CB_LANGUAGE], CB_GETLBTEXT, ui32CurSel, (LPARAM)buf);
+        ::SendMessage(hWndPageItems[CB_LANGUAGE], CB_GETLBTEXT, ui32CurSel, (LPARAM)sTempBuf);
 
-        clsSettingManager::mPtr->SetText(SETTXT_LANGUAGE, buf, ui32Len);
+        clsSettingManager::mPtr->SetText(SETTXT_LANGUAGE, sTempBuf, ui32Len);
 
-        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)buf) == 0) {
-            AppendDebugLog("%s - [MEM] Cannot deallocate buf in SettingPageGeneral::Save\n");
+        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sTempBuf) == 0) {
+            AppendDebugLog("%s - [MEM] Cannot deallocate sTempBuf in SettingPageGeneral::Save\n");
         }
     }
 

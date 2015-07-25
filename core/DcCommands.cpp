@@ -892,7 +892,7 @@ void clsDcCommands::ConnectToMe(User * pUser, char * sData, const uint32_t &ui32
 	}
 
     // IP check
-    if(bCheck == true && clsSettingManager::mPtr->bBools[SETBOOL_CHECK_IP_IN_COMMANDS] == true && clsProfileManager::mPtr->IsAllowed(pUser, clsProfileManager::NOIPCHECK) == false && bCorrectIP == false) {
+    if(bCheck == true && clsProfileManager::mPtr->IsAllowed(pUser, clsProfileManager::NOIPCHECK) == false && bCorrectIP == false) {
         if((pUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6 && (pOtherUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
             int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "$ConnectToMe %s [%s]:%hu|", pOtherUser->sNick, pUser->sIP, ui16Port);
             if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsDcCommands::ConnectToMe1") == true) {
@@ -1489,7 +1489,7 @@ void clsDcCommands::Search(User *pUser, char * sData, uint32_t ui32Len, const bo
 		}
     
         // IP check
-        if(bCheck == true && clsSettingManager::mPtr->bBools[SETBOOL_CHECK_IP_IN_COMMANDS] == true && clsProfileManager::mPtr->IsAllowed(pUser, clsProfileManager::NOIPCHECK) == false && bCorrectIP == false) {
+        if(bCheck == true && clsProfileManager::mPtr->IsAllowed(pUser, clsProfileManager::NOIPCHECK) == false && bCorrectIP == false) {
             if((pUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
                 if((pUser->ui32BoolBits & User::BIT_IPV6_ACTIVE) == User::BIT_IPV6_ACTIVE) {
                     int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "$Search [%s]:%hu %s", pUser->sIP, ui16Port, sData+iAfterCmd+ui8AfterPortLen);
@@ -2182,10 +2182,6 @@ void clsDcCommands::Supports(User * pUser, char * sData, const uint32_t &ui32Len
                 if(((pUser->ui32BoolBits & User::BIT_PINGER) == User::BIT_PINGER) == false && szDataLen == 7 && memcmp(sSupport+1, "otINFO", 6) == 0) {
                     if(clsSettingManager::mPtr->bBools[SETBOOL_DONT_ALLOW_PINGERS] == true) {
                         pUser->SendFormat("clsDcCommands::Supports2", false, "<%s> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_THIS_HUB_NOT_ALLOW_PINGERS]);
-                        pUser->Close();
-                        return;
-                    } else if(clsSettingManager::mPtr->bBools[SETBOOL_CHECK_IP_IN_COMMANDS] == false) {
-                        pUser->SendFormat("clsDcCommands::Supports3", false, "<%s> Sorry, this hub don't want to be in hublist because allow CTM exploit.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
                         pUser->Close();
                         return;
                     } else {

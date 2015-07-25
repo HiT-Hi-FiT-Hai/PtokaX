@@ -39,7 +39,9 @@ private:
     void SaveMOTD();
     void CheckMOTD();
 
-    void Load();
+	void CheckAndSet(char * sName, char * sValue);
+	void Load();
+    void LoadXML();
 public:
     static clsSettingManager * mPtr;
 

@@ -369,7 +369,7 @@
     <ClInclude Include="core\SettingManager.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="core\SettingXml.h">
+    <ClInclude Include="core\SettingStr.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="core\stdinc.h">
@@ -484,6 +484,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="core\TextConverter.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\SettingCom.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

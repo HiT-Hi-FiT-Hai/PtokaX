@@ -520,7 +520,6 @@ SetMan.tBooleans.BanMsgShowNick			-	Send nick in ban message.
 SetMan.tBooleans.BanMsgShowReason		-	Send reason in ban message.
 SetMan.tBooleans.BanMsgShowBy			-	Send who create ban in ban message.
 SetMan.tBooleans.ReportSuspiciousTag	-	Report suspicious tag to OPs.
-SetMan.tBooleans.CheckIpInCommands		-	Check IP in commands.
 SetMan.tBooleans.LogScriptErrors		-	Save script errors to log.
 SetMan.tBooleans.DisallowBadSupports	-	Disallow clients sending buggy supports.
 SetMan.tBooleans.HashPasswords			-	Hash registered users passwords.

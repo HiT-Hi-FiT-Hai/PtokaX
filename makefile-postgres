@@ -287,8 +287,8 @@ $(CURDIR)/obj/serviceLoop.o: $(CURDIR)/core/serviceLoop.cpp $(CURDIR)/core/stdin
   $(CURDIR)/core/utility.h $(CURDIR)/core/ZlibUtility.h $(CURDIR)/core/LuaScript.h $(CURDIR)/core/RegThread.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $(CURDIR)/core/serviceLoop.cpp -o $(CURDIR)/obj/serviceLoop.o
 
-$(CURDIR)/obj/SettingManager.o: $(CURDIR)/core/SettingManager.cpp $(CURDIR)/core/stdinc.h $(CURDIR)/core/pxstring.h $(CURDIR)/core/SettingXml.h \
-  $(CURDIR)/core/SettingDefaults.h $(CURDIR)/core/SettingManager.h $(CURDIR)/core/SettingIds.h $(CURDIR)/core/colUsers.h \
+$(CURDIR)/obj/SettingManager.o: $(CURDIR)/core/SettingManager.cpp $(CURDIR)/core/stdinc.h $(CURDIR)/core/pxstring.h $(CURDIR)/core/SettingStr.h \
+  $(CURDIR)/core/SettingCom.h $(CURDIR)/core/SettingDefaults.h $(CURDIR)/core/SettingManager.h $(CURDIR)/core/SettingIds.h $(CURDIR)/core/colUsers.h \
   $(CURDIR)/core/GlobalDataQueue.h $(CURDIR)/core/LanguageManager.h $(CURDIR)/core/LanguageIds.h $(CURDIR)/core/LuaScriptManager.h \
   $(CURDIR)/core/ProfileManager.h $(CURDIR)/core/ServerManager.h $(CURDIR)/core/User.h $(CURDIR)/core/utility.h $(CURDIR)/core/ResNickManager.h \
   $(CURDIR)/core/ServerThread.h $(CURDIR)/core/TextFileManager.h $(CURDIR)/core/UDPThread.h

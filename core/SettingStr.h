@@ -17,11 +17,11 @@
  */
 
 //---------------------------------------------------------------------------
-#ifndef SettingXmlH
-#define SettingXmlH
+#ifndef SettingStrH
+#define SettingStrH
 //---------------------------------------------------------------------------
 
-const char* SetBoolXmlStr[] = {
+const char* SetBoolStr[] = {
     "AntiMoGlo", 
     "AutoStart", 
     "RedirectAll", 
@@ -75,7 +75,7 @@ const char* SetBoolXmlStr[] = {
     "BanMessageShowBy", 
     "ReportSuspiciousTag", 
 /*Obsolete "AcceptUnknownTag"*/"",
-    "CheckIpInCommands", 
+/*Obsolete "CheckIpInCommands"*/"", 
 /*Obsolete "PopupScriptsWindow"*/"",
     "LogScriptErrors", 
     "NoQuackSupports", 
@@ -85,7 +85,7 @@ const char* SetBoolXmlStr[] = {
 #endif
 };
 
-const char* SetShortXmlStr[] = {
+const char* SetShortStr[] = {
     "MaxUsers", 
     "MinShareLimit", 
     "MinShareUnits", 
@@ -206,7 +206,7 @@ const char* SetShortXmlStr[] = {
     "MaxUsersPeak", 
 };
 
-const char* SetTxtXmlStr[] = {
+const char* SetTxtStr[] = {
     "HubName", 
     "AdminNick", 
     "HubAddress", 

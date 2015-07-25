@@ -521,10 +521,11 @@
     <ClInclude Include="core\ServerManager.h" />
     <ClInclude Include="core\ServerThread.h" />
     <ClInclude Include="core\serviceLoop.h" />
+    <ClInclude Include="core\SettingCom.h" />
     <ClInclude Include="core\SettingDefaults.h" />
     <ClInclude Include="core\SettingIds.h" />
     <ClInclude Include="core\SettingManager.h" />
-    <ClInclude Include="core\SettingXml.h" />
+    <ClInclude Include="core\SettingStr.h" />
     <ClInclude Include="core\stdinc.h" />
     <ClInclude Include="core\TextConverter.h" />
     <ClInclude Include="core\TextFileManager.h" />

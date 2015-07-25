@@ -19,9 +19,10 @@
 //---------------------------------------------------------------------------
 #include "stdinc.h"
 //---------------------------------------------------------------------------
-#include "SettingXml.h"
+#include "SettingCom.h"
 #include "SettingDefaults.h"
 #include "SettingManager.h"
+#include "SettingStr.h"
 //---------------------------------------------------------------------------
 #include "colUsers.h"
 #include "GlobalDataQueue.h"
@@ -97,9 +98,6 @@ clsSettingManager::clsSettingManager(void) : ui64MinShare(0), ui64MaxShare(0), s
 
     // Load settings
 	Load();
-
-    //Always enable after startup !
-    bBools[SETBOOL_CHECK_IP_IN_COMMANDS] = true;
 }
 //---------------------------------------------------------------------------
 
@@ -258,12 +256,123 @@ void clsSettingManager::CheckMOTD() {
 }
 //---------------------------------------------------------------------------
 
+void clsSettingManager::CheckAndSet(char * sName, char * sValue) {
+	// Booleans
+    for(size_t szi = 0; szi < SETBOOL_IDS_END; szi++) {
+        if(strcmp(SetBoolStr[szi], sName) == 0) {
+            SetBool(szi, sValue[0] == '1' ? true : false);
+            return;
+        }
+    }
+
+	// Integers
+    for(size_t szi = 0; szi < SETSHORT_IDS_END; szi++) {
+        if(strcmp(SetShortStr[szi], sName) == 0) {
+            int32_t iValue = atoi(sValue);
+
+            // Check if is valid value
+            if(sValue[0] == '\0' || iValue < 0 || iValue > 32767) {
+                return;
+            }
+
+            SetShort(szi, (int16_t)iValue);
+			return;
+        }
+    }
+
+	// Strings
+    for(size_t szi = 0; szi < SETTXT_IDS_END; szi++) {
+        if(strcmp(SetTxtStr[szi], sName) == 0) {
+            SetText(szi, sValue);
+            return;
+        }
+    }
+}
+//---------------------------------------------------------------------------
+
 void clsSettingManager::Load() {
     bUpdateLocked = true;
 
     // Load MOTD
     LoadMOTD();
 
+#ifdef _WIN32
+    if(FileExist((clsServerManager::sPath + "\\cfg\\Settings.pxt").c_str()) == false) {
+#else
+    if(FileExist((clsServerManager::sPath + "/cfg/Settings.pxt").c_str()) == false) {
+#endif
+        LoadXML();
+
+        bUpdateLocked = false;
+
+        return;
+    }
+
+#ifdef _WIN32
+	FILE * fSettingsFile = fopen((clsServerManager::sPath + "\\cfg\\Settings.pxt").c_str(), "rt");
+#else
+	FILE * fSettingsFile = fopen((clsServerManager::sPath + "/cfg/Settings.pxt").c_str(), "rt");
+#endif
+    if(fSettingsFile == NULL) {
+#ifdef _WIN32
+        int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "Error loading file Settings.pxt %s (%d)", WSErrorStr(errno), errno);
+#else
+		int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "Error loading file Settings.pxt %s (%d)", ErrnoStr(errno), errno);
+#endif
+		CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::Load");
+#ifdef _BUILD_GUI
+		::MessageBox(NULL, clsServerManager::pGlobalBuffer, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
+#else
+		AppendLog(clsServerManager::pGlobalBuffer);
+#endif
+        exit(EXIT_FAILURE);
+    }
+
+	char * sReturn = NULL, * sValue = NULL;
+	size_t szLen = 0;
+
+	while((sReturn = fgets(clsServerManager::pGlobalBuffer, (int)clsServerManager::szGlobalBufferSize, fSettingsFile)) != NULL) {
+		if(clsServerManager::pGlobalBuffer[0] == '#' || clsServerManager::pGlobalBuffer[0] == '\n') {
+			continue;
+		}
+
+		sValue = NULL;
+
+		szLen = strlen(clsServerManager::pGlobalBuffer)-1;
+
+		clsServerManager::pGlobalBuffer[szLen] = '\0';
+
+		for(size_t szi = 0; szi < szLen; szi++) {
+			if(isspace(clsServerManager::pGlobalBuffer[szi]) != 0) {
+				clsServerManager::pGlobalBuffer[szi] = '\0';
+				continue;
+			}
+
+			if(clsServerManager::pGlobalBuffer[szi] == '=') {
+				if(isspace(clsServerManager::pGlobalBuffer[szi+1]) != 0) {
+					sValue = clsServerManager::pGlobalBuffer+szi+2;
+				} else {
+					sValue = clsServerManager::pGlobalBuffer+szi+1;
+				}
+
+				break;
+			}
+		}
+
+		if(sValue == NULL || clsServerManager::pGlobalBuffer[0] == '\0') {
+			continue;
+		}
+
+		CheckAndSet(clsServerManager::pGlobalBuffer, sValue);
+	}
+
+    fclose(fSettingsFile);
+
+    bUpdateLocked = false;
+}
+//---------------------------------------------------------------------------
+
+void clsSettingManager::LoadXML() {
 #ifdef _WIN32
     TiXmlDocument doc((clsServerManager::sPath + "\\cfg\\Settings.xml").c_str());
 #else
@@ -272,7 +381,7 @@ void clsSettingManager::Load() {
     if(doc.LoadFile() == false) {
         if(doc.ErrorId() != TiXmlBase::TIXML_ERROR_OPENING_FILE && doc.ErrorId() != TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY) {
             int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "Error loading file Settings.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
-			CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::Load");
+			CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::LoadXml");
 #ifdef _BUILD_GUI
 			::MessageBox(NULL, clsServerManager::pGlobalBuffer, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
@@ -311,7 +420,7 @@ void clsSettingManager::Load() {
                 bool bValue = atoi(SettingValue->ToElement()->GetText()) == 0 ? false : true;
 
                 for(size_t szi = 0; szi < SETBOOL_IDS_END; szi++) {
-                    if(strcmp(SetBoolXmlStr[szi], sName) == 0) {
+                    if(strcmp(SetBoolStr[szi], sName) == 0) {
                         SetBool(szi, bValue);
                     }
                 }
@@ -336,7 +445,7 @@ void clsSettingManager::Load() {
                 }
 
                 for(size_t szi = 0; szi < SETSHORT_IDS_END; szi++) {
-                    if(strcmp(SetShortXmlStr[szi], sName) == 0) {
+                    if(strcmp(SetShortStr[szi], sName) == 0) {
                         SetShort(szi, (int16_t)iValue);
                     }
                 }
@@ -361,15 +470,13 @@ void clsSettingManager::Load() {
                 }
 
                 for(size_t szi = 0; szi < SETTXT_IDS_END; szi++) {
-                    if(strcmp(SetTxtXmlStr[szi], sName) == 0) {
+                    if(strcmp(SetTxtStr[szi], sName) == 0) {
                         SetText(szi, sText);
                     }
                 }
             }
         }
     }
-
-    bUpdateLocked = false;
 }
 //---------------------------------------------------------------------------
 
@@ -377,66 +484,87 @@ void clsSettingManager::Save() {
     SaveMOTD();
 
 #ifdef _WIN32
-    TiXmlDocument doc((clsServerManager::sPath + "\\cfg\\Settings.xml").c_str());
+    FILE * fSettingsFile = fopen((clsServerManager::sPath + "\\cfg\\Settings.pxt").c_str(), "wb");
 #else
-	TiXmlDocument doc((clsServerManager::sPath + "/cfg/Settings.xml").c_str());
+	FILE * fSettingsFile = fopen((clsServerManager::sPath + "/cfg/Settings.pxt").c_str(), "wb");
 #endif
-    doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
-    TiXmlElement settings("PtokaX");
-    settings.SetAttribute("Version", PtokaXVersionString);
+    if(fSettingsFile == NULL) {
+    	return;
+    }
 
-    // Save bools
-    TiXmlElement booleans("Booleans");
+	static const char sPtokaXSettingsFile[] = "#\n# PtokaX setting file\n#\n";
+    fwrite(sPtokaXSettingsFile, 1, sizeof(sPtokaXSettingsFile)-1, fSettingsFile);
+
+	// Save booleans
+	static const char sPtokaXSettingsFileBooleans[] = "\n#\n# Boolean settings\n#\n\n";
+    fwrite(sPtokaXSettingsFileBooleans, 1, sizeof(sPtokaXSettingsFileBooleans)-1, fSettingsFile);
+
     for(size_t szi = 0; szi < SETBOOL_IDS_END; szi++) {
-        // Don't save setting with default value
-        if(bBools[szi] == SetBoolDef[szi] || SetBoolXmlStr[szi][0] == '\0') {
+    	// Don't save empty hint
+    	if(SetBoolCom[szi] != '\0') {
+			fputs(SetBoolCom[szi], fSettingsFile);
+		}
+
+        // Don't save setting with empty id
+        if(SetBoolStr[szi][0] == '\0') {
             continue;
         }
 
-        TiXmlElement boolean("Bool");
-        boolean.SetAttribute("Name", SetBoolXmlStr[szi]);
-        boolean.InsertEndChild(TiXmlText(bBools[szi] == 0 ? "0" : "1"));
-        booleans.InsertEndChild(boolean);
+		// Save setting with default value as comment
+        if(bBools[szi] == SetBoolDef[szi]) {
+        	fprintf(fSettingsFile, "#%s\t=\t%c\n", SetBoolStr[szi], bBools[szi] == 0 ? '0' : '1');
+        } else {
+        	fprintf(fSettingsFile, "%s\t=\t%c\n", SetBoolStr[szi], bBools[szi] == 0 ? '0' : '1');
+		}
     }
-    settings.InsertEndChild(booleans);
 
-    // Save integers
-    TiXmlElement integers("Integers");
-    char msg[8];
+	// Save integers
+	static const char sPtokaXSettingsFileIntegers[] = "\n#\n# Integer settings\n#\n\n";
+    fwrite(sPtokaXSettingsFileIntegers, 1, sizeof(sPtokaXSettingsFileIntegers)-1, fSettingsFile);
+
     for(size_t szi = 0; szi < SETSHORT_IDS_END; szi++) {
-        // Don't save setting with default value
-        if(i16Shorts[szi] == SetShortDef[szi] || SetShortXmlStr[szi][0] == '\0') {
+    	// Don't save empty hint
+    	if(SetShortCom[szi] != '\0') {
+			fputs(SetShortCom[szi], fSettingsFile);
+		}
+
+        // Don't save setting with empty id
+        if(SetShortStr[szi][0] == '\0') {
             continue;
         }
 
-        TiXmlElement integer("Integer");
-        integer.SetAttribute("Name", SetShortXmlStr[szi]);
-		sprintf(msg, "%hd", i16Shorts[szi]);
-        integer.InsertEndChild(TiXmlText(msg));
-        integers.InsertEndChild(integer);
+        // Save setting with default value as comment
+        if(i16Shorts[szi] == SetShortDef[szi]) {
+        	fprintf(fSettingsFile, "#%s\t=\t%hd\n", SetShortStr[szi], i16Shorts[szi]);
+        } else {
+        	fprintf(fSettingsFile, "%s\t=\t%hd\n", SetShortStr[szi], i16Shorts[szi]);
+		}
     }
-    settings.InsertEndChild(integers);
 
-    // Save strings
-    TiXmlElement setstrings("Strings");
+	// Save strings
+	static const char sPtokaXSettingsFileStrings[] = "\n#\n# String settings\n#\n\n";
+    fwrite(sPtokaXSettingsFileStrings, 1, sizeof(sPtokaXSettingsFileStrings)-1, fSettingsFile);
+
     for(size_t szi = 0; szi < SETTXT_IDS_END; szi++) {
-        // Don't save setting with default value
-        if((sTexts[szi] == NULL && SetTxtDef[szi][0] == '\0') ||
-            (sTexts[szi] != NULL && strcmp(sTexts[szi], SetTxtDef[szi]) == 0) ||
-            SetTxtXmlStr[szi][0] == '\0') {
+    	// Don't save empty hint
+    	if(SetTxtCom[szi] != '\0') {
+			fputs(SetTxtCom[szi], fSettingsFile);
+		}
+
+        // Don't save setting with empty id
+        if(SetTxtStr[szi][0] == '\0') {
             continue;
         }
-
-        TiXmlElement setstring("String");
-        setstring.SetAttribute("Name", SetTxtXmlStr[szi]);
-        setstring.InsertEndChild(TiXmlText(sTexts[szi] != NULL ? sTexts[szi] : ""));
-        setstrings.InsertEndChild(setstring);
-    }
-    settings.InsertEndChild(setstrings);
     
-    doc.InsertEndChild(settings);
+        // Save setting with default value as comment
+        if((sTexts[szi] == NULL && SetTxtDef[szi][0] == '\0') || (sTexts[szi] != NULL && strcmp(sTexts[szi], SetTxtDef[szi]) == 0)) {
+			fprintf(fSettingsFile, "#%s\t=\t%s\n", SetTxtStr[szi], sTexts[szi] != NULL ? sTexts[szi] : "");
+        } else {
+        	fprintf(fSettingsFile, "%s\t=\t%s\n", SetTxtStr[szi], sTexts[szi] != NULL ? sTexts[szi] : "");
+		}
+    }
 
-    doc.SaveFile();
+    fclose(fSettingsFile);
 }
 //---------------------------------------------------------------------------
 
@@ -727,15 +855,12 @@ void clsSettingManager::SetShort(const size_t &szShortId, const int16_t &iValue)
             break;
         case SETSHORT_MAIN_CHAT_MESSAGES:
         case SETSHORT_MAIN_CHAT_TIME:
-        case SETSHORT_SAME_MAIN_CHAT_MESSAGES:
         case SETSHORT_SAME_MAIN_CHAT_TIME:
         case SETSHORT_PM_MESSAGES:
         case SETSHORT_PM_TIME:
-        case SETSHORT_SAME_PM_MESSAGES:
         case SETSHORT_SAME_PM_TIME:
         case SETSHORT_SEARCH_MESSAGES:
         case SETSHORT_SEARCH_TIME:
-        case SETSHORT_SAME_SEARCH_MESSAGES:
         case SETSHORT_SAME_SEARCH_TIME:
         case SETSHORT_MYINFO_MESSAGES:
         case SETSHORT_MYINFO_TIME:
@@ -802,10 +927,13 @@ void clsSettingManager::SetShort(const size_t &szShortId, const int16_t &iValue)
 			pthread_mutex_unlock(&mtxSetting);
 #endif
             return;
+        case SETSHORT_SAME_MAIN_CHAT_MESSAGES:
         case SETSHORT_SAME_MULTI_MAIN_CHAT_MESSAGES:
         case SETSHORT_SAME_MULTI_MAIN_CHAT_LINES:
+        case SETSHORT_SAME_PM_MESSAGES:
         case SETSHORT_SAME_MULTI_PM_MESSAGES:
         case SETSHORT_SAME_MULTI_PM_LINES:
+        case SETSHORT_SAME_SEARCH_MESSAGES:
             if(iValue < 2 || iValue > 999) {
                 return;
             }
@@ -935,6 +1063,10 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
     switch(szTxtId) {
         case SETTXT_HUB_NAME:
         case SETTXT_HUB_ADDRESS:
+            if(szLen == 0 || szLen > 256 || strchr(sTxt, '$') != NULL || strchr(sTxt, '|') != NULL) {
+                return;
+            }
+            break;
         case SETTXT_REG_ONLY_MSG:
         case SETTXT_SHARE_LIMIT_MSG:
         case SETTXT_SLOTS_LIMIT_MSG:
@@ -942,12 +1074,12 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
         case SETTXT_MAX_HUBS_LIMIT_MSG:
         case SETTXT_NO_TAG_MSG:
         case SETTXT_NICK_LIMIT_MSG:
-            if(szLen == 0 || szLen > 256) {
+            if(szLen == 0 || szLen > 256 || strchr(sTxt, '|') != NULL) {
                 return;
             }
             break;
         case SETTXT_BOT_NICK:
-            if(strchr(sTxt, '$') != NULL || strchr(sTxt, ' ') != NULL || szLen == 0 || szLen > 64) {
+            if(szLen == 0 || szLen > 64 || strpbrk(sTxt, " $|") != NULL) {
                 return;
             }
             if(clsServerManager::pServersS != NULL && bBotsSameNick == false) {
@@ -958,7 +1090,7 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
             }
             break;
         case SETTXT_OP_CHAT_NICK:
-            if(strchr(sTxt, '$') != NULL || strchr(sTxt, ' ') != NULL || szLen == 0 || szLen > 64) {
+            if(szLen == 0 || szLen > 64 || strpbrk(sTxt, " $|") != NULL) {
                 return;
             }
             if(clsServerManager::pServersS != NULL && bBotsSameNick == false) {
@@ -969,7 +1101,7 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
             }
             break;
         case SETTXT_ADMIN_NICK:
-            if(strchr(sTxt, '$') != NULL || strchr(sTxt, ' ') != NULL) {
+            if(szLen == 0 || szLen > 64 || strpbrk(sTxt, " $|") != NULL) {
                 return;
             }
         case SETTXT_TCP_PORTS:
@@ -984,14 +1116,18 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
             UpdateUDPPort();
             break;
         case SETTXT_CHAT_COMMANDS_PREFIXES:
-            if(szLen == 0 || szLen > 5) {
+            if(szLen == 0 || szLen > 5 || strchr(sTxt, '|') != NULL || strchr(sTxt, ' ') != NULL) {
                 return;
             }
             break;
         case SETTXT_HUB_DESCRIPTION:
+        case SETTXT_HUB_TOPIC:
+            if(szLen > 256 || (szLen != 0 && (strchr(sTxt, '$') != NULL || strchr(sTxt, '|') != NULL))) {
+                return;
+            }
+            break;
         case SETTXT_REDIRECT_ADDRESS:
         case SETTXT_REG_ONLY_REDIR_ADDRESS:
-        case SETTXT_HUB_TOPIC:
         case SETTXT_SHARE_LIMIT_REDIR_ADDRESS:
         case SETTXT_SLOTS_LIMIT_REDIR_ADDRESS:
         case SETTXT_HUB_SLOT_RATIO_REDIR_ADDRESS:
@@ -1001,7 +1137,7 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
         case SETTXT_PERM_BAN_REDIR_ADDRESS:
         case SETTXT_NICK_LIMIT_REDIR_ADDRESS:
         case SETTXT_MSG_TO_ADD_TO_BAN_MSG:
-            if(szLen > 256) {
+            if(szLen > 256 || (szLen != 0 && strchr(sTxt, '|') != NULL)) {
                 return;
             }
             break;
@@ -1012,7 +1148,7 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
             break;
         case SETTXT_BOT_DESCRIPTION:
         case SETTXT_BOT_EMAIL:
-            if(strchr(sTxt, '$') != NULL || szLen > 64) {
+            if(szLen > 64 || strchr(sTxt, '$') != NULL || strchr(sTxt, '|') != NULL) {
                 return;
             }
             if(bBools[SETBOOL_REG_BOT] == true) {
@@ -1021,7 +1157,7 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
             break;
         case SETTXT_OP_CHAT_DESCRIPTION:
         case SETTXT_OP_CHAT_EMAIL:
-            if(strchr(sTxt, '$') != NULL || szLen > 64) {
+            if(szLen > 64 || strchr(sTxt, '$') != NULL || strchr(sTxt, '|') != NULL) {
                 return;
             }
             if(bBools[SETBOOL_REG_OP_CHAT] == true) {
@@ -1029,7 +1165,7 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
             }
             break;
         case SETTXT_HUB_OWNER_EMAIL:
-            if(szLen > 64) {
+            if(szLen > 64 || strchr(sTxt, '$') != NULL || strchr(sTxt, '|') != NULL) {
                 return;
             }
             break;
@@ -1039,6 +1175,16 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
 #else
 			if(szLen != 0 && FileExist((clsServerManager::sPath+"/language/"+string(sTxt, szLen)+".xml").c_str()) == false) {
 #endif
+                return;
+            }
+            break;
+        case SETTXT_IPV4_ADDRESS:
+            if(szLen > 15) {
+                return;
+            }
+            break;
+        case SETTXT_IPV6_ADDRESS:
+            if(szLen > 39) {
                 return;
             }
             break;
