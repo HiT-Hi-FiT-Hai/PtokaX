@@ -35,6 +35,8 @@ private:
 
 	void AddRunningScript(Script * curScript);
 	void RemoveRunningScript(Script * curScript);
+
+	void LoadXML();
 public:
     static clsScriptManager * mPtr;
 

@@ -53,23 +53,23 @@
 //---------------------------------------------------------------------------
 clsMainWindow * clsMainWindow::mPtr = NULL;
 //---------------------------------------------------------------------------
-static uint64_t (*GetActualTick)();
-//---------------------------------------------------------------------------
 static const char sPtokaXDash[] = "PtokaX - ";
 static const size_t szPtokaXDashLen = sizeof(sPtokaXDash)-1;
-
-uint64_t PXGetTickCount() {
-	return (uint64_t)(::GetTickCount() / 1000);
-}
 //---------------------------------------------------------------------------
-
-typedef ULONGLONG (WINAPI *GTC64)(void);
-GTC64 pGTC64 = NULL;
-//---------------------------------------------------------------------------
-
-uint64_t PXGetTickCount64() {
-	return (pGTC64() / 1000);
-}
+#ifndef _WIN64
+	static uint64_t (*GetActualTick)();
+	
+	uint64_t PXGetTickCount() {
+		return (uint64_t)(::GetTickCount() / 1000);
+	}
+	
+	typedef ULONGLONG (WINAPI *GTC64)(void);
+	GTC64 pGTC64 = NULL;
+	
+	uint64_t PXGetTickCount64() {
+		return (pGTC64() / 1000);
+	}
+#endif
 //---------------------------------------------------------------------------
 
 clsMainWindow::clsMainWindow() : m_hWnd(NULL), uiTaskBarCreated(0), ui64LastTrayMouseMove(0) {
@@ -236,9 +236,13 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             break;
         case WM_TRAYICON:
             if(lParam == WM_MOUSEMOVE) {
+#ifndef _WIN64
                 if(ui64LastTrayMouseMove != GetActualTick()) {
                     ui64LastTrayMouseMove = GetActualTick();
-
+#else
+                if(ui64LastTrayMouseMove != GetTickCount64()) {
+                    ui64LastTrayMouseMove = GetTickCount64();
+#endif
                     NOTIFYICONDATA nid;
                     memset(&nid, 0, sizeof(NOTIFYICONDATA));
                     nid.cbSize = sizeof(NOTIFYICONDATA);
@@ -561,9 +565,11 @@ HWND clsMainWindow::CreateEx() {
 	memset(&ver, 0, sizeof(OSVERSIONINFOEX));
 	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 
+#ifndef _WIN64
     if(::GetVersionEx((OSVERSIONINFO*)&ver) != 0 && ver.dwPlatformId == VER_PLATFORM_WIN32_NT && ver.dwMajorVersion < 6) {
         NCM.cbSize -= sizeof(int);
     }
+#endif
 
 	::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), &NCM, 0);
 
@@ -628,6 +634,7 @@ HWND clsMainWindow::CreateEx() {
     m_hWnd = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE, MAKEINTATOM(atom), (string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_NAME], (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_NAME]) + " | " + g_sPtokaXTitle).c_str(),
         WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, CW_USEDEFAULT, CW_USEDEFAULT, ScaleGuiDefaultsOnly(GUISETINT_MAIN_WINDOW_WIDTH), ScaleGuiDefaultsOnly(GUISETINT_MAIN_WINDOW_HEIGHT), NULL, hMainMenu, clsServerManager::hInstance, NULL);
 
+#ifndef _WIN64
 	if(::GetVersionEx((OSVERSIONINFO*)&ver) != 0 && ver.dwPlatformId == VER_PLATFORM_WIN32_NT && ver.dwMajorVersion >= 6) {
         pGTC64 = (GTC64)::GetProcAddress(::GetModuleHandle("kernel32.dll"), "GetTickCount64");
         if(pGTC64 != NULL) {
@@ -637,6 +644,7 @@ HWND clsMainWindow::CreateEx() {
     }
 
     GetActualTick = PXGetTickCount;
+#endif
 
 	return m_hWnd;
 }

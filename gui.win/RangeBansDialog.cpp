@@ -528,7 +528,7 @@ void clsRangeBansDialog::FilterRangeBans() {
 bool clsRangeBansDialog::FilterRangeBan(const RangeBanItem * pRangeBan) {
     switch(iFilterColumn) {
         case 0: {
-            char sTxt[64];
+            char sTxt[82];
             sprintf(sTxt, "%s - %s", pRangeBan->sIpFrom, pRangeBan->sIpTo);
 
             if(stristr2(sTxt, sFilterString.c_str()) != NULL) {

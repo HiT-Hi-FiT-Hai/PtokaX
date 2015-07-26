@@ -492,7 +492,7 @@ void clsSettingManager::Save() {
     	return;
     }
 
-	static const char sPtokaXSettingsFile[] = "#\n# PtokaX setting file\n#\n";
+	static const char sPtokaXSettingsFile[] = "#\n# PtokaX settings file\n#\n";
     fwrite(sPtokaXSettingsFile, 1, sizeof(sPtokaXSettingsFile)-1, fSettingsFile);
 
 	// Save booleans

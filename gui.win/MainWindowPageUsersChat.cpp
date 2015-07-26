@@ -628,18 +628,8 @@ void clsMainWindowPageUsersChat::DisconnectUser() {
     curUser->Close();
 
     if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
-        if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-            int imsgLen = sprintf(msg, "%s $<%s> *** %s %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], curUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], curUser->sIP, 
-				clsLanguageManager::mPtr->sTexts[LAN_WAS_CLOSED_BY], clsSettingManager::mPtr->sTexts[SETTXT_ADMIN_NICK]);
-            if(CheckSprintf(imsgLen, 1024, "clsMainWindowPageUsersChat::DisconnectUser2") == true) {
-				clsGlobalDataQueue::mPtr->SingleItemStore(msg, imsgLen, NULL, 0, clsGlobalDataQueue::SI_PM2OPS);
-            }
-        } else {
-            int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], curUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], curUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_WAS_CLOSED_BY], clsSettingManager::mPtr->sTexts[SETTXT_ADMIN_NICK]);
-            if(CheckSprintf(imsgLen, 1024, "clsMainWindowPageUsersChat::DisconnectUser3") == true) {
-                clsGlobalDataQueue::mPtr->AddQueueItem(msg, imsgLen, NULL, 0, clsGlobalDataQueue::CMD_OPS);
-            }
-        }
+        clsGlobalDataQueue::mPtr->StatusMessageFormat("clsMainWindowPageUsersChat::DisconnectUser", "<%s> *** %s %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], curUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], curUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_WAS_CLOSED_BY], 
+			clsSettingManager::mPtr->sTexts[SETTXT_ADMIN_NICK]);
     }
 
     int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], curUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], curUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_WAS_CLOSED]);
@@ -674,21 +664,7 @@ void OnKickOk(char * sLine, const int &iLen) {
     }
 
     if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
-        int imsgLen = 0;
-        if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-            imsgLen = sprintf(msg, "%s $", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
-            CheckSprintf(imsgLen, 1024, "OnKickOk2");
-        }
-
-        int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], pUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], pUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_WAS_KICKED_BY], clsSettingManager::mPtr->sTexts[SETTXT_ADMIN_NICK]);
-        imsgLen += iret;
-        if(CheckSprintf1(iret, imsgLen, 1024, "OnKickOk3") == true) {
-            if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-    			clsGlobalDataQueue::mPtr->SingleItemStore(msg, imsgLen, NULL, 0, clsGlobalDataQueue::SI_PM2OPS);
-            } else {
-                clsGlobalDataQueue::mPtr->AddQueueItem(msg, imsgLen, NULL, 0, clsGlobalDataQueue::CMD_OPS);
-            }
-        }
+        clsGlobalDataQueue::mPtr->StatusMessageFormat("OnKickOk", "<%s> *** %s %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], pUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], pUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_WAS_KICKED_BY], clsSettingManager::mPtr->sTexts[SETTXT_ADMIN_NICK]);
     }
 
     int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], pUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], pUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_WAS_KICKED]);
@@ -743,22 +719,8 @@ void OnBanOk(char * sLine, const int &iLen) {
     }
 
     if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
-        int imsgLen = 0;
-        if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-            imsgLen = sprintf(msg, "%s $", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
-            CheckSprintf(imsgLen, 1024, "OnBanOk2");
-        }
-
-        int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], pUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], pUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_HAS_BEEN], clsLanguageManager::mPtr->sTexts[LAN_BANNED_LWR], 
+        clsGlobalDataQueue::mPtr->StatusMessageFormat("OnBanOk", "<%s> *** %s %s %s %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], pUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], pUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_HAS_BEEN], clsLanguageManager::mPtr->sTexts[LAN_BANNED_LWR], 
 			clsLanguageManager::mPtr->sTexts[LAN_BY_LWR], clsSettingManager::mPtr->sTexts[SETTXT_ADMIN_NICK]);
-        imsgLen += iret;
-        if(CheckSprintf1(iret, imsgLen, 1024, "OnBanOk3") == true) {
-            if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-    			clsGlobalDataQueue::mPtr->SingleItemStore(msg, imsgLen, NULL, 0, clsGlobalDataQueue::SI_PM2OPS);
-            } else {
-                clsGlobalDataQueue::mPtr->AddQueueItem(msg, imsgLen, NULL, 0, clsGlobalDataQueue::CMD_OPS);
-            }
-        }
     }
 
     int imsgLen = sprintf(msg, "<%s> *** %s %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], pUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WITH_IP], pUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_HAS_BEEN], clsLanguageManager::mPtr->sTexts[LAN_BANNED_LWR]);
@@ -800,21 +762,7 @@ void OnRedirectOk(char * sLine, const int &iLen) {
     pUser->SendFormat("OnRedirectOk", false, "<%s> %s %s %s %s.|$ForceMove %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_ARE_REDIRECTED_TO], sLine, clsLanguageManager::mPtr->sTexts[LAN_BY_LWR], clsSettingManager::mPtr->sTexts[SETTXT_ADMIN_NICK], sLine);
 
     if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES] == true) {
-        int imsgLen = 0;
-        if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-            imsgLen = sprintf(msg, "%s $", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC]);
-            CheckSprintf(imsgLen, 2048, "OnRedirectOk1");
-        }
-
-        int iret = sprintf(msg+imsgLen, "<%s> *** %s %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], pUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WAS_REDIRECTED_TO], sLine, clsLanguageManager::mPtr->sTexts[LAN_BY_LWR], clsSettingManager::mPtr->sTexts[SETTXT_ADMIN_NICK]);
-        imsgLen += iret;
-        if(CheckSprintf1(iret, imsgLen, 2048, "OnRedirectOk2") == true) {
-            if(clsSettingManager::mPtr->bBools[SETBOOL_SEND_STATUS_MESSAGES_AS_PM] == true) {
-    			clsGlobalDataQueue::mPtr->SingleItemStore(msg, imsgLen, NULL, 0, clsGlobalDataQueue::SI_PM2OPS);
-            } else {
-                clsGlobalDataQueue::mPtr->AddQueueItem(msg, imsgLen, NULL, 0, clsGlobalDataQueue::CMD_OPS);
-            }
-        }
+        clsGlobalDataQueue::mPtr->StatusMessageFormat("OnRedirectOk", "<%s> *** %s %s %s %s %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], pUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WAS_REDIRECTED_TO], sLine, clsLanguageManager::mPtr->sTexts[LAN_BY_LWR], clsSettingManager::mPtr->sTexts[SETTXT_ADMIN_NICK]);
     }
 
     int imsgLen = sprintf(msg, "<%s> *** %s %s %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], pUser->sNick, clsLanguageManager::mPtr->sTexts[LAN_WAS_REDIRECTED_TO], sLine);
