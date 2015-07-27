@@ -49,13 +49,6 @@ LRESULT SettingPageMyINFO::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPar
 
                 break;
             case EDT_NO_TAG_MESSAGE:
-                if(HIWORD(wParam) == EN_CHANGE) {
-                    RemovePipes((HWND)lParam);
-
-                    return 0;
-                }
-
-                break;
             case EDT_NO_TAG_REDIRECT:
                 if(HIWORD(wParam) == EN_CHANGE) {
                     RemovePipes((HWND)lParam);

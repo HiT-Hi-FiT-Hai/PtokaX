@@ -420,7 +420,7 @@ bool SettingPageDeflood2::CreateSettingPage(HWND hOwner) {
         ScaleGui(180) + 13, iPosY + clsGuiSettingManager::iGroupBoxMargin, ScaleGui(40), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_SAME_PM_MSGS, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SAME_PM_MSGS], EM_SETLIMITTEXT, 3, 0);
 
-    AddUpDown(hWndPageItems[UD_SAME_PM_MSGS], ScaleGui(220) + 13, iPosY + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_SAME_PM_MSGS],
+    AddUpDown(hWndPageItems[UD_SAME_PM_MSGS], ScaleGui(220) + 13, iPosY + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 2), (WPARAM)hWndPageItems[EDT_SAME_PM_MSGS],
         (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_PM_MESSAGES], 0));
 
     hWndPageItems[LBL_SAME_PM_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER,

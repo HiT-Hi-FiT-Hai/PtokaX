@@ -26,16 +26,11 @@
 #include "hashUsrManager.h"
 #include "LanguageManager.h"
 #include "ProfileManager.h"
+#include "PXBReader.h"
 #include "ServerManager.h"
 #include "SettingManager.h"
 #include "User.h"
 #include "utility.h"
-//---------------------------------------------------------------------------
-#ifdef _WIN32
-	#pragma hdrstop
-#endif
-//---------------------------------------------------------------------------
-#include "PXBReader.h"
 //---------------------------------------------------------------------------
 #ifdef _BUILD_GUI
     #include "../gui.win/RegisteredUserDialog.h"
@@ -568,9 +563,9 @@ void clsRegManager::Load(void) {
 
     // Open regs file
 #ifdef _WIN32
-    if(pxbRegs.OpenFileRead((clsServerManager::sPath + "\\cfg\\RegisteredUsers.pxb").c_str()) == false) {
+    if(pxbRegs.OpenFileRead((clsServerManager::sPath + "\\cfg\\RegisteredUsers.pxb").c_str(), 4) == false) {
 #else
-    if(pxbRegs.OpenFileRead((clsServerManager::sPath + "/cfg/RegisteredUsers.pxb").c_str()) == false) {
+    if(pxbRegs.OpenFileRead((clsServerManager::sPath + "/cfg/RegisteredUsers.pxb").c_str(), 4) == false) {
 #endif
         return;
     }
@@ -764,37 +759,37 @@ void clsRegManager::Save(const bool &bSaveOnChange/* = false*/, const bool &bSav
 
     // Open regs file
 #ifdef _WIN32
-    if(pxbRegs.OpenFileSave((clsServerManager::sPath + "\\cfg\\RegisteredUsers.pxb").c_str()) == false) {
+    if(pxbRegs.OpenFileSave((clsServerManager::sPath + "\\cfg\\RegisteredUsers.pxb").c_str(), 3) == false) {
 #else
-    if(pxbRegs.OpenFileSave((clsServerManager::sPath + "/cfg/RegisteredUsers.pxb").c_str()) == false) {
+    if(pxbRegs.OpenFileSave((clsServerManager::sPath + "/cfg/RegisteredUsers.pxb").c_str(), 3) == false) {
 #endif
         return;
     }
 
     // Write file header
-    pxbRegs.sItemIdentifiers[0][0] = 'F';
-    pxbRegs.sItemIdentifiers[0][1] = 'I';
+    pxbRegs.sItemIdentifiers[0] = 'F';
+    pxbRegs.sItemIdentifiers[1] = 'I';
     pxbRegs.ui16ItemLengths[0] = (uint16_t)szPtokaXRegiteredUsersLen;
     pxbRegs.pItemDatas[0] = (void *)sPtokaXRegiteredUsers;
     pxbRegs.ui8ItemValues[0] = PXBReader::PXB_STRING;
 
-    pxbRegs.sItemIdentifiers[1][0] = 'F';
-    pxbRegs.sItemIdentifiers[1][1] = 'V';
+    pxbRegs.sItemIdentifiers[2] = 'F';
+    pxbRegs.sItemIdentifiers[3] = 'V';
     pxbRegs.ui16ItemLengths[1] = 4;
     uint32_t ui32Version = 1;
     pxbRegs.pItemDatas[1] = (void *)&ui32Version;
     pxbRegs.ui8ItemValues[1] = PXBReader::PXB_FOUR_BYTES;
 
-    if(pxbRegs.WriteNextItem(27, 2) == false) {
+    if(pxbRegs.WriteNextItem(szPtokaXRegiteredUsersLen+4, 2) == false) {
         return;
     }
 
-    pxbRegs.sItemIdentifiers[0][0] = 'N';
-    pxbRegs.sItemIdentifiers[0][1] = 'I';
-    pxbRegs.sItemIdentifiers[1][0] = 'P';
-    pxbRegs.sItemIdentifiers[1][1] = 'A';
-    pxbRegs.sItemIdentifiers[2][0] = 'P';
-    pxbRegs.sItemIdentifiers[2][1] = 'R';
+    pxbRegs.sItemIdentifiers[0] = 'N';
+    pxbRegs.sItemIdentifiers[1] = 'I';
+    pxbRegs.sItemIdentifiers[2] = 'P';
+    pxbRegs.sItemIdentifiers[3] = 'A';
+    pxbRegs.sItemIdentifiers[4] = 'P';
+    pxbRegs.sItemIdentifiers[5] = 'R';
 
     pxbRegs.ui8ItemValues[0] = PXBReader::PXB_STRING;
     pxbRegs.ui8ItemValues[1] = PXBReader::PXB_STRING;
@@ -812,12 +807,12 @@ void clsRegManager::Save(const bool &bSaveOnChange/* = false*/, const bool &bSav
         pxbRegs.ui8ItemValues[0] = PXBReader::PXB_STRING;
 
         if(curReg->bPassHash == true) {
-            pxbRegs.sItemIdentifiers[1][1] = 'S';
+            pxbRegs.sItemIdentifiers[3] = 'S';
 
             pxbRegs.ui16ItemLengths[1] = 64;
             pxbRegs.pItemDatas[1] = (void *)curReg->ui8PassHash;
         } else {
-            pxbRegs.sItemIdentifiers[1][1] = 'A';
+            pxbRegs.sItemIdentifiers[3] = 'A';
 
             pxbRegs.ui16ItemLengths[1] = (uint16_t)strlen(curReg->sPass);
             pxbRegs.pItemDatas[1] = (void *)curReg->sPass;

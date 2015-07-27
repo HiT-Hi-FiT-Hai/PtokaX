@@ -130,10 +130,9 @@ clsScriptManager::clsScriptManager() : pRunningScriptE(NULL), pRunningScriptS(NU
         exit(EXIT_FAILURE);
     }
 
-	char * sReturn = NULL;
 	size_t szLen = 0;
 
-	while((sReturn = fgets(clsServerManager::pGlobalBuffer, (int)clsServerManager::szGlobalBufferSize, fScriptsFile)) != NULL) {
+	while(fgets(clsServerManager::pGlobalBuffer, (int)clsServerManager::szGlobalBufferSize, fScriptsFile) != NULL) {
 		if(clsServerManager::pGlobalBuffer[0] == '#' || clsServerManager::pGlobalBuffer[0] == '\n') {
 			continue;
 		}

@@ -43,8 +43,9 @@ LRESULT SettingPageGeneral::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lPa
             case EDT_HUB_NAME:
             case EDT_HUB_TOPIC:
             case EDT_HUB_DESCRIPTION:
+            case EDT_HUB_ADDRESS:
                 if(HIWORD(wParam) == EN_CHANGE) {
-                    RemovePipes((HWND)lParam);
+                    RemoveDollarsPipes((HWND)lParam);
 
                     return 0;
                 }
@@ -329,7 +330,7 @@ bool SettingPageGeneral::CreateSettingPage(HWND hOwner) {
         0, iPosY, iFullGB, clsGuiSettingManager::iOneLineTwoChecksGB + clsGuiSettingManager::iOneLineGB + 3, m_hWnd, NULL, clsServerManager::hInstance, NULL);
 
     hWndPageItems[EDT_HUB_ADDRESS] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS], WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-        8, iPosY + clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iEditHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+        8, iPosY + clsGuiSettingManager::iGroupBoxMargin, iFullEDT, clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_HUB_ADDRESS, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_HUB_ADDRESS], EM_SETLIMITTEXT, 256, 0);
 
     hWndPageItems[BTN_RESOLVE_ADDRESS] = ::CreateWindowEx(0, WC_BUTTON, clsLanguageManager::mPtr->sTexts[LAN_RESOLVE_HOSTNAME], WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,

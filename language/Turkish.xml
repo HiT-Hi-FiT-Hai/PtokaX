@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<Language Name="Turkish Language" Author="zapman" Version="0.5.0.2 build 457">
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<Language Name="Turkish Language" Author="zapman" Version="0.5.1.0 build 499">
     <String Name="ThisHubIsRunning">Hub şu sürümü çalıştırıyor:</String>
     <String Name="HubName">Hub ismi</String>
     <String Name="MOTD(motd)">MOTD (günün mesajı)</String>
@@ -395,7 +395,7 @@
     <String Name="DisplayBansFoundForGivenIp">seçilen IP adresi için yasakları göster</String>
     <String Name="DisplayRangeBanFoundForGivenRange">seçilen IP alanı için bulunan alan yasağını göster</String>
     <String Name="DisconnectWithTempban">geçici olarak yasakla ve bağlantıyı kes</String>
-    <String Name="DisplaysInfoOnUserWithGivenNick">seçilen rumuzlu kullanıcı için temel bilgi göster</String>
+    <String Name="DisplaysInfoOnUserWithGivenNick">seçilen rumuzlu kullanıcı hakkında temel bilgi görüntüler</String>
     <String Name="GiveTempOp">Kullanıcıya bu oturum için geçici Op statüsü ver</String>
     <String Name="DisallowUserToPostInMainchat">kullanıcının ana sohbete katılmasına izin verme</String>
     <String Name="UserCanPostToMainchatAgain">kullanıcı yeniden ana sohbete mesaj yollayabilir</String>
@@ -697,7 +697,7 @@
     <String Name="DisallowBuggySupports">Hatalı $Supports komutu tollayan istemcilere izin verme</String>
     <String Name="MaxAlwdTopicLen256Chars">İzin verilen azami mevzu boyutu 256 karakterdir</String>
     <String Name="MaxAlwdScriptNameLen256Chars">İzin verilen azami betik ismi boyutu 256 karakterdir</String>
-    <String Name="MaxAlwdIPLen15Chars">İzin verilen azami IP boyutu 15 karakterdir</String>
+    <String Name="MaxAlwdIPLen39Chars">İzin verilen azami IP boyutu 39 karakterdir</String>
     <String Name="View">&amp;Görünüm</String>
     <String Name="Help">&amp;Yardım</String>
     <String Name="Exit">&amp;Çık</String>
@@ -760,6 +760,7 @@
     <String Name="IPv4Address">IPv4 adresi</String>
     <String Name="IPv6Address">IPv6 adresi</String>
     <String Name="Register">kaydet</String>
+    <String Name="As">olarak</String>
     <String Name="Registered">kayıtlı</String>
     <String Name="YouWereRegisteredPleaseEnterYourPassword">Kaydınız vardı, lütfen parolanızı giriniz</String>
     <String Name="SorryYouAreAlreadyRegistered">Üzgünüz, zaten kayıtlısınız</String>
@@ -769,4 +770,12 @@
     <String Name="YourNickContainsIllegalWhiteCharacter">Rumuzunuz geçersiz boşluk karakteri içermektedir</String>
     <String Name="PasswordIsHashed">Parola hash değerine çevrildiğinden dolayı bu kutu boştur</String>
     <String Name="StoreRegPassHashed">Kayıtlı kullanıcıların parolalarını hash değeri olarak kaydet</String>
+    <String Name="YourClientSentIncorrectPortInCTM">İstemciniz bağlantı talebinde yanlış port gönderdi</String>
+    <String Name="YourClientSentIncorrectPortInSearch">İstemciniz arama talebinde yanlış port gönderdi</String>
+    <String Name="NotFound">bulunamadı</String>
+    <String Name="OfflineFrom">Şuradan çevrimdışında</String>
+    <String Name="DisplaysInfoOnGivenIP">seçilen IP hakkında temel bilgiler görüntüler</String>
+    <String Name="DatabaseSupport">Veritabanı desteği (kullanıcı ve IP verilerini depolamaya yarar)</String>
+    <String Name="EnableDatabase">Veritabanını etkinleştir</String>
+    <String Name="RemoveOldRecords">Şu kadar günden eski kayıtları kaldır</String>
 </Language>

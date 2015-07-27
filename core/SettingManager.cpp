@@ -328,10 +328,10 @@ void clsSettingManager::Load() {
         exit(EXIT_FAILURE);
     }
 
-	char * sReturn = NULL, * sValue = NULL;
+	char * sValue = NULL;
 	size_t szLen = 0;
 
-	while((sReturn = fgets(clsServerManager::pGlobalBuffer, (int)clsServerManager::szGlobalBufferSize, fSettingsFile)) != NULL) {
+	while(fgets(clsServerManager::pGlobalBuffer, (int)clsServerManager::szGlobalBufferSize, fSettingsFile) != NULL) {
 		if(clsServerManager::pGlobalBuffer[0] == '#' || clsServerManager::pGlobalBuffer[0] == '\n') {
 			continue;
 		}

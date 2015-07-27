@@ -94,7 +94,7 @@
 #include "pxstring.h"
 //---------------------------------------------------------------------------
 #define PtokaXVersionString "0.5.1.0"
-#define BUILD_NUMBER "516"
+#define BUILD_NUMBER "517"
 const char g_sPtokaXTitle[] = "PtokaX DC Hub " PtokaXVersionString
 #ifdef _PtokaX_TESTING_
 	" [build " BUILD_NUMBER "]";

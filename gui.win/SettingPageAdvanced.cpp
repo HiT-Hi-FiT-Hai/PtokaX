@@ -97,7 +97,7 @@ LRESULT SettingPageAdvanced::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lP
                     bool bChanged = false;
 
                     for(uint16_t ui16i = 0; buf[ui16i] != '\0'; ui16i++) {
-                        if(buf[ui16i] == '|') {
+                        if(buf[ui16i] == '|' || buf[ui16i] == ' ') {
                             strcpy(buf+ui16i, buf+ui16i+1);
                             bChanged = true;
                             ui16i--;

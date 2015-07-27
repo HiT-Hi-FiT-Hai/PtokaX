@@ -537,7 +537,7 @@ bool SettingPageDeflood::CreateSettingPage(HWND hOwner) {
         ScaleGui(180) + 13, iPosY + clsGuiSettingManager::iGroupBoxMargin, ScaleGui(40), clsGuiSettingManager::iEditHeight, m_hWnd, (HMENU)EDT_SAME_MAIN_CHAT_MSGS, clsServerManager::hInstance, NULL);
     ::SendMessage(hWndPageItems[EDT_SAME_MAIN_CHAT_MSGS], EM_SETLIMITTEXT, 3, 0);
 
-    AddUpDown(hWndPageItems[UD_SAME_MAIN_CHAT_MSGS], ScaleGui(220) + 13, iPosY + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 1), (WPARAM)hWndPageItems[EDT_SAME_MAIN_CHAT_MSGS],
+    AddUpDown(hWndPageItems[UD_SAME_MAIN_CHAT_MSGS], ScaleGui(220) + 13, iPosY + clsGuiSettingManager::iGroupBoxMargin, clsGuiSettingManager::iUpDownWidth, clsGuiSettingManager::iEditHeight, (LPARAM)MAKELONG(999, 2), (WPARAM)hWndPageItems[EDT_SAME_MAIN_CHAT_MSGS],
         (LPARAM)MAKELONG(clsSettingManager::mPtr->i16Shorts[SETSHORT_SAME_MAIN_CHAT_MESSAGES], 0));
 
     hWndPageItems[LBL_SAME_MAIN_CHAT_DIVIDER] = ::CreateWindowEx(0, WC_STATIC, "/", WS_CHILD | WS_VISIBLE | SS_CENTER,

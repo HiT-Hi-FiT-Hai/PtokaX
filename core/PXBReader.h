@@ -23,18 +23,21 @@
 
 class PXBReader {
 private:
-    bool bFullRead;
-
     char * pActualPosition;
 
     FILE * pFile;
 
     size_t szRemainingSize;
 
+	uint8_t ui8AllocatedSize;
+
+    bool bFullRead;
+
 	PXBReader(const PXBReader&);
 	const PXBReader& operator=(const PXBReader&);
 
     void ReadNextFilePart();
+    bool PrepareArrays(const uint8_t &ui8Size);
 public:
     enum enmDataTypes {
         PXB_BYTE,
@@ -43,21 +46,21 @@ public:
         PXB_STRING
     };
 
-    void * pItemDatas[10];
+    void ** pItemDatas;
 
-    uint16_t ui16ItemLengths[10];
+    uint16_t * ui16ItemLengths;
 
-    char sItemIdentifiers[10][2];
+    char * sItemIdentifiers;
 
-    uint8_t ui8ItemValues[10];
+    uint8_t * ui8ItemValues;
 
 	PXBReader();
 	~PXBReader();
 
-    bool OpenFileRead(const char * sFilename);
+    bool OpenFileRead(const char * sFilename, const uint8_t &ui8SubItems);
     bool ReadNextItem(const uint16_t * sExpectedIdentificators, const uint8_t &ui8ExpectedSubItems, const uint8_t &ui8ExtraSubItems = 0);
 
-    bool OpenFileSave(const char * sFilename);
+    bool OpenFileSave(const char * sFilename, const uint8_t &ui8Size);
     bool WriteNextItem(const uint32_t &ui32Length, const uint8_t &ui8SubItems);
     void WriteRemaining();
 };

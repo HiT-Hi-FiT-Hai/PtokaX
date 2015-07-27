@@ -43,6 +43,13 @@ LRESULT SettingPageGeneral2::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lP
     if(uMsg == WM_COMMAND) {
         switch(LOWORD(wParam)) {
             case EDT_OWNER_EMAIL:
+                if(HIWORD(wParam) == EN_CHANGE) {
+                    RemoveDollarsPipes((HWND)lParam);
+
+                    return 0;
+                }
+
+                break;
             case EDT_MAIN_REDIR_ADDR:
             case EDT_MSG_TO_NON_REGS:
             case EDT_NON_REG_REDIR_ADDR:

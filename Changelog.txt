@@ -12,6 +12,7 @@ Fixed: Compile on FreeBSD 10.1, Haiku, Solaris and illumos.
 Fixed: Missing checks for $, |, space and length for many settings strings.
 Changed: Timer handling on Unixes.
 Changed: Settings, Reserved Nicks and Scripts settings files from xml to simple text format.
+Changed: Profiles file from xml to binary format.
 Improved: Performance for strings sent to UDP Debug.
 
 

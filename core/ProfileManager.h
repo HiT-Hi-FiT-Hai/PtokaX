@@ -41,8 +41,10 @@ private:
     clsProfileManager(const clsProfileManager&);
     const clsProfileManager& operator=(const clsProfileManager&);
 
-    static void CreateDefaultProfiles();
     ProfileItem * CreateProfile(const char * name);
+
+	void Load();
+    void LoadXML();
 public:
     static clsProfileManager * mPtr;
 

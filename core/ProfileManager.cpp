@@ -25,6 +25,7 @@
 #include "colUsers.h"
 #include "hashRegManager.h"
 #include "LanguageManager.h"
+#include "PXBReader.h"
 #include "ServerManager.h"
 #include "UdpDebug.h"
 #include "User.h"
@@ -41,6 +42,68 @@
 #endif
 //---------------------------------------------------------------------------
 clsProfileManager * clsProfileManager::mPtr = NULL;
+//---------------------------------------------------------------------------
+static const char sPtokaXProfiles[] = "PtokaX Profiles";
+static const size_t szPtokaXProfilesLen = sizeof(sPtokaXProfiles)-1;
+static const char sProfilePermissionIds[] = // PN reserved for profile name!
+		"OP" // HASKEYICON
+		"DG" // NODEFLOODGETNICKLIST
+		"DM" // NODEFLOODMYINFO
+		"DS" // NODEFLOODSEARCH
+		"DP" // NODEFLOODPM
+		"DN" // NODEFLOODMAINCHAT
+		"MM" // MASSMSG
+		"TO" // TOPIC
+		"TB" // TEMP_BAN
+		"RT" // REFRESHTXT
+		"NT" // NOTAGCHECK
+		"TU" // TEMP_UNBAN
+		"DR" // DELREGUSER
+		"AR" // ADDREGUSER
+		"NC" // NOCHATLIMITS
+		"NH" // NOMAXHUBCHECK
+		"NR" // NOSLOTHUBRATIO
+		"NS" // NOSLOTCHECK
+		"NA" // NOSHARELIMIT
+		"CP" // CLRPERMBAN
+		"CT" // CLRTEMPBAN
+		"GI" // GETINFO
+		"GB" // GETBANLIST
+		"RS" // RSTSCRIPTS
+		"RH" // RSTHUB
+		"TP" // TEMPOP
+		"GG" // GAG
+		"RE" // REDIRECT
+		"BN" // BAN
+		"KI" // KICK
+		"DR" // DROP
+		"EF" // ENTERFULLHUB
+		"EB" // ENTERIFIPBAN
+		"AO" // ALLOWEDOPCHAT
+		"UI" // SENDALLUSERIP
+		"RB" // RANGE_BAN
+		"RU" // RANGE_UNBAN
+		"RT" // RANGE_TBAN
+		"RV" // RANGE_TUNBAN
+		"GR" // GET_RANGE_BANS
+		"CR" // CLR_RANGE_BANS
+		"CU" // CLR_RANGE_TBANS
+		"UN" // UNBAN
+		"NT" // NOSEARCHLIMITS
+		"SM" // SENDFULLMYINFOS
+		"NI" // NOIPCHECK
+		"CL" // CLOSE
+		"DC" // NODEFLOODCTM
+		"DR" // NODEFLOODRCTM
+		"DT" // NODEFLOODSR
+		"DU" // NODEFLOODRECV
+		"CI" // NOCHATINTERVAL
+		"PI" // NOPMINTERVAL
+		"SI" // NOSEARCHINTERVAL
+		"UI" // NOUSRSAMEIP
+		"RT" // NORECONNTIME
+;
+static const size_t szProfilePermissionIdsLen = sizeof(sProfilePermissionIds)-1;
 //---------------------------------------------------------------------------
 
 ProfileItem::ProfileItem() : sName(NULL) {
@@ -60,27 +123,73 @@ ProfileItem::~ProfileItem() {
 #endif
 }
 //---------------------------------------------------------------------------
+void clsProfileManager::Load() {
+    PXBReader pxbProfiles;
 
-clsProfileManager::clsProfileManager() : ui16ProfileCount(0), ppProfilesTable(NULL) {
+    // Open setting file
+#ifdef _WIN32
+    if(pxbProfiles.OpenFileRead((clsServerManager::sPath + "\\cfg\\Profiles.pxb").c_str(), NORECONNTIME+2) == false) {
+#else
+    if(pxbProfiles.OpenFileRead((clsServerManager::sPath + "/cfg/Profiles.pxb").c_str(), NORECONNTIME+2) == false) {
+#endif
+    	AppendDebugLog("%s - [ERR] Cannot open Profiles.pxb in clsProfileManager::Load\n");
+        return;
+    }
+
+    // Read file header
+    uint16_t ui16Identificators[NORECONNTIME+2];
+    ui16Identificators[0] = *((uint16_t *)"FI");
+    ui16Identificators[1] = *((uint16_t *)"FV");
+
+    if(pxbProfiles.ReadNextItem(ui16Identificators, 2) == false) {
+        return;
+    }
+
+    // Check header if we have correct file
+    if(pxbProfiles.ui16ItemLengths[0] != szPtokaXProfilesLen || strncmp((char *)pxbProfiles.pItemDatas[0], sPtokaXProfiles, szPtokaXProfilesLen) != 0) {
+        return;
+    }
+
+    {
+        uint32_t ui32FileVersion = ntohl(*((uint32_t *)(pxbProfiles.pItemDatas[1])));
+
+        if(ui32FileVersion < 1) {
+            return;
+        }
+    }
+
+    // Read settings =)
+    ui16Identificators[0] = *((uint16_t *)"PN");
+    memcpy(ui16Identificators+1, sProfilePermissionIds, szProfilePermissionIdsLen);
+
+    bool bSuccess = pxbProfiles.ReadNextItem(ui16Identificators, NORECONNTIME+2);
+
+    while(bSuccess == true) {
+    	ProfileItem * pNewProfile = CreateProfile((char *)pxbProfiles.pItemDatas[0]);
+
+        for(uint16_t ui16i = 0; ui16i <= NORECONNTIME; ui16i++) {
+			if(((char *)pxbProfiles.pItemDatas[ui16i+1])[0] == '0') {
+				pNewProfile->bPermissions[ui16i] = false;
+			} else {
+				pNewProfile->bPermissions[ui16i] = true;
+			}
+        }
+
+        bSuccess = pxbProfiles.ReadNextItem(ui16Identificators, NORECONNTIME+2);
+    }
+}
+//---------------------------------------------------------------------------
+
+void clsProfileManager::LoadXML() {
 #ifdef _WIN32
     TiXmlDocument doc((clsServerManager::sPath+"\\cfg\\Profiles.xml").c_str());
 #else
 	TiXmlDocument doc((clsServerManager::sPath+"/cfg/Profiles.xml").c_str());
 #endif
 	if(doc.LoadFile() == false) {
-        if(doc.ErrorId() == TiXmlBase::TIXML_ERROR_OPENING_FILE || doc.ErrorId() == TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY) {
-            CreateDefaultProfiles();
-            if(doc.LoadFile() == false) {
-#ifdef _BUILD_GUI
-                ::MessageBox(NULL, clsLanguageManager::mPtr->sTexts[LAN_PROFILES_LOAD_FAIL], g_sPtokaXTitle, MB_OK | MB_ICONERROR);
-#else
-                AppendLog(clsLanguageManager::mPtr->sTexts[LAN_PROFILES_LOAD_FAIL]);
-#endif
-                exit(EXIT_FAILURE);
-            }
-		} else {
+         if(doc.ErrorId() != TiXmlBase::TIXML_ERROR_OPENING_FILE && doc.ErrorId() != TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY) {
             int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "Error loading file Profiles.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
-			CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsProfileManager::clsProfileManager()");
+			CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsProfileManager::LoadXML");
 #ifdef _BUILD_GUI
 			::MessageBox(NULL, clsServerManager::pGlobalBuffer, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
@@ -144,6 +253,48 @@ clsProfileManager::clsProfileManager() : ui16ProfileCount(0), ppProfilesTable(NU
 }
 //---------------------------------------------------------------------------
 
+clsProfileManager::clsProfileManager() : ui16ProfileCount(0), ppProfilesTable(NULL) {
+	#ifdef _WIN32
+    if(FileExist((clsServerManager::sPath + "\\cfg\\Profiles.pxb").c_str()) == true) {
+#else
+    if(FileExist((clsServerManager::sPath + "/cfg/Profiles.pxb").c_str()) == true) {
+#endif
+        Load();
+        return;
+#ifdef _WIN32
+    } else if(FileExist((clsServerManager::sPath + "\\cfg\\Profiles.xml").c_str()) == true) {
+#else
+    } else if(FileExist((clsServerManager::sPath + "/cfg/Profiles.xml").c_str()) == true) {
+#endif
+        LoadXML();
+        return;
+    } else {
+	    const char * sProfileNames[] = { "Master", "Operator", "VIP", "Reg" };
+	    const char * sProfilePermisions[] = {
+	        "10011111111111111111111111111111111111111111101000111111",
+	        "10011111101111111110011000111111111000000011101000111111",
+	        "00000000000000011110000000000001100000000000000000000111",
+	        "00000000000000000000000000000001100000000000000000000000"
+	    };
+
+		for(uint8_t ui8i = 0; ui8i < 4; ui8i++) {
+			ProfileItem * pNewProfile = CreateProfile(sProfileNames[ui8i]);
+
+			for(uint8_t ui8j = 0; ui8j < strlen(sProfilePermisions[ui8i]); ui8j++) {
+				if(sProfilePermisions[ui8i][ui8j] == '1') {
+					pNewProfile->bPermissions[ui8j] = true;
+				} else {
+					pNewProfile->bPermissions[ui8j] = false;
+				}
+			}
+		}
+
+	    SaveProfiles();
+	}
+
+}
+//---------------------------------------------------------------------------
+
 clsProfileManager::~clsProfileManager() {
     SaveProfiles();
 
@@ -162,78 +313,61 @@ clsProfileManager::~clsProfileManager() {
 }
 //---------------------------------------------------------------------------
 
-void clsProfileManager::CreateDefaultProfiles() {
-    const char* profilenames[] = { "Master", "Operator", "VIP", "Reg" };
-    const char* profilepermisions[] = {
-        "1001111111111111111111111111111111111111111110100011111100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-        "1001111110111111111001100011111111100000001110100011111100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-        "0000000000000001111000000000000110000000000000000000011100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-        "0000000000000000000000000000000110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    };
-
-#ifdef _WIN32
-    TiXmlDocument doc((clsServerManager::sPath+"\\cfg\\Profiles.xml").c_str());
-#else
-	TiXmlDocument doc((clsServerManager::sPath+"/cfg/Profiles.xml").c_str());
-#endif
-    doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
-    TiXmlElement profiles("Profiles");
-
-    for(uint8_t i = 0; i < 4;i++) {
-        TiXmlElement name("Name");
-        name.InsertEndChild(TiXmlText(profilenames[i]));
-        
-        TiXmlElement permisions("Permissions");
-        permisions.InsertEndChild(TiXmlText(profilepermisions[i]));
-        
-        TiXmlElement profile("Profile");
-        profile.InsertEndChild(name);
-        profile.InsertEndChild(permisions);
-        
-        profiles.InsertEndChild(profile);
-    }
-
-    doc.InsertEndChild(profiles);
-    doc.SaveFile();
-}
-//---------------------------------------------------------------------------
-
 void clsProfileManager::SaveProfiles() {
-    char permisionsbits[257];
+    PXBReader pxbProfiles;
 
+    // Open regs file
 #ifdef _WIN32
-    TiXmlDocument doc((clsServerManager::sPath+"\\cfg\\Profiles.xml").c_str());
+    if(pxbProfiles.OpenFileSave((clsServerManager::sPath + "\\cfg\\Profiles.pxb").c_str(), NORECONNTIME+2) == false) {
 #else
-	TiXmlDocument doc((clsServerManager::sPath+"/cfg/Profiles.xml").c_str());
+    if(pxbProfiles.OpenFileSave((clsServerManager::sPath + "/cfg/Profiles.pxb").c_str(), NORECONNTIME+2) == false) {
 #endif
-    doc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
-    TiXmlElement profiles("Profiles");
-
-    for(uint16_t ui16j = 0; ui16j < ui16ProfileCount; ui16j++) {
-        TiXmlElement name("Name");
-        name.InsertEndChild(TiXmlText(ppProfilesTable[ui16j]->sName));
-        
-        for(uint16_t ui16i = 0; ui16i < 256; ui16i++) {
-            if(ppProfilesTable[ui16j]->bPermissions[ui16i] == false) {
-                permisionsbits[ui16i] = '0';
-            } else {
-                permisionsbits[ui16i] = '1';
-            }
-        }
-        permisionsbits[256] = '\0';
-        
-        TiXmlElement permisions("Permissions");
-        permisions.InsertEndChild(TiXmlText(permisionsbits));
-        
-        TiXmlElement profile("Profile");
-        profile.InsertEndChild(name);
-        profile.InsertEndChild(permisions);
-        
-        profiles.InsertEndChild(profile);
+		AppendDebugLog("%s - [ERR] Cannot open Profiles.pxb in clsProfileManager::SaveProfiles\n");
+        return;
     }
 
-    doc.InsertEndChild(profiles);
-    doc.SaveFile();
+    // Write file header
+    pxbProfiles.sItemIdentifiers[0] = 'F';
+    pxbProfiles.sItemIdentifiers[1] = 'I';
+    pxbProfiles.ui16ItemLengths[0] = (uint16_t)szPtokaXProfilesLen;
+    pxbProfiles.pItemDatas[0] = (void *)sPtokaXProfiles;
+    pxbProfiles.ui8ItemValues[0] = PXBReader::PXB_STRING;
+
+    pxbProfiles.sItemIdentifiers[2] = 'F';
+    pxbProfiles.sItemIdentifiers[3] = 'V';
+    pxbProfiles.ui16ItemLengths[1] = 4;
+    uint32_t ui32Version = 1;
+    pxbProfiles.pItemDatas[1] = (void *)&ui32Version;
+    pxbProfiles.ui8ItemValues[1] = PXBReader::PXB_FOUR_BYTES;
+
+    if(pxbProfiles.WriteNextItem(szPtokaXProfilesLen+4, 2) == false) {
+        return;
+    }
+
+    pxbProfiles.sItemIdentifiers[0] = 'P';
+    pxbProfiles.sItemIdentifiers[1] = 'N';
+    pxbProfiles.ui8ItemValues[0] = PXBReader::PXB_STRING;
+
+	memcpy(pxbProfiles.sItemIdentifiers+2, sProfilePermissionIds, szProfilePermissionIdsLen);
+	memset(pxbProfiles.ui8ItemValues+1, PXBReader::PXB_BYTE, NORECONNTIME+1);
+
+    for(uint16_t ui16i = 0; ui16i < ui16ProfileCount; ui16i++) {
+        pxbProfiles.ui16ItemLengths[0] = (uint16_t)strlen(ppProfilesTable[ui16i]->sName);
+        pxbProfiles.pItemDatas[0] = (void *)ppProfilesTable[ui16i]->sName;
+        pxbProfiles.ui8ItemValues[0] = PXBReader::PXB_STRING;
+
+        for(uint16_t ui16j = 0; ui16j <= NORECONNTIME; ui16j++) {
+	        pxbProfiles.ui16ItemLengths[ui16j+1] = 1;
+	        pxbProfiles.pItemDatas[ui16j+1] = (ppProfilesTable[ui16i]->bPermissions[ui16j] == true ? (void *)1 : 0);
+	        pxbProfiles.ui8ItemValues[ui16j+1] = PXBReader::PXB_BYTE;
+        }
+
+        if(pxbProfiles.WriteNextItem(pxbProfiles.ui16ItemLengths[0] + NORECONNTIME+1, NORECONNTIME+2) == false) {
+            break;
+        }
+    }
+
+    pxbProfiles.WriteRemaining();
 }
 //---------------------------------------------------------------------------
 
