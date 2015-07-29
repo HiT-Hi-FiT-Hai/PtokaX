@@ -259,6 +259,9 @@ bool PXBReader::WriteNextItem(const uint32_t &ui32Length, const uint8_t &ui8SubI
             case PXB_FOUR_BYTES:
                 (*((uint32_t *)(pActualPosition+4))) = htonl(*((uint32_t *)pItemDatas[ui8i]));
                 break;
+            case PXB_EIGHT_BYTES:
+            	(*((uint64_t *)(pActualPosition+4))) = htobe64(*((uint64_t *)pItemDatas[ui8i]));
+            	break;
             case PXB_STRING:
                 memcpy(pActualPosition+4, pItemDatas[ui8i], ui16ItemLengths[ui8i]);
                 break;

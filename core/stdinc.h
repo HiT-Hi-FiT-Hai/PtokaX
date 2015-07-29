@@ -66,7 +66,7 @@
 	#include <pthread.h>
 	#include <signal.h>
 	#include <sys/ioctl.h>
-	#if defined (__SVR4) && defined (__sun)
+	#if defined(__SVR4) && defined(__sun)
 	   #include <sys/filio.h>
 	#endif
 	#include <sys/resource.h> 
@@ -86,15 +86,29 @@
 	#include <psapi.h>
 	#include <io.h>
 	#include <Iphlpapi.h>
-#endif
-#ifdef __MACH__
+#elif __MACH__
 	#include <mach/clock.h>
 	#include <mach/mach.h>
-#endif 
+	#include <libkern/OSByteOrder.h>
+
+	#define htobe64(x) OSSwapHostToBigInt64(x)
+	#define be64toh(x) OSSwapBigToHostInt64(x)
+#elif __HAIKU__
+	#include <support/ByteOrder.h>
+	#define htobe64(x) B_HOST_TO_BENDIAN_INT64(x)
+	#define be64toh(x) B_BENDIAN_TO_HOST_INT64(x)
+#elif defined(__SVR4) && defined(__sun)
+	#define htobe64(x) htonll(x)
+	#define be64toh(x) ntohll(x)
+#elif defined(__NetBSD__) || defined(__FreeBSD__)
+	#include <sys/endian.h>
+#else // Linux, OpenBSD
+	#include <endian.h>
+#endif
 #include "pxstring.h"
 //---------------------------------------------------------------------------
 #define PtokaXVersionString "0.5.1.0"
-#define BUILD_NUMBER "517"
+#define BUILD_NUMBER "519"
 const char g_sPtokaXTitle[] = "PtokaX DC Hub " PtokaXVersionString
 #ifdef _PtokaX_TESTING_
 	" [build " BUILD_NUMBER "]";

@@ -112,6 +112,11 @@ bool CheckAndResizeGlobalBuffer(const size_t &szWantedSize);
 void ReduceGlobalBuffer();
 
 bool HashPassword(char * sPassword, const size_t &szPassLen, uint8_t * ui8PassHash);
+
+#ifdef _WIN32
+	uint64_t htobe64(const uint64_t & ui64Value);
+	uint64_t be64toh(const uint64_t & ui64Value);
+#endif
 //---------------------------------------------------------------------------
 
 #endif

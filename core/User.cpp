@@ -1865,7 +1865,7 @@ void User::SetBuffer(char * sKickMsg, size_t szLen/* = 0*/) {
             ui32BoolBits |= BIT_ERROR;
             Close();
 
-			AppendDebugLog("%s - [MEM] Cannot allocate 256 bytes for pBuffer in User::SetBuffer\n");
+			AppendDebugLog("%s - [MEM] Cannot allocate 512 bytes for pBuffer in User::SetBuffer\n");
 
             return;
         }

@@ -10,9 +10,10 @@ Added: Support to compile PtokaX on Solaris, Fedora, OpenBSD, NetBSD and Mac OS 
 Fixed: Few minor issues in Lua api.
 Fixed: Compile on FreeBSD 10.1, Haiku, Solaris and illumos.
 Fixed: Missing checks for $, |, space and length for many settings strings.
+Fixed: Ban message on some places was truncated to 255 bytes instead of 511.
 Changed: Timer handling on Unixes.
 Changed: Settings, Reserved Nicks and Scripts settings files from xml to simple text format.
-Changed: Profiles file from xml to binary format.
+Changed: Profiles and bans files from xml to binary format.
 Improved: Performance for strings sent to UDP Debug.
 
 

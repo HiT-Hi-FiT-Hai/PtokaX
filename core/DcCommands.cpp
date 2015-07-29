@@ -169,10 +169,6 @@ void clsDcCommands::PreProcessData(User * pUser, char * sData, const bool &bChec
                             // PPK [ Strikes back ;) ] ... get nick from MyINFO
                             char *cTemp;
                             if((cTemp = strchr(sData+13, ' ')) == NULL) {
-                                if(ui32Len > 65000) {
-                                    sData[65000] = '\0';
-                                }
-
 								clsUdpDebug::mPtr->BroadcastFormat("[SYS] Attempt to validate empty nick  from %s (%s) - user closed. (QuickList -> %s)", pUser->sNick, pUser->sIP, sData);
 
                                 pUser->Close();
@@ -246,10 +242,6 @@ void clsDcCommands::PreProcessData(User * pUser, char * sData, const bool &bChec
                                 // Am I sending MyINFO of someone other ?
                                 // OR i try to fuck up hub with some chars after my nick ??? ... PPK
                                 if((sData[13+pUser->ui8NickLen] != ' ') || (memcmp(pUser->sNick, sData+13, pUser->ui8NickLen) != 0)) {
-                                    if(ui32Len > 65000) {
-                                        sData[65000] = '\0';
-                                    }
-
 									clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in myinfo from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
                                     pUser->Close();
@@ -293,10 +285,6 @@ void clsDcCommands::PreProcessData(User * pUser, char * sData, const bool &bChec
                     // Am I sending MyINFO of someone other ?
                     // OR i try to fuck up hub with some chars after my nick ??? ... PPK
                     if((sData[13+pUser->ui8NickLen] != ' ') || (memcmp(pUser->sNick, sData+13, pUser->ui8NickLen) != 0)) {
-                        if(ui32Len > 65000) {
-                            sData[65000] = '\0';
-                        }
-
 						clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in myinfo from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
                         pUser->Close();
@@ -338,10 +326,6 @@ void clsDcCommands::PreProcessData(User * pUser, char * sData, const bool &bChec
                             // Am I sending MyINFO of someone other ?
                             // OR i try to fuck up hub with some chars after my nick ??? ... PPK
                             if((sData[13+pUser->ui8NickLen] != ' ') || (memcmp(pUser->sNick, sData+13, pUser->ui8NickLen) != 0)) {
-                                if(ui32Len > 65000) {
-                                    sData[65000] = '\0';
-                                }
-
 								clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in myinfo from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
                                 pUser->Close();
@@ -420,10 +404,6 @@ void clsDcCommands::PreProcessData(User * pUser, char * sData, const bool &bChec
                             // Am I sending MyINFO of someone other ?
                             // OR i try to fuck up hub with some chars after my nick ??? ... PPK
                             if((sData[13+pUser->ui8NickLen] != ' ') || (memcmp(pUser->sNick, sData+13, pUser->ui8NickLen) != 0)) {
-                                if(ui32Len > 65000) {
-                                    sData[65000] = '\0';
-                                }
-
 								clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in myinfo from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
                                 pUser->Close();
@@ -837,10 +817,6 @@ void clsDcCommands::ConnectToMe(User * pUser, char * sData, const uint32_t &ui32
     if(ui32Len > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_CTM_LEN]) {
         pUser->SendFormat("clsDcCommands::ConnectToMe", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_CTM_TOO_LONG]);
 
-        if(ui32Len > 65000) {
-            sData[65000] = '\0';
-        }
-
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Long $ConnectToMe from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
         pUser->Close();
@@ -880,10 +856,6 @@ void clsDcCommands::ConnectToMe(User * pUser, char * sData, const uint32_t &ui32
 
 	if(bWrongPort == true) {
         SendIncorrectPortMsg(pUser, true);
-
-        if(ui32Len > 65000) {
-            sData[65000] = '\0';
-        }
 
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad Port in %sCTM from %s (%s). (%s)", bMulti == false ? "" : "M", pUser->sNick, pUser->sIP, sData);
 
@@ -927,10 +899,6 @@ void clsDcCommands::ConnectToMe(User * pUser, char * sData, const uint32_t &ui32
 
         SendIncorrectIPMsg(pUser, towho+1, true);
 
-        if(ui32Len > 65000) {
-            sData[65000] = '\0';
-        }
-
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad IP in %sCTM from %s (%s). (%s)", bMulti == false ? "" : "M", pUser->sNick, pUser->sIP, sData);
 
         pUser->Close();
@@ -955,12 +923,7 @@ void clsDcCommands::GetINFO(User * pUser, char * sData, const uint32_t &ui32Len)
     }
     
     // PPK ... code change, added own nick and space on right place check
-    if(ui32Len < (12u+pUser->ui8NickLen) || ui32Len > (75u+pUser->ui8NickLen) || sData[ui32Len-pUser->ui8NickLen-2] != ' ' ||
-        memcmp(sData+(ui32Len-pUser->ui8NickLen-1), pUser->sNick, pUser->ui8NickLen) != 0) {
-        if(ui32Len > 65000) {
-            sData[65000] = '\0';
-        }
-
+    if(ui32Len < (12u+pUser->ui8NickLen) || ui32Len > (75u+pUser->ui8NickLen) || sData[ui32Len-pUser->ui8NickLen-2] != ' ' || memcmp(sData+(ui32Len-pUser->ui8NickLen-1), pUser->sNick, pUser->ui8NickLen) != 0) {
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $GetINFO from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
         pUser->Close();
@@ -1125,10 +1088,6 @@ void clsDcCommands::Key(User * pUser, char * sData, const uint32_t &ui32Len) {
     sData[ui32Len-1] = '\0'; // cutoff pipe
 
     if(ui32Len < 6 || strcmp(Lock2Key(pUser->pLogInOut->pBuffer), sData+5) != 0) {
-        if(ui32Len > 65000) {
-            sData[65000] = '\0';
-        }
-
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $Key from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
         pUser->Close();
@@ -1399,10 +1358,6 @@ void clsDcCommands::Search(User *pUser, char * sData, uint32_t ui32Len, const bo
 
         // PPK ... check nick !!!
         if((sData[iAfterCmd+4+pUser->ui8NickLen] != ' ') || (memcmp(sData+iAfterCmd+4, pUser->sNick, pUser->ui8NickLen) != 0)) {
-            if(ui32Len > 65000) {
-                sData[65000] = '\0';
-            }
-
 			clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in search from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
             pUser->Close();
@@ -1477,10 +1432,6 @@ void clsDcCommands::Search(User *pUser, char * sData, uint32_t ui32Len, const bo
 
 		if(bWrongPort == true) {
             SendIncorrectPortMsg(pUser, false);
-
-            if(ui32Len > 65000) {
-                sData[65000] = '\0';
-            }
 
 			clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad Port in Search from %s (%s). (%s)", pUser->sNick, pUser->sIP, sData);
 
@@ -1619,10 +1570,6 @@ bool clsDcCommands::MyINFODeflood(User * pUser, char * sData, const uint32_t &ui
     if(ui32Len > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_MYINFO_LEN]) {
         pUser->SendFormat("clsDcCommands::MyINFODeflood", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_MYINFO_TOO_LONG]);
 
-        if(ui32Len > 65000) {
-            sData[65000] = '\0';
-        }
-
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $MyINFO from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
         pUser->Close();
@@ -1690,10 +1637,6 @@ void clsDcCommands::MyPass(User * pUser, char * sData, const uint32_t &ui32Len) 
     }
 
     if(ui32Len < 10|| ui32Len > 73) {
-        if(ui32Len > 65000) {
-            sData[65000] = '\0';
-        }
-
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad $MyPass from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
         pUser->Close();
@@ -1765,10 +1708,6 @@ void clsDcCommands::MyPass(User * pUser, char * sData, const uint32_t &ui32Len) 
                         clsGlobalDataQueue::mPtr->StatusMessageFormat("clsDcCommands::MyPass", "<%s> *** %s %s %s %s|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_IP], pUser->sIP, clsLanguageManager::mPtr->sTexts[LAN_BANNED_BECAUSE_3X_BAD_PASS_FOR_NICK], pUser->sNick);
                     }
 
-                    if(ui32Len > 65000) {
-                        sData[65000] = '\0';
-                    }
-
 					clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad 3x password from %s (%s) - user banned. (%s)", pUser->sNick, pUser->sIP, sData);
 
                     pUser->Close();
@@ -1780,10 +1719,6 @@ void clsDcCommands::MyPass(User * pUser, char * sData, const uint32_t &ui32Len) 
         }
 
         pUser->SendFormat("clsDcCommands::MyPass3", false, "$BadPass|<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_INCORRECT_PASSWORD]);
-
-        if(ui32Len > 65000) {
-            sData[65000] = '\0';
-        }
 
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad password from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
@@ -1938,10 +1873,6 @@ void clsDcCommands::RevConnectToMe(User * pUser, char * sData, const uint32_t &u
 
     // PPK ... optimizations
     if((sData[16+pUser->ui8NickLen] != ' ') || (memcmp(sData+16, pUser->sNick, pUser->ui8NickLen) != 0)) {
-        if(ui32Len > 65000) {
-            sData[65000] = '\0';
-        }
-
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in RCTM from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
         pUser->Close();
@@ -1969,10 +1900,6 @@ void clsDcCommands::RevConnectToMe(User * pUser, char * sData, const uint32_t &u
 
     if(ui32Len > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_RCTM_LEN]) {
         pUser->SendFormat("clsDcCommands::RevConnectToMe", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_RCTM_TOO_LONG]);
-
-        if(ui32Len > 65000) {
-            sData[65000] = '\0';
-        }
 
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Long $RevConnectToMe from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
@@ -2032,10 +1959,6 @@ void clsDcCommands::SR(User * pUser, char * sData, const uint32_t &ui32Len, cons
     if(ui32Len > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SR_LEN]) {
         pUser->SendFormat("clsDcCommands::SR", true, "<%s> %s!|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SR_TOO_LONG]);
 
-        if(ui32Len > 65000) {
-            sData[65000] = '\0';
-        }
-
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Long $SR from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
 
@@ -2046,10 +1969,6 @@ void clsDcCommands::SR(User * pUser, char * sData, const uint32_t &ui32Len, cons
     // check $SR spoofing (thanx Fusbar)
     // PPK... added checking for empty space after nick
     if(sData[4+pUser->ui8NickLen] != ' ' || memcmp(sData+4, pUser->sNick, pUser->ui8NickLen) != 0) {
-        if(ui32Len > 65000) {
-            sData[65000] = '\0';
-        }
-
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in SR from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
         pUser->Close();
@@ -2118,10 +2037,6 @@ void clsDcCommands::Supports(User * pUser, char * sData, const uint32_t &ui32Len
         if(clsSettingManager::mPtr->bBools[SETBOOL_NO_QUACK_SUPPORTS] == false) {
             pUser->ui32BoolBits |= User::BIT_QUACK_SUPPORTS;
         } else {
-            if(ui32Len > 65000) {
-                sData[65000] = '\0';
-            }
-
 			clsUdpDebug::mPtr->BroadcastFormat("[SYS] Quack $Supports from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
 			pUser->SendFormat("clsDcCommands::Supports1", false, "<%s> %s.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_QUACK_SUPPORTS]);
@@ -2249,10 +2164,6 @@ void clsDcCommands::To(User * pUser, char * sData, const uint32_t &ui32Len, cons
     char *cTemp = strchr(sData+5, ' ');
 
     if(ui32Len < 19 || cTemp == NULL) {
-        if(ui32Len > 65000) {
-            sData[65000] = '\0';
-        }
-
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Bad To from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
         pUser->Close();
@@ -2502,10 +2413,6 @@ bool clsDcCommands::ChatDeflood(User * pUser, char * sData, const uint32_t &ui32
     
 	// if the user is sending chat as other user, kick him
 	if(sData[1+pUser->ui8NickLen] != '>' || sData[2+pUser->ui8NickLen] != ' ' || memcmp(pUser->sNick, sData+1, pUser->ui8NickLen) != 0) {
-        if(ui32Len > 65000) {
-            sData[65000] = '\0';
-        }
-
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Nick spoofing in chat from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
 		pUser->Close();
@@ -2756,10 +2663,6 @@ void clsDcCommands::Unknown(User * pUser, char * sData, const uint32_t &ui32Len,
     // Give him chance with script...
     // if this is unkncwn command and script dont clarify that it's ok, disconnect the user
     if(clsScriptManager::mPtr->Arrival(pUser, sData, ui32Len, clsScriptManager::UNKNOWN_ARRIVAL) == false) {
-        if(ui32Len > 65000) {
-            sData[65000] = '\0';
-        }
-
 		clsUdpDebug::mPtr->BroadcastFormat("[SYS] Unknown command from %s (%s) - user closed. (%s)", pUser->sNick, pUser->sIP, sData);
 
 		if(bMyNick == true) {

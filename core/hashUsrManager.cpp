@@ -269,7 +269,7 @@ User * clsHashManager::FindUser(User * u) {
 User * clsHashManager::FindUser(const uint8_t * ui128IpHash) {
     uint16_t ui16IpTableIdx = 0;
 
-    if(ui128IpHash[10] == 255 && ui128IpHash[11] == 255 && memcmp(ui128IpHash, "\0\0\0\0\0\0\0\0\0\0", 10) == 0) {
+    if(IN6_IS_ADDR_V4MAPPED((const in6_addr *)ui128IpHash)) {
         ui16IpTableIdx = ui128IpHash[14] * ui128IpHash[15];
     } else {
         ui16IpTableIdx = GetIpTableIdx(ui128IpHash);

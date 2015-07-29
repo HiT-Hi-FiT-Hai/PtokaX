@@ -1413,3 +1413,25 @@ bool HashPassword(char * sPassword, const size_t &szPassLen, uint8_t * ui8PassHa
     return false;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#ifdef _WIN32
+static const uint16_t ui16Num = 42; // The answer to life
+static const uint8_t ui8Num = 42; // the universe and everything
+
+uint64_t htobe64(const uint64_t & ui64Value) {
+	if(*(uint8_t *)&ui16Num == ui8Num) { // LE
+		return _byteswap_uint64(ui64Value);
+	} else { // BE
+		return ui64Value;
+	}
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+uint64_t be64toh(const uint64_t & ui64Value) {
+	if(*(uint8_t *)&ui16Num == ui8Num) { // LE
+		return _byteswap_uint64(ui64Value);
+	} else { // BE
+		return ui64Value;
+	}
+}
+#endif

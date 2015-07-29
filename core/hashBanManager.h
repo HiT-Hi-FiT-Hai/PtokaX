@@ -146,7 +146,8 @@ public:
     BanItem* FindPermNick(const uint32_t &hash, char * sNick);
     BanItem* FindPermIP(const uint8_t * ui128IpHash);
 
-    void Load(void);
+    void Load();
+    void LoadXML();
     void Save(bool bForce = false);
 
     void ClearTemp(void);

@@ -627,7 +627,7 @@ void clsRegManager::Load(void) {
                 }
             } else if(pxbRegs.ui16ItemLengths[1] == 64) {
 #ifdef _WITHOUT_SKEIN
-				AppendDebugLog("%s - [ERR] Hashed password found in RegisteredUsers, but PtokaX is compiled without hashing support!\n", 0);
+				AppendDebugLog("%s - [ERR] Hashed password found in RegisteredUsers, but PtokaX is compiled without hashing support!\n");
 
                 exit(EXIT_FAILURE);
 #endif

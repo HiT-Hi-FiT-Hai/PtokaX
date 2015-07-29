@@ -76,28 +76,7 @@ LRESULT SettingPageBots::SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam
             case EDT_OP_CHAT_BOT_DESCRIPTION:
             case EDT_OP_CHAT_BOT_EMAIL:
                 if(HIWORD(wParam) == EN_CHANGE) {
-                    char buf[65];
-                    ::GetWindowText((HWND)lParam, buf, 65);
-
-                    bool bChanged = false;
-
-                    for(uint16_t ui16i = 0; buf[ui16i] != '\0'; ui16i++) {
-                        if(buf[ui16i] == '|' || buf[ui16i] == '$') {
-                            strcpy(buf+ui16i, buf+ui16i+1);
-                            bChanged = true;
-                            ui16i--;
-                        }
-                    }
-
-                    if(bChanged == true) {
-                        int iStart, iEnd;
-
-                        ::SendMessage((HWND)lParam, EM_GETSEL, (WPARAM)&iStart, (LPARAM)&iEnd);
-
-                        ::SetWindowText((HWND)lParam, buf);
-
-                        ::SendMessage((HWND)lParam, EM_SETSEL, iStart, iEnd);
-                    }
+                    RemoveDollarsPipes((HWND)lParam);
 
                     return 0;
                 }

@@ -126,7 +126,7 @@ ProfileItem::~ProfileItem() {
 void clsProfileManager::Load() {
     PXBReader pxbProfiles;
 
-    // Open setting file
+    // Open profiles file
 #ifdef _WIN32
     if(pxbProfiles.OpenFileRead((clsServerManager::sPath + "\\cfg\\Profiles.pxb").c_str(), NORECONNTIME+2) == false) {
 #else
@@ -316,7 +316,7 @@ clsProfileManager::~clsProfileManager() {
 void clsProfileManager::SaveProfiles() {
     PXBReader pxbProfiles;
 
-    // Open regs file
+    // Open profiles file
 #ifdef _WIN32
     if(pxbProfiles.OpenFileSave((clsServerManager::sPath + "\\cfg\\Profiles.pxb").c_str(), NORECONNTIME+2) == false) {
 #else
