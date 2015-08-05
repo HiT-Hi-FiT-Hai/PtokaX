@@ -1398,8 +1398,7 @@ void clsDcCommands::Search(User *pUser, char * sData, uint32_t ui32Len, const bo
             pUser->ui32BoolBits |= User::BIT_IPV4_ACTIVE;
         }
 
-        if(bCheck == true && clsProfileManager::mPtr->IsAllowed(pUser, clsProfileManager::NOSEARCHLIMITS) == false &&
-            (clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SEARCH_LEN] != 0 || clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN] != 0)) {
+        if(bCheck == true && clsProfileManager::mPtr->IsAllowed(pUser, clsProfileManager::NOSEARCHLIMITS) == false && (clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SEARCH_LEN] != 0 || clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN] != 0)) {
             // PPK ... search string len check
             // $Search 1.2.3.4:1 F?F?0?2?test| / $Search [::1]:1 F?F?0?2?test|
             uint32_t iChar = iAfterCmd+9;
@@ -3178,7 +3177,9 @@ bool CheckPort(char * sData, char cPortEnd) {
 				sData[ui8i] = cEnd;
 
 				return false;
-    		}
+    		} else {
+    			sData[ui8i] = cEnd;
+			}
 		}
 
 		break;
@@ -3192,13 +3193,16 @@ bool clsDcCommands::CheckIPPort(const User * pUser, char * sIP, bool &bWrongPort
     if((pUser->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
         if(sIP[0] == '[' && sIP[1+pUser->ui8IpLen] == ']' && sIP[2+pUser->ui8IpLen] == ':' && strncmp(sIP+1, pUser->sIP, pUser->ui8IpLen) == 0) {
         	bWrongPort = CheckPort(sIP+3+pUser->ui8IpLen, cPortEnd);
+
             return true;
         } else if(((pUser->ui32BoolBits & User::BIT_IPV4) == User::BIT_IPV4) && sIP[pUser->ui8IPv4Len] == ':' && strncmp(sIP, pUser->sIPv4, pUser->ui8IPv4Len) == 0) {
         	bWrongPort = CheckPort(sIP+pUser->ui8IPv4Len+1, cPortEnd);
+
             return true;
         }
     } else if(sIP[pUser->ui8IpLen] == ':' && strncmp(sIP, pUser->sIP, pUser->ui8IpLen) == 0) {
     	bWrongPort = CheckPort(sIP+pUser->ui8IpLen+1, cPortEnd);
+
         return true;
     }
 
@@ -3218,6 +3222,8 @@ bool clsDcCommands::GetPort(char * sData, uint16_t &ui16Port, uint8_t &ui8AfterP
 
     char * sPortStart = strrchr(sData, ':');
     if(sPortStart == NULL || sPortStart[1] == '\0') {
+    	sPortEnd[0] = cPortEnd;
+
         return true;
     }
 
@@ -3225,6 +3231,9 @@ bool clsDcCommands::GetPort(char * sData, uint16_t &ui16Port, uint8_t &ui8AfterP
 
     int iPort = atoi(sPortStart+1);
     if(iPort < 1 || iPort > 65535) {
+    	sPortEnd[0] = cPortEnd;
+		sPortStart[0] = ':';
+
         return true;
     }
 

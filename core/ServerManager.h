@@ -42,6 +42,8 @@ public:
     static void FinalClose();
     static void CreateServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber, const bool &bResume = false);
 
+	static void CommandLineSetup();
+
     static string sPath, sScriptPath;
 
 #ifdef _WIN32

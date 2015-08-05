@@ -86,7 +86,7 @@ const char * SetBoolCom[] = {
 };
 
 const char * SetShortCom[] = {
-    "# Maximal users limit. Maximum 65535\n", 
+    "# Maximal users limit. Maximum 32767\n", 
     "# Minimal share limit. Maximum 9999\n", 
     "# Minimal share units. 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB\n", 
     "# Maximal share limit. Maximum 9999\n", 

@@ -31,7 +31,7 @@ struct ProfileItem {
     ProfileItem(const ProfileItem&);
     const ProfileItem& operator=(const ProfileItem&);
 
-    char *sName;
+    char * sName;
     bool bPermissions[256];
 };
 //---------------------------------------------------------------------------

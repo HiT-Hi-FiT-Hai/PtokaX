@@ -883,3 +883,154 @@ void clsRegManager::HashPasswords() {
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void clsRegManager::AddRegCmdLine() {
+	char sNick[66];
+
+nick:
+	printf("Please enter Nick for new Registered User (Maximal length 64 characters. Characters |, $ and space are not allowed): ");
+	if(fgets(sNick, 66, stdin) != NULL) {
+		char * sMatch = strchr(sNick, '\n');
+		if(sMatch != NULL) {
+			sMatch[0] = '\0';
+		}
+
+		sMatch = strpbrk(sNick, " $|");
+		if(sMatch != NULL) {
+			printf("Character '%c' is not allowed in Nick!\n", sMatch[0]);
+
+			if(WantAgain() == false) {
+				return;
+			}
+
+			goto nick;
+		}
+
+		size_t szLen = strlen(sNick);
+
+		if(szLen == 0) {
+			printf("No Nick specified!\n");
+
+			if(WantAgain() == false) {
+				return;
+			}
+
+			goto nick;
+		}
+
+		RegUser * pReg = Find(sNick, strlen(sNick));
+		if(pReg != NULL) {
+			printf("Registered user with nick '%s' already exist!\n", sNick);
+
+			if(WantAgain() == false) {
+				return;
+			}
+
+			goto nick;
+		}
+	} else {
+		printf("Error reading Nick... ending.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	char sPassword[66];
+
+password:
+	printf("Please enter Password for new Registered User (Maximal length 64 characters. Character | is not allowed): ");
+	if(fgets(sPassword, 66, stdin) != NULL) {
+		char * sMatch = strchr(sPassword, '\n');
+		if(sMatch != NULL) {
+			sMatch[0] = '\0';
+		}
+
+		sMatch = strchr(sPassword, '|');
+		if(sMatch != NULL) {
+			printf("Character | is not allowed in Password!\n");
+
+			if(WantAgain() == false) {
+				return;
+			}
+
+			goto password;
+		}
+
+		size_t szLen = strlen(sPassword);
+
+		if(szLen == 0) {
+			printf("No Password specified!\n");
+
+			if(WantAgain() == false) {
+				return;
+			}
+
+			goto password;
+		}
+	} else {
+		printf("Error reading Password... ending.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	printf("\nAvailable profiles: \n");
+    for(uint16_t ui16i = 0; ui16i < clsProfileManager::mPtr->ui16ProfileCount; ui16i++) {
+    	printf("%hu - %s\n", ui16i, clsProfileManager::mPtr->ppProfilesTable[ui16i]->sName);
+    }
+
+	uint16_t ui16Profile = 0;
+	char sProfile[7];
+
+profile:
+
+	printf("Please enter Profile number for new Registered User: ");
+	if(fgets(sProfile, 7, stdin) != NULL) {
+		char * sMatch = strchr(sProfile, '\n');
+		if(sMatch != NULL) {
+			sMatch[0] = '\0';
+		}
+
+		uint8_t ui8Len = (uint8_t)strlen(sProfile);
+
+		if(ui8Len == 0) {
+			printf("No Profile specified!\n");
+
+			if(WantAgain() == false) {
+				return;
+			}
+
+			goto profile;
+		}
+
+		for(uint8_t ui8i = 0; ui8i < ui8Len; ui8i++) {
+			if(isdigit(sProfile[ui8i]) == 0) {
+				printf("Character '%c' is not valid number!\n", sProfile[ui8i]);
+
+				if(WantAgain() == false) {
+					return;
+				}
+
+				goto profile;
+			}
+		}
+
+		ui16Profile = (uint16_t)atoi(sProfile);
+		if(ui16Profile >= clsProfileManager::mPtr->ui16ProfileCount) {
+			printf("Profile number %hu not exist!\n", ui16Profile);
+
+			if(WantAgain() == false) {
+				return;
+			}
+
+			goto profile;
+		}
+	} else {
+		printf("Error reading Profile... ending.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	if(AddNew(sNick, sPassword, ui16Profile) == false) {
+		printf("Error adding new Registered User... ending.\n");
+		exit(EXIT_FAILURE);
+	} else {
+		printf("Registered User with Nick '%s' Password '%s' and Profile '%hu' was added.", sNick, sPassword, ui16Profile);
+	}
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

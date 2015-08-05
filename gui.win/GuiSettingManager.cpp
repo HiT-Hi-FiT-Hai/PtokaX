@@ -80,7 +80,7 @@ void clsGuiSettingManager::Load() {
     PXBReader pxbSetting;
 
     // Open setting file
-    if(pxbSetting.OpenFileRead((clsServerManager::sPath + "\\cfg\\GuiSettigs.pxb").c_str()) == false) {
+    if(pxbSetting.OpenFileRead((clsServerManager::sPath + "\\cfg\\GuiSettigs.pxb").c_str(), 2) == false) {
         return;
     }
 
@@ -133,32 +133,32 @@ void clsGuiSettingManager::Save() const {
     PXBReader pxbSetting;
 
     // Open setting file
-    if(pxbSetting.OpenFileSave((clsServerManager::sPath + "\\cfg\\GuiSettigs.pxb").c_str()) == false) {
+    if(pxbSetting.OpenFileSave((clsServerManager::sPath + "\\cfg\\GuiSettigs.pxb").c_str(), 2) == false) {
         return;
     }
 
     // Write file header
-    pxbSetting.sItemIdentifiers[0][0] = 'F';
-    pxbSetting.sItemIdentifiers[0][1] = 'I';
+    pxbSetting.sItemIdentifiers[0] = 'F';
+    pxbSetting.sItemIdentifiers[1] = 'I';
     pxbSetting.ui16ItemLengths[0] = (uint16_t)szPtokaXGUISettingsLen;
     pxbSetting.pItemDatas[0] = (void *)sPtokaXGUISettings;
     pxbSetting.ui8ItemValues[0] = PXBReader::PXB_STRING;
 
-    pxbSetting.sItemIdentifiers[1][0] = 'F';
-    pxbSetting.sItemIdentifiers[1][1] = 'V';
+    pxbSetting.sItemIdentifiers[2] = 'F';
+    pxbSetting.sItemIdentifiers[3] = 'V';
     pxbSetting.ui16ItemLengths[1] = 4;
     uint32_t ui32Version = 1;
     pxbSetting.pItemDatas[1] = (void *)&ui32Version;
     pxbSetting.ui8ItemValues[1] = PXBReader::PXB_FOUR_BYTES;
 
-    if(pxbSetting.WriteNextItem(23, 2) == false) {
+    if(pxbSetting.WriteNextItem(szPtokaXGUISettingsLen+4, 2) == false) {
         return;
     }
 
-    pxbSetting.sItemIdentifiers[0][0] = 'S';
-    pxbSetting.sItemIdentifiers[0][1] = 'I';
-    pxbSetting.sItemIdentifiers[1][0] = 'S';
-    pxbSetting.sItemIdentifiers[1][1] = 'V';
+    pxbSetting.sItemIdentifiers[0] = 'S';
+    pxbSetting.sItemIdentifiers[1] = 'I';
+    pxbSetting.sItemIdentifiers[2] = 'S';
+    pxbSetting.sItemIdentifiers[3] = 'V';
 
     for(size_t szi = 0; szi < GUISETBOOL_IDS_END; szi++) {
         // Don't save setting with default value

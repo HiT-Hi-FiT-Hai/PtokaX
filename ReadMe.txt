@@ -8,6 +8,7 @@ Command line commands available:
 -c <configdir>		- absolute path to PtokaX config directory (where will PtokaX have cfg, logs, scripts and texts directories).
 -d			- run as daemon.
 -h			- show help.
+-m			- show PtokaX configuration menu.
 -p <pidfile>	- path with filename where PtokaX PID will be stored.
 -v			- show PtokaX version with build date and time.
 /generatexmllanguage	- generate english language example file.

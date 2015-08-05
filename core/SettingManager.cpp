@@ -2823,3 +2823,216 @@ void clsSettingManager::UpdateDatabase() {
 	}
 #endif
 }
+//---------------------------------------------------------------------------
+
+void clsSettingManager::CmdLineBasicSetup() {
+	bUpdateLocked = true;
+
+	printf("\nWelcome to basic setup.\nYou will now be asked for few settings required to run PtokaX.\nWhen you don't want to change default settings, then simply press enter.\n");
+
+	int16_t i16MaxUsers = 0;
+	char sMaxUsers[7];
+
+maxusers:
+	printf("%sActual value is: %hd\nEnter new value: ", SetShortCom[SETSHORT_MAX_USERS]+2, i16Shorts[SETSHORT_MAX_USERS]);
+	if(fgets(sMaxUsers, 7, stdin) != NULL) {
+		if(sMaxUsers[0] != '\n') {
+			char * sMatch = strchr(sMaxUsers, '\n');
+			if(sMatch != NULL) {
+				sMatch[0] = '\0';
+			}
+	
+			uint8_t ui8Len = (uint8_t)strlen(sMaxUsers);
+	
+			for(uint8_t ui8i = 0; ui8i < ui8Len; ui8i++) {
+				if(isdigit(sMaxUsers[ui8i]) == 0) {
+					printf("Character '%c' is not valid number!\n", sMaxUsers[ui8i]);
+	
+					if(WantAgain() == false) {
+						return;
+					}
+	
+					goto maxusers;
+				}
+			}
+	
+			i16MaxUsers = (int16_t)atoi(sMaxUsers);
+			SetShort(SETSHORT_MAX_USERS, i16MaxUsers);
+	
+			if(i16MaxUsers != i16Shorts[SETSHORT_MAX_USERS]) {
+				printf("Failed to set value %hd!\n", i16MaxUsers);
+	
+				if(WantAgain() == false) {
+					return;
+				}
+	
+				goto maxusers;
+			}
+		}
+	} else {
+		printf("Error reading value... ending.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	const uint8_t ui8Strings[] = { SETTXT_HUB_NAME, SETTXT_HUB_ADDRESS, SETTXT_ENCODING,
+#ifdef _WITH_POSTGRES
+		SETTXT_POSTGRES_HOST, SETTXT_POSTGRES_PORT, SETTXT_POSTGRES_DBNAME, SETTXT_POSTGRES_USER, SETTXT_POSTGRES_PASS,
+#elif _WITH_MYSQL
+		SETTXT_MYSQL_HOST, SETTXT_MYSQL_PORT, SETTXT_MYSQL_DBNAME, SETTXT_MYSQL_USER, SETTXT_MYSQL_PASS,
+#endif
+	};
+
+	char sValue[4098];
+
+	for(uint8_t ui8i = 0; ui8i < sizeof(ui8Strings); ui8i++) {
+value:
+		printf("%sActual value is: %s\nEnter new value: ", SetTxtCom[ui8Strings[ui8i]]+2, sTexts[ui8Strings[ui8i]] != NULL ? sTexts[ui8Strings[ui8i]] : "");
+		if(fgets(sValue, 4098, stdin) != NULL) {
+			if(sValue[0] == '\n') {
+				continue;
+			}
+
+			char * sMatch = strchr(sValue, '\n');
+			if(sMatch != NULL) {
+				sMatch[0] = '\0';
+			}
+	
+			size_t szLen = strlen(sValue);
+			SetText(ui8Strings[ui8i], sValue, szLen);
+	
+			if((szLen == 0 && sTexts[ui8Strings[ui8i]] != NULL) || strcmp(sValue, sTexts[ui8Strings[ui8i]]) != 0) {
+				printf("Failed to set new string value. Incorrect length or invalid characters?\n");
+	
+				if(WantAgain() == false) {
+					return;
+				}
+	
+				goto value;
+			}
+		} else {
+			printf("Error reading string value... ending.\n");
+			exit(EXIT_FAILURE);
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+void clsSettingManager::CmdLineCompleteSetup() {
+	bUpdateLocked = true;
+
+	printf("\nWelcome to complete setup.\nYou will now be asked for all PtokaX settings.\nWhen you don't want to change default settings, then simply press enter.\n\nFirst we set boolean settings. Use 1 for enabled and 0 for disabled.\n\n");
+
+	char sValue[4098];
+
+    for(size_t szi = 0; szi < SETBOOL_IDS_END; szi++) {
+        // skip obsolete settings
+        if(SetBoolStr[szi][0] == '\0') {
+            continue;
+        }
+booleanstart:
+		printf("%sActual value is: %c\nEnter new value: ", SetBoolCom[szi]+2, bBools[szi] == true ? '1' : '0');
+		if(fgets(sValue, 3, stdin) != NULL) {
+			if(sValue[0] == '\n') {
+				continue;
+			}
+
+			if(sValue[0] != '0' && sValue[0] != '1') {
+				printf("You need to use 1 or 0 for new value!\n");
+
+				if(WantAgain() == false) {
+					return;
+				}
+	
+				goto booleanstart;
+			}
+
+			SetBool(szi, sValue[0] == '0' ? false : true);
+		} else {
+			printf("Error reading boolean value... ending.\n");
+			exit(EXIT_FAILURE);
+		}
+    }
+
+	printf("\nWe finished boolean settings. Now we will set number settings.\n\n");
+
+	int16_t i16Value = 0;
+
+    for(size_t szi = 0; szi < (SETSHORT_IDS_END-1); szi++) {
+numberstart:
+		printf("%sActual value is: %hd\nEnter new value: ", SetShortCom[szi]+2, i16Shorts[szi]);
+		if(fgets(sValue, 7, stdin) != NULL) {
+			if(sValue[0] == '\n') {
+				continue;
+			}
+
+			char * sMatch = strchr(sValue, '\n');
+			if(sMatch != NULL) {
+				sMatch[0] = '\0';
+			}
+
+			uint8_t ui8Len = (uint8_t)strlen(sValue);
+
+			for(uint8_t ui8i = 0; ui8i < ui8Len; ui8i++) {
+				if(isdigit(sValue[ui8i]) == 0) {
+					printf("Character '%c' is not valid number!\n", sValue[ui8i]);
+	
+					if(WantAgain() == false) {
+						return;
+					}
+	
+					goto numberstart;
+				}
+			}
+
+			i16Value = (int16_t)atoi(sValue);
+			SetShort(szi, i16Value);
+	
+			if(i16Value != i16Shorts[szi]) {
+				printf("Failed to set value %hd!\n", i16Value);
+	
+				if(WantAgain() == false) {
+					return;
+				}
+	
+				goto numberstart;
+			}
+		} else {
+			printf("Error reading number value... ending.\n");
+			exit(EXIT_FAILURE);
+		}
+    }
+
+	printf("\nWe finished number settings. Now we will set string settings.\n\n");
+
+    for(size_t szi = 0; szi < SETTXT_IDS_END; szi++) {
+stringstart:
+		printf("%sActual value is: %s\nEnter new value: ", SetTxtCom[szi]+2, sTexts[szi] != NULL ? sTexts[szi] : "");
+		if(fgets(sValue, 4098, stdin) != NULL) {
+			if(sValue[0] == '\n') {
+				continue;
+			}
+
+			char * sMatch = strchr(sValue, '\n');
+			if(sMatch != NULL) {
+				sMatch[0] = '\0';
+			}
+
+			size_t szLen = strlen(sValue);
+			SetText(szi, sValue, szLen);
+	
+			if((szLen == 0 && sTexts[szi] != NULL) || strcmp(sValue, sTexts[szi]) != 0) {
+				printf("Failed to set new string value. Incorrect length or invalid characters?\n");
+	
+				if(WantAgain() == false) {
+					return;
+				}
+	
+				goto stringstart;
+			}
+		} else {
+			printf("Error reading string value... ending.\n");
+			exit(EXIT_FAILURE);
+		}
+    }
+}
+//---------------------------------------------------------------------------

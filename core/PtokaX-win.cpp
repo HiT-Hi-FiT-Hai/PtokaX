@@ -235,9 +235,9 @@ int __cdecl main(int argc, char* argv[]) {
 
 	char * sServiceName = NULL;
 	
-	bool bInstallService = false;
-	
-	for(int i = 0; i < argc; i++) {
+	bool bInstallService = false, bSetup = false;
+
+	for(int i = 1; i < argc; i++) {
 	    if(stricmp(argv[i], "-s") == NULL || stricmp(argv[i], "/service") == NULL) {
 	    	if(++i == argc) {
 	            AppendLog("Missing service name!");
@@ -289,12 +289,41 @@ int __cdecl main(int argc, char* argv[]) {
 	    	printf("%s built on %s %s\n", g_sPtokaXTitle, __DATE__, __TIME__);
 	    	return EXIT_SUCCESS;
 	    } else if(stricmp(argv[i], "-h") == NULL || stricmp(argv[i], "/help") == NULL) {
-	    	printf("PtokaX [-c <configdir>] [-i <servicename>] [-u <servicename>] [-v]");
+	        printf("Usage: PtokaX [-v] [-m] [-i servicename] [-u servicename] [-c configdir]\n\n"
+				"Options:\n"
+				"\t-i servicename\t\t- install ptokax service with given name.\n"
+				"\t-u servicename\t\t- uninstall ptokax service with given name.\n"
+				"\t-c configdir\t- absolute path to PtokaX configuration directory.\n"
+				"\t-v\t\t- show PtokaX version with build date and time.\n"
+				"\t-m\t\t- show PtokaX configuration menu.\n"
+			);
 	    	return EXIT_SUCCESS;
 	    } else if(stricmp(argv[i], "/generatexmllanguage") == NULL) {
 	        clsLanguageManager::GenerateXmlExample();
 	        return EXIT_SUCCESS;
-	    }
+	    } else if(strcasecmp(argv[i], "-m") == 0) {
+	    	bSetup = true;
+	    } else {
+	    	printf("Unknown parameter %s.\nUsage: PtokaX [-v] [-m] [-i servicename] [-u servicename] [-c configdir]\n\n"
+				"Options:\n"
+				"\t-i servicename\t\t- install ptokax service with given name.\n"
+				"\t-u servicename\t\t- uninstall ptokax service with given name.\n"
+				"\t-c configdir\t- absolute path to PtokaX configuration directory.\n"
+				"\t-v\t\t- show PtokaX version with build date and time.\n"
+				"\t-m\t\t- show PtokaX configuration menu.\n",
+				argv[i]);
+	    	return EXIT_SUCCESS;
+		}
+	}
+
+	if(bSetup == true) {
+		clsServerManager::Initialize();
+
+		clsServerManager::CommandLineSetup();
+		
+		clsServerManager::FinalClose();
+
+		return EXIT_SUCCESS;
 	}
 
 	if(bInstallService == true) {

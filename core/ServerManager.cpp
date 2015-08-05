@@ -1118,3 +1118,49 @@ void clsServerManager::CreateServerThread(const int &iAddrFamily, const uint16_t
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void clsServerManager::CommandLineSetup() {
+	printf("%s built on %s %s\n\n", g_sPtokaXTitle, __DATE__, __TIME__);
+	printf("Welcome to PtokaX configuration setup.\nDirectory for PtokaX configuration is: %s\nWhen this directory is wrong, then exit this setup.\nTo specify correct configuration directory start PtokaX with -c configdir parameter.", clsServerManager::sPath.c_str());
+
+	const char sMenu[] = "\n\nAvailable options:\n"
+		"1. Basic setup. Only few things required for PtokaX run.\n"
+		"2. Complete setup. Long setup, where you can change all PtokaX setings.\n"
+		"3. Add registered user.\n"
+		"4. Exit this setup.\n\n"
+		"Your choice: ";
+
+	printf(sMenu);
+
+	while(true) {
+		int iChar = getchar();
+	
+		while(getchar() != '\n') {
+			// boredom...
+		};
+
+		switch(iChar) {
+			case '1':
+				clsSettingManager::mPtr->CmdLineBasicSetup();
+				printf(sMenu);
+				continue;
+			case '2':
+				clsSettingManager::mPtr->CmdLineCompleteSetup();
+				printf(sMenu);
+				continue;
+			case '3':
+				clsRegManager::mPtr->AddRegCmdLine();
+				printf(sMenu);
+				continue;
+			case '4':
+				printf("%s ending...\n", g_sPtokaXTitle);
+				break;
+			default:
+				printf("Unknown option: %c\nYour choice: ", iChar);
+				continue;
+		}
+
+		break;
+	}
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
