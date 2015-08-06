@@ -180,7 +180,7 @@ void clsRangeBanDialog::DoModal(HWND hWndParent, RangeBanItem * pRangeBan/* = NU
 
     hWndWindowItems[EDT_REASON] = ::CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
         11, iPosY + clsGuiSettingManager::iGroupBoxMargin, rcParent.right - 22, clsGuiSettingManager::iEditHeight, hWndWindowItems[WINDOW_HANDLE], NULL, clsServerManager::hInstance, NULL);
-    ::SendMessage(hWndWindowItems[EDT_REASON], EM_SETLIMITTEXT, 255, 0);
+    ::SendMessage(hWndWindowItems[EDT_REASON], EM_SETLIMITTEXT, 511, 0);
 
     iPosY += clsGuiSettingManager::iOneLineGB;
 

@@ -800,6 +800,7 @@ const char* LangStr[] = {
 	"Database support (used to store user and ip information)",
 	"Enable database",
 	"Remove records older than (days)",
+	"You can use SQL Wildcards",
 };
 //---------------------------------------------------------------------------
 

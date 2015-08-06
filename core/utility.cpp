@@ -1415,8 +1415,8 @@ bool HashPassword(char * sPassword, const size_t &szPassLen, uint8_t * ui8PassHa
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #ifdef _WIN32
-static const uint16_t ui16Num = 42; // The answer to life
-static const uint8_t ui8Num = 42; // the universe and everything
+static const uint16_t ui16Num = 42; // Answer to the Ultimate Question
+static const uint8_t ui8Num = 42; //  of Life, The Universe, and Everything
 
 uint64_t htobe64(const uint64_t & ui64Value) {
 	if(*(uint8_t *)&ui16Num == ui8Num) { // LE

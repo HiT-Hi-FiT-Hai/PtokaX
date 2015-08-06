@@ -300,8 +300,6 @@ static int SetString(lua_State * L) {
     size_t szId = (size_t)lua_tointeger(L, 1);
 #endif
 
-	lua_settop(L, 0);
-
     if(szId >= SETTXT_IDS_END) {
         luaL_error(L, "bad argument #1 to 'SetString' (it's not valid id)");
         return 0;
@@ -769,7 +767,6 @@ static int SetHubBot(lua_State * L) {
         clsSettingManager::mPtr->UpdateBot((bBotHaveNewNick == true || bRegStateChange == true));
     }
 
-	lua_settop(L, 0);
     return 0;
 }
 //------------------------------------------------------------------------------

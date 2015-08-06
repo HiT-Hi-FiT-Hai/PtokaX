@@ -800,6 +800,7 @@ const char* LangXmlStr[] = {
 	"DatabaseSupport",
 	"EnableDatabase",
 	"RemoveOldRecords",
+	"YouCanUseSQLWildcards",
 };
 //---------------------------------------------------------------------------
 

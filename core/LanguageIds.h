@@ -800,6 +800,7 @@ enum LangIds {
 	LAN_DATABASE_SUPPORT,
 	LAN_ENABLE_DATABASE,
 	LAN_REMOVE_OLD_RECORDS,
+	LAN_YOU_CAN_USE_SQL_WILDCARDS,
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------

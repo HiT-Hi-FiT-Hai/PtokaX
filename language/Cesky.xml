@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1252" standalone="yes" ?>
-<Language Name="Èeština" Author="Petr &apos;PPK&apos; Kozelka" Version="0.5.0.3 build 495">
+<Language Name="Èeština" Author="Petr &apos;PPK&apos; Kozelka" Version="0.5.2.0 build 521">
     <String Name="ThisHubIsRunning">Tento hub pohání</String>
     <String Name="HubName">Jméno hubu</String>
     <String Name="MOTD(motd)">MOTD (zpráva dne)</String>
@@ -778,4 +778,5 @@
     <String Name="DatabaseSupport">Podpora databáze (používaná k uložení informací o uživatelích a ip</String>
     <String Name="EnableDatabase">Zapnout databázi</String>
     <String Name="RemoveOldRecords">Odebrat záznamy starší než (dny)</String>
+    <String Name="YouCanUseSQLWildcards">Mùžete použít SQL Wildcards</String>
 </Language>

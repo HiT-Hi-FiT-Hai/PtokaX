@@ -3101,16 +3101,23 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
                 }
 
                 if(clsProfileManager::mPtr->IsAllowed(pUser, clsProfileManager::GETINFO)) {
-                    iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "\t%cgetinfo <%s> - %s.\n", clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], clsLanguageManager::mPtr->sTexts[LAN_NICK_LWR],
-                        clsLanguageManager::mPtr->sTexts[LAN_DISPLAY_INFO_GIVEN_NICK]);
+                    iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "\t%cgetinfo <%s> - %s."
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
+						" %s."
+#endif
+						"\n", clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], clsLanguageManager::mPtr->sTexts[LAN_NICK_LWR], clsLanguageManager::mPtr->sTexts[LAN_DISPLAY_INFO_GIVEN_NICK],
+#if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
+						clsLanguageManager::mPtr->sTexts[LAN_YOU_CAN_USE_SQL_WILDCARDS]
+#endif
+					);
                     if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand368") == false) {
                         return true;
                     }
 					help += clsServerManager::pGlobalBuffer;
 
 #if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
-                    iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "\t%cgetipinfo <%s> - %s.\n", clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], clsLanguageManager::mPtr->sTexts[LAN_IP],
-                        clsLanguageManager::mPtr->sTexts[LAN_DISPLAY_INFO_GIVEN_IP]);
+                    iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "\t%cgetipinfo <%s> - %s. %s.\n", clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], clsLanguageManager::mPtr->sTexts[LAN_IP],
+                        clsLanguageManager::mPtr->sTexts[LAN_DISPLAY_INFO_GIVEN_IP], clsLanguageManager::mPtr->sTexts[LAN_YOU_CAN_USE_SQL_WILDCARDS]);
                     if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand368-1") == false) {
                         return true;
                     }
