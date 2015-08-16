@@ -1,4 +1,4 @@
-PtokaX 0.5.1.0
+PtokaX 0.5.2.0
 ---------------
 
 This is PtokaX version without gui able to run from console or as windows service.
@@ -6,11 +6,11 @@ You can use for that version config files from gui version of PtokaX or you can 
 
 Command line commands available:
 -c <configdir>		- absolute path to PtokaX config directory (where will PtokaX have cfg, logs, scripts and texts directories).
--d			- run as daemon.
--h			- show help.
--m			- show PtokaX configuration menu.
--p <pidfile>	- path with filename where PtokaX PID will be stored.
--v			- show PtokaX version with build date and time.
+-d					- run as daemon.
+-h					- show help.
+-m					- show PtokaX configuration menu.
+-p <pidfile>		- path with filename where PtokaX PID will be stored.
+-v					- show PtokaX version with build date and time.
 /generatexmllanguage	- generate english language example file.
 
 In case when that version not start for you check logs directory, in most cases it log problem.
@@ -19,7 +19,7 @@ When no config dir is specified then PtokaX running from console use actual dire
 
 Homepage: http://www.PtokaX.org
 
-PtokaX LUA Scripts forum: http://forum.PtokaX.org
+PtokaX Forum: http://forum.PtokaX.org
 
 PtokaX Wiki: http://wiki.PtokaX.org
 

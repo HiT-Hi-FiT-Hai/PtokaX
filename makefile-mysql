@@ -93,10 +93,10 @@ openbsd51: $(OBJS)
 	cd skein; $(MAKE)
 	$(CXX) $(OBJS) -L/usr/local/lib -L/usr/local/lib/mysql $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.1 -ltinyxml -liconv -lmysqlclient
 
-netbsd: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/pkg/include -I/usr/pkg/include/lua-5.2 -I/usr/pkg/include/mysql
+netbsd: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/pkg/include -I/usr/pkg/include/lua-5.3 -I/usr/pkg/include/mysql
 netbsd: $(OBJS)
 	cd skein; $(MAKE)
-	$(CXX) $(OBJS) -L/usr/pkg/lib -L/usr/pkg/lib/mysql $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.2 -ltinyxml -liconv -lmysqlclient
+	$(CXX) $(OBJS) -L/usr/pkg/lib -L/usr/pkg/lib/mysql $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.3 -ltinyxml -liconv -lmysqlclient
 
 netbsd51: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/pkg/include -I/usr/pkg/include/lua-5.1 -I/usr/pkg/include/mysql
 netbsd51: $(OBJS)

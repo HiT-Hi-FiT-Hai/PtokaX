@@ -3105,9 +3105,9 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
 #if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
 						" %s."
 #endif
-						"\n", clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], clsLanguageManager::mPtr->sTexts[LAN_NICK_LWR], clsLanguageManager::mPtr->sTexts[LAN_DISPLAY_INFO_GIVEN_NICK],
+						"\n", clsSettingManager::mPtr->sTexts[SETTXT_CHAT_COMMANDS_PREFIXES][0], clsLanguageManager::mPtr->sTexts[LAN_NICK_LWR], clsLanguageManager::mPtr->sTexts[LAN_DISPLAY_INFO_GIVEN_NICK]
 #if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
-						clsLanguageManager::mPtr->sTexts[LAN_YOU_CAN_USE_SQL_WILDCARDS]
+						, clsLanguageManager::mPtr->sTexts[LAN_YOU_CAN_USE_SQL_WILDCARDS]
 #endif
 					);
                     if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsHubCommands::DoCommand368") == false) {

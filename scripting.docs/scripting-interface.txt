@@ -141,20 +141,20 @@ SetHubBot(bEnabled, sNewHubBotName, sNewDescription, sNewEmail, bUseAsHubSecAlia
 
 RegMan.
 -------------------
-Save()									- Save registered users.
+Save()										- Save registered users.
 
-GetRegsByProfile(iProfileNumber)		- Return table with all registered users with given profile as registered user tables.
-GetNonOps()								- Return table with all registered users without operator status as registered user tables.
-GetOps()								- Return table with all registered users with operator status as registered user tables.
-GetReg(sNick)							- Return registered user with given nick as registered user table or nil when reg with this nick not exist.
-GetRegs()								- Return table with all registered users as registered user tables.
+GetRegsByProfile(iProfileNumber)			- Return table with all registered users with given profile as registered user tables.
+GetNonOps()									- Return table with all registered users without operator status as registered user tables.
+GetOps()									- Return table with all registered users with operator status as registered user tables.
+GetReg(sNick)								- Return registered user with given nick as registered user table or nil when reg with this nick not exist.
+GetRegs()									- Return table with all registered users as registered user tables.
 
-AddReg(sNick, iProfileNumber)			- Chars $| and space not allowed in nick. Max nick length 64 chars. Hub will ask user for password and after password is received then user will be registered. Return nil when failed, true if success.
-AddReg(sNick, sPass, iProfileNumber)	- Chars $| and space not allowed in nick. Char | not allowed in password. Max nick/pass length 64 chars. Return nil when failed, true if success.
-DelReg(sNick)							- Return nil when failed, true if success.
+AddReg(sNick, iProfileNumber)				- Chars $| and space not allowed in nick. Max nick length 64 chars. Hub will ask user for password and after password is received then user will be registered. Return nil when failed, true if success.
+AddReg(sNick, sPass, iProfileNumber)		- Chars $| and space not allowed in nick. Char | not allowed in password. Max nick/pass length 64 chars. Return nil when failed, true if success.
+DelReg(sNick)								- Return nil when failed, true if success.
 ChangeReg(sNick, sPass/nil, iProfileNumber)	- Return nil when failed, true if success. When you don't want to change password then use nil instead of string as second param.
 
-ClrRegBadPass(sNick)					- Clear advanced password protection bad password count for given nick. Return nil when failed, true if success.
+ClrRegBadPass(sNick)						- Clear advanced password protection bad password count for given nick. Return nil when failed, true if success.
 
 
 BanMan.
@@ -685,11 +685,11 @@ SetMan.tStrings.Language					-	Language. When language is default then return ni
 SetMan.tStrings.IPv4Address					-	TCP/IP version 4 address.
 SetMan.tStrings.IPv6Address					-	TCP/IP version 6 address.
 SetMan.tStrings.Encoding					-	Character encoding for non-unicode texts.
-SetMan.tStrings.PostgresHost					-	PostgreSQL host.
-SetMan.tStrings.PostgresPort					-	PostgreSQL port.
-SetMan.tStrings.PostgresDBName					-	PostgreSQL database name.
-SetMan.tStrings.PostgresUser					-	PostgreSQL database user.
-SetMan.tStrings.PostgresPass					-	PostgreSQL database password.
+SetMan.tStrings.PostgresHost				-	PostgreSQL host.
+SetMan.tStrings.PostgresPort				-	PostgreSQL port.
+SetMan.tStrings.PostgresDBName				-	PostgreSQL database name.
+SetMan.tStrings.PostgresUser				-	PostgreSQL database user.
+SetMan.tStrings.PostgresPass				-	PostgreSQL database password.
 SetMan.tStrings.MySQLHost					-	MySQL host.
 SetMan.tStrings.MySQLPort					-	MySQL port.
 SetMan.tStrings.MySQLDBName					-	MySQL database name.

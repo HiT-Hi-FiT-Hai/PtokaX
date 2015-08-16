@@ -5,6 +5,9 @@ PtokaX DC hub software - PPK (c) 2006/2015
 
 
 ----------------------------------------Next Release...---------------------------------------
+
+
+-------------------------------------0.5.2.0 16 August 2015-------------------------------------
 Added: Support to compile PtokaX on FreeBSD with Lua 5.2 and 5.3.
 Added: Support to compile PtokaX on Solaris, Fedora, OpenBSD, NetBSD and Mac OS X.
 Added: Command line menu with configuration and add registered user options to PtokaX service and non-Windows version (-m cmd param).

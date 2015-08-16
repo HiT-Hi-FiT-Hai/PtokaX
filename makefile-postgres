@@ -93,10 +93,10 @@ openbsd51: $(OBJS)
 	cd skein; $(MAKE)
 	$(CXX) $(OBJS) -L/usr/local/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.1 -ltinyxml -liconv -lpq
 
-netbsd: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/pkg/include -I/usr/pkg/include/lua-5.2 -I/usr/pkg/include/postgresql
+netbsd: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/pkg/include -I/usr/pkg/include/lua-5.3 -I/usr/pkg/include/postgresql
 netbsd: $(OBJS)
 	cd skein; $(MAKE)
-	$(CXX) $(OBJS) -L/usr/pkg/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.2 -ltinyxml -liconv -lpq
+	$(CXX) $(OBJS) -L/usr/pkg/lib $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.3 -ltinyxml -liconv -lpq
 
 netbsd51: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/pkg/include -I/usr/pkg/include/lua-5.1 -I/usr/pkg/include/postgresql
 netbsd51: $(OBJS)
