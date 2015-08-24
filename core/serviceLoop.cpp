@@ -288,7 +288,7 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
     }
     
     if(clsSettingManager::mPtr->bBools[SETBOOL_REDIRECT_ALL] == true) {
-        if(clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS] != NULL) {
+        if(clsSettingManager::mPtr->sTexts[SETTXT_REDIRECT_ADDRESS] != NULL) {
        	    int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> %s %s|%s", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_REDIR_TO], clsSettingManager::mPtr->sTexts[SETTXT_REDIRECT_ADDRESS], clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_REDIRECT_ADDRESS]);
             if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsServiceLoop::AcceptUser4") == true) {
                 send(AccptSocket->s, clsServerManager::pGlobalBuffer, iMsgLen, 0);

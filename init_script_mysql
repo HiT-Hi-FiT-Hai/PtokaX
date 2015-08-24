@@ -16,7 +16,7 @@ PTOKAX_USER=ptokax
 PTOKAX_GROUP=ptokax
 PTOKAX_BIN=/usr/local/bin/PtokaX
 PTOKAX_PATH=/home/$PTOKAX_USER/
-PTOKAX_PID=/home/$PTOKAX_USER/PtokaX.pid
+PTOKAX_PID=$PTOKAX_PATHPtokaX.pid
 
 # Check that the package is still installed
 [ -x $PTOKAX_BIN ] || exit 0;

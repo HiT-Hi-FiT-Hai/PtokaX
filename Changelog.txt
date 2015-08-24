@@ -5,10 +5,17 @@ PtokaX DC hub software - PPK (c) 2006/2015
 
 
 ----------------------------------------Next Release...---------------------------------------
+Added: Support to build with Lua 5.3 on Debian (Ubuntu, Mint, Dyson...) to makefile (make without param).
+Added: Disable registration to hublist, when hub address is local/private IP.
+Changed: Build with Lua 5.1 on Debian (Ubuntu, Mint, Dyson...) now have lua51 param (make lua51).
+Fixed: Crash when redirect on permanent ban is enabled and permban redirect address is empty and main redirect addres is empty.
+Fixed: Possible crash or memory corruption on settings messages with possibility to use settings value(s) in them.
+Fixed: String 'unlimited' was not translated in some settings messages.
+Fixed: Crash when timer was removed in OnTimer Lua function (thx Cęńoßy†ę for report).
 
 
 -------------------------------------0.5.2.0 16 August 2015-------------------------------------
-Added: Support to compile PtokaX on FreeBSD with Lua 5.2 and 5.3.
+Added: Support to compile PtokaX on FreeBSD with Lua 5.3.
 Added: Support to compile PtokaX on Solaris, Fedora, OpenBSD, NetBSD and Mac OS X.
 Added: Command line menu with configuration and add registered user options to PtokaX service and non-Windows version (-m cmd param).
 Fixed: Few minor issues in Lua api.

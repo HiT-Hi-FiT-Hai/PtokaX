@@ -801,6 +801,7 @@ const char* LangStr[] = {
 	"Enable database",
 	"Remove records older than (days)",
 	"You can use SQL Wildcards",
+	"unlimited", 
 };
 //---------------------------------------------------------------------------
 

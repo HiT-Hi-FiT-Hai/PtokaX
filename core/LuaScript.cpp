@@ -1189,6 +1189,8 @@ void ScriptError(Script * cur) {
 #else
 	void ScriptOnTimer(const uint64_t &ui64ActualMillis) {
 #endif
+	lua_State * pLuaState = NULL;
+
     ScriptTimer * pCurTmr = NULL,
         * pNextTmr = clsScriptManager::mPtr->pTimerListS;
         
@@ -1231,6 +1233,8 @@ void ScriptError(Script * cur) {
 			lua_pushlightuserdata(pCurTmr->pLua, (void *)pCurTmr);
 #endif
 
+			pLuaState = pCurTmr->pLua; // For case when timer will be removed in OnTimer
+	
 			// 1 passed parameters, 0 returned
 			if(lua_pcall(pCurTmr->pLua, 1, 0, iTraceback) != 0) {
 				ScriptError(clsScriptManager::mPtr->FindScript(pCurTmr->pLua));
@@ -1250,7 +1254,7 @@ void ScriptError(Script * cur) {
 			}
 
 			// clear the stack for sure
-			lua_settop(pCurTmr->pLua, 0);
+			lua_settop(pLuaState, 0);
 #ifdef _WIN32
 			return;
 #else

@@ -119,6 +119,7 @@ bool HashPassword(char * sPassword, const size_t &szPassLen, uint8_t * ui8PassHa
 #endif
 
 bool WantAgain();
+bool IsPrivateIP(const char * sIP);
 //---------------------------------------------------------------------------
 
 #endif

@@ -712,7 +712,7 @@ int GenerateBanMessage(BanItem * pBan, const time_t &tmAccTime) {
     }
 
     if(((pBan->ui8Bits & clsBanManager::PERM) == clsBanManager::PERM) == true) {
-        if(clsSettingManager::mPtr->bBools[SETBOOL_PERM_BAN_REDIR] == true) {
+        if(clsSettingManager::mPtr->bBools[SETBOOL_PERM_BAN_REDIR] == true && clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_PERM_BAN_REDIR_ADDRESS] != NULL) {
         	strcpy(clsServerManager::pGlobalBuffer+iMsgLen, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_PERM_BAN_REDIR_ADDRESS]);
             iMsgLen += (int)clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_PERM_BAN_REDIR_ADDRESS];
         }
@@ -791,7 +791,7 @@ int GenerateRangeBanMessage(RangeBanItem * pRangeBan, const time_t &tmAccTime) {
     }
 
     if(((pRangeBan->ui8Bits & clsBanManager::PERM) == clsBanManager::PERM) == true) {
-        if(clsSettingManager::mPtr->bBools[SETBOOL_PERM_BAN_REDIR] == true) {
+        if(clsSettingManager::mPtr->bBools[SETBOOL_PERM_BAN_REDIR] == true && clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_PERM_BAN_REDIR_ADDRESS] != NULL) {
             strcpy(clsServerManager::pGlobalBuffer+iMsgLen, clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_PERM_BAN_REDIR_ADDRESS]);
             iMsgLen += (int)clsSettingManager::mPtr->ui16PreTextsLens[clsSettingManager::SETPRETXT_PERM_BAN_REDIR_ADDRESS];
         }
@@ -1448,6 +1448,39 @@ bool WantAgain() {
 	if(toupper(iChar) == 'Y') {
 		return true;
 	}
+
+	return false;
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+bool IsPrivateIP(const char * sIP) {
+    if(clsServerManager::bUseIPv6 == true && strchr(sIP, '.') == NULL) {
+        uint8_t ui128IpHash[16];
+#if defined(_WIN32) && !defined(_WIN64)
+        if(win_inet_pton(sIP, ui128IpHash) != 1) {
+#else
+        if(inet_pton(AF_INET6, sIP, ui128IpHash) != 1) {
+#endif
+            return false;
+        }
+
+		if(IN6_IS_ADDR_LOOPBACK((in6_addr *)ui128IpHash) || IN6_IS_ADDR_LINKLOCAL((in6_addr *)ui128IpHash) || IN6_IS_ADDR_SITELOCAL((in6_addr *)ui128IpHash)) {
+			return true;
+		}
+    } else {
+        uint32_t ui32IpHash = inet_addr(sIP);
+
+        if(ui32IpHash == INADDR_NONE) {
+            return false;
+        }
+
+		uint8_t ui32IP[4];
+		memcpy(ui32IP, &ui32IpHash, 4);
+
+		if(ui32IP[0] == 10 || ui32IP[0] == 127 || (ui32IP[0] == 169 && ui32IP[1] == 254) || (ui32IP[0] == 172 && ui32IP[1] == 16) || (ui32IP[0] == 192 && ui32IP[1] == 168)) {
+			return true;
+		}
+    }
 
 	return false;
 }

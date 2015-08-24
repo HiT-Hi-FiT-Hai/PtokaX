@@ -457,102 +457,14 @@ bool clsServerManager::Start() {
     sHubIP[0] = '\0';
     sHubIP6[0] = '\0';
 
-    if(clsSettingManager::mPtr->bBools[SETBOOL_RESOLVE_TO_IP] == true) {
-        if(isIP(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS]) == false) {
 #ifdef _BUILD_GUI
-            clsMainWindow::mPtr->SetStatusValue((string(clsLanguageManager::mPtr->sTexts[LAN_RESOLVING_HUB_ADDRESS], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RESOLVING_HUB_ADDRESS])+"...").c_str());
-#endif
-
-            struct addrinfo hints;
-            memset(&hints, 0, sizeof(addrinfo));
-
-            if(bUseIPv6 == true) {
-                hints.ai_family = AF_UNSPEC;
-            } else {
-                hints.ai_family = AF_INET;
-            }
-
-            struct addrinfo *res;
-
-            if(::getaddrinfo(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS], NULL, &hints, &res) != 0 ||
-                (res->ai_family != AF_INET && res->ai_family != AF_INET6)) {
-#ifdef _WIN32
-            	int err = WSAGetLastError();
-	#ifdef _BUILD_GUI
-				::MessageBox(clsMainWindow::mPtr->m_hWnd,(string(clsLanguageManager::mPtr->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
-					" '"+string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(clsLanguageManager::mPtr->sTexts[LAN_HAS_FAILED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_HAS_FAILED])+
-					".\n"+string(clsLanguageManager::mPtr->sTexts[LAN_ERROR_CODE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ERROR_CODE])+": "+
-					string(WSErrorStr(err))+" ("+string(err)+")\n\n"+
-					string(clsLanguageManager::mPtr->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".").c_str(),
-					clsLanguageManager::mPtr->sTexts[LAN_ERROR], MB_OK|MB_ICONERROR);
-                clsMainWindow::mPtr->EnableStartButton(TRUE);
-	#else
-                AppendLog(string(clsLanguageManager::mPtr->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
-					" '"+string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(clsLanguageManager::mPtr->sTexts[LAN_HAS_FAILED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_HAS_FAILED])+
-					".\n"+string(clsLanguageManager::mPtr->sTexts[LAN_ERROR_CODE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ERROR_CODE])+": "+
-					string(WSErrorStr(err))+" ("+string(err)+")\n\n"+
-					string(clsLanguageManager::mPtr->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".");
-	#endif
-#else
-                AppendLog(string(clsLanguageManager::mPtr->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
-					" '"+string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(clsLanguageManager::mPtr->sTexts[LAN_HAS_FAILED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_HAS_FAILED])+
-					".\n"+string(clsLanguageManager::mPtr->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".");
-#endif
-                return false;
-            } else {
-				Memo("*** "+string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS], (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_ADDRESS])+" "+
-					string(clsLanguageManager::mPtr->sTexts[LAN_RESOLVED_SUCCESSFULLY], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RESOLVED_SUCCESSFULLY])+".");
-
-                if(bUseIPv6 == true) {
-                    struct addrinfo *next = res;
-                    while(next != NULL) {
-                        if(next->ai_family == AF_INET) {
-                            if(((sockaddr_in *)(next->ai_addr))->sin_addr.s_addr != INADDR_ANY) {
-                                strcpy(sHubIP, inet_ntoa(((sockaddr_in *)(next->ai_addr))->sin_addr));
-                            }
-                        } else if(next->ai_family == AF_INET6) {
-#if defined(_WIN32) && !defined(_WIN64)
-                            win_inet_ntop(&((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, sHubIP6, 40);
-#else
-                            inet_ntop(AF_INET6, &((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, sHubIP6, 40);
-#endif
-                        }
-
-                        next = next->ai_next;
-                    }
-                } else if(((sockaddr_in *)(res->ai_addr))->sin_addr.s_addr != INADDR_ANY) {
-                    strcpy(sHubIP, inet_ntoa(((sockaddr_in *)(res->ai_addr))->sin_addr));
-                }
-
-                if(sHubIP[0] != '\0') {
-                    string msg = "*** "+string(sHubIP);
-                    if(sHubIP6[0] != '\0') {
-                        msg += " / "+string(sHubIP6);
-                    }
-
-				    Memo(msg);
-                } else if(sHubIP6[0] != '\0') {
-				    Memo("*** "+string(sHubIP6));
-                }
-
-				freeaddrinfo(res);
-            }
-        } else {
-            strcpy(sHubIP, clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS]);
-        }
-    } else {
-        if(clsSettingManager::mPtr->sTexts[SETTXT_IPV4_ADDRESS] != NULL) {
-            strcpy(sHubIP, clsSettingManager::mPtr->sTexts[SETTXT_IPV4_ADDRESS]);
-        } else {
-            sHubIP[0] = '\0';
-        }
-
-        if(clsSettingManager::mPtr->sTexts[SETTXT_IPV6_ADDRESS] != NULL) {
-            strcpy(sHubIP6, clsSettingManager::mPtr->sTexts[SETTXT_IPV6_ADDRESS]);
-        } else {
-            sHubIP6[0] = '\0';
-        }
+	if(ResolveHubAddress() == false) {
+        clsMainWindow::mPtr->EnableStartButton(TRUE);
+        return false;
     }
+#else
+	ResolveHubAddress();
+#endif
 
     for(uint8_t ui8i = 0; ui8i < 25; ui8i++) {
         if(clsSettingManager::mPtr->ui16PortNumbers[ui8i] == 0) {
@@ -1162,5 +1074,120 @@ void clsServerManager::CommandLineSetup() {
 
 		break;
 	}
+}
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+bool clsServerManager::ResolveHubAddress(const bool &bSilent/* = false*/) {
+    if(clsSettingManager::mPtr->bBools[SETBOOL_RESOLVE_TO_IP] == true) {
+        if(isIP(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS]) == false) {
+#ifdef _BUILD_GUI
+            clsMainWindow::mPtr->SetStatusValue((string(clsLanguageManager::mPtr->sTexts[LAN_RESOLVING_HUB_ADDRESS], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RESOLVING_HUB_ADDRESS])+"...").c_str());
+#endif
+
+            struct addrinfo hints;
+            memset(&hints, 0, sizeof(addrinfo));
+
+            if(bUseIPv6 == true) {
+                hints.ai_family = AF_UNSPEC;
+            } else {
+                hints.ai_family = AF_INET;
+            }
+
+            struct addrinfo *res;
+
+            if(::getaddrinfo(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS], NULL, &hints, &res) != 0 || (res->ai_family != AF_INET && res->ai_family != AF_INET6)) {
+            	if(&bSilent == false) {
+#ifdef _WIN32
+            		int err = WSAGetLastError();
+	#ifdef _BUILD_GUI
+					::MessageBox(clsMainWindow::mPtr->m_hWnd,(string(clsLanguageManager::mPtr->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+" '"+string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS])+"' "+
+						string(clsLanguageManager::mPtr->sTexts[LAN_HAS_FAILED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_HAS_FAILED])+".\n"+string(clsLanguageManager::mPtr->sTexts[LAN_ERROR_CODE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ERROR_CODE])+": "+string(WSErrorStr(err))+" ("+string(err)+")\n\n"+
+						string(clsLanguageManager::mPtr->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".").c_str(), clsLanguageManager::mPtr->sTexts[LAN_ERROR], MB_OK|MB_ICONERROR);
+	#else
+                	AppendLog(string(clsLanguageManager::mPtr->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
+						" '"+string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(clsLanguageManager::mPtr->sTexts[LAN_HAS_FAILED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_HAS_FAILED])+".\n"+string(clsLanguageManager::mPtr->sTexts[LAN_ERROR_CODE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_ERROR_CODE])+
+						": "+string(WSErrorStr(err))+" ("+string(err)+")\n\n"+string(clsLanguageManager::mPtr->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".");
+	#endif
+#else
+                	AppendLog(string(clsLanguageManager::mPtr->sTexts[LAN_RESOLVING_OF_HOSTNAME], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RESOLVING_OF_HOSTNAME])+
+						" '"+string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS])+"' "+string(clsLanguageManager::mPtr->sTexts[LAN_HAS_FAILED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_HAS_FAILED])+".\n"+string(clsLanguageManager::mPtr->sTexts[LAN_CHECK_THE_ADDRESS_PLEASE], 
+						(size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_CHECK_THE_ADDRESS_PLEASE])+".");
+#endif
+				}
+
+                return false;
+            } else {
+				Memo("*** "+string(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS], (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_HUB_ADDRESS])+" "+string(clsLanguageManager::mPtr->sTexts[LAN_RESOLVED_SUCCESSFULLY], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_RESOLVED_SUCCESSFULLY])+".");
+
+                if(bUseIPv6 == true) {
+                    struct addrinfo *next = res;
+                    while(next != NULL) {
+                        if(next->ai_family == AF_INET) {
+                            if(((sockaddr_in *)(next->ai_addr))->sin_addr.s_addr != INADDR_ANY) {
+                                strcpy(sHubIP, inet_ntoa(((sockaddr_in *)(next->ai_addr))->sin_addr));
+                            }
+                        } else if(next->ai_family == AF_INET6) {
+#if defined(_WIN32) && !defined(_WIN64)
+                            win_inet_ntop(&((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, sHubIP6, 40);
+#else
+                            inet_ntop(AF_INET6, &((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, sHubIP6, 40);
+#endif
+                        }
+
+                        next = next->ai_next;
+                    }
+                } else if(((sockaddr_in *)(res->ai_addr))->sin_addr.s_addr != INADDR_ANY) {
+                    strcpy(sHubIP, inet_ntoa(((sockaddr_in *)(res->ai_addr))->sin_addr));
+                }
+
+                if(sHubIP[0] != '\0') {
+                    string msg = "*** "+string(sHubIP);
+                    if(IsPrivateIP(sHubIP) == true) {
+                    	clsSettingManager::mPtr->SetBool(SETBOOL_AUTO_REG, false);
+					}
+                    if(sHubIP6[0] != '\0') {
+                        msg += " / "+string(sHubIP6);
+                        if(IsPrivateIP(sHubIP6) == true) {
+	                    	clsSettingManager::mPtr->SetBool(SETBOOL_AUTO_REG, false);
+						}
+                    }
+
+				    Memo(msg);
+                } else if(sHubIP6[0] != '\0') {
+				    Memo("*** "+string(sHubIP6));
+				    if(IsPrivateIP(sHubIP6) == true) {
+                    	clsSettingManager::mPtr->SetBool(SETBOOL_AUTO_REG, false);
+					}
+                }
+
+				freeaddrinfo(res);
+            }
+        } else {
+            strcpy(sHubIP, clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS]);
+            if(IsPrivateIP(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS]) == true) {
+                clsSettingManager::mPtr->SetBool(SETBOOL_AUTO_REG, false);
+			}
+        }
+    } else {
+        if(clsSettingManager::mPtr->sTexts[SETTXT_IPV4_ADDRESS] != NULL) {
+            strcpy(sHubIP, clsSettingManager::mPtr->sTexts[SETTXT_IPV4_ADDRESS]);
+        } else {
+            sHubIP[0] = '\0';
+        }
+
+        if(clsSettingManager::mPtr->sTexts[SETTXT_IPV6_ADDRESS] != NULL) {
+            strcpy(sHubIP6, clsSettingManager::mPtr->sTexts[SETTXT_IPV6_ADDRESS]);
+        } else {
+            sHubIP6[0] = '\0';
+        }
+
+        if(isIP(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS]) == true) {
+        	if(IsPrivateIP(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS]) == true) {
+                clsSettingManager::mPtr->SetBool(SETBOOL_AUTO_REG, false);
+			}
+        }
+    }
+
+    return true;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

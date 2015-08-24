@@ -746,6 +746,11 @@ void clsSettingManager::SetBool(const size_t &szBoolId, const bool &bValue) {
 
         	break;
 #endif
+        case SETBOOL_RESOLVE_TO_IP:
+        	if(bUpdateLocked == false) {
+        		clsServerManager::ResolveHubAddress(true);
+        	}
+        	break;
         default:
             break;
     }
@@ -1370,6 +1375,13 @@ void clsSettingManager::SetText(const size_t &szTxtId, const char * sTxt, const 
         case SETTXT_TCP_PORTS:
             UpdateTCPPorts();
             break;
+        case SETTXT_HUB_ADDRESS:
+		case SETTXT_IPV4_ADDRESS:
+		case SETTXT_IPV6_ADDRESS:
+			if(bUpdateLocked == false) {
+        		clsServerManager::ResolveHubAddress(true);
+        	}
+        	break;
         default:
             break;
     }
@@ -1471,9 +1483,7 @@ void clsSettingManager::UpdateMOTD() {
         return;
     }
 
-    size_t szNeededMem = (bBools[SETBOOL_MOTD_AS_PM] == true ?
-        ((2*(ui16PreTextsLens[SETPRETXT_HUB_SEC]))+ui16MOTDLen+21) :
-        (ui16PreTextsLens[SETPRETXT_HUB_SEC]+ui16MOTDLen+5));
+    size_t szNeededMem = (bBools[SETBOOL_MOTD_AS_PM] == true ? ((2*(ui16PreTextsLens[SETPRETXT_HUB_SEC]))+ui16MOTDLen+21) : (ui16PreTextsLens[SETPRETXT_HUB_SEC]+ui16MOTDLen+5));
 
     char * sOldMotd = sPreTexts[SETPRETXT_MOTD];
 
@@ -1515,16 +1525,11 @@ void clsSettingManager::UpdateHubNameWelcome() {
         return;
     }
 
-    size_t szNeededMem = 19 + ui16TextsLens[SETTXT_HUB_NAME] + ui16PreTextsLens[SETPRETXT_HUB_SEC] + clsLanguageManager::mPtr->ui16TextsLens[LAN_THIS_HUB_IS_RUNNING] + (sizeof(g_sPtokaXTitle)-1) +
-        clsLanguageManager::mPtr->ui16TextsLens[LAN_UPTIME];
+    size_t szNeededMem = 19 + ui16TextsLens[SETTXT_HUB_NAME] + ui16PreTextsLens[SETPRETXT_HUB_SEC] + clsLanguageManager::mPtr->ui16TextsLens[LAN_THIS_HUB_IS_RUNNING] + (sizeof(g_sPtokaXTitle)-1) + clsLanguageManager::mPtr->ui16TextsLens[LAN_UPTIME];
 
     if(sTexts[SETTXT_HUB_TOPIC] != NULL) {
         szNeededMem += ui16TextsLens[SETTXT_HUB_TOPIC] + 3;
     }
-
-#ifdef _PtokaX_TESTING_
-    szNeededMem += 9 + sizeof(BUILD_NUMBER);
-#endif
 
     char * sOldWelcome = sPreTexts[SETPRETXT_HUB_NAME_WLCM];
 
@@ -1723,37 +1728,8 @@ void clsSettingManager::UpdateShareLimitMessage() {
         return;
     }
 
-    size_t szNeededMem = 9 + ui16PreTextsLens[SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_SHARE_LIMIT_MSG];
-
-    if(bBools[SETBOOL_SHARE_LIMIT_REDIR] == true) {
-        if(sTexts[SETTXT_SHARE_LIMIT_REDIR_ADDRESS] != NULL) {
-            szNeededMem += 12 + ui16TextsLens[SETTXT_SHARE_LIMIT_REDIR_ADDRESS];
-        }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
-  		   	szNeededMem += ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS];
-        }
-    }
-
-    char * sOldShareLimitMsg = sPreTexts[SETPRETXT_SHARE_LIMIT_MSG];
-
-#ifdef _WIN32
-    if(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] == NULL) {
-        sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
-    } else {
-        sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldShareLimitMsg, szNeededMem);
-    }
-#else
-	sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] = (char *)realloc(sOldShareLimitMsg, szNeededMem);
-#endif
-    if(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] == NULL) {
-        sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] = sOldShareLimitMsg;
-
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateShareLimitMessage\n", (uint64_t)szNeededMem);
-
-        return;
-    }
-
-    int iMsgLen = sprintf(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG], "<%s> ", sPreTexts[SETPRETXT_HUB_SEC]);
-    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateShareLimitMessage0") == false) {
+    int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> ", sPreTexts[SETPRETXT_HUB_SEC]);
+    if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateShareLimitMessage0") == false) {
         exit(EXIT_FAILURE);
     }
     
@@ -1763,55 +1739,75 @@ void clsSettingManager::UpdateShareLimitMessage() {
         if(sTexts[SETTXT_SHARE_LIMIT_MSG][ui16i] == '%') {
             if(strncmp(sTexts[SETTXT_SHARE_LIMIT_MSG]+ui16i+1, sMin, 5) == 0) {
                 if(ui64MinShare != 0) {
-                    int iRet = sprintf(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG]+iMsgLen, "%hd %s", i16Shorts[SETSHORT_MIN_SHARE_LIMIT], units[i16Shorts[SETSHORT_MIN_SHARE_UNITS]]);
+                    int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "%hd %s", i16Shorts[SETSHORT_MIN_SHARE_LIMIT], units[i16Shorts[SETSHORT_MIN_SHARE_UNITS]]);
                     iMsgLen += iRet;
-                    if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateShareLimitMessage") == false) {
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateShareLimitMessage") == false) {
                         exit(EXIT_FAILURE);
                     }
                 } else {
-                    memcpy(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG]+iMsgLen, "0 B", 3);
+                    memcpy(clsServerManager::pGlobalBuffer+iMsgLen, "0 B", 3);
                     iMsgLen += 3;
                 }
                 ui16i += (uint16_t)5;
                 continue;
             } else if(strncmp(sTexts[SETTXT_SHARE_LIMIT_MSG]+ui16i+1, sMax, 5) == 0) {
                 if(ui64MaxShare != 0) {
-                    int iRet = sprintf(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG]+iMsgLen, "%hd %s", i16Shorts[SETSHORT_MAX_SHARE_LIMIT], units[i16Shorts[SETSHORT_MAX_SHARE_UNITS]]);
+                    int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "%hd %s", i16Shorts[SETSHORT_MAX_SHARE_LIMIT], units[i16Shorts[SETSHORT_MAX_SHARE_UNITS]]);
                     iMsgLen += iRet;
-                    if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateShareLimitMessage1") == false) {
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateShareLimitMessage1") == false) {
                         exit(EXIT_FAILURE);
                     }
                 } else {
-                    memcpy(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG]+iMsgLen, "unlimited", 9);
-                    iMsgLen += 9;
+                    memcpy(clsServerManager::pGlobalBuffer+iMsgLen, clsLanguageManager::mPtr->sTexts[LAN_UNLIMITED], clsLanguageManager::mPtr->ui16TextsLens[LAN_UNLIMITED]);
+                    iMsgLen += clsLanguageManager::mPtr->ui16TextsLens[LAN_UNLIMITED];
                 }
                 ui16i += (uint16_t)5;
                 continue;
             }
         }
 
-        sPreTexts[SETPRETXT_SHARE_LIMIT_MSG][iMsgLen] = sTexts[SETTXT_SHARE_LIMIT_MSG][ui16i];
+        clsServerManager::pGlobalBuffer[iMsgLen] = sTexts[SETTXT_SHARE_LIMIT_MSG][ui16i];
         iMsgLen++;
     }
 
-    sPreTexts[SETPRETXT_SHARE_LIMIT_MSG][iMsgLen] = '|';
+    clsServerManager::pGlobalBuffer[iMsgLen] = '|';
     iMsgLen++;
 
     if(bBools[SETBOOL_SHARE_LIMIT_REDIR] == true) {
         if(sTexts[SETTXT_SHARE_LIMIT_REDIR_ADDRESS] != NULL) {
-        	int iRet = sprintf(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG]+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_SHARE_LIMIT_REDIR_ADDRESS]);
+        	int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_SHARE_LIMIT_REDIR_ADDRESS]);
         	iMsgLen += iRet;
-        	if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateShareLimitMessage6") == false) {
+        	if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateShareLimitMessage6") == false) {
                 exit(EXIT_FAILURE);
             }
         }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
-  		   	memcpy(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG]+iMsgLen, sPreTexts[SETPRETXT_REDIRECT_ADDRESS], (size_t)ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS]);
+  		   	memcpy(clsServerManager::pGlobalBuffer+iMsgLen, sPreTexts[SETPRETXT_REDIRECT_ADDRESS], (size_t)ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS]);
             iMsgLen += (int)ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS];
         }
     }
 
-    ui16PreTextsLens[SETPRETXT_SHARE_LIMIT_MSG] = (uint16_t)iMsgLen;
+    char * sOldShareLimitMsg = sPreTexts[SETPRETXT_SHARE_LIMIT_MSG];
+
+#ifdef _WIN32
+    if(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] == NULL) {
+        sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iMsgLen+1);
+    } else {
+        sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldShareLimitMsg, iMsgLen+1);
+    }
+#else
+	sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] = (char *)realloc(sOldShareLimitMsg, iMsgLen+1);
+#endif
+    if(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] == NULL) {
+        sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] = sOldShareLimitMsg;
+
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateShareLimitMessage\n", (uint64_t)iMsgLen+1);
+
+        return;
+    }
+
+	memcpy(sPreTexts[SETPRETXT_SHARE_LIMIT_MSG], clsServerManager::pGlobalBuffer, iMsgLen);
     sPreTexts[SETPRETXT_SHARE_LIMIT_MSG][iMsgLen] = '\0';
+    ui16PreTextsLens[SETPRETXT_SHARE_LIMIT_MSG] = (uint16_t)iMsgLen;
 }
 //---------------------------------------------------------------------------
 
@@ -1820,46 +1816,17 @@ void clsSettingManager::UpdateSlotsLimitMessage() {
         return;
     }
 
-    size_t szNeededMem = 8 + ui16PreTextsLens[SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_SLOTS_LIMIT_MSG];
-
-    if(bBools[SETBOOL_SLOTS_LIMIT_REDIR] == true) {
-        if(sTexts[SETTXT_SLOTS_LIMIT_REDIR_ADDRESS] != NULL) {
-            szNeededMem += 12 + ui16TextsLens[SETTXT_SLOTS_LIMIT_REDIR_ADDRESS];
-        }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
-  		   	szNeededMem += ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS];
-        }
-    }
-
-    char * sOldSlotsLimitMsg = sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG];
-
-#ifdef _WIN32
-    if(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] == NULL) {
-        sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
-    } else {
-        sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldSlotsLimitMsg, szNeededMem);
-    }
-#else
-	sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] = (char *)realloc(sOldSlotsLimitMsg, szNeededMem);
-#endif
-    if(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] == NULL) {
-        sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] = sOldSlotsLimitMsg;
-
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateSlotsLimitMessage\n", (uint64_t)szNeededMem);
-
-        return;
-    }
-
-    int iMsgLen = sprintf(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG], "<%s> ", sPreTexts[SETPRETXT_HUB_SEC]);
-    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateSlotsLimitMessage0") == false) {
+    int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> ", sPreTexts[SETPRETXT_HUB_SEC]);
+    if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateSlotsLimitMessage0") == false) {
         exit(EXIT_FAILURE);
     }
 
     for(uint16_t ui16i = 0; ui16i < ui16TextsLens[SETTXT_SLOTS_LIMIT_MSG]; ui16i++) {
         if(sTexts[SETTXT_SLOTS_LIMIT_MSG][ui16i] == '%') {
             if(strncmp(sTexts[SETTXT_SLOTS_LIMIT_MSG]+ui16i+1, sMin, 5) == 0) {
-                int iRet = sprintf(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG]+iMsgLen, "%hd", i16Shorts[SETSHORT_MIN_SLOTS_LIMIT]);
+                int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "%hd", i16Shorts[SETSHORT_MIN_SLOTS_LIMIT]);
                 iMsgLen += iRet;
-                if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateSlotsLimitMessage") == false) {
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateSlotsLimitMessage") == false) {
                     exit(EXIT_FAILURE);
                 }
 
@@ -1867,42 +1834,62 @@ void clsSettingManager::UpdateSlotsLimitMessage() {
                 continue;
             } else if(strncmp(sTexts[SETTXT_SLOTS_LIMIT_MSG]+ui16i+1, sMax, 5) == 0) {
                 if(i16Shorts[SETSHORT_MAX_SLOTS_LIMIT] != 0) {
-                    int iRet = sprintf(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG]+iMsgLen, "%hd", i16Shorts[SETSHORT_MAX_SLOTS_LIMIT]);
+                    int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "%hd", i16Shorts[SETSHORT_MAX_SLOTS_LIMIT]);
                     iMsgLen += iRet;
-                    if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateSlotsLimitMessage1") == false) {
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateSlotsLimitMessage1") == false) {
                         exit(EXIT_FAILURE);
                     }
                 } else {
-                    memcpy(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG]+iMsgLen, "unlimited", 9);
-                    iMsgLen += 9;
+                    memcpy(clsServerManager::pGlobalBuffer+iMsgLen, clsLanguageManager::mPtr->sTexts[LAN_UNLIMITED], clsLanguageManager::mPtr->ui16TextsLens[LAN_UNLIMITED]);
+                    iMsgLen += clsLanguageManager::mPtr->ui16TextsLens[LAN_UNLIMITED];
                 }
                 ui16i += (uint16_t)5;
                 continue;
             }
         }
 
-        sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG][iMsgLen] = sTexts[SETTXT_SLOTS_LIMIT_MSG][ui16i];
+        clsServerManager::pGlobalBuffer[iMsgLen] = sTexts[SETTXT_SLOTS_LIMIT_MSG][ui16i];
         iMsgLen++;
     }
 
-    sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG][iMsgLen] = '|';
+    clsServerManager::pGlobalBuffer[iMsgLen] = '|';
     iMsgLen++;
 
     if(bBools[SETBOOL_SLOTS_LIMIT_REDIR] == true) {
         if(sTexts[SETTXT_SLOTS_LIMIT_REDIR_ADDRESS] != NULL) {
-        	int iRet = sprintf(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG]+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_SLOTS_LIMIT_REDIR_ADDRESS]);
+        	int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_SLOTS_LIMIT_REDIR_ADDRESS]);
             iMsgLen += iRet;
-            if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateSlotsLimitMessage2") == false) {
+            if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateSlotsLimitMessage2") == false) {
                 exit(EXIT_FAILURE);
             }
         }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
-  		   	memcpy(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG]+iMsgLen, sPreTexts[SETPRETXT_REDIRECT_ADDRESS], (size_t)ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS]);
+  		   	memcpy(clsServerManager::pGlobalBuffer+iMsgLen, sPreTexts[SETPRETXT_REDIRECT_ADDRESS], (size_t)ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS]);
             iMsgLen += (int)ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS];
         }
     }
 
-    ui16PreTextsLens[SETPRETXT_SLOTS_LIMIT_MSG] = (uint16_t)iMsgLen;
+    char * sOldSlotsLimitMsg = sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG];
+
+#ifdef _WIN32
+    if(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] == NULL) {
+        sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iMsgLen+1);
+    } else {
+        sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldSlotsLimitMsg, iMsgLen+1);
+    }
+#else
+	sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] = (char *)realloc(sOldSlotsLimitMsg, iMsgLen+1);
+#endif
+    if(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] == NULL) {
+        sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] = sOldSlotsLimitMsg;
+
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateSlotsLimitMessage\n", (uint64_t)iMsgLen+1);
+
+        return;
+    }
+
+	memcpy(sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG], clsServerManager::pGlobalBuffer, iMsgLen);
     sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG][iMsgLen] = '\0';
+    ui16PreTextsLens[SETPRETXT_SLOTS_LIMIT_MSG] = (uint16_t)iMsgLen;
 }
 //---------------------------------------------------------------------------
 
@@ -1911,37 +1898,8 @@ void clsSettingManager::UpdateHubSlotRatioMessage() {
         return;
     }
 
-    size_t szNeededMem = 5 + ui16PreTextsLens[SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_HUB_SLOT_RATIO_MSG];
-
-    if(bBools[SETBOOL_HUB_SLOT_RATIO_REDIR] == true) {
-        if(sTexts[SETTXT_HUB_SLOT_RATIO_REDIR_ADDRESS] != NULL) {
-            szNeededMem += 12 + ui16TextsLens[SETTXT_HUB_SLOT_RATIO_REDIR_ADDRESS];
-        }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
-  		   	szNeededMem += ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS];
-        }
-    }
-
-    char * sOldHubSlotLimitMsg = sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG];
-
-#ifdef _WIN32
-    if(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] == NULL) {
-        sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
-    } else {
-        sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldHubSlotLimitMsg, szNeededMem);
-    }
-#else
-	sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] = (char *)realloc(sOldHubSlotLimitMsg, szNeededMem);
-#endif
-    if(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] == NULL) {
-        sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] = sOldHubSlotLimitMsg;
-
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateHubSlotRatioMessage\n", (uint64_t)szNeededMem);
-
-        return;
-    }
-
-    int iMsgLen = sprintf(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG], "<%s> ", sPreTexts[SETPRETXT_HUB_SEC]);
-    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateHubSlotRatioMessage0") == false) {
+    int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> ", sPreTexts[SETPRETXT_HUB_SEC]);
+    if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateHubSlotRatioMessage0") == false) {
         exit(EXIT_FAILURE);
     }
 
@@ -1951,17 +1909,17 @@ void clsSettingManager::UpdateHubSlotRatioMessage() {
     for(uint16_t ui16i = 0; ui16i < ui16TextsLens[SETTXT_HUB_SLOT_RATIO_MSG]; ui16i++) {
         if(sTexts[SETTXT_HUB_SLOT_RATIO_MSG][ui16i] == '%') {
             if(strncmp(sTexts[SETTXT_HUB_SLOT_RATIO_MSG]+ui16i+1, sHubs, 6) == 0) {
-                int iRet = sprintf(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG]+iMsgLen, "%hd", i16Shorts[SETSHORT_HUB_SLOT_RATIO_HUBS]);
+                int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "%hd", i16Shorts[SETSHORT_HUB_SLOT_RATIO_HUBS]);
                 iMsgLen += iRet;
-                if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateHubSlotRatioMessage") == false) {
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateHubSlotRatioMessage") == false) {
                     exit(EXIT_FAILURE);
                 }
                 ui16i += (uint16_t)6;
                 continue;
             } else if(strncmp(sTexts[SETTXT_HUB_SLOT_RATIO_MSG]+ui16i+1, sSlots, 7) == 0) {
-                int iRet = sprintf(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG]+iMsgLen, "%hd", i16Shorts[SETSHORT_HUB_SLOT_RATIO_SLOTS]);
+                int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "%hd", i16Shorts[SETSHORT_HUB_SLOT_RATIO_SLOTS]);
                 iMsgLen += iRet;
-                if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateHubSlotRatioMessage1") == false) {
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateHubSlotRatioMessage1") == false) {
                     exit(EXIT_FAILURE);
                 }
                 ui16i += (uint16_t)7;
@@ -1969,28 +1927,48 @@ void clsSettingManager::UpdateHubSlotRatioMessage() {
             }
         }
 
-        sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG][iMsgLen] = sTexts[SETTXT_HUB_SLOT_RATIO_MSG][ui16i];
+        clsServerManager::pGlobalBuffer[iMsgLen] = sTexts[SETTXT_HUB_SLOT_RATIO_MSG][ui16i];
         iMsgLen++;
     }
 
-    sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG][iMsgLen] = '|';
+    clsServerManager::pGlobalBuffer[iMsgLen] = '|';
     iMsgLen++;
 
     if(bBools[SETBOOL_HUB_SLOT_RATIO_REDIR] == true) {
         if(sTexts[SETTXT_HUB_SLOT_RATIO_REDIR_ADDRESS] != NULL) {
-        	int iRet = sprintf(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG]+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_HUB_SLOT_RATIO_REDIR_ADDRESS]);
+        	int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_HUB_SLOT_RATIO_REDIR_ADDRESS]);
             iMsgLen += iRet;
-            if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateHubSlotRatioMessage2") == false) {
+            if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateHubSlotRatioMessage2") == false) {
                 exit(EXIT_FAILURE);
             }
         }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
-  		   	memcpy(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG]+iMsgLen, sPreTexts[SETPRETXT_REDIRECT_ADDRESS], (size_t)ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS]);
+  		   	memcpy(clsServerManager::pGlobalBuffer+iMsgLen, sPreTexts[SETPRETXT_REDIRECT_ADDRESS], (size_t)ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS]);
             iMsgLen += (int)ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS];
         }
     }
 
+    char * sOldHubSlotLimitMsg = sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG];
+
+#ifdef _WIN32
+    if(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] == NULL) {
+        sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iMsgLen+1);
+    } else {
+        sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldHubSlotLimitMsg, iMsgLen+1);
+    }
+#else
+	sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] = (char *)realloc(sOldHubSlotLimitMsg, iMsgLen+1);
+#endif
+    if(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] == NULL) {
+        sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] = sOldHubSlotLimitMsg;
+
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateHubSlotRatioMessage\n", (uint64_t)iMsgLen+1);
+
+        return;
+    }
+
+	memcpy(sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG], clsServerManager::pGlobalBuffer, iMsgLen);
+	sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG][iMsgLen] = '\0';
     ui16PreTextsLens[SETPRETXT_HUB_SLOT_RATIO_MSG] = (uint16_t)iMsgLen;
-    sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG][iMsgLen] = '\0';
 }
 //---------------------------------------------------------------------------
 
@@ -1999,37 +1977,8 @@ void clsSettingManager::UpdateMaxHubsLimitMessage() {
         return;
     }
 
-    size_t szNeededMem = 5 + ui16PreTextsLens[SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_MAX_HUBS_LIMIT_MSG];
-
-    if(bBools[SETBOOL_MAX_HUBS_LIMIT_REDIR] == true) {
-        if(sTexts[SETTXT_MAX_HUBS_LIMIT_REDIR_ADDRESS] != NULL) {
-            szNeededMem += 12 + ui16TextsLens[SETTXT_MAX_HUBS_LIMIT_REDIR_ADDRESS];
-        }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
-  		   	szNeededMem += ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS];
-        }
-    }
-
-    char * sOldHubLimitMsg = sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG];
-
-#ifdef _WIN32
-    if(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] == NULL) {
-        sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
-    } else {
-        sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldHubLimitMsg, szNeededMem);
-    }
-#else
-	sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] = (char *)realloc(sOldHubLimitMsg, szNeededMem);
-#endif
-    if(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] == NULL) {
-        sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] = sOldHubLimitMsg;
-
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateMaxHubsLimitMessage\n", (uint64_t)szNeededMem);
-
-        return;
-    }
-
-    int iMsgLen = sprintf(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG], "<%s> ", sPreTexts[SETPRETXT_HUB_SEC]);
-    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateMaxHubsLimitMessage") == false) {
+    int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> ", sPreTexts[SETPRETXT_HUB_SEC]);
+    if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateMaxHubsLimitMessage") == false) {
         exit(EXIT_FAILURE);
     }
 
@@ -2040,44 +1989,64 @@ void clsSettingManager::UpdateMaxHubsLimitMessage() {
     if(sMatch != NULL) {
         if(sMatch > sTexts[SETTXT_MAX_HUBS_LIMIT_MSG]) {
             size_t szLen = sMatch-sTexts[SETTXT_MAX_HUBS_LIMIT_MSG];
-            memcpy(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG]+iMsgLen, sTexts[SETTXT_MAX_HUBS_LIMIT_MSG], szLen);
+            memcpy(clsServerManager::pGlobalBuffer+iMsgLen, sTexts[SETTXT_MAX_HUBS_LIMIT_MSG], szLen);
             iMsgLen += (int)szLen;
         }
 
-        int iRet = sprintf(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG]+iMsgLen, "%hd", i16Shorts[SETSHORT_MAX_HUBS_LIMIT]);
+        int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "%hd", i16Shorts[SETSHORT_MAX_HUBS_LIMIT]);
         iMsgLen += iRet;
-        if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateMaxHubsLimitMessage") == false) {
+        if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateMaxHubsLimitMessage") == false) {
             exit(EXIT_FAILURE);
         }
 
         if(sMatch+7 < sTexts[SETTXT_MAX_HUBS_LIMIT_MSG]+ui16TextsLens[SETTXT_MAX_HUBS_LIMIT_MSG]) {
             size_t szLen = (sTexts[SETTXT_MAX_HUBS_LIMIT_MSG]+ui16TextsLens[SETTXT_MAX_HUBS_LIMIT_MSG])-(sMatch+7);
-            memcpy(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG]+iMsgLen, sMatch+7, szLen);
+            memcpy(clsServerManager::pGlobalBuffer+iMsgLen, sMatch+7, szLen);
             iMsgLen += (int)szLen;
         }
     } else {
-        memcpy(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG], sTexts[SETTXT_MAX_HUBS_LIMIT_MSG], ui16TextsLens[SETTXT_MAX_HUBS_LIMIT_MSG]);
+        memcpy(clsServerManager::pGlobalBuffer, sTexts[SETTXT_MAX_HUBS_LIMIT_MSG], ui16TextsLens[SETTXT_MAX_HUBS_LIMIT_MSG]);
         iMsgLen = (int)ui16TextsLens[SETTXT_MAX_HUBS_LIMIT_MSG];
     }
 
-    sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG][iMsgLen] = '|';
+    clsServerManager::pGlobalBuffer[iMsgLen] = '|';
     iMsgLen++;
 
     if(bBools[SETBOOL_MAX_HUBS_LIMIT_REDIR] == true) {
         if(sTexts[SETTXT_MAX_HUBS_LIMIT_REDIR_ADDRESS] != NULL) {
-        	int iRet = sprintf(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG]+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_MAX_HUBS_LIMIT_REDIR_ADDRESS]);
+        	int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_MAX_HUBS_LIMIT_REDIR_ADDRESS]);
             iMsgLen += iRet;
-            if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateMaxHubsLimitMessage1") == false) {
+            if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateMaxHubsLimitMessage1") == false) {
                 exit(EXIT_FAILURE);
             }
         }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
-  		   	memcpy(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG]+iMsgLen, sPreTexts[SETPRETXT_REDIRECT_ADDRESS], (size_t)ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS]);
+  		   	memcpy(clsServerManager::pGlobalBuffer+iMsgLen, sPreTexts[SETPRETXT_REDIRECT_ADDRESS], (size_t)ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS]);
             iMsgLen += (int)ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS];
         }
     }
 
+    char * sOldHubLimitMsg = sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG];
+
+#ifdef _WIN32
+    if(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] == NULL) {
+        sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iMsgLen+1);
+    } else {
+        sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldHubLimitMsg, iMsgLen+1);
+    }
+#else
+	sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] = (char *)realloc(sOldHubLimitMsg, iMsgLen+1);
+#endif
+    if(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] == NULL) {
+        sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] = sOldHubLimitMsg;
+
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateMaxHubsLimitMessage\n", (uint64_t)iMsgLen+1);
+
+        return;
+    }
+
+	memcpy(sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG], clsServerManager::pGlobalBuffer, iMsgLen);
+	sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG][iMsgLen] = '\0';
     ui16PreTextsLens[SETPRETXT_MAX_HUBS_LIMIT_MSG] = (uint16_t)iMsgLen;
-    sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG][iMsgLen] = '\0';
 }
 //---------------------------------------------------------------------------
 
@@ -2285,46 +2254,17 @@ void clsSettingManager::UpdateNickLimitMessage() {
         return;
     }
 
-    size_t szNeededMem = 8 + ui16PreTextsLens[SETPRETXT_HUB_SEC] + ui16TextsLens[SETTXT_NICK_LIMIT_MSG];
-
-    if(bBools[SETBOOL_NICK_LIMIT_REDIR] == true) {
-        if(sTexts[SETTXT_NICK_LIMIT_REDIR_ADDRESS] != NULL) {
-            szNeededMem += 12 + ui16TextsLens[SETTXT_NICK_LIMIT_REDIR_ADDRESS];
-        }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
-  		   	szNeededMem += ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS];
-        }
-    }
-
-    char * sOldNickLimitMsg = sPreTexts[SETPRETXT_NICK_LIMIT_MSG];
-
-#ifdef _WIN32
-    if(sPreTexts[SETPRETXT_NICK_LIMIT_MSG] == NULL) {
-        sPreTexts[SETPRETXT_NICK_LIMIT_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNeededMem);
-    } else {
-        sPreTexts[SETPRETXT_NICK_LIMIT_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldNickLimitMsg, szNeededMem);
-    }
-#else
-	sPreTexts[SETPRETXT_NICK_LIMIT_MSG] = (char *)realloc(sOldNickLimitMsg, szNeededMem);
-#endif
-    if(sPreTexts[SETPRETXT_NICK_LIMIT_MSG] == NULL) {
-        sPreTexts[SETPRETXT_NICK_LIMIT_MSG] = sOldNickLimitMsg;
-
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateNickLimitMessage\n", (uint64_t)szNeededMem);
-
-        return;
-    }
-
-    int iMsgLen = sprintf(sPreTexts[SETPRETXT_NICK_LIMIT_MSG], "<%s> ", sPreTexts[SETPRETXT_HUB_SEC]);
-    if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateNickLimitMessage0") == false) {
+    int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "<%s> ", sPreTexts[SETPRETXT_HUB_SEC]);
+    if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateNickLimitMessage0") == false) {
         exit(EXIT_FAILURE);
     }
 
     for(uint16_t ui16i = 0; ui16i < ui16TextsLens[SETTXT_NICK_LIMIT_MSG]; ui16i++) {
         if(sTexts[SETTXT_NICK_LIMIT_MSG][ui16i] == '%') {
             if(strncmp(sTexts[SETTXT_NICK_LIMIT_MSG]+ui16i+1, sMin, 5) == 0) {
-                int iRet = sprintf(sPreTexts[SETPRETXT_NICK_LIMIT_MSG]+iMsgLen, "%hd", i16Shorts[SETSHORT_MIN_NICK_LEN]);
+                int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "%hd", i16Shorts[SETSHORT_MIN_NICK_LEN]);
                 iMsgLen += iRet;
-                if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateNickLimitMessage") == false) {
+                if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateNickLimitMessage") == false) {
                     exit(EXIT_FAILURE);
                 }
 
@@ -2332,42 +2272,62 @@ void clsSettingManager::UpdateNickLimitMessage() {
                 continue;
             } else if(strncmp(sTexts[SETTXT_NICK_LIMIT_MSG]+ui16i+1, sMax, 5) == 0) {
                 if(i16Shorts[SETSHORT_MAX_NICK_LEN] != 0) {
-                    int iRet = sprintf(sPreTexts[SETPRETXT_NICK_LIMIT_MSG]+iMsgLen, "%hd", i16Shorts[SETSHORT_MAX_NICK_LEN]);
+                    int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "%hd", i16Shorts[SETSHORT_MAX_NICK_LEN]);
                     iMsgLen += iRet;
-                    if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateNickLimitMessage1") == false) {
+                    if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateNickLimitMessage1") == false) {
                         exit(EXIT_FAILURE);
                     }
                 } else {
-                    memcpy(sPreTexts[SETPRETXT_NICK_LIMIT_MSG]+iMsgLen, "unlimited", 9);
-                    iMsgLen += 9;
+                    memcpy(clsServerManager::pGlobalBuffer+iMsgLen, clsLanguageManager::mPtr->sTexts[LAN_UNLIMITED], clsLanguageManager::mPtr->ui16TextsLens[LAN_UNLIMITED]);
+                    iMsgLen += clsLanguageManager::mPtr->ui16TextsLens[LAN_UNLIMITED];
                 }
                 ui16i += (uint16_t)5;
                 continue;
             }
         }
 
-        sPreTexts[SETPRETXT_NICK_LIMIT_MSG][iMsgLen] = sTexts[SETTXT_NICK_LIMIT_MSG][ui16i];
+        clsServerManager::pGlobalBuffer[iMsgLen] = sTexts[SETTXT_NICK_LIMIT_MSG][ui16i];
         iMsgLen++;
     }
 
-    sPreTexts[SETPRETXT_NICK_LIMIT_MSG][iMsgLen] = '|';
+    clsServerManager::pGlobalBuffer[iMsgLen] = '|';
     iMsgLen++;
 
     if(bBools[SETBOOL_NICK_LIMIT_REDIR] == true) {
         if(sTexts[SETTXT_NICK_LIMIT_REDIR_ADDRESS] != NULL) {
-            int iRet = sprintf(sPreTexts[SETPRETXT_NICK_LIMIT_MSG]+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_NICK_LIMIT_REDIR_ADDRESS]);
+            int iRet = sprintf(clsServerManager::pGlobalBuffer+iMsgLen, "$ForceMove %s|", sTexts[SETTXT_NICK_LIMIT_REDIR_ADDRESS]);
             iMsgLen += iRet;
-            if(CheckSprintf1(iRet, iMsgLen, szNeededMem, "clsSettingManager::UpdateNickLimitMessage2") == false) {
+            if(CheckSprintf1(iRet, iMsgLen, clsServerManager::szGlobalBufferSize, "clsSettingManager::UpdateNickLimitMessage2") == false) {
                 exit(EXIT_FAILURE);
             }
         }  else if(sPreTexts[SETPRETXT_REDIRECT_ADDRESS] != NULL) {
-  		   	memcpy(sPreTexts[SETPRETXT_NICK_LIMIT_MSG]+iMsgLen, sPreTexts[SETPRETXT_REDIRECT_ADDRESS], (size_t)ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS]);
+  		   	memcpy(clsServerManager::pGlobalBuffer+iMsgLen, sPreTexts[SETPRETXT_REDIRECT_ADDRESS], (size_t)ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS]);
             iMsgLen += (int)ui16PreTextsLens[SETPRETXT_REDIRECT_ADDRESS];
         }
     }
 
+    char * sOldNickLimitMsg = sPreTexts[SETPRETXT_NICK_LIMIT_MSG];
+
+#ifdef _WIN32
+    if(sPreTexts[SETPRETXT_NICK_LIMIT_MSG] == NULL) {
+        sPreTexts[SETPRETXT_NICK_LIMIT_MSG] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iMsgLen+1);
+    } else {
+        sPreTexts[SETPRETXT_NICK_LIMIT_MSG] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldNickLimitMsg, iMsgLen+1);
+    }
+#else
+	sPreTexts[SETPRETXT_NICK_LIMIT_MSG] = (char *)realloc(sOldNickLimitMsg, iMsgLen+1);
+#endif
+    if(sPreTexts[SETPRETXT_NICK_LIMIT_MSG] == NULL) {
+        sPreTexts[SETPRETXT_NICK_LIMIT_MSG] = sOldNickLimitMsg;
+
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in clsSettingManager::UpdateNickLimitMessage\n", (uint64_t)iMsgLen+1);
+
+        return;
+    }
+
+	memcpy(sPreTexts[SETPRETXT_NICK_LIMIT_MSG], clsServerManager::pGlobalBuffer, iMsgLen);
+	sPreTexts[SETPRETXT_NICK_LIMIT_MSG][iMsgLen] = '\0';
     ui16PreTextsLens[SETPRETXT_NICK_LIMIT_MSG] = (uint16_t)iMsgLen;
-    sPreTexts[SETPRETXT_NICK_LIMIT_MSG][iMsgLen] = '\0';
 }
 //---------------------------------------------------------------------------
 
@@ -2515,9 +2475,7 @@ void clsSettingManager::UpdateBot(const bool &bNickChanged/* = true*/) {
         return;
     }
 
-    int iMsgLen = sprintf(sPreTexts[SETPRETXT_HUB_BOT_MYINFO], "$MyINFO $ALL %s %s$ $$%s$$|", sTexts[SETTXT_BOT_NICK],
-        sTexts[SETTXT_BOT_DESCRIPTION] != NULL ? sTexts[SETTXT_BOT_DESCRIPTION] : "",
-        sTexts[SETTXT_BOT_EMAIL] != NULL ? sTexts[SETTXT_BOT_EMAIL] : "");
+    int iMsgLen = sprintf(sPreTexts[SETPRETXT_HUB_BOT_MYINFO], "$MyINFO $ALL %s %s$ $$%s$$|", sTexts[SETTXT_BOT_NICK], sTexts[SETTXT_BOT_DESCRIPTION] != NULL ? sTexts[SETTXT_BOT_DESCRIPTION] : "", sTexts[SETTXT_BOT_EMAIL] != NULL ? sTexts[SETTXT_BOT_EMAIL] : "");
     if(CheckSprintf(iMsgLen, szNeededMem, "clsSettingManager::UpdateBot") == false) {
         exit(EXIT_FAILURE);
     }

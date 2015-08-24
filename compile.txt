@@ -8,15 +8,15 @@ Compile guides for different Operating Systems are available in PtokaX Wiki http
 Short compile instruction:
 
 Compile on Debian/Mint/Ubuntu/Dyson:
-Packages to install: make g++ zlib1g-dev libtinyxml-dev and liblua5.2-dev or liblua5.1-dev for required Lua version.
+Packages to install: make g++ zlib1g-dev libtinyxml-dev and liblua5.3-dev or liblua5.2-dev or liblua5.1-dev for required Lua version.
 Optional package for PostgreSQL database support: libpq-dev
 Optional package for MariaDB database support: libmariadb-client-lgpl-dev-compat
 Optional package for MySQL database support: libmysqlclient-dev
 Optional package for SQLite database support: libsqlite3-dev
-To compile PtokaX with without database: make lua52 for Lua 5.2 or make for Lua 5.1
-To compile PtokaX with PostgreSQL database: make -f makefile-postgres lua52 for Lua 5.2 or make -f makefile-postgres for Lua 5.1
-To compile PtokaX with MariaDB or MySQL database: make -f makefile-mysql lua52 for Lua 5.2 or make -f makefile-mysql for Lua 5.1
-To compile PtokaX with SQLite database: make -f makefile-sqlite lua52 for Lua 5.2 or make -f makefile-sqlite for Lua 5.1
+To compile PtokaX with without database: make for Lua 5.3 or make lua52 for Lua 5.2 or make lua51 for Lua 5.1
+To compile PtokaX with PostgreSQL database: make -f makefile-postgres for Lua 5.3 or make -f makefile-postgres lua52 for Lua 5.2 or make -f makefile-postgres lua51 for Lua 5.1
+To compile PtokaX with MariaDB or MySQL database: make -f makefile-mysql  for Lua 5.3 or make -f makefile-mysql lua52 for Lua 5.2 or make -f makefile-mysql lua51 for Lua 5.1
+To compile PtokaX with SQLite database: make -f makefile-sqlite for Lua 5.3 or make -f makefile-sqlite lua52 for Lua 5.2 or make -f makefile-sqlite lua51 for Lua 5.1
 
 Compile on CentOS:
 Packages to install: make gcc-c++ zlib-devel lua-devel
@@ -60,14 +60,14 @@ To compile PtokaX with MariaDB database: make -f makefile-mysql fedora
 To compile PtokaX with SQLite database: make -f makefile-sqlite fedora
 
 Compile on Arch Linux:
-Packages to install: make make gcc zlib tinyxml and lua52 or lua51 for required Lua version.
+Packages to install: make make gcc zlib tinyxml and lua53 or lua51 for required Lua version.
 Optional package for PostgreSQL database support: postgresql-libs
 Optional package for MariaDB database support: mariadb
 Optional package for SQLite database support: sqlite
-To compile PtokaX with without database: make lua52 for Lua 5.2 or make for Lua 5.1
-To compile PtokaX with PostgreSQL database: make -f makefile-postgres lua52 for Lua 5.2 or make -f makefile-postgres for Lua 5.1
-To compile PtokaX with MariaDB database: make -f makefile-mysql lua52 for Lua 5.2 or make -f makefile-mysql for Lua 5.1
-To compile PtokaX with SQLite database: make -f makefile-sqlite lua52 for Lua 5.2 or make -f makefile-sqlite for Lua 5.1
+To compile PtokaX with without database: make fedora for Lua 5.3 or make for Lua 5.1
+To compile PtokaX with PostgreSQL database: make -f makefile-postgres fedora for Lua 5.3 or make -f makefile-postgres for Lua 5.1
+To compile PtokaX with MariaDB database: make -f makefile-mysql fedora for Lua 5.3 or make -f makefile-mysql for Lua 5.1
+To compile PtokaX with SQLite database: make -f makefile-sqlite fedora for Lua 5.3 or make -f makefile-sqlite for Lua 5.1
 
 Compile on FreeBSD:
 Packages to install: gmake tinyxml libiconv and lua53 or lua51 for required Lua version.

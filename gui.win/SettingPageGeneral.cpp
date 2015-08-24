@@ -145,10 +145,23 @@ void SettingPageGeneral::Save() {
 
     clsSettingManager::mPtr->SetBool(SETBOOL_ANTI_MOGLO, ::SendMessage(hWndPageItems[BTN_ANTI_MOGLO], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
 
-    iLen = ::GetWindowText(hWndPageItems[EDT_HUB_ADDRESS], sBuf, 1025);
+	bool bResolveHubAddress = false;
+
+	iLen = ::GetWindowText(hWndPageItems[EDT_HUB_ADDRESS], sBuf, 1025);
+
+	if(strcmp(sBuf, clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS]) != NULL) {
+		bResolveHubAddress = true;
+	}
+
     clsSettingManager::mPtr->SetText(SETTXT_HUB_ADDRESS, sBuf, iLen);
 
+	bool bOldResolve = clsSettingManager::mPtr->bBools[SETBOOL_RESOLVE_TO_IP];
+
     clsSettingManager::mPtr->SetBool(SETBOOL_RESOLVE_TO_IP, ::SendMessage(hWndPageItems[BTN_RESOLVE_ADDRESS], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
+
+	if(bOldResolve != clsSettingManager::mPtr->bBools[SETBOOL_RESOLVE_TO_IP]) {
+		bResolveHubAddress = true;
+	}
 
     if(clsSettingManager::mPtr->bBools[SETBOOL_RESOLVE_TO_IP] == false) {
         iLen = ::GetWindowText(hWndPageItems[EDT_IPV4_ADDRESS], sBuf, 1025);
@@ -184,6 +197,10 @@ void SettingPageGeneral::Save() {
     }
 
     clsSettingManager::mPtr->SetBool(SETBOOL_AUTO_REG, ::SendMessage(hWndPageItems[BTN_HUBLIST_AUTO_REG], BM_GETCHECK, 0, 0) == BST_CHECKED ? true : false);
+
+	if(bResolveHubAddress == true) {
+		clsServerManager::ResolveHubAddress(true);
+	}
 
     uint32_t ui32CurSel = (uint32_t)::SendMessage(hWndPageItems[CB_LANGUAGE], CB_GETCURSEL, 0, 0);
 

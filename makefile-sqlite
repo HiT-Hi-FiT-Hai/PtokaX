@@ -52,15 +52,20 @@ OBJS = $(CURDIR)/obj/colUsers.o $(CURDIR)/obj/DB-SQLite.o $(CURDIR)/obj/DcComman
 # then remove -llua5.1 and after tinyxml/tinyxml.a add /usr/local/lib/liblua.a (default path when is Lua compiled from sources).
 #*******************************************************************************
 
-PtokaX: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.1 
+PtokaX: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.3
 PtokaX: $(OBJS)
 	cd skein; $(MAKE)
-	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.1 -ltinyxml -lsqlite3
+	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.3 -ltinyxml -lsqlite3
 
 lua52: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.2
 lua52: $(OBJS)
 	cd skein; $(MAKE)
 	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.2 -ltinyxml -lsqlite3
+
+lua51: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.1
+lua51: $(OBJS)
+	cd skein; $(MAKE)
+	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.1 -ltinyxml -lsqlite3
 
 centos: CXXFLAGS = -O -g -Wall -Wextra -DTIXML_USE_STL -D_WITH_SQLITE
 centos: $(OBJS)
@@ -112,6 +117,9 @@ install:
 		echo "Can't install, because directory $(INSTDIR) don't exist"; \
 		false; \
 	fi
+
+uninstall:
+	-rm $(INSTDIR)/PtokaX
 
 
 #*******************************************************************************

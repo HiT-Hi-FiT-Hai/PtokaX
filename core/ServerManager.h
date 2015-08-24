@@ -44,6 +44,8 @@ public:
 
 	static void CommandLineSetup();
 
+	static bool ResolveHubAddress(const bool &bSilent = false);
+
     static string sPath, sScriptPath;
 
 #ifdef _WIN32

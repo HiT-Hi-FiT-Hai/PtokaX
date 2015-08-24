@@ -128,9 +128,7 @@ void SettingPageGeneral2::Save() {
 
     iLen = ::GetWindowText(hWndPageItems[EDT_MAIN_REDIR_ADDR], buf, 257);
 
-    if((clsSettingManager::mPtr->sTexts[SETTXT_REDIRECT_ADDRESS] == NULL && iLen != 0) ||
-        (clsSettingManager::mPtr->sTexts[SETTXT_REDIRECT_ADDRESS] != NULL &&
-        strcmp(buf, clsSettingManager::mPtr->sTexts[SETTXT_REDIRECT_ADDRESS]) != NULL)) {
+    if((clsSettingManager::mPtr->sTexts[SETTXT_REDIRECT_ADDRESS] == NULL && iLen != 0) || (clsSettingManager::mPtr->sTexts[SETTXT_REDIRECT_ADDRESS] != NULL && strcmp(buf, clsSettingManager::mPtr->sTexts[SETTXT_REDIRECT_ADDRESS]) != NULL)) {
         bUpdateRedirectAddress = true;
         bUpdateRegOnlyMessage = true;
         bUpdateShareLimitMessage = true;
