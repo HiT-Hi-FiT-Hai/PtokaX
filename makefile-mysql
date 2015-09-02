@@ -55,23 +55,23 @@ OBJS = $(CURDIR)/obj/colUsers.o $(CURDIR)/obj/DB-MySQL.o $(CURDIR)/obj/DcCommand
 PtokaX: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.3 -I/usr/include/mysql -I/usr/include/mariadb
 PtokaX: $(OBJS)
 	cd skein; $(MAKE)
-	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.3 -ltinyxml -lmysqlclient
+	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua5.3 -ltinyxml -lmysqlclient
 
 lua52: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.2 -I/usr/include/mysql -I/usr/include/mariadb
 lua52: $(OBJS)
 	cd skein; $(MAKE)
-	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.2 -ltinyxml -lmysqlclient
+	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua5.2 -ltinyxml -lmysqlclient
 
 lua51: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/lua5.1 -I/usr/include/mysql -I/usr/include/mariadb
 lua51: $(OBJS)
 	cd skein; $(MAKE)
-	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua5.1 -ltinyxml -lmysqlclient
+	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua5.1 -ltinyxml -lmysqlclient
 
 centos: CXXFLAGS = -O -g -Wall -Wextra -DTIXML_USE_STL -D_WITH_MYSQL
 centos: $(OBJS)
 	cd skein; $(MAKE)
 	cd tinyxml; $(MAKE)
-	$(CXX) $(OBJS) -L/usr/lib64/mysql $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua -lmysqlclient
+	$(CXX) $(OBJS) -L/usr/lib64/mysql $(CURDIR)/tinyxml/tinyxml.a $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lrt -lz -llua -lmysqlclient
 
 fedora: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/mysql -I/usr/include/mariadb
 fedora: $(OBJS)

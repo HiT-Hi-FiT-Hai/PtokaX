@@ -5,6 +5,9 @@ PtokaX DC hub software - PPK (c) 2006/2015
 
 
 ----------------------------------------Next Release...---------------------------------------
+
+
+-------------------------------------0.5.2.1 3 September 2015-------------------------------------
 Added: Support to build with Lua 5.3 on Debian (Ubuntu, Mint, Dyson...) to makefile (make without param).
 Added: Disable registration to hublist, when hub address is local/private IP.
 Changed: Build with Lua 5.1 on Debian (Ubuntu, Mint, Dyson...) now have lua51 param (make lua51).
