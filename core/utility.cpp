@@ -554,7 +554,7 @@ char* stristr2(const char *str1, const char *str2) {
 bool isIP(char * sIP) {
     if(clsServerManager::bUseIPv6 == true && strchr(sIP, '.') == NULL) {
         uint8_t ui128IpHash[16];
-#if defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
         if(win_inet_pton(sIP, ui128IpHash) != 1) {
 #else
         if(inet_pton(AF_INET6, sIP, ui128IpHash) != 1) {
@@ -589,7 +589,7 @@ uint32_t HashNick(const char * sNick, const size_t &szNickLen) {
 
 bool HashIP(const char * sIP, uint8_t * ui128IpHash) {
     if(clsServerManager::bUseIPv6 == true && strchr(sIP, '.') == NULL) {
-#if defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
         if(win_inet_pton(sIP, ui128IpHash) != 1) {
 #else
         if(inet_pton(AF_INET6, sIP, ui128IpHash) != 1) {
@@ -1140,7 +1140,7 @@ bool DirExist(char * sPath) {
 #endif
 //---------------------------------------------------------------------------
 
-#if defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
 	typedef INT (WSAAPI * pInetPton)(INT, PCTSTR, PVOID);
 	pInetPton MyInetPton = NULL;
 	typedef PCTSTR (WSAAPI *pInetNtop)(INT, PVOID, PTSTR, size_t);
@@ -1206,7 +1206,7 @@ void CheckForIPv6() {
     close(sock);
 #endif
 
-#if defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
     HINSTANCE hWs2_32 = ::LoadLibrary("Ws2_32.dll");
 
     MyInetPton = (pInetPton)::GetProcAddress(hWs2_32, "inet_pton");
@@ -1217,7 +1217,7 @@ void CheckForIPv6() {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-#if defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
 INT win_inet_pton(PCTSTR pAddrString, PVOID pAddrBuf) {
     if(MyInetPton != NULL) {
         return MyInetPton(AF_INET6, pAddrString, pAddrBuf);
@@ -1456,7 +1456,7 @@ bool WantAgain() {
 bool IsPrivateIP(const char * sIP) {
     if(clsServerManager::bUseIPv6 == true && strchr(sIP, '.') == NULL) {
         uint8_t ui128IpHash[16];
-#if defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
         if(win_inet_pton(sIP, ui128IpHash) != 1) {
 #else
         if(inet_pton(AF_INET6, sIP, ui128IpHash) != 1) {

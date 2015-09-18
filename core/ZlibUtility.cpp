@@ -36,7 +36,7 @@ static const uint32_t ZMINLEN = 100;
 clsZlibUtility * clsZlibUtility::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-clsZlibUtility::clsZlibUtility() : szZbufferSize(0), pZbuffer(NULL) {
+clsZlibUtility::clsZlibUtility() : pZbuffer(NULL), szZbufferSize(0) {
 	// allocate buffer for zlib
 #ifdef _WIN32
 	pZbuffer = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE | HEAP_ZERO_MEMORY, ZBUFFERLEN);

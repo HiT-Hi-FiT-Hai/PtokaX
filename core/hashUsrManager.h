@@ -26,21 +26,22 @@ struct User;
 
 class clsHashManager {
 private:
+    User * pNickTable[65536];
+
     struct IpTableItem {
-        IpTableItem() : pPrev(NULL), pNext(NULL), pFirstUser(NULL), ui16Count(0) { };
-
-        IpTableItem(const IpTableItem&);
-        const IpTableItem& operator=(const IpTableItem&);
-
         IpTableItem * pPrev, * pNext;
 
         User * pFirstUser;
 
         uint16_t ui16Count;
+
+        IpTableItem() : pPrev(NULL), pNext(NULL), pFirstUser(NULL), ui16Count(0) { };
+
+        IpTableItem(const IpTableItem&);
+        const IpTableItem& operator=(const IpTableItem&);
     };
 
-    User * pNickTable[65536];
-    IpTableItem * pIpTable[65536];
+	IpTableItem * pIpTable[65536];
 
     clsHashManager(const clsHashManager&);
     const clsHashManager& operator=(const clsHashManager&);

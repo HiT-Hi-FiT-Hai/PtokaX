@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1251" standalone="yes" ?>
-<Language Name="Russian Language" Author="dmvn, WAJIM, Alexey" Version="0.5.1.0 build 498">
+<Language Name="Russian Language" Author="dmvn, WAJIM, Alexey" Version="0.5.2.1 build 524">
     <String Name="ThisHubIsRunning">Этот хаб работает под управлением</String>
     <String Name="HubName">Название хаба</String>
     <String Name="MOTD(motd)">MOTD (сообщение дня, отправляется при входе в хаб)</String>
@@ -78,8 +78,8 @@
     <String Name="KeepSlow">Поддержка медленных клиентов</String>
     <String Name="CheckStartupNewVersion">Проверять наличие новой версии PtokaX при старте</String>
     <String Name="MyinfoProcess">Обработка MyINFO</String>
-    <String Name="ToAllUsers">Отправлять всем пользователям</String>
-    <String Name="OnlyAllowedProfiles">Только уполномоченным профилям</String>
+    <String Name="ToAllUsers">Всем пользователям</String>
+    <String Name="OnlyAllowedProfiles">Уполномоченным профилям</String>
     <String Name="DontSend">Не отправлять никому</String>
     <String Name="ModeToMyINFO">Добавлять режим соединения в MyINFO</String>
     <String Name="ModeToDescr">Добавлять режим соединения в начало описания</String>
@@ -122,7 +122,7 @@
     <String Name="MyINFOs">MyINFOs</String>
     <String Name="GetNickLists">Запрос списка пользователей</String>
     <String Name="MinLwr">мин</String>
-    <String Name="GlobalMainChatDeflood">Общий антифлуд в главном чате</String>
+    <String Name="GlobalMainChatDeflood">Общий антифлуд главного чата</String>
     <String Name="LockChat">Заблокировать чат</String>
     <String Name="OnlyToOPsWithIP">Блокировать и сообщить ОПам</String>
     <String Name="For">на</String>
@@ -215,7 +215,7 @@
     <String Name="ProfileNameExist">Такое имя уже использовано для другого профиля!</String>
     <String Name="RegisteredUser">Регистрация пользователя</String>
     <String Name="Discard">Отмена</String>
-    <String Name="Error">Ошибка:</String>
+    <String Name="Error">Ошибка</String>
     <String Name="NickMustBeSpecified">Надо указать ник!</String>
     <String Name="PassMustBeSpecified">Надо указать пароль!</String>
     <String Name="NoBadCharsInNickName">Ник не должен содержать символов вертикальной черты (pipe), доллара ($) и пробела!</String>
@@ -414,7 +414,7 @@
     <String Name="SendPrivateMessageToAllUsers">отправить личное сообщение всем пользователям</String>
     <String Name="SendPrivateMessageToAllOPs">отправить личное сообщение всем операторам</String>
     <String Name="ReasonIsAlwaysOptional">Причину бана указывать необязательно</String>
-    <String Name="FullBansDisallowAllFromBannedIpToLogin">Полный (с приставкой full) бан никому не даст зайти с забаненного IP</String>
+    <String Name="FullBansDisallowAllFromBannedIpToLogin">Полный бан (с приставкой full) никому не даст зайти с забаненного IP</String>
     <String Name="TempBanTimeValues">Возможные значения временных банов</String>
     <String Name="GlobalCommands">Общие команды</String>
     <String Name="SpeakIn3rdPerson">сказать от третьего лица</String>
@@ -422,7 +422,7 @@
     <String Name="StoppedScript">остановил скрипт</String>
     <String Name="StoppedLwr">остановлен</String>
     <String Name="ErrorScriptAlreadyRunning">Ошибка: скрипт уже запущен</String>
-    <String Name="ErrorScriptNotExist">Ошибка: такого скрипта не существует</String>
+    <String Name="ErrorScriptNotExist">Ошибка: нет скрипта с таким именем</String>
     <String Name="StartedScript">запустил скрипт</String>
     <String Name="StartedLwr">запущен</String>
     <String Name="StartFailed">запуск не удался</String>
@@ -553,7 +553,7 @@
     <String Name="MaxUsersLimit">Вместимость хаба</String>
     <String Name="TempBanTimeAfterEtc">Срок бана при кике</String>
     <String Name="HubOwnerEmail">Email владельца хаба (для пингеров хаблистов)</String>
-    <String Name="MainRedirectAddress">Основной адрес перенаправления (исп. в т.ч. для перенапр. без адреса)</String>
+    <String Name="MainRedirectAddress">Основной адрес перенаправления (для перенаправлений без адреса)</String>
     <String Name="RegOnlyMsg">Сообщение, отправляемое незарегистрированным пользователям</String>
     <String Name="PSRLimit">Макс.результатов поиска для пассивов</String>
     <String Name="OpChatBot">Комната для операторов хаба</String>
@@ -703,7 +703,6 @@
     <String Name="Help">&amp;Справка</String>
     <String Name="Exit">Выход</String>
     <String Name="website">веб-сайт</String>
-    <String Name="board">форум</String>
     <String Name="forum">&amp;форум</String>
     <String Name="MenuAbout">О программе</String>
     <String Name="CheckForUpdate">Проверить наличие обновлений</String>
@@ -742,7 +741,7 @@
     <String Name="FailedToOpen">Не удалось открыть</String>
     <String Name="OpenInScriptEditor">Открыть во встроенном редакторе</String>
     <String Name="FailedToSave">Не удалось сохранить</String>
-    <String Name="FailedToCheckSyntax">Failed to check syntax</String>
+    <String Name="FailedToCheckSyntax">Не удалось проверить синтаксис</String>
     <String Name="Change">Изменить</String>
     <String Name="FilterRegisteredUsers">Фильтр зарегистрированных пользователей</String>
     <String Name="UserDeletedAcceptToNew">Registered user was deleted. When you now press accept then new registered user will be created!</String>
@@ -763,10 +762,10 @@
     <String Name="Register">предложил зарегистрироваться пользователю</String>
     <String Name="As">зарегистрироваться с профилем</String>
     <String Name="Registered">предложил пользователю</String>
-    <String Name="YouWereRegisteredPleaseEnterYourPassword">Вам предлагают зарегистрироваться. Пожалуйста, введите ваш пароль</String>
+    <String Name="YouWereRegisteredPleaseEnterYourPassword">Вам предлагают зарегистрироваться в хабе. Пожалуйста, введите ваш пароль</String>
     <String Name="SorryYouAreAlreadyRegistered">Sorry you are already registered</String>
     <String Name="ThankYouForPasswordYouAreNowRegisteredAs">Теперь вы зарегистрированы в хабе с профилем</String>
-    <String Name="RegisterUserWithSpecifiedProfile">зарегистрировать онлайн-пользователя с указанным профилем. Хаб запросит у пользователя пароль и зарегистрирует его</String>
+    <String Name="RegisterUserWithSpecifiedProfile">предложить онлайн-пользователю зарегистрироваться с указанным профилем. Хаб запросит у пользователя пароль и зарегистрирует его</String>
     <String Name="InCommandHubReplacedItWithYourRealIP">в параметрах команды, сервер заменил его на IP вашего соединения</String>
     <String Name="YourNickContainsIllegalWhiteCharacter">Ваш ник содержит запрещённые управляющие символы</String>
     <String Name="PasswordIsHashed">Эта графа пуста, так-как пароль зашифрован</String>
@@ -779,4 +778,6 @@
     <String Name="DatabaseSupport">Работа с базой данных (используется для хранения основной информации о пользователях)</String>
     <String Name="EnableDatabase">Использовать базу данных</String>
     <String Name="RemoveOldRecords">Удалять записи старше чем (дней)</String>
+    <String Name="YouCanUseSQLWildcards">Можно использовать символы подстановки SQL</String>
+    <String Name="Unlimited">неограничено</String>
 </Language>

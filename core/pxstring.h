@@ -24,6 +24,7 @@
 class string {
 private:
 	char * sData;
+
 	size_t szDataLen;
 
 	void stralloc(const char * sTxt, const size_t &szLen);

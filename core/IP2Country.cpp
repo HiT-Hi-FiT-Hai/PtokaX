@@ -385,7 +385,7 @@ void clsIpP2Country::LoadIPv6() {
 		for(size_t szi = 0; szi < szLineLen; szi++) {
             if(ui8d == 0 && sLine[szi] == '-') {
                 sLine[szi] = '\0';
-#if defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
                 win_inet_pton(sStart, ui128IPv6RangeFrom + (ui32IPv6Count*16));
 #else
                 inet_pton(AF_INET6, sStart, ui128IPv6RangeFrom + (ui32IPv6Count*16));
@@ -393,7 +393,7 @@ void clsIpP2Country::LoadIPv6() {
             } else if(sLine[szi] == ',') {
                 sLine[szi] = '\0';
                 if(ui8d == 1) {
-#if defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
                     win_inet_pton(sStart, ui128IPv6RangeTo + (ui32IPv6Count*16));
 #else
                     inet_pton(AF_INET6, sStart, ui128IPv6RangeTo + (ui32IPv6Count*16));
@@ -460,8 +460,7 @@ void clsIpP2Country::LoadIPv6() {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-clsIpP2Country::clsIpP2Country() : ui32Size(0), ui32IPv6Size(0), ui32RangeFrom(NULL), ui32RangeTo(NULL), ui8RangeCI(NULL), ui8IPv6RangeCI(NULL),
-	ui128IPv6RangeFrom(NULL), ui128IPv6RangeTo(NULL), ui32Count(0), ui32IPv6Count(0) {
+clsIpP2Country::clsIpP2Country() : ui32RangeFrom(NULL), ui32RangeTo(NULL), ui8RangeCI(NULL), ui8IPv6RangeCI(NULL), ui128IPv6RangeFrom(NULL), ui128IPv6RangeTo(NULL), ui32Size(0), ui32IPv6Size(0), ui32Count(0), ui32IPv6Count(0) {
     LoadIPv4();
     LoadIPv6();
 }

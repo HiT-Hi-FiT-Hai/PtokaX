@@ -31,7 +31,7 @@
 clsReservedNicksManager * clsReservedNicksManager::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-clsReservedNicksManager::ReservedNick::ReservedNick() : sNick(NULL), pPrev(NULL), pNext(NULL), ui32Hash(0), bFromScript(false) {
+clsReservedNicksManager::ReservedNick::ReservedNick() : pPrev(NULL), pNext(NULL), sNick(NULL), ui32Hash(0), bFromScript(false) {
 	// ...
 }
 //---------------------------------------------------------------------------

@@ -26,17 +26,18 @@ struct User;
 class clsTextFilesManager {
 private:
     struct TextFile {
+    	TextFile * pPrev, * pNext;
+
+        char * sCommand, * sText;
+
         TextFile();
         ~TextFile();
 
         TextFile(const TextFile&);
         const TextFile& operator=(const TextFile&);
-
-        char * sCommand, * sText;
-        TextFile * pPrev, * pNext;
     };
 
-    TextFile * pTextFiles;
+	TextFile * pTextFiles;
 
     clsTextFilesManager(const clsTextFilesManager&);
     const clsTextFilesManager& operator=(const clsTextFilesManager&);

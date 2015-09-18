@@ -70,8 +70,10 @@ static ServerThread * pServersE = NULL;
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
-    UINT_PTR clsServerManager::sectimer = 0;
-    UINT_PTR clsServerManager::regtimer = 0;
+	#ifndef _WIN_IOT
+	    UINT_PTR clsServerManager::sectimer = 0;
+	    UINT_PTR clsServerManager::regtimer = 0;
+    #endif
 
 	HANDLE clsServerManager::hConsole = NULL, clsServerManager::hLuaHeap = NULL, clsServerManager::hPtokaXHeap = NULL, clsServerManager::hRecvHeap = NULL, clsServerManager::hSendHeap = NULL;
 	string clsServerManager::sLuaPath = "", clsServerManager::sOS = "";
@@ -418,7 +420,7 @@ void clsServerManager::Initialize() {
 
 	clsSettingManager::mPtr->UpdateAll();
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
     sectimer = SetTimer(NULL, 0, 1000, NULL);
 
 	if(sectimer == 0) {
@@ -613,17 +615,17 @@ bool clsServerManager::Start() {
     clsMainWindow::mPtr->EnableGuiItems(TRUE);
 #endif
 
+#if defined(_WIN32) && !defined(_WIN_IOT)
     //Start the HubRegistration timer
     if(clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG] == true) {
-#ifdef _WIN32
 		regtimer = SetTimer(NULL, 0, 901000, NULL);
 
         if(regtimer == 0) {
 			AppendDebugLog("%s - [ERR] Cannot start regtimer in ServerStart\n");
         	exit(EXIT_FAILURE);
         }
-#endif
     }
+#endif
 
     return true;
 }
@@ -639,15 +641,15 @@ void clsServerManager::Stop() {
         AppendLog(clsServerManager::pGlobalBuffer);
     }
 
+#if defined(_WIN32) && !defined(_WIN_IOT)
 	//Stop the HubRegistration timer
 	if(clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG] == true) {
-#ifdef _WIN32
         if(KillTimer(NULL, regtimer) == 0) {
     		AppendDebugLog("%s - [ERR] Cannot stop regtimer in ServerStop\n");
         	exit(EXIT_FAILURE);
         }
-#endif
     }
+#endif
 
     ServerThread * cur = NULL,
         * next = pServersS;
@@ -779,7 +781,7 @@ void clsServerManager::FinalStop(const bool &bDeleteServiceLoop) {
 //---------------------------------------------------------------------------
 
 void clsServerManager::FinalClose() {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
     KillTimer(NULL, sectimer);
 #endif
 
@@ -840,8 +842,10 @@ void clsServerManager::FinalClose() {
 	HeapDestroy(hPtokaXHeap);
 	
 	WSACleanup();
-	
-	::PostMessage(NULL, WM_USER+1, 0, 0);
+
+	#ifndef _WIN_IOT
+		::PostMessage(NULL, WM_USER+1, 0, 0);
+	#endif
 #endif
 }
 //---------------------------------------------------------------------------
@@ -976,7 +980,7 @@ void clsServerManager::UpdateAutoRegState() {
     }
 
     if(clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG] == true) {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
         regtimer = SetTimer(NULL, 0, 901000, NULL);
 
         if(regtimer == 0) {
@@ -988,14 +992,16 @@ void clsServerManager::UpdateAutoRegState() {
 		mach_timespec_t mts;
 		clock_get_time(clsServerManager::csMachClock, &mts);
 		clsServiceLoop::mPtr->ui64LastRegToHublist = mts.tv_sec;
+	#elif _WIN32
+		clsServiceLoop::mPtr->ui64LastRegToHublist = ::GetTickCount64() / 1000;
 	#else
 		timespec ts;
 		clock_gettime(CLOCK_MONOTONIC, &ts);
 		clsServiceLoop::mPtr->ui64LastRegToHublist = ts.tv_sec;
 	#endif
 #endif
+#if defined(_WIN32) && !defined(_WIN_IOT)
     } else {
-#ifdef _WIN32
         if(KillTimer(NULL, regtimer) == 0) {
     		AppendDebugLog("%s - [ERR] Cannot stop regtimer in ServerUpdateAutoRegState\n");
         	exit(EXIT_FAILURE);
@@ -1096,7 +1102,7 @@ bool clsServerManager::ResolveHubAddress(const bool &bSilent/* = false*/) {
             struct addrinfo *res;
 
             if(::getaddrinfo(clsSettingManager::mPtr->sTexts[SETTXT_HUB_ADDRESS], NULL, &hints, &res) != 0 || (res->ai_family != AF_INET && res->ai_family != AF_INET6)) {
-            	if(&bSilent == false) {
+            	if(bSilent == false) {
 #ifdef _WIN32
             		int err = WSAGetLastError();
 	#ifdef _BUILD_GUI
@@ -1127,7 +1133,7 @@ bool clsServerManager::ResolveHubAddress(const bool &bSilent/* = false*/) {
                                 strcpy(sHubIP, inet_ntoa(((sockaddr_in *)(next->ai_addr))->sin_addr));
                             }
                         } else if(next->ai_family == AF_INET6) {
-#if defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
                             win_inet_ntop(&((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, sHubIP6, 40);
 #else
                             inet_ntop(AF_INET6, &((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, sHubIP6, 40);

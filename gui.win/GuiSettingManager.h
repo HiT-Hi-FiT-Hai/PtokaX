@@ -32,17 +32,6 @@ private:
 public:
     static clsGuiSettingManager * mPtr;
 
-    static float fScaleFactor;
-
-    static int iGroupBoxMargin;
-    static int iCheckHeight;
-    static int iEditHeight;
-    static int iTextHeight;
-    static int iUpDownWidth;
-    static int iOneLineGB;
-    static int iOneLineOneChecksGB;
-    static int iOneLineTwoChecksGB;
-
     static HFONT hFont;
     static HCURSOR hArrowCursor;
     static HCURSOR hVerticalCursor;
@@ -53,6 +42,17 @@ public:
     static WNDPROC wpOldNumberEditProc;
     static WNDPROC wpOldTabsProc;
     static WNDPROC wpOldTreeProc;
+
+    static float fScaleFactor;
+
+    static int iGroupBoxMargin;
+    static int iCheckHeight;
+    static int iEditHeight;
+    static int iTextHeight;
+    static int iUpDownWidth;
+    static int iOneLineGB;
+    static int iOneLineOneChecksGB;
+    static int iOneLineTwoChecksGB;
 
     int32_t i32Integers[GUISETINT_IDS_END]; //clsGuiSettingManager::mPtr->iIntegers[]
 

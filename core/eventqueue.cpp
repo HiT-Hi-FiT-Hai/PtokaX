@@ -45,7 +45,7 @@
 clsEventQueue * clsEventQueue::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-clsEventQueue::event::event() : sMsg(NULL), pPrev(NULL), pNext(NULL), ui8Id(0) {
+clsEventQueue::event::event() : pPrev(NULL), pNext(NULL), sMsg(NULL), ui8Id(0) {
     memset(&ui128IpHash, 0, 16);
 };
 //---------------------------------------------------------------------------

@@ -3324,6 +3324,8 @@ bool clsHubCommands::DoCommand(User * pUser, char * sCommand, const size_t &szCm
 #ifdef _WIN32
     #ifdef _M_X64
                 " x64"
+    #elif _M_ARM
+    			" ARM"
     #endif
 #endif
 #ifdef _PtokaX_TESTING_

@@ -23,32 +23,34 @@
 
 class clsEventQueue {
 private:
-    struct event {
-        event();
-
-        event(const event&);
-        const event& operator=(const event&);
-
-        char * sMsg;
-
-        event * pPrev, * pNext;
-
-        uint8_t ui128IpHash[16];
-        uint8_t ui8Id;
-    };
-
-    event * pNormalE, * pThreadE;
-
 #ifdef _WIN32
 	CRITICAL_SECTION csEventQueue;
 #else
 	pthread_mutex_t mtxEventQueue;
 #endif
 
+    struct event {
+    	event * pPrev, * pNext;
+
+        char * sMsg;
+
+        uint8_t ui128IpHash[16];
+        uint8_t ui8Id;
+
+        event();
+
+        event(const event&);
+        const event& operator=(const event&);
+    };
+
+	event * pNormalE, * pThreadE;
+
 	clsEventQueue(const clsEventQueue&);
 	const clsEventQueue& operator=(const clsEventQueue&);
 public:
     static clsEventQueue * mPtr;
+
+	event * pNormalS, * pThreadS;
 
 	enum {
         EVENT_RESTART, 
@@ -61,8 +63,6 @@ public:
         EVENT_SRVTHREAD_MSG, 
         EVENT_UDP_SR
 	};
-
-    event * pNormalS, * pThreadS;
 
     clsEventQueue();
     ~clsEventQueue();

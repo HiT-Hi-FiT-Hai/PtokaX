@@ -35,13 +35,13 @@
 clsUdpDebug * clsUdpDebug::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-clsUdpDebug::UdpDbgItem::UdpDbgItem() :
+clsUdpDebug::UdpDbgItem::UdpDbgItem() : pPrev(NULL), pNext(NULL), sNick(NULL), 
 #ifdef _WIN32
     s(INVALID_SOCKET),
 #else
     s(-1),
 #endif
-	sas_len(0), ui32Hash(0), sNick(NULL), pPrev(NULL), pNext(NULL), bIsScript(false), bAllData(true) {
+	sas_len(0), ui32Hash(0), bIsScript(false), bAllData(true) {
     memset(&sas_to, 0, sizeof(sockaddr_storage));
 }
 //---------------------------------------------------------------------------

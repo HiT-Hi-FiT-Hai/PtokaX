@@ -23,9 +23,9 @@
 
 class PXBReader {
 private:
-    char * pActualPosition;
+	FILE * pFile;
 
-    FILE * pFile;
+    char * pActualPosition;
 
     size_t szRemainingSize;
 

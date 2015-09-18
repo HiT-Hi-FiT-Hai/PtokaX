@@ -26,6 +26,69 @@ class ServerThread;
 
 class clsServerManager {
 public:
+    static string sPath, sScriptPath;
+
+#ifdef _WIN32
+	static string sLuaPath, sOS;
+#endif
+
+    static double daCpuUsage[60], dCpuUsage;
+
+    static uint64_t ui64ActualTick, ui64TotalShare;
+    static uint64_t ui64BytesRead, ui64BytesSent, ui64BytesSentSaved;
+    static uint64_t ui64LastBytesRead, ui64LastBytesSent;
+    static uint64_t ui64Mins, ui64Hours, ui64Days;
+
+#ifdef _WIN32
+	static HANDLE hConsole, hLuaHeap, hPtokaXHeap, hRecvHeap, hSendHeap;
+#endif
+
+#ifdef __MACH__
+	static clock_serv_t csMachClock;
+#endif
+
+	static time_t tStartTime;
+
+#if defined(_WIN32) && !defined(_WIN_IOT)
+    static UINT_PTR sectimer;
+    static UINT_PTR regtimer;
+	#ifdef _BUILD_GUI
+        static HINSTANCE hInstance;
+        static HWND hWndActiveDialog;
+	#endif
+#endif
+
+	static ServerThread * pServersS;
+
+    static char * pGlobalBuffer;
+
+	static size_t szGlobalBufferSize;
+
+#ifndef _WIN32
+    static uint32_t ui32CpuCount;
+#endif
+
+    static uint32_t ui32Joins, ui32Parts, ui32Logged, ui32Peak;
+    static uint32_t ui32aUploadSpeed[60], ui32aDownloadSpeed[60];
+    static uint32_t ui32ActualBytesRead, ui32ActualBytesSent;
+    static uint32_t ui32AverageBytesRead, ui32AverageBytesSent;
+
+    static bool bServerRunning, bServerTerminated, bIsRestart, bIsClose;
+
+#ifdef _WIN32
+	#ifndef _BUILD_GUI
+        static bool bService;
+	#endif
+#else
+    static bool bDaemon;
+#endif
+
+    static bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bUseIPv4, bUseIPv6, bIPv6DualStack;
+
+    static char sHubIP[16], sHubIP6[40];
+
+    static uint8_t ui8SrCntr, ui8MinTick;
+
 	static void OnSecTimer();
     static void OnRegTimer();
 
@@ -45,65 +108,6 @@ public:
 	static void CommandLineSetup();
 
 	static bool ResolveHubAddress(const bool &bSilent = false);
-
-    static string sPath, sScriptPath;
-
-#ifdef _WIN32
-	static string sLuaPath, sOS;
-#endif
-
-    static size_t szGlobalBufferSize;
-
-    static char * pGlobalBuffer;
-
-#ifdef _WIN32
-	static HANDLE hConsole, hLuaHeap, hPtokaXHeap, hRecvHeap, hSendHeap;
-#endif
-
-#ifdef __MACH__
-	static clock_serv_t csMachClock;
-#endif
-
-    static double daCpuUsage[60], dCpuUsage;
-
-    static uint64_t ui64ActualTick, ui64TotalShare;
-    static uint64_t ui64BytesRead, ui64BytesSent, ui64BytesSentSaved;
-    static uint64_t ui64LastBytesRead, ui64LastBytesSent;
-    static uint64_t ui64Mins, ui64Hours, ui64Days;
-
-#ifndef _WIN32
-    static uint32_t ui32CpuCount;
-#endif
-
-    static uint32_t ui32Joins, ui32Parts, ui32Logged, ui32Peak;
-    static uint32_t ui32aUploadSpeed[60], ui32aDownloadSpeed[60];
-    static uint32_t ui32ActualBytesRead, ui32ActualBytesSent;
-    static uint32_t ui32AverageBytesRead, ui32AverageBytesSent;
-
-    static ServerThread * pServersS;
-
-    static time_t tStartTime;
-
-    static bool bServerRunning, bServerTerminated, bIsRestart, bIsClose;
-
-#ifdef _WIN32
-    static UINT_PTR sectimer;
-    static UINT_PTR regtimer;
-	#ifndef _BUILD_GUI
-        static bool bService;
-    #else
-        static HINSTANCE hInstance;
-        static HWND hWndActiveDialog;
-	#endif
-#else
-    static bool bDaemon;
-#endif
-
-    static bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bUseIPv4, bUseIPv6, bIPv6DualStack;
-
-    static char sHubIP[16], sHubIP6[40];
-
-    static uint8_t ui8SrCntr, ui8MinTick;
 };
 //--------------------------------------------------------------------------- 
 

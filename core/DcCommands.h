@@ -29,8 +29,10 @@ struct PassBf;
 class clsDcCommands {
 private:
     struct PassBf {
+    	PassBf * pPrev, * pNext;
+
         int iCount;
-        PassBf * pPrev, * pNext;
+
         uint8_t ui128IpHash[16];
 
         explicit PassBf(const uint8_t * ui128Hash);
@@ -82,12 +84,11 @@ private:
     static void SendIPFixedMsg(User * pUser, char * sBadIP, char * sRealIP);
 
     PrcsdUsrCmd * AddSearch(User * pUser, PrcsdUsrCmd * cmdSearch, char * sSearch, const size_t &szLen, const bool &bActive) const;
-protected:
 public:
+	static clsDcCommands * mPtr;
+
 	clsDcCommands();
     ~clsDcCommands();
-
-    static clsDcCommands * mPtr;
 
     void PreProcessData(User * pUser, char * sData, const bool &bCheck, const uint32_t &ui32Len);
     void ProcessCmds(User * pUser);

@@ -24,15 +24,15 @@
 class UDPThread {
 private:
 #ifdef _WIN32
+	HANDLE hThreadHandle;
+
     SOCKET sock;
 
     unsigned int threadId;
-
-    HANDLE hThreadHandle;
 #else
-    int sock;
+	pthread_t threadId;
 
-    pthread_t threadId;
+    int sock;
 #endif
 
     bool bTerminated;

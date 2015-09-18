@@ -31,26 +31,30 @@ static const uint32_t ZMYINFOLISTSIZE = 1024*128;
 
 class clsUsers {
 private:
+	uint64_t ui64ChatMsgsTick, ui64ChatLockFromTick;
+
     struct RecTime {
+        uint64_t ui64DisConnTick;
+
+        RecTime * pPrev, * pNext;
+
+        char * sNick;
+
+        uint32_t ui32NickHash;
+
+        uint8_t ui128IpHash[16];
+
         explicit RecTime(const uint8_t * pIpHash);
 
         RecTime(const RecTime&);
         const RecTime& operator=(const RecTime&);
-
-        uint64_t ui64DisConnTick;
-        uint32_t ui32NickHash;
-        RecTime * pPrev, * pNext;
-        char * sNick;
-        uint8_t ui128IpHash[16];
     };
-
-    uint64_t ui64ChatMsgsTick, ui64ChatLockFromTick;
-
-    uint16_t ui16ChatMsgs;
 
     RecTime * pRecTimeList;
 
 	User * pListE;
+
+	uint16_t ui16ChatMsgs;
 
     bool bChatLocked;
 
@@ -59,16 +63,17 @@ private:
 public:
     static clsUsers * mPtr;
 
+	User * pListS;
+
+    char * pNickList, * pZNickList, * pOpList, * pZOpList, * pUserIPList, * pZUserIPList;
+    char * pMyInfos, * pZMyInfos, * pMyInfosTag, * pZMyInfosTag;
+
+
     uint32_t ui32MyInfosLen, ui32MyInfosSize, ui32ZMyInfosLen, ui32ZMyInfosSize;
     uint32_t ui32MyInfosTagLen, ui32MyInfosTagSize, ui32ZMyInfosTagLen, ui32ZMyInfosTagSize;
     uint32_t ui32NickListLen, ui32NickListSize, ui32ZNickListLen, ui32ZNickListSize;
     uint32_t ui32OpListLen, ui32OpListSize, ui32ZOpListLen, ui32ZOpListSize;
     uint32_t ui32UserIPListSize, ui32UserIPListLen, ui32ZUserIPListSize, ui32ZUserIPListLen;
-
-    char * pNickList, * pZNickList, * pOpList, * pZOpList, * pUserIPList, * pZUserIPList;
-    char * pMyInfos, * pZMyInfos, * pMyInfosTag, * pZMyInfosTag;
-
-    User * pListS;
     
     uint16_t ui16ActSearchs, ui16PasSearchs;
 

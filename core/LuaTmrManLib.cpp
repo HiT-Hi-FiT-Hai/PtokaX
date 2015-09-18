@@ -98,7 +98,7 @@ static int AddTimer(lua_State * L) {
         }
     }
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
 #if LUA_VERSION_NUM < 503
 	UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tonumber(L, 1), NULL);
 #else
@@ -117,7 +117,7 @@ static int AddTimer(lua_State * L) {
 #endif
 
     if(pNewtimer == NULL) {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
         KillTimer(NULL, timer);
 #endif
         AppendDebugLog("%s - [MEM] Cannot allocate pNewtimer in TmrMan.AddTimer\n");
@@ -126,7 +126,7 @@ static int AddTimer(lua_State * L) {
         return 1;
     }
 
-#ifndef _WIN32
+#if !defined(_WIN32) || (defined(_WIN32) && defined(_WIN_IOT))
 #if LUA_VERSION_NUM < 503
 	pNewtimer->ui64Interval = (uint64_t)lua_tonumber(L, 1);// ms
 #else
@@ -136,6 +136,8 @@ static int AddTimer(lua_State * L) {
 		mach_timespec_t mts;
 		clock_get_time(clsServerManager::csMachClock, &mts);
 		pNewtimer->ui64LastTick = (uint64_t(mts.tv_sec) * 1000) + (uint64_t(mts.tv_nsec) / 1000000);
+	#elif _WIN32
+		pNewtimer->ui64LastTick = ::GetTickCount64();
 	#else
 		timespec ts;
 		clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -145,7 +147,7 @@ static int AddTimer(lua_State * L) {
 
     lua_settop(L, 0);
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
     lua_pushlightuserdata(L, (void *)pNewtimer->uiTimerId);
 #else
     lua_pushlightuserdata(L, (void *)pNewtimer);
@@ -183,7 +185,7 @@ static int RemoveTimer(lua_State * L) {
         return 0;
 	}
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
     UINT_PTR timer = (UINT_PTR)lua_touserdata(L, 1);
 #else
 	ScriptTimer * timer = (ScriptTimer *)lua_touserdata(L, 1);
@@ -196,7 +198,7 @@ static int RemoveTimer(lua_State * L) {
         pCurTmr = pNextTmr;
         pNextTmr = pCurTmr->pNext;
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
         if(pCurTmr->uiTimerId == timer) {
             KillTimer(NULL, pCurTmr->uiTimerId);
 #else

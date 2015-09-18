@@ -34,14 +34,14 @@
 clsRegisterThread * clsRegisterThread::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-clsRegisterThread::RegSocket::RegSocket() : ui64TotalShare(0),
+clsRegisterThread::RegSocket::RegSocket() : ui64TotalShare(0), pPrev(NULL), pNext(NULL), sAddress(NULL), pRecvBuf(NULL), pSendBuf(NULL), pSendBufHead(NULL),
 #ifdef _WIN32
-    sock(INVALID_SOCKET),
+    sock(INVALID_SOCKET), 
 #else
     sock(-1),
 #endif
-	ui32RecvBufLen(0), ui32RecvBufSize(0), ui32SendBufLen(0), ui32TotalUsers(0), ui32AddrLen(0), sAddress(NULL), pRecvBuf(NULL), pSendBuf(NULL), pSendBufHead(NULL),
-	pPrev(NULL), pNext(NULL) {
+	ui32RecvBufLen(0), ui32RecvBufSize(0), ui32SendBufLen(0), ui32TotalUsers(0), ui32AddrLen(0)
+	 {
 	// ...
 }
 //---------------------------------------------------------------------------
@@ -61,7 +61,7 @@ clsRegisterThread::RegSocket::~RegSocket() {
 }
 //---------------------------------------------------------------------------
 
-clsRegisterThread::clsRegisterThread() : threadId(0), pRegSockListS(NULL), pRegSockListE(NULL), bTerminated(false), ui32BytesRead(0), ui32BytesSent(0) {
+clsRegisterThread::clsRegisterThread() : pRegSockListS(NULL), pRegSockListE(NULL), threadId(0), bTerminated(false), ui32BytesRead(0), ui32BytesSent(0) {
     sMsg[0] = '\0';
 
 #ifdef _WIN32

@@ -29,25 +29,28 @@ private:
 	char * sDebugBuffer, * sDebugHead;
 
     struct UdpDbgItem {
-        UdpDbgItem();
-        ~UdpDbgItem();
+    	sockaddr_storage sas_to;
 
-        UdpDbgItem(const UdpDbgItem&);
-        const UdpDbgItem& operator=(const UdpDbgItem&);
+		UdpDbgItem * pPrev, * pNext;
 
+        char * sNick;
 #ifdef _WIN32
         SOCKET s;
 #else
 		int s;
 #endif
-        sockaddr_storage sas_to;
+
         int sas_len;
 
         uint32_t ui32Hash;
-        char * sNick;
 
-        UdpDbgItem * pPrev, * pNext;
         bool bIsScript, bAllData;
+
+        UdpDbgItem();
+        ~UdpDbgItem();
+
+        UdpDbgItem(const UdpDbgItem&);
+        const UdpDbgItem& operator=(const UdpDbgItem&);
     };
 
     clsUdpDebug(const clsUdpDebug&);

@@ -29,7 +29,7 @@
 #endif
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-PXBReader::PXBReader() : pActualPosition(NULL), pFile(NULL), szRemainingSize(0), ui8AllocatedSize(0), bFullRead(false), pItemDatas(NULL), ui16ItemLengths(NULL), sItemIdentifiers(NULL), ui8ItemValues(NULL) {
+PXBReader::PXBReader() : pFile(NULL), pActualPosition(NULL), szRemainingSize(0), ui8AllocatedSize(0), bFullRead(false), pItemDatas(NULL), ui16ItemLengths(NULL), sItemIdentifiers(NULL), ui8ItemValues(NULL) {
 	// ...
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

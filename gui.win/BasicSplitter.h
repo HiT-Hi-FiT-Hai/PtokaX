@@ -23,16 +23,19 @@
 
 class BasicSplitter {
 public:
+    RECT rcSplitter;
+
+    int iSplitterPos, iPercentagePos;
+
     BasicSplitter();
     virtual ~BasicSplitter() { }
 
     bool BasicSplitterProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     void SetSplitterRect(const LPRECT &lpRect);
-
-    RECT rcSplitter;
-    int iSplitterPos, iPercentagePos;
 private:
+    bool bUpdatePercentagePos;
+
     BasicSplitter(const BasicSplitter&);
     const BasicSplitter& operator=(const BasicSplitter&);
 
@@ -45,8 +48,6 @@ private:
 
     void SetSplitterPosition(int iPos, const bool &bUpdate = true);
 	bool IsCursorOverSplitter(const int &iX, const int &iY) const;
-
-    bool bUpdatePercentagePos;
 };
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

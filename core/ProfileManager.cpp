@@ -253,7 +253,7 @@ void clsProfileManager::LoadXML() {
 }
 //---------------------------------------------------------------------------
 
-clsProfileManager::clsProfileManager() : ui16ProfileCount(0), ppProfilesTable(NULL) {
+clsProfileManager::clsProfileManager() : ppProfilesTable(NULL), ui16ProfileCount(0) {
 	#ifdef _WIN32
     if(FileExist((clsServerManager::sPath + "\\cfg\\Profiles.pxb").c_str()) == true) {
 #else

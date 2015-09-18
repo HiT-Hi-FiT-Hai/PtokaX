@@ -24,6 +24,8 @@ struct User;
 //---------------------------------------------------------------------------
 
 struct RegUser {
+	time_t tLastBadPass;
+
     char * sNick;
 
     union {
@@ -33,8 +35,6 @@ struct RegUser {
 
     RegUser * pPrev, * pNext;
     RegUser * pHashTablePrev, * pHashTableNext;
-
-    time_t tLastBadPass;
 
     uint32_t ui32Hash;
 

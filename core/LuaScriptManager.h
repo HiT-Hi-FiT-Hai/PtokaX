@@ -40,6 +40,17 @@ private:
 public:
     static clsScriptManager * mPtr;
 
+    Script * pRunningScriptS;
+
+    Script ** ppScriptTable;
+	User * pActualUser;
+
+	ScriptTimer * pTimerListS, * pTimerListE;
+
+    uint8_t ui8ScriptCount, ui8BotsCount;
+
+    bool bMoved;
+
     enum LuaArrivals {
         CHAT_ARRIVAL,
         KEY_ARRIVAL,
@@ -63,17 +74,6 @@ public:
         CLOSE_ARRIVAL, 
         UNKNOWN_ARRIVAL
     };
-
-    Script * pRunningScriptS;
-
-    Script ** ppScriptTable;
-	User * pActualUser;
-
-	ScriptTimer * pTimerListS, * pTimerListE;
-
-    uint8_t ui8ScriptCount, ui8BotsCount;
-
-    bool bMoved;
     
     clsScriptManager();
     ~clsScriptManager();

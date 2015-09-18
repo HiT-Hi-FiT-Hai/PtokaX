@@ -72,7 +72,7 @@ static int ScriptPanic(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
-ScriptBot::ScriptBot() : sNick(NULL), sMyINFO(NULL), pPrev(NULL), pNext(NULL), bIsOP(false) {
+ScriptBot::ScriptBot() : pPrev(NULL), pNext(NULL), sNick(NULL), sMyINFO(NULL), bIsOP(false) {
     clsScriptManager::mPtr->ui8BotsCount++;
 }
 //------------------------------------------------------------------------------
@@ -146,12 +146,12 @@ ScriptBot * ScriptBot::CreateScriptBot(char * sBotNick, const size_t &szNickLen,
 //------------------------------------------------------------------------------
 
 ScriptTimer::ScriptTimer() : 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
 	uiTimerId(NULL),
 #else
 	ui64Interval(0), ui64LastTick(0),
 #endif
-	pLua(NULL), sFunctionName(NULL), pPrev(NULL), pNext(NULL), iFunctionRef(0) {
+	pPrev(NULL), pNext(NULL), pLua(NULL), sFunctionName(NULL), iFunctionRef(0) {
 	// ...
 }
 //------------------------------------------------------------------------------
@@ -170,7 +170,7 @@ ScriptTimer::~ScriptTimer() {
 }
 //------------------------------------------------------------------------------
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
 ScriptTimer * ScriptTimer::CreateScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &szLen, const int &iRef, lua_State * pLuaState) {
 #else
 ScriptTimer * ScriptTimer::CreateScriptTimer(char * sFunctName, const size_t &szLen, const int &iRef, lua_State * pLuaState) {
@@ -208,7 +208,7 @@ ScriptTimer * ScriptTimer::CreateScriptTimer(char * sFunctName, const size_t &sz
         pScriptTimer->iFunctionRef = iRef;
     }
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
 	pScriptTimer->uiTimerId = uiTmrId;
 #endif
 
@@ -216,7 +216,7 @@ ScriptTimer * ScriptTimer::CreateScriptTimer(char * sFunctName, const size_t &sz
 }
 //------------------------------------------------------------------------------
 
-Script::Script() : ui32DataArrivals(4294967295U), sName(NULL), pLUA(NULL), pPrev(NULL), pNext(NULL), pBotList(NULL), ui16Functions(65535),
+Script::Script() : pPrev(NULL), pNext(NULL), pBotList(NULL), pLUA(NULL), sName(NULL), ui32DataArrivals(4294967295U), ui16Functions(65535),
 	bEnabled(false), bRegUDP(false), bProcessed(false) {
 	// ...
 }
@@ -615,7 +615,7 @@ void ScriptStop(Script * cur) {
         pNextTmr = pCurTmr->pNext;
 
 		if(cur->pLUA == pCurTmr->pLua) {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
 	        if(pCurTmr->uiTimerId != 0) {
 	            KillTimer(NULL, pCurTmr->uiTimerId);
 	        }
@@ -1184,7 +1184,7 @@ void ScriptError(Script * cur) {
 }
 //------------------------------------------------------------------------------
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
     void ScriptOnTimer(const UINT_PTR &uiTimerId) {
 #else
 	void ScriptOnTimer(const uint64_t &ui64ActualMillis) {
@@ -1198,7 +1198,7 @@ void ScriptError(Script * cur) {
         pCurTmr = pNextTmr;
         pNextTmr = pCurTmr->pNext;
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
         if(pCurTmr->uiTimerId == uiTimerId) {
 #else
 		while((ui64ActualMillis - pCurTmr->ui64LastTick) >= pCurTmr->ui64Interval) {
@@ -1213,7 +1213,7 @@ void ScriptError(Script * cur) {
 
 				if(lua_isfunction(pCurTmr->pLua, i) == 0) {
 					lua_settop(pCurTmr->pLua, 0);
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
 				    return;
 #else
 					continue;
@@ -1227,7 +1227,7 @@ void ScriptError(Script * cur) {
 
 			lua_checkstack(pCurTmr->pLua, 1); // we need 1 empty slots in stack, check it to be sure
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
             lua_pushlightuserdata(pCurTmr->pLua, (void *)uiTimerId);
 #else
 			lua_pushlightuserdata(pCurTmr->pLua, (void *)pCurTmr);
@@ -1238,7 +1238,7 @@ void ScriptError(Script * cur) {
 			// 1 passed parameters, 0 returned
 			if(lua_pcall(pCurTmr->pLua, 1, 0, iTraceback) != 0) {
 				ScriptError(clsScriptManager::mPtr->FindScript(pCurTmr->pLua));
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
 				return;
 #else
 				if(pNextTmr == NULL) {
@@ -1255,7 +1255,7 @@ void ScriptError(Script * cur) {
 
 			// clear the stack for sure
 			lua_settop(pLuaState, 0);
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
 			return;
 #else
 			if(pNextTmr == NULL) {

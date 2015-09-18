@@ -57,24 +57,24 @@
 #endif
 //---------------------------------------------------------------------------
 clsServiceLoop * clsServiceLoop::mPtr = NULL;
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
     UINT_PTR clsServiceLoop::srvLoopTimer = 0;
 #endif
 //---------------------------------------------------------------------------
 
-clsServiceLoop::AcceptedSocket::AcceptedSocket() :
+clsServiceLoop::AcceptedSocket::AcceptedSocket() : pNext(NULL),
 #ifdef _WIN32
-	s(INVALID_SOCKET),
+	s(INVALID_SOCKET)
 #else
-	s(-1),
+	s(-1)
 #endif
-    pNext(NULL) {
+    {
     // ...
 };
 //---------------------------------------------------------------------------
 
 void clsServiceLoop::Looper() {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
 	KillTimer(NULL, srvLoopTimer);
 #endif
 
@@ -89,7 +89,7 @@ void clsServiceLoop::Looper() {
 	if(clsServerManager::bServerTerminated == false) {
 		bRecv = !bRecv;
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN_IOT)
         srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
 
 	    if(srvLoopTimer == 0) {
@@ -119,12 +119,17 @@ clsServiceLoop::clsServiceLoop() : ui64LstUptmTck(clsServerManager::ui64ActualTi
 	clsServerManager::bServerTerminated = false;
 	
 #ifdef _WIN32
-	srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
-
-    if(srvLoopTimer == 0) {
-		AppendDebugLog("%s - [ERR] Cannot start Looper in clsServiceLoop::clsServiceLoop\n");
-    	exit(EXIT_FAILURE);
-    }
+	#ifdef _WIN_IOT
+		ui64LastSecond = ::GetTickCount64() / 1000;
+		ui64LastRegToHublist = ::GetTickCount64() / 1000;
+	#else
+		srvLoopTimer = SetTimer(NULL, 0, 100, NULL);
+	
+	    if(srvLoopTimer == 0) {
+			AppendDebugLog("%s - [ERR] Cannot start Looper in clsServiceLoop::clsServiceLoop\n");
+	    	exit(EXIT_FAILURE);
+	    }
+	#endif
 #else
 	#ifdef __MACH__
 		mach_timespec_t mts;
@@ -192,7 +197,7 @@ void clsServiceLoop::AcceptUser(AcceptedSocket *AccptSocket) {
             ui16IpTableIdx = ui128IpHash[14] * ui128IpHash[15];
         } else {
             bIPv6 = true;
-#if defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
             win_inet_ntop(&((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr, sIP, 40);
 #else
             inet_ntop(AF_INET6, &((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr, sIP, 40);
@@ -471,6 +476,25 @@ void clsServiceLoop::ReceiveLoop() {
 	}
 
 	ScriptOnTimer((uint64_t(ts.tv_sec) * 1000) + (uint64_t(ts.tv_nsec) / 1000000));
+#elif defined(_WIN32) && defined(_WIN_IOT)
+	uint64_t ui64Millis = (uint64_t)::GetTickCount64();
+	uint64_t ui64Secs = ui64Millis / 1000;
+
+	if(ui64Secs != ui64LastSecond) {
+		ui64LastSecond = ui64Secs;
+
+		clsServerManager::OnSecTimer();
+	}
+
+	if(clsSettingManager::mPtr->bBools[SETBOOL_AUTO_REG] == true) {
+		if((ui64Secs - ui64LastRegToHublist) >= 901) { // 15 min 1 sec is hublist register interval
+			ui64LastRegToHublist = ui64Secs;
+
+			clsServerManager::OnRegTimer();
+		}
+	}
+
+	ScriptOnTimer(ui64Millis);
 #endif
 
     // Receiving loop for process all incoming data and store in queues

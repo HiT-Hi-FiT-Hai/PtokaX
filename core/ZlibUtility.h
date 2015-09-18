@@ -23,8 +23,9 @@
 
 class clsZlibUtility {
 private:
+	char * pZbuffer;
+
     size_t szZbufferSize;
-    char * pZbuffer;
 
     clsZlibUtility(const clsZlibUtility&);
     const clsZlibUtility& operator=(const clsZlibUtility&);

@@ -25,13 +25,11 @@
 class clsRegisterThread {
 private:
     struct RegSocket {
-        RegSocket();
-        ~RegSocket();
-
-        RegSocket(const RegSocket&);
-        const RegSocket& operator=(const RegSocket&);
-
         uint64_t ui64TotalShare;
+
+		RegSocket * pPrev, * pNext;
+
+		char * sAddress, * pRecvBuf, * pSendBuf, * pSendBufHead;
 
 #ifdef _WIN32
         SOCKET sock;
@@ -43,20 +41,22 @@ private:
 
         uint32_t ui32AddrLen;
 
-		char * sAddress, * pRecvBuf, * pSendBuf, * pSendBufHead;
+        RegSocket();
+        ~RegSocket();
 
-        RegSocket * pPrev, * pNext;
+        RegSocket(const RegSocket&);
+        const RegSocket& operator=(const RegSocket&);
     };
 
-#ifdef _WIN32
-    unsigned int threadId;
+	RegSocket * pRegSockListS, * pRegSockListE;
 
-    HANDLE threadHandle;
+#ifdef _WIN32
+	HANDLE threadHandle;
+
+    unsigned int threadId;
 #else
 	pthread_t threadId;
 #endif
-
-    RegSocket * pRegSockListS, * pRegSockListE;
 
     bool bTerminated;
 

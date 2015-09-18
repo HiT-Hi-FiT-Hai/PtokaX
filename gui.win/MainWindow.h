@@ -56,10 +56,11 @@ public:
     void EnableGuiItems(const BOOL &bEnable) const;
     static void SaveGuiSettings();
 private:
+	uint64_t ui64LastTrayMouseMove;
+
     MainWindowPage * MainWindowPages[3];
 
     UINT uiTaskBarCreated;
-    uint64_t ui64LastTrayMouseMove;
 
     clsMainWindow(const clsMainWindow&);
     const clsMainWindow& operator=(const clsMainWindow&);

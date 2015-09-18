@@ -41,14 +41,14 @@ static const uint32_t IPLISTSIZE = 1024*64;
 clsUsers * clsUsers::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-clsUsers::RecTime::RecTime(const uint8_t * pIpHash) : ui64DisConnTick(0), ui32NickHash(0), pPrev(NULL), pNext(NULL), sNick(NULL) {
+clsUsers::RecTime::RecTime(const uint8_t * pIpHash) : ui64DisConnTick(0), pPrev(NULL), pNext(NULL), sNick(NULL), ui32NickHash(0) {
     memcpy(ui128IpHash, pIpHash, 16);
 };
 //---------------------------------------------------------------------------
 
-clsUsers::clsUsers() : ui64ChatMsgsTick(0), ui64ChatLockFromTick(0), ui16ChatMsgs(0), pRecTimeList(NULL), pListE(NULL), bChatLocked(false), ui32MyInfosLen(0), ui32MyInfosSize(0), ui32ZMyInfosLen(0), ui32ZMyInfosSize(0), ui32MyInfosTagLen(0), ui32MyInfosTagSize(0), ui32ZMyInfosTagLen(0),
-	ui32ZMyInfosTagSize(0), ui32NickListLen(0), ui32NickListSize(0), ui32ZNickListLen(0), ui32ZNickListSize(0), ui32OpListLen(0), ui32OpListSize(0), ui32ZOpListLen(0), ui32ZOpListSize(0), ui32UserIPListSize(0), ui32UserIPListLen(0), ui32ZUserIPListSize(0), ui32ZUserIPListLen(0),
-    pNickList(NULL), pZNickList(NULL), pOpList(NULL), pZOpList(NULL), pUserIPList(NULL), pZUserIPList(NULL), pMyInfos(NULL), pZMyInfos(NULL), pMyInfosTag(NULL), pZMyInfosTag(NULL), pListS(NULL), ui16ActSearchs(0), ui16PasSearchs(0) {
+clsUsers::clsUsers() : ui64ChatMsgsTick(0), ui64ChatLockFromTick(0), pRecTimeList(NULL), pListE(NULL), ui16ChatMsgs(0), bChatLocked(false), pListS(NULL), pNickList(NULL), pZNickList(NULL), pOpList(NULL), pZOpList(NULL), pUserIPList(NULL), pZUserIPList(NULL), pMyInfos(NULL), pZMyInfos(NULL), pMyInfosTag(NULL), 
+	pZMyInfosTag(NULL), ui32MyInfosLen(0), ui32MyInfosSize(0), ui32ZMyInfosLen(0), ui32ZMyInfosSize(0), ui32MyInfosTagLen(0), ui32MyInfosTagSize(0), ui32ZMyInfosTagLen(0), ui32ZMyInfosTagSize(0), ui32NickListLen(0), ui32NickListSize(0), ui32ZNickListLen(0), ui32ZNickListSize(0), ui32OpListLen(0), ui32OpListSize(0), 
+	ui32ZOpListLen(0), ui32ZOpListSize(0), ui32UserIPListSize(0), ui32UserIPListLen(0), ui32ZUserIPListSize(0), ui32ZUserIPListLen(0), ui16ActSearchs(0), ui16PasSearchs(0) {
 #ifdef _WIN32
     clsServerManager::hRecvHeap = HeapCreate(HEAP_NO_SERIALIZE, 0x20000, 0);
     clsServerManager::hSendHeap = HeapCreate(HEAP_NO_SERIALIZE, 0x40000, 0);

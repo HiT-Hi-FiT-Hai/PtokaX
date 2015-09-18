@@ -23,16 +23,16 @@
 
 class clsUpdateCheckThread {
 private:
+	HANDLE hThread;
+
+	char * sRecvBuf;
+
     SOCKET sSocket;
 
 	uint32_t ui32FileLen;
 
     uint32_t ui32RecvBufLen, ui32RecvBufSize;
     uint32_t ui32BytesRead, ui32BytesSent;
-
-    HANDLE hThread;
-
-    char * sRecvBuf;
     
     bool bOk, bData, bTerminated;
 

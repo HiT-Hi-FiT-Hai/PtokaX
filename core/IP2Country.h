@@ -23,10 +23,11 @@
 
 class clsIpP2Country {
 private:
-    uint32_t ui32Size, ui32IPv6Size;
     uint32_t * ui32RangeFrom, * ui32RangeTo;
     uint8_t * ui8RangeCI, * ui8IPv6RangeCI;
     uint8_t * ui128IPv6RangeFrom, * ui128IPv6RangeTo;
+
+    uint32_t ui32Size, ui32IPv6Size;
 
     clsIpP2Country(const clsIpP2Country&);
     const clsIpP2Country& operator=(const clsIpP2Country&);

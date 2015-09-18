@@ -25,14 +25,15 @@ struct User;
 //---------------------------------------------------------------------------
 
 struct ProfileItem {
+    char * sName;
+
+    bool bPermissions[256];
+
     ProfileItem();
     ~ProfileItem();
 
     ProfileItem(const ProfileItem&);
     const ProfileItem& operator=(const ProfileItem&);
-
-    char * sName;
-    bool bPermissions[256];
 };
 //---------------------------------------------------------------------------
 
@@ -47,6 +48,10 @@ private:
     void LoadXML();
 public:
     static clsProfileManager * mPtr;
+
+    ProfileItem ** ppProfilesTable;
+
+	uint16_t ui16ProfileCount;
 
     enum ProfilePermissions {
         HASKEYICON,
@@ -106,9 +111,6 @@ public:
         NOUSRSAMEIP, 
         NORECONNTIME
     };
-
-    uint16_t ui16ProfileCount;
-    ProfileItem ** ppProfilesTable;
 
     clsProfileManager();
     ~clsProfileManager();

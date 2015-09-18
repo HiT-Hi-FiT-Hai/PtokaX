@@ -33,7 +33,7 @@
 clsTextFilesManager * clsTextFilesManager::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-clsTextFilesManager::TextFile::TextFile() : sCommand(NULL), sText(NULL), pPrev(NULL), pNext(NULL) {
+clsTextFilesManager::TextFile::TextFile() : pPrev(NULL), pNext(NULL), sCommand(NULL), sText(NULL) {
     // ...
 }
 //---------------------------------------------------------------------------

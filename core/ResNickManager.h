@@ -24,24 +24,24 @@
 class clsReservedNicksManager {
 private:
     struct ReservedNick {
+    	ReservedNick * pPrev, * pNext;
+
+        char * sNick;
+
+        uint32_t ui32Hash;
+
+        bool bFromScript;
+
         ReservedNick();
         ~ReservedNick();
 
         ReservedNick(const ReservedNick&);
         const ReservedNick& operator=(const ReservedNick&);
 
-        char * sNick;
-
-        ReservedNick * pPrev, * pNext;
-
-        uint32_t ui32Hash;
-
-        bool bFromScript;
-
         static ReservedNick * CreateReservedNick(const char * sNewNick, uint32_t ui32NickHash);
     };
 
-    ReservedNick * pReservedNicks;
+	ReservedNick * pReservedNicks;
 
     clsReservedNicksManager(const clsReservedNicksManager&);
     const clsReservedNicksManager& operator=(const clsReservedNicksManager&);

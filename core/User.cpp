@@ -534,7 +534,7 @@ UserBan * UserBan::CreateUserBan(char * sMess, const uint32_t &ui32MessLen, cons
 }
 //---------------------------------------------------------------------------
 
-LoginLogout::LoginLogout() : ui64LogonTick(0), ui64IPv4CheckTick(0), ui32ToCloseLoops(0), ui32UserConnectedLen(0), pBuffer(NULL), pBan(NULL) {
+LoginLogout::LoginLogout() : ui64LogonTick(0), ui64IPv4CheckTick(0), pBan(NULL), pBuffer(NULL), ui32ToCloseLoops(0), ui32UserConnectedLen(0) {
     // ...
 }
 //---------------------------------------------------------------------------
@@ -558,30 +558,32 @@ User::User() : ui64SharedSize(0), ui64ChangedSharedSizeShort(0), ui64ChangedShar
 	ui64ChatMsgsTick(0), ui64PMsTick(0), ui64SameSearchsTick(0), ui64SamePMsTick(0), ui64SameChatsTick(0), iLastMyINFOSendTick(0), iLastNicklist(0), iReceivedPmTick(0),
 	ui64ChatMsgsTick2(0), ui64PMsTick2(0), ui64SearchsTick2(0), ui64MyINFOsTick2(0), ui64CTMsTick(0), ui64CTMsTick2(0), ui64RCTMsTick(0), ui64RCTMsTick2(0),
 	ui64SRsTick(0), ui64SRsTick2(0), ui64RecvsTick(0), ui64RecvsTick2(0), ui64ChatIntMsgsTick(0), ui64PMsIntTick(0), ui64SearchsIntTick(0), 
-	ui32Recvs(0), ui32Recvs2(0),
-	Hubs(0), Slots(0), OLimit(0), LLimit(0), DLimit(0), iNormalHubs(0), iRegHubs(0), iOpHubs(0), 
-	iSendCalled(0), iRecvCalled(0), iReceivedPmCount(0), iSR(0), iDefloodWarnings(0),
-	ui32BoolBits(0), ui32InfoBits(0), ui32SupportBits(0), 
-#ifdef _WIN32
-	Sck(INVALID_SOCKET),
-#else
-	Sck(-1),
-#endif
-	tLoginTime(0), ui32SendBufLen(0), ui32RecvBufLen(0), ui32SendBufDataLen(0), ui32RecvBufDataLen(0),
-	ui32NickHash(0), i32Profile(-1), 
+	tLoginTime(0), 
+	pLogInOut(NULL),
+	pCmdToUserStrt(NULL), pCmdToUserEnd(NULL), pCmdStrt(NULL), pCmdEnd(NULL), pCmdActive4Search(NULL), pCmdActive6Search(NULL), pCmdPassiveSearch(NULL),
+	pPrev(NULL), pNext(NULL), pHashTablePrev(NULL), pHashTableNext(NULL), pHashIpTablePrev(NULL), pHashIpTableNext(NULL),
 	sNick((char *)sDefaultNick), sVersion(NULL), sMyInfoOriginal(NULL), sMyInfoShort(NULL), sMyInfoLong(NULL), 
 	sDescription(NULL), sTag(NULL), sConnection(NULL), sEmail(NULL), sClient((char *)sOtherNoTag), sTagVersion(NULL), 
 	sLastChat(NULL), sLastPM(NULL), sLastSearch(NULL), pSendBuf(NULL), pRecvBuf(NULL), pSendBufHead(NULL),
 	sChangedDescriptionShort(NULL), sChangedDescriptionLong(NULL), sChangedTagShort(NULL), sChangedTagLong(NULL),
 	sChangedConnectionShort(NULL), sChangedConnectionLong(NULL), sChangedEmailShort(NULL), sChangedEmailLong(NULL),
-	ui8MagicByte(0), pLogInOut(NULL),
-	pCmdToUserStrt(NULL), pCmdToUserEnd(NULL), pCmdStrt(NULL), pCmdEnd(NULL), pCmdActive4Search(NULL), pCmdActive6Search(NULL), pCmdPassiveSearch(NULL),
-	pPrev(NULL), pNext(NULL), pHashTablePrev(NULL), pHashTableNext(NULL), pHashIpTablePrev(NULL), pHashIpTableNext(NULL),
+	ui32Recvs(0), ui32Recvs2(0),
+	Hubs(0), Slots(0), OLimit(0), LLimit(0), DLimit(0), iNormalHubs(0), iRegHubs(0), iOpHubs(0), 
+	iSendCalled(0), iRecvCalled(0), iReceivedPmCount(0), iSR(0), iDefloodWarnings(0),
+	ui32BoolBits(0), ui32InfoBits(0), ui32SupportBits(0), 
+	ui32SendBufLen(0), ui32RecvBufLen(0), ui32SendBufDataLen(0), ui32RecvBufDataLen(0),
+	ui32NickHash(0), i32Profile(-1), 
+#ifdef _WIN32
+	Sck(INVALID_SOCKET),
+#else
+	Sck(-1),
+#endif
 	ui16MyInfoOriginalLen(0), ui16MyInfoShortLen(0), ui16MyInfoLongLen(0), ui16GetNickLists(0), ui16MyINFOs(0), ui16Searchs(0),
 	ui16ChatMsgs(0), ui16PMs(0), ui16SameSearchs(0), ui16LastSearchLen(0), ui16SamePMs(0), ui16LastPMLen(0), ui16SameChatMsgs(0),
 	ui16LastChatLen(0), ui16LastPmLines(0), ui16SameMultiPms(0), ui16LastChatLines(0), ui16SameMultiChats(0), ui16ChatMsgs2(0), ui16PMs2(0),
 	ui16Searchs2(0), ui16MyINFOs2(0), ui16CTMs(0), ui16CTMs2(0), ui16RCTMs(0), ui16RCTMs2(0), ui16SRs(0), ui16SRs2(0), ui16ChatIntMsgs(0),
 	ui16PMsInt(0), ui16SearchsInt(0), ui16IpTableIdx(0),
+	ui8MagicByte(0), 
 	ui8NickLen(9), ui8IpLen(0), ui8ConnectionLen(0), ui8DescriptionLen(0), ui8EmailLen(0), ui8TagLen(0), ui8ClientLen(14), ui8TagVersionLen(0),
 	ui8Country(246), ui8State(User::STATE_SOCKET_ACCEPTED), ui8IPv4Len(0),
 	ui8ChangedDescriptionShortLen(0), ui8ChangedDescriptionLongLen(0), ui8ChangedTagShortLen(0), ui8ChangedTagLongLen(0),
@@ -882,6 +884,8 @@ bool User::MakeLock() {
 	#else
 	    #ifndef _M_X64
 	        static const char sLock[] = "$Lock EXTENDEDPROTOCOL                           wis Pk=PtokaX|";
+	    #elif _M_ARM
+	    	static const char sLock[] = "$Lock EXTENDEDPROTOCOL                           wsa Pk=PtokaX|";
 	    #else
 	        static const char sLock[] = "$Lock EXTENDEDPROTOCOL                           ws6 Pk=PtokaX|";
 	    #endif

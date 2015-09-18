@@ -45,8 +45,7 @@ static const char sRangeBanIds[] = "BT" "RF" "RT" "FB" "RE" "BY" "EX";
 static const size_t szRangeBanIdsLen = sizeof(sRangeBanIds)-1;
 //---------------------------------------------------------------------------
 
-BanItem::BanItem(void) : tTempBanExpire(0), ui32NickHash(0), sNick(NULL), sReason(NULL), sBy(NULL), pPrev(NULL), pNext(NULL), pHashNickTablePrev(NULL), pHashNickTableNext(NULL),
-	pHashIpTablePrev(NULL), pHashIpTableNext(NULL), ui8Bits(0) {
+BanItem::BanItem(void) : tTempBanExpire(0), sNick(NULL), sReason(NULL), sBy(NULL), pPrev(NULL), pNext(NULL), pHashNickTablePrev(NULL), pHashNickTableNext(NULL), pHashIpTablePrev(NULL), pHashIpTableNext(NULL), ui32NickHash(0), ui8Bits(0) {
     sIp[0] = '\0';
 
     memset(ui128IpHash, 0, 16);
@@ -1202,7 +1201,7 @@ void clsBanManager::Load() {
 				memcpy(&ipv4addr, pBan->ui128IpHash + 12, 4);
 				strcpy(pBan->sIp, inet_ntoa(ipv4addr));
     		} else {
-#if defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
             	win_inet_ntop(pBan->ui128IpHash, pBan->sIp, 40);
 #else
             	inet_ntop(AF_INET6, pBan->ui128IpHash, pBan->sIp, 40);
@@ -1354,7 +1353,7 @@ void clsBanManager::Load() {
 			memcpy(&ipv4addr, pRangeBan->ui128FromIpHash + 12, 4);
 			strcpy(pRangeBan->sIpFrom, inet_ntoa(ipv4addr));
     	} else {
-#if defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
             win_inet_ntop(pRangeBan->ui128FromIpHash, pRangeBan->sIpFrom, 40);
 #else
             inet_ntop(AF_INET6, pRangeBan->ui128FromIpHash, pRangeBan->sIpFrom, 40);
@@ -1375,7 +1374,7 @@ void clsBanManager::Load() {
 			memcpy(&ipv4addr, pRangeBan->ui128ToIpHash + 12, 4);
 			strcpy(pRangeBan->sIpTo, inet_ntoa(ipv4addr));
     	} else {
-#if defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
             win_inet_ntop(pRangeBan->ui128ToIpHash, pRangeBan->sIpTo, 40);
 #else
             inet_ntop(AF_INET6, pRangeBan->ui128ToIpHash, pRangeBan->sIpTo, 40);

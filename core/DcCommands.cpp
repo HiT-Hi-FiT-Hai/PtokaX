@@ -55,7 +55,7 @@
 clsDcCommands * clsDcCommands::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-clsDcCommands::PassBf::PassBf(const uint8_t * ui128Hash) : iCount(1), pPrev (NULL), pNext(NULL) {
+clsDcCommands::PassBf::PassBf(const uint8_t * ui128Hash) : pPrev (NULL), pNext(NULL), iCount(1) {
 	memcpy(ui128IpHash, ui128Hash, 16);
 }
 //---------------------------------------------------------------------------
