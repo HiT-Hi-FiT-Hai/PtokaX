@@ -76,7 +76,7 @@ centos: $(OBJS)
 fedora: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/include/postgresql -I/usr/include/pgsql
 fedora: $(OBJS)
 	cd skein; $(MAKE)
-	$(CXX) $(OBJS) -L/usr/lib64/mysql $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua -ltinyxml -lpq
+	$(CXX) $(OBJS) $(CURDIR)/skein/skein.a -o PtokaX -lstdc++ -lpthread -lm -lz -llua -ltinyxml -lpq
 
 freebsd: INCLUDE = -Iskein/Optimized_32bit -I/usr/include -I/usr/local/include -I/usr/local/include/lua53 -I/usr/local/include/postgresql
 freebsd: $(OBJS)

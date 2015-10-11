@@ -7,6 +7,7 @@ PtokaX DC hub software - PPK (c) 2006/2015
 ----------------------------------------Next Release...---------------------------------------
 Fixed: Compile for Windows 10 IoT.
 Fixed: Typo in server manager and resource leak in sqlite on exit (thx Pavel Pimenov for report).
+Fixed: Incorrect long length message when incomplete search command was received (thx Alexey for report).
 
 
 -------------------------------------0.5.2.1 3 September 2015-------------------------------------

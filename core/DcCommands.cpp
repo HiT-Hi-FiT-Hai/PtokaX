@@ -1401,24 +1401,24 @@ void clsDcCommands::Search(User *pUser, char * sData, uint32_t ui32Len, const bo
         if(bCheck == true && clsProfileManager::mPtr->IsAllowed(pUser, clsProfileManager::NOSEARCHLIMITS) == false && (clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SEARCH_LEN] != 0 || clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN] != 0)) {
             // PPK ... search string len check
             // $Search 1.2.3.4:1 F?F?0?2?test| / $Search [::1]:1 F?F?0?2?test|
-            uint32_t iChar = iAfterCmd+9;
-            uint32_t iCount = 0;
+            uint32_t ui32Char = iAfterCmd+9;
+            uint32_t ui32QCount = 0;
 
-            for(; iChar < ui32Len; iChar++) {
-                if(sData[iChar] == '?') {
-                    iCount++;
-                    if(iCount == 4)
+            for(; ui32Char < ui32Len; ui32Char++) {
+                if(sData[ui32Char] == '?') {
+                    ui32QCount++;
+                    if(ui32QCount == 4)
                         break;
                 }
             }
 
-            iCount = ui32Len-2-iChar;
+            uint32_t ui32Count = ui32Len-2-ui32Char;
 
-            if(iCount < (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SEARCH_LEN]) {
+            if(ui32QCount != 4 || ui32Count < (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SEARCH_LEN]) {
                 pUser->SendFormat("clsDcCommands::Search3", true, "<%s> %s %hd.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_MIN_SEARCH_LEN_IS], clsSettingManager::mPtr->i16Shorts[SETSHORT_MIN_SEARCH_LEN]);
                 return;
             }
-            if(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN] != 0 && iCount > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN]) {
+            if(clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN] != 0 && ui32Count > (uint32_t)clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN]) {
                 pUser->SendFormat("clsDcCommands::Search4", true, "<%s> %s %hd.|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_SORRY_MAX_SEARCH_LEN_IS], clsSettingManager::mPtr->i16Shorts[SETSHORT_MAX_SEARCH_LEN]);
                 return;
             }
