@@ -77,7 +77,11 @@ bool SetBoolDef[] = {
 /*OBSOLETE*/true, //ACCEPT_UNKNOWN_TAG
 /*OBSOLETE*/true, //CHECK_IP_IN_COMMANDS
 /*OBSOLETE*/false, //ABSOLOTE_POPUP_SCRIPT_WINDOW
+#ifdef _BUILD_GUI
     false, //LOG_SCRIPT_ERRORS
+#else
+	true, //LOG_SCRIPT_ERRORS
+#endif
     false, //NO_QUACK_SUPPORTS
     false, //HASH_PASSWORDS
 #if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)

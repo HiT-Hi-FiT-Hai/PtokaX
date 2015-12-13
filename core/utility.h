@@ -66,11 +66,11 @@ bool GenerateTempBanTime(const char &cMultiplyer, const uint32_t &iTime, time_t 
 
 bool HaveOnlyNumbers(char *sData, const uint16_t &ui16Len);
 
-inline size_t Allign256(size_t n) { return ((n+1) & 0xFFFFFF00) + 0x100; }
-inline size_t Allign512(size_t n) { return ((n+1) & 0xFFFFFE00) + 0x200; }
-inline size_t Allign1024(size_t n) { return ((n+1) & 0xFFFFFC00) + 0x400; }
-inline size_t Allign16K(size_t n) { return ((n+1) & 0xFFFFC000) + 0x4000; }
-inline size_t Allign128K(size_t n) { return ((n+1) & 0xFFFE0000) + 0x20000; }
+inline size_t Allign256(size_t n) { return (n+1); }
+inline size_t Allign512(size_t n) { return (n+1); }
+inline size_t Allign1024(size_t n) { return (n+1); }
+inline size_t Allign16K(size_t n) { return (n+1); }
+inline size_t Allign128K(size_t n) { return (n+1); }
 
 bool CheckSprintf(const int &iRetVal, const size_t &szMax, const char * sMsg); // CheckSprintf(imsgLen, 64, "UdpDebug::New");
 bool CheckSprintf1(const int &iRetVal, const size_t &szLenVal, const size_t &szMax, const char * sMsg); // CheckSprintf1(iret, imsgLen, 64, "UdpDebug::New");

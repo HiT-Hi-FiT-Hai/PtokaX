@@ -120,7 +120,7 @@ void clsReservedNicksManager::Load() {
 }
 //---------------------------------------------------------------------------
 
-void clsReservedNicksManager::Save() {
+void clsReservedNicksManager::Save() const {
 #ifdef _WIN32
     FILE * fReservedNicks = fopen((clsServerManager::sPath + "\\cfg\\ReservedNicks.pxt").c_str(), "wb");
 #else

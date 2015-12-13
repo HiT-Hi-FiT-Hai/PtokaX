@@ -155,7 +155,7 @@ LRESULT clsBansDialog::BansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                         break;
                     }
 
-                    BanItem * pBan = (BanItem *)ListViewGetItem(hWndWindowItems[LV_BANS], ((LPNMITEMACTIVATE)lParam)->iItem);
+                    BanItem * pBan = reinterpret_cast<BanItem *>(ListViewGetItem(hWndWindowItems[LV_BANS], ((LPNMITEMACTIVATE)lParam)->iItem));
 
                     clsBanDialog * pBanDialog = new (std::nothrow) clsBanDialog();
 
@@ -424,8 +424,8 @@ void clsBansDialog::AddBan(const BanItem * pBan) {
 //------------------------------------------------------------------------------
 
 int clsBansDialog::CompareBans(const void * pItem, const void * pOtherItem) {
-    BanItem * pFirstBan = (BanItem *)pItem;
-    BanItem * pSecondBan = (BanItem *)pOtherItem;
+    const BanItem * pFirstBan = reinterpret_cast<const BanItem *>(pItem);
+    const BanItem * pSecondBan = reinterpret_cast<const BanItem *>(pOtherItem);
 
     switch(clsBansDialog::mPtr->iSortColumn) {
         case 0:
@@ -486,7 +486,7 @@ void clsBansDialog::RemoveBans() {
     int iSel = -1;
 
     while((iSel = (int)::SendMessage(hWndWindowItems[LV_BANS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED)) != -1) {
-        pBan = (BanItem *)ListViewGetItem(hWndWindowItems[LV_BANS], iSel);
+        pBan = reinterpret_cast<BanItem *>(ListViewGetItem(hWndWindowItems[LV_BANS], iSel));
 
         clsBanManager::mPtr->Rem(pBan, true);
 
@@ -646,7 +646,7 @@ void clsBansDialog::ChangeBan() {
         return;
     }
 
-    BanItem * pBan = (BanItem *)ListViewGetItem(hWndWindowItems[LV_BANS], iSel);
+    BanItem * pBan = reinterpret_cast<BanItem *>(ListViewGetItem(hWndWindowItems[LV_BANS], iSel));
 
     clsBanDialog * pBanDialog = new (std::nothrow) clsBanDialog();
 

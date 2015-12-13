@@ -72,7 +72,7 @@ static const size_t szPtokaXDashLen = sizeof(sPtokaXDash)-1;
 #endif
 //---------------------------------------------------------------------------
 
-clsMainWindow::clsMainWindow() : m_hWnd(NULL), uiTaskBarCreated(0), ui64LastTrayMouseMove(0) {
+clsMainWindow::clsMainWindow() : m_hWnd(NULL), ui64LastTrayMouseMove(0), uiTaskBarCreated(0) {
     memset(&hWndWindowItems, 0, sizeof(hWndWindowItems));
     memset(&MainWindowPages, 0, sizeof(MainWindowPages));
 }
@@ -342,7 +342,7 @@ LRESULT clsMainWindow::MainWindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                             ::MessageBox(m_hWnd, "Not implemented!", g_sPtokaXTitle, MB_OK);
                         }
 
-                        MainWindowPage * curMainWindowPage = (MainWindowPage *)tcItem.lParam;
+                        MainWindowPage * curMainWindowPage = reinterpret_cast<MainWindowPage *>(tcItem.lParam);
 
                         if((::GetKeyState(VK_SHIFT) & 0x8000) > 0) {
                             curMainWindowPage->FocusLastItem();
@@ -671,22 +671,22 @@ void clsMainWindow::UpdateSysTray() const {
 //---------------------------------------------------------------------------
 
 void clsMainWindow::UpdateStats() const {
-    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_JOINS_VALUE], string(clsServerManager::ui32Joins).c_str());
-    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_PARTS_VALUE], string(clsServerManager::ui32Parts).c_str());
-    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_ACTIVE_VALUE], string(clsServerManager::ui32Joins - clsServerManager::ui32Parts).c_str());
-    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_ONLINE_VALUE], string(clsServerManager::ui32Logged).c_str());
-    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_PEAK_VALUE], string(clsServerManager::ui32Peak).c_str());
+    ::SetWindowText((reinterpret_cast<MainWindowPageStats *>(MainWindowPages[0]))->hWndPageItems[MainWindowPageStats::LBL_JOINS_VALUE], string(clsServerManager::ui32Joins).c_str());
+    ::SetWindowText((reinterpret_cast<MainWindowPageStats *>(MainWindowPages[0]))->hWndPageItems[MainWindowPageStats::LBL_PARTS_VALUE], string(clsServerManager::ui32Parts).c_str());
+    ::SetWindowText((reinterpret_cast<MainWindowPageStats *>(MainWindowPages[0]))->hWndPageItems[MainWindowPageStats::LBL_ACTIVE_VALUE], string(clsServerManager::ui32Joins - clsServerManager::ui32Parts).c_str());
+    ::SetWindowText((reinterpret_cast<MainWindowPageStats *>(MainWindowPages[0]))->hWndPageItems[MainWindowPageStats::LBL_ONLINE_VALUE], string(clsServerManager::ui32Logged).c_str());
+    ::SetWindowText((reinterpret_cast<MainWindowPageStats *>(MainWindowPages[0]))->hWndPageItems[MainWindowPageStats::LBL_PEAK_VALUE], string(clsServerManager::ui32Peak).c_str());
 
     char msg[256];
 
 	int imsglen = sprintf(msg, "%s (%s)", formatBytes(clsServerManager::ui64BytesRead), formatBytesPerSecond(clsServerManager::ui32ActualBytesRead));
     if(CheckSprintf(imsglen, 256, "clsMainWindow::UpdateStats") == true) {
-        ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_RECEIVED_VALUE], msg);
+        ::SetWindowText((reinterpret_cast<MainWindowPageStats *>(MainWindowPages[0]))->hWndPageItems[MainWindowPageStats::LBL_RECEIVED_VALUE], msg);
 	}
 
 	imsglen = sprintf(msg, "%s (%s)", formatBytes(clsServerManager::ui64BytesSent), formatBytesPerSecond(clsServerManager::ui32ActualBytesSent));
     if(CheckSprintf(imsglen, 256, "clsMainWindow::UpdateStats1") == true) {
-		::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_SENT_VALUE], msg);
+		::SetWindowText((reinterpret_cast<MainWindowPageStats *>(MainWindowPages[0]))->hWndPageItems[MainWindowPageStats::LBL_SENT_VALUE], msg);
 	}
 }
 //---------------------------------------------------------------------------
@@ -740,37 +740,37 @@ void clsMainWindow::UpdateLanguage() {
 //---------------------------------------------------------------------------
 
 void clsMainWindow::EnableStartButton(const BOOL &bEnable) const {
-    ::EnableWindow(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::BTN_START_STOP], bEnable);
+    ::EnableWindow((reinterpret_cast<MainWindowPageStats *>(MainWindowPages[0]))->hWndPageItems[MainWindowPageStats::BTN_START_STOP], bEnable);
 }
 //---------------------------------------------------------------------------
 
 void clsMainWindow::SetStartButtonText(const char * sText) const {
-    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::BTN_START_STOP], sText);
+    ::SetWindowText((reinterpret_cast<MainWindowPageStats *>(MainWindowPages[0]))->hWndPageItems[MainWindowPageStats::BTN_START_STOP], sText);
 }
 //---------------------------------------------------------------------------
 
 void clsMainWindow::SetStatusValue(const char * sText) const {
-    ::SetWindowText(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[MainWindowPageStats::LBL_STATUS_VALUE], sText);
+    ::SetWindowText((reinterpret_cast<MainWindowPageStats *>(MainWindowPages[0]))->hWndPageItems[MainWindowPageStats::LBL_STATUS_VALUE], sText);
 }
 //---------------------------------------------------------------------------
 
 void clsMainWindow::EnableGuiItems(const BOOL &bEnable) const {
     for(uint8_t ui8i = 2; ui8i < 20; ui8i++) {
-        ::EnableWindow(((MainWindowPageStats *)MainWindowPages[0])->hWndPageItems[ui8i], bEnable);
+        ::EnableWindow((reinterpret_cast<MainWindowPageStats *>(MainWindowPages[0]))->hWndPageItems[ui8i], bEnable);
     }
 
-    if(bEnable == FALSE || ::SendMessage(((clsMainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[clsMainWindowPageUsersChat::BTN_AUTO_UPDATE_USERLIST], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-        ::EnableWindow(((clsMainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[clsMainWindowPageUsersChat::BTN_UPDATE_USERS], FALSE);
+    if(bEnable == FALSE || ::SendMessage((reinterpret_cast<clsMainWindowPageUsersChat *>(MainWindowPages[1]))->hWndPageItems[clsMainWindowPageUsersChat::BTN_AUTO_UPDATE_USERLIST], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+        ::EnableWindow((reinterpret_cast<clsMainWindowPageUsersChat *>(MainWindowPages[1]))->hWndPageItems[clsMainWindowPageUsersChat::BTN_UPDATE_USERS], FALSE);
     } else {
-        ::EnableWindow(((clsMainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[clsMainWindowPageUsersChat::BTN_UPDATE_USERS], TRUE);
+        ::EnableWindow((reinterpret_cast<clsMainWindowPageUsersChat *>(MainWindowPages[1]))->hWndPageItems[clsMainWindowPageUsersChat::BTN_UPDATE_USERS], TRUE);
     }
 
     if(bEnable == FALSE) {
-        ::SendMessage(((clsMainWindowPageUsersChat *)MainWindowPages[1])->hWndPageItems[clsMainWindowPageUsersChat::LV_USERS], LVM_DELETEALLITEMS, 0, 0);
-        ((clsMainWindowPageScripts *)MainWindowPages[1])->ClearMemUsageAll();
+        ::SendMessage((reinterpret_cast<clsMainWindowPageUsersChat *>(MainWindowPages[1]))->hWndPageItems[clsMainWindowPageUsersChat::LV_USERS], LVM_DELETEALLITEMS, 0, 0);
+        (reinterpret_cast<clsMainWindowPageScripts *>(MainWindowPages[2]))->ClearMemUsageAll();
     }
 
-    ::EnableWindow(((clsMainWindowPageScripts *)MainWindowPages[2])->hWndPageItems[clsMainWindowPageScripts::BTN_RESTART_SCRIPTS], bEnable);
+    ::EnableWindow((reinterpret_cast<clsMainWindowPageScripts *>(MainWindowPages[2]))->hWndPageItems[clsMainWindowPageScripts::BTN_RESTART_SCRIPTS], bEnable);
 }
 //---------------------------------------------------------------------------
 
@@ -792,7 +792,7 @@ void clsMainWindow::OnSelChanged() {
         ::MessageBox(m_hWnd, "Not implemented!", g_sPtokaXTitle, MB_OK);
     }
 
-    ::BringWindowToTop(((MainWindowPage *)tcItem.lParam)->m_hWnd);
+    ::BringWindowToTop((reinterpret_cast<MainWindowPage *>(tcItem.lParam))->m_hWnd);
 }
 //---------------------------------------------------------------------------
 

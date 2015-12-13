@@ -61,7 +61,7 @@ private:
 	clsServiceLoop(const clsServiceLoop&);
 	const clsServiceLoop& operator=(const clsServiceLoop&);
 
-    void AcceptUser(AcceptedSocket * AccptSocket);
+    static void AcceptUser(AcceptedSocket * AccptSocket);
 protected:
 public:
 	double dLoggedUsers, dActualSrvLoopLogins;

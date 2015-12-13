@@ -138,7 +138,7 @@ public:
     void UpdateLanguage();
     void UpdateUDPPort();
     void UpdateScripting() const;
-    void UpdateDatabase();
+    static void UpdateDatabase();
 
 	void CmdLineBasicSetup();
 	void CmdLineCompleteSetup();

@@ -187,11 +187,12 @@ void clsRegisterThread::AddSock(char * sAddress, const size_t &szLen) {
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
-	unsigned __stdcall ExecuteRegisterThread(void* RThread) {
+	unsigned __stdcall ExecuteRegisterThread(void * pThread) {
 #else
-	static void* ExecuteRegisterThread(void* RThread) {
+	static void* ExecuteRegisterThread(void * pThread) {
 #endif
-	((clsRegisterThread *)RThread)->Run();
+	(reinterpret_cast<clsRegisterThread *>(pThread))->Run();
+
 	return 0;
 }
 //---------------------------------------------------------------------------

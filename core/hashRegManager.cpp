@@ -830,7 +830,7 @@ void clsRegManager::Save(const bool &bSaveOnChange/* = false*/, const bool &bSav
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void clsRegManager::HashPasswords() {
+void clsRegManager::HashPasswords() const {
     size_t szPassLen = 0;
     char * sOldPass = NULL;
 

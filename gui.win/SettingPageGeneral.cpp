@@ -205,8 +205,7 @@ void SettingPageGeneral::Save() {
     uint32_t ui32CurSel = (uint32_t)::SendMessage(hWndPageItems[CB_LANGUAGE], CB_GETCURSEL, 0, 0);
 
     if(ui32CurSel == 0) {
-        if((clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE] == NULL && ui32CurSel != 0) ||
-			(clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE] != NULL && (ui32CurSel == 0 || strcmp(sBuf, clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE]) != NULL))) {
+        if(clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE] != NULL) {
             bUpdateLanguage = true;
             bUpdateHubNameWelcome = true;
         }
@@ -222,8 +221,7 @@ void SettingPageGeneral::Save() {
             return;
         }
 
-        if((clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE] == NULL && ui32CurSel != 0) ||
-			(clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE] != NULL && (ui32CurSel == 0 || strcmp(sTempBuf, clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE]) != NULL))) {
+        if(clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE] == NULL || strcmp(sTempBuf, clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE]) != NULL) {
             bUpdateLanguage = true;
             bUpdateHubNameWelcome = true;
         }

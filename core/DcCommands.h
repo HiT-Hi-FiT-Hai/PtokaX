@@ -47,43 +47,43 @@ private:
     clsDcCommands(const clsDcCommands&);
     const clsDcCommands& operator=(const clsDcCommands&);
 
-	void BotINFO(User * pUser, char * sData, const uint32_t &ui32Len);
-    void ConnectToMe(User * pUser, char * sData, const uint32_t &ui32LenLen, const bool &bCheck, const bool &bMulti);
+	static void BotINFO(User * pUser, char * sData, const uint32_t &ui32Len);
+    static void ConnectToMe(User * pUser, char * sData, const uint32_t &ui32LenLen, const bool &bCheck, const bool &bMulti);
 	void GetINFO(User * pUser, char * sData, const uint32_t &ui32Len);
-    bool GetNickList(User * pUser, char * sData, const uint32_t &ui32Len, const bool &bCheck);
-	void Key(User * pUser, char * sData, const uint32_t &ui32Len);
-	void Kick(User * pUser, char * sData, const uint32_t &ui32Len);
+    static bool GetNickList(User * pUser, char * sData, const uint32_t &ui32Len, const bool &bCheck);
+	static void Key(User * pUser, char * sData, const uint32_t &ui32Len);
+	static void Kick(User * pUser, char * sData, const uint32_t &ui32Len);
     static bool SearchDeflood(User * pUser, char * sData, const uint32_t &ui32Len, const bool &bCheck, const bool &bMulti);
-    void Search(User * pUser, char * sData, uint32_t ui32Len, const bool &bCheck, const bool &bMulti);
-    bool MyINFODeflood(User * pUser, char * sData, const uint32_t &ui32Len, const bool &bCheck);
+    static void Search(User * pUser, char * sData, uint32_t ui32Len, const bool &bCheck, const bool &bMulti);
+    static bool MyINFODeflood(User * pUser, char * sData, const uint32_t &ui32Len, const bool &bCheck);
 	static bool MyINFO(User * pUser, char * sData, const uint32_t &ui32Len);
 	void MyPass(User * pUser, char * sData, const uint32_t &ui32Len);
-	void OpForceMove(User * pUser, char * sData, const uint32_t &ui32Len);
-	void RevConnectToMe(User * pUser, char * sData, const uint32_t &ui32Len, const bool &bCheck);
-	void SR(User * pUser, char * sData, const uint32_t &ui32Len, const bool &bCheck);
+	static void OpForceMove(User * pUser, char * sData, const uint32_t &ui32Len);
+	static void RevConnectToMe(User * pUser, char * sData, const uint32_t &ui32Len, const bool &bCheck);
+	static void SR(User * pUser, char * sData, const uint32_t &ui32Len, const bool &bCheck);
 	void Supports(User * pUser, char * sData, const uint32_t &ui32Len);
-    void To(User * pUser, char * sData, const uint32_t &ui32Len, const bool &bCheck);
-	void ValidateNick(User * pUser, char * sData, const uint32_t &ui32Len);
-	void Version(User * pUser, char * sData, const uint32_t &ui32Len);
+    static void To(User * pUser, char * sData, const uint32_t &ui32Len, const bool &bCheck);
+	static void ValidateNick(User * pUser, char * sData, const uint32_t &ui32Len);
+	static void Version(User * pUser, char * sData, const uint32_t &ui32Len);
     static bool ChatDeflood(User * pUser, char * sData, const uint32_t &ui32Len, const bool &bCheck);
-	void Chat(User * pUser, char * sData, const uint32_t &ui32Len, const bool &bCheck);
-	void Close(User * pUser, char * sData, const uint32_t &ui32Len);
+	static void Chat(User * pUser, char * sData, const uint32_t &ui32Len, const bool &bCheck);
+	static void Close(User * pUser, char * sData, const uint32_t &ui32Len);
     
     void Unknown(User * pUser, char * sData, const uint32_t &ui32Len, const bool &bMyNick = false);
     void MyNick(User * pUser, char * sData, const uint32_t &ui32Len);
     
-    bool ValidateUserNick(User * pUser, char * sNick, const size_t &szNickLen, const bool &ValidateNick);
+    static bool ValidateUserNick(User * pUser, char * sNick, const size_t &szNickLen, const bool &ValidateNick);
 
 	PassBf * Find(const uint8_t * ui128IpHash);
 	void Remove(PassBf * PassBfItem);
 
     static bool CheckIPPort(const User * pUser, char * sIP, bool &bWrongPort, uint16_t &ui16Port, uint8_t &ui8AfterPortLen, char cPortEnd);
     static bool GetPort(char * sData, uint16_t &ui16Port, uint8_t &ui8AfterPortLen, char cPortEnd);
-    void SendIncorrectPortMsg(User * pUser, const bool &bCTM);
-    void SendIncorrectIPMsg(User * pUser, char * sBadIP, const bool &bCTM);
+    static void SendIncorrectPortMsg(User * pUser, const bool &bCTM);
+    static void SendIncorrectIPMsg(User * pUser, char * sBadIP, const bool &bCTM);
     static void SendIPFixedMsg(User * pUser, char * sBadIP, char * sRealIP);
 
-    PrcsdUsrCmd * AddSearch(User * pUser, PrcsdUsrCmd * cmdSearch, char * sSearch, const size_t &szLen, const bool &bActive) const;
+    static PrcsdUsrCmd * AddSearch(User * pUser, PrcsdUsrCmd * cmdSearch, char * sSearch, const size_t &szLen, const bool &bActive);
 public:
 	static clsDcCommands * mPtr;
 

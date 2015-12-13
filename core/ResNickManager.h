@@ -47,7 +47,7 @@ private:
     const clsReservedNicksManager& operator=(const clsReservedNicksManager&);
 
 	void Load();
-	void Save();
+	void Save() const;
 	void LoadXML();
 public:
     static clsReservedNicksManager * mPtr;

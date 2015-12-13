@@ -634,7 +634,7 @@ void clsUsers::DelFromOpList(char * sNick) {
 //---------------------------------------------------------------------------
 
 // PPK ... check global mainchat flood and add to global queue
-void clsUsers::SendChat2All(User * pUser, char * sData, const size_t &szChatLen, void * pToUser) {
+void clsUsers::SendChat2All(User * pUser, char * sData, const size_t &szChatLen, void * pQueueItem) {
     clsUdpDebug::mPtr->Broadcast(sData, szChatLen);
 
     if(clsProfileManager::mPtr->IsAllowed(pUser, clsProfileManager::NODEFLOODMAINCHAT) == false && clsSettingManager::mPtr->i16Shorts[SETSHORT_GLOBAL_MAIN_CHAT_ACTION] != 0) {
@@ -682,10 +682,10 @@ void clsUsers::SendChat2All(User * pUser, char * sData, const size_t &szChatLen,
         }
     }
 
-    if(pToUser == NULL) {
+    if(pQueueItem == NULL) {
         clsGlobalDataQueue::mPtr->AddQueueItem(sData, szChatLen, NULL, 0, clsGlobalDataQueue::CMD_CHAT);
     } else {
-        clsGlobalDataQueue::mPtr->FillBlankQueueItem(sData, szChatLen, pToUser);
+        clsGlobalDataQueue::mPtr->FillBlankQueueItem(sData, szChatLen, pQueueItem);
     }
 }
 //---------------------------------------------------------------------------

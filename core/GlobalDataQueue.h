@@ -176,7 +176,7 @@ public:
     void * GetLastQueueItem();
     void * GetFirstQueueItem();
     void * InsertBlankQueueItem(void * pAfterItem, const uint8_t &ui8CmdType);
-    void FillBlankQueueItem(char * sCommand, const size_t &szLen, void * pQueueItem);
+    static void FillBlankQueueItem(char * sCommand, const size_t &szLen, void * pVoidQueueItem);
     void StatusMessageFormat(const char * sFrom, const char * sFormatMsg, ...);
 };
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -1051,22 +1051,24 @@ void * clsGlobalDataQueue::InsertBlankQueueItem(void * pAfterItem, const uint8_t
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void clsGlobalDataQueue::FillBlankQueueItem(char * sCommand, const size_t &szLen, void * pQueueItem) {
+void clsGlobalDataQueue::FillBlankQueueItem(char * sCommand, const size_t &szLen, void * pVoidQueueItem) {
+	QueueItem * pQueueItem = reinterpret_cast<QueueItem *>(pVoidQueueItem);
+
 #ifdef _WIN32
-    ((QueueItem *)pQueueItem)->pCommand1 = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
+    pQueueItem->pCommand1 = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
 #else
-	((QueueItem *)pQueueItem)->pCommand1 = (char *)malloc(szLen+1);
+	pQueueItem->pCommand1 = (char *)malloc(szLen+1);
 #endif
-    if(((QueueItem *)pQueueItem)->pCommand1 == NULL) {
+    if(pQueueItem->pCommand1 == NULL) {
 		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pNewItem->pCommand1 in clsGlobalDataQueue::FillBlankQueueItem\n", (uint64_t)(szLen+1));
 
         return;
     }
 
-    memcpy(((QueueItem *)pQueueItem)->pCommand1, sCommand, szLen);
-    ((QueueItem *)pQueueItem)->pCommand1[szLen] = '\0';
+    memcpy(pQueueItem->pCommand1, sCommand, szLen);
+    pQueueItem->pCommand1[szLen] = '\0';
 
-	((QueueItem *)pQueueItem)->szLen1 = szLen;
+	pQueueItem->szLen1 = szLen;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -109,7 +109,7 @@
 # Report suspicious tag to Operators
 #ReportSuspiciousTag	=	1
 # Save script errors to log
-#LogScriptErrors	=	0
+#LogScriptErrors	=	1
 # Disallow clients sending buggy $Supports command
 #NoQuackSupports	=	0
 # Store registered users passwords as hashes

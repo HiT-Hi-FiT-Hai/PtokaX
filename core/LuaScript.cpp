@@ -1132,7 +1132,7 @@ User * ScriptGetUser(lua_State * L, const int &iTop, const char * sFunction) {
         return NULL;
     }
 
-    User *u = (User *)lua_touserdata(L, iTop+1);
+    User *u = reinterpret_cast<User *>(lua_touserdata(L, iTop+1));
                 
     if(u == NULL) {
         return NULL;

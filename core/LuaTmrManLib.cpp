@@ -188,7 +188,7 @@ static int RemoveTimer(lua_State * L) {
 #if defined(_WIN32) && !defined(_WIN_IOT)
     UINT_PTR timer = (UINT_PTR)lua_touserdata(L, 1);
 #else
-	ScriptTimer * timer = (ScriptTimer *)lua_touserdata(L, 1);
+	ScriptTimer * timer = reinterpret_cast<ScriptTimer *>(lua_touserdata(L, 1));
 #endif
 
     ScriptTimer * pCurTmr = NULL,

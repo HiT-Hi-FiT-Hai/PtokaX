@@ -135,7 +135,7 @@ LRESULT clsRegisteredUsersDialog::RegisteredUsersDialogProc(UINT uMsg, WPARAM wP
                         break;
                     }
 
-                    RegUser * pReg = (RegUser *)ListViewGetItem(hWndWindowItems[LV_REGS],  ((LPNMITEMACTIVATE)lParam)->iItem);
+                    RegUser * pReg = reinterpret_cast<RegUser *>(ListViewGetItem(hWndWindowItems[LV_REGS],  ((LPNMITEMACTIVATE)lParam)->iItem));
 
                     clsRegisteredUserDialog::mPtr = new (std::nothrow) clsRegisteredUserDialog();
 
@@ -356,8 +356,8 @@ void clsRegisteredUsersDialog::AddReg(const RegUser * pReg) {
 //------------------------------------------------------------------------------
 
 int clsRegisteredUsersDialog::CompareRegs(const void * pItem, const void * pOtherItem) {
-    RegUser * pFirstReg = (RegUser *)pItem;
-    RegUser * pSecondReg = (RegUser *)pOtherItem;
+    const RegUser * pFirstReg = reinterpret_cast<const RegUser *>(pItem);
+    const RegUser * pSecondReg = reinterpret_cast<const RegUser *>(pOtherItem);
 
     switch(clsRegisteredUsersDialog::mPtr->iSortColumn) {
         case 0:
@@ -404,7 +404,7 @@ void clsRegisteredUsersDialog::RemoveRegs() {
     int iSel = -1;
 
     while((iSel = (int)::SendMessage(hWndWindowItems[LV_REGS], LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED)) != -1) {
-        pReg = (RegUser *)ListViewGetItem(hWndWindowItems[LV_REGS], iSel);
+        pReg = reinterpret_cast<RegUser *>(ListViewGetItem(hWndWindowItems[LV_REGS], iSel));
 
         clsRegManager::mPtr->Delete(pReg, true);
 
@@ -499,7 +499,7 @@ void clsRegisteredUsersDialog::UpdateProfiles() {
     lvItem.iSubItem = 2;
 
     for(int i = 0; i < iItemCount; i++) {
-        pReg = (RegUser *)ListViewGetItem(hWndWindowItems[LV_REGS], i);
+        pReg = reinterpret_cast<RegUser *>(ListViewGetItem(hWndWindowItems[LV_REGS], i));
 
         lvItem.iItem = i;
         lvItem.pszText = clsProfileManager::mPtr->ppProfilesTable[pReg->ui16Profile]->sName;
@@ -553,7 +553,7 @@ void clsRegisteredUsersDialog::ChangeReg() {
         return;
     }
 
-    RegUser * pReg = (RegUser *)ListViewGetItem(hWndWindowItems[LV_REGS], iSel);
+    RegUser * pReg = reinterpret_cast<RegUser *>(ListViewGetItem(hWndWindowItems[LV_REGS], iSel));
 
     clsRegisteredUserDialog::mPtr = new (std::nothrow) clsRegisteredUserDialog();
 

@@ -33,7 +33,7 @@
 clsUpdateCheckThread * clsUpdateCheckThread::mPtr = NULL;
 //---------------------------------------------------------------------------
 
-clsUpdateCheckThread::clsUpdateCheckThread() : sSocket(INVALID_SOCKET), ui32FileLen(0), ui32RecvBufLen(0), ui32RecvBufSize(0), ui32BytesRead(0), ui32BytesSent(0), hThread(INVALID_HANDLE_VALUE), sRecvBuf(NULL), bOk(false), bData(false), bTerminated(false) {
+clsUpdateCheckThread::clsUpdateCheckThread() : hThread(INVALID_HANDLE_VALUE), sRecvBuf(NULL), sSocket(INVALID_SOCKET), ui32FileLen(0), ui32RecvBufLen(0), ui32RecvBufSize(0), ui32BytesRead(0), ui32BytesSent(0), bOk(false), bData(false), bTerminated(false) {
     sMsg[0] = '\0';
 }
 //---------------------------------------------------------------------------

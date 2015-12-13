@@ -135,11 +135,12 @@ UDPThread::~UDPThread() {
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
-unsigned __stdcall ExecuteUDP(void* UDPThrd) {
+unsigned __stdcall ExecuteUDP(void * pThread) {
 #else
-static void* ExecuteUDP(void* UDPThrd) {
+static void* ExecuteUDP(void * pThread) {
 #endif
-	((UDPThread *)UDPThrd)->Run();
+	(reinterpret_cast<UDPThread *>(pThread))->Run();
+
 	return 0;
 }
 //---------------------------------------------------------------------------

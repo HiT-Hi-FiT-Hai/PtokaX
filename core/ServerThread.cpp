@@ -40,11 +40,11 @@ ServerThread::AntiConFlood::AntiConFlood(const uint8_t * pIpHash) : ui64Time(cls
 };
 //---------------------------------------------------------------------------
 
-ServerThread::ServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber) : pAntiFloodList(NULL), threadId(0), 
+ServerThread::ServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber) : pAntiFloodList(NULL), 
 #ifdef _WIN32
-    server(INVALID_SOCKET),
+    server(INVALID_SOCKET), threadId(0),
 #else
-    server(-1),
+    threadId(0), server(-1),
 #endif
 	iSuspendTime(0), iAdressFamily(iAddrFamily), bTerminated(false), pPrev(NULL), pNext(NULL), ui16Port(ui16PortNumber), 
 	bActive(false), bSuspended(false) {
@@ -89,11 +89,12 @@ ServerThread::~ServerThread() {
 //---------------------------------------------------------------------------
 
 #ifdef _WIN32
-	unsigned __stdcall ExecuteServerThread(void* SrvThread) {
+	unsigned __stdcall ExecuteServerThread(void * pThread) {
 #else
-	static void* ExecuteServerThread(void* SrvThread) {
+	static void* ExecuteServerThread(void * pThread) {
 #endif
-	((ServerThread *)SrvThread)->Run();
+	(reinterpret_cast<ServerThread *>(pThread))->Run();
+
 	return 0;
 }
 //---------------------------------------------------------------------------
