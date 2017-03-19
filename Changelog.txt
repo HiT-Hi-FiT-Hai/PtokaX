@@ -5,12 +5,19 @@ PtokaX DC hub software - PPK (c) 2006/2015
 
 
 ----------------------------------------Next Release...---------------------------------------
+Added: Reconnect to database on connection failure or connection lost.
 Fixed: Compile for Windows 10 IoT.
 Fixed: Typo in server manager and resource leak in sqlite on exit (thx Pavel Pimenov for report).
 Fixed: Incorrect long length message when incomplete search command was received (thx Alexey for report).
 Fixed: Search request was sent to users without share (thx Pavel Pimenov for report).
 Fixed: Missing $ValidateDenide when user use nick that is in reserved nicks (thx Alexey for report).
 Fixed: Extra pipe in !checknickban result (thx Alexey for report).
+Fixed: IP and Port check in DC commands. (thx Mank and Rolex for report).
+Fixed: Missing IP check for validity in some hub commands.
+Fixed: Empty password received from user was not checked properly and accepted as new password for reg.
+Fixed: Bandwidth waste, when IPv6 user send search request with IPv4 address.
+Fixed: Possible crash on hublist registration (thx Pavel Pimenov for report).
+Fixed: Bind to single IP caused bind to all addresses when IPv6 address was empty.
 Changed: Log script errors is enabled by default for PtokaX versions without GUI.
 
 

@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -30,18 +30,18 @@ public:
 
     static LRESULT CALLBACK StaticMainWindowPageProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    virtual bool CreateMainWindowPage(HWND hOwner) = NULL;
-    virtual void UpdateLanguage() = NULL;
-    virtual char * GetPageName() = NULL;
-    virtual void FocusFirstItem() = NULL;
-    virtual void FocusLastItem() = NULL;
+    virtual bool CreateMainWindowPage(HWND hOwner) = 0;
+    virtual void UpdateLanguage() = 0;
+    virtual char * GetPageName() = 0;
+    virtual void FocusFirstItem() = 0;
+    virtual void FocusLastItem() = 0;
 protected:
     void CreateHWND(HWND hOwner);
 private:
-    MainWindowPage(const MainWindowPage&);
-    const MainWindowPage& operator=(const MainWindowPage&);
+    MainWindowPage(const MainWindowPage&) = delete;
+    const MainWindowPage& operator=(const MainWindowPage&) = delete;
 
-    virtual LRESULT MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam) = NULL;
+    virtual LRESULT MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
 };
 //------------------------------------------------------------------------------
 

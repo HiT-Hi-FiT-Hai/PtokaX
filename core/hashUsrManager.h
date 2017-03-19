@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -24,37 +24,37 @@
 struct User;
 //---------------------------------------------------------------------------
 
-class clsHashManager {
+class HashManager {
 private:
-    User * pNickTable[65536];
+    User * m_pNickTable[65536];
 
     struct IpTableItem {
-        IpTableItem * pPrev, * pNext;
+        IpTableItem * m_pPrev, * m_pNext;
 
-        User * pFirstUser;
+        User * m_pFirstUser;
 
-        uint16_t ui16Count;
+        uint16_t m_ui16Count;
 
-        IpTableItem() : pPrev(NULL), pNext(NULL), pFirstUser(NULL), ui16Count(0) { };
+        IpTableItem() : m_pPrev(NULL), m_pNext(NULL), m_pFirstUser(NULL), m_ui16Count(0) { };
 
         IpTableItem(const IpTableItem&);
         const IpTableItem& operator=(const IpTableItem&);
     };
 
-	IpTableItem * pIpTable[65536];
+	IpTableItem * m_pIpTable[65536];
 
-    clsHashManager(const clsHashManager&);
-    const clsHashManager& operator=(const clsHashManager&);
+    HashManager(const HashManager&);
+    const HashManager& operator=(const HashManager&);
 public:
-    static clsHashManager * mPtr;
+    static HashManager * m_Ptr;
 
-    clsHashManager();
-    ~clsHashManager();
+    HashManager();
+    ~HashManager();
 
     bool Add(User * pUser);
     void Remove(User * pUser);
 
-    User * FindUser(char * sNick, const size_t &szNickLen);
+    User * FindUser(char * sNick, const size_t szNickLen);
     User * FindUser(User * pUser);
     User * FindUser(const uint8_t * ui128IpHash);
 

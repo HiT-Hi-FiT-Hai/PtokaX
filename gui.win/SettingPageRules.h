@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -25,7 +25,7 @@
 
 class SettingPageRules : public SettingPage {
 public:
-    bool bUpdateNickLimitMessage, bUpdateMinShare, bUpdateMaxShare, bUpdateShareLimitMessage;
+    bool m_bUpdateNickLimitMessage, m_bUpdateMinShare, m_bUpdateMaxShare, m_bUpdateShareLimitMessage;
 
     SettingPageRules();
     ~SettingPageRules() { };
@@ -43,7 +43,7 @@ public:
     char * GetPageName();
     void FocusLastItem();
 private:
-    HWND hWndPageItems[47];
+    HWND m_hWndPageItems[47];
     
     enum enmPageItems {
         GB_NICK_LIMITS,
@@ -95,8 +95,8 @@ private:
         UD_SEARCH_MAX_LEN
     };
 
-    SettingPageRules(const SettingPageRules&);
-    const SettingPageRules& operator=(const SettingPageRules&);
+    SettingPageRules(const SettingPageRules&) = delete;
+    const SettingPageRules& operator=(const SettingPageRules&) = delete;
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

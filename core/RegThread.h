@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -22,24 +22,24 @@
 #define RegThreadH
 //---------------------------------------------------------------------------
 
-class clsRegisterThread {
+class RegisterThread {
 private:
     struct RegSocket {
-        uint64_t ui64TotalShare;
+        uint64_t m_ui64TotalShare;
 
-		RegSocket * pPrev, * pNext;
+		RegSocket * m_pPrev, * m_pNext;
 
-		char * sAddress, * pRecvBuf, * pSendBuf, * pSendBufHead;
+		char * m_sAddress, * m_pRecvBuf, * m_pSendBuf, * m_pSendBufHead;
 
 #ifdef _WIN32
-        SOCKET sock;
+        SOCKET m_Sock;
 #else
-		int sock;
+		int m_Sock;
 #endif
 
-        uint32_t ui32RecvBufLen, ui32RecvBufSize, ui32SendBufLen, ui32TotalUsers;
+        uint32_t m_ui32RecvBufLen, m_ui32RecvBufSize, m_ui32SendBufLen, m_ui32TotalUsers;
 
-        uint32_t ui32AddrLen;
+        uint32_t m_ui32AddrLen;
 
         RegSocket();
         ~RegSocket();
@@ -48,37 +48,35 @@ private:
         const RegSocket& operator=(const RegSocket&);
     };
 
-	RegSocket * pRegSockListS, * pRegSockListE;
+	RegSocket * m_pRegSockListS, * m_pRegSockListE;
 
 #ifdef _WIN32
-	HANDLE threadHandle;
-
-    unsigned int threadId;
+	HANDLE m_hThreadHandle;
 #else
-	pthread_t threadId;
+	pthread_t m_ThreadId;
 #endif
 
-    bool bTerminated;
+    bool m_bTerminated;
 
-    char sMsg[2048];
+    char m_sMsg[2048];
 
-	clsRegisterThread(const clsRegisterThread&);
-	const clsRegisterThread& operator=(const clsRegisterThread&);
+	RegisterThread(const RegisterThread&);
+	const RegisterThread& operator=(const RegisterThread&);
 
-	void AddSock(char * sAddress, const size_t &szLen);
+	void AddSock(char * sAddress, const size_t szLen);
 	bool Receive(RegSocket * pSock);
     static void Add2SendBuf(RegSocket * pSock, char * sData);
     bool Send(RegSocket * pSock);
     void RemoveSock(RegSocket * pSock);
 public:
-    static clsRegisterThread * mPtr;
+    static RegisterThread * m_Ptr;
 
-    uint32_t ui32BytesRead, ui32BytesSent;
+    uint32_t m_ui32BytesRead, m_ui32BytesSent;
 
-	clsRegisterThread();
-	~clsRegisterThread();
+	RegisterThread();
+	~RegisterThread();
 
-	void Setup(char * sAddresses, const uint16_t &ui16AddrsLen);
+	void Setup(char * sAddresses, const uint16_t ui16AddrsLen);
 	void Resume();
 	void Run();
 	void Close();

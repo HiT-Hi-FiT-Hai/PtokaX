@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -23,31 +23,31 @@
 
 class BasicSplitter {
 public:
-    RECT rcSplitter;
+    RECT m_rcSplitter;
 
-    int iSplitterPos, iPercentagePos;
+    int m_iSplitterPos, m_iPercentagePos;
 
     BasicSplitter();
     virtual ~BasicSplitter() { }
 
     bool BasicSplitterProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    void SetSplitterRect(const LPRECT &lpRect);
+    void SetSplitterRect(const LPRECT lpRect);
 private:
-    bool bUpdatePercentagePos;
+    bool m_bUpdatePercentagePos;
 
-    BasicSplitter(const BasicSplitter&);
-    const BasicSplitter& operator=(const BasicSplitter&);
+    BasicSplitter(const BasicSplitter&) = delete;
+    const BasicSplitter& operator=(const BasicSplitter&) = delete;
 
-    virtual HWND GetWindowHandle() = NULL;
-    virtual void UpdateSplitterParts() = NULL;
+    virtual HWND GetWindowHandle() = 0;
+    virtual void UpdateSplitterParts() = 0;
 
 	bool OnMouseMove(WPARAM wParam, LPARAM lParam);
 	void OnLButtonDown(LPARAM lParam);
 	static void OnLButtonUp();
 
-    void SetSplitterPosition(int iPos, const bool &bUpdate = true);
-	bool IsCursorOverSplitter(const int &iX, const int &iY) const;
+    void SetSplitterPosition(int iPos, const bool bUpdate = true);
+	bool IsCursorOverSplitter(const int iX, const int iY) const;
 };
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

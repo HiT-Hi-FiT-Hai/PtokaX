@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -21,36 +21,36 @@
 #define eventqueueH
 //---------------------------------------------------------------------------
 
-class clsEventQueue {
+class EventQueue {
 private:
 #ifdef _WIN32
-	CRITICAL_SECTION csEventQueue;
+	CRITICAL_SECTION m_csEventQueue;
 #else
-	pthread_mutex_t mtxEventQueue;
+	pthread_mutex_t m_mtxEventQueue;
 #endif
 
-    struct event {
-    	event * pPrev, * pNext;
+    struct Event {
+    	Event * m_pPrev, * m_pNext;
 
-        char * sMsg;
+        char * m_sMsg;
 
-        uint8_t ui128IpHash[16];
-        uint8_t ui8Id;
+        uint8_t m_ui128IpHash[16];
+        uint8_t m_ui8Id;
 
-        event();
+        Event();
 
-        event(const event&);
-        const event& operator=(const event&);
+        Event(const Event&);
+        const Event& operator=(const Event&);
     };
 
-	event * pNormalE, * pThreadE;
+	Event * m_pNormalE, * m_pThreadE;
 
-	clsEventQueue(const clsEventQueue&);
-	const clsEventQueue& operator=(const clsEventQueue&);
+	EventQueue(const EventQueue&);
+	const EventQueue& operator=(const EventQueue&);
 public:
-    static clsEventQueue * mPtr;
+    static EventQueue * m_Ptr;
 
-	event * pNormalS, * pThreadS;
+	Event * m_pNormalS, * m_pThreadS;
 
 	enum {
         EVENT_RESTART, 
@@ -64,11 +64,11 @@ public:
         EVENT_UDP_SR
 	};
 
-    clsEventQueue();
-    ~clsEventQueue();
+    EventQueue();
+    ~EventQueue();
 
-    void AddNormal(uint8_t ui8Id, char * sMsg);
-    void AddThread(uint8_t ui8Id, char * sMsg, const sockaddr_storage * sas = NULL);
+    void AddNormal(const uint8_t ui8Id, char * sMsg);
+    void AddThread(const uint8_t ui8Id, char * sMsg, const sockaddr_storage * sas = NULL);
     void ProcessEvents();
 };
 //---------------------------------------------------------------------------

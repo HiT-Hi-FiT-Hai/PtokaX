@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -119,8 +119,8 @@ static void WINAPI CtrlHandler(DWORD dwCtrl) {
 	    case SERVICE_CONTROL_SHUTDOWN:
 	    case SERVICE_CONTROL_STOP:
 	        ss.dwCurrentState = SERVICE_STOP_PENDING;
-	        clsServerManager::bIsClose = true;
-			clsServerManager::Stop();
+	        ServerManager::m_bIsClose = true;
+			ServerManager::Stop();
 	    case SERVICE_CONTROL_INTERROGATE:
 	        // Fall through to send current status.
 	        break;
@@ -129,7 +129,7 @@ static void WINAPI CtrlHandler(DWORD dwCtrl) {
 	}
 	
 	if(SetServiceStatus(ssh, &ss) == false) {
-		AppendLog("CtrlHandler::SetServiceStatus failed ("+string((uint32_t)GetLastError())+")!");
+		AppendLog(("CtrlHandler::SetServiceStatus failed ("+string((uint32_t)GetLastError())+")!").c_str());
 	}
 }
 //---------------------------------------------------------------------------
@@ -137,9 +137,9 @@ static void WINAPI CtrlHandler(DWORD dwCtrl) {
 static void MainLoop() {
 #ifdef _WIN_IOT
 	while(true) {
-		clsServiceLoop::mPtr->Looper();
+		ServiceLoop::m_Ptr->Looper();
 		
-		if(clsServerManager::bServerTerminated == true) {
+		if(ServerManager::m_bServerTerminated == true) {
 		    break;
 		}
 
@@ -153,20 +153,18 @@ static void MainLoop() {
 	    if(bRet == -1) {
 	        // handle the error and possibly exit
 	    } else {
-	        if(msg.message == WM_USER+1) {
-	            break;
+	    	if(msg.message == WM_PX_DO_LOOP) {
+	    		ServiceLoop::m_Ptr->Looper();
 	        } else if(msg.message == WM_TIMER) {
-				if (msg.wParam == clsServerManager::sectimer) {
-					clsServerManager::OnSecTimer();
-				} else if (msg.wParam == clsServiceLoop::srvLoopTimer) {
-                    clsServiceLoop::mPtr->Looper();
-                } else if(msg.wParam == clsServerManager::regtimer) {
-					clsServerManager::OnRegTimer();
+				if (msg.wParam == ServerManager::m_upSecTimer) {
+					ServerManager::OnSecTimer();
+                } else if(msg.wParam == ServerManager::m_upRegTimer) {
+					ServerManager::OnRegTimer();
                 } else {
                     //Must be script timer
                     ScriptOnTimer(msg.wParam);
                 }
-            }
+	        }
 
 	    	::TranslateMessage(&msg);
 	        ::DispatchMessage(&msg);
@@ -182,7 +180,7 @@ static void WINAPI StartService(DWORD /*argc*/, char* argv[]) {
 	ssh = RegisterServiceCtrlHandler(argv[0], CtrlHandler);
 	
 	if(ssh == NULL) {
-		AppendLog("RegisterServiceCtrlHandler failed ("+string((uint32_t)GetLastError())+")!");
+		AppendLog(("RegisterServiceCtrlHandler failed ("+string((uint32_t)GetLastError())+")!").c_str());
 	    return;
 	}
 	
@@ -194,13 +192,13 @@ static void WINAPI StartService(DWORD /*argc*/, char* argv[]) {
 	ss.dwWaitHint = 10 * 1000;
 	
 	if(SetServiceStatus(ssh, &ss) == false) {
-		AppendLog("StartService::SetServiceStatus failed ("+string((uint32_t)GetLastError())+")!");
+		AppendLog(("StartService::SetServiceStatus failed ("+string((uint32_t)GetLastError())+")!").c_str());
 		return;
 	}
 	
-	clsServerManager::Initialize();
+	ServerManager::Initialize();
 	
-	if (clsServerManager::Start() == false) {
+	if (ServerManager::Start() == false) {
 	    AppendLog("Server start failed!");
 		ss.dwCurrentState = SERVICE_STOPPED;
 		SetServiceStatus(ssh, &ss);
@@ -210,7 +208,7 @@ static void WINAPI StartService(DWORD /*argc*/, char* argv[]) {
 	ss.dwCurrentState = SERVICE_RUNNING;
 	
 	if(SetServiceStatus(ssh, &ss) == false) {
-		AppendLog("StartService::SetServiceStatus1 failed ("+string((uint32_t)GetLastError())+")!");
+		AppendLog(("StartService::SetServiceStatus1 failed ("+string((uint32_t)GetLastError())+")!").c_str());
 		return;
 	}
 
@@ -249,9 +247,9 @@ int __cdecl main(int argc, char* argv[]) {
 	::GetModuleFileName(NULL, sBuf, MAX_PATH);
 	char * sPath = strrchr(sBuf, '\\');
 	if(sPath != NULL) {
-		clsServerManager::sPath = string(sBuf, sPath - sBuf);
+		ServerManager::m_sPath = string(sBuf, sPath - sBuf);
 	} else {
-		clsServerManager::sPath = sBuf;
+		ServerManager::m_sPath = sBuf;
 	}
 
 	char * sServiceName = NULL;
@@ -265,7 +263,7 @@ int __cdecl main(int argc, char* argv[]) {
 	            return EXIT_FAILURE;
 	    	}
 	    	sServiceName = argv[i];
-			clsServerManager::bService = true;
+			ServerManager::m_bService = true;
 	    } else if(stricmp(argv[i], "-c") == 0) {
 	        if(++i == argc) {
 	            printf("Missing config directory!");
@@ -281,13 +279,13 @@ int __cdecl main(int argc, char* argv[]) {
 	    	}
 	
 	    	if(argv[i][szLen - 1] == '/' || argv[i][szLen - 1] == '\\') {
-				clsServerManager::sPath = string(argv[i], szLen - 1);
+				ServerManager::m_sPath = string(argv[i], szLen - 1);
 	    	} else {
-				clsServerManager::sPath = string(argv[i], szLen);
+				ServerManager::m_sPath = string(argv[i], szLen);
 	        }
 	    
-			if(DirExist(clsServerManager::sPath.c_str()) == false) {
-				if(CreateDirectory(clsServerManager::sPath.c_str(), NULL) == 0) {
+			if(DirExist(ServerManager::m_sPath.c_str()) == false) {
+				if(CreateDirectory(ServerManager::m_sPath.c_str(), NULL) == 0) {
 	                printf("Config directory not exist and can't be created!");
 	                return EXIT_FAILURE;
 	            }
@@ -320,7 +318,7 @@ int __cdecl main(int argc, char* argv[]) {
 			);
 	    	return EXIT_SUCCESS;
 	    } else if(stricmp(argv[i], "/generatexmllanguage") == NULL) {
-	        clsLanguageManager::GenerateXmlExample();
+	        LanguageManager::GenerateXmlExample();
 	        return EXIT_SUCCESS;
 	    } else if(strcasecmp(argv[i], "-m") == 0) {
 	    	bSetup = true;
@@ -338,31 +336,31 @@ int __cdecl main(int argc, char* argv[]) {
 	}
 
 	if(bSetup == true) {
-		clsServerManager::Initialize();
+		ServerManager::Initialize();
 
-		clsServerManager::CommandLineSetup();
+		ServerManager::CommandLineSetup();
 		
-		clsServerManager::FinalClose();
+		ServerManager::FinalClose();
 
 		return EXIT_SUCCESS;
 	}
 
 	if(bInstallService == true) {
-	    if(sPath == NULL && strcmp(clsServerManager::sPath.c_str(), sBuf) == 0) {
+	    if(sPath == NULL && strcmp(ServerManager::m_sPath.c_str(), sBuf) == 0) {
 	        return InstallService(sServiceName, NULL);
 		} else {
-			return InstallService(sServiceName, clsServerManager::sPath.c_str());
+			return InstallService(sServiceName, ServerManager::m_sPath.c_str());
 		}
 	}
 
 #ifndef _WIN_IOT
-    ExceptionHandlingInitialize(clsServerManager::sPath, sBuf);
+    ExceptionHandlingInitialize(ServerManager::m_sPath, sBuf);
 #endif
 
-	if(clsServerManager::bService == false) {
-	    clsServerManager::Initialize();
+	if(ServerManager::m_bService == false) {
+	    ServerManager::Initialize();
 	
-	    if(clsServerManager::Start() == false) {
+	    if(ServerManager::Start() == false) {
 	        printf("Server start failed!");
 #ifndef _WIN_IOT
             ExceptionHandlingUnitialize();
@@ -380,7 +378,7 @@ int __cdecl main(int argc, char* argv[]) {
 	    };
 	       
 	    if(StartServiceCtrlDispatcher(DispatchTable) == false) {
-			AppendLog("StartServiceCtrlDispatcher failed ("+string((uint32_t)GetLastError())+")!");
+			AppendLog(("StartServiceCtrlDispatcher failed ("+string((uint32_t)GetLastError())+")!").c_str());
 #ifndef _WIN_IOT
             ExceptionHandlingUnitialize();
 #endif

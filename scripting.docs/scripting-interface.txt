@@ -52,7 +52,7 @@ ResumeAccepts()														- Resume listening thread(s) if they were suspended
 SuspendAccepts()													- Stop listening thread(s). Hub looks in this time like it is not running.
 SuspendAccepts(nTime)												- Stop listening thread(s) for given time in seconds. Hub looks in this time like it is not running.
 
-RegBot(sBotName, sDescription, sEmail, bHaveKey)					- Chars $|<>:?*"/\ and space not allowed in nick, $| not allowed in Description and Email, max length 64 chars per string. Return nil when failed, true when success.
+RegBot(sBotName, sDescription, sEmail, bHaveKey)					- Chars $| and space not allowed in nick. $ and | not allowed in Description and Email, max length 64 chars per string. Return nil when failed, true when success.
 UnregBot(sBotName)													- Return nil when failed, true when success.
 
 GetBots()															- Return table with all bots registered by scripts as tables with sNick, sMyINFO, bIsOP and sScriptName.

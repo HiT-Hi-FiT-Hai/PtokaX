@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -25,7 +25,7 @@
 
 class SettingPageGeneral : public SettingPage {
 public:
-    bool bUpdateHubNameWelcome, bUpdateHubName, bUpdateTCPPorts, bUpdateUDPPort, bUpdateAutoReg, bUpdateLanguage;
+    bool m_bUpdateHubNameWelcome, m_bUpdateHubName, m_bUpdateTCPPorts, m_bUpdateUDPPort, m_bUpdateAutoReg, m_bUpdateLanguage;
 
     SettingPageGeneral();
     ~SettingPageGeneral() { };
@@ -43,7 +43,7 @@ public:
     char * GetPageName();
     void FocusLastItem();
 private:
-    HWND hWndPageItems[27];
+    HWND m_hWndPageItems[27];
     
     enum enmPageItems {
         GB_LANGUAGE,
@@ -75,8 +75,8 @@ private:
         BTN_HUBLIST_AUTO_REG
     };
 
-    SettingPageGeneral(const SettingPageGeneral&);
-    const SettingPageGeneral& operator=(const SettingPageGeneral&);
+    SettingPageGeneral(const SettingPageGeneral&) = delete;
+    const SettingPageGeneral& operator=(const SettingPageGeneral&) = delete;
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

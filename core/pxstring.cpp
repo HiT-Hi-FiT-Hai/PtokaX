@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -30,183 +30,191 @@
 static const char * sEmpty = "";
 //---------------------------------------------------------------------------
 
-void string::stralloc(const char * sTxt, const size_t &szLen) {
-	szDataLen = szLen;
+void string::stralloc(const char * sTxt, const size_t szLen) {
+	m_szDataLen = szLen;
 
-	if(szDataLen == 0) {
-		sData = (char *)sEmpty;
+	if(m_szDataLen == 0) {
+		m_sData = (char *)sEmpty;
 		return;
 	}
 
-	sData = (char *)malloc(szDataLen+1);
-	if(sData == NULL) {
-		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sData in string::stralloc\n", (uint64_t)(szDataLen+1));
+	m_sData = (char *)malloc(m_szDataLen+1);
+	if(m_sData == NULL) {
+		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sData in string::stralloc\n", (uint64_t)(m_szDataLen+1));
 
         return;
 	}
 
-	memcpy(sData, sTxt, szDataLen);
-	sData[szDataLen] = '\0';
+	memcpy(m_sData, sTxt, m_szDataLen);
+	m_sData[m_szDataLen] = '\0';
 }
 //---------------------------------------------------------------------------
 
-string::string() : sData((char *)sEmpty), szDataLen(0) {
+string::string() : m_sData((char *)sEmpty), m_szDataLen(0) {
 	// ...
 }
 //---------------------------------------------------------------------------
 
-string::string(const char * sTxt) : sData((char *)sEmpty), szDataLen(0) {
+string::string(const char * sTxt) : m_sData((char *)sEmpty), m_szDataLen(0) {
 	stralloc(sTxt, strlen(sTxt));
 }
 //---------------------------------------------------------------------------
 
-string::string(const char * sTxt, const size_t &szLen) : sData((char *)sEmpty), szDataLen(0) {
+string::string(const char * sTxt, const size_t szLen) : m_sData((char *)sEmpty), m_szDataLen(0) {
 	stralloc(sTxt, szLen);
 }
 //---------------------------------------------------------------------------
 
-string::string(const string & sStr) : sData((char *)sEmpty), szDataLen(0) {
+string::string(const string & sStr) : m_sData((char *)sEmpty), m_szDataLen(0) {
     stralloc(sStr.c_str(), sStr.size());
 }
 //---------------------------------------------------------------------------
 
-string::string(const uint32_t & ui32Number) : sData((char *)sEmpty), szDataLen(0) {
+string::string(const uint32_t ui32Number) : m_sData((char *)sEmpty), m_szDataLen(0) {
 	char tmp[16];
 #ifdef _WIN32
 	ultoa(ui32Number, tmp, 10);
 	stralloc(tmp, strlen(tmp));
 #else
-	int iLen = sprintf(tmp, "%u", ui32Number);
-	stralloc(tmp, iLen);
+	int iLen = snprintf(tmp, 16, "%u", ui32Number);
+	if(iLen > 0) {
+		stralloc(tmp, iLen);
+	}
 #endif
 }
 //---------------------------------------------------------------------------
 
-string::string(const int32_t & i32Number) : sData((char *)sEmpty), szDataLen(0) {
+string::string(const int32_t i32Number) : m_sData((char *)sEmpty), m_szDataLen(0) {
 	char tmp[16];
 #ifdef _WIN32
 	ltoa(i32Number, tmp, 10);
 	stralloc(tmp, strlen(tmp));
 #else
-	int iLen = sprintf(tmp, "%d", i32Number);
-	stralloc(tmp, iLen);
+	int iLen = snprintf(tmp, 16, "%d", i32Number);
+	if(iLen > 0) {
+		stralloc(tmp, iLen);
+	}
 #endif
 }
 //---------------------------------------------------------------------------
 
-string::string(const uint64_t & ui64Number) : sData((char *)sEmpty), szDataLen(0) {
+string::string(const uint64_t ui64Number) : m_sData((char *)sEmpty), m_szDataLen(0) {
 	char tmp[32];
 #ifdef _WIN32
 	_ui64toa(ui64Number, tmp, 10);
 	stralloc(tmp, strlen(tmp));
 #else
-	int iLen = sprintf(tmp, "%" PRIu64, ui64Number);
-	stralloc(tmp, iLen);
+	int iLen = snprintf(tmp, 32, "%" PRIu64, ui64Number);
+	if(iLen > 0) {
+		stralloc(tmp, iLen);
+	}
 #endif
 }
 //---------------------------------------------------------------------------
 
-string::string(const int64_t & i64Number) : sData((char *)sEmpty), szDataLen(0) {
+string::string(const int64_t i64Number) : m_sData((char *)sEmpty), m_szDataLen(0) {
 	char tmp[32];
 #ifdef _WIN32
 	_i64toa(i64Number, tmp, 10);
 	stralloc(tmp, strlen(tmp));
 #else
-	int iLen = sprintf(tmp, "%" PRId64, i64Number);
-	stralloc(tmp, iLen);
+	int iLen = snprintf(tmp, 32, "%" PRId64, i64Number);
+	if(iLen > 0) {
+		stralloc(tmp, iLen);
+	}
 #endif
 }
 //---------------------------------------------------------------------------
 
-string::string(const string & sStr1, const string & sStr2) : sData((char *)sEmpty), szDataLen(0) {
-    szDataLen = sStr1.size()+sStr2.size();
+string::string(const string & sStr1, const string & sStr2) : m_sData((char *)sEmpty), m_szDataLen(0) {
+	m_szDataLen = sStr1.size()+sStr2.size();
 
-    if(szDataLen == 0) {
-        sData = (char *)sEmpty;
+    if(m_szDataLen == 0) {
+		m_sData = (char *)sEmpty;
         return;
     }
 
-    sData = (char *)malloc(szDataLen+1);
-    if(sData == NULL) {
-        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sData in string::string(string, string)\n", (uint64_t)(szDataLen+1));
+	m_sData = (char *)malloc(m_szDataLen+1);
+    if(m_sData == NULL) {
+        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sData in string::string(string, string)\n", (uint64_t)(m_szDataLen+1));
 
         return;
     }
 
-    memcpy(sData, sStr1.c_str(), sStr1.size());
-    memcpy(sData+sStr1.size(), sStr2.c_str(), sStr2.size());
-    sData[szDataLen] = '\0';
+    memcpy(m_sData, sStr1.c_str(), sStr1.size());
+    memcpy(m_sData+sStr1.size(), sStr2.c_str(), sStr2.size());
+	m_sData[m_szDataLen] = '\0';
 }
 //---------------------------------------------------------------------------
 
-string::string(const char * sTxt, const string & sStr) : sData((char *)sEmpty), szDataLen(0) {
+string::string(const char * sTxt, const string & sStr) : m_sData((char *)sEmpty), m_szDataLen(0) {
     size_t szLen = strlen(sTxt);
-	szDataLen = szLen+sStr.size();
+	m_szDataLen = szLen+sStr.size();
 
-    if(szDataLen == 0) {
-        sData = (char *)sEmpty;
+    if(m_szDataLen == 0) {
+		m_sData = (char *)sEmpty;
         return;
     }
 
-    sData = (char *)malloc(szDataLen+1);
-    if(sData == NULL) {
-        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sData in string::string(char, string)\n", (uint64_t)(szDataLen+1));
+	m_sData = (char *)malloc(m_szDataLen+1);
+    if(m_sData == NULL) {
+        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sData in string::string(char, string)\n", (uint64_t)(m_szDataLen+1));
 
         return;
     }
 
-    memcpy(sData, sTxt, szLen);
-    memcpy(sData+szLen, sStr.c_str(), sStr.size());
-    sData[szDataLen] = '\0';
+    memcpy(m_sData, sTxt, szLen);
+    memcpy(m_sData+szLen, sStr.c_str(), sStr.size());
+	m_sData[m_szDataLen] = '\0';
 }
 //---------------------------------------------------------------------------
 
-string::string(const string & sStr, const char * sTxt) : sData((char *)sEmpty), szDataLen(0) {
+string::string(const string & sStr, const char * sTxt) : m_sData((char *)sEmpty), m_szDataLen(0) {
     size_t szLen = strlen(sTxt);
-	szDataLen = sStr.size()+szLen;
+	m_szDataLen = sStr.size()+szLen;
 
-    if(szDataLen == 0) {
-        sData = (char *)sEmpty;
+    if(m_szDataLen == 0) {
+		m_sData = (char *)sEmpty;
         return;
     }
 
-    sData = (char *)malloc(szDataLen+1);
-    if(sData == NULL) {
-        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sData in string::string(string, char)\n", (uint64_t)(szDataLen+1));
+	m_sData = (char *)malloc(m_szDataLen+1);
+    if(m_sData == NULL) {
+        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sData in string::string(string, char)\n", (uint64_t)(m_szDataLen+1));
 
         return;
     }
 
-    memcpy(sData, sStr.c_str(), sStr.size());
-    memcpy(sData+sStr.size(), sTxt, szLen);
-    sData[szDataLen] = '\0';
+    memcpy(m_sData, sStr.c_str(), sStr.size());
+    memcpy(m_sData+sStr.size(), sTxt, szLen);
+	m_sData[m_szDataLen] = '\0';
 }
 //---------------------------------------------------------------------------
 
 string::~string() {
-    if(sData != sEmpty) {
-        free(sData);
+    if(m_sData != sEmpty) {
+        free(m_sData);
     }
 }
 //---------------------------------------------------------------------------
 
 size_t string::size() const {
-    return szDataLen;
+    return m_szDataLen;
 }
 //---------------------------------------------------------------------------
 
 char * string::c_str() const {
-	return sData;
+	return m_sData;
 }
 //---------------------------------------------------------------------------
 
 void string::clear() {
-    if(sData != sEmpty) {
-        free(sData);
+    if(m_sData != sEmpty) {
+        free(m_sData);
     }
 
-	sData = (char *)sEmpty;
-    szDataLen = 0;
+	m_sData = (char *)sEmpty;
+	m_szDataLen = 0;
 }
 //---------------------------------------------------------------------------
 
@@ -231,25 +239,25 @@ string operator+(const char * sTxt, const string & sStr) {
 string & string::operator+=(const char * sTxt) {
     size_t szLen = strlen(sTxt);
 
-    char * oldbuf = sData;
+    char * oldbuf = m_sData;
 
-    if(sData == sEmpty) {
-        sData = (char *)malloc(szDataLen+szLen+1);
+    if(m_sData == sEmpty) {
+		m_sData = (char *)malloc(m_szDataLen+szLen+1);
     } else {
-        sData = (char *)realloc(oldbuf, szDataLen+szLen+1);
+		m_sData = (char *)realloc(oldbuf, m_szDataLen+szLen+1);
     }
 
-    if(sData == NULL) {
-        sData = oldbuf;
+    if(m_sData == NULL) {
+		m_sData = oldbuf;
 
-        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sData in string::operator+=(char)\n", (uint64_t)(szDataLen+szLen+1));
+        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sData in string::operator+=(char)\n", (uint64_t)(m_szDataLen+szLen+1));
 
         return *this;
     }
 
-    memcpy(sData+szDataLen, sTxt, szLen);
-	szDataLen += szLen;
-	sData[szDataLen] = '\0';
+    memcpy(m_sData+m_szDataLen, sTxt, szLen);
+	m_szDataLen += szLen;
+	m_sData[m_szDataLen] = '\0';
 
     return *this;
 }
@@ -260,33 +268,33 @@ string & string::operator+=(const string & sStr) {
         return *this;
     }
 
-    char * oldbuf = sData;
+    char * oldbuf = m_sData;
 
-    if(sData == sEmpty) {
-        sData = (char *)malloc(szDataLen+sStr.size()+1);
+    if(m_sData == sEmpty) {
+		m_sData = (char *)malloc(m_szDataLen+sStr.size()+1);
     } else {
-        sData = (char *)realloc(oldbuf, szDataLen+sStr.size()+1);
+		m_sData = (char *)realloc(oldbuf, m_szDataLen+sStr.size()+1);
     }
 
-    if(sData == NULL) {
-        sData = oldbuf;
+    if(m_sData == NULL) {
+		m_sData = oldbuf;
 
-        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sData in string::operator+=(string)\n", (uint64_t)(szDataLen+sStr.size()+1));
+        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sData in string::operator+=(string)\n", (uint64_t)(m_szDataLen+sStr.size()+1));
 
         return *this;
     }
 
-    memcpy(sData+szDataLen, sStr.c_str(), sStr.size());
-	szDataLen += sStr.size();
-	sData[szDataLen] = '\0';
+    memcpy(m_sData+m_szDataLen, sStr.c_str(), sStr.size());
+	m_szDataLen += sStr.size();
+	m_sData[m_szDataLen] = '\0';
 
     return *this;
 }
 //---------------------------------------------------------------------------
 
 string & string::operator=(const char * sTxt) {
-	if(sData != sEmpty) {
-        free(sData);
+	if(m_sData != sEmpty) {
+        free(m_sData);
     }
 
 	stralloc(sTxt, strlen(sTxt));
@@ -296,8 +304,8 @@ string & string::operator=(const char * sTxt) {
 //---------------------------------------------------------------------------
 
 string & string::operator=(const string & sStr) {
-    if(sData != sEmpty) {
-        free(sData);
+    if(m_sData != sEmpty) {
+        free(m_sData);
     }
 
 	stralloc(sStr.c_str(), sStr.size());
@@ -307,8 +315,8 @@ string & string::operator=(const string & sStr) {
 //---------------------------------------------------------------------------
 
 bool string::operator==(const char * sTxt) {
-    if(szDataLen != strlen(sTxt) || 
-        memcmp(sData, sTxt, szDataLen) != 0) {
+    if(m_szDataLen != strlen(sTxt) || 
+        memcmp(m_sData, sTxt, m_szDataLen) != 0) {
         return false;
     }
 
@@ -317,8 +325,8 @@ bool string::operator==(const char * sTxt) {
 //---------------------------------------------------------------------------
 
 bool string::operator==(const string & sStr) {
-    if(szDataLen != sStr.size() || 
-        memcmp(sData, sStr.c_str(), szDataLen) != 0) {
+    if(m_szDataLen != sStr.size() || 
+        memcmp(m_sData, sStr.c_str(), m_szDataLen) != 0) {
         return false;
     }
 

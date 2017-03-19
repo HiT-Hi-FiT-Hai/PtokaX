@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -23,21 +23,21 @@
 
 class PXBReader {
 private:
-	FILE * pFile;
+	FILE * m_pFile;
 
-    char * pActualPosition;
+    char * m_pActualPosition;
 
-    size_t szRemainingSize;
+    size_t m_szRemainingSize;
 
-	uint8_t ui8AllocatedSize;
+	uint8_t m_ui8AllocatedSize;
 
-    bool bFullRead;
+    bool m_bFullRead;
 
 	PXBReader(const PXBReader&);
 	const PXBReader& operator=(const PXBReader&);
 
     void ReadNextFilePart();
-    bool PrepareArrays(const uint8_t &ui8Size);
+    bool PrepareArrays(const uint8_t ui8Size);
 public:
     enum enmDataTypes {
         PXB_BYTE,
@@ -47,22 +47,22 @@ public:
         PXB_STRING
     };
 
-    void ** pItemDatas;
+    void ** m_pItemDatas;
 
-    uint16_t * ui16ItemLengths;
+    uint16_t * m_ui16ItemLengths;
 
-    char * sItemIdentifiers;
+    char * m_sItemIdentifiers;
 
-    uint8_t * ui8ItemValues;
+    uint8_t * m_ui8ItemValues;
 
 	PXBReader();
 	~PXBReader();
 
-    bool OpenFileRead(const char * sFilename, const uint8_t &ui8SubItems);
-    bool ReadNextItem(const uint16_t * sExpectedIdentificators, const uint8_t &ui8ExpectedSubItems, const uint8_t &ui8ExtraSubItems = 0);
+	bool OpenFileRead(const char * sFilename, const uint8_t ui8SubItems);
+    bool ReadNextItem(const uint16_t * pExpectedIdentificators, const uint8_t ui8ExpectedSubItems, const uint8_t ui8ExtraSubItems = 0);
 
-    bool OpenFileSave(const char * sFilename, const uint8_t &ui8Size);
-    bool WriteNextItem(const uint32_t &ui32Length, const uint8_t &ui8SubItems);
+	bool OpenFileSave(const char * sFilename, const uint8_t ui8Size);
+    bool WriteNextItem(const uint32_t ui32Length, const uint8_t ui8SubItems);
     void WriteRemaining();
 };
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

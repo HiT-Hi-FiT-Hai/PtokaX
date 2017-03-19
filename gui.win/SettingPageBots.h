@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -25,9 +25,9 @@
 
 class SettingPageBots : public SettingPage {
 public:
-    bool bUpdateHubSec, bUpdateMOTD, bUpdateHubNameWelcome, bUpdateRegOnlyMessage, bUpdateShareLimitMessage, bUpdateSlotsLimitMessage,
-        bUpdateHubSlotRatioMessage, bUpdateMaxHubsLimitMessage, bUpdateNoTagMessage, bUpdateNickLimitMessage, bUpdateBotsSameNick, bBotNickChanged,
-        bUpdateBot, bOpChatNickChanged, bUpdateOpChat;
+    bool m_bUpdateHubSec, m_bUpdateMOTD, m_bUpdateHubNameWelcome, m_bUpdateRegOnlyMessage, m_bUpdateShareLimitMessage, m_bUpdateSlotsLimitMessage,
+        m_bUpdateHubSlotRatioMessage, m_bUpdateMaxHubsLimitMessage, m_bUpdateNoTagMessage, m_bUpdateNickLimitMessage, m_bUpdateBotsSameNick, m_bBotNickChanged,
+        m_bUpdateBot, m_bOpChatNickChanged, m_bUpdateOpChat;
 
     SettingPageBots();
     ~SettingPageBots() { };
@@ -45,7 +45,7 @@ public:
     char * GetPageName();
     void FocusLastItem();
 private:
-    HWND hWndPageItems[17];
+    HWND m_hWndPageItems[17];
     
     enum enmPageItems {
         GB_HUB_BOT,
@@ -67,8 +67,8 @@ private:
         EDT_OP_CHAT_BOT_EMAIL
     };
 
-    SettingPageBots(const SettingPageBots&);
-    const SettingPageBots& operator=(const SettingPageBots&);
+    SettingPageBots(const SettingPageBots&) = delete;
+    const SettingPageBots& operator=(const SettingPageBots&) = delete;
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

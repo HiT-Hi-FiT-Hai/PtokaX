@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -21,34 +21,34 @@
 #define UpdateCheckThreadH
 //---------------------------------------------------------------------------
 
-class clsUpdateCheckThread {
+class UpdateCheckThread {
 private:
-	HANDLE hThread;
+	HANDLE m_hThread;
 
-	char * sRecvBuf;
+	char * m_sRecvBuf;
 
-    SOCKET sSocket;
+    SOCKET m_Socket;
 
-	uint32_t ui32FileLen;
+	uint32_t m_ui32FileLen;
 
-    uint32_t ui32RecvBufLen, ui32RecvBufSize;
-    uint32_t ui32BytesRead, ui32BytesSent;
+    uint32_t m_ui32RecvBufLen, m_ui32RecvBufSize;
+    uint32_t m_ui32BytesRead, m_ui32BytesSent;
     
-    bool bOk, bData, bTerminated;
+    bool m_bOk, m_bData, m_bTerminated;
 
-	char sMsg[2048];
+	char m_sMsg[2048];
 
-    static void Message(char * sMessage, const size_t &szLen);
+    static void Message(char * sMessage, const size_t szLen);
     bool Receive();
     bool SendHeader();
 
-    clsUpdateCheckThread(const clsUpdateCheckThread&);
-    const clsUpdateCheckThread& operator=(const clsUpdateCheckThread&);
+    UpdateCheckThread(const UpdateCheckThread&);
+    const UpdateCheckThread& operator=(const UpdateCheckThread&);
 public:
-    static clsUpdateCheckThread * mPtr;
+    static UpdateCheckThread * m_Ptr;
 
-	clsUpdateCheckThread();
-	~clsUpdateCheckThread();
+	UpdateCheckThread();
+	~UpdateCheckThread();
 
     void Resume();
     void Run();

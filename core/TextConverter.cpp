@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -26,7 +26,7 @@
 #include "UdpDebug.h"
 #include "utility.h"
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-TextConverter * TextConverter::mPtr = NULL;
+TextConverter * TextConverter::m_Ptr = NULL;
 #ifdef _WIN32
 	static wchar_t wcTempBuf[2048];
 #else
@@ -42,20 +42,20 @@ TextConverter * TextConverter::mPtr = NULL;
 
 TextConverter::TextConverter() {
 #ifndef _WIN32
-	if(clsSettingManager::mPtr->sTexts[SETTXT_ENCODING] == NULL) {
+	if(SettingManager::m_Ptr->m_sTexts[SETTXT_ENCODING] == NULL) {
 		AppendLog("TextConverter failed to initialize - TextEncoding not set!");
 		exit(EXIT_FAILURE);
 	}
 
-	iconvUtfCheck = iconv_open("utf-8", "utf-8");
-	if(iconvUtfCheck == (iconv_t)-1) {
-		AppendLog("TextConverter iconv_open for iconvUtfCheck failed!");
+	m_iconvUtfCheck = iconv_open("utf-8", "utf-8");
+	if(m_iconvUtfCheck == (iconv_t)-1) {
+		AppendLog("TextConverter iconv_open for m_iconvUtfCheck failed!");
 		exit(EXIT_FAILURE);
 	}
 
-	iconvAsciiToUtf = iconv_open("utf-8//TRANSLIT//IGNORE", clsSettingManager::mPtr->sTexts[SETTXT_ENCODING]);
-	if(iconvAsciiToUtf == (iconv_t)-1) {
-		AppendLog("TextConverter iconv_open for iconvAsciiToUtf failed!");
+	m_iconvAsciiToUtf = iconv_open("utf-8//TRANSLIT//IGNORE", SettingManager::m_Ptr->m_sTexts[SETTXT_ENCODING]);
+	if(m_iconvAsciiToUtf == (iconv_t)-1) {
+		AppendLog("TextConverter iconv_open for m_iconvAsciiToUtf failed!");
 		exit(EXIT_FAILURE);
 	}
 #endif
@@ -64,25 +64,25 @@ TextConverter::TextConverter() {
 	
 TextConverter::~TextConverter() {
 #ifndef _WIN32
-	iconv_close(iconvUtfCheck);
-	iconv_close(iconvAsciiToUtf);
+	iconv_close(m_iconvUtfCheck);
+	iconv_close(m_iconvAsciiToUtf);
 #endif
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #ifdef _WIN32
-bool TextConverter::CheckUtf8Validity(char * sInput, const uint8_t &ui8InputLen, char * /*sOutput*/, const uint8_t &/*ui8OutputSize*/) {
+bool TextConverter::CheckUtf8Validity(char * sInput, const uint8_t ui8InputLen, char * /*sOutput*/, const uint8_t /*ui8OutputSize*/) {
 	if(::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, sInput, ui8InputLen, NULL, 0) == 0) {
 		return false;
 #else
-bool TextConverter::CheckUtf8Validity(char * sInput, const uint8_t &ui8InputLen, char * sOutput, const uint8_t &ui8OutputSize) {
+bool TextConverter::CheckUtf8Validity(char * sInput, const uint8_t ui8InputLen, char * sOutput, const uint8_t ui8OutputSize) {
 	char * sInBuf = sInput;
 	size_t szInbufLeft = ui8InputLen;
 
 	char * sOutBuf = sOutput;
 	size_t szOutbufLeft = ui8OutputSize-1;
 
-	size_t szRet = iconv(iconvUtfCheck, (ICONV_CONST char**)&sInBuf, &szInbufLeft, &sOutBuf, &szOutbufLeft);
+	size_t szRet = iconv(m_iconvUtfCheck, (ICONV_CONST char**)&sInBuf, &szInbufLeft, &sOutBuf, &szOutbufLeft);
 	if(szRet == (size_t)-1) {
 		return false;
 #endif
@@ -92,7 +92,7 @@ bool TextConverter::CheckUtf8Validity(char * sInput, const uint8_t &ui8InputLen,
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-size_t TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8InputLen, char * sOutput, const uint8_t &ui8OutputSize) {
+size_t TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t ui8InputLen, char * sOutput, const uint8_t ui8OutputSize) {
 #ifdef _WIN32
 	if(CheckUtf8Validity(sInput, ui8InputLen, sOutput, ui8OutputSize) == true) {
 		memcpy(sOutput, sInput, ui8InputLen);
@@ -109,7 +109,7 @@ size_t TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 
 	wchar_t * wcTemp = 	wcTempBuf;
 	if(iMtoWRegLen > 2048) {
-		wcTemp = (wchar_t *)::HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, iMtoWRegLen * sizeof(wchar_t));
+		wcTemp = (wchar_t *)::HeapAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, iMtoWRegLen * sizeof(wchar_t));
 		if(wcTemp == NULL) {	
 			sOutput[0] = '\0';
 			return 0;
@@ -118,7 +118,7 @@ size_t TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 
 	if(::MultiByteToWideChar(CP_ACP, 0, sInput, ui8InputLen, wcTemp, iMtoWRegLen) == 0) {
 		if(wcTemp != wcTempBuf) {
-			::HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)wcTemp);
+			::HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)wcTemp);
 		}
 				
 		sOutput[0] = '\0';
@@ -128,7 +128,7 @@ size_t TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 	int iWtoMRegLen = ::WideCharToMultiByte(CP_UTF8, 0, wcTemp, iMtoWRegLen, NULL, 0, NULL, NULL);
 	if(iWtoMRegLen == 0) {
 		if(wcTemp != wcTempBuf) {
-			::HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)wcTemp);
+			::HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)wcTemp);
 		}
 		sOutput[0] = '\0';
 		return 0;
@@ -143,7 +143,7 @@ size_t TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 
 		if(iMtoWRegLen == 0) {
 			if(wcTemp != wcTempBuf) {
-				::HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)wcTemp);
+				::HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)wcTemp);
 			}
 
 			sOutput[0] = '\0';
@@ -153,7 +153,7 @@ size_t TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 
 	if(::WideCharToMultiByte(CP_UTF8, 0, wcTemp, iMtoWRegLen, sOutput, iWtoMRegLen, NULL, NULL) == 0) {
 		if(wcTemp != wcTempBuf) {
-			::HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)wcTemp);
+			::HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)wcTemp);
 		}
 
 		sOutput[0] = '\0';
@@ -161,7 +161,7 @@ size_t TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 	}
 
 	if(wcTemp != wcTempBuf) {
-		::HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)wcTemp);
+		::HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)wcTemp);
 	}
 
 	sOutput[iWtoMRegLen] = '\0';
@@ -178,47 +178,20 @@ size_t TextConverter::CheckUtf8AndConvert(char * sInput, const uint8_t &ui8Input
 	char * sOutBuf = sOutput;
 	size_t szOutbufLeft = ui8OutputSize-1;
 
-	size_t szRet = iconv(iconvAsciiToUtf, (ICONV_CONST char**)&sInBuf, &szInbufLeft, &sOutBuf, &szOutbufLeft);
+	size_t szRet = iconv(m_iconvAsciiToUtf, (ICONV_CONST char**)&sInBuf, &szInbufLeft, &sOutBuf, &szOutbufLeft);
 	if(szRet == (size_t)-1) {
 		if(errno == E2BIG) {
 			string sMsg = "[LOG] TextConverter::DoIconv iconv E2BIG for param: " + string(sInput, ui8InputLen);
-			clsUdpDebug::mPtr->Broadcast(sMsg.c_str(), sMsg.size());
+			UdpDebug::m_Ptr->Broadcast(sMsg.c_str(), sMsg.size());
 		} else if(errno == EILSEQ) {
-			sInBuf++;
-			szInbufLeft--;
-
-			while(szInbufLeft != 0) {
-				szRet = iconv(iconvAsciiToUtf, (ICONV_CONST char**)&sInBuf, &szInbufLeft, &sOutBuf, &szOutbufLeft);
-				if(szRet == (size_t)-1) {
-					if(errno == E2BIG) {
-						string sMsg = "[LOG] TextConverter::DoIconv iconv E2BIG in EILSEQ for param: "+string(sInput, ui8InputLen);
-						clsUdpDebug::mPtr->Broadcast(sMsg.c_str(), sMsg.size());
-					} else if(errno == EINVAL) {
-						string sMsg = "[LOG] TextConverter::DoIconv iconv EINVAL in EILSEQ for param: "+string(sInput, ui8InputLen);
-						clsUdpDebug::mPtr->Broadcast(sMsg.c_str(), sMsg.size());
-						sOutput[0] = '\0';
-						return 0;
-					} else if(errno == EILSEQ) {
-						sInBuf++;
-						szInbufLeft--;
-
-						continue;
-					}
-				}
-			}
-
-			if(szOutbufLeft == size_t(ui8OutputSize-1)) {
-				string sMsg = "[LOG] TextConverter::DoIconv iconv EILSEQ for param: "+string(sInput, ui8InputLen);
-				clsUdpDebug::mPtr->Broadcast(sMsg.c_str(), sMsg.size());
-				sOutput[0] = '\0';
-				return 0;
-			}
+			string sMsg = "[LOG] TextConverter::DoIconv iconv EILSEQ for param: "+string(sInput, ui8InputLen);
+			UdpDebug::m_Ptr->Broadcast(sMsg.c_str(), sMsg.size());
 		} else if(errno == EINVAL) {
 			string sMsg = "[LOG] TextConverter::DoIconv iconv EINVAL for param: "+string(sInput, ui8InputLen);
-			clsUdpDebug::mPtr->Broadcast(sMsg.c_str(), sMsg.size());
-			sOutput[0] = '\0';
-			return 0;
+			UdpDebug::m_Ptr->Broadcast(sMsg.c_str(), sMsg.size());
 		}
+		sOutput[0] = '\0';
+		return 0;
 	}
 
 	sOutput[(ui8OutputSize-szOutbufLeft)-1] = '\0';

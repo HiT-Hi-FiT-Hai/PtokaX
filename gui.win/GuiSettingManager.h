@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -23,51 +23,51 @@
 #include "GuiSettingIds.h"
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-class clsGuiSettingManager {
-private:
-    clsGuiSettingManager(const clsGuiSettingManager&);
-    const clsGuiSettingManager& operator=(const clsGuiSettingManager&);
-
-    void Load();
+class GuiSettingManager {
 public:
-    static clsGuiSettingManager * mPtr;
+    static GuiSettingManager * m_Ptr;
 
-    static HFONT hFont;
-    static HCURSOR hArrowCursor;
-    static HCURSOR hVerticalCursor;
-    static WNDPROC wpOldButtonProc;
-    static WNDPROC wpOldEditProc;
-    static WNDPROC wpOldListViewProc;
-    static WNDPROC wpOldMultiRichEditProc;
-    static WNDPROC wpOldNumberEditProc;
-    static WNDPROC wpOldTabsProc;
-    static WNDPROC wpOldTreeProc;
+    static HFONT m_hFont;
+    static HCURSOR m_hArrowCursor;
+    static HCURSOR m_hVerticalCursor;
+    static WNDPROC m_wpOldButtonProc;
+    static WNDPROC m_wpOldEditProc;
+    static WNDPROC m_wpOldListViewProc;
+    static WNDPROC m_wpOldMultiRichEditProc;
+    static WNDPROC m_wpOldNumberEditProc;
+    static WNDPROC m_wpOldTabsProc;
+    static WNDPROC m_wpOldTreeProc;
 
-    static float fScaleFactor;
+    static float m_fScaleFactor;
 
-    static int iGroupBoxMargin;
-    static int iCheckHeight;
-    static int iEditHeight;
-    static int iTextHeight;
-    static int iUpDownWidth;
-    static int iOneLineGB;
-    static int iOneLineOneChecksGB;
-    static int iOneLineTwoChecksGB;
+    static int m_iGroupBoxMargin;
+    static int m_iCheckHeight;
+    static int m_iEditHeight;
+    static int m_iTextHeight;
+    static int m_iUpDownWidth;
+    static int m_iOneLineGB;
+    static int m_iOneLineOneChecksGB;
+    static int m_iOneLineTwoChecksGB;
 
-    int32_t i32Integers[GUISETINT_IDS_END]; //clsGuiSettingManager::mPtr->iIntegers[]
+    int32_t m_i32Integers[GUISETINT_IDS_END]; //GuiSettingManager::mPtr->iIntegers[]
 
-    bool bBools[GUISETBOOL_IDS_END]; //clsGuiSettingManager::mPtr->bBools[]
+    bool m_bBools[GUISETBOOL_IDS_END]; //GuiSettingManager::mPtr->bBools[]
 
-    clsGuiSettingManager(void);
-    ~clsGuiSettingManager(void);
+    GuiSettingManager(void);
+    ~GuiSettingManager(void);
 
-    static bool GetDefaultBool(const size_t &szBoolId);
-    static int32_t GetDefaultInteger(const size_t &szIntegerId);
+    static bool GetDefaultBool(const size_t szBoolId);
+    static int32_t GetDefaultInteger(const size_t szIntegerId);
 
-    void SetBool(const size_t &szBoolId, const bool &bValue); //clsGuiSettingManager::mPtr->SetBool()
-    void SetInteger(const size_t &szIntegerId, const int32_t &i32Value); //clsGuiSettingManager::mPtr->SetInteger()
+    void SetBool(const size_t szBoolId, const bool bValue); //GuiSettingManager::mPtr->SetBool()
+    void SetInteger(const size_t szIntegerId, const int32_t i32Value); //GuiSettingManager::mPtr->SetInteger()
 
     void Save() const;
+private:
+    GuiSettingManager(const GuiSettingManager&) = delete;
+    const GuiSettingManager& operator=(const GuiSettingManager&) = delete;
+
+    void Load();
 };
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

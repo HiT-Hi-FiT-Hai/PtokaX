@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -35,7 +35,7 @@
 #include "MainWindow.h"
 //---------------------------------------------------------------------------
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmdLine, int nCmdShow) {
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmdLine, int iCmdShow) {
     ::SetDllDirectory("");
 
 #ifndef _WIN64
@@ -44,14 +44,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
     typedef BOOL (WINAPI * SPDEPP)(DWORD);
     SPDEPP pSPDEPP = (SPDEPP)::GetProcAddress(hKernel32, "SetProcessDEPPolicy");
 
-    if(pSPDEPP != NULL) {
+    if(pSPDEPP != nullptr) {
         pSPDEPP(PROCESS_DEP_ENABLE);
     }
 
     ::FreeLibrary(hKernel32);
 #endif
 
-    clsServerManager::hInstance = hInstance;
+    ServerManager::m_hInstance = hInstance;
 
 #ifdef _DEBUG
 //    AllocConsole();
@@ -60,12 +60,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 #endif
 	
 	char sBuf[MAX_PATH+1];
-	::GetModuleFileName(NULL, sBuf, MAX_PATH);
+	::GetModuleFileName(nullptr, sBuf, MAX_PATH);
 	char * sPath = strrchr(sBuf, '\\');
-	if(sPath != NULL) {
-		clsServerManager::sPath = string(sBuf, sPath-sBuf);
+	if(sPath != nullptr) {
+		ServerManager::m_sPath = string(sBuf, sPath-sBuf);
 	} else {
-		clsServerManager::sPath = sBuf;
+		ServerManager::m_sPath = sBuf;
 	}
 
 	size_t szCmdLen = strlen(lpCmdLine);
@@ -86,50 +86,50 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 
 	        switch(szParamLen) {
 	            case 7:
-	                if(strnicmp(sParam, "/notray", 7) == NULL) {
-	                    clsServerManager::bCmdNoTray = true;
+	                if(strnicmp(sParam, "/notray", 7) == 0) {
+	                    ServerManager::m_bCmdNoTray = true;
 	                }
 	                break;
 	            case 10:
-	                if(strnicmp(sParam, "/autostart", 10) == NULL) {
-	                    clsServerManager::bCmdAutoStart = true;
+	                if(strnicmp(sParam, "/autostart", 10) == 0) {
+	                    ServerManager::m_bCmdAutoStart = true;
 	                }
 	                break;
 	            case 12:
-	                if(strnicmp(sParam, "/noautostart", 12) == NULL) {
-	                    clsServerManager::bCmdNoAutoStart = true;
+	                if(strnicmp(sParam, "/noautostart", 12) == 0) {
+	                    ServerManager::m_bCmdNoAutoStart = true;
 	                }
 	                break;
                 case 20:
-	                if(strnicmp(sParam, "/generatexmllanguage", 20) == NULL) {
-	                    clsLanguageManager::GenerateXmlExample();
+	                if(strnicmp(sParam, "/generatexmllanguage", 20) == 0) {
+	                    LanguageManager::GenerateXmlExample();
 	                    return 0;
 	                }
 	                break;
 	            default:
-                    if(strnicmp(sParam, "-c ", 3) == NULL) {
+                    if(strnicmp(sParam, "-c ", 3) == 0) {
                         szLen = strlen(sParam+3);
                         if(szLen == 0) {
-                            ::MessageBox(NULL, "Missing config directory!", "Error!", MB_OK);
+                            ::MessageBox(nullptr, "Missing config directory!", "Error!", MB_OK);
                             return 0;
                         }
 
                         if(szLen >= 1 && sParam[0] != '\\' && sParam[0] != '/') {
                             if(szLen < 4 || (sParam[1] != ':' || (sParam[2] != '\\' && sParam[2] != '/'))) {
-                                ::MessageBox(NULL, "Config directory must be absolute path!", "Error!", MB_OK);
+                                ::MessageBox(nullptr, "Config directory must be absolute path!", "Error!", MB_OK);
                                 return 0;
                             }
                         }
 
                         if(sParam[szLen - 1] == '/' || sParam[szLen - 1] == '\\') {
-                            clsServerManager::sPath = string(sParam, szLen - 1);
+                            ServerManager::m_sPath = string(sParam, szLen - 1);
                         } else {
-                            clsServerManager::sPath = string(sParam, szLen);
+                            ServerManager::m_sPath = string(sParam, szLen);
                         }
 
-                        if(DirExist(clsServerManager::sPath.c_str()) == false) {
-                            if(CreateDirectory(clsServerManager::sPath.c_str(), NULL) == 0) {
-                                ::MessageBox(NULL, "Config directory not exist and can't be created!", "Error!", MB_OK);
+                        if(DirExist(ServerManager::m_sPath.c_str()) == false) {
+                            if(CreateDirectory(ServerManager::m_sPath.c_str(), nullptr) == 0) {
+                                ::MessageBox(nullptr, "Config directory not exist and can't be created!", "Error!", MB_OK);
                                 return 0;
                             }
                         }
@@ -143,55 +143,51 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 
     HINSTANCE hRichEdit = ::LoadLibrary(/*"msftedit.dll"*/"riched20.dll");
 
-    ExceptionHandlingInitialize(clsServerManager::sPath, sBuf);
+    ExceptionHandlingInitialize(ServerManager::m_sPath, sBuf);
 
-	clsServerManager::Initialize();
+	ServerManager::Initialize();
 
 	// systray icon on/off? added by Ptaczek 16.5.2003
-	if(clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_TRAY_ICON] == true) {
-		clsMainWindow::mPtr->UpdateSysTray();
+	if(SettingManager::m_Ptr->m_bBools[SETBOOL_ENABLE_TRAY_ICON] == true) {
+		MainWindow::m_Ptr->UpdateSysTray();
 	}
 
 	// If autostart is checked (or commandline /autostart given), then start the server
-	if((clsSettingManager::mPtr->bBools[SETBOOL_AUTO_START] == true || clsServerManager::bCmdAutoStart == true) && clsServerManager::bCmdNoAutoStart == false) {
-	    if(clsServerManager::Start() == false) {
-            clsMainWindow::mPtr->SetStatusValue((string(clsLanguageManager::mPtr->sTexts[LAN_READY], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_READY])+".").c_str());
+	if((SettingManager::m_Ptr->m_bBools[SETBOOL_AUTO_START] == true || ServerManager::m_bCmdAutoStart == true) && ServerManager::m_bCmdNoAutoStart == false) {
+	    if(ServerManager::Start() == false) {
+            MainWindow::m_Ptr->SetStatusValue((string(LanguageManager::m_Ptr->m_sTexts[LAN_READY], (size_t)LanguageManager::m_Ptr->m_ui16TextsLens[LAN_READY])+".").c_str());
 		}
 	}
 
-    if(clsSettingManager::mPtr->bBools[SETBOOL_START_MINIMIZED] == true && clsSettingManager::mPtr->bBools[SETBOOL_ENABLE_TRAY_ICON] == true) {
-        ::ShowWindow(clsMainWindow::mPtr->m_hWnd, SW_SHOWMINIMIZED);
+    if(SettingManager::m_Ptr->m_bBools[SETBOOL_START_MINIMIZED] == true && SettingManager::m_Ptr->m_bBools[SETBOOL_ENABLE_TRAY_ICON] == true) {
+        ::ShowWindow(MainWindow::m_Ptr->m_hWnd, SW_SHOWMINIMIZED);
     } else {
-        ::ShowWindow(clsMainWindow::mPtr->m_hWnd, nCmdShow);
+        ::ShowWindow(MainWindow::m_Ptr->m_hWnd, iCmdShow);
     }
 
 	MSG msg = { 0 };
 	BOOL bRet = -1;
 
-	while((bRet = ::GetMessage(&msg, NULL, 0, 0)) != 0) {
+	while((bRet = ::GetMessage(&msg, nullptr, 0, 0)) != 0) {
 	    if(bRet == -1) {
 	        // handle the error and possibly exit
 	    } else {
-            if(msg.message == WM_USER+1) {
-	            break;
-	        } else if(msg.message == WM_TIMER) {
-                if(msg.wParam == clsServerManager::sectimer) {
-                    clsServerManager::OnSecTimer();
-                } else if(msg.wParam == clsServiceLoop::srvLoopTimer) {
-					clsServiceLoop::mPtr->Looper();
-                } else if(msg.wParam == clsServerManager::regtimer) {
-                    clsServerManager::OnRegTimer();
+	        if(msg.message == WM_TIMER) {
+				if (msg.wParam == ServerManager::m_upSecTimer) {
+					ServerManager::OnSecTimer();
+                } else if(msg.wParam == ServerManager::m_upRegTimer) {
+					ServerManager::OnRegTimer();
                 } else {
                     //Must be script timer
                     ScriptOnTimer(msg.wParam);
                 }
-            }
+	        }
 
-	        if(clsServerManager::hWndActiveDialog == NULL) {
-                if(::IsDialogMessage(clsMainWindow::mPtr->m_hWnd, &msg) != 0) {
+	        if(ServerManager::m_hWndActiveDialog == nullptr) {
+                if(::IsDialogMessage(MainWindow::m_Ptr->m_hWnd, &msg) != 0) {
                     continue;
                 }
-            } else if(::IsDialogMessage(clsServerManager::hWndActiveDialog, &msg) != 0) {
+            } else if(::IsDialogMessage(ServerManager::m_hWndActiveDialog, &msg) != 0) {
                 continue;
             }
 
@@ -200,7 +196,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR lpCmd
 	    }
 	}
 
-    delete clsMainWindow::mPtr;
+    delete MainWindow::m_Ptr;
 
     ExceptionHandlingUnitialize();
 

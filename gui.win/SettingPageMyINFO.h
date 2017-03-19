@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -25,7 +25,7 @@
 
 class SettingPageMyINFO : public SettingPage {
 public:
-    bool bUpdateNoTagMessage;
+    bool m_bUpdateNoTagMessage;
 
     SettingPageMyINFO();
     ~SettingPageMyINFO() { };
@@ -43,7 +43,7 @@ public:
     char * GetPageName();
     void FocusLastItem();
 private:
-    HWND hWndPageItems[21];
+    HWND m_hWndPageItems[21];
     
     enum enmPageItems {
         GB_DESCRIPTION_TAG,
@@ -69,8 +69,8 @@ private:
         UD_MINUTES_BEFORE_ACCEPT_NEW_MYINFO
     };
 
-    SettingPageMyINFO(const SettingPageMyINFO&);
-    const SettingPageMyINFO& operator=(const SettingPageMyINFO&);
+    SettingPageMyINFO(const SettingPageMyINFO&) = delete;
+    const SettingPageMyINFO& operator=(const SettingPageMyINFO&) = delete;
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

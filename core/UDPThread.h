@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -24,37 +24,35 @@
 class UDPThread {
 private:
 #ifdef _WIN32
-	HANDLE hThreadHandle;
+	HANDLE m_hThreadHandle;
 
-    SOCKET sock;
-
-    unsigned int threadId;
+    SOCKET m_Socket;
 #else
-	pthread_t threadId;
+	pthread_t m_ThreadId;
 
-    int sock;
+    int m_Socket;
 #endif
 
-    bool bTerminated;
+    bool m_bTerminated;
 
-	char rcvbuf[4096];
+	char m_RecvBuf[4096];
 
     UDPThread(const UDPThread&);
     const UDPThread& operator=(const UDPThread&);
 public:
-    static UDPThread * mPtrIPv4;
-    static UDPThread * mPtrIPv6;
+    static UDPThread * m_PtrIPv4;
+    static UDPThread * m_PtrIPv6;
 
 	UDPThread();
 	~UDPThread();
 
-    bool Listen(const int &iAddressFamily);
+    bool Listen(const int iAddressFamily);
     void Resume();
     void Run();
 	void Close();
 	void WaitFor();
 
-    static UDPThread * Create(const int &iAddressFamily);
+    static UDPThread * Create(const int iAddressFamily);
     static void Destroy(UDPThread * pUDPThread);
 };
 //---------------------------------------------------------------------------

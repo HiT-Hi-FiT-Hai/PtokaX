@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -40,88 +40,88 @@
 #endif
 //---------------------------------------------------------------------------
 
-static void PushReg(lua_State * L, RegUser * r) {
-	lua_checkstack(L, 3); // we need 3 (1 table, 2 id, 3 value) empty slots in stack, check it to be sure
+static void PushReg(lua_State * pLua, RegUser * pReg) {
+	lua_checkstack(pLua, 3); // we need 3 (1 table, 2 id, 3 value) empty slots in stack, check it to be sure
 
-    lua_newtable(L);
-    int i = lua_gettop(L);
+    lua_newtable(pLua);
+    int i = lua_gettop(pLua);
 
-    lua_pushliteral(L, "sNick");
-    lua_pushstring(L, r->sNick);
-    lua_rawset(L, i);
+    lua_pushliteral(pLua, "sNick");
+    lua_pushstring(pLua, pReg->m_sNick);
+    lua_rawset(pLua, i);
 
-    lua_pushliteral(L, "sPassword");
-    if(r->bPassHash == true) {
-        lua_pushnil(L);
+    lua_pushliteral(pLua, "sPassword");
+    if(pReg->m_bPassHash == true) {
+        lua_pushnil(pLua);
     } else {
-        lua_pushstring(L, r->sPass);
+        lua_pushstring(pLua, pReg->m_sPass);
     }
-    lua_rawset(L, i);
+    lua_rawset(pLua, i);
             
-    lua_pushliteral(L, "iProfile");
+    lua_pushliteral(pLua, "iProfile");
 #if LUA_VERSION_NUM < 503
-	lua_pushnumber(L, r->ui16Profile);
+	lua_pushnumber(pLua, pReg->m_ui16Profile);
 #else
-    lua_pushinteger(L, r->ui16Profile);
+    lua_pushinteger(pLua, pReg->m_ui16Profile);
 #endif
-    lua_rawset(L, i);
+    lua_rawset(pLua, i);
 }
 //------------------------------------------------------------------------------
 
-static int Save(lua_State * L) {
-	if(lua_gettop(L) != 0) {
-        luaL_error(L, "bad argument count to 'Save' (0 expected, got %d)", lua_gettop(L));
-        lua_settop(L, 0);
+static int Save(lua_State * pLua) {
+	if(lua_gettop(pLua) != 0) {
+        luaL_error(pLua, "bad argument count to 'Save' (0 expected, got %d)", lua_gettop(pLua));
+        lua_settop(pLua, 0);
         return 0;
     }
 
-	clsRegManager::mPtr->Save();
+	RegManager::m_Ptr->Save();
 
     return 0;
 }
 //------------------------------------------------------------------------------
 
-static int GetRegsByProfile(lua_State * L) {
-	if(lua_gettop(L) != 1) {
-        luaL_error(L, "bad argument count to 'GetRegsByProfile' (1 expected, got %d)", lua_gettop(L));
-        lua_settop(L, 0);
-        lua_pushnil(L);
+static int GetRegsByProfile(lua_State * pLua) {
+	if(lua_gettop(pLua) != 1) {
+        luaL_error(pLua, "bad argument count to 'GetRegsByProfile' (1 expected, got %d)", lua_gettop(pLua));
+        lua_settop(pLua, 0);
+        lua_pushnil(pLua);
         return 1;
     }
 
-    if(lua_type(L, 1) != LUA_TNUMBER) {
-        luaL_checktype(L, 1, LUA_TNUMBER);
-		lua_settop(L, 0);
-		lua_pushnil(L);
+    if(lua_type(pLua, 1) != LUA_TNUMBER) {
+        luaL_checktype(pLua, 1, LUA_TNUMBER);
+		lua_settop(pLua, 0);
+		lua_pushnil(pLua);
         return 1;
     }
 
 #if LUA_VERSION_NUM < 503
-	uint16_t iProfile = (uint16_t)lua_tonumber(L, 1);
+	uint16_t iProfile = (uint16_t)lua_tonumber(pLua, 1);
 #else
-    uint16_t iProfile = (uint16_t)lua_tointeger(L, 1);
+    uint16_t iProfile = (uint16_t)lua_tointeger(pLua, 1);
 #endif
 
-    lua_settop(L, 0);
+    lua_settop(pLua, 0);
 
-    lua_newtable(L);
-    int t = lua_gettop(L), i = 0;
+    lua_newtable(pLua);
+    int t = lua_gettop(pLua), i = 0;
 
 	RegUser * cur = NULL,
-        * next = clsRegManager::mPtr->pRegListS;
+        * next = RegManager::m_Ptr->m_pRegListS;
         
     while(next != NULL) {
         cur = next;
-        next = cur->pNext;
+        next = cur->m_pNext;
         
-		if(cur->ui16Profile == iProfile) {
+		if(cur->m_ui16Profile == iProfile) {
 #if LUA_VERSION_NUM < 503
-			lua_pushnumber(L, ++i);
+			lua_pushnumber(pLua, ++i);
 #else
-            lua_pushinteger(L, ++i);
+            lua_pushinteger(pLua, ++i);
 #endif
-            PushReg(L, cur);
-            lua_rawset(L, t);
+            PushReg(pLua, cur);
+            lua_rawset(pLua, t);
         }
     }
     
@@ -129,36 +129,36 @@ static int GetRegsByProfile(lua_State * L) {
 }
 //------------------------------------------------------------------------------
 
-static int GetRegsByOpStatus(lua_State * L, const bool &bOperator) {
-	if(lua_gettop(L) != 0) {
+static int GetRegsByOpStatus(lua_State * pLua, const bool bOperator) {
+	if(lua_gettop(pLua) != 0) {
         if(bOperator == true) {
-            luaL_error(L, "bad argument count to 'GetOps' (0 expected, got %d)", lua_gettop(L));
+            luaL_error(pLua, "bad argument count to 'GetOps' (0 expected, got %d)", lua_gettop(pLua));
         } else {
-            luaL_error(L, "bad argument count to 'GetNonOps' (0 expected, got %d)", lua_gettop(L));
+            luaL_error(pLua, "bad argument count to 'GetNonOps' (0 expected, got %d)", lua_gettop(pLua));
         }
-        lua_settop(L, 0);
-        lua_pushnil(L);
+        lua_settop(pLua, 0);
+        lua_pushnil(pLua);
         return 1;
     }
     
-    lua_newtable(L);
-    int t = lua_gettop(L), i = 0;
+    lua_newtable(pLua);
+    int t = lua_gettop(pLua), i = 0;
 
     RegUser * curReg = NULL,
-        * next = clsRegManager::mPtr->pRegListS;
+        * next = RegManager::m_Ptr->m_pRegListS;
 
     while(next != NULL) {
         curReg = next;
-		next = curReg->pNext;
+		next = curReg->m_pNext;
 
-        if(clsProfileManager::mPtr->IsProfileAllowed(curReg->ui16Profile, clsProfileManager::HASKEYICON) == bOperator) {
+        if(ProfileManager::m_Ptr->IsProfileAllowed(curReg->m_ui16Profile, ProfileManager::HASKEYICON) == bOperator) {
 #if LUA_VERSION_NUM < 503
-			lua_pushnumber(L, ++i);
+			lua_pushnumber(pLua, ++i);
 #else
-            lua_pushinteger(L, ++i);
+            lua_pushinteger(pLua, ++i);
 #endif
-			PushReg(L, curReg);
-            lua_rawset(L, t);
+			PushReg(pLua, curReg);
+            lua_rawset(pLua, t);
         }
     }
 
@@ -166,334 +166,334 @@ static int GetRegsByOpStatus(lua_State * L, const bool &bOperator) {
 }
 //------------------------------------------------------------------------------
 
-static int GetNonOps(lua_State * L) {
-    return GetRegsByOpStatus(L, false);
+static int GetNonOps(lua_State * pLua) {
+    return GetRegsByOpStatus(pLua, false);
 }
 //------------------------------------------------------------------------------
 
-static int GetOps(lua_State * L) {
-    return GetRegsByOpStatus(L, true);
+static int GetOps(lua_State * pLua) {
+    return GetRegsByOpStatus(pLua, true);
 }
 //------------------------------------------------------------------------------
 
-static int GetReg(lua_State * L) {
-	if(lua_gettop(L) != 1) {
-        luaL_error(L, "bad argument count to 'GetReg' (1 expected, got %d)", lua_gettop(L));
-        lua_settop(L, 0);
-        lua_pushnil(L);
+static int GetReg(lua_State * pLua) {
+	if(lua_gettop(pLua) != 1) {
+        luaL_error(pLua, "bad argument count to 'GetReg' (1 expected, got %d)", lua_gettop(pLua));
+        lua_settop(pLua, 0);
+        lua_pushnil(pLua);
         return 1;
     }
 
-    if(lua_type(L, 1) != LUA_TSTRING) {
-        luaL_checktype(L, 1, LUA_TSTRING);
-		lua_settop(L, 0);
-		lua_pushnil(L);
+    if(lua_type(pLua, 1) != LUA_TSTRING) {
+        luaL_checktype(pLua, 1, LUA_TSTRING);
+		lua_settop(pLua, 0);
+		lua_pushnil(pLua);
         return 1;
     }
 
     size_t szLen;
-    char * sNick = (char *)lua_tolstring(L, 1, &szLen);
+    char * sNick = (char *)lua_tolstring(pLua, 1, &szLen);
 
     if(szLen == 0) {
-		lua_settop(L, 0);
-		lua_pushnil(L);
+		lua_settop(pLua, 0);
+		lua_pushnil(pLua);
         return 1;
     }
 
-    RegUser * r = clsRegManager::mPtr->Find(sNick, szLen);
+    RegUser * r = RegManager::m_Ptr->Find(sNick, szLen);
 
-    lua_settop(L, 0);
+    lua_settop(pLua, 0);
 
     if(r == NULL) {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
         return 1;
     }
 
-    PushReg(L, r);
+    PushReg(pLua, r);
 
     return 1;
 }
 //------------------------------------------------------------------------------
 
-static int GetRegs(lua_State * L) {
-	if(lua_gettop(L) != 0) {
-        luaL_error(L, "bad argument count to 'GetRegs' (0 expected, got %d)", lua_gettop(L));
-        lua_settop(L, 0);
-        lua_pushnil(L);
+static int GetRegs(lua_State * pLua) {
+	if(lua_gettop(pLua) != 0) {
+        luaL_error(pLua, "bad argument count to 'GetRegs' (0 expected, got %d)", lua_gettop(pLua));
+        lua_settop(pLua, 0);
+        lua_pushnil(pLua);
         return 1;
     }
     
-    lua_newtable(L);
-    int t = lua_gettop(L), i = 0;
+    lua_newtable(pLua);
+    int t = lua_gettop(pLua), i = 0;
 
     RegUser * curReg = NULL,
-        * next = clsRegManager::mPtr->pRegListS;
+        * next = RegManager::m_Ptr->m_pRegListS;
 
     while(next != NULL) {
         curReg = next;
-		next = curReg->pNext;
+		next = curReg->m_pNext;
 
 #if LUA_VERSION_NUM < 503
-		lua_pushnumber(L, ++i);
+		lua_pushnumber(pLua, ++i);
 #else
-        lua_pushinteger(L, ++i);
+        lua_pushinteger(pLua, ++i);
 #endif
 
-		PushReg(L, curReg); 
+		PushReg(pLua, curReg); 
     
-        lua_rawset(L, t);
+        lua_rawset(pLua, t);
     }
 
     return 1;
 }
 //------------------------------------------------------------------------------
 
-static int AddReg(lua_State * L) {
-	if(lua_gettop(L) == 3) {
-        if(lua_type(L, 1) != LUA_TSTRING || lua_type(L, 2) != LUA_TSTRING || lua_type(L, 3) != LUA_TNUMBER) {
-            luaL_checktype(L, 1, LUA_TSTRING);
-            luaL_checktype(L, 2, LUA_TSTRING);
-            luaL_checktype(L, 3, LUA_TNUMBER);
-            lua_settop(L, 0);
-            lua_pushnil(L);
+static int AddReg(lua_State * pLua) {
+	if(lua_gettop(pLua) == 3) {
+        if(lua_type(pLua, 1) != LUA_TSTRING || lua_type(pLua, 2) != LUA_TSTRING || lua_type(pLua, 3) != LUA_TNUMBER) {
+            luaL_checktype(pLua, 1, LUA_TSTRING);
+            luaL_checktype(pLua, 2, LUA_TSTRING);
+            luaL_checktype(pLua, 3, LUA_TNUMBER);
+            lua_settop(pLua, 0);
+            lua_pushnil(pLua);
             return 1;
         }
 
         size_t szNickLen, szPassLen;
-        char *sNick = (char *)lua_tolstring(L, 1, &szNickLen);
-        char *sPass = (char *)lua_tolstring(L, 2, &szPassLen);
+        char *sNick = (char *)lua_tolstring(pLua, 1, &szNickLen);
+        char *sPass = (char *)lua_tolstring(pLua, 2, &szPassLen);
 
 #if LUA_VERSION_NUM < 503
-		uint16_t i16Profile = (uint16_t)lua_tonumber(L, 3);
+		uint16_t i16Profile = (uint16_t)lua_tonumber(pLua, 3);
 #else
-        uint16_t i16Profile = (uint16_t)lua_tointeger(L, 3);
+        uint16_t i16Profile = (uint16_t)lua_tointeger(pLua, 3);
 #endif
 
-        if(i16Profile > clsProfileManager::mPtr->ui16ProfileCount-1 || szNickLen == 0 || szNickLen > 64 || szPassLen == 0 || szPassLen > 64 || strpbrk(sNick, " $|") != NULL || strchr(sPass, '|') != NULL) {
-            lua_settop(L, 0);
-            lua_pushnil(L);
+        if(i16Profile > ProfileManager::m_Ptr->m_ui16ProfileCount-1 || szNickLen == 0 || szNickLen > 64 || szPassLen == 0 || szPassLen > 64 || strpbrk(sNick, " $|") != NULL || strchr(sPass, '|') != NULL) {
+            lua_settop(pLua, 0);
+            lua_pushnil(pLua);
             return 1;
         }
 
-        bool bAdded = clsRegManager::mPtr->AddNew(sNick, sPass, i16Profile);
+        bool bAdded = RegManager::m_Ptr->AddNew(sNick, sPass, i16Profile);
 
-        lua_settop(L, 0);
+        lua_settop(pLua, 0);
 
         if(bAdded == false) {
-            lua_pushnil(L);
+            lua_pushnil(pLua);
             return 1;
         }
 
-        lua_pushboolean(L, 1);
+        lua_pushboolean(pLua, 1);
         return 1;
-    } else if(lua_gettop(L) == 2) {
-        if(lua_type(L, 1) != LUA_TSTRING || lua_type(L, 2) != LUA_TNUMBER) {
-            luaL_checktype(L, 1, LUA_TSTRING);
-            luaL_checktype(L, 2, LUA_TNUMBER);
-            lua_settop(L, 0);
-            lua_pushnil(L);
+    } else if(lua_gettop(pLua) == 2) {
+        if(lua_type(pLua, 1) != LUA_TSTRING || lua_type(pLua, 2) != LUA_TNUMBER) {
+            luaL_checktype(pLua, 1, LUA_TSTRING);
+            luaL_checktype(pLua, 2, LUA_TNUMBER);
+            lua_settop(pLua, 0);
+            lua_pushnil(pLua);
             return 1;
         }
 
         size_t szNickLen;
-        char *sNick = (char *)lua_tolstring(L, 1, &szNickLen);
+        char *sNick = (char *)lua_tolstring(pLua, 1, &szNickLen);
 
 #if LUA_VERSION_NUM < 503
-		uint16_t ui16Profile = (uint16_t)lua_tonumber(L, 2);
+		uint16_t ui16Profile = (uint16_t)lua_tonumber(pLua, 2);
 #else
-        uint16_t ui16Profile = (uint16_t)lua_tointeger(L, 2);
+        uint16_t ui16Profile = (uint16_t)lua_tointeger(pLua, 2);
 #endif
 
-        if(ui16Profile > clsProfileManager::mPtr->ui16ProfileCount-1 || szNickLen == 0 || szNickLen > 64 || strpbrk(sNick, " $|") != NULL) {
-            lua_settop(L, 0);
-            lua_pushnil(L);
+        if(ui16Profile > ProfileManager::m_Ptr->m_ui16ProfileCount-1 || szNickLen == 0 || szNickLen > 64 || strpbrk(sNick, " $|") != NULL) {
+            lua_settop(pLua, 0);
+            lua_pushnil(pLua);
             return 1;
         }
 
         // check if user is registered
-        if(clsRegManager::mPtr->Find(sNick, szNickLen) != NULL) {
-            lua_settop(L, 0);
-            lua_pushnil(L);
+        if(RegManager::m_Ptr->Find(sNick, szNickLen) != NULL) {
+            lua_settop(pLua, 0);
+            lua_pushnil(pLua);
             return 1;
         }
 
-        User * pUser = clsHashManager::mPtr->FindUser(sNick, szNickLen);
+        User * pUser = HashManager::m_Ptr->FindUser(sNick, szNickLen);
         if(pUser == NULL) {
-            lua_settop(L, 0);
-            lua_pushnil(L);
+            lua_settop(pLua, 0);
+            lua_pushnil(pLua);
             return 1;
         }
 
-        if(pUser->pLogInOut == NULL) {
-            pUser->pLogInOut = new (std::nothrow) LoginLogout();
-            if(pUser->pLogInOut == NULL) {
-                pUser->ui32BoolBits |= User::BIT_ERROR;
+        if(pUser->m_pLogInOut == NULL) {
+            pUser->m_pLogInOut = new (std::nothrow) LoginLogout();
+            if(pUser->m_pLogInOut == NULL) {
+                pUser->m_ui32BoolBits |= User::BIT_ERROR;
                 pUser->Close();
 
                 AppendDebugLog("%s - [MEM] Cannot allocate new pUser->pLogInOut in RegMan.AddReg\n");
-                lua_settop(L, 0);
-                lua_pushnil(L);
+                lua_settop(pLua, 0);
+                lua_pushnil(pLua);
                 return 1;
             }
         }
 
-        pUser->SetBuffer(clsProfileManager::mPtr->ppProfilesTable[ui16Profile]->sName);
-        pUser->ui32BoolBits |= User::BIT_WAITING_FOR_PASS;
+        pUser->SetBuffer(ProfileManager::m_Ptr->m_ppProfilesTable[ui16Profile]->m_sName);
+        pUser->m_ui32BoolBits |= User::BIT_WAITING_FOR_PASS;
 
-        pUser->SendFormat("RegMan.AddReg", true, "<%s> %s.|$GetPass|", clsSettingManager::mPtr->sPreTexts[clsSettingManager::SETPRETXT_HUB_SEC], clsLanguageManager::mPtr->sTexts[LAN_YOU_WERE_REGISTERED_PLEASE_ENTER_YOUR_PASSWORD]);
+        pUser->SendFormat("RegMan.AddReg", true, "<%s> %s.|$GetPass|", SettingManager::m_Ptr->m_sPreTexts[SettingManager::SETPRETXT_HUB_SEC], LanguageManager::m_Ptr->m_sTexts[LAN_YOU_WERE_REGISTERED_PLEASE_ENTER_YOUR_PASSWORD]);
 
-        lua_settop(L, 0);
-        lua_pushboolean(L, 1);
+        lua_settop(pLua, 0);
+        lua_pushboolean(pLua, 1);
         return 1;
     } else {
-        luaL_error(L, "bad argument count to 'RegMan.AddReg' (2 or 3 expected, got %d)", lua_gettop(L));
-        lua_settop(L, 0);
-        lua_pushnil(L);
+        luaL_error(pLua, "bad argument count to 'RegMan.AddReg' (2 or 3 expected, got %d)", lua_gettop(pLua));
+        lua_settop(pLua, 0);
+        lua_pushnil(pLua);
         return 1;
     }
 }
 //------------------------------------------------------------------------------
 
-static int DelReg(lua_State * L) {
-	if(lua_gettop(L) != 1) {
-        luaL_error(L, "bad argument count to 'DelReg' (1 expected, got %d)", lua_gettop(L));
-        lua_settop(L, 0);
-        lua_pushnil(L);
+static int DelReg(lua_State * pLua) {
+	if(lua_gettop(pLua) != 1) {
+        luaL_error(pLua, "bad argument count to 'DelReg' (1 expected, got %d)", lua_gettop(pLua));
+        lua_settop(pLua, 0);
+        lua_pushnil(pLua);
         return 1;
     }
 
-    if(lua_type(L, 1) != LUA_TSTRING) {
-        luaL_checktype(L, 1, LUA_TSTRING);
-		lua_settop(L, 0);
-		lua_pushnil(L);
+    if(lua_type(pLua, 1) != LUA_TSTRING) {
+        luaL_checktype(pLua, 1, LUA_TSTRING);
+		lua_settop(pLua, 0);
+		lua_pushnil(pLua);
         return 1;
     }
 
     size_t szNickLen;
-    char * sNick = (char *)lua_tolstring(L, 1, &szNickLen);
+    char * sNick = (char *)lua_tolstring(pLua, 1, &szNickLen);
 
     if(szNickLen == 0) {
-        lua_settop(L, 0);
-        lua_pushnil(L);
+        lua_settop(pLua, 0);
+        lua_pushnil(pLua);
         return 1;
     }
 
-	RegUser *reg = clsRegManager::mPtr->Find(sNick, szNickLen);
+	RegUser *reg = RegManager::m_Ptr->Find(sNick, szNickLen);
 
-    lua_settop(L, 0);
+    lua_settop(pLua, 0);
 
     if(reg == NULL) {
-        lua_pushnil(L);
+        lua_pushnil(pLua);
         return 1;
     }
 
-    clsRegManager::mPtr->Delete(reg);
+    RegManager::m_Ptr->Delete(reg);
 
-    lua_pushboolean(L, 1);
+    lua_pushboolean(pLua, 1);
     return 1;
 }
 //------------------------------------------------------------------------------
 
-static int ChangeReg(lua_State * L) {
-	if(lua_gettop(L) != 3) {
-        luaL_error(L, "bad argument count to 'ChangeReg' (3 expected, got %d)", lua_gettop(L));
-        lua_settop(L, 0);
-        lua_pushnil(L);
+static int ChangeReg(lua_State * pLua) {
+	if(lua_gettop(pLua) != 3) {
+        luaL_error(pLua, "bad argument count to 'ChangeReg' (3 expected, got %d)", lua_gettop(pLua));
+        lua_settop(pLua, 0);
+        lua_pushnil(pLua);
         return 1;
     }
 
-    if(lua_type(L, 1) != LUA_TSTRING || lua_type(L, 3) != LUA_TNUMBER) {
-        luaL_checktype(L, 1, LUA_TSTRING);
-        luaL_checktype(L, 3, LUA_TNUMBER);
-		lua_settop(L, 0);
-		lua_pushnil(L);
+    if(lua_type(pLua, 1) != LUA_TSTRING || lua_type(pLua, 3) != LUA_TNUMBER) {
+        luaL_checktype(pLua, 1, LUA_TSTRING);
+        luaL_checktype(pLua, 3, LUA_TNUMBER);
+		lua_settop(pLua, 0);
+		lua_pushnil(pLua);
         return 1;
     }
 
     size_t szNickLen, szPassLen = 0;
-    char * sNick = (char *)lua_tolstring(L, 1, &szNickLen);
+    char * sNick = (char *)lua_tolstring(pLua, 1, &szNickLen);
     char * sPass = NULL;
 
-    if(lua_type(L, 2) == LUA_TSTRING) {
-        sPass = (char *)lua_tolstring(L, 2, &szPassLen);
+    if(lua_type(pLua, 2) == LUA_TSTRING) {
+        sPass = (char *)lua_tolstring(pLua, 2, &szPassLen);
         if(szPassLen == 0 || szPassLen > 64 || strpbrk(sPass, "|") != NULL) {
-            lua_settop(L, 0);
-            lua_pushnil(L);
+            lua_settop(pLua, 0);
+            lua_pushnil(pLua);
             return 1;
         }
-    } else if(lua_type(L, 2) != LUA_TNIL) {
-        luaL_checktype(L, 2, LUA_TSTRING);
-		lua_settop(L, 0);
-		lua_pushnil(L);
+    } else if(lua_type(pLua, 2) != LUA_TNIL) {
+        luaL_checktype(pLua, 2, LUA_TSTRING);
+		lua_settop(pLua, 0);
+		lua_pushnil(pLua);
         return 1;
     }
 
 #if LUA_VERSION_NUM < 503
-	uint16_t i16Profile = (uint16_t)lua_tonumber(L, 3);
+	uint16_t i16Profile = (uint16_t)lua_tonumber(pLua, 3);
 #else
-	uint16_t i16Profile = (uint16_t)lua_tointeger(L, 3);
+	uint16_t i16Profile = (uint16_t)lua_tointeger(pLua, 3);
 #endif
 
-	if(i16Profile > clsProfileManager::mPtr->ui16ProfileCount-1 || szNickLen == 0 || szNickLen > 64 || strpbrk(sNick, " $|") != NULL) {
-		lua_settop(L, 0);
-		lua_pushnil(L);
+	if(i16Profile > ProfileManager::m_Ptr->m_ui16ProfileCount-1 || szNickLen == 0 || szNickLen > 64 || strpbrk(sNick, " $|") != NULL) {
+		lua_settop(pLua, 0);
+		lua_pushnil(pLua);
         return 1;
     }
 
-	RegUser *reg = clsRegManager::mPtr->Find(sNick, szNickLen);
+	RegUser *reg = RegManager::m_Ptr->Find(sNick, szNickLen);
 
     if(reg == NULL) {
-		lua_settop(L, 0);
-		lua_pushnil(L);
+		lua_settop(pLua, 0);
+		lua_pushnil(pLua);
         return 1;
     }
 
-    clsRegManager::mPtr->ChangeReg(reg, sPass, i16Profile);
+    RegManager::m_Ptr->ChangeReg(reg, sPass, i16Profile);
 
-    lua_settop(L, 0);
+    lua_settop(pLua, 0);
 
-    lua_pushboolean(L, 1);
+    lua_pushboolean(pLua, 1);
     return 1;
 }
 //------------------------------------------------------------------------------
 
-static int ClrRegBadPass(lua_State * L) {
-	if(lua_gettop(L) != 1) {
-        luaL_error(L, "bad argument count to 'ClrRegBadPass' (1 expected, got %d)", lua_gettop(L));
-        lua_settop(L, 0);
-        lua_pushnil(L);
+static int ClrRegBadPass(lua_State * pLua) {
+	if(lua_gettop(pLua) != 1) {
+        luaL_error(pLua, "bad argument count to 'ClrRegBadPass' (1 expected, got %d)", lua_gettop(pLua));
+        lua_settop(pLua, 0);
+        lua_pushnil(pLua);
         return 1;
     }
 
-    if(lua_type(L, 1) != LUA_TSTRING) {
-        luaL_checktype(L, 1, LUA_TSTRING);
-		lua_settop(L, 0);
-		lua_pushnil(L);
+    if(lua_type(pLua, 1) != LUA_TSTRING) {
+        luaL_checktype(pLua, 1, LUA_TSTRING);
+		lua_settop(pLua, 0);
+		lua_pushnil(pLua);
 		return 1;
     }
     
     size_t szNickLen;
-    char * sNick = (char*)lua_tolstring(L, 1, &szNickLen);
+    char * sNick = (char*)lua_tolstring(pLua, 1, &szNickLen);
 
     if(szNickLen != 0) {
-        RegUser *Reg = clsRegManager::mPtr->Find(sNick, szNickLen);
+        RegUser *Reg = RegManager::m_Ptr->Find(sNick, szNickLen);
         if(Reg != NULL) {
-            Reg->ui8BadPassCount = 0;
+            Reg->m_ui8BadPassCount = 0;
         } else {
-			lua_settop(L, 0);
-			lua_pushnil(L);
+			lua_settop(pLua, 0);
+			lua_pushnil(pLua);
 			return 1;
         }
     }
 
-	lua_settop(L, 0);
+	lua_settop(pLua, 0);
 
-    lua_pushboolean(L, 1);
+    lua_pushboolean(pLua, 1);
     return 1;
 }
 //------------------------------------------------------------------------------
 
-static const luaL_Reg regman[] = {
+static const luaL_Reg RegManRegs[] = {
     { "Save", Save },
 	{ "GetRegsByProfile", GetRegsByProfile }, 
 	{ "GetNonOps", GetNonOps }, 
@@ -509,12 +509,12 @@ static const luaL_Reg regman[] = {
 //---------------------------------------------------------------------------
 
 #if LUA_VERSION_NUM > 501
-int RegRegMan(lua_State * L) {
-    luaL_newlib(L, regman);
+int RegRegMan(lua_State * pLua) {
+    luaL_newlib(pLua, RegManRegs);
     return 1;
 #else
-void RegRegMan(lua_State * L) {
-    luaL_register(L, "RegMan", regman);
+void RegRegMan(lua_State * pLua) {
+    luaL_register(pLua, "RegMan", RegManRegs);
 #endif
 }
 //---------------------------------------------------------------------------

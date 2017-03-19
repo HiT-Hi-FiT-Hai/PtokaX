@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -26,11 +26,11 @@
 class ScriptEditorDialog;
 //------------------------------------------------------------------------------
 
-class clsMainWindowPageScripts : public MainWindowPage, private BasicSplitter {
+class MainWindowPageScripts : public MainWindowPage, private BasicSplitter {
 public:
-    static clsMainWindowPageScripts * mPtr;
+    static MainWindowPageScripts * m_Ptr;
 
-    HWND hWndPageItems[8];
+    HWND m_hWndPageItems[8];
 
     enum enmPageItems {
         GB_SCRIPTS_ERRORS,
@@ -43,8 +43,8 @@ public:
         BTN_RESTART_SCRIPTS
     };
 
-    clsMainWindowPageScripts();
-    ~clsMainWindowPageScripts();
+    MainWindowPageScripts();
+    ~MainWindowPageScripts();
 
     bool CreateMainWindowPage(HWND hOwner);
     void UpdateLanguage();
@@ -54,31 +54,31 @@ public:
 
     void ClearMemUsageAll();
     void UpdateMemUsage();
-    void MoveScript(uint8_t ui8ScriptId, const bool &bUp);
-    void AddScriptsToList(const bool &bDelete);
-    void ScriptToList(const uint8_t &ui8ScriptId, const bool &bInsert, const bool &bSelected);
-    void UpdateCheck(const uint8_t &ui8ScriptId);
+    void MoveScript(uint8_t ui8ScriptId, const bool bUp);
+    void AddScriptsToList(const bool bDelete);
+    void ScriptToList(const uint8_t ui8ScriptId, const bool bInsert, const bool bSelected);
+    void UpdateCheck(const uint8_t ui8ScriptId);
     void OpenInScriptEditor();
 private:
-    bool bIgnoreItemChanged;
+    bool m_bIgnoreItemChanged;
 
-    clsMainWindowPageScripts(const clsMainWindowPageScripts&);
-    const clsMainWindowPageScripts& operator=(const clsMainWindowPageScripts&);
+    MainWindowPageScripts(const MainWindowPageScripts&) = delete;
+    const MainWindowPageScripts& operator=(const MainWindowPageScripts&) = delete;
 
     LRESULT MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     void OnContextMenu(HWND hWindow, LPARAM lParam);
-    static void OpenScriptEditor(char * sScript = NULL);
+    static void OpenScriptEditor(char * sScript = nullptr);
     void RefreshScripts();
-    void OnItemChanged(const LPNMLISTVIEW &pListView);
-    void OnDoubleClick(const LPNMITEMACTIVATE &pItemActivate);
+    void OnItemChanged(const LPNMLISTVIEW pListView);
+    void OnDoubleClick(const LPNMITEMACTIVATE pItemActivate);
     void MoveUp();
     void MoveDown();
     static void RestartScripts();
     void UpdateUpDown();
     void OpenInExternalEditor();
     void DeleteScript();
-    void ClearMemUsage(uint8_t ui8ScriptId);
+    void ClearMemUsage(const uint8_t ui8ScriptId);
 
     HWND GetWindowHandle();
     void UpdateSplitterParts();

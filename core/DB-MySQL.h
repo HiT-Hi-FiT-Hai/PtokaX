@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -20,6 +20,7 @@
 #ifndef DBMySQLH
 #define DBMySQLH
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+struct ChatCommand;
 struct User;
 typedef struct st_mysql MYSQL;
 typedef struct st_mysql_res MYSQL_RES;
@@ -27,26 +28,34 @@ typedef struct st_mysql_res MYSQL_RES;
 
 class DBMySQL {
 private:
-	MYSQL * pDBHandle;
+	MYSQL * m_pDBHandle;
 
-	bool bConnected;
+#ifdef _WIN32
+	HANDLE m_hThreadHandle;
+#else
+	pthread_t m_threadId;
+#endif
+
+	bool m_bConnected, m_bTerminated;
 
     DBMySQL(const DBMySQL&);
     const DBMySQL& operator=(const DBMySQL&);
 
-	bool SendQueryResults(User * pUser, const bool &bFromPM, MYSQL_RES * pResult, uint64_t &ui64Rows);
+	bool SendQueryResults(ChatCommand * pChatCommand, MYSQL_RES * pResult, uint64_t &ui64Rows);
+	void ReconnectDb();
 public:
-    static DBMySQL * mPtr;
+    static DBMySQL * m_Ptr;
 
 	DBMySQL();
 	~DBMySQL();
 
 	void UpdateRecord(User * pUser);
 
-	bool SearchNick(char * sNick, const uint8_t &ui8NickLen, User * pUser, const bool &bFromPM);
-	bool SearchIP(char * sIP, User * pUser, const bool &bFromPM);
+	bool SearchNick(ChatCommand * pChatCommand);
+	bool SearchIP(ChatCommand * pChatCommand);
 
-	void RemoveOldRecords(const uint16_t &ui16Days);
+	void RemoveOldRecords(const uint16_t ui16Days);
+	void RunReconnect();
 };
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

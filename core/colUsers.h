@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -25,24 +25,22 @@ struct User;
 //---------------------------------------------------------------------------
 static const uint32_t NICKLISTSIZE = 1024*64;
 static const uint32_t OPLISTSIZE = 1024*32;
-static const uint32_t ZLISTSIZE = 1024*16;
-static const uint32_t ZMYINFOLISTSIZE = 1024*128;
 //---------------------------------------------------------------------------
 
-class clsUsers {
+class Users {
 private:
-	uint64_t ui64ChatMsgsTick, ui64ChatLockFromTick;
+	uint64_t m_ui64ChatMsgsTick, m_ui64ChatLockFromTick;
 
     struct RecTime {
-        uint64_t ui64DisConnTick;
+        uint64_t m_ui64DisConnTick;
 
-        RecTime * pPrev, * pNext;
+        RecTime * m_pPrev, * m_pNext;
 
-        char * sNick;
+        char * m_sNick;
 
-        uint32_t ui32NickHash;
+        uint32_t m_ui32NickHash;
 
-        uint8_t ui128IpHash[16];
+        uint8_t m_ui128IpHash[16];
 
         explicit RecTime(const uint8_t * pIpHash);
 
@@ -50,45 +48,45 @@ private:
         const RecTime& operator=(const RecTime&);
     };
 
-    RecTime * pRecTimeList;
+    RecTime * m_pRecTimeList;
 
-	User * pListE;
+	User * m_pUserListE;
 
-	uint16_t ui16ChatMsgs;
+	uint16_t m_ui16ChatMsgs;
 
-    bool bChatLocked;
+    bool m_bChatLocked;
 
-    clsUsers(const clsUsers&);
-    const clsUsers& operator=(const clsUsers&);
+    Users(const Users&);
+    const Users& operator=(const Users&);
 public:
-    static clsUsers * mPtr;
+    static Users * m_Ptr;
 
-	User * pListS;
+	User * m_pUserListS;
 
-    char * pNickList, * pZNickList, * pOpList, * pZOpList, * pUserIPList, * pZUserIPList;
-    char * pMyInfos, * pZMyInfos, * pMyInfosTag, * pZMyInfosTag;
+    char * m_pNickList, * m_pZNickList, * m_pOpList, * m_pZOpList;
+	char * m_pUserIPList, * m_pZUserIPList, * m_pMyInfos, * m_pZMyInfos;
+	char * m_pMyInfosTag, * m_pZMyInfosTag;
 
-
-    uint32_t ui32MyInfosLen, ui32MyInfosSize, ui32ZMyInfosLen, ui32ZMyInfosSize;
-    uint32_t ui32MyInfosTagLen, ui32MyInfosTagSize, ui32ZMyInfosTagLen, ui32ZMyInfosTagSize;
-    uint32_t ui32NickListLen, ui32NickListSize, ui32ZNickListLen, ui32ZNickListSize;
-    uint32_t ui32OpListLen, ui32OpListSize, ui32ZOpListLen, ui32ZOpListSize;
-    uint32_t ui32UserIPListSize, ui32UserIPListLen, ui32ZUserIPListSize, ui32ZUserIPListLen;
+    uint32_t m_ui32MyInfosLen, m_ui32MyInfosSize, m_ui32ZMyInfosLen, m_ui32ZMyInfosSize;
+    uint32_t m_ui32MyInfosTagLen, m_ui32MyInfosTagSize, m_ui32ZMyInfosTagLen, m_ui32ZMyInfosTagSize;
+    uint32_t m_ui32NickListLen, m_ui32NickListSize, m_ui32ZNickListLen, m_ui32ZNickListSize;
+    uint32_t m_ui32OpListLen, m_ui32OpListSize, m_ui32ZOpListLen, m_ui32ZOpListSize;
+    uint32_t m_ui32UserIPListSize, m_ui32UserIPListLen, m_ui32ZUserIPListSize, m_ui32ZUserIPListLen;
     
-    uint16_t ui16ActSearchs, ui16PasSearchs;
+    uint16_t m_ui16ActSearchs, m_ui16PasSearchs;
 
-    clsUsers();
-    ~clsUsers();
+    Users();
+    ~Users();
 
     void DisconnectAll();
     void AddUser(User * pUser);
     void RemUser(User * pUser);
     void Add2NickList(User * pUser);
-    void AddBot2NickList(char * sNick, const size_t &szNickLen, const bool &bIsOp);
+    void AddBot2NickList(char * sNick, const size_t szNickLen, const bool bIsOp);
     void Add2OpList(User * pUser);
-    void DelFromNickList(char * sNick, const bool &bIsOp);
+    void DelFromNickList(char * sNick, const bool bIsOp);
     void DelFromOpList(char * sNick);
-    void SendChat2All(User * pUser, char * sData, const size_t &szChatLen, void * pToUser);
+    void SendChat2All(User * pUser, char * sData, const size_t szChatLen, void * pToUser);
 	void Add2MyInfos(User * pUser);
 	void DelFromMyInfos(User * pUser);
     void Add2MyInfosTag(User * pUser);

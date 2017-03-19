@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -23,9 +23,9 @@
 struct BanItem;
 //------------------------------------------------------------------------------
 
-class clsBanDialog {
+class BanDialog {
 public:
-    HWND hWndWindowItems[20];
+    HWND m_hWndWindowItems[20];
 
     enum enmWindowItems {
         WINDOW_HANDLE,
@@ -50,18 +50,18 @@ public:
         BTN_DISCARD
     };
 
-    clsBanDialog();
-    ~clsBanDialog();
+    BanDialog();
+    ~BanDialog();
 
     static LRESULT CALLBACK StaticBanDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	void DoModal(HWND hWndParent, BanItem * pBan = NULL);
+	void DoModal(HWND hWndParent, BanItem * pBan = nullptr);
 	void BanDeleted(BanItem * pBan);
 private:
-    BanItem * pBanToChange;
+    BanItem * m_pBanToChange;
 
-    clsBanDialog(const clsBanDialog&);
-    const clsBanDialog& operator=(const clsBanDialog&);
+    BanDialog(const BanDialog&) = delete;
+    const BanDialog& operator=(const BanDialog&) = delete;
 
     LRESULT BanDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 

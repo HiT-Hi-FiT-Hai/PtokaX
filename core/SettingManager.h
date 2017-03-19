@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -23,16 +23,16 @@
 #include "SettingIds.h"
 //---------------------------------------------------------------------------
 
-class clsSettingManager {
+class SettingManager {
 private:
 #ifdef _WIN32
-	CRITICAL_SECTION csSetting;
+	CRITICAL_SECTION m_csSetting;
 #else
-	pthread_mutex_t mtxSetting;
+	pthread_mutex_t m_mtxSetting;
 #endif
 
-    clsSettingManager(const clsSettingManager&);
-    const clsSettingManager& operator=(const clsSettingManager&);
+    SettingManager(const SettingManager&);
+    const SettingManager& operator=(const SettingManager&);
 
     void CreateDefaultMOTD();
     void LoadMOTD();
@@ -43,7 +43,7 @@ private:
 	void Load();
     void LoadXML();
 public:
-    static clsSettingManager * mPtr;
+    static SettingManager * m_Ptr;
 
     enum SetPreTxtIds {
         SETPRETXT_HUB_SEC,
@@ -66,53 +66,53 @@ public:
         SETPRETXT_IDS_END
     };//SETPRETXT_,
 
-    uint64_t ui64MinShare; //SettingManager->ui64MinShare
-    uint64_t ui64MaxShare; //SettingManager->ui64MaxShare
+    uint64_t m_ui64MinShare; //SettingManager->ui64MinShare
+    uint64_t m_ui64MaxShare; //SettingManager->ui64MaxShare
 
-    char * sMOTD;
+    char * m_sMOTD;
 
-    char * sPreTexts[SETPRETXT_IDS_END]; //SettingManager->sPreTexts[]
-    char * sTexts[SETTXT_IDS_END]; //SettingManager->sTexts[]
+    char * m_sPreTexts[SETPRETXT_IDS_END]; //SettingManager->sPreTexts[]
+    char * m_sTexts[SETTXT_IDS_END]; //SettingManager->sTexts[]
 
-    int16_t i16Shorts[SETSHORT_IDS_END]; //SettingManager->i16Shorts[]
+    int16_t m_i16Shorts[SETSHORT_IDS_END]; //SettingManager->i16Shorts[]
 
-    uint16_t ui16MOTDLen;
-    uint16_t ui16PreTextsLens[SETPRETXT_IDS_END]; //SettingManager->ui16PreTextsLens[]
-    uint16_t ui16TextsLens[SETTXT_IDS_END]; //SettingManager->ui16TextsLens[]
+    uint16_t m_ui16MOTDLen;
+    uint16_t m_ui16PreTextsLens[SETPRETXT_IDS_END]; //SettingManager->ui16PreTextsLens[]
+    uint16_t m_ui16TextsLens[SETTXT_IDS_END]; //SettingManager->ui16TextsLens[]
     
-    uint16_t ui16PortNumbers[25]; //SettingManager->ui16PortNumbers[0]
+    uint16_t m_ui16PortNumbers[25]; //SettingManager->ui16PortNumbers[0]
 
-    bool bBools[SETBOOL_IDS_END]; //SettingManager->bBools[]
+    bool m_bBools[SETBOOL_IDS_END]; //SettingManager->bBools[]
     
     // PPK ... same nick for bot and opchat bool
-	bool bBotsSameNick; //SettingManager->bBotsSameNick
+	bool m_bBotsSameNick; //SettingManager->bBotsSameNick
 	
-	bool bUpdateLocked; //SettingManager->bUpdateLocked
+	bool m_bUpdateLocked; //SettingManager->bUpdateLocked
 
-	bool bFirstRun;
+	bool m_bFirstRun;
 	
-    uint8_t ui8FullMyINFOOption; //SettingManager->ui8FullMyINFOOption;
+    uint8_t m_ui8FullMyINFOOption; //SettingManager->ui8FullMyINFOOption;
 
-    clsSettingManager(void);
-    ~clsSettingManager(void);
+    SettingManager(void);
+    ~SettingManager(void);
 
-    bool GetBool(const size_t &szBoolId);
+    bool GetBool(const size_t szBoolId);
     uint16_t GetFirstPort();
-    int16_t GetShort(const size_t &szShortId);
-    void GetText(const size_t &szTxtId, char * sMsg);
+    int16_t GetShort(const size_t szShortId);
+    void GetText(const size_t szTxtId, char * sMsg);
 
-    void SetBool(const size_t &szBoolId, const bool &bValue); //SettingManager->SetBool()
-    void SetMOTD(char * sTxt, const size_t &szLen);
-    void SetShort(const size_t &szShortId, const int16_t &iValue);
-    void SetText(const size_t &szTxtId, char * sTxt);
-    void SetText(const size_t &szTxtId, const char * sTxt);
-    void SetText(const size_t &szTxtId, const char * sTxt, const size_t &szLen);
-    void SetText(const size_t &szTxtId, const string & sTxt);
+    void SetBool(const size_t szBoolId, const bool bValue); //SettingManager->SetBool()
+    void SetMOTD(char * sTxt, const size_t szLen);
+    void SetShort(const size_t szShortId, const int16_t i16Value);
+    void SetText(const size_t szTxtId, char * sTxt);
+    void SetText(const size_t szTxtId, const char * sTxt);
+    void SetText(const size_t szTxtId, const char * sTxt, const size_t szLen);
+    void SetText(const size_t szTxtId, const string & sTxt);
 
-    void UpdateBot(const bool &bNickChanged = true);
-    void DisableBot(const bool &bNickChanged = true, const bool &bRemoveMyINFO = true);
-    void UpdateOpChat(const bool &bNickChanged = true);
-    void DisableOpChat(const bool &bNickChanged = true);
+    void UpdateBot(const bool bNickChanged = true);
+    void DisableBot(const bool bNickChanged = true, const bool bRemoveMyINFO = true);
+    void UpdateOpChat(const bool bNickChanged = true);
+    void DisableOpChat(const bool bNickChanged = true);
 
     void Save();
     void UpdateAll();

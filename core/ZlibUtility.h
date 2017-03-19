@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -21,23 +21,23 @@
 #define zlibutilityH
 //---------------------------------------------------------------------------
 
-class clsZlibUtility {
+class ZlibUtility {
 private:
-	char * pZbuffer;
+	char * m_pZbuffer;
 
-    size_t szZbufferSize;
+    size_t m_szZbufferSize;
 
-    clsZlibUtility(const clsZlibUtility&);
-    const clsZlibUtility& operator=(const clsZlibUtility&);
+    ZlibUtility(const ZlibUtility&);
+    const ZlibUtility& operator=(const ZlibUtility&);
 public:
-    static clsZlibUtility * mPtr;
+    static ZlibUtility * m_Ptr;
 
-	clsZlibUtility();
-	~clsZlibUtility();
+	ZlibUtility();
+	~ZlibUtility();
 	
-    char * CreateZPipe(const char *sInData, const size_t &sInDataSize, uint32_t &iOutDataLen);
-    char * CreateZPipe(char *sInData, const size_t &sInDataSize, char *sOutData, size_t &szOutDataLen, size_t &szOutDataSize);
-    char * CreateZPipe(char *sInData, const unsigned int &sInDataSize, char *sOutData, unsigned int &iOutDataLen, unsigned int &iOutDataSize, size_t (* pAllignFunc)(size_t n));
+    char * CreateZPipe(const char * sInData, const size_t szInDataSize, uint32_t &ui32OutDataLen);
+    char * CreateZPipe(char * sInData, const size_t szInDataSize, char * sOutData, size_t &szOutDataLen, size_t &szOutDataSize);
+    char * CreateZPipe(char *sInData, const size_t szInDataSize, char * sOutData, uint32_t &ui32OutDataLen, uint32_t &ui32OutDataSize, size_t (* pAllignFunc)(size_t n));
 };
 //---------------------------------------------------------------------------
 

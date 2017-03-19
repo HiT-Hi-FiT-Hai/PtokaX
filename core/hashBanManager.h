@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -24,20 +24,20 @@ struct User;
 //---------------------------------------------------------------------------
 
 struct BanItem {
-    time_t tTempBanExpire;
+    time_t m_tTempBanExpire;
 
-    char * sNick, * sReason, * sBy;
+    char * m_sNick, * m_sReason, * m_sBy;
 
-    BanItem * pPrev, * pNext;
-    BanItem * pHashNickTablePrev, * pHashNickTableNext;
-    BanItem * pHashIpTablePrev, * pHashIpTableNext;
+    BanItem * m_pPrev, * m_pNext;
+    BanItem * m_pHashNickTablePrev, * m_pHashNickTableNext;
+    BanItem * m_pHashIpTablePrev, * m_pHashIpTableNext;
 
-    uint32_t ui32NickHash;
+    uint32_t m_ui32NickHash;
 
-    uint8_t ui128IpHash[16];
+    uint8_t m_ui128IpHash[16];
 
-    uint8_t ui8Bits;
-    char sIp[40];
+    uint8_t m_ui8Bits;
+    char m_sIp[40];
 
     BanItem();
     ~BanItem();
@@ -48,17 +48,17 @@ struct BanItem {
 //---------------------------------------------------------------------------
 
 struct RangeBanItem {
-    time_t tTempBanExpire;
+    time_t m_tTempBanExpire;
 
-    char * sReason, * sBy;
+    char * m_sReason, * m_sBy;
 
-    RangeBanItem * pPrev, * pNext;
+    RangeBanItem * m_pPrev, * m_pNext;
 
-    uint8_t ui128FromIpHash[16], ui128ToIpHash[16];
+    uint8_t m_ui128FromIpHash[16], m_ui128ToIpHash[16];
 
-    uint8_t ui8Bits;
+    uint8_t m_ui8Bits;
 
-    char sIpFrom[40], sIpTo[40] ;
+    char m_sIpFrom[40], m_sIpTo[40] ;
 
     RangeBanItem();
     ~RangeBanItem();
@@ -68,33 +68,33 @@ struct RangeBanItem {
 };
 //---------------------------------------------------------------------------
 
-class clsBanManager {
+class BanManager {
 private:
-    BanItem * pNickTable[65536];
+    BanItem * m_pNickTable[65536];
 
     struct IpTableItem {
-        IpTableItem * pPrev, * pNext;
+        IpTableItem * m_pPrev, * m_pNext;
 
-        BanItem * pFirstBan;
+        BanItem * m_pFirstBan;
 
-        IpTableItem() : pPrev(NULL), pNext(NULL), pFirstBan(NULL) { };
+        IpTableItem() : m_pPrev(NULL), m_pNext(NULL), m_pFirstBan(NULL) { };
 
         IpTableItem(const IpTableItem&);
         const IpTableItem& operator=(const IpTableItem&);
     };
 
-	IpTableItem * pIpTable[65536];
+	IpTableItem * m_pIpTable[65536];
 
-    uint32_t ui32SaveCalled;
+    uint32_t m_ui32SaveCalled;
 
-    clsBanManager(const clsBanManager&);
-    const clsBanManager& operator=(const clsBanManager&);
+    BanManager(const BanManager&);
+    const BanManager& operator=(const BanManager&);
 public:
-    static clsBanManager * mPtr;
+    static BanManager * m_Ptr;
 
-    BanItem * pTempBanListS, * pTempBanListE;
-    BanItem * pPermBanListS, * pPermBanListE;
-    RangeBanItem * pRangeBanListS, * pRangeBanListE;
+    BanItem * m_pTempBanListS, * m_pTempBanListE;
+    BanItem * m_pPermBanListS, * m_pPermBanListE;
+    RangeBanItem * m_pRangeBanListS, * m_pRangeBanListE;
 
     enum BanBits {
         PERM        = 0x1,
@@ -104,53 +104,53 @@ public:
         NICK        = 0x10
     };
 
-    clsBanManager(void);
-    ~clsBanManager(void);
+    BanManager(void);
+    ~BanManager(void);
 
 
-    bool Add(BanItem * Ban);
-    bool Add2Table(BanItem *Ban);
-	void Add2NickTable(BanItem *Ban);
-	bool Add2IpTable(BanItem *Ban);
-    void Rem(BanItem * Ban, const bool &bFromGui = false);
-    void RemFromTable(BanItem *Ban);
-    void RemFromNickTable(BanItem *Ban);
-	void RemFromIpTable(BanItem *Ban);
+    bool Add(BanItem * pBan);
+    bool Add2Table(BanItem * pBan);
+	void Add2NickTable(BanItem * pBan);
+	bool Add2IpTable(BanItem * pBan);
+    void Rem(BanItem * pBan, const bool bFromGui = false);
+    void RemFromTable(BanItem * pBan);
+    void RemFromNickTable(BanItem * pBan);
+	void RemFromIpTable(BanItem * pBan);
 
-	BanItem* Find(BanItem *Ban); // from gui
-	void Remove(BanItem *Ban); // from gui
+	BanItem* Find(BanItem * pBan); // from gui
+	void Remove(BanItem * pBan); // from gui
 
-    void AddRange(RangeBanItem *RangeBan);
-	void RemRange(RangeBanItem *RangeBan, const bool &bFromGui = false);
+    void AddRange(RangeBanItem * pRangeBan);
+	void RemRange(RangeBanItem * pRangeBan, const bool bFromGui = false);
 
-	RangeBanItem* FindRange(RangeBanItem *RangeBan); // from gui
-	void RemoveRange(RangeBanItem *RangeBan); // from gui
+	RangeBanItem* FindRange(RangeBanItem * pRangeBan); // from gui
+	void RemoveRange(RangeBanItem * pRangeBan); // from gui
 
-    BanItem* FindNick(User* u);
-    BanItem* FindIP(User* u);
-    RangeBanItem* FindRange(User* u);
+    BanItem* FindNick(User * pUser);
+    BanItem* FindIP(User * pUser);
+    RangeBanItem* FindRange(User * pUser);
 
 	BanItem* FindFull(const uint8_t * ui128IpHash);
-    BanItem* FindFull(const uint8_t * ui128IpHash, const time_t &acc_time);
-    RangeBanItem* FindFullRange(const uint8_t * ui128IpHash, const time_t &acc_time);
+    BanItem* FindFull(const uint8_t * ui128IpHash, const time_t &tAccTime);
+    RangeBanItem* FindFullRange(const uint8_t * ui128IpHash, const time_t &tAccTime);
 
-    BanItem* FindNick(char * sNick, const size_t &szNickLen);
-    BanItem* FindNick(const uint32_t &hash, const time_t &acc_time, char * sNick);
-    BanItem* FindIP(const uint8_t * ui128IpHash, const time_t &acc_time);
-    RangeBanItem* FindRange(const uint8_t * ui128IpHash, const time_t &acc_time);
-    RangeBanItem* FindRange(const uint8_t * ui128FromHash, const uint8_t * ui128ToHash, const time_t &acc_time);
+    BanItem* FindNick(char * sNick, const size_t szNickLen);
+    BanItem* FindNick(const uint32_t ui32Hash, const time_t &tAccTime, char * sNick);
+    BanItem* FindIP(const uint8_t * ui128IpHash, const time_t &tAccTime);
+    RangeBanItem* FindRange(const uint8_t * ui128IpHash, const time_t &tAccTime);
+    RangeBanItem* FindRange(const uint8_t * ui128FromHash, const uint8_t * ui128ToHash, const time_t &tAccTime);
 
-    BanItem* FindTempNick(char * sNick, const size_t &szNickLen);
-    BanItem* FindTempNick(const uint32_t &hash, const time_t &acc_time, char * sNick);
-    BanItem* FindTempIP(const uint8_t * ui128IpHash, const time_t &acc_time);
+    BanItem* FindTempNick(char * sNick, const size_t szNickLen);
+    BanItem* FindTempNick(const uint32_t ui32Hash, const time_t &tAccTime, char * sNick);
+    BanItem* FindTempIP(const uint8_t * ui128IpHash, const time_t &tAccTime);
     
-    BanItem* FindPermNick(char * sNick, const size_t &szNickLen);
-    BanItem* FindPermNick(const uint32_t &hash, char * sNick);
+    BanItem* FindPermNick(char * sNick, const size_t szNickLen);
+    BanItem* FindPermNick(const uint32_t ui32Hash, char * sNick);
     BanItem* FindPermIP(const uint8_t * ui128IpHash);
 
     void Load();
     void LoadXML();
-    void Save(bool bForce = false);
+    void Save(const bool bForce = false);
 
     void ClearTemp(void);
     void ClearPerm(void);
@@ -158,13 +158,13 @@ public:
     void ClearTempRange(void);
     void ClearPermRange(void);
 
-    void Ban(User * u, const char * sReason, char * sBy, const bool &bFull);
-    char BanIp(User * u, char * sIp, char * sReason, char * sBy, const bool &bFull);
-    bool NickBan(User * u, char * sNick, char * sReason, char * sBy);
+    void Ban(User * pUser, const char * sReason, char * sBy, const bool bFull);
+    char BanIp(User * pUser, char * sIp, char * sReason, char * sBy, const bool bFull);
+    bool NickBan(User * pUser, char * sNick, char * sReason, char * sBy);
     
-    void TempBan(User * u, const char * sReason, char * sBy, const uint32_t &minutes, const time_t &expiretime, const bool &bFull);
-    char TempBanIp(User * u, char * sIp, char * sReason, char * sBy, const uint32_t &minutes, const time_t &expiretime, const bool &bFull);
-    bool NickTempBan(User * u, char * sNick, char * sReason, char * sBy, const uint32_t &minutes, const time_t &expiretime);
+    void TempBan(User * pUser, const char * sReason, char * sBy, const uint32_t ui32Minutes, const time_t &tExpiretime, const bool bFull);
+    char TempBanIp(User * pUser, char * sIp, char * sReason, char * sBy, const uint32_t ui32Minutes, const time_t &tExpireTime, const bool bFull);
+    bool NickTempBan(User * pUser, char * sNick, char * sReason, char * sBy, const uint32_t ui32Minutes, const time_t &tExpireTime);
     
     bool Unban(char * sWhat);
     bool PermUnban(char * sWhat);
@@ -174,12 +174,12 @@ public:
     void RemovePermAllIP(const uint8_t * ui128IpHash);
     void RemoveTempAllIP(const uint8_t * ui128IpHash);
 
-    bool RangeBan(char * sIpFrom, const uint8_t * ui128FromIpHash, char * sIpTo, const uint8_t * ui128ToIpHash, char * sReason, char * sBy, const bool &bFull);
-    bool RangeTempBan(char * sIpFrom, const uint8_t * ui128FromIpHash, char * sIpTo, const uint8_t * ui128ToIpHash, char * sReason, char * sBy, const uint32_t &minutes,
-        const time_t &expiretime, const bool &bFull);
+    bool RangeBan(char * sIpFrom, const uint8_t * ui128FromIpHash, char * sIpTo, const uint8_t * ui128ToIpHash, char * sReason, char * sBy, const bool bFull);
+    bool RangeTempBan(char * sIpFrom, const uint8_t * ui128FromIpHash, char * sIpTo, const uint8_t * ui128ToIpHash, char * sReason, char * sBy, const uint32_t ui32Minutes,
+        const time_t &tExpireTime, const bool bFull);
         
     bool RangeUnban(const uint8_t * ui128FromIpHash, const uint8_t * ui128ToIpHash);
-    bool RangeUnban(const uint8_t * ui128FromIpHash, const uint8_t * ui128ToIpHash, unsigned char cType);
+    bool RangeUnban(const uint8_t * ui128FromIpHash, const uint8_t * ui128ToIpHash, const uint8_t ui8Type);
 };
 //---------------------------------------------------------------------------
 

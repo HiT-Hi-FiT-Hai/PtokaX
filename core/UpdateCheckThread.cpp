@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -30,53 +30,52 @@
 //---------------------------------------------------------------------------
 #include "../gui.win/MainWindow.h"
 //---------------------------------------------------------------------------
-clsUpdateCheckThread * clsUpdateCheckThread::mPtr = NULL;
+UpdateCheckThread * UpdateCheckThread::m_Ptr = NULL;
 //---------------------------------------------------------------------------
 
-clsUpdateCheckThread::clsUpdateCheckThread() : hThread(INVALID_HANDLE_VALUE), sRecvBuf(NULL), sSocket(INVALID_SOCKET), ui32FileLen(0), ui32RecvBufLen(0), ui32RecvBufSize(0), ui32BytesRead(0), ui32BytesSent(0), bOk(false), bData(false), bTerminated(false) {
-    sMsg[0] = '\0';
+UpdateCheckThread::UpdateCheckThread() : m_hThread(NULL), m_sRecvBuf(NULL), m_Socket(INVALID_SOCKET), m_ui32FileLen(0), m_ui32RecvBufLen(0), m_ui32RecvBufSize(0), m_ui32BytesRead(0), m_ui32BytesSent(0), m_bOk(false), m_bData(false), m_bTerminated(false) {
+    m_sMsg[0] = '\0';
 }
 //---------------------------------------------------------------------------
 
-clsUpdateCheckThread::~clsUpdateCheckThread() {
-	clsServerManager::ui64BytesRead += (uint64_t)ui32BytesRead;
-    clsServerManager::ui64BytesSent += (uint64_t)ui32BytesSent;
+UpdateCheckThread::~UpdateCheckThread() {
+	ServerManager::m_ui64BytesRead += (uint64_t)m_ui32BytesRead;
+    ServerManager::m_ui64BytesSent += (uint64_t)m_ui32BytesSent;
 
-    if(sSocket != INVALID_SOCKET) {
+    if(m_Socket != INVALID_SOCKET) {
 #ifdef _WIN32
-        shutdown(sSocket, SD_SEND);
-		closesocket(sSocket);
+        shutdown(m_Socket, SD_SEND);
+		closesocket(m_Socket);
 #else
-        shutdown(sSocket, 1);
-        close(sSocket);
+        shutdown(m_Socket, 1);
+        close(m_Socket);
 #endif
-        sSocket = INVALID_SOCKET;
     }
 
-    free(sRecvBuf);
+    free(m_sRecvBuf);
 
-    if(hThread != INVALID_HANDLE_VALUE) {
-        ::CloseHandle(hThread);
+    if(m_hThread != NULL) {
+        ::CloseHandle(m_hThread);
     }
 }
 //---------------------------------------------------------------------------
 
 unsigned __stdcall ExecuteUpdateCheck(void * /*pArguments*/) {
-	clsUpdateCheckThread::mPtr->Run();
+	UpdateCheckThread::m_Ptr->Run();
 
 	return 0;
 }
 //---------------------------------------------------------------------------
 
-void clsUpdateCheckThread::Resume() {
-	hThread = (HANDLE)_beginthreadex(NULL, 0, ExecuteUpdateCheck, NULL, 0, NULL);
-	if(hThread == 0) {
+void UpdateCheckThread::Resume() {
+	m_hThread = (HANDLE)_beginthreadex(NULL, 0, ExecuteUpdateCheck, NULL, 0, NULL);
+	if(m_hThread == 0) {
 		AppendDebugLog("%s - [ERR] Failed to create new UpdateCheckThread\n");
     }
 }
 //---------------------------------------------------------------------------
 
-void clsUpdateCheckThread::Run() {
+void UpdateCheckThread::Run() {
     struct addrinfo * pResult = NULL;
 
     struct addrinfo hints;
@@ -84,7 +83,7 @@ void clsUpdateCheckThread::Run() {
 
     hints.ai_socktype = SOCK_STREAM;
 
-    if(clsServerManager::bUseIPv6 == true) {
+    if(ServerManager::m_bUseIPv6 == true) {
         hints.ai_family = AF_UNSPEC;
     } else {
         hints.ai_family = AF_INET;
@@ -92,12 +91,12 @@ void clsUpdateCheckThread::Run() {
 
     if(::getaddrinfo("www.PtokaX.org", "80", &hints, &pResult) != 0 || (pResult->ai_family != AF_INET && pResult->ai_family != AF_INET6)) {
         int iError = WSAGetLastError();
-        int iMsgLen = sprintf(sMsg, "Update check resolve error %s (%d).", WSErrorStr(iError), iError);
-        if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::Run") == true) {
-            Message(sMsg, iMsgLen);
+        int iMsgLen = snprintf(m_sMsg, 2048, "Update check resolve error %s (%d).", WSErrorStr(iError), iError);
+        if(iMsgLen > 0) {
+            Message(m_sMsg, iMsgLen);
         }
 
-        ::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+        ::PostMessage(MainWindow::m_Ptr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
         if(pResult != NULL) {
             ::freeaddrinfo(pResult);
@@ -108,18 +107,18 @@ void clsUpdateCheckThread::Run() {
 
     // Initialise socket we want to use for connect
 #ifdef _WIN32
-    if((sSocket = socket(pResult->ai_family, pResult->ai_socktype, pResult->ai_protocol)) == INVALID_SOCKET) {
+    if((m_Socket = socket(pResult->ai_family, pResult->ai_socktype, pResult->ai_protocol)) == INVALID_SOCKET) {
         int iError = WSAGetLastError();
-        int iMsgLen = sprintf(sMsg, "Update check create error %s (%d).", WSErrorStr(iError), iError);
+        int iMsgLen = snprintf(m_sMsg, 2048, "Update check create error %s (%d).", WSErrorStr(iError), iError);
 #else
-    if((sSocket = socket(pResult->ai_family, pResult->ai_socktype, pResult->ai_protocol)) == -1) {
-        int iMsgLen = sprintf(sMsg, "Update check create error %s (%d).", WSErrorStr(errno), errno);
+    if((m_Socket = socket(pResult->ai_family, pResult->ai_socktype, pResult->ai_protocol)) == -1) {
+        int iMsgLen = snprintf(m_sMsg, 2048, "Update check create error %s (%d).", WSErrorStr(errno), errno);
 #endif
-        if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::Run1") == true) {
-            Message(sMsg, iMsgLen);
+        if(iMsgLen > 0) {
+            Message(m_sMsg, iMsgLen);
         }
 
-        ::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+        ::PostMessage(MainWindow::m_Ptr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
         ::freeaddrinfo(pResult);
 
@@ -129,18 +128,18 @@ void clsUpdateCheckThread::Run() {
     // Set the receive buffer
     int32_t bufsize = 8192;
 #ifdef _WIN32
-    if(setsockopt(sSocket, SOL_SOCKET, SO_RCVBUF, (char *) &bufsize, sizeof(bufsize)) == SOCKET_ERROR) {
+    if(setsockopt(m_Socket, SOL_SOCKET, SO_RCVBUF, (char *) &bufsize, sizeof(bufsize)) == SOCKET_ERROR) {
         int iError = WSAGetLastError();
-        int iMsgLen = sprintf(sMsg, "Update check recv buff error %s (%d).", WSErrorStr(iError), iError);
+        int iMsgLen = snprintf(m_sMsg, 2048, "Update check recv buff error %s (%d).", WSErrorStr(iError), iError);
 #else
-    if(setsockopt(sSocket, SOL_SOCKET, SO_RCVBUF, &bufsize, sizeof(bufsize)) == -1) {
-        int iMsgLen = sprintf(sMsg, "Update check recv buff error %s (%d).", WSErrorStr(errno), errno);
+    if(setsockopt(m_Socket, SOL_SOCKET, SO_RCVBUF, &bufsize, sizeof(bufsize)) == -1) {
+        int iMsgLen = snprintf(m_sMsg, 2048, "Update check recv buff error %s (%d).", WSErrorStr(errno), errno);
 #endif
-		if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::Run2") == true) {
-			Message(sMsg, iMsgLen);
+		if(iMsgLen > 0) {
+			Message(m_sMsg, iMsgLen);
 		}
 
-		::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+		::PostMessage(MainWindow::m_Ptr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
         ::freeaddrinfo(pResult);
 
@@ -150,18 +149,18 @@ void clsUpdateCheckThread::Run() {
 	// Set the send buffer
 	bufsize = 2048;
 #ifdef _WIN32
-	if(setsockopt(sSocket, SOL_SOCKET, SO_SNDBUF, (char *) &bufsize, sizeof(bufsize)) == SOCKET_ERROR) {
+	if(setsockopt(m_Socket, SOL_SOCKET, SO_SNDBUF, (char *) &bufsize, sizeof(bufsize)) == SOCKET_ERROR) {
 		int iError = WSAGetLastError();
-		int iMsgLen = sprintf(sMsg, "Update check send buff error %s (%d).", WSErrorStr(iError), iError);
+		int iMsgLen = snprintf(m_sMsg, 2048, "Update check send buff error %s (%d).", WSErrorStr(iError), iError);
 #else
-	if(setsockopt(sSocket, SOL_SOCKET, SO_SNDBUF, &bufsize, sizeof(bufsize)) == -1) {
-        int iMsgLen = sprintf(sMsg, "Update check buff error %s (%d).", WSErrorStr(errno), errno);
+	if(setsockopt(m_Socket, SOL_SOCKET, SO_SNDBUF, &bufsize, sizeof(bufsize)) == -1) {
+        int iMsgLen = snprintf(m_sMsg, 2048, "Update check buff error %s (%d).", WSErrorStr(errno), errno);
 #endif
-        if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::Run3") == true) {
-            Message(sMsg, iMsgLen);
+        if(iMsgLen > 0) {
+            Message(m_sMsg, iMsgLen);
 		}
 			
-		::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+		::PostMessage(MainWindow::m_Ptr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
         ::freeaddrinfo(pResult);
 
@@ -172,20 +171,20 @@ void clsUpdateCheckThread::Run() {
 
     // Finally, time to connect ! ;)
 #ifdef _WIN32
-    if(connect(sSocket, pResult->ai_addr, (int)pResult->ai_addrlen) == SOCKET_ERROR) {
+    if(connect(m_Socket, pResult->ai_addr, (int)pResult->ai_addrlen) == SOCKET_ERROR) {
         int iError = WSAGetLastError();
         if(iError != WSAEWOULDBLOCK) {
-            int iMsgLen = sprintf(sMsg, "Update check connect error %s (%d).", WSErrorStr(iError), iError);
+            int iMsgLen = snprintf(m_sMsg, 2048, "Update check connect error %s (%d).", WSErrorStr(iError), iError);
 #else
-    if(connect(sSocket, pResult->ai_addr, (int)pResult->ai_addrlen) == -1) {
+    if(connect(m_Socket, pResult->ai_addr, (int)pResult->ai_addrlen) == -1) {
         if(errno != EAGAIN) {
-            int iMsgLen = sprintf(sMsg, "Update check connect error %s (%d).", WSErrorStr(errno), errno);
+            int iMsgLen = snprintf(m_sMsg, 2048, "Update check connect error %s (%d).", WSErrorStr(errno), errno);
 #endif
-            if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::Run4") == true) {
-                Message(sMsg, iMsgLen);
+            if(iMsgLen > 0) {
+                Message(m_sMsg, iMsgLen);
             }
 
-			::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+			::PostMessage(MainWindow::m_Ptr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
             ::freeaddrinfo(pResult);
 
@@ -198,7 +197,7 @@ void clsUpdateCheckThread::Run() {
 	Message("Connected to PtokaX.org, sending request...", 43);
 
     if(SendHeader() == false) {
-        ::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+        ::PostMessage(MainWindow::m_Ptr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
         return;
     }
@@ -208,39 +207,39 @@ void clsUpdateCheckThread::Run() {
     // Set non-blocking mode
 #ifdef _WIN32
     uint32_t block = 1;
-    if(ioctlsocket(sSocket, FIONBIO, (unsigned long *)&block) == SOCKET_ERROR) {
+    if(ioctlsocket(m_Socket, FIONBIO, (unsigned long *)&block) == SOCKET_ERROR) {
         int iError = WSAGetLastError();
-        int iMsgLen = sprintf(sMsg, "Update check non-block error %s (%d).", WSErrorStr(iError), iError);
+        int iMsgLen = snprintf(m_sMsg, 2048, "Update check non-block error %s (%d).", WSErrorStr(iError), iError);
 #else
     int32_t oldFlag = fcntl(u->s, F_GETFL, 0);
-    if(fcntl(sSocket, F_SETFL, oldFlag | O_NONBLOCK) == -1) {
-        int iMsgLen = sprintf(sMsg, "Update check non-block error %s (%d).", WSErrorStr(errno), errno);
+    if(fcntl(m_Socket, F_SETFL, oldFlag | O_NONBLOCK) == -1) {
+        int iMsgLen = snprintf(m_sMsg, 2048, "Update check non-block error %s (%d).", WSErrorStr(errno), errno);
 #endif
-        if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::Run5") == true) {
-            Message(sMsg, iMsgLen);
+        if(iMsgLen > 0) {
+            Message(m_sMsg, iMsgLen);
 		}
 
-		::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+		::PostMessage(MainWindow::m_Ptr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
         return;
     }
 
-    sRecvBuf = (char *)malloc(512);
-    if(sRecvBuf == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate 512 bytes for sRecvBuf in clsUpdateCheckThread::Run\n");
+	m_sRecvBuf = (char *)malloc(512);
+    if(m_sRecvBuf == NULL) {
+		AppendDebugLog("%s - [MEM] Cannot allocate 512 bytes for sRecvBuf in UpdateCheckThread::Run\n");
 
-		::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+		::PostMessage(MainWindow::m_Ptr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
         return;
     }
 
     uint16_t iLoops = 0;
 
-    while(bTerminated == false && iLoops < 4000) {
+    while(m_bTerminated == false && iLoops < 4000) {
         iLoops++;
 
 		if(Receive() == false) {
-			::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+			::PostMessage(MainWindow::m_Ptr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
 			return;
         }
@@ -248,28 +247,28 @@ void clsUpdateCheckThread::Run() {
         ::Sleep(75);
     }
 
-    if(bTerminated == false) {
+    if(m_bTerminated == false) {
         Message("Update check timeout.", 21);
 
-		::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+		::PostMessage(MainWindow::m_Ptr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
     }
 }
 //---------------------------------------------------------------------------
 
-void clsUpdateCheckThread::Close() {
-	bTerminated = true;
+void UpdateCheckThread::Close() {
+	m_bTerminated = true;
 }
 //---------------------------------------------------------------------------
 
-void clsUpdateCheckThread::WaitFor() {
-    ::WaitForSingleObject(hThread, INFINITE);
+void UpdateCheckThread::WaitFor() {
+    ::WaitForSingleObject(m_hThread, INFINITE);
 }
 //---------------------------------------------------------------------------
 
-void clsUpdateCheckThread::Message(char * sMessage, const size_t &szLen) {
-	char *sMess = (char *)malloc(szLen + 1);
+void UpdateCheckThread::Message(char * sMessage, const size_t szLen) {
+	char * sMess = (char *)malloc(szLen + 1);
 	if(sMess == NULL) {
-		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sMess in clsUpdateCheckThread::Message\n", (uint64_t)(szLen+1));
+		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sMess in UpdateCheckThread::Message\n", (uint64_t)(szLen+1));
 
 		return;
 	}
@@ -277,45 +276,45 @@ void clsUpdateCheckThread::Message(char * sMessage, const size_t &szLen) {
 	memcpy(sMess, sMessage, szLen);
 	sMess[szLen] = '\0';
 
-	::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_MSG, 0, (LPARAM)sMess);
+	::PostMessage(MainWindow::m_Ptr->m_hWnd, WM_UPDATE_CHECK_MSG, 0, (LPARAM)sMess);
 }
 //---------------------------------------------------------------------------
 
-bool clsUpdateCheckThread::SendHeader() {
+bool UpdateCheckThread::SendHeader() {
 	char * sDataToSend = "GET /version HTTP/1.1\r\nUser-Agent: PtokaX " PtokaXVersionString " [" BUILD_NUMBER "]"
 		"\r\nHost: www.PtokaX.org\r\nConnection: close\r\nCache-Control: no-cache\r\nAccept: */*\r\nAccept-Language: en\r\n\r\n";
 
-	int iBytes = send(sSocket, sDataToSend, (int)strlen(sDataToSend), 0);
+	int iBytes = send(m_Socket, sDataToSend, (int)strlen(sDataToSend), 0);
 
 #ifdef _WIN32
     if(iBytes == SOCKET_ERROR) {
     	int iError = WSAGetLastError();
-        int iMsgLen = sprintf(sMsg, "Update check send error %s (%d).", WSErrorStr(iError), iError);
+        int iMsgLen = snprintf(m_sMsg, 2048, "Update check send error %s (%d).", WSErrorStr(iError), iError);
 #else
     if(iBytes == -1) {
-        int iMsgLen = sprintf(sMsg, "Update check send error %s (%d).)", WSErrorStr(errno), errno);
+        int iMsgLen = snprintf(m_sMsg, 2048, "Update check send error %s (%d).)", WSErrorStr(errno), errno);
 #endif
-        if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::SendHeader") == true) {
-            Message(sMsg, iMsgLen);
+        if(iMsgLen > 0) {
+            Message(m_sMsg, iMsgLen);
         }
 
         return false;
     }
 
-    ui32BytesSent += iBytes;
+	m_ui32BytesSent += iBytes;
     
     return true;
 }
 //---------------------------------------------------------------------------
 
-bool clsUpdateCheckThread::Receive() {
+bool UpdateCheckThread::Receive() {
     u_long ui32bytes = 0;
 
-	if(ioctlsocket(sSocket, FIONREAD, &ui32bytes) == SOCKET_ERROR) {
+	if(ioctlsocket(m_Socket, FIONREAD, &ui32bytes) == SOCKET_ERROR) {
         int iError = WSAGetLastError();
-	    int iMsgLen = sprintf(sMsg, "Update check ioctlsocket(FIONREAD) error %s (%d).", WSErrorStr(iError), iError);
-        if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::Receive") == true) {
-			Message(sMsg, iMsgLen);
+	    int iMsgLen = snprintf(m_sMsg, 2048, "Update check ioctlsocket(FIONREAD) error %s (%d).", WSErrorStr(iError), iError);
+        if(iMsgLen > 0) {
+			Message(m_sMsg, iMsgLen);
         }
 
         return false;
@@ -329,37 +328,37 @@ bool clsUpdateCheckThread::Receive() {
         ui32bytes = 8192;
     }
 
-    if(ui32RecvBufSize < ui32RecvBufLen + ui32bytes) {
-        size_t szAllignLen = ((ui32RecvBufLen + ui32bytes + 1) & 0xFFFFFE00) + 0x200;
+    if(m_ui32RecvBufSize < m_ui32RecvBufLen + ui32bytes) {
+        size_t szAllignLen = ((m_ui32RecvBufLen + ui32bytes + 1) & 0xFFFFFE00) + 0x200;
 
-        char * pOldBuf = sRecvBuf;
+        char * pOldBuf = m_sRecvBuf;
 
-        sRecvBuf = (char *)realloc(sRecvBuf, szAllignLen);
-        if(sRecvBuf == NULL) {
-            sRecvBuf = pOldBuf;
+		m_sRecvBuf = (char *)realloc(m_sRecvBuf, szAllignLen);
+        if(m_sRecvBuf == NULL) {
+			m_sRecvBuf = pOldBuf;
 
-            AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes for sRecvBuf in clsUpdateCheckThread::Receive\n", (uint64_t)szAllignLen);
+            AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes for sRecvBuf in UpdateCheckThread::Receive\n", (uint64_t)szAllignLen);
 
             return false;
         }
 
-        ui32RecvBufSize = (int)szAllignLen - 1;
+		m_ui32RecvBufSize = (int)szAllignLen - 1;
     }
 
-    int iBytes = recv(sSocket, sRecvBuf + ui32RecvBufLen, ui32RecvBufSize - ui32RecvBufLen, 0);
+    int iBytes = recv(m_Socket, m_sRecvBuf + m_ui32RecvBufLen, m_ui32RecvBufSize - m_ui32RecvBufLen, 0);
 
 #ifdef _WIN32
     if(iBytes == SOCKET_ERROR) {
         int iError = WSAGetLastError();
         if(iError != WSAEWOULDBLOCK) {                  
-			int iMsgLen = sprintf(sMsg, "Update check recv error %s (%d).", WSErrorStr(iError), iError);
+			int iMsgLen = snprintf(m_sMsg, 2048, "Update check recv error %s (%d).", WSErrorStr(iError), iError);
 #else
     if(iBytes == -1) {
         if(errno != EAGAIN) {
-			int iMsgLen = sprintf(sMsg, "Update check recv error %s (%d).", WSErrorStr(errno), errno);
+			int iMsgLen = snprintf(m_sMsg, 2048, "Update check recv error %s (%d).", WSErrorStr(errno), errno);
 #endif
-            if(CheckSprintf(iMsgLen, 2048, "clsUpdateCheckThread::Receive2") == true) {
-                Message(sMsg, iMsgLen);
+            if(iMsgLen > 0) {
+                Message(m_sMsg, iMsgLen);
             }
 
             return false;
@@ -373,75 +372,75 @@ bool clsUpdateCheckThread::Receive() {
 		return false;
     }
     
-    ui32BytesRead += iBytes;
+	m_ui32BytesRead += iBytes;
 
-	ui32RecvBufLen += iBytes;
-	sRecvBuf[ui32RecvBufLen] = '\0';
+	m_ui32RecvBufLen += iBytes;
+	m_sRecvBuf[m_ui32RecvBufLen] = '\0';
 
-	if(bData == false) {
-		char *sBuffer = sRecvBuf;
+	if(m_bData == false) {
+		char *sBuffer = m_sRecvBuf;
 
-		for(uint32_t ui32i = 0; ui32i < ui32RecvBufLen; ui32i++) {
-			if(sRecvBuf[ui32i] == '\n') {
-				sRecvBuf[ui32i] = '\0';
-				uint32_t ui32iCommandLen = (uint32_t)((sRecvBuf+ui32i) - sBuffer) + 1;
+		for(uint32_t ui32i = 0; ui32i < m_ui32RecvBufLen; ui32i++) {
+			if(m_sRecvBuf[ui32i] == '\n') {
+				m_sRecvBuf[ui32i] = '\0';
+				uint32_t ui32iCommandLen = (uint32_t)((m_sRecvBuf+ui32i) - sBuffer) + 1;
 
 				if(ui32iCommandLen > 7 && strncmp(sBuffer, "HTTP", 4) == NULL && strstr(sBuffer, "200") != NULL) {
-					bOk = true;
+					m_bOk = true;
 				} else if(ui32iCommandLen == 2 && sBuffer[0] == '\r') {
-					if(bOk == true && ui32FileLen != 0) {
-						bData = true;
+					if(m_bOk == true && m_ui32FileLen != 0) {
+						m_bData = true;
 					} else {
 						Message("Update check failed.", 20);
-						::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+						::PostMessage(MainWindow::m_Ptr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
 
 						return false;
                     }
 				} else if(ui32iCommandLen > 16 && strncmp(sBuffer, "Content-Length: ", 16) == NULL) {
-					ui32FileLen = atoi(sBuffer+16);
+					m_ui32FileLen = atoi(sBuffer+16);
 				}
 
 				sBuffer += ui32iCommandLen;
 
-				if(bData == true) {
+				if(m_bData == true) {
 					break;
                 }
 			}
 		}
 
-		ui32RecvBufLen -= (uint32_t)(sBuffer - sRecvBuf);
+		m_ui32RecvBufLen -= (uint32_t)(sBuffer - m_sRecvBuf);
 
-		if(ui32RecvBufLen == 0) {
-			sRecvBuf[0] = '\0';
-		} else if(ui32RecvBufLen != 1) {
-			memmove(sRecvBuf, sBuffer, ui32RecvBufLen);
-			sRecvBuf[ui32RecvBufLen] = '\0';
+		if(m_ui32RecvBufLen == 0) {
+			m_sRecvBuf[0] = '\0';
+		} else if(m_ui32RecvBufLen != 1) {
+			memmove(m_sRecvBuf, sBuffer, m_ui32RecvBufLen);
+			m_sRecvBuf[m_ui32RecvBufLen] = '\0';
 		} else {
 			if(sBuffer[0] == '\n') {
-				sRecvBuf[0] = '\0';
-				ui32RecvBufLen = 0;
+				m_sRecvBuf[0] = '\0';
+				m_ui32RecvBufLen = 0;
 			} else {
-				sRecvBuf[0] = sBuffer[0];
-				sRecvBuf[1] = '\0';
+				m_sRecvBuf[0] = sBuffer[0];
+				m_sRecvBuf[1] = '\0';
 			}
 		}
 	}
 
-	if(bData == true) {
-		if(ui32RecvBufLen == (uint32_t)ui32FileLen) {
-			char *sMess = (char *)malloc(ui32RecvBufLen + 1);
+	if(m_bData == true) {
+		if(m_ui32RecvBufLen == (uint32_t)m_ui32FileLen) {
+			char *sMess = (char *)malloc(m_ui32RecvBufLen + 1);
 			if(sMess == NULL) {
-				AppendDebugLogFormat("[MEM] Cannot allocate %u bytes for sMess in clsUpdateCheckThread::Receive\n", ui32RecvBufLen+1);
+				AppendDebugLogFormat("[MEM] Cannot allocate %u bytes for sMess in UpdateCheckThread::Receive\n", m_ui32RecvBufLen+1);
 
 				return false;
 			}
 
-			memcpy(sMess, sRecvBuf, ui32RecvBufLen);
-			sMess[ui32RecvBufLen] = '\0';
+			memcpy(sMess, m_sRecvBuf, m_ui32RecvBufLen);
+			sMess[m_ui32RecvBufLen] = '\0';
 
-			::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_DATA, 0, (LPARAM)sMess);
+			::PostMessage(MainWindow::m_Ptr->m_hWnd, WM_UPDATE_CHECK_DATA, 0, (LPARAM)sMess);
 
-			::PostMessage(clsMainWindow::mPtr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
+			::PostMessage(MainWindow::m_Ptr->m_hWnd, WM_UPDATE_CHECK_TERMINATE, 0, 0);
         }
     }
 

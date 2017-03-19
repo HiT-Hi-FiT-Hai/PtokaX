@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -20,31 +20,41 @@
 #ifndef DBPostgreSQLH
 #define DBPostgreSQLH
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+struct ChatCommand;
 struct User;
 typedef struct pg_conn PGconn;
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class DBPostgreSQL {
 private:
-	PGconn * pDBConn;
+	PGconn * m_pDBConn;
 
-	bool bConnected;
+#ifdef _WIN32
+	HANDLE m_hThreadHandle;
+#else
+	pthread_t m_threadId;
+#endif
+
+	bool m_bConnected, m_bTerminated;
 
     DBPostgreSQL(const DBPostgreSQL&);
     const DBPostgreSQL& operator=(const DBPostgreSQL&);
 
+	void ReconnectDb();
 public:
-    static DBPostgreSQL * mPtr;
+    static DBPostgreSQL * m_Ptr;
 
 	DBPostgreSQL();
 	~DBPostgreSQL();
 
 	void UpdateRecord(User * pUser);
 
-	bool SearchNick(char * sNick, const uint8_t &ui8NickLen, User * pUser, const bool &bFromPM);
-	bool SearchIP(char * sIP, User * pUser, const bool &bFromPM);
+	bool SearchNick(ChatCommand * pChatCommand);
+	bool SearchIP(ChatCommand * pChatCommand);
 
-	void RemoveOldRecords(const uint16_t &ui16Days);
+	void RemoveOldRecords(const uint16_t ui16Days);
+
+	void RunReconnect();
 };
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

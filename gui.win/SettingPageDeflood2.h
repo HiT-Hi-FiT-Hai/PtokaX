@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -41,7 +41,7 @@ public:
     char * GetPageName();
     void FocusLastItem();
 private:
-    HWND hWndPageItems[74];
+    HWND m_hWndPageItems[74];
     
     enum enmPageItems {
         GB_PM,
@@ -120,8 +120,8 @@ private:
         BTN_REPORT_FLOOD_TO_OPS
     };
 
-    SettingPageDeflood2(const SettingPageDeflood2&);
-    const SettingPageDeflood2& operator=(const SettingPageDeflood2&);
+    SettingPageDeflood2(const SettingPageDeflood2&) = delete;
+    const SettingPageDeflood2& operator=(const SettingPageDeflood2&) = delete;
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

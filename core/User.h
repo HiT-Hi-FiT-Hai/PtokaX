@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -22,6 +22,19 @@
 #define UserH
 //---------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------
+struct User; // needed for next struct, and next struct must be defined before user :-/
+//---------------------------------------------------------------------------
+
+struct DcCommand {
+	User * m_pUser;
+
+	char * m_sCommand;
+
+	uint32_t m_ui32CommandLen;
+};
+//---------------------------------------------------------------------------
+
 struct UserBan {
     UserBan();
     ~UserBan();
@@ -29,11 +42,11 @@ struct UserBan {
     UserBan(const UserBan&);
     const UserBan& operator=(const UserBan&);
 
-    char * sMessage;
+    char * m_sMessage;
 
-    uint32_t ui32Len, ui32NickHash;
+    uint32_t m_ui32Len, m_ui32NickHash;
 
-    static UserBan * CreateUserBan(char * sMess, const uint32_t &ui32MessLen, const uint32_t &ui32Hash);
+    static UserBan * CreateUserBan(char * sMess, const uint32_t ui32MessLen, const uint32_t ui32Hash);
 };
 //---------------------------------------------------------------------------
 
@@ -44,18 +57,18 @@ struct LoginLogout {
     LoginLogout(const LoginLogout&);
     const LoginLogout& operator=(const LoginLogout&);
 
-    uint64_t ui64LogonTick, ui64IPv4CheckTick;
+    uint64_t m_ui64LogonTick, m_ui64IPv4CheckTick;
 
-	UserBan * pBan;
+	UserBan * m_pBan;
 
-    char * pBuffer;
+    char * m_pBuffer;
 
-    uint32_t ui32ToCloseLoops, ui32UserConnectedLen;
+    uint32_t m_ui32ToCloseLoops, m_ui32UserConnectedLen;
 };
 //---------------------------------------------------------------------------
 
 struct PrcsdUsrCmd {
-    PrcsdUsrCmd() : pNext(NULL), pPtr(NULL), sCommand(NULL), ui32Len(0), ui8Type(0) { };
+    PrcsdUsrCmd() : m_pNext(NULL), m_pPtr(NULL), m_sCommand(NULL), m_ui32Len(0), m_ui8Type(0) { };
 
     PrcsdUsrCmd(const PrcsdUsrCmd&);
     const PrcsdUsrCmd& operator=(const PrcsdUsrCmd&);
@@ -69,111 +82,107 @@ struct PrcsdUsrCmd {
         TO_OP_CHAT
     };
 
-    PrcsdUsrCmd * pNext;
+    PrcsdUsrCmd * m_pNext;
 
-    void * pPtr;
+    void * m_pPtr;
 
-	char * sCommand;
+	char * m_sCommand;
 
-    uint32_t ui32Len;
+    uint32_t m_ui32Len;
 
-    uint8_t ui8Type;
+    uint8_t m_ui8Type;
 };
 //---------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
-struct User; // needed for next struct, and next struct must be defined before user :-/
-//---------------------------------------------------------------------------
-
 struct PrcsdToUsrCmd {
-    PrcsdToUsrCmd() : pNext(NULL), pTo(NULL), sCommand(NULL), sToNick(NULL), ui32Len(0), ui32PmCount(0), ui32Loops(0), ui32ToNickLen(0) { };
+    PrcsdToUsrCmd() : m_pNext(NULL), m_pToUser(NULL), m_sCommand(NULL), m_sToNick(NULL), m_ui32Len(0), m_ui32PmCount(0), m_ui32Loops(0), m_ui32ToNickLen(0) { };
 
     PrcsdToUsrCmd(const PrcsdToUsrCmd&);
     const PrcsdToUsrCmd& operator=(const PrcsdToUsrCmd&);
 
-    PrcsdToUsrCmd * pNext;
+    PrcsdToUsrCmd * m_pNext;
 
-    User * pTo;
+    User * m_pToUser;
 
-    char * sCommand, * sToNick;
+    char * m_sCommand, * m_sToNick;
 
-    uint32_t ui32Len, ui32PmCount, ui32Loops, ui32ToNickLen;
+    uint32_t m_ui32Len, m_ui32PmCount, m_ui32Loops, m_ui32ToNickLen;
 };
 //---------------------------------------------------------------------------
 struct QzBuf; // for send queue
 //---------------------------------------------------------------------------
 
 struct User {
-    uint64_t ui64SharedSize, ui64ChangedSharedSizeShort, ui64ChangedSharedSizeLong;
-	uint64_t ui64GetNickListsTick, ui64MyINFOsTick, ui64SearchsTick, ui64ChatMsgsTick;
-    uint64_t ui64PMsTick, ui64SameSearchsTick, ui64SamePMsTick, ui64SameChatsTick;
-    uint64_t iLastMyINFOSendTick, iLastNicklist, iReceivedPmTick, ui64ChatMsgsTick2;
-    uint64_t ui64PMsTick2, ui64SearchsTick2, ui64MyINFOsTick2, ui64CTMsTick;
-    uint64_t ui64CTMsTick2, ui64RCTMsTick, ui64RCTMsTick2, ui64SRsTick;
-    uint64_t ui64SRsTick2, ui64RecvsTick, ui64RecvsTick2, ui64ChatIntMsgsTick;
-    uint64_t ui64PMsIntTick, ui64SearchsIntTick;
+    uint64_t m_ui64SharedSize, m_ui64ChangedSharedSizeShort, m_ui64ChangedSharedSizeLong;
+	uint64_t m_ui64GetNickListsTick, m_ui64MyINFOsTick, m_ui64SearchsTick, m_ui64ChatMsgsTick;
+    uint64_t m_ui64PMsTick, m_ui64SameSearchsTick, m_ui64SamePMsTick, m_ui64SameChatsTick;
+    uint64_t m_ui64LastMyINFOSendTick, m_ui64LastNicklist, m_ui64ReceivedPmTick, m_ui64ChatMsgsTick2;
+    uint64_t m_ui64PMsTick2, m_ui64SearchsTick2, m_ui64MyINFOsTick2, m_ui64CTMsTick;
+    uint64_t m_ui64CTMsTick2, m_ui64RCTMsTick, m_ui64RCTMsTick2, m_ui64SRsTick;
+    uint64_t m_ui64SRsTick2, m_ui64RecvsTick, m_ui64RecvsTick2, m_ui64ChatIntMsgsTick;
+    uint64_t m_ui64PMsIntTick, m_ui64SearchsIntTick;
 
-	time_t tLoginTime;
+	time_t m_tLoginTime;
 
-    LoginLogout * pLogInOut;
+    LoginLogout * m_pLogInOut;
 
-    PrcsdToUsrCmd * pCmdToUserStrt, * pCmdToUserEnd;
+    PrcsdToUsrCmd * m_pCmdToUserStrt, * m_pCmdToUserEnd;
 
-    PrcsdUsrCmd * pCmdStrt, * pCmdEnd,
-        * pCmdActive4Search, * pCmdActive6Search, * pCmdPassiveSearch;
+    PrcsdUsrCmd * m_pCmdStrt, * m_pCmdEnd,
+        * m_pCmdActive4Search, * m_pCmdActive6Search, * m_pCmdPassiveSearch;
 
-    User * pPrev, * pNext, * pHashTablePrev, * pHashTableNext, * pHashIpTablePrev, * pHashIpTableNext;
+    User * m_pPrev, * m_pNext, * m_pHashTablePrev, * m_pHashTableNext, * m_pHashIpTablePrev, * m_pHashIpTableNext;
 
-    char * sNick, *sVersion;
-    char * sMyInfoOriginal, *sMyInfoShort, *sMyInfoLong;
-    char * sDescription, *sTag, *sConnection, *sEmail;
-    char * sClient, *sTagVersion;
-    char * sLastChat, *sLastPM, *sLastSearch;
-    char * pSendBuf, * pRecvBuf, * pSendBufHead;
-    char * sChangedDescriptionShort, *sChangedDescriptionLong, *sChangedTagShort, *sChangedTagLong;
-    char * sChangedConnectionShort, *sChangedConnectionLong, *sChangedEmailShort, *sChangedEmailLong;
+    char * m_sNick, * m_sVersion;
+    char * m_sMyInfoOriginal, * m_sMyInfoShort, * m_sMyInfoLong;
+    char * m_sDescription, * m_sTag, * m_sConnection, * m_sEmail;
+    char * m_sClient, * m_sTagVersion;
+    char * m_sLastChat, * m_sLastPM, * m_sLastSearch;
+    char * m_pSendBuf, * m_pRecvBuf, * m_pSendBufHead;
+    char * m_sChangedDescriptionShort, * m_sChangedDescriptionLong, * m_sChangedTagShort, * m_sChangedTagLong;
+    char * m_sChangedConnectionShort, * m_sChangedConnectionLong, * m_sChangedEmailShort, * m_sChangedEmailLong;
 
-    uint32_t ui32Recvs, ui32Recvs2;
+    uint32_t m_ui32Recvs, m_ui32Recvs2;
 
-    uint32_t Hubs, Slots, OLimit, LLimit, DLimit, iNormalHubs, iRegHubs, iOpHubs;
-    uint32_t iSendCalled, iRecvCalled, iReceivedPmCount, iSR, iDefloodWarnings;
-    uint32_t ui32BoolBits, ui32InfoBits, ui32SupportBits;
+    uint32_t m_ui32Hubs, m_ui32Slots, m_ui32OLimit, m_ui32LLimit, m_ui32DLimit, m_ui32NormalHubs, m_ui32RegHubs, m_ui32OpHubs;
+    uint32_t m_ui32SendCalled, m_ui32RecvCalled, m_ui32ReceivedPmCount, m_ui32SR, m_ui32DefloodWarnings;
+    uint32_t m_ui32BoolBits, m_ui32InfoBits, m_ui32SupportBits;
 
-    uint32_t ui32SendBufLen, ui32RecvBufLen, ui32SendBufDataLen, ui32RecvBufDataLen;
+    uint32_t m_ui32SendBufLen, m_ui32RecvBufLen, m_ui32SendBufDataLen, m_ui32RecvBufDataLen;
 
-    uint32_t ui32NickHash;
+    uint32_t m_ui32NickHash;
 
-    int32_t i32Profile;
+    int32_t m_i32Profile;
 
 #ifdef _WIN32
-	SOCKET Sck;
+	SOCKET m_Socket;
 #else
-	int Sck;
+	int m_Socket;
 #endif
 
-    uint16_t ui16MyInfoOriginalLen, ui16MyInfoShortLen, ui16MyInfoLongLen;
-    uint16_t ui16GetNickLists, ui16MyINFOs, ui16Searchs, ui16ChatMsgs, ui16PMs;
-    uint16_t ui16SameSearchs, ui16LastSearchLen, ui16SamePMs, ui16LastPMLen;
-    uint16_t ui16SameChatMsgs, ui16LastChatLen, ui16LastPmLines, ui16SameMultiPms; 
-    uint16_t ui16LastChatLines, ui16SameMultiChats, ui16ChatMsgs2, ui16PMs2;
-    uint16_t ui16Searchs2, ui16MyINFOs2, ui16CTMs, ui16CTMs2;
-    uint16_t ui16RCTMs, ui16RCTMs2, ui16SRs, ui16SRs2;
-    uint16_t ui16ChatIntMsgs, ui16PMsInt, ui16SearchsInt;
-    uint16_t ui16IpTableIdx;
+    uint16_t m_ui16MyInfoOriginalLen, m_ui16MyInfoShortLen, m_ui16MyInfoLongLen;
+    uint16_t m_ui16GetNickLists, m_ui16MyINFOs, m_ui16Searchs, m_ui16ChatMsgs, m_ui16PMs;
+    uint16_t m_ui16SameSearchs, m_ui16LastSearchLen, m_ui16SamePMs, m_ui16LastPMLen;
+    uint16_t m_ui16SameChatMsgs, m_ui16LastChatLen, m_ui16LastPmLines, m_ui16SameMultiPms; 
+    uint16_t m_ui16LastChatLines, m_ui16SameMultiChats, m_ui16ChatMsgs2, m_ui16PMs2;
+    uint16_t m_ui16Searchs2, m_ui16MyINFOs2, m_ui16CTMs, m_ui16CTMs2;
+    uint16_t m_ui16RCTMs, m_ui16RCTMs2, m_ui16SRs, m_ui16SRs2;
+    uint16_t m_ui16ChatIntMsgs, m_ui16PMsInt, m_ui16SearchsInt;
+    uint16_t m_ui16IpTableIdx;
 
-    uint8_t ui8MagicByte;
+    uint8_t m_ui8MagicByte;
 
-    uint8_t ui8NickLen;
-    uint8_t ui8IpLen, ui8ConnectionLen, ui8DescriptionLen, ui8EmailLen, ui8TagLen, ui8ClientLen, ui8TagVersionLen;
-    uint8_t ui8Country, ui8State, ui8IPv4Len;
-    uint8_t ui8ChangedDescriptionShortLen, ui8ChangedDescriptionLongLen, ui8ChangedTagShortLen, ui8ChangedTagLongLen;
-    uint8_t ui8ChangedConnectionShortLen, ui8ChangedConnectionLongLen, ui8ChangedEmailShortLen, ui8ChangedEmailLongLen;
+    uint8_t m_ui8NickLen;
+    uint8_t m_ui8IpLen, m_ui8ConnectionLen, m_ui8DescriptionLen, m_ui8EmailLen, m_ui8TagLen, m_ui8ClientLen, m_ui8TagVersionLen;
+    uint8_t m_ui8Country, m_ui8State, m_ui8IPv4Len;
+    uint8_t m_ui8ChangedDescriptionShortLen, m_ui8ChangedDescriptionLongLen, m_ui8ChangedTagShortLen, m_ui8ChangedTagLongLen;
+    uint8_t m_ui8ChangedConnectionShortLen, m_ui8ChangedConnectionLongLen, m_ui8ChangedEmailShortLen, m_ui8ChangedEmailLongLen;
 
-    uint8_t ui128IpHash[16];
+    uint8_t m_ui128IpHash[16];
 
-    char sIP[40], sIPv4[16];
+    char m_sIP[40], m_sIPv4[16];
 
-    char sModes[3];
+    char m_sModes[3];
 
     enum UserStates {
         STATE_SOCKET_ACCEPTED,
@@ -261,25 +270,25 @@ struct User {
 	bool MakeLock();
 	bool DoRecv();
 
-	void SendChar(const char * cText, const size_t &szTextLen);
-	void SendCharDelayed(const char * cText, const size_t &szTextLen);
-	void SendFormat(const char * sFrom, const bool &bDelayed, const char * sFormatMsg, ...);
-	void SendFormatCheckPM(const char * sFrom, const char * sOtherNick, const bool &bDelayed, const char * sFormatMsg, ...);
+	void SendChar(const char * sText, const size_t szTextLen);
+	void SendCharDelayed(const char * sText, const size_t szTextLen);
+	void SendFormat(const char * sFrom, const bool bDelayed, const char * sFormatMsg, ...);
+	void SendFormatCheckPM(const char * sFrom, const char * sOtherNick, const bool bDelayed, const char * sFormatMsg, ...);
 
-    bool PutInSendBuf(const char * Text, const size_t &szTxtLen);
+    bool PutInSendBuf(const char * sText, const size_t szTxtLen);
     bool Try2Send();
 
-    void SetIP(char * sNewIP);
-    void SetNick(char * sNewNick, const uint8_t &ui8NewNickLen);
-    void SetMyInfoOriginal(char * sNewMyInfo, const uint16_t &ui16NewMyInfoLen);
-    void SetVersion(char * sNewVer);
-    void SetLastChat(char * sNewData, const size_t &szLen);
-    void SetLastPM(char * sNewData, const size_t &szLen);
-    void SetLastSearch(char * sNewData, const size_t &szLen);
+    void SetIP(char * sIP);
+    void SetNick(char * sNick, const uint8_t ui8NickLen);
+    void SetMyInfoOriginal(char * sMyInfo, const uint16_t ui16MyInfoLen);
+    void SetVersion(char * sVersion);
+    void SetLastChat(char * sData, const size_t szLen);
+    void SetLastPM(char * sData, const size_t szLen);
+    void SetLastSearch(char * sData, const size_t szLen);
     void SetBuffer(char * sKickMsg, size_t szLen = 0);
     void FreeBuffer();
 
-    void Close(bool bNoQuit = false);
+    void Close(const bool bNoQuit = false);
 
     void Add2Userlist();
     void AddUserList();
@@ -293,13 +302,13 @@ struct User {
 
     bool ProcessRules();
 
-    void AddPrcsdCmd(const uint8_t &ui8Type, char * sCommand, const size_t &szCommandLen, User * to, const bool &bIsPm = false);
+    void AddPrcsdCmd(const uint8_t ui8Type, char * sCommand, const size_t szCommandLen, User * pToUser, const bool bIsPm = false);
 
     void AddMeOrIPv4Check();
 
-    static char * SetUserInfo(char * sOldData, uint8_t &ui8OldDataLen, char * sNewData, size_t &szNewDataLen, const char * sDataName);
+    static char * SetUserInfo(char * sOldData, uint8_t &ui8OldDataLen, char * sNewData, const size_t szNewDataLen, const char * sDataName);
 
-    void RemFromSendBuf(const char * sData, const uint32_t &iLen, const uint32_t &iSbLen);
+    void RemFromSendBuf(const char * sData, const uint32_t ui32Len, const uint32_t ui32SendBufLen);
 
     static void DeletePrcsdUsrCmd(PrcsdUsrCmd * pCommand);
 };

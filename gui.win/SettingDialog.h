@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -21,13 +21,13 @@
 #define SettingDialogH
 //------------------------------------------------------------------------------
 #include "SettingPage.h"
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-class clsSettingDialog {
+class SettingDialog {
 public:
-    static clsSettingDialog * mPtr;
+    static SettingDialog * m_Ptr;
 
-    HWND hWndWindowItems[4];
+    HWND m_hWndWindowItems[4];
 
     enum enmWindowItems {
         WINDOW_HANDLE,
@@ -36,17 +36,17 @@ public:
         BTN_CANCEL
     };
 
-    clsSettingDialog();
-    ~clsSettingDialog();
+    SettingDialog();
+    ~SettingDialog();
 
     static LRESULT CALLBACK StaticSettingDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	void DoModal(HWND hWndParent);
 private:
-    SettingPage * SettingPages[12];
+    SettingPage * m_SettingPages[12];
 
-    clsSettingDialog(const clsSettingDialog&);
-    const clsSettingDialog& operator=(const clsSettingDialog&);
+    SettingDialog(const SettingDialog&) = delete;
+    const SettingDialog& operator=(const SettingDialog&) = delete;
 
     LRESULT SettingDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 

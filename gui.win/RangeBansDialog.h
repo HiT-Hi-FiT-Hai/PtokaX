@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -23,11 +23,11 @@
 struct RangeBanItem;
 //------------------------------------------------------------------------------
 
-class clsRangeBansDialog {
+class RangeBansDialog {
 public:
-    static clsRangeBansDialog * mPtr;
+    static RangeBansDialog * m_Ptr;
 
-    HWND hWndWindowItems[8];
+    HWND m_hWndWindowItems[8];
 
     enum enmWindowItems {
         WINDOW_HANDLE,
@@ -40,8 +40,8 @@ public:
         BTN_CLEAR_RANGE_PERM_BANS
     };
 
-    clsRangeBansDialog();
-    ~clsRangeBansDialog();
+    RangeBansDialog();
+    ~RangeBansDialog();
 
     static LRESULT CALLBACK StaticRangeBansDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
     static int CompareRangeBans(const void * pItem, const void * pOtherItem);
@@ -52,19 +52,19 @@ public:
 	void AddRangeBan(const RangeBanItem * pRangeBan);
 	void RemoveRangeBan(const RangeBanItem * pRangeBan);
 private:
-    string sFilterString;
+    string m_sFilterString;
 
-    int iFilterColumn, iSortColumn;
+    int m_iFilterColumn, m_iSortColumn;
 
-    bool bSortAscending;
+    bool m_bSortAscending;
 
-    clsRangeBansDialog(const clsRangeBansDialog&);
-    const clsRangeBansDialog& operator=(const clsRangeBansDialog&);
+    RangeBansDialog(const RangeBansDialog&) = delete;
+    const RangeBansDialog& operator=(const RangeBansDialog&) = delete;
 
     LRESULT RangeBansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     void AddAllRangeBans();
-    void OnColumnClick(const LPNMLISTVIEW &pListView);
+    void OnColumnClick(const LPNMLISTVIEW pListView);
     void RemoveRangeBans();
     void OnContextMenu(HWND hWindow, LPARAM lParam);
     bool FilterRangeBan(const RangeBanItem * pRangeBan);

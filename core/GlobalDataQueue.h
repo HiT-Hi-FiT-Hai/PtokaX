@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -24,101 +24,101 @@
 struct User;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-class clsGlobalDataQueue {
+class GlobalDataQueue {
 private:
     struct QueueItem {
-    	QueueItem * pNext;
+    	QueueItem * m_pNext;
 
-        char * pCommand1, * pCommand2;
+        char * m_pCommand1, * m_pCommand2;
 
-        size_t szLen1, szLen2;
+        size_t m_szLen1, m_szLen2;
 
-        uint8_t ui8CommandType;
+        uint8_t m_ui8CommandType;
 
-        QueueItem() : pNext(NULL), pCommand1(NULL), pCommand2(NULL), szLen1(0), szLen2(0), ui8CommandType(0) { };
+        QueueItem() : m_pNext(NULL), m_pCommand1(NULL), m_pCommand2(NULL), m_szLen1(0), m_szLen2(0), m_ui8CommandType(0) { };
 
         QueueItem(const QueueItem&);
         const QueueItem& operator=(const QueueItem&);
     };
 
     struct GlobalQueue {
-    	GlobalQueue * pNext;
+    	GlobalQueue * m_pNext;
 
-        char * pBuffer, * pZbuffer;
+        char * m_pBuffer, * m_pZbuffer;
 
-        size_t szLen, szSize, szZlen, szZsize;
+        size_t m_szLen, m_szSize, m_szZlen, m_szZsize;
 
-        bool bCreated, bZlined;
+        bool m_bCreated, m_bZlined;
 
-        GlobalQueue() : pNext(NULL), pBuffer(NULL), pZbuffer(NULL), szLen(0), szSize(0), szZlen(0), szZsize(0), bCreated(false), bZlined(false) { };
+        GlobalQueue() : m_pNext(NULL), m_pBuffer(NULL), m_pZbuffer(NULL), m_szLen(0), m_szSize(0), m_szZlen(0), m_szZsize(0), m_bCreated(false), m_bZlined(false) { };
 
         GlobalQueue(const GlobalQueue&);
         const GlobalQueue& operator=(const GlobalQueue&);
     };
 
     struct OpsQueue {
-    	char * pBuffer;
+    	char * m_pBuffer;
 
-    	size_t szLen, szSize;
+    	size_t m_szLen, m_szSize;
 
-        OpsQueue() : pBuffer(NULL), szLen(0), szSize(0) { };
+        OpsQueue() : m_pBuffer(NULL), m_szLen(0), m_szSize(0) { };
 
         OpsQueue(const OpsQueue&);
         const OpsQueue& operator=(const OpsQueue&);
     };
 
     struct IPsQueue {
-    	char * pBuffer;
+    	char * m_pBuffer;
 
-    	size_t szLen, szSize;
+    	size_t m_szLen, m_szSize;
 
-    	bool bHaveDollars;
+    	bool m_bHaveDollars;
 
-        IPsQueue() : pBuffer(NULL), szLen(0), szSize(0), bHaveDollars(false) { };
+        IPsQueue() : m_pBuffer(NULL), m_szLen(0), m_szSize(0), m_bHaveDollars(false) { };
 
         IPsQueue(const IPsQueue&);
         const IPsQueue& operator=(const IPsQueue&);
     };
 
     struct SingleDataItem {
-        SingleDataItem * pPrev, * pNext;
+        SingleDataItem * m_pPrev, * m_pNext;
 
-        User * pFromUser;
+        User * m_pFromUser;
 
-        char * pData;
+        char * m_pData;
 
-        size_t szDataLen;
+        size_t m_szDataLen;
 
-        int32_t i32Profile;
+        int32_t m_i32Profile;
 
-        uint8_t ui8Type;
+        uint8_t m_ui8Type;
 
-        SingleDataItem() : pPrev(NULL), pNext(NULL), pFromUser(NULL), pData(NULL), szDataLen(0), i32Profile(0), ui8Type(0) { };
+        SingleDataItem() : m_pPrev(NULL), m_pNext(NULL), m_pFromUser(NULL), m_pData(NULL), m_szDataLen(0), m_i32Profile(0), m_ui8Type(0) { };
 
         SingleDataItem(const SingleDataItem&);
         const SingleDataItem& operator=(const SingleDataItem&);
     };
 
-	GlobalQueue GlobalQueues[144];
+	GlobalQueue m_GlobalQueues[144];
 
-	struct OpsQueue OpListQueue;
-	struct IPsQueue UserIPQueue;
+	struct OpsQueue m_OpListQueue;
+	struct IPsQueue m_UserIPQueue;
 
-    GlobalQueue * pCreatedGlobalQueues;
+    GlobalQueue * m_pCreatedGlobalQueues;
 
-    QueueItem * pNewQueueItems[2], * pQueueItems;
-    SingleDataItem * pNewSingleItems[2];
+    QueueItem * m_pNewQueueItems[2], * m_pQueueItems;
+    SingleDataItem * m_pNewSingleItems[2];
 
-    clsGlobalDataQueue(const clsGlobalDataQueue&);
-    const clsGlobalDataQueue& operator=(const clsGlobalDataQueue&);
+    GlobalDataQueue(const GlobalDataQueue&);
+    const GlobalDataQueue& operator=(const GlobalDataQueue&);
 
-    static void AddDataToQueue(GlobalQueue &pQueue, char * sData, const size_t &szLen);
+    static void AddDataToQueue(GlobalQueue & rQueue, char * sData, const size_t szLen);
 public:
-    static clsGlobalDataQueue * mPtr;
+    static GlobalDataQueue * m_Ptr;
 
-    SingleDataItem * pSingleItems;
+    SingleDataItem * m_pSingleItems;
 
-    bool bHaveItems;
+    bool m_bHaveItems;
 
     enum {
         CMD_HUBNAME,
@@ -161,22 +161,22 @@ public:
         SI_PM2PROFILE,
     };
 
-    clsGlobalDataQueue();
-    ~clsGlobalDataQueue();
+    GlobalDataQueue();
+    ~GlobalDataQueue();
 
-    void AddQueueItem(char * sCommand1, const size_t &szLen1, char * sCommand2, const size_t &szLen2, const uint8_t &ui8CmdType);
+    void AddQueueItem(char * sCommand1, const size_t szLen1, char * sCommand2, const size_t szLen2, const uint8_t ui8CmdType);
     void OpListStore(char * sNick);
     void UserIPStore(User * pUser);
     void PrepareQueueItems();
     void ClearQueues();
-    void ProcessQueues(User * u);
-    void ProcessSingleItems(User * u) const;
-    void SingleItemStore(char * sData, const size_t &szDataLen, User * pFromUser, const int32_t &i32Profile, const uint8_t &ui8Type);
+    void ProcessQueues(User * pUser);
+    void ProcessSingleItems(User * pUser) const;
+    void SingleItemStore(char * sData, const size_t szDataLen, User * pFromUser, const int32_t i32Profile, const uint8_t ui8Type);
     void SendFinalQueue();
     void * GetLastQueueItem();
     void * GetFirstQueueItem();
-    void * InsertBlankQueueItem(void * pAfterItem, const uint8_t &ui8CmdType);
-    static void FillBlankQueueItem(char * sCommand, const size_t &szLen, void * pVoidQueueItem);
+    void * InsertBlankQueueItem(void * pAfterItem, const uint8_t ui8CmdType);
+    static void FillBlankQueueItem(char * sCommand, const size_t szLen, void * pVoidQueueItem);
     void StatusMessageFormat(const char * sFrom, const char * sFormatMsg, ...);
 };
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

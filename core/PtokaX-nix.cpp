@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -32,10 +32,10 @@ static bool bTerminatedBySignal = false;
 static int iSignal = 0;
 //---------------------------------------------------------------------------
 
-static void SigHandler(int sig) {
+static void SigHandler(int iSig) {
     bTerminatedBySignal = true;
 
-    iSignal = sig;
+    iSignal = iSig;
 
 	// restore to default...
 	struct sigaction sigact;
@@ -43,7 +43,7 @@ static void SigHandler(int sig) {
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
 	    
-	sigaction(sig, &sigact, NULL);
+	sigaction(iSig, &sigact, NULL);
 }
 //---------------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
 
 	for(int i = 1; i < argc; i++) {
 	    if(strcasecmp(argv[i], "-d") == 0) {
-	    	clsServerManager::bDaemon = true;
+	    	ServerManager::m_bDaemon = true;
 	    } else if(strcasecmp(argv[i], "-c") == 0) {
 	    	if(++i == argc) {
 	            printf("Missing config directory!\n");
@@ -68,14 +68,14 @@ int main(int argc, char* argv[]) {
 	
 	        size_t szLen = strlen(argv[i]);
 			if(argv[i][szLen - 1] == '/') {
-	            clsServerManager::sPath = string(argv[i], szLen - 1);
+	            ServerManager::m_sPath = string(argv[i], szLen - 1);
 			} else {
-	            clsServerManager::sPath = string(argv[i], szLen);
+	            ServerManager::m_sPath = string(argv[i], szLen);
 	        }
 	
-	        if(DirExist(clsServerManager::sPath.c_str()) == false) {
-	        	if(mkdir(clsServerManager::sPath.c_str(), 0755) == -1) {
-	                if(clsServerManager::bDaemon == true) {
+	        if(DirExist(ServerManager::m_sPath.c_str()) == false) {
+	        	if(mkdir(ServerManager::m_sPath.c_str(), 0755) == -1) {
+	                if(ServerManager::m_bDaemon == true) {
 	                    syslog(LOG_USER | LOG_ERR, "Config directory not exist and can't be created!\n");
 	                } else {
 	                    printf("Config directory not exist and can't be created!");
@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
 	
 			sPidFile = argv[i];
 	    } else if(strcasecmp(argv[i], "/generatexmllanguage") == 0) {
-	        clsLanguageManager::GenerateXmlExample();
+	        LanguageManager::GenerateXmlExample();
 	        return EXIT_SUCCESS;
 	    } else if(strcasecmp(argv[i], "-m") == 0) {
 	    	bSetup = true;
@@ -120,36 +120,36 @@ int main(int argc, char* argv[]) {
 		}
 	}
 	
-	if(clsServerManager::sPath.size() == 0) {
+	if(ServerManager::m_sPath.size() == 0) {
 	    char* home;
 	    char curdir[PATH_MAX];
-	    if(clsServerManager::bDaemon == true && (home = getenv("HOME")) != NULL) {
-	        clsServerManager::sPath = string(home) + "/.PtokaX";
+	    if(ServerManager::m_bDaemon == true && (home = getenv("HOME")) != NULL) {
+	        ServerManager::m_sPath = string(home) + "/.PtokaX";
 	            
-	        if(DirExist(clsServerManager::sPath.c_str()) == false) {
-	            if(mkdir(clsServerManager::sPath.c_str(), 0755) == -1) {
+	        if(DirExist(ServerManager::m_sPath.c_str()) == false) {
+	            if(mkdir(ServerManager::m_sPath.c_str(), 0755) == -1) {
 	                syslog(LOG_USER | LOG_ERR, "Config directory not exist and can't be created!\n");
 	            }
 	        }
 	    } else if(getcwd(curdir, PATH_MAX) != NULL) {
-	        clsServerManager::sPath = curdir;
+	        ServerManager::m_sPath = curdir;
 	    } else {
-	        clsServerManager::sPath = ".";
+	        ServerManager::m_sPath = ".";
 	    }
 	}
 
 	if(bSetup == true) {
-		clsServerManager::Initialize();
+		ServerManager::Initialize();
 
-		clsServerManager::CommandLineSetup();
+		ServerManager::CommandLineSetup();
 		
-		clsServerManager::FinalClose();
+		ServerManager::FinalClose();
 
 		return EXIT_SUCCESS;
 	}
 
-	if(clsServerManager::bDaemon == true) {
-	    printf("Starting %s as daemon using %s as config directory.\n", g_sPtokaXTitle, clsServerManager::sPath.c_str());
+	if(ServerManager::m_bDaemon == true) {
+	    printf("Starting %s as daemon using %s as config directory.\n", g_sPtokaXTitle, ServerManager::m_sPath.c_str());
 	
 	    pid_t pid1 = fork();
 	    if(pid1 == -1) {
@@ -212,7 +212,7 @@ int main(int argc, char* argv[]) {
 	sigaddset(&sst, SIGURG);
 	sigaddset(&sst, SIGALRM);
 	
-	if(clsServerManager::bDaemon == true) {
+	if(ServerManager::m_bDaemon == true) {
 	    sigaddset(&sst, SIGHUP);
 	}
 	
@@ -238,21 +238,21 @@ int main(int argc, char* argv[]) {
 	    exit(EXIT_FAILURE);
 	}
 	
-	if(clsServerManager::bDaemon == false && sigaction(SIGHUP, &sigact, NULL) == -1) {
+	if(ServerManager::m_bDaemon == false && sigaction(SIGHUP, &sigact, NULL) == -1) {
 	    AppendDebugLog("%s - [ERR] Cannot create sigaction SIGHUP in main\n");
 	    exit(EXIT_FAILURE);
 	}
 
-	clsServerManager::Initialize();
+	ServerManager::Initialize();
 
-	if(clsServerManager::Start() == false) {
-		if(clsServerManager::bDaemon == false) {
+	if(ServerManager::Start() == false) {
+		if(ServerManager::m_bDaemon == false) {
 		    printf("Server start failed!\n");
 		} else {
 		    syslog(LOG_USER | LOG_ERR, "Server start failed!\n");
 		}
 		return EXIT_FAILURE;
-	} else if(clsServerManager::bDaemon == false) {
+	} else if(ServerManager::m_bDaemon == false) {
 		printf("%s running...\n", g_sPtokaXTitle);
 	}
 	
@@ -261,18 +261,18 @@ int main(int argc, char* argv[]) {
 	sleeptime.tv_nsec = 100000000;
 	
 	while(true) {
-		clsServiceLoop::mPtr->Looper();
+		ServiceLoop::m_Ptr->Looper();
 		
-		if(clsServerManager::bServerTerminated == true) {
+		if(ServerManager::m_bServerTerminated == true) {
 		    break;
 		}
 	
 	    if(bTerminatedBySignal == true) {
-	        if(clsServerManager::bIsClose == true) {
+	        if(ServerManager::m_bIsClose == true) {
 	            break;
 	        }
 	
-	        string str = "Received signal ";
+	        string str("Received signal ");
 	
 	        if(iSignal == SIGINT) {
 	            str += "SIGINT";
@@ -290,16 +290,16 @@ int main(int argc, char* argv[]) {
 	
 	        AppendLog(str.c_str());
 	
-	        clsServerManager::bIsClose = true;
-	        clsServerManager::Stop();
+	        ServerManager::m_bIsClose = true;
+	        ServerManager::Stop();
 	
 	        // tell the scripts about the end
-	        clsScriptManager::mPtr->OnExit();
+	        ScriptManager::m_Ptr->OnExit();
 	
 	        // send last possible global data
-	        clsGlobalDataQueue::mPtr->SendFinalQueue();
+	        GlobalDataQueue::m_Ptr->SendFinalQueue();
 	
-	        clsServerManager::FinalStop(true);
+	        ServerManager::FinalStop(true);
 	
 	        break;
 	    }
@@ -307,7 +307,7 @@ int main(int argc, char* argv[]) {
 	    nanosleep(&sleeptime, NULL);
 	}
 
-	if(clsServerManager::bDaemon == false) {
+	if(ServerManager::m_bDaemon == false) {
 	    printf("%s ending...\n", g_sPtokaXTitle);
 	} else if(sPidFile != NULL) {
 		unlink(sPidFile);

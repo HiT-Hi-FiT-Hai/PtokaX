@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -34,86 +34,86 @@
 #include "LuaScript.h"
 //---------------------------------------------------------------------------
 
-static int AddTimer(lua_State * L) {
-	Script * cur = clsScriptManager::mPtr->FindScript(L);
+static int AddTimer(lua_State * pLua) {
+	Script * cur = ScriptManager::m_Ptr->FindScript(pLua);
     if(cur == NULL) {
-		lua_settop(L, 0);
-		lua_pushnil(L);
+		lua_settop(pLua, 0);
+		lua_pushnil(pLua);
         return 1;
 	}
 
-    int n = lua_gettop(L);
+    int n = lua_gettop(pLua);
 
 	size_t szLen = 0;
     char * sFunctionName = NULL;
     int iRef = 0;
 
 	if(n == 2) {
-        if(lua_type(L, 1) != LUA_TNUMBER) {
-            luaL_checktype(L, 1, LUA_TNUMBER);
-    		lua_settop(L, 0);
-    		lua_pushnil(L);
+        if(lua_type(pLua, 1) != LUA_TNUMBER) {
+            luaL_checktype(pLua, 1, LUA_TNUMBER);
+    		lua_settop(pLua, 0);
+    		lua_pushnil(pLua);
             return 1;
         }
 
-        if(lua_type(L, 2) == LUA_TSTRING) {
-            sFunctionName = (char *)lua_tolstring(L, 2, &szLen);
+        if(lua_type(pLua, 2) == LUA_TSTRING) {
+            sFunctionName = (char *)lua_tolstring(pLua, 2, &szLen);
 
             if(szLen == 0) {
-				lua_settop(L, 0);
-				lua_pushnil(L);
+				lua_settop(pLua, 0);
+				lua_pushnil(pLua);
                 return 1;
             }
-        } else if(lua_type(L, 2) == LUA_TFUNCTION) {
-            iRef = luaL_ref(L, LUA_REGISTRYINDEX);
+        } else if(lua_type(pLua, 2) == LUA_TFUNCTION) {
+            iRef = luaL_ref(pLua, LUA_REGISTRYINDEX);
         } else {
-            luaL_error(L, "bad argument #2 to 'AddTimer' (string or function expected, got %s)", lua_typename(L, lua_type(L, 2)));
-    		lua_settop(L, 0);
-    		lua_pushnil(L);
+            luaL_error(pLua, "bad argument #2 to 'AddTimer' (string or function expected, got %s)", lua_typename(pLua, lua_type(pLua, 2)));
+    		lua_settop(pLua, 0);
+    		lua_pushnil(pLua);
             return 1;
         }
 	} else if(n == 1) {
-        if(lua_type(L, 1) != LUA_TNUMBER) {
-            luaL_checktype(L, 1, LUA_TNUMBER);
-    		lua_settop(L, 0);
-    		lua_pushnil(L);
+        if(lua_type(pLua, 1) != LUA_TNUMBER) {
+            luaL_checktype(pLua, 1, LUA_TNUMBER);
+    		lua_settop(pLua, 0);
+    		lua_pushnil(pLua);
             return 1;
 		}
 
-        sFunctionName = ScriptTimer::sDefaultTimerFunc;
+        sFunctionName = ScriptTimer::m_sDefaultTimerFunc;
     } else {
-        luaL_error(L, "bad argument count to 'AddTimer' (1 or 2 expected, got %d)", lua_gettop(L));
-        lua_settop(L, 0);
-        lua_pushnil(L);
+        luaL_error(pLua, "bad argument count to 'AddTimer' (1 or 2 expected, got %d)", lua_gettop(pLua));
+        lua_settop(pLua, 0);
+        lua_pushnil(pLua);
         return 1;
     }
 
     if(sFunctionName != NULL) {
-        lua_getglobal(L, sFunctionName);
-        int i = lua_gettop(L);
-        if(lua_isfunction(L, i) == 0) {
-            lua_settop(L, 0);
-            lua_pushnil(L);
+        lua_getglobal(pLua, sFunctionName);
+        int i = lua_gettop(pLua);
+        if(lua_isfunction(pLua, i) == 0) {
+            lua_settop(pLua, 0);
+            lua_pushnil(pLua);
 			return 1;
         }
     }
 
 #if defined(_WIN32) && !defined(_WIN_IOT)
-#if LUA_VERSION_NUM < 503
-	UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tonumber(L, 1), NULL);
-#else
-	UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tointeger(L, 1), NULL);
+	#if LUA_VERSION_NUM < 503
+		UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tonumber(pLua, 1), NULL);
+	#else
+		UINT_PTR timer = SetTimer(NULL, 0, (UINT)lua_tointeger(pLua, 1), NULL);
 #endif
 
     if(timer == 0) {
-        lua_settop(L, 0);
-		lua_pushnil(L);
+        lua_settop(pLua, 0);
+		lua_pushnil(pLua);
         return 1;
     }
 
-	ScriptTimer * pNewtimer = ScriptTimer::CreateScriptTimer(timer, sFunctionName, szLen, iRef, cur->pLUA);
+	ScriptTimer * pNewtimer = ScriptTimer::CreateScriptTimer(timer, sFunctionName, szLen, iRef, cur->m_pLua);
 #else
-	ScriptTimer * pNewtimer = ScriptTimer::CreateScriptTimer(sFunctionName, szLen, iRef, cur->pLUA);
+	ScriptTimer * pNewtimer = ScriptTimer::CreateScriptTimer(sFunctionName, szLen, iRef, cur->m_pLua);
 #endif
 
     if(pNewtimer == NULL) {
@@ -121,107 +121,107 @@ static int AddTimer(lua_State * L) {
         KillTimer(NULL, timer);
 #endif
         AppendDebugLog("%s - [MEM] Cannot allocate pNewtimer in TmrMan.AddTimer\n");
-        lua_settop(L, 0);
-		lua_pushnil(L);
+        lua_settop(pLua, 0);
+		lua_pushnil(pLua);
         return 1;
     }
 
 #if !defined(_WIN32) || (defined(_WIN32) && defined(_WIN_IOT))
 #if LUA_VERSION_NUM < 503
-	pNewtimer->ui64Interval = (uint64_t)lua_tonumber(L, 1);// ms
+	pNewtimer->m_ui64Interval = (uint64_t)lua_tonumber(pLua, 1);// ms
 #else
-    pNewtimer->ui64Interval = (uint64_t)lua_tointeger(L, 1);// ms
+    pNewtimer->m_ui64Interval = (uint64_t)lua_tointeger(pLua, 1);// ms
 #endif
 	#ifdef __MACH__
 		mach_timespec_t mts;
-		clock_get_time(clsServerManager::csMachClock, &mts);
-		pNewtimer->ui64LastTick = (uint64_t(mts.tv_sec) * 1000) + (uint64_t(mts.tv_nsec) / 1000000);
+		clock_get_time(ServerManager::m_csMachClock, &mts);
+		pNewtimer->m_ui64LastTick = (uint64_t(mts.tv_sec) * 1000) + (uint64_t(mts.tv_nsec) / 1000000);
 	#elif _WIN32
-		pNewtimer->ui64LastTick = ::GetTickCount64();
+		pNewtimer->m_ui64LastTick = ::GetTickCount64();
 	#else
 		timespec ts;
 		clock_gettime(CLOCK_MONOTONIC, &ts);
-		pNewtimer->ui64LastTick = (uint64_t(ts.tv_sec) * 1000) + (uint64_t(ts.tv_nsec) / 1000000);
+		pNewtimer->m_ui64LastTick = (uint64_t(ts.tv_sec) * 1000) + (uint64_t(ts.tv_nsec) / 1000000);
 	#endif
 #endif
 
-    lua_settop(L, 0);
+    lua_settop(pLua, 0);
 
 #if defined(_WIN32) && !defined(_WIN_IOT)
-    lua_pushlightuserdata(L, (void *)pNewtimer->uiTimerId);
+    lua_pushlightuserdata(pLua, (void *)pNewtimer->m_uiTimerId);
 #else
-    lua_pushlightuserdata(L, (void *)pNewtimer);
+    lua_pushlightuserdata(pLua, (void *)pNewtimer);
 #endif
 
-    if(clsScriptManager::mPtr->pTimerListS == NULL) {
-        clsScriptManager::mPtr->pTimerListS = pNewtimer;
-        clsScriptManager::mPtr->pTimerListE = pNewtimer;
+    if(ScriptManager::m_Ptr->m_pTimerListS == NULL) {
+        ScriptManager::m_Ptr->m_pTimerListS = pNewtimer;
+        ScriptManager::m_Ptr->m_pTimerListE = pNewtimer;
     } else {
-    	pNewtimer->pPrev = clsScriptManager::mPtr->pTimerListE;
-    	clsScriptManager::mPtr->pTimerListE->pNext = pNewtimer;
-    	clsScriptManager::mPtr->pTimerListE = pNewtimer;
+    	pNewtimer->m_pPrev = ScriptManager::m_Ptr->m_pTimerListE;
+    	ScriptManager::m_Ptr->m_pTimerListE->m_pNext = pNewtimer;
+    	ScriptManager::m_Ptr->m_pTimerListE = pNewtimer;
     }
 
     return 1;
 }
 //------------------------------------------------------------------------------
 
-static int RemoveTimer(lua_State * L) {
-    if(lua_gettop(L) != 1) {
-        luaL_error(L, "bad argument count to 'RemoveTimer' (1 expected, got %d)", lua_gettop(L));
-        lua_settop(L, 0);
+static int RemoveTimer(lua_State * pLua) {
+    if(lua_gettop(pLua) != 1) {
+        luaL_error(pLua, "bad argument count to 'RemoveTimer' (1 expected, got %d)", lua_gettop(pLua));
+        lua_settop(pLua, 0);
         return 0;
     }
 
-    if(lua_type(L, 1) != LUA_TLIGHTUSERDATA) {
-        luaL_checktype(L, 1, LUA_TLIGHTUSERDATA);
-		lua_settop(L, 0);
+    if(lua_type(pLua, 1) != LUA_TLIGHTUSERDATA) {
+        luaL_checktype(pLua, 1, LUA_TLIGHTUSERDATA);
+		lua_settop(pLua, 0);
         return 0;
     }
     
-	Script * cur = clsScriptManager::mPtr->FindScript(L);
+	Script * cur = ScriptManager::m_Ptr->FindScript(pLua);
     if(cur == NULL) {
-		lua_settop(L, 0);
+		lua_settop(pLua, 0);
         return 0;
 	}
 
 #if defined(_WIN32) && !defined(_WIN_IOT)
-    UINT_PTR timer = (UINT_PTR)lua_touserdata(L, 1);
+    UINT_PTR timer = (UINT_PTR)lua_touserdata(pLua, 1);
 #else
-	ScriptTimer * timer = reinterpret_cast<ScriptTimer *>(lua_touserdata(L, 1));
+	ScriptTimer * timer = reinterpret_cast<ScriptTimer *>(lua_touserdata(pLua, 1));
 #endif
 
     ScriptTimer * pCurTmr = NULL,
-        * pNextTmr = clsScriptManager::mPtr->pTimerListS;
+        * pNextTmr = ScriptManager::m_Ptr->m_pTimerListS;
 
     while(pNextTmr != NULL) {
         pCurTmr = pNextTmr;
-        pNextTmr = pCurTmr->pNext;
+        pNextTmr = pCurTmr->m_pNext;
 
 #if defined(_WIN32) && !defined(_WIN_IOT)
-        if(pCurTmr->uiTimerId == timer) {
-            KillTimer(NULL, pCurTmr->uiTimerId);
+        if(pCurTmr->m_uiTimerId == timer) {
+            KillTimer(NULL, pCurTmr->m_uiTimerId);
 #else
         if(pCurTmr == timer) {
 #endif
-			if(pCurTmr->pPrev == NULL) {
-				if(pCurTmr->pNext == NULL) {
-					clsScriptManager::mPtr->pTimerListS = NULL;
-					clsScriptManager::mPtr->pTimerListE = NULL;
+			if(pCurTmr->m_pPrev == NULL) {
+				if(pCurTmr->m_pNext == NULL) {
+					ScriptManager::m_Ptr->m_pTimerListS = NULL;
+					ScriptManager::m_Ptr->m_pTimerListE = NULL;
 				} else {
-					clsScriptManager::mPtr->pTimerListS = pCurTmr->pNext;
-					clsScriptManager::mPtr->pTimerListS->pPrev = NULL;
+					ScriptManager::m_Ptr->m_pTimerListS = pCurTmr->m_pNext;
+					ScriptManager::m_Ptr->m_pTimerListS->m_pPrev = NULL;
 				}
-			} else if(pCurTmr->pNext == NULL) {
-				clsScriptManager::mPtr->pTimerListE = pCurTmr->pPrev;
-				clsScriptManager::mPtr->pTimerListE->pNext = NULL;
+			} else if(pCurTmr->m_pNext == NULL) {
+				ScriptManager::m_Ptr->m_pTimerListE = pCurTmr->m_pPrev;
+				ScriptManager::m_Ptr->m_pTimerListE->m_pNext = NULL;
 			} else {
-				pCurTmr->pPrev->pNext = pCurTmr->pNext;
-				pCurTmr->pNext->pPrev = pCurTmr->pPrev;
+				pCurTmr->m_pPrev->m_pNext = pCurTmr->m_pNext;
+				pCurTmr->m_pNext->m_pPrev = pCurTmr->m_pPrev;
 			}
 
-            if(pCurTmr->sFunctionName == NULL) {
-                luaL_unref(L, LUA_REGISTRYINDEX, pCurTmr->iFunctionRef);
+            if(pCurTmr->m_sFunctionName == NULL) {
+                luaL_unref(pLua, LUA_REGISTRYINDEX, pCurTmr->m_iFunctionRef);
             }
 
             delete pCurTmr;
@@ -230,12 +230,12 @@ static int RemoveTimer(lua_State * L) {
         }
     }
 
-    lua_settop(L, 0);
+    lua_settop(pLua, 0);
     return 0;
 }
 //------------------------------------------------------------------------------
 
-static const luaL_Reg tmrman[] = {
+static const luaL_Reg TmrManRegs[] = {
 	{ "AddTimer", AddTimer },
 	{ "RemoveTimer", RemoveTimer }, 
 	{ NULL, NULL }
@@ -243,12 +243,12 @@ static const luaL_Reg tmrman[] = {
 //---------------------------------------------------------------------------
 
 #if LUA_VERSION_NUM > 501
-int RegTmrMan(lua_State * L) {
-    luaL_newlib(L, tmrman);
+int RegTmrMan(lua_State * pLua) {
+    luaL_newlib(pLua, TmrManRegs);
     return 1;
 #else
-void RegTmrMan(lua_State * L) {
-    luaL_register(L, "TmrMan", tmrman);
+void RegTmrMan(lua_State * pLua) {
+    luaL_register(pLua, "TmrMan", TmrManRegs);
 #endif
 }
 //---------------------------------------------------------------------------

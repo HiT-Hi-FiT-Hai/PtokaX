@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -41,7 +41,7 @@
     #include "../gui.win/RegisteredUsersDialog.h"
 #endif
 //---------------------------------------------------------------------------
-clsProfileManager * clsProfileManager::mPtr = NULL;
+ProfileManager * ProfileManager::m_Ptr = NULL;
 //---------------------------------------------------------------------------
 static const char sPtokaXProfiles[] = "PtokaX Profiles";
 static const size_t szPtokaXProfilesLen = sizeof(sPtokaXProfiles)-1;
@@ -106,33 +106,33 @@ static const char sProfilePermissionIds[] = // PN reserved for profile name!
 static const size_t szProfilePermissionIdsLen = sizeof(sProfilePermissionIds)-1;
 //---------------------------------------------------------------------------
 
-ProfileItem::ProfileItem() : sName(NULL) {
+ProfileItem::ProfileItem() : m_sName(NULL) {
 	for(uint16_t ui16i = 0; ui16i < 256; ui16i++) {
-        bPermissions[ui16i] = false;
+        m_bPermissions[ui16i] = false;
     }
 }
 //---------------------------------------------------------------------------
 
 ProfileItem::~ProfileItem() {
 #ifdef _WIN32
-    if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sName) == 0) {
-        AppendDebugLog("%s - [MEM] Cannot deallocate sName in ProfileItem::~ProfileItem\n");
+    if(HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)m_sName) == 0) {
+        AppendDebugLog("%s - [MEM] Cannot deallocate m_sName in ProfileItem::~ProfileItem\n");
     }
 #else
-	free(sName);
+	free(m_sName);
 #endif
 }
 //---------------------------------------------------------------------------
-void clsProfileManager::Load() {
+void ProfileManager::Load() {
     PXBReader pxbProfiles;
 
     // Open profiles file
 #ifdef _WIN32
-    if(pxbProfiles.OpenFileRead((clsServerManager::sPath + "\\cfg\\Profiles.pxb").c_str(), NORECONNTIME+2) == false) {
+    if(pxbProfiles.OpenFileRead((ServerManager::m_sPath + "\\cfg\\Profiles.pxb").c_str(), NORECONNTIME+2) == false) {
 #else
-    if(pxbProfiles.OpenFileRead((clsServerManager::sPath + "/cfg/Profiles.pxb").c_str(), NORECONNTIME+2) == false) {
+    if(pxbProfiles.OpenFileRead((ServerManager::m_sPath + "/cfg/Profiles.pxb").c_str(), NORECONNTIME+2) == false) {
 #endif
-    	AppendDebugLog("%s - [ERR] Cannot open Profiles.pxb in clsProfileManager::Load\n");
+    	AppendDebugLog("%s - [ERR] Cannot open Profiles.pxb in ProfileManager::Load\n");
         return;
     }
 
@@ -146,12 +146,12 @@ void clsProfileManager::Load() {
     }
 
     // Check header if we have correct file
-    if(pxbProfiles.ui16ItemLengths[0] != szPtokaXProfilesLen || strncmp((char *)pxbProfiles.pItemDatas[0], sPtokaXProfiles, szPtokaXProfilesLen) != 0) {
+    if(pxbProfiles.m_ui16ItemLengths[0] != szPtokaXProfilesLen || strncmp((char *)pxbProfiles.m_pItemDatas[0], sPtokaXProfiles, szPtokaXProfilesLen) != 0) {
         return;
     }
 
     {
-        uint32_t ui32FileVersion = ntohl(*((uint32_t *)(pxbProfiles.pItemDatas[1])));
+        uint32_t ui32FileVersion = ntohl(*((uint32_t *)(pxbProfiles.m_pItemDatas[1])));
 
         if(ui32FileVersion < 1) {
             return;
@@ -165,13 +165,13 @@ void clsProfileManager::Load() {
     bool bSuccess = pxbProfiles.ReadNextItem(ui16Identificators, NORECONNTIME+2);
 
     while(bSuccess == true) {
-    	ProfileItem * pNewProfile = CreateProfile((char *)pxbProfiles.pItemDatas[0]);
+    	ProfileItem * pNewProfile = CreateProfile((char *)pxbProfiles.m_pItemDatas[0]);
 
         for(uint16_t ui16i = 0; ui16i <= NORECONNTIME; ui16i++) {
-			if(((char *)pxbProfiles.pItemDatas[ui16i+1])[0] == '0') {
-				pNewProfile->bPermissions[ui16i] = false;
+			if(((char *)pxbProfiles.m_pItemDatas[ui16i+1])[0] == '0') {
+				pNewProfile->m_bPermissions[ui16i] = false;
 			} else {
-				pNewProfile->bPermissions[ui16i] = true;
+				pNewProfile->m_bPermissions[ui16i] = true;
 			}
         }
 
@@ -180,21 +180,23 @@ void clsProfileManager::Load() {
 }
 //---------------------------------------------------------------------------
 
-void clsProfileManager::LoadXML() {
+void ProfileManager::LoadXML() {
 #ifdef _WIN32
-    TiXmlDocument doc((clsServerManager::sPath+"\\cfg\\Profiles.xml").c_str());
+    TiXmlDocument doc((ServerManager::m_sPath+"\\cfg\\Profiles.xml").c_str());
 #else
-	TiXmlDocument doc((clsServerManager::sPath+"/cfg/Profiles.xml").c_str());
+	TiXmlDocument doc((ServerManager::m_sPath+"/cfg/Profiles.xml").c_str());
 #endif
 	if(doc.LoadFile() == false) {
          if(doc.ErrorId() != TiXmlBase::TIXML_ERROR_OPENING_FILE && doc.ErrorId() != TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY) {
-            int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "Error loading file Profiles.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
-			CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsProfileManager::LoadXML");
+            int iMsgLen = snprintf(ServerManager::m_pGlobalBuffer, ServerManager::m_szGlobalBufferSize, "Error loading file Profiles.xml. %s (Col: %d, Row: %d)", doc.ErrorDesc(), doc.Column(), doc.Row());
+			if(iMsgLen > 0) {
 #ifdef _BUILD_GUI
-			::MessageBox(NULL, clsServerManager::pGlobalBuffer, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
+				::MessageBox(NULL, ServerManager::m_pGlobalBuffer, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
-			AppendLog(clsServerManager::pGlobalBuffer);
+				AppendLog(ServerManager::m_pGlobalBuffer);
 #endif
+			}
+
             exit(EXIT_FAILURE);
         }
 	}
@@ -224,17 +226,17 @@ void clsProfileManager::LoadXML() {
 			if(strlen(sRights) == 32) {
 				for(uint8_t ui8i = 0; ui8i < 32; ui8i++) {
 					if(sRights[ui8i] == '1') {
-						pNewProfile->bPermissions[ui8i] = true;
+						pNewProfile->m_bPermissions[ui8i] = true;
 					} else {
-						pNewProfile->bPermissions[ui8i] = false;
+						pNewProfile->m_bPermissions[ui8i] = false;
 					}
 				}
 			} else if(strlen(sRights) == 256) {
 				for(uint16_t ui8i = 0; ui8i < 256; ui8i++) {
 					if(sRights[ui8i] == '1') {
-						pNewProfile->bPermissions[ui8i] = true;
+						pNewProfile->m_bPermissions[ui8i] = true;
 					} else {
-						pNewProfile->bPermissions[ui8i] = false;
+						pNewProfile->m_bPermissions[ui8i] = false;
 					}
 				}
 			} else {
@@ -244,27 +246,27 @@ void clsProfileManager::LoadXML() {
 		}
 	} else {
 #ifdef _BUILD_GUI
-		::MessageBox(NULL, clsLanguageManager::mPtr->sTexts[LAN_PROFILES_LOAD_FAIL], g_sPtokaXTitle, MB_OK | MB_ICONERROR);
+		::MessageBox(NULL, LanguageManager::m_Ptr->m_sTexts[LAN_PROFILES_LOAD_FAIL], g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
-		AppendLog(clsLanguageManager::mPtr->sTexts[LAN_PROFILES_LOAD_FAIL]);
+		AppendLog(LanguageManager::m_Ptr->m_sTexts[LAN_PROFILES_LOAD_FAIL]);
 #endif
 		exit(EXIT_FAILURE);
 	}
 }
 //---------------------------------------------------------------------------
 
-clsProfileManager::clsProfileManager() : ppProfilesTable(NULL), ui16ProfileCount(0) {
+ProfileManager::ProfileManager() : m_ppProfilesTable(NULL), m_ui16ProfileCount(0) {
 	#ifdef _WIN32
-    if(FileExist((clsServerManager::sPath + "\\cfg\\Profiles.pxb").c_str()) == true) {
+    if(FileExist((ServerManager::m_sPath + "\\cfg\\Profiles.pxb").c_str()) == true) {
 #else
-    if(FileExist((clsServerManager::sPath + "/cfg/Profiles.pxb").c_str()) == true) {
+    if(FileExist((ServerManager::m_sPath + "/cfg/Profiles.pxb").c_str()) == true) {
 #endif
         Load();
         return;
 #ifdef _WIN32
-    } else if(FileExist((clsServerManager::sPath + "\\cfg\\Profiles.xml").c_str()) == true) {
+    } else if(FileExist((ServerManager::m_sPath + "\\cfg\\Profiles.xml").c_str()) == true) {
 #else
-    } else if(FileExist((clsServerManager::sPath + "/cfg/Profiles.xml").c_str()) == true) {
+    } else if(FileExist((ServerManager::m_sPath + "/cfg/Profiles.xml").c_str()) == true) {
 #endif
         LoadXML();
         return;
@@ -282,9 +284,9 @@ clsProfileManager::clsProfileManager() : ppProfilesTable(NULL), ui16ProfileCount
 
 			for(uint8_t ui8j = 0; ui8j < strlen(sProfilePermisions[ui8i]); ui8j++) {
 				if(sProfilePermisions[ui8i][ui8j] == '1') {
-					pNewProfile->bPermissions[ui8j] = true;
+					pNewProfile->m_bPermissions[ui8j] = true;
 				} else {
-					pNewProfile->bPermissions[ui8j] = false;
+					pNewProfile->m_bPermissions[ui8j] = false;
 				}
 			}
 		}
@@ -295,74 +297,73 @@ clsProfileManager::clsProfileManager() : ppProfilesTable(NULL), ui16ProfileCount
 }
 //---------------------------------------------------------------------------
 
-clsProfileManager::~clsProfileManager() {
+ProfileManager::~ProfileManager() {
     SaveProfiles();
 
-    for(uint16_t ui16i = 0; ui16i < ui16ProfileCount; ui16i++) {
-        delete ppProfilesTable[ui16i];
+    for(uint16_t ui16i = 0; ui16i < m_ui16ProfileCount; ui16i++) {
+        delete m_ppProfilesTable[ui16i];
     }
 
 #ifdef _WIN32
-    if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)ppProfilesTable) == 0) {
-        AppendDebugLog("%s - [MEM] Cannot deallocate ProfilesTable in clsProfileManager::~clsProfileManager\n");
+    if(HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)m_ppProfilesTable) == 0) {
+        AppendDebugLog("%s - [MEM] Cannot deallocate m_ppProfilesTable in ProfileManager::~ProfileManager\n");
     }
 #else
-	free(ppProfilesTable);
+	free(m_ppProfilesTable);
 #endif
-    ppProfilesTable = NULL;
 }
 //---------------------------------------------------------------------------
 
-void clsProfileManager::SaveProfiles() {
+void ProfileManager::SaveProfiles() {
     PXBReader pxbProfiles;
 
     // Open profiles file
 #ifdef _WIN32
-    if(pxbProfiles.OpenFileSave((clsServerManager::sPath + "\\cfg\\Profiles.pxb").c_str(), NORECONNTIME+2) == false) {
+    if(pxbProfiles.OpenFileSave((ServerManager::m_sPath + "\\cfg\\Profiles.pxb").c_str(), NORECONNTIME+2) == false) {
 #else
-    if(pxbProfiles.OpenFileSave((clsServerManager::sPath + "/cfg/Profiles.pxb").c_str(), NORECONNTIME+2) == false) {
+    if(pxbProfiles.OpenFileSave((ServerManager::m_sPath + "/cfg/Profiles.pxb").c_str(), NORECONNTIME+2) == false) {
 #endif
-		AppendDebugLog("%s - [ERR] Cannot open Profiles.pxb in clsProfileManager::SaveProfiles\n");
+		AppendDebugLog("%s - [ERR] Cannot open Profiles.pxb in ProfileManager::SaveProfiles\n");
         return;
     }
 
     // Write file header
-    pxbProfiles.sItemIdentifiers[0] = 'F';
-    pxbProfiles.sItemIdentifiers[1] = 'I';
-    pxbProfiles.ui16ItemLengths[0] = (uint16_t)szPtokaXProfilesLen;
-    pxbProfiles.pItemDatas[0] = (void *)sPtokaXProfiles;
-    pxbProfiles.ui8ItemValues[0] = PXBReader::PXB_STRING;
+    pxbProfiles.m_sItemIdentifiers[0] = 'F';
+    pxbProfiles.m_sItemIdentifiers[1] = 'I';
+    pxbProfiles.m_ui16ItemLengths[0] = (uint16_t)szPtokaXProfilesLen;
+    pxbProfiles.m_pItemDatas[0] = (void *)sPtokaXProfiles;
+    pxbProfiles.m_ui8ItemValues[0] = PXBReader::PXB_STRING;
 
-    pxbProfiles.sItemIdentifiers[2] = 'F';
-    pxbProfiles.sItemIdentifiers[3] = 'V';
-    pxbProfiles.ui16ItemLengths[1] = 4;
+    pxbProfiles.m_sItemIdentifiers[2] = 'F';
+    pxbProfiles.m_sItemIdentifiers[3] = 'V';
+    pxbProfiles.m_ui16ItemLengths[1] = 4;
     uint32_t ui32Version = 1;
-    pxbProfiles.pItemDatas[1] = (void *)&ui32Version;
-    pxbProfiles.ui8ItemValues[1] = PXBReader::PXB_FOUR_BYTES;
+    pxbProfiles.m_pItemDatas[1] = (void *)&ui32Version;
+    pxbProfiles.m_ui8ItemValues[1] = PXBReader::PXB_FOUR_BYTES;
 
     if(pxbProfiles.WriteNextItem(szPtokaXProfilesLen+4, 2) == false) {
         return;
     }
 
-    pxbProfiles.sItemIdentifiers[0] = 'P';
-    pxbProfiles.sItemIdentifiers[1] = 'N';
-    pxbProfiles.ui8ItemValues[0] = PXBReader::PXB_STRING;
+    pxbProfiles.m_sItemIdentifiers[0] = 'P';
+    pxbProfiles.m_sItemIdentifiers[1] = 'N';
+    pxbProfiles.m_ui8ItemValues[0] = PXBReader::PXB_STRING;
 
-	memcpy(pxbProfiles.sItemIdentifiers+2, sProfilePermissionIds, szProfilePermissionIdsLen);
-	memset(pxbProfiles.ui8ItemValues+1, PXBReader::PXB_BYTE, NORECONNTIME+1);
+	memcpy(pxbProfiles.m_sItemIdentifiers+2, sProfilePermissionIds, szProfilePermissionIdsLen);
+	memset(pxbProfiles.m_ui8ItemValues+1, PXBReader::PXB_BYTE, NORECONNTIME+1);
 
-    for(uint16_t ui16i = 0; ui16i < ui16ProfileCount; ui16i++) {
-        pxbProfiles.ui16ItemLengths[0] = (uint16_t)strlen(ppProfilesTable[ui16i]->sName);
-        pxbProfiles.pItemDatas[0] = (void *)ppProfilesTable[ui16i]->sName;
-        pxbProfiles.ui8ItemValues[0] = PXBReader::PXB_STRING;
+    for(uint16_t ui16i = 0; ui16i < m_ui16ProfileCount; ui16i++) {
+        pxbProfiles.m_ui16ItemLengths[0] = (uint16_t)strlen(m_ppProfilesTable[ui16i]->m_sName);
+        pxbProfiles.m_pItemDatas[0] = (void *)m_ppProfilesTable[ui16i]->m_sName;
+        pxbProfiles.m_ui8ItemValues[0] = PXBReader::PXB_STRING;
 
         for(uint16_t ui16j = 0; ui16j <= NORECONNTIME; ui16j++) {
-	        pxbProfiles.ui16ItemLengths[ui16j+1] = 1;
-	        pxbProfiles.pItemDatas[ui16j+1] = (ppProfilesTable[ui16i]->bPermissions[ui16j] == true ? (void *)1 : 0);
-	        pxbProfiles.ui8ItemValues[ui16j+1] = PXBReader::PXB_BYTE;
+	        pxbProfiles.m_ui16ItemLengths[ui16j+1] = 1;
+	        pxbProfiles.m_pItemDatas[ui16j+1] = (m_ppProfilesTable[ui16i]->m_bPermissions[ui16j] == true ? (void *)1 : 0);
+	        pxbProfiles.m_ui8ItemValues[ui16j+1] = PXBReader::PXB_BYTE;
         }
 
-        if(pxbProfiles.WriteNextItem(pxbProfiles.ui16ItemLengths[0] + NORECONNTIME+1, NORECONNTIME+2) == false) {
+        if(pxbProfiles.WriteNextItem(pxbProfiles.m_ui16ItemLengths[0] + NORECONNTIME+1, NORECONNTIME+2) == false) {
             break;
         }
     }
@@ -371,42 +372,42 @@ void clsProfileManager::SaveProfiles() {
 }
 //---------------------------------------------------------------------------
 
-bool clsProfileManager::IsAllowed(User * u, const uint32_t &iOption) const {
+bool ProfileManager::IsAllowed(User * pUser, const uint32_t ui32Option) const {
     // profile number -1 = normal user/no profile assigned
-    if(u->i32Profile == -1)
+    if(pUser->m_i32Profile == -1)
         return false;
         
     // return right of the profile
-    return ppProfilesTable[u->i32Profile]->bPermissions[iOption];
+    return m_ppProfilesTable[pUser->m_i32Profile]->m_bPermissions[ui32Option];
 }
 //---------------------------------------------------------------------------
 
-bool clsProfileManager::IsProfileAllowed(const int32_t &iProfile, const uint32_t &iOption) const {
+bool ProfileManager::IsProfileAllowed(const int32_t i32Profile, const uint32_t ui32Option) const {
     // profile number -1 = normal user/no profile assigned
-    if(iProfile == -1)
+    if(i32Profile == -1)
         return false;
         
     // return right of the profile
-    return ppProfilesTable[iProfile]->bPermissions[iOption];
+    return m_ppProfilesTable[i32Profile]->m_bPermissions[ui32Option];
 }
 //---------------------------------------------------------------------------
 
-int32_t clsProfileManager::AddProfile(char * name) {
-    for(uint16_t ui16i = 0; ui16i < ui16ProfileCount; ui16i++) {
-		if(strcasecmp(ppProfilesTable[ui16i]->sName, name) == 0) {
+int32_t ProfileManager::AddProfile(char * sName) {
+    for(uint16_t ui16i = 0; ui16i < m_ui16ProfileCount; ui16i++) {
+		if(strcasecmp(m_ppProfilesTable[ui16i]->m_sName, sName) == 0) {
             return -1;
         }
     }
 
     uint32_t ui32j = 0;
     while(true) {
-        switch(name[ui32j]) {
+        switch(sName[ui32j]) {
             case '\0':
                 break;
             case '|':
                 return -2;
             default:
-                if(name[ui32j] < 33) {
+                if(sName[ui32j] < 33) {
                     return -2;
                 }
                 
@@ -417,27 +418,27 @@ int32_t clsProfileManager::AddProfile(char * name) {
         break;
     }
 
-    CreateProfile(name);
+    CreateProfile(sName);
 
 #ifdef _BUILD_GUI
-    if(clsProfilesDialog::mPtr != NULL) {
-        clsProfilesDialog::mPtr->AddProfile();
+    if(ProfilesDialog::m_Ptr != NULL) {
+        ProfilesDialog::m_Ptr->AddProfile();
     }
 #endif
 
 #ifdef _BUILD_GUI
-    if(clsRegisteredUserDialog::mPtr != NULL) {
-        clsRegisteredUserDialog::mPtr->UpdateProfiles();
+    if(RegisteredUserDialog::m_Ptr != NULL) {
+        RegisteredUserDialog::m_Ptr->UpdateProfiles();
     }
 #endif
 
-    return (int32_t)(ui16ProfileCount-1);
+    return (int32_t)(m_ui16ProfileCount-1);
 }
 //---------------------------------------------------------------------------
 
-int32_t clsProfileManager::GetProfileIndex(const char * name) {
-    for(uint16_t ui16i = 0; ui16i < ui16ProfileCount; ui16i++) {
-		if(strcasecmp(ppProfilesTable[ui16i]->sName, name) == 0) {
+int32_t ProfileManager::GetProfileIndex(const char * sName) {
+    for(uint16_t ui16i = 0; ui16i < m_ui16ProfileCount; ui16i++) {
+		if(strcasecmp(m_ppProfilesTable[ui16i]->m_sName, sName) == 0) {
             return ui16i;
         }
     }
@@ -450,9 +451,9 @@ int32_t clsProfileManager::GetProfileIndex(const char * name) {
 // returns: 0 if the name doesnot exists or is a default profile idx 0-3
 //          -1 if the profile is in use
 //          1 on success
-int32_t clsProfileManager::RemoveProfileByName(char * name) {
-    for(uint16_t ui16i = 0; ui16i < ui16ProfileCount; ui16i++) {
-		if(strcasecmp(ppProfilesTable[ui16i]->sName, name) == 0) {
+int32_t ProfileManager::RemoveProfileByName(char * sName) {
+    for(uint16_t ui16i = 0; ui16i < m_ui16ProfileCount; ui16i++) {
+		if(strcasecmp(m_ppProfilesTable[ui16i]->m_sName, sName) == 0) {
             return (RemoveProfile(ui16i) == true ? 1 : -1);
         }
     }
@@ -462,78 +463,78 @@ int32_t clsProfileManager::RemoveProfileByName(char * name) {
 
 //---------------------------------------------------------------------------
 
-bool clsProfileManager::RemoveProfile(const uint16_t &iProfile) {
+bool ProfileManager::RemoveProfile(const uint16_t ui16Profile) {
     RegUser * curReg = NULL,
-        * next = clsRegManager::mPtr->pRegListS;
+        * next = RegManager::m_Ptr->m_pRegListS;
 
     while(next != NULL) {
         curReg = next;
-		next = curReg->pNext;
+		next = curReg->m_pNext;
 
-		if(curReg->ui16Profile == iProfile) {
+		if(curReg->m_ui16Profile == ui16Profile) {
             //Profile in use can't be deleted!
             return false;
         }
     }
     
-    ui16ProfileCount--;
+    m_ui16ProfileCount--;
 
 #ifdef _BUILD_GUI
-    if(clsProfilesDialog::mPtr != NULL) {
-        clsProfilesDialog::mPtr->RemoveProfile(iProfile);
+    if(ProfilesDialog::m_Ptr != NULL) {
+        ProfilesDialog::m_Ptr->RemoveProfile(ui16Profile);
     }
 #endif
     
-    delete ppProfilesTable[iProfile];
+    delete m_ppProfilesTable[ui16Profile];
     
-	for(uint16_t ui16i = iProfile; ui16i < ui16ProfileCount; ui16i++) {
-        ppProfilesTable[ui16i] = ppProfilesTable[ui16i+1];
+	for(uint16_t ui16i = ui16Profile; ui16i < m_ui16ProfileCount; ui16i++) {
+        m_ppProfilesTable[ui16i] = m_ppProfilesTable[ui16i+1];
     }
 
     // Update profiles for online users
-    if(clsServerManager::bServerRunning == true) {
+    if(ServerManager::m_bServerRunning == true) {
         User * curUser = NULL,
-            * nextUser = clsUsers::mPtr->pListS;
+            * nextUser = Users::m_Ptr->m_pUserListS;
 
         while(nextUser != NULL) {
             curUser = nextUser;
-            nextUser = curUser->pNext;
+            nextUser = curUser->m_pNext;
             
-            if(curUser->i32Profile > iProfile) {
-                curUser->i32Profile--;
+            if(curUser->m_i32Profile > ui16Profile) {
+                curUser->m_i32Profile--;
             }
         }
     }
 
     // Update profiles for registered users
-    next = clsRegManager::mPtr->pRegListS;
+    next = RegManager::m_Ptr->m_pRegListS;
     while(next != NULL) {
         curReg = next;
-		next = curReg->pNext;
-        if(curReg->ui16Profile > iProfile) {
-            curReg->ui16Profile--;
+		next = curReg->m_pNext;
+        if(curReg->m_ui16Profile > ui16Profile) {
+            curReg->m_ui16Profile--;
         }
     }
 
-    ProfileItem ** pOldTable = ppProfilesTable;
+    ProfileItem ** pOldTable = m_ppProfilesTable;
 #ifdef _WIN32
-    ppProfilesTable = (ProfileItem **)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldTable, ui16ProfileCount*sizeof(ProfileItem *));
+    m_ppProfilesTable = (ProfileItem **)HeapReAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldTable, m_ui16ProfileCount*sizeof(ProfileItem *));
 #else
-	ppProfilesTable = (ProfileItem **)realloc(pOldTable, ui16ProfileCount*sizeof(ProfileItem *));
+	m_ppProfilesTable = (ProfileItem **)realloc(pOldTable, m_ui16ProfileCount*sizeof(ProfileItem *));
 #endif
-    if(ppProfilesTable == NULL) {
-        ppProfilesTable = pOldTable;
+    if(m_ppProfilesTable == NULL) {
+        m_ppProfilesTable = pOldTable;
 
-		AppendDebugLog("%s - [MEM] Cannot reallocate ProfilesTable in clsProfileManager::RemoveProfile\n");
+		AppendDebugLog("%s - [MEM] Cannot reallocate m_ppProfilesTable in ProfileManager::RemoveProfile\n");
     }
 
 #ifdef _BUILD_GUI
-    if(clsRegisteredUserDialog::mPtr != NULL) {
-        clsRegisteredUserDialog::mPtr->UpdateProfiles();
+    if(RegisteredUserDialog::m_Ptr != NULL) {
+        RegisteredUserDialog::m_Ptr->UpdateProfiles();
     }
 
-	if(clsRegisteredUsersDialog::mPtr != NULL) {
-		clsRegisteredUsersDialog::mPtr->UpdateProfiles();
+	if(RegisteredUsersDialog::m_Ptr != NULL) {
+		RegisteredUsersDialog::m_Ptr->UpdateProfiles();
 	}
 #endif
 
@@ -541,200 +542,200 @@ bool clsProfileManager::RemoveProfile(const uint16_t &iProfile) {
 }
 //---------------------------------------------------------------------------
 
-ProfileItem * clsProfileManager::CreateProfile(const char * name) {
-    ProfileItem ** pOldTable = ppProfilesTable;
+ProfileItem * ProfileManager::CreateProfile(const char * sName) {
+    ProfileItem ** pOldTable = m_ppProfilesTable;
 #ifdef _WIN32
-    if(ppProfilesTable == NULL) {
-        ppProfilesTable = (ProfileItem **)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (ui16ProfileCount+1)*sizeof(ProfileItem *));
+    if(m_ppProfilesTable == NULL) {
+        m_ppProfilesTable = (ProfileItem **)HeapAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (m_ui16ProfileCount+1)*sizeof(ProfileItem *));
     } else {
-        ppProfilesTable = (ProfileItem **)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldTable, (ui16ProfileCount+1)*sizeof(ProfileItem *));
+        m_ppProfilesTable = (ProfileItem **)HeapReAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldTable, (m_ui16ProfileCount+1)*sizeof(ProfileItem *));
     }
 #else
-	ppProfilesTable = (ProfileItem **)realloc(pOldTable, (ui16ProfileCount+1)*sizeof(ProfileItem *));
+	m_ppProfilesTable = (ProfileItem **)realloc(pOldTable, (m_ui16ProfileCount+1)*sizeof(ProfileItem *));
 #endif
-    if(ppProfilesTable == NULL) {
+    if(m_ppProfilesTable == NULL) {
 #ifdef _WIN32
-        HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldTable);
+        HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)pOldTable);
 #else
         free(pOldTable);
 #endif
-		AppendDebugLog("%s - [MEM] Cannot (re)allocate ProfilesTable in clsProfileManager::CreateProfile\n");
+		AppendDebugLog("%s - [MEM] Cannot (re)allocate m_ppProfilesTable in ProfileManager::CreateProfile\n");
         exit(EXIT_FAILURE);
     }
 
     ProfileItem * pNewProfile = new (std::nothrow) ProfileItem();
     if(pNewProfile == NULL) {
-		AppendDebugLog("%s - [MEM] Cannot allocate pNewProfile in clsProfileManager::CreateProfile\n");
+		AppendDebugLog("%s - [MEM] Cannot allocate pNewProfile in ProfileManager::CreateProfile\n");
         exit(EXIT_FAILURE);
     }
  
-    size_t szLen = strlen(name);
+    size_t szLen = strlen(sName);
 #ifdef _WIN32
-    pNewProfile->sName = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
+    pNewProfile->m_sName = (char *)HeapAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
 #else
-	pNewProfile->sName = (char *)malloc(szLen+1);
+	pNewProfile->m_sName = (char *)malloc(szLen+1);
 #endif
-    if(pNewProfile->sName == NULL) {
-		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes in clsProfileManager::CreateProfile for pNewProfile->sName\n", (uint64_t)szLen);
+    if(pNewProfile->m_sName == NULL) {
+		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes in ProfileManager::CreateProfile for pNewProfile->sName\n", (uint64_t)szLen);
 
         exit(EXIT_FAILURE);
     } 
-    memcpy(pNewProfile->sName, name, szLen);
-    pNewProfile->sName[szLen] = '\0';
+    memcpy(pNewProfile->m_sName, sName, szLen);
+    pNewProfile->m_sName[szLen] = '\0';
 
     for(uint16_t ui16i = 0; ui16i < 256; ui16i++) {
-        pNewProfile->bPermissions[ui16i] = false;
+        pNewProfile->m_bPermissions[ui16i] = false;
     }
     
-    ui16ProfileCount++;
+    m_ui16ProfileCount++;
 
-    ppProfilesTable[ui16ProfileCount-1] = pNewProfile;
+    m_ppProfilesTable[m_ui16ProfileCount-1] = pNewProfile;
 
     return pNewProfile;
 }
 //---------------------------------------------------------------------------
 
-void clsProfileManager::MoveProfileDown(const uint16_t &iProfile) {
-    ProfileItem *first = ppProfilesTable[iProfile];
-    ProfileItem *second = ppProfilesTable[iProfile+1];
+void ProfileManager::MoveProfileDown(const uint16_t ui16Profile) {
+    ProfileItem *first = m_ppProfilesTable[ui16Profile];
+    ProfileItem *second = m_ppProfilesTable[ui16Profile+1];
     
-    ppProfilesTable[iProfile+1] = first;
-    ppProfilesTable[iProfile] = second;
+	m_ppProfilesTable[ui16Profile+1] = first;
+	m_ppProfilesTable[ui16Profile] = second;
 
     RegUser * curReg = NULL,
-        * nextReg = clsRegManager::mPtr->pRegListS;
+        * nextReg = RegManager::m_Ptr->m_pRegListS;
 
 	while(nextReg != NULL) {
         curReg = nextReg;
-		nextReg = curReg->pNext;
+		nextReg = curReg->m_pNext;
 
-		if(curReg->ui16Profile == iProfile) {
-			curReg->ui16Profile++;
-		} else if(curReg->ui16Profile == iProfile+1) {
-			curReg->ui16Profile--;
+		if(curReg->m_ui16Profile == ui16Profile) {
+			curReg->m_ui16Profile++;
+		} else if(curReg->m_ui16Profile == ui16Profile+1) {
+			curReg->m_ui16Profile--;
 		}
 	}
 
 #ifdef _BUILD_GUI
-    if(clsProfilesDialog::mPtr != NULL) {
-        clsProfilesDialog::mPtr->MoveDown(iProfile);
+    if(ProfilesDialog::m_Ptr != NULL) {
+        ProfilesDialog::m_Ptr->MoveDown(ui16Profile);
     }
 
-    if(clsRegisteredUserDialog::mPtr != NULL) {
-        clsRegisteredUserDialog::mPtr->UpdateProfiles();
+    if(RegisteredUserDialog::m_Ptr != NULL) {
+        RegisteredUserDialog::m_Ptr->UpdateProfiles();
     }
 
-	if(clsRegisteredUsersDialog::mPtr != NULL) {
-		clsRegisteredUsersDialog::mPtr->UpdateProfiles();
+	if(RegisteredUsersDialog::m_Ptr != NULL) {
+		RegisteredUsersDialog::m_Ptr->UpdateProfiles();
 	}
 #endif
 
-    if(clsUsers::mPtr == NULL) {
+    if(Users::m_Ptr == NULL) {
         return;
     }
 
     User * curUser = NULL,
-        * nextUser = clsUsers::mPtr->pListS;
+        * nextUser = Users::m_Ptr->m_pUserListS;
 
 	while(nextUser != NULL) {
         curUser = nextUser;
-		nextUser = curUser->pNext;
+		nextUser = curUser->m_pNext;
 
-		if(curUser->i32Profile == (int32_t)iProfile) {
-			curUser->i32Profile++;
-		} else if(curUser->i32Profile == (int32_t)(iProfile+1)) {
-			curUser->i32Profile--;
+		if(curUser->m_i32Profile == (int32_t)ui16Profile) {
+			curUser->m_i32Profile++;
+		} else if(curUser->m_i32Profile == (int32_t)(ui16Profile+1)) {
+			curUser->m_i32Profile--;
 		}
     }
 }
 //---------------------------------------------------------------------------
 
-void clsProfileManager::MoveProfileUp(const uint16_t &iProfile) {
-    ProfileItem *first = ppProfilesTable[iProfile];
-    ProfileItem *second = ppProfilesTable[iProfile-1];
+void ProfileManager::MoveProfileUp(const uint16_t ui16Profile) {
+    ProfileItem *first = m_ppProfilesTable[ui16Profile];
+    ProfileItem *second = m_ppProfilesTable[ui16Profile-1];
     
-    ppProfilesTable[iProfile-1] = first;
-    ppProfilesTable[iProfile] = second;
+	m_ppProfilesTable[ui16Profile-1] = first;
+	m_ppProfilesTable[ui16Profile] = second;
 
 	RegUser * curReg = NULL,
-        * nextReg = clsRegManager::mPtr->pRegListS;
+        * nextReg = RegManager::m_Ptr->m_pRegListS;
 
 	while(nextReg != NULL) {
 		curReg = nextReg;
-		nextReg = curReg->pNext;
+		nextReg = curReg->m_pNext;
 
-        if(curReg->ui16Profile == iProfile) {
-			curReg->ui16Profile--;
-		} else if(curReg->ui16Profile == iProfile-1) {
-			curReg->ui16Profile++;
+        if(curReg->m_ui16Profile == ui16Profile) {
+			curReg->m_ui16Profile--;
+		} else if(curReg->m_ui16Profile == ui16Profile-1) {
+			curReg->m_ui16Profile++;
 		}
 	}
 
 #ifdef _BUILD_GUI
-    if(clsProfilesDialog::mPtr != NULL) {
-        clsProfilesDialog::mPtr->MoveUp(iProfile);
+    if(ProfilesDialog::m_Ptr != NULL) {
+        ProfilesDialog::m_Ptr->MoveUp(ui16Profile);
     }
 
-    if(clsRegisteredUserDialog::mPtr != NULL) {
-        clsRegisteredUserDialog::mPtr->UpdateProfiles();
+    if(RegisteredUserDialog::m_Ptr != NULL) {
+        RegisteredUserDialog::m_Ptr->UpdateProfiles();
     }
 
-	if(clsRegisteredUsersDialog::mPtr != NULL) {
-		clsRegisteredUsersDialog::mPtr->UpdateProfiles();
+	if(RegisteredUsersDialog::m_Ptr != NULL) {
+		RegisteredUsersDialog::m_Ptr->UpdateProfiles();
 	}
 #endif
 
-    if(clsUsers::mPtr == NULL) {
+    if(Users::m_Ptr == NULL) {
         return;
     }
 
     User * curUser = NULL,
-        * nextUser = clsUsers::mPtr->pListS;
+        * nextUser = Users::m_Ptr->m_pUserListS;
 
     while(nextUser != NULL) {
         curUser = nextUser;
-		nextUser = curUser->pNext;
+		nextUser = curUser->m_pNext;
 
-		if(curUser->i32Profile == (int32_t)iProfile) {
-			curUser->i32Profile--;
-		} else if(curUser->i32Profile == (int32_t)(iProfile-1)) {
-			curUser->i32Profile++;
+		if(curUser->m_i32Profile == (int32_t)ui16Profile) {
+			curUser->m_i32Profile--;
+		} else if(curUser->m_i32Profile == (int32_t)(ui16Profile-1)) {
+			curUser->m_i32Profile++;
 		}
     }
 }
 //---------------------------------------------------------------------------
 
-void clsProfileManager::ChangeProfileName(const uint16_t &iProfile, char * sName, const size_t &szLen) {
-    char * sOldName = ppProfilesTable[iProfile]->sName;
+void ProfileManager::ChangeProfileName(const uint16_t ui16Profile, char * sName, const size_t szLen) {
+    char * sOldName = m_ppProfilesTable[ui16Profile]->m_sName;
 
 #ifdef _WIN32
-    ppProfilesTable[iProfile]->sName = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldName, szLen+1);
+    m_ppProfilesTable[ui16Profile]->m_sName = (char *)HeapReAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldName, szLen+1);
 #else
-	ppProfilesTable[iProfile]->sName = (char *)realloc(sOldName, szLen+1);
+	m_ppProfilesTable[ui16Profile]->m_sName = (char *)realloc(sOldName, szLen+1);
 #endif
-    if(ppProfilesTable[iProfile]->sName == NULL) {
-        ppProfilesTable[iProfile]->sName = sOldName;
+    if(m_ppProfilesTable[ui16Profile]->m_sName == NULL) {
+        m_ppProfilesTable[ui16Profile]->m_sName = sOldName;
 
-		AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in clsProfileManager::ChangeProfileName for ProfilesTable[iProfile]->sName\n", (uint64_t)szLen);
+		AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in ProfileManager::ChangeProfileName for m_ppProfilesTable[ui16Profile]->sName\n", (uint64_t)szLen);
 
         return;
     } 
-	memcpy(ppProfilesTable[iProfile]->sName, sName, szLen);
-    ppProfilesTable[iProfile]->sName[szLen] = '\0';
+	memcpy(m_ppProfilesTable[ui16Profile]->m_sName, sName, szLen);
+    m_ppProfilesTable[ui16Profile]->m_sName[szLen] = '\0';
 
 #ifdef _BUILD_GUI
-    if(clsRegisteredUserDialog::mPtr != NULL) {
-        clsRegisteredUserDialog::mPtr->UpdateProfiles();
+    if(RegisteredUserDialog::m_Ptr != NULL) {
+        RegisteredUserDialog::m_Ptr->UpdateProfiles();
     }
 
-	if(clsRegisteredUsersDialog::mPtr != NULL) {
-		clsRegisteredUsersDialog::mPtr->UpdateProfiles();
+	if(RegisteredUsersDialog::m_Ptr != NULL) {
+		RegisteredUsersDialog::m_Ptr->UpdateProfiles();
 	}
 #endif
 }
 //---------------------------------------------------------------------------
 
-void clsProfileManager::ChangeProfilePermission(const uint16_t &iProfile, const size_t &szId, const bool &bValue) {
-    ppProfilesTable[iProfile]->bPermissions[szId] = bValue;
+void ProfileManager::ChangeProfilePermission(const uint16_t ui16Profile, const size_t szId, const bool bValue) {
+    m_ppProfilesTable[ui16Profile]->m_bPermissions[szId] = bValue;
 }
 //---------------------------------------------------------------------------

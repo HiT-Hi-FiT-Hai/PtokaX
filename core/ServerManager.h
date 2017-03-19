@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -21,93 +21,100 @@
 #ifndef ServerManagerH
 #define ServerManagerH
 //---------------------------------------------------------------------------
+#ifdef _WIN32
+	#define WM_PX_DO_LOOP (WM_USER+1)
+#endif
+//---------------------------------------------------------------------------
 class ServerThread;
 //---------------------------------------------------------------------------
 
-class clsServerManager {
+class ServerManager {
 public:
-    static string sPath, sScriptPath;
+    static string m_sPath, m_sScriptPath;
 
 #ifdef _WIN32
-	static string sLuaPath, sOS;
+	static string m_sLuaPath, m_sOS;
 #endif
 
-    static double daCpuUsage[60], dCpuUsage;
+    static double m_dCpuUsages[60], m_dCpuUsage;
 
-    static uint64_t ui64ActualTick, ui64TotalShare;
-    static uint64_t ui64BytesRead, ui64BytesSent, ui64BytesSentSaved;
-    static uint64_t ui64LastBytesRead, ui64LastBytesSent;
-    static uint64_t ui64Mins, ui64Hours, ui64Days;
+    static uint64_t m_ui64ActualTick, m_ui64TotalShare;
+    static uint64_t m_ui64BytesRead, m_ui64BytesSent, m_ui64BytesSentSaved;
+    static uint64_t m_ui64LastBytesRead, m_ui64LastBytesSent;
+    static uint64_t m_ui64Mins, m_ui64Hours, m_ui64Days;
 
 #ifdef _WIN32
-	static HANDLE hConsole, hLuaHeap, hPtokaXHeap, hRecvHeap, hSendHeap;
+	static HANDLE m_hConsole, m_hLuaHeap, m_hPtokaXHeap, m_hRecvHeap, m_hSendHeap;
+	#ifdef _BUILD_GUI
+		static HWND m_hMainWindow;
+	#endif
 #endif
 
 #ifdef __MACH__
-	static clock_serv_t csMachClock;
+	static clock_serv_t m_csMachClock;
 #endif
 
-	static time_t tStartTime;
+	static time_t m_tStartTime;
 
 #if defined(_WIN32) && !defined(_WIN_IOT)
-    static UINT_PTR sectimer;
-    static UINT_PTR regtimer;
+    static UINT_PTR m_upSecTimer;
+    static UINT_PTR m_upRegTimer;
 	#ifdef _BUILD_GUI
-        static HINSTANCE hInstance;
-        static HWND hWndActiveDialog;
+        static HINSTANCE m_hInstance;
+        static HWND m_hWndActiveDialog;
 	#endif
 #endif
 
-	static ServerThread * pServersS;
+	static ServerThread * m_pServersS;
 
-    static char * pGlobalBuffer;
+    static char * m_pGlobalBuffer;
 
-	static size_t szGlobalBufferSize;
+	static size_t m_szGlobalBufferSize;
 
 #ifndef _WIN32
-    static uint32_t ui32CpuCount;
+    static uint32_t m_ui32CpuCount;
 #endif
 
-    static uint32_t ui32Joins, ui32Parts, ui32Logged, ui32Peak;
-    static uint32_t ui32aUploadSpeed[60], ui32aDownloadSpeed[60];
-    static uint32_t ui32ActualBytesRead, ui32ActualBytesSent;
-    static uint32_t ui32AverageBytesRead, ui32AverageBytesSent;
+    static uint32_t m_ui32Joins, m_ui32Parts, m_ui32Logged, m_ui32Peak;
+    static uint32_t m_ui32UploadSpeed[60], m_ui32DownloadSpeed[60];
+    static uint32_t m_ui32ActualBytesRead, m_ui32ActualBytesSent;
+    static uint32_t m_ui32AverageBytesRead, m_ui32AverageBytesSent;
 
-    static bool bServerRunning, bServerTerminated, bIsRestart, bIsClose;
+    static bool m_bServerRunning, m_bServerTerminated, m_bIsRestart, m_bIsClose;
 
 #ifdef _WIN32
 	#ifndef _BUILD_GUI
-        static bool bService;
+        static bool m_bService;
 	#endif
 #else
-    static bool bDaemon;
+    static bool m_bDaemon;
 #endif
 
-    static bool bCmdAutoStart, bCmdNoAutoStart, bCmdNoTray, bUseIPv4, bUseIPv6, bIPv6DualStack;
+    static bool m_bCmdAutoStart, m_bCmdNoAutoStart, m_bCmdNoTray, m_bUseIPv4, m_bUseIPv6, m_bIPv6DualStack;
 
-    static char sHubIP[16], sHubIP6[40];
+    static char m_sHubIP[16], m_sHubIP6[40];
 
-    static uint8_t ui8SrCntr, ui8MinTick;
+    static uint8_t m_ui8SrCntr, m_ui8MinTick;
 
 	static void OnSecTimer();
     static void OnRegTimer();
 
     static void Initialize();
 
-    static void FinalStop(const bool &bDeleteServiceLoop);
+    static void FinalStop(const bool bDeleteServiceLoop);
     static void ResumeAccepts();
-    static void SuspendAccepts(const uint32_t &ui32Time);
+    static void SuspendAccepts(const uint32_t ui32Time);
     static void UpdateAutoRegState();
 
     static bool Start();
     static void UpdateServers();
     static void Stop();
     static void FinalClose();
-    static void CreateServerThread(const int &iAddrFamily, const uint16_t &ui16PortNumber, const bool &bResume = false);
+    static void CreateServerThread(const int iAddrFamily, const uint16_t ui16PortNumber, const bool bResume = false);
 
 	static void CommandLineSetup();
 
-	static bool ResolveHubAddress(const bool &bSilent = false);
+	static bool ResolveHubAddress(const bool bSilent = false);
 };
 //--------------------------------------------------------------------------- 
 

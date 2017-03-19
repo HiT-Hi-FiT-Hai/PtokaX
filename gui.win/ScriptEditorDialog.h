@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -23,7 +23,7 @@
 
 class ScriptEditorDialog {
 public:
-    HWND hWndWindowItems[5];
+    HWND m_hWndWindowItems[5];
 
     enum enmWindowItems {
         WINDOW_HANDLE,
@@ -41,10 +41,10 @@ public:
 	void DoModal(HWND hWndParent);
 	void LoadScript(char * sScript);
 private:
-    string sScriptPath;
+    string m_sScriptPath;
 
-    ScriptEditorDialog(const ScriptEditorDialog&);
-    const ScriptEditorDialog& operator=(const ScriptEditorDialog&);
+    ScriptEditorDialog(const ScriptEditorDialog&) = delete;
+    const ScriptEditorDialog& operator=(const ScriptEditorDialog&) = delete;
 
     LRESULT ScriptEditorDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 

@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -23,11 +23,11 @@
 struct RegUser;
 //------------------------------------------------------------------------------
 
-class clsRegisteredUserDialog {
+class RegisteredUserDialog {
 public:
-    static clsRegisteredUserDialog * mPtr;
+    static RegisteredUserDialog * m_Ptr;
 
-    HWND hWndWindowItems[9];
+    HWND m_hWndWindowItems[9];
 
     enum enmWindowItems {
         WINDOW_HANDLE,
@@ -41,20 +41,20 @@ public:
         BTN_DISCARD
     };
 
-    clsRegisteredUserDialog();
-    ~clsRegisteredUserDialog();
+    RegisteredUserDialog();
+    ~RegisteredUserDialog();
 
     static LRESULT CALLBACK StaticRegisteredUserDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	void DoModal(HWND hWndParent, RegUser * pReg = NULL, char * sNick = NULL);
+	void DoModal(HWND hWndParent, RegUser * pReg = nullptr, char * sNick = nullptr);
 	void UpdateProfiles();
 	void RegChanged(RegUser * pReg);
 	void RegDeleted(RegUser * pReg);
 private:
-    RegUser * pRegToChange;
+    RegUser * m_pRegToChange;
 
-    clsRegisteredUserDialog(const clsRegisteredUserDialog&);
-    const clsRegisteredUserDialog& operator=(const clsRegisteredUserDialog&);
+    RegisteredUserDialog(const RegisteredUserDialog&) = delete;
+    const RegisteredUserDialog& operator=(const RegisteredUserDialog&) = delete;
 
     LRESULT RegisteredUserDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 

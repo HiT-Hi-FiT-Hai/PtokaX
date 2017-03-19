@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -23,9 +23,9 @@
 struct RangeBanItem;
 //------------------------------------------------------------------------------
 
-class clsRangeBanDialog {
+class RangeBanDialog {
 public:
-    HWND hWndWindowItems[17];
+    HWND m_hWndWindowItems[17];
 
     enum enmWindowItems {
         WINDOW_HANDLE,
@@ -47,18 +47,18 @@ public:
         BTN_DISCARD
     };
 
-    clsRangeBanDialog();
-    ~clsRangeBanDialog();
+    RangeBanDialog();
+    ~RangeBanDialog();
 
     static LRESULT CALLBACK StaticRangeBanDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	void DoModal(HWND hWndParent, RangeBanItem * pRangeBan = NULL);
+	void DoModal(HWND hWndParent, RangeBanItem * pRangeBan = nullptr);
 	void RangeBanDeleted(RangeBanItem * pRangeBan);
 private:
-    RangeBanItem * pRangeBanToChange;
+    RangeBanItem * m_pRangeBanToChange;
 
-    clsRangeBanDialog(const clsRangeBanDialog&);
-    const clsRangeBanDialog& operator=(const clsRangeBanDialog&);
+    RangeBanDialog(const RangeBanDialog&) = delete;
+    const RangeBanDialog& operator=(const RangeBanDialog&) = delete;
 
     LRESULT RangeBanDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 

@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -31,83 +31,84 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-clsLanguageManager * clsLanguageManager::mPtr = NULL;
+LanguageManager * LanguageManager::m_Ptr = NULL;
 //---------------------------------------------------------------------------
 
-clsLanguageManager::clsLanguageManager(void) {
+LanguageManager::LanguageManager(void) {
     for(size_t szi = 0; szi < LANG_IDS_END; szi++) {
         size_t szTextLen = strlen(LangStr[szi]);
 #ifdef _WIN32
-        sTexts[szi] = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szTextLen+1);
+        m_sTexts[szi] = (char *)HeapAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, szTextLen+1);
 #else
-		sTexts[szi] = (char *)malloc(szTextLen+1);
+		m_sTexts[szi] = (char *)malloc(szTextLen+1);
 #endif
-        if(sTexts[szi] == NULL) {
-            AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes in clsLanguageManager::clsLanguageManager\n", (uint64_t)(szTextLen+1));
+        if(m_sTexts[szi] == NULL) {
+            AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes in LanguageManager::LanguageManager\n", (uint64_t)(szTextLen+1));
 
             exit(EXIT_FAILURE);
         }
-        memcpy(sTexts[szi], LangStr[szi], szTextLen);
-        ui16TextsLens[szi] = (uint16_t)szTextLen;
-        sTexts[szi][ui16TextsLens[szi]] = '\0';
+        memcpy(m_sTexts[szi], LangStr[szi], szTextLen);
+		m_ui16TextsLens[szi] = (uint16_t)szTextLen;
+		m_sTexts[szi][m_ui16TextsLens[szi]] = '\0';
     }
 }
 //---------------------------------------------------------------------------
 
-clsLanguageManager::~clsLanguageManager(void) {
+LanguageManager::~LanguageManager(void) {
     for(size_t szi = 0; szi < LANG_IDS_END; szi++) {
 #ifdef _WIN32
-        if(sTexts[szi] != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sTexts[szi]) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sTexts[szi] in clsLanguageManager::~clsLanguageManager\n");
+        if(m_sTexts[szi] != NULL && HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)m_sTexts[szi]) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate m_sTexts[szi] in LanguageManager::~LanguageManager\n");
         }
 #else
-		free(sTexts[szi]);
+		free(m_sTexts[szi]);
 #endif
     }
 }
 //---------------------------------------------------------------------------
 
-void clsLanguageManager::Load() {
-    if(clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE] == NULL) {
+void LanguageManager::Load() {
+    if(SettingManager::m_Ptr->m_sTexts[SETTXT_LANGUAGE] == NULL) {
         for(size_t szi = 0; szi < LANG_IDS_END; szi++) {
-            char * sOldText = sTexts[szi];
+            char * sOldText = m_sTexts[szi];
 
             size_t szTextLen = strlen(LangStr[szi]);
 #ifdef _WIN32
-            sTexts[szi] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldText, szTextLen+1);
+			m_sTexts[szi] = (char *)HeapReAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldText, szTextLen+1);
 #else
-			sTexts[szi] = (char *)realloc(sOldText, szTextLen+1);
+			m_sTexts[szi] = (char *)realloc(sOldText, szTextLen+1);
 #endif
-            if(sTexts[szi] == NULL) {
-                sTexts[szi] = sOldText;
+            if(m_sTexts[szi] == NULL) {
+				m_sTexts[szi] = sOldText;
 
-				AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in clsLanguageManager::Load\n", (uint64_t)(szTextLen+1));
+				AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in LanguageManager::Load\n", (uint64_t)(szTextLen+1));
 
                 continue;
             }
 
-            memcpy(sTexts[szi], LangStr[szi], szTextLen);
-            ui16TextsLens[szi] = (uint16_t)szTextLen;
-            sTexts[szi][ui16TextsLens[szi]] = '\0';
+            memcpy(m_sTexts[szi], LangStr[szi], szTextLen);
+			m_ui16TextsLens[szi] = (uint16_t)szTextLen;
+			m_sTexts[szi][m_ui16TextsLens[szi]] = '\0';
         }
     } else {
 #ifdef _WIN32
-		string sLanguageFile = clsServerManager::sPath+"\\language\\"+string(clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE],
+		string sLanguageFile = ServerManager::m_sPath+"\\language\\"+string(SettingManager::m_Ptr->m_sTexts[SETTXT_LANGUAGE],
 #else
-		string sLanguageFile = clsServerManager::sPath+"/language/"+string(clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE],
+		string sLanguageFile = ServerManager::m_sPath+"/language/"+string(SettingManager::m_Ptr->m_sTexts[SETTXT_LANGUAGE],
 #endif
-            (size_t)clsSettingManager::mPtr->ui16TextsLens[SETTXT_LANGUAGE])+".xml";
+            (size_t)SettingManager::m_Ptr->m_ui16TextsLens[SETTXT_LANGUAGE])+".xml";
 
         TiXmlDocument doc(sLanguageFile.c_str());
         if(doc.LoadFile() == false) {
             if(doc.ErrorId() != TiXmlBase::TIXML_ERROR_OPENING_FILE && doc.ErrorId() != TiXmlBase::TIXML_ERROR_DOCUMENT_EMPTY) {
-                int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "Error loading file %s.xml. %s (Col: %d, Row: %d)", clsSettingManager::mPtr->sTexts[SETTXT_LANGUAGE], doc.ErrorDesc(), doc.Column(), doc.Row());
-                CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "clsLanguageManager::Load");
+                int iMsgLen = snprintf(ServerManager::m_pGlobalBuffer, ServerManager::m_szGlobalBufferSize, "Error loading file %s.xml. %s (Col: %d, Row: %d)", SettingManager::m_Ptr->m_sTexts[SETTXT_LANGUAGE], doc.ErrorDesc(), doc.Column(), doc.Row());
+                if(iMsgLen > 0) {
 #ifdef _BUILD_GUI
-                ::MessageBox(NULL, clsServerManager::pGlobalBuffer, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
+                	::MessageBox(NULL, ServerManager::m_pGlobalBuffer, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
-                AppendLog(clsServerManager::pGlobalBuffer);
+                	AppendLog(ServerManager::m_pGlobalBuffer);
 #endif
+				}
             }
         } else {
             TiXmlHandle cfg(&doc);
@@ -125,23 +126,23 @@ void clsLanguageManager::Load() {
                     if(szLen != 0 && szLen < 129) {
                         for(size_t szi = 0; szi < LANG_IDS_END; szi++) {
                             if(strcmp(LangXmlStr[szi], sName) == 0) {
-                                char * sOldText = sTexts[szi];
+                                char * sOldText = m_sTexts[szi];
 #ifdef _WIN32
-                                sTexts[szi] = (char *)HeapReAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldText, szLen+1);
+								m_sTexts[szi] = (char *)HeapReAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sOldText, szLen+1);
 #else
-                                sTexts[szi] = (char *)realloc(sOldText, szLen+1);
+								m_sTexts[szi] = (char *)realloc(sOldText, szLen+1);
 #endif
-                                if(sTexts[szi] == NULL) {
-                                    sTexts[szi] = sOldText;
+                                if(m_sTexts[szi] == NULL) {
+									m_sTexts[szi] = sOldText;
 
-									AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in clsLanguageManager::Load1\n", (uint64_t)(szLen+1));
+									AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in LanguageManager::Load1\n", (uint64_t)(szLen+1));
 
                                     break;
                                 }
 
-                                memcpy(sTexts[szi], sText, szLen);
-                                ui16TextsLens[szi] = (uint16_t)szLen;
-                                sTexts[szi][ui16TextsLens[szi]] = '\0';
+                                memcpy(m_sTexts[szi], sText, szLen);
+								m_ui16TextsLens[szi] = (uint16_t)szLen;
+								m_sTexts[szi][m_ui16TextsLens[szi]] = '\0';
                                 break;
                             }
                         }
@@ -153,7 +154,7 @@ void clsLanguageManager::Load() {
 }
 //---------------------------------------------------------------------------
 
-void clsLanguageManager::GenerateXmlExample() {
+void LanguageManager::GenerateXmlExample() {
     TiXmlDocument xmldoc;
     xmldoc.InsertEndChild(TiXmlDeclaration("1.0", "windows-1252", "yes"));
     TiXmlElement xmllanguage("Language");

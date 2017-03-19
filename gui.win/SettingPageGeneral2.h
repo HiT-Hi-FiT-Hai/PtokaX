@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -25,8 +25,8 @@
 
 class SettingPageGeneral2 : public SettingPage {
 public:
-    bool bUpdateTextFiles, bUpdateRedirectAddress, bUpdateRegOnlyMessage, bUpdateShareLimitMessage, bUpdateSlotsLimitMessage, bUpdateHubSlotRatioMessage,
-        bUpdateMaxHubsLimitMessage, bUpdateNoTagMessage, bUpdateTempBanRedirAddress, bUpdatePermBanRedirAddress, bUpdateNickLimitMessage;
+    bool m_bUpdateTextFiles, m_bUpdateRedirectAddress, m_bUpdateRegOnlyMessage, m_bUpdateShareLimitMessage, m_bUpdateSlotsLimitMessage, m_bUpdateHubSlotRatioMessage,
+        m_bUpdateMaxHubsLimitMessage, m_bUpdateNoTagMessage, m_bUpdateTempBanRedirAddress, m_bUpdatePermBanRedirAddress, m_bUpdateNickLimitMessage;
 
     SettingPageGeneral2();
     ~SettingPageGeneral2() { };
@@ -44,7 +44,7 @@ public:
     char * GetPageName();
     void FocusLastItem();
 private:
-    HWND hWndPageItems[23];
+    HWND m_hWndPageItems[23];
     
     enum enmPageItems {
         GB_TEXT_FILES,
@@ -72,8 +72,8 @@ private:
         BTN_KILL_THAT_DUCK,
     };
 
-    SettingPageGeneral2(const SettingPageGeneral2&);
-    const SettingPageGeneral2& operator=(const SettingPageGeneral2&);
+    SettingPageGeneral2(const SettingPageGeneral2&) = delete;
+    const SettingPageGeneral2& operator=(const SettingPageGeneral2&) = delete;
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

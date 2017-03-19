@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -25,7 +25,7 @@
 
 class SettingPageMOTD : public SettingPage {
 public:
-    bool bUpdateMOTD;
+    bool m_bUpdateMOTD;
 
     SettingPageMOTD();
     ~SettingPageMOTD() { };
@@ -43,7 +43,7 @@ public:
     char * GetPageName();
     void FocusLastItem();
 private:
-    HWND hWndPageItems[4];
+    HWND m_hWndPageItems[4];
     
     enum enmPageItems {
         GB_MOTD,
@@ -52,8 +52,8 @@ private:
         BTN_DISABLE_MOTD
     };
 
-    SettingPageMOTD(const SettingPageMOTD&);
-    const SettingPageMOTD& operator=(const SettingPageMOTD&);
+    SettingPageMOTD(const SettingPageMOTD&) = delete;
+    const SettingPageMOTD& operator=(const SettingPageMOTD&) = delete;
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

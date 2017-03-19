@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -669,8 +669,6 @@ enum LangIds {
     LAN_MORE_MORE_DEFLOOD, 
     LAN_MYINFO_LIMIT, 
     LAN_YOUR_CLIENT_SEND_INCORRECT_IP, 
-    LAN_IN_CTM_REQ_REAL_IP_IS, 
-    LAN_IN_SEARCH_REQ_REAL_IP_IS, 
     LAN_CONNECTTOME, 
     LAN_NO_CTM_DFLD, 
     LAN_PLS_DONT_FLOOD_WITH_CTM, 
@@ -802,6 +800,7 @@ enum LangIds {
 	LAN_REMOVE_OLD_RECORDS,
 	LAN_YOU_CAN_USE_SQL_WILDCARDS,
 	LAN_UNLIMITED, 
+	LAN_YOUR_CLIENT_SEND_INCORRECT_IPPORT_IN_COMMAND, 
     LANG_IDS_END
 };
 //---------------------------------------------------------------------------

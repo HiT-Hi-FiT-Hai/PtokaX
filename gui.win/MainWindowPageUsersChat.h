@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -26,11 +26,11 @@
 struct User;
 //---------------------------------------------------------------------------
 
-class clsMainWindowPageUsersChat : public MainWindowPage, private BasicSplitter {
+class MainWindowPageUsersChat : public MainWindowPage, private BasicSplitter {
 public:
-    static clsMainWindowPageUsersChat * mPtr;
+    static MainWindowPageUsersChat * m_Ptr;
 
-    HWND hWndPageItems[7];
+    HWND m_hWndPageItems[7];
 
     enum enmPageItems {
         BTN_SHOW_CHAT,
@@ -42,8 +42,16 @@ public:
         BTN_UPDATE_USERS
     };
 
-    clsMainWindowPageUsersChat();
-    ~clsMainWindowPageUsersChat();
+    enum enmMenuItems {
+		IDC_REG_USER = 100,
+		IDC_DISCONNECT_USER,
+		IDC_KICK_USER,
+		IDC_BAN_USER,
+		IDC_REDIRECT_USER
+    };
+
+    MainWindowPageUsersChat();
+    ~MainWindowPageUsersChat();
 
     bool CreateMainWindowPage(HWND hOwner);
     void UpdateLanguage();
@@ -52,12 +60,12 @@ public:
     void FocusLastItem();
 
     bool OnEditEnter();
-    void AddUser(const User * curUser);
-    void RemoveUser(const User * curUser);
+    void AddUser(const User * pUser);
+    void RemoveUser(const User * pUser);
     User * GetUser();
 private:
-    clsMainWindowPageUsersChat(const clsMainWindowPageUsersChat&);
-    const clsMainWindowPageUsersChat& operator=(const clsMainWindowPageUsersChat&);
+    MainWindowPageUsersChat(const MainWindowPageUsersChat&) = delete;
+    const MainWindowPageUsersChat& operator=(const MainWindowPageUsersChat&) = delete;
 
     LRESULT MainWindowPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 

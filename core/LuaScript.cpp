@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -57,48 +57,48 @@
     #include "../gui.win/MainWindowPageScripts.h"
 #endif
 //---------------------------------------------------------------------------
-char ScriptTimer::sDefaultTimerFunc[] = "OnTimer";
+char ScriptTimer::m_sDefaultTimerFunc[] = "OnTimer";
 //---------------------------------------------------------------------------
 
-static int ScriptPanic(lua_State * L) {
+static int ScriptPanic(lua_State * pLua) {
     size_t szLen = 0;
-    char * stmp = (char*)lua_tolstring(L, -1, &szLen);
+    char * stmp = (char*)lua_tolstring(pLua, -1, &szLen);
 
     string sMsg = "[LUA] At panic -> " + string(stmp, szLen);
 
-    AppendLog(sMsg);
+    AppendLog(sMsg.c_str());
 
     return 0;
 }
 //------------------------------------------------------------------------------
 
-ScriptBot::ScriptBot() : pPrev(NULL), pNext(NULL), sNick(NULL), sMyINFO(NULL), bIsOP(false) {
-    clsScriptManager::mPtr->ui8BotsCount++;
+ScriptBot::ScriptBot() : m_pPrev(NULL), m_pNext(NULL), m_sNick(NULL), m_sMyINFO(NULL), m_bIsOP(false) {
+    ScriptManager::m_Ptr->m_ui8BotsCount++;
 }
 //------------------------------------------------------------------------------
 
 ScriptBot::~ScriptBot() {
 #ifdef _WIN32
-    if(sNick != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
-		AppendDebugLog("%s - [MEM] Cannot deallocate sNick in ScriptBot::~ScriptBot\n");
+    if(m_sNick != NULL && HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)m_sNick) == 0) {
+		AppendDebugLog("%s - [MEM] Cannot deallocate m_sNick in ScriptBot::~ScriptBot\n");
     }
 #else
-	free(sNick);
+	free(m_sNick);
 #endif
 
 #ifdef _WIN32
-    if(sMyINFO != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sMyINFO) == 0) {
-		AppendDebugLog("%s - [MEM] Cannot deallocate sMyINFO in ScriptBot::~ScriptBot\n");
+    if(m_sMyINFO != NULL && HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)m_sMyINFO) == 0) {
+		AppendDebugLog("%s - [MEM] Cannot deallocate m_sMyINFO in ScriptBot::~ScriptBot\n");
     }
 #else
-	free(sMyINFO);
+	free(m_sMyINFO);
 #endif
 
-	clsScriptManager::mPtr->ui8BotsCount--;
+	ScriptManager::m_Ptr->m_ui8BotsCount--;
 }
 //------------------------------------------------------------------------------
 
-ScriptBot * ScriptBot::CreateScriptBot(char * sBotNick, const size_t &szNickLen, char * sDescription, const size_t &szDscrLen, char * sEmail, const size_t &szEmlLen, const bool &bOP) {
+ScriptBot * ScriptBot::CreateScriptBot(char * sBotNick, const size_t szNickLen, char * sDescription, const size_t szDscrLen, char * sEmail, const size_t szEmlLen, const bool bOP) {
     ScriptBot * pScriptBot = new (std::nothrow) ScriptBot();
 
     if(pScriptBot == NULL) {
@@ -108,38 +108,38 @@ ScriptBot * ScriptBot::CreateScriptBot(char * sBotNick, const size_t &szNickLen,
     }
 
 #ifdef _WIN32
-    pScriptBot->sNick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
+    pScriptBot->m_sNick = (char *)HeapAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
 #else
-	pScriptBot->sNick = (char *)malloc(szNickLen+1);
+	pScriptBot->m_sNick = (char *)malloc(szNickLen+1);
 #endif
-    if(pScriptBot->sNick == NULL) {
-		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pScriptBot->sNick in ScriptBot::CreateScriptBot\n", (uint64_t)(szNickLen+1));
+    if(pScriptBot->m_sNick == NULL) {
+		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pScriptBot->m_sNick in ScriptBot::CreateScriptBot\n", (uint64_t)(szNickLen+1));
 
         delete pScriptBot;
 		return NULL;
     }
-    memcpy(pScriptBot->sNick, sBotNick, szNickLen);
-    pScriptBot->sNick[szNickLen] = '\0';
+    memcpy(pScriptBot->m_sNick, sBotNick, szNickLen);
+    pScriptBot->m_sNick[szNickLen] = '\0';
 
-    pScriptBot->bIsOP = bOP;
+    pScriptBot->m_bIsOP = bOP;
 
     size_t szWantLen = 24+szNickLen+szDscrLen+szEmlLen;
 
 #ifdef _WIN32
-    pScriptBot->sMyINFO = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szWantLen);
+    pScriptBot->m_sMyINFO = (char *)HeapAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, szWantLen);
 #else
-	pScriptBot->sMyINFO = (char *)malloc(szWantLen);
+	pScriptBot->m_sMyINFO = (char *)malloc(szWantLen);
 #endif
-    if(pScriptBot->sMyINFO == NULL) {
-		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pScriptBot->sMyINFO in ScriptBot::CreateScriptBot\n", (uint64_t)szWantLen);
+    if(pScriptBot->m_sMyINFO == NULL) {
+		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pScriptBot->m_sMyINFO in ScriptBot::CreateScriptBot\n", (uint64_t)szWantLen);
 
         delete pScriptBot;
 		return NULL;
     }
 
-	int iLen = sprintf(pScriptBot->sMyINFO, "$MyINFO $ALL %s %s$ $$%s$$|", sBotNick, sDescription != NULL ? sDescription : "", sEmail != NULL ? sEmail : "");
-
-	CheckSprintf(iLen, szWantLen, "ScriptBot::CreateScriptBot");
+	if(snprintf(pScriptBot->m_sMyINFO, szWantLen, "$MyINFO $ALL %s %s$ $$%s$$|", sBotNick, sDescription != NULL ? sDescription : "", sEmail != NULL ? sEmail : "") <= 0) {
+		pScriptBot->m_sMyINFO[0] = '\0';
+	}
 
     return pScriptBot;
 }
@@ -147,33 +147,33 @@ ScriptBot * ScriptBot::CreateScriptBot(char * sBotNick, const size_t &szNickLen,
 
 ScriptTimer::ScriptTimer() : 
 #if defined(_WIN32) && !defined(_WIN_IOT)
-	uiTimerId(NULL),
+	m_uiTimerId(NULL),
 #else
-	ui64Interval(0), ui64LastTick(0),
+	m_ui64Interval(0), m_ui64LastTick(0),
 #endif
-	pPrev(NULL), pNext(NULL), pLua(NULL), sFunctionName(NULL), iFunctionRef(0) {
+	m_pPrev(NULL), m_pNext(NULL), m_pLua(NULL), m_sFunctionName(NULL), m_iFunctionRef(0) {
 	// ...
 }
 //------------------------------------------------------------------------------
 
 ScriptTimer::~ScriptTimer() {
 #ifdef _WIN32
-	if(sFunctionName != NULL && sFunctionName != sDefaultTimerFunc) {
-        if(HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sFunctionName) == 0) {
-			AppendDebugLog("%s - [MEM] Cannot deallocate sFunctionName in ScriptTimer::~ScriptTimer\n");
+	if(m_sFunctionName != NULL && m_sFunctionName != m_sDefaultTimerFunc) {
+        if(HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)m_sFunctionName) == 0) {
+			AppendDebugLog("%s - [MEM] Cannot deallocate m_sFunctionName in ScriptTimer::~ScriptTimer\n");
         }
 #else
-    if(sFunctionName != sDefaultTimerFunc) {
-        free(sFunctionName);
+    if(m_sFunctionName != m_sDefaultTimerFunc) {
+        free(m_sFunctionName);
 #endif
     }
 }
 //------------------------------------------------------------------------------
 
 #if defined(_WIN32) && !defined(_WIN_IOT)
-ScriptTimer * ScriptTimer::CreateScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t &szLen, const int &iRef, lua_State * pLuaState) {
+ScriptTimer * ScriptTimer::CreateScriptTimer(UINT_PTR uiTmrId, char * sFunctName, const size_t szLen, const int iRef, lua_State * pLuaState) {
 #else
-ScriptTimer * ScriptTimer::CreateScriptTimer(char * sFunctName, const size_t &szLen, const int &iRef, lua_State * pLuaState) {
+ScriptTimer * ScriptTimer::CreateScriptTimer(char * sFunctName, const size_t szLen, const int iRef, lua_State * pLuaState) {
 #endif
     ScriptTimer * pScriptTimer = new (std::nothrow) ScriptTimer();
 
@@ -183,66 +183,66 @@ ScriptTimer * ScriptTimer::CreateScriptTimer(char * sFunctName, const size_t &sz
         return NULL;
     }
 
-	pScriptTimer->pLua = pLuaState;
+	pScriptTimer->m_pLua = pLuaState;
 
 	if(sFunctName != NULL) {
-        if(sFunctName != sDefaultTimerFunc) {
+        if(sFunctName != m_sDefaultTimerFunc) {
 #ifdef _WIN32
-            pScriptTimer->sFunctionName = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
+            pScriptTimer->m_sFunctionName = (char *)HeapAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, szLen+1);
 #else
-            pScriptTimer->sFunctionName = (char *)malloc(szLen+1);
+            pScriptTimer->m_sFunctionName = (char *)malloc(szLen+1);
 #endif
-            if(pScriptTimer->sFunctionName == NULL) {
-                AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pScriptTimer->sFunctionName in ScriptTimer::CreateScriptTimer\n", (uint64_t)(szLen+1));
+            if(pScriptTimer->m_sFunctionName == NULL) {
+                AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pScriptTimer->m_sFunctionName in ScriptTimer::CreateScriptTimer\n", (uint64_t)(szLen+1));
 
                 delete pScriptTimer;
                 return NULL;
             }
 
-            memcpy(pScriptTimer->sFunctionName, sFunctName, szLen);
-            pScriptTimer->sFunctionName[szLen] = '\0';
+            memcpy(pScriptTimer->m_sFunctionName, sFunctName, szLen);
+            pScriptTimer->m_sFunctionName[szLen] = '\0';
         } else {
-            pScriptTimer->sFunctionName = sDefaultTimerFunc;
+            pScriptTimer->m_sFunctionName = m_sDefaultTimerFunc;
         }
     } else {
-        pScriptTimer->iFunctionRef = iRef;
+        pScriptTimer->m_iFunctionRef = iRef;
     }
 
 #if defined(_WIN32) && !defined(_WIN_IOT)
-	pScriptTimer->uiTimerId = uiTmrId;
+	pScriptTimer->m_uiTimerId = uiTmrId;
 #endif
 
     return pScriptTimer;
 }
 //------------------------------------------------------------------------------
 
-Script::Script() : pPrev(NULL), pNext(NULL), pBotList(NULL), pLUA(NULL), sName(NULL), ui32DataArrivals(4294967295U), ui16Functions(65535),
-	bEnabled(false), bRegUDP(false), bProcessed(false) {
+Script::Script() : m_pPrev(NULL), m_pNext(NULL), m_pBotList(NULL), m_pLua(NULL), m_sName(NULL), m_ui32DataArrivals(4294967295U), m_ui16Functions(65535),
+	m_bEnabled(false), m_bRegUDP(false), m_bProcessed(false) {
 	// ...
 }
 //------------------------------------------------------------------------------
 
 Script::~Script() {
-    if(bRegUDP == true) {
-		clsUdpDebug::mPtr->Remove(sName);
-        bRegUDP = false;
+    if(m_bRegUDP == true) {
+		UdpDebug::m_Ptr->Remove(m_sName);
+        m_bRegUDP = false;
     }
 
-    if(pLUA != NULL) {
-        lua_close(pLUA);
+    if(m_pLua != NULL) {
+        lua_close(m_pLua);
     }
 
 #ifdef _WIN32
-	if(sName != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sName) == 0) {
-        AppendDebugLog("%s - [MEM] Cannot deallocate sName in Script::~Script\n");
+	if(m_sName != NULL && HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)m_sName) == 0) {
+        AppendDebugLog("%s - [MEM] Cannot deallocate m_sName in Script::~Script\n");
     }
 #else
-	free(sName);
+	free(m_sName);
 #endif
 }
 //------------------------------------------------------------------------------
 
-Script * Script::CreateScript(char * Name, const bool &enabled) {
+Script * Script::CreateScript(char * Name, const bool enabled) {
     Script * pScript = new (std::nothrow) Script();
 
     if(pScript == NULL) {
@@ -252,46 +252,46 @@ Script * Script::CreateScript(char * Name, const bool &enabled) {
     }
 
 #ifdef _WIN32
-	string ExtractedFilename = ExtractFileName(Name);
+	string ExtractedFilename(ExtractFileName(Name));
 	size_t szNameLen = ExtractedFilename.size();
 
-    pScript->sName = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNameLen+1);
+    pScript->m_sName = (char *)HeapAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, szNameLen+1);
 #else
     size_t szNameLen = strlen(Name);
 
-    pScript->sName = (char *)malloc(szNameLen+1);
+    pScript->m_sName = (char *)malloc(szNameLen+1);
 #endif
-    if(pScript->sName == NULL) {
+    if(pScript->m_sName == NULL) {
         AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes in Script::CreateScript\n", (uint64_t)szNameLen+1);
 
         delete pScript;
         return NULL;
     }
 #ifdef _WIN32
-    memcpy(pScript->sName, ExtractedFilename.c_str(), ExtractedFilename.size());
+    memcpy(pScript->m_sName, ExtractedFilename.c_str(), ExtractedFilename.size());
 #else
-    memcpy(pScript->sName, Name, szNameLen);
+    memcpy(pScript->m_sName, Name, szNameLen);
 #endif
-    pScript->sName[szNameLen] = '\0';
+    pScript->m_sName[szNameLen] = '\0';
 
-    pScript->bEnabled = enabled;
+    pScript->m_bEnabled = enabled;
 
     return pScript;
 }
 //------------------------------------------------------------------------------
 
-static int OsExit(lua_State * /* L*/) {
-	clsEventQueue::mPtr->AddNormal(clsEventQueue::EVENT_SHUTDOWN, NULL);
+static int OsExit(lua_State * /* pLua*/) {
+	EventQueue::m_Ptr->AddNormal(EventQueue::EVENT_SHUTDOWN, NULL);
 
     return 0;
 }
 //------------------------------------------------------------------------------
 
-static void AddSettingIds(lua_State * L) {
-	int iTable = lua_gettop(L);
+static void AddSettingIds(lua_State * pLua) {
+	int iTable = lua_gettop(pLua);
 
-	lua_newtable(L);
-	int iNewTable = lua_gettop(L);
+	lua_newtable(pLua);
+	int iNewTable = lua_gettop(pLua);
 
 	const uint8_t ui8Bools[] = { SETBOOL_ANTI_MOGLO, SETBOOL_AUTO_START, SETBOOL_REDIRECT_ALL, SETBOOL_REDIRECT_WHEN_HUB_FULL, SETBOOL_AUTO_REG, SETBOOL_REG_ONLY, 
 		SETBOOL_REG_ONLY_REDIR, SETBOOL_SHARE_LIMIT_REDIR, SETBOOL_SLOTS_LIMIT_REDIR, SETBOOL_HUB_SLOT_RATIO_REDIR, SETBOOL_MAX_HUBS_LIMIT_REDIR, 
@@ -326,14 +326,14 @@ static void AddSettingIds(lua_State * L) {
 	};
 
 	for(uint8_t ui8i = 0; ui8i < sizeof(ui8Bools); ui8i++) {
-		lua_pushinteger(L, ui8Bools[ui8i]);
-		lua_setfield(L, iNewTable, pBoolsNames[ui8i]);
+		lua_pushinteger(pLua, ui8Bools[ui8i]);
+		lua_setfield(pLua, iNewTable, pBoolsNames[ui8i]);
 	}
 
-	lua_setfield(L, iTable, "tBooleans");
+	lua_setfield(pLua, iTable, "tBooleans");
 
-	lua_newtable(L);
-	iNewTable = lua_gettop(L);
+	lua_newtable(pLua);
+	iNewTable = lua_gettop(pLua);
 
 	const uint8_t ui8Numbers[] = { SETSHORT_MAX_USERS, SETSHORT_MIN_SHARE_LIMIT, SETSHORT_MIN_SHARE_UNITS, SETSHORT_MAX_SHARE_LIMIT, SETSHORT_MAX_SHARE_UNITS, 
 		SETSHORT_MIN_SLOTS_LIMIT, SETSHORT_MAX_SLOTS_LIMIT, SETSHORT_HUB_SLOT_RATIO_HUBS, SETSHORT_HUB_SLOT_RATIO_SLOTS, SETSHORT_MAX_HUBS_LIMIT, 
@@ -392,14 +392,14 @@ static void AddSettingIds(lua_State * L) {
 	};
 
 	for(uint8_t ui8i = 0; ui8i < sizeof(ui8Numbers); ui8i++) {
-		lua_pushinteger(L, ui8Numbers[ui8i]);
-		lua_setfield(L, iNewTable, pNumbersNames[ui8i]);
+		lua_pushinteger(pLua, ui8Numbers[ui8i]);
+		lua_setfield(pLua, iNewTable, pNumbersNames[ui8i]);
 	}
 
-	lua_setfield(L, iTable, "tNumbers");
+	lua_setfield(pLua, iTable, "tNumbers");
 
-	lua_newtable(L);
-	iNewTable = lua_gettop(L);
+	lua_newtable(pLua);
+	iNewTable = lua_gettop(pLua);
 
 	const uint8_t ui8Strings[] = { SETTXT_HUB_NAME, SETTXT_ADMIN_NICK, SETTXT_HUB_ADDRESS, SETTXT_TCP_PORTS, SETTXT_UDP_PORT, SETTXT_HUB_DESCRIPTION, SETTXT_REDIRECT_ADDRESS, 
 		SETTXT_REGISTER_SERVERS, SETTXT_REG_ONLY_MSG, SETTXT_REG_ONLY_REDIR_ADDRESS, SETTXT_HUB_TOPIC, SETTXT_SHARE_LIMIT_MSG, SETTXT_SHARE_LIMIT_REDIR_ADDRESS, 
@@ -430,33 +430,33 @@ static void AddSettingIds(lua_State * L) {
 	};
 
 	for(uint8_t ui8i = 0; ui8i < sizeof(ui8Strings); ui8i++) {
-		lua_pushinteger(L, ui8Strings[ui8i]);
-		lua_setfield(L, iNewTable, pStringsNames[ui8i]);
+		lua_pushinteger(pLua, ui8Strings[ui8i]);
+		lua_setfield(pLua, iNewTable, pStringsNames[ui8i]);
 	}
 
-	lua_setfield(L, iTable, "tStrings");
+	lua_setfield(pLua, iTable, "tStrings");
 
-    lua_pop(L, 1);
+    lua_pop(pLua, 1);
 }
 //------------------------------------------------------------------------------
 
-static void AddPermissionsIds(lua_State * L) {
-	int iTable = lua_gettop(L);
+static void AddPermissionsIds(lua_State * pLua) {
+	int iTable = lua_gettop(pLua);
 
-	lua_newtable(L);
-	int iNewTable = lua_gettop(L);
+	lua_newtable(pLua);
+	int iNewTable = lua_gettop(pLua);
 
-	const uint8_t ui8Permissions[] = { clsProfileManager::HASKEYICON, clsProfileManager::NODEFLOODGETNICKLIST, clsProfileManager::NODEFLOODMYINFO, clsProfileManager::NODEFLOODSEARCH, clsProfileManager::NODEFLOODPM,
-		clsProfileManager::NODEFLOODMAINCHAT, clsProfileManager::MASSMSG, clsProfileManager::TOPIC, clsProfileManager::TEMP_BAN, clsProfileManager::REFRESHTXT,
-		clsProfileManager::NOTAGCHECK, clsProfileManager::TEMP_UNBAN, clsProfileManager::DELREGUSER, clsProfileManager::ADDREGUSER, clsProfileManager::NOCHATLIMITS,
-		clsProfileManager::NOMAXHUBCHECK, clsProfileManager::NOSLOTHUBRATIO, clsProfileManager::NOSLOTCHECK, clsProfileManager::NOSHARELIMIT, clsProfileManager::CLRPERMBAN,
-		clsProfileManager::CLRTEMPBAN, clsProfileManager::GETINFO, clsProfileManager::GETBANLIST, clsProfileManager::RSTSCRIPTS, clsProfileManager::RSTHUB,
-		clsProfileManager::TEMPOP, clsProfileManager::GAG, clsProfileManager::REDIRECT, clsProfileManager::BAN, clsProfileManager::KICK, clsProfileManager::DROP,
-		clsProfileManager::ENTERFULLHUB, clsProfileManager::ENTERIFIPBAN, clsProfileManager::ALLOWEDOPCHAT, clsProfileManager::SENDALLUSERIP, clsProfileManager::RANGE_BAN,
-		clsProfileManager::RANGE_UNBAN, clsProfileManager::RANGE_TBAN, clsProfileManager::RANGE_TUNBAN, clsProfileManager::GET_RANGE_BANS, clsProfileManager::CLR_RANGE_BANS,
-		clsProfileManager::CLR_RANGE_TBANS, clsProfileManager::UNBAN, clsProfileManager::NOSEARCHLIMITS, clsProfileManager:: SENDFULLMYINFOS, clsProfileManager::NOIPCHECK,
-		clsProfileManager::CLOSE, clsProfileManager::NODEFLOODCTM, clsProfileManager::NODEFLOODRCTM, clsProfileManager::NODEFLOODSR, clsProfileManager::NODEFLOODRECV,
-		clsProfileManager::NOCHATINTERVAL, clsProfileManager::NOPMINTERVAL, clsProfileManager::NOSEARCHINTERVAL, clsProfileManager::NOUSRSAMEIP, clsProfileManager::NORECONNTIME
+	const uint8_t ui8Permissions[] = { ProfileManager::HASKEYICON, ProfileManager::NODEFLOODGETNICKLIST, ProfileManager::NODEFLOODMYINFO, ProfileManager::NODEFLOODSEARCH, ProfileManager::NODEFLOODPM,
+		ProfileManager::NODEFLOODMAINCHAT, ProfileManager::MASSMSG, ProfileManager::TOPIC, ProfileManager::TEMP_BAN, ProfileManager::REFRESHTXT,
+		ProfileManager::NOTAGCHECK, ProfileManager::TEMP_UNBAN, ProfileManager::DELREGUSER, ProfileManager::ADDREGUSER, ProfileManager::NOCHATLIMITS,
+		ProfileManager::NOMAXHUBCHECK, ProfileManager::NOSLOTHUBRATIO, ProfileManager::NOSLOTCHECK, ProfileManager::NOSHARELIMIT, ProfileManager::CLRPERMBAN,
+		ProfileManager::CLRTEMPBAN, ProfileManager::GETINFO, ProfileManager::GETBANLIST, ProfileManager::RSTSCRIPTS, ProfileManager::RSTHUB,
+		ProfileManager::TEMPOP, ProfileManager::GAG, ProfileManager::REDIRECT, ProfileManager::BAN, ProfileManager::KICK, ProfileManager::DROP,
+		ProfileManager::ENTERFULLHUB, ProfileManager::ENTERIFIPBAN, ProfileManager::ALLOWEDOPCHAT, ProfileManager::SENDALLUSERIP, ProfileManager::RANGE_BAN,
+		ProfileManager::RANGE_UNBAN, ProfileManager::RANGE_TBAN, ProfileManager::RANGE_TUNBAN, ProfileManager::GET_RANGE_BANS, ProfileManager::CLR_RANGE_BANS,
+		ProfileManager::CLR_RANGE_TBANS, ProfileManager::UNBAN, ProfileManager::NOSEARCHLIMITS, ProfileManager:: SENDFULLMYINFOS, ProfileManager::NOIPCHECK,
+		ProfileManager::CLOSE, ProfileManager::NODEFLOODCTM, ProfileManager::NODEFLOODRCTM, ProfileManager::NODEFLOODSR, ProfileManager::NODEFLOODRECV,
+		ProfileManager::NOCHATINTERVAL, ProfileManager::NOPMINTERVAL, ProfileManager::NOSEARCHINTERVAL, ProfileManager::NOUSRSAMEIP, ProfileManager::NORECONNTIME
 	};
 
 	const char * pPermissionsNames[] = { "IsOperator", "NoDefloodGetnicklist", "NoDefloodMyinfo", "NoDefloodSearch", "NoDefloodPm",
@@ -473,684 +473,684 @@ static void AddPermissionsIds(lua_State * L) {
 	};
 
 	for(uint8_t ui8i = 0; ui8i < sizeof(ui8Permissions); ui8i++) {
-		lua_pushinteger(L, ui8Permissions[ui8i]);
-		lua_setfield(L, iNewTable, pPermissionsNames[ui8i]);
+		lua_pushinteger(pLua, ui8Permissions[ui8i]);
+		lua_setfield(pLua, iNewTable, pPermissionsNames[ui8i]);
 	}
 
-	lua_setfield(L, iTable, "tPermissions");
+	lua_setfield(pLua, iTable, "tPermissions");
 
-    lua_pop(L, 1);
+    lua_pop(pLua, 1);
 }
 //------------------------------------------------------------------------------
 
-bool ScriptStart(Script * cur) {
-	cur->ui16Functions = 65535;
-	cur->ui32DataArrivals = 4294967295U;
+bool ScriptStart(Script * pScript) {
+	pScript->m_ui16Functions = 65535;
+	pScript->m_ui32DataArrivals = 4294967295U;
 
-	cur->pPrev = NULL;
-	cur->pNext = NULL;
+	pScript->m_pPrev = NULL;
+	pScript->m_pNext = NULL;
 
 #ifdef _WIN32
-	cur->pLUA = lua_newstate(LuaAlocator, NULL);
+	pScript->m_pLua = lua_newstate(LuaAlocator, NULL);
 #else
-    cur->pLUA = luaL_newstate();
+	pScript->m_pLua = luaL_newstate();
 #endif
 
-    if(cur->pLUA == NULL) {
+    if(pScript->m_pLua == NULL) {
         return false;
     }
 
-	luaL_openlibs(cur->pLUA);
+	luaL_openlibs(pScript->m_pLua);
 
-	lua_atpanic(cur->pLUA, ScriptPanic);
+	lua_atpanic(pScript->m_pLua, ScriptPanic);
 
     // replace internal lua os.exit with correct shutdown
-    lua_getglobal(cur->pLUA, "os");
+    lua_getglobal(pScript->m_pLua, "os");
 
-    if(lua_istable(cur->pLUA, -1)) {
-        lua_pushcfunction(cur->pLUA, OsExit);
-        lua_setfield(cur->pLUA, -2, "exit");
+    if(lua_istable(pScript->m_pLua, -1)) {
+        lua_pushcfunction(pScript->m_pLua, OsExit);
+        lua_setfield(pScript->m_pLua, -2, "exit");
 
-        lua_pop(cur->pLUA, 1);
+        lua_pop(pScript->m_pLua, 1);
     }
 
 #if LUA_VERSION_NUM > 501
-    luaL_requiref(cur->pLUA, "Core", RegCore, 1);
-	lua_pop(cur->pLUA, 1);
+    luaL_requiref(pScript->m_pLua, "Core", RegCore, 1);
+	lua_pop(pScript->m_pLua, 1);
 
-    luaL_requiref(cur->pLUA, "SetMan", RegSetMan, 1);
-	AddSettingIds(cur->pLUA);
+    luaL_requiref(pScript->m_pLua, "SetMan", RegSetMan, 1);
+	AddSettingIds(pScript->m_pLua);
 
-    luaL_requiref(cur->pLUA, "RegMan", RegRegMan, 1);
-    lua_pop(cur->pLUA, 1);
+    luaL_requiref(pScript->m_pLua, "RegMan", RegRegMan, 1);
+    lua_pop(pScript->m_pLua, 1);
 
-    luaL_requiref(cur->pLUA, "BanMan", RegBanMan, 1);
-    lua_pop(cur->pLUA, 1);
+    luaL_requiref(pScript->m_pLua, "BanMan", RegBanMan, 1);
+    lua_pop(pScript->m_pLua, 1);
 
-    luaL_requiref(cur->pLUA, "ProfMan", RegProfMan, 1);
-	AddPermissionsIds(cur->pLUA);
+    luaL_requiref(pScript->m_pLua, "ProfMan", RegProfMan, 1);
+	AddPermissionsIds(pScript->m_pLua);
 
-    luaL_requiref(cur->pLUA, "TmrMan", RegTmrMan, 1);
-    lua_pop(cur->pLUA, 1);
+    luaL_requiref(pScript->m_pLua, "TmrMan", RegTmrMan, 1);
+    lua_pop(pScript->m_pLua, 1);
 
-    luaL_requiref(cur->pLUA, "UDPDbg", RegUDPDbg, 1);
-    lua_pop(cur->pLUA, 1);
+    luaL_requiref(pScript->m_pLua, "UDPDbg", RegUDPDbg, 1);
+    lua_pop(pScript->m_pLua, 1);
 
-    luaL_requiref(cur->pLUA, "ScriptMan", RegScriptMan, 1);
-    lua_pop(cur->pLUA, 1);
+    luaL_requiref(pScript->m_pLua, "ScriptMan", RegScriptMan, 1);
+    lua_pop(pScript->m_pLua, 1);
 
-    luaL_requiref(cur->pLUA, "IP2Country", RegIP2Country, 1);
-    lua_pop(cur->pLUA, 1);
+    luaL_requiref(pScript->m_pLua, "IP2Country", RegIP2Country, 1);
+    lua_pop(pScript->m_pLua, 1);
 #else
-	RegCore(cur->pLUA);
+	RegCore(pScript->m_pLua);
 
-	RegSetMan(cur->pLUA);
+	RegSetMan(pScript->m_pLua);
 
-    lua_getglobal(cur->pLUA, "SetMan");
+    lua_getglobal(pScript->m_pLua, "SetMan");
 
-    if(lua_istable(cur->pLUA, -1)) {
-        AddSettingIds(cur->pLUA);
+    if(lua_istable(pScript->m_pLua, -1)) {
+        AddSettingIds(pScript->m_pLua);
     }
 
-	RegRegMan(cur->pLUA);
-	RegBanMan(cur->pLUA);
+	RegRegMan(pScript->m_pLua);
+	RegBanMan(pScript->m_pLua);
 
-	RegProfMan(cur->pLUA);
+	RegProfMan(pScript->m_pLua);
 
-    lua_getglobal(cur->pLUA, "ProfMan");
+    lua_getglobal(pScript->m_pLua, "ProfMan");
 
-    if(lua_istable(cur->pLUA, -1)) {
-        AddPermissionsIds(cur->pLUA);
+    if(lua_istable(pScript->m_pLua, -1)) {
+        AddPermissionsIds(pScript->m_pLua);
     }
 
-	RegTmrMan(cur->pLUA);
-	RegUDPDbg(cur->pLUA);
-	RegScriptMan(cur->pLUA);
-	RegIP2Country(cur->pLUA);
+	RegTmrMan(pScript->m_pLua);
+	RegUDPDbg(pScript->m_pLua);
+	RegScriptMan(pScript->m_pLua);
+	RegIP2Country(pScript->m_pLua);
 #endif
 
-	if(luaL_dofile(cur->pLUA, (clsServerManager::sScriptPath+cur->sName).c_str()) == 0) {
+	if(luaL_dofile(pScript->m_pLua, (ServerManager::m_sScriptPath+pScript->m_sName).c_str()) == 0) {
 #ifdef _BUILD_GUI
-        RichEditAppendText(clsMainWindowPageScripts::mPtr->hWndPageItems[clsMainWindowPageScripts::REDT_SCRIPTS_ERRORS],
-            (string(clsLanguageManager::mPtr->sTexts[LAN_NO_SYNERR_IN_SCRIPT_FILE], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_NO_SYNERR_IN_SCRIPT_FILE]) + " " + string(cur->sName)).c_str());
+        RichEditAppendText(MainWindowPageScripts::m_Ptr->m_hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS], 
+			(string(LanguageManager::m_Ptr->m_sTexts[LAN_NO_SYNERR_IN_SCRIPT_FILE], (size_t)LanguageManager::m_Ptr->m_ui16TextsLens[LAN_NO_SYNERR_IN_SCRIPT_FILE]) + " " + string(pScript->m_sName)).c_str());
 #endif
 
         return true;
 	} else {
         size_t szLen = 0;
-        char * stmp = (char*)lua_tolstring(cur->pLUA, -1, &szLen);
+        char * stmp = (char*)lua_tolstring(pScript->m_pLua, -1, &szLen);
 
         string sMsg(stmp, szLen);
 
 #ifdef _BUILD_GUI
-        RichEditAppendText(clsMainWindowPageScripts::mPtr->hWndPageItems[clsMainWindowPageScripts::REDT_SCRIPTS_ERRORS],
-            (string(clsLanguageManager::mPtr->sTexts[LAN_SYNTAX], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
+        RichEditAppendText(MainWindowPageScripts::m_Ptr->m_hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+            (string(LanguageManager::m_Ptr->m_sTexts[LAN_SYNTAX], (size_t)LanguageManager::m_Ptr->m_ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
 #endif
 
-		clsUdpDebug::mPtr->BroadcastFormat("[LUA] %s", sMsg.c_str());
+		UdpDebug::m_Ptr->BroadcastFormat("[LUA] %s", sMsg.c_str());
 
-        if(clsSettingManager::mPtr->bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true) {
-            AppendLog(sMsg, true);
+        if(SettingManager::m_Ptr->m_bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true) {
+            AppendLog(sMsg.c_str(), true);
         }
 
-		lua_close(cur->pLUA);
-		cur->pLUA = NULL;
+		lua_close(pScript->m_pLua);
+		pScript->m_pLua = NULL;
     
         return false;
     }
 }
 //------------------------------------------------------------------------------
 
-void ScriptStop(Script * cur) {
-	if(cur->bRegUDP == true) {
-        clsUdpDebug::mPtr->Remove(cur->sName);
-        cur->bRegUDP = false;
+void ScriptStop(Script * pScript) {
+	if(pScript->m_bRegUDP == true) {
+        UdpDebug::m_Ptr->Remove(pScript->m_sName);
+		pScript->m_bRegUDP = false;
     }
 
     ScriptTimer * pCurTmr = NULL,
-        * pNextTmr = clsScriptManager::mPtr->pTimerListS;
+        * pNextTmr = ScriptManager::m_Ptr->m_pTimerListS;
     
     while(pNextTmr != NULL) {
         pCurTmr = pNextTmr;
-        pNextTmr = pCurTmr->pNext;
+        pNextTmr = pCurTmr->m_pNext;
 
-		if(cur->pLUA == pCurTmr->pLua) {
+		if(pScript->m_pLua == pCurTmr->m_pLua) {
 #if defined(_WIN32) && !defined(_WIN_IOT)
-	        if(pCurTmr->uiTimerId != 0) {
-	            KillTimer(NULL, pCurTmr->uiTimerId);
+	        if(pCurTmr->m_uiTimerId != 0) {
+	            KillTimer(NULL, pCurTmr->m_uiTimerId);
 	        }
 #endif
-			if(pCurTmr->pPrev == NULL) {
-				if(pCurTmr->pNext == NULL) {
-					clsScriptManager::mPtr->pTimerListS = NULL;
-					clsScriptManager::mPtr->pTimerListE = NULL;
+			if(pCurTmr->m_pPrev == NULL) {
+				if(pCurTmr->m_pNext == NULL) {
+					ScriptManager::m_Ptr->m_pTimerListS = NULL;
+					ScriptManager::m_Ptr->m_pTimerListE = NULL;
 				} else {
-					clsScriptManager::mPtr->pTimerListS = pCurTmr->pNext;
-					clsScriptManager::mPtr->pTimerListS->pPrev = NULL;
+					ScriptManager::m_Ptr->m_pTimerListS = pCurTmr->m_pNext;
+					ScriptManager::m_Ptr->m_pTimerListS->m_pPrev = NULL;
 				}
-			} else if(pCurTmr->pNext == NULL) {
-				clsScriptManager::mPtr->pTimerListE = pCurTmr->pPrev;
-				clsScriptManager::mPtr->pTimerListE->pNext = NULL;
+			} else if(pCurTmr->m_pNext == NULL) {
+				ScriptManager::m_Ptr->m_pTimerListE = pCurTmr->m_pPrev;
+				ScriptManager::m_Ptr->m_pTimerListE->m_pNext = NULL;
 			} else {
-				pCurTmr->pPrev->pNext = pCurTmr->pNext;
-				pCurTmr->pNext->pPrev = pCurTmr->pPrev;
+				pCurTmr->m_pPrev->m_pNext = pCurTmr->m_pNext;
+				pCurTmr->m_pNext->m_pPrev = pCurTmr->m_pPrev;
 			}
 
 			delete pCurTmr;
 		}
     }
 
-    if(cur->pLUA != NULL) {
-        lua_close(cur->pLUA);
-        cur->pLUA = NULL;
+    if(pScript->m_pLua != NULL) {
+        lua_close(pScript->m_pLua);
+		pScript->m_pLua = NULL;
     }
 
-    ScriptBot * bot = NULL,
-        * next = cur->pBotList;
+    ScriptBot * pBot = NULL,
+        * next = pScript->m_pBotList;
     
     while(next != NULL) {
-        bot = next;
-        next = bot->pNext;
+        pBot = next;
+        next = pBot->m_pNext;
 
-        clsReservedNicksManager::mPtr->DelReservedNick(bot->sNick, true);
+        ReservedNicksManager::m_Ptr->DelReservedNick(pBot->m_sNick, true);
 
-        if(clsServerManager::bServerRunning == true) {
-   			clsUsers::mPtr->DelFromNickList(bot->sNick, bot->bIsOP);
+        if(ServerManager::m_bServerRunning == true) {
+   			Users::m_Ptr->DelFromNickList(pBot->m_sNick, pBot->m_bIsOP);
 
-            clsUsers::mPtr->DelBotFromMyInfos(bot->sMyINFO);
+            Users::m_Ptr->DelBotFromMyInfos(pBot->m_sMyINFO);
 
-			int iMsgLen = sprintf(clsServerManager::pGlobalBuffer, "$Quit %s|", bot->sNick);
-           	if(CheckSprintf(iMsgLen, clsServerManager::szGlobalBufferSize, "ScriptStop") == true) {
-                clsGlobalDataQueue::mPtr->AddQueueItem(clsServerManager::pGlobalBuffer, iMsgLen, NULL, 0, clsGlobalDataQueue::CMD_QUIT);
+			int iMsgLen = snprintf(ServerManager::m_pGlobalBuffer, ServerManager::m_szGlobalBufferSize, "$Quit %s|", pBot->m_sNick);
+           	if(iMsgLen > 0) {
+                GlobalDataQueue::m_Ptr->AddQueueItem(ServerManager::m_pGlobalBuffer, iMsgLen, NULL, 0, GlobalDataQueue::CMD_QUIT);
             }
 		}
 
-		delete bot;
+		delete pBot;
     }
 
-    cur->pBotList = NULL;
+	pScript->m_pBotList = NULL;
 }
 //------------------------------------------------------------------------------
 
-int ScriptGetGC(Script * cur) {
-	return lua_gc(cur->pLUA, LUA_GCCOUNT, 0);
+int ScriptGetGC(Script * pScript) {
+	return lua_gc(pScript->m_pLua, LUA_GCCOUNT, 0);
 }
 //------------------------------------------------------------------------------
 
-void ScriptOnStartup(Script * cur) {
-    lua_pushcfunction(cur->pLUA, ScriptTraceback);
-    int iTraceback = lua_gettop(cur->pLUA);
+void ScriptOnStartup(Script * pScript) {
+    lua_pushcfunction(pScript->m_pLua, ScriptTraceback);
+    int iTraceback = lua_gettop(pScript->m_pLua);
 
-    lua_getglobal(cur->pLUA, "OnStartup");
-    int i = lua_gettop(cur->pLUA);
+    lua_getglobal(pScript->m_pLua, "OnStartup");
+    int i = lua_gettop(pScript->m_pLua);
 
-    if(lua_isfunction(cur->pLUA, i) == 0) {
-		cur->ui16Functions &= ~Script::ONSTARTUP;
-		lua_settop(cur->pLUA, 0);
+    if(lua_isfunction(pScript->m_pLua, i) == 0) {
+		pScript->m_ui16Functions &= ~Script::ONSTARTUP;
+		lua_settop(pScript->m_pLua, 0);
         return;
     }
 
-    if(lua_pcall(cur->pLUA, 0, 0, iTraceback) != 0) {
-        ScriptError(cur);
+    if(lua_pcall(pScript->m_pLua, 0, 0, iTraceback) != 0) {
+        ScriptError(pScript);
 
-        lua_settop(cur->pLUA, 0);
+        lua_settop(pScript->m_pLua, 0);
         return;
     }
 
     // clear the stack for sure
-    lua_settop(cur->pLUA, 0);
+    lua_settop(pScript->m_pLua, 0);
 }
 //------------------------------------------------------------------------------
 
-void ScriptOnExit(Script * cur) {
-    lua_pushcfunction(cur->pLUA, ScriptTraceback);
-    int iTraceback = lua_gettop(cur->pLUA);
+void ScriptOnExit(Script * pScript) {
+    lua_pushcfunction(pScript->m_pLua, ScriptTraceback);
+    int iTraceback = lua_gettop(pScript->m_pLua);
 
-    lua_getglobal(cur->pLUA, "OnExit");
-    int i = lua_gettop(cur->pLUA);
-    if(lua_isfunction(cur->pLUA, i) == 0) {
-		cur->ui16Functions &= ~Script::ONEXIT;
-		lua_settop(cur->pLUA, 0);
+    lua_getglobal(pScript->m_pLua, "OnExit");
+    int i = lua_gettop(pScript->m_pLua);
+    if(lua_isfunction(pScript->m_pLua, i) == 0) {
+		pScript->m_ui16Functions &= ~Script::ONEXIT;
+		lua_settop(pScript->m_pLua, 0);
         return;
     }
 
-    if(lua_pcall(cur->pLUA, 0, 0, iTraceback) != 0) {
-        ScriptError(cur);
+    if(lua_pcall(pScript->m_pLua, 0, 0, iTraceback) != 0) {
+        ScriptError(pScript);
 
-        lua_settop(cur->pLUA, 0);
+        lua_settop(pScript->m_pLua, 0);
         return;
 	}
 
 	// clear the stack for sure
-    lua_settop(cur->pLUA, 0);
+    lua_settop(pScript->m_pLua, 0);
 }
 //------------------------------------------------------------------------------
 
-static bool ScriptOnError(Script * cur, char * sErrorMsg, const size_t &szMsgLen) {
-    lua_pushcfunction(cur->pLUA, ScriptTraceback);
-    int iTraceback = lua_gettop(cur->pLUA);
+static bool ScriptOnError(Script * pScript, char * sErrorMsg, const size_t szMsgLen) {
+    lua_pushcfunction(pScript->m_pLua, ScriptTraceback);
+    int iTraceback = lua_gettop(pScript->m_pLua);
 
-	lua_getglobal(cur->pLUA, "OnError");
-    int i = lua_gettop(cur->pLUA);
-    if(lua_isfunction(cur->pLUA, i) == 0) {
-		cur->ui16Functions &= ~Script::ONERROR;
-		lua_settop(cur->pLUA, 0);
+	lua_getglobal(pScript->m_pLua, "OnError");
+    int i = lua_gettop(pScript->m_pLua);
+    if(lua_isfunction(pScript->m_pLua, i) == 0) {
+		pScript->m_ui16Functions &= ~Script::ONERROR;
+		lua_settop(pScript->m_pLua, 0);
         return true;
     }
 
-	clsScriptManager::mPtr->pActualUser = NULL;
+	ScriptManager::m_Ptr->m_pActualUser = NULL;
     
-    lua_pushlstring(cur->pLUA, sErrorMsg, szMsgLen);
+    lua_pushlstring(pScript->m_pLua, sErrorMsg, szMsgLen);
 
-	if(lua_pcall(cur->pLUA, 1, 0, iTraceback) != 0) { // 1 passed parameters, zero returned
+	if(lua_pcall(pScript->m_pLua, 1, 0, iTraceback) != 0) { // 1 passed parameters, zero returned
 		size_t szLen = 0;
-		char * stmp = (char*)lua_tolstring(cur->pLUA, -1, &szLen);
+		char * stmp = (char*)lua_tolstring(pScript->m_pLua, -1, &szLen);
 
 		string sMsg(stmp, szLen);
 
 #ifdef _BUILD_GUI
-        RichEditAppendText(clsMainWindowPageScripts::mPtr->hWndPageItems[clsMainWindowPageScripts::REDT_SCRIPTS_ERRORS],
-            (string(clsLanguageManager::mPtr->sTexts[LAN_SYNTAX], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
-        RichEditAppendText(clsMainWindowPageScripts::mPtr->hWndPageItems[clsMainWindowPageScripts::REDT_SCRIPTS_ERRORS],
-            (string(clsLanguageManager::mPtr->sTexts[LAN_FATAL_ERR_SCRIPT], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_FATAL_ERR_SCRIPT]) + " " + string(cur->sName) + " ! " +
-			string(clsLanguageManager::mPtr->sTexts[LAN_SCRIPT_STOPPED], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SCRIPT_STOPPED]) + "!").c_str());
+        RichEditAppendText(MainWindowPageScripts::m_Ptr->m_hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+            (string(LanguageManager::m_Ptr->m_sTexts[LAN_SYNTAX], (size_t)LanguageManager::m_Ptr->m_ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
+        RichEditAppendText(MainWindowPageScripts::m_Ptr->m_hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+            (string(LanguageManager::m_Ptr->m_sTexts[LAN_FATAL_ERR_SCRIPT], (size_t)LanguageManager::m_Ptr->m_ui16TextsLens[LAN_FATAL_ERR_SCRIPT]) + " " + string(pScript->m_sName) + " ! " +
+			string(LanguageManager::m_Ptr->m_sTexts[LAN_SCRIPT_STOPPED], (size_t)LanguageManager::m_Ptr->m_ui16TextsLens[LAN_SCRIPT_STOPPED]) + "!").c_str());
 #endif
 
-		if(clsSettingManager::mPtr->bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true) {
-			AppendLog(sMsg, true);
+		if(SettingManager::m_Ptr->m_bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true) {
+			AppendLog(sMsg.c_str(), true);
 		}
 
-        lua_settop(cur->pLUA, 0);
+        lua_settop(pScript->m_pLua, 0);
         return false;
     }
 
     // clear the stack for sure
-    lua_settop(cur->pLUA, 0);
+    lua_settop(pScript->m_pLua, 0);
     return true;
 }
 //------------------------------------------------------------------------------
 
-void ScriptPushUser(lua_State * L, User * u, const bool &bFullTable/* = false*/) {
-	lua_checkstack(L, 3); // we need 3 (1 table, 2 id, 3 value) empty slots in stack, check it to be sure
+void ScriptPushUser(lua_State * pLua, User * pUser, const bool bFullTable/* = false*/) {
+	lua_checkstack(pLua, 3); // we need 3 (1 table, 2 id, 3 value) empty slots in stack, check it to be sure
 
-	lua_newtable(L);
-	int i = lua_gettop(L);
+	lua_newtable(pLua);
+	int i = lua_gettop(pLua);
 
-	lua_pushliteral(L, "sNick");
-	lua_pushlstring(L, u->sNick, u->ui8NickLen);
-	lua_rawset(L, i);
+	lua_pushliteral(pLua, "sNick");
+	lua_pushlstring(pLua, pUser->m_sNick, pUser->m_ui8NickLen);
+	lua_rawset(pLua, i);
 
-	lua_pushliteral(L, "uptr");
-	lua_pushlightuserdata(L, (void *)u);
-	lua_rawset(L, i);
+	lua_pushliteral(pLua, "uptr");
+	lua_pushlightuserdata(pLua, (void *)pUser);
+	lua_rawset(pLua, i);
 
-	lua_pushliteral(L, "sIP");
-	lua_pushlstring(L, u->sIP, u->ui8IpLen);
-	lua_rawset(L, i);
+	lua_pushliteral(pLua, "sIP");
+	lua_pushlstring(pLua, pUser->m_sIP, pUser->m_ui8IpLen);
+	lua_rawset(pLua, i);
 
-	lua_pushliteral(L, "iProfile");
-	lua_pushinteger(L, u->i32Profile);
-	lua_rawset(L, i);
+	lua_pushliteral(pLua, "iProfile");
+	lua_pushinteger(pLua, pUser->m_i32Profile);
+	lua_rawset(pLua, i);
 
     if(bFullTable == true) {
-        ScriptPushUserExtended(L, u, i);
+        ScriptPushUserExtended(pLua, pUser, i);
     }
 }
 //------------------------------------------------------------------------------
 
-void ScriptPushUserExtended(lua_State * L, User * u, const int &iTable) {
-	lua_pushliteral(L, "sMode");
-	if(u->sModes[0] != '\0') {
-		lua_pushstring(L, u->sModes);
+void ScriptPushUserExtended(lua_State * pLua, User * pUser, const int iTable) {
+	lua_pushliteral(pLua, "sMode");
+	if(pUser->m_sModes[0] != '\0') {
+		lua_pushstring(pLua, pUser->m_sModes);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "sMyInfoString");
-	if(u->sMyInfoOriginal != NULL) {
-		lua_pushlstring(L, u->sMyInfoOriginal, u->ui16MyInfoOriginalLen);
+	lua_pushliteral(pLua, "sMyInfoString");
+	if(pUser->m_sMyInfoOriginal != NULL) {
+		lua_pushlstring(pLua, pUser->m_sMyInfoOriginal, pUser->m_ui16MyInfoOriginalLen);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "sDescription");
-	if(u->sDescription != NULL) {
-		lua_pushlstring(L, u->sDescription, (size_t)u->ui8DescriptionLen);
+	lua_pushliteral(pLua, "sDescription");
+	if(pUser->m_sDescription != NULL) {
+		lua_pushlstring(pLua, pUser->m_sDescription, (size_t)pUser->m_ui8DescriptionLen);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "sTag");
-	if(u->sTag != NULL) {
-		lua_pushlstring(L, u->sTag, (size_t)u->ui8TagLen);
+	lua_pushliteral(pLua, "sTag");
+	if(pUser->m_sTag != NULL) {
+		lua_pushlstring(pLua, pUser->m_sTag, (size_t)pUser->m_ui8TagLen);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "sConnection");
-	if(u->sConnection != NULL) {
-		lua_pushlstring(L, u->sConnection, (size_t)u->ui8ConnectionLen);
+	lua_pushliteral(pLua, "sConnection");
+	if(pUser->m_sConnection != NULL) {
+		lua_pushlstring(pLua, pUser->m_sConnection, (size_t)pUser->m_ui8ConnectionLen);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "sEmail");
-	if(u->sEmail != NULL) {
-		lua_pushlstring(L, u->sEmail, (size_t)u->ui8EmailLen);
+	lua_pushliteral(pLua, "sEmail");
+	if(pUser->m_sEmail != NULL) {
+		lua_pushlstring(pLua, pUser->m_sEmail, (size_t)pUser->m_ui8EmailLen);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "sClient");
-	if(u->sClient != NULL) {
-		lua_pushlstring(L, u->sClient, (size_t)u->ui8ClientLen);
+	lua_pushliteral(pLua, "sClient");
+	if(pUser->m_sClient != NULL) {
+		lua_pushlstring(pLua, pUser->m_sClient, (size_t)pUser->m_ui8ClientLen);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "sClientVersion");
-	if(u->sTagVersion != NULL) {
-		lua_pushlstring(L, u->sTagVersion, (size_t)u->ui8TagVersionLen);
+	lua_pushliteral(pLua, "sClientVersion");
+	if(pUser->m_sTagVersion != NULL) {
+		lua_pushlstring(pLua, pUser->m_sTagVersion, (size_t)pUser->m_ui8TagVersionLen);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "sVersion");
-	if(u->sVersion != NULL) {
-		lua_pushstring(L, u->sVersion);
+	lua_pushliteral(pLua, "sVersion");
+	if(pUser->m_sVersion != NULL) {
+		lua_pushstring(pLua, pUser->m_sVersion);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "sCountryCode");
-	if(clsIpP2Country::mPtr->ui32Count != 0) {
-		lua_pushlstring(L, clsIpP2Country::mPtr->GetCountry(u->ui8Country, false), 2);
+	lua_pushliteral(pLua, "sCountryCode");
+	if(IpP2Country::m_Ptr->m_ui32Count != 0) {
+		lua_pushlstring(pLua, IpP2Country::m_Ptr->GetCountry(pUser->m_ui8Country, false), 2);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "bConnected");
-	u->ui8State == User::STATE_ADDED ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
-	lua_rawset(L, iTable);
+	lua_pushliteral(pLua, "bConnected");
+	pUser->m_ui8State == User::STATE_ADDED ? lua_pushboolean(pLua, 1) : lua_pushboolean(pLua, 0);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "bActive");
-	if((u->ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
-        (u->ui32BoolBits & User::BIT_IPV6_ACTIVE) == User::BIT_IPV6_ACTIVE ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+	lua_pushliteral(pLua, "bActive");
+	if((pUser->m_ui32BoolBits & User::BIT_IPV6) == User::BIT_IPV6) {
+        (pUser->m_ui32BoolBits & User::BIT_IPV6_ACTIVE) == User::BIT_IPV6_ACTIVE ? lua_pushboolean(pLua, 1) : lua_pushboolean(pLua, 0);
     } else {
-	   (u->ui32BoolBits & User::BIT_IPV4_ACTIVE) == User::BIT_IPV4_ACTIVE ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
+	   (pUser->m_ui32BoolBits & User::BIT_IPV4_ACTIVE) == User::BIT_IPV4_ACTIVE ? lua_pushboolean(pLua, 1) : lua_pushboolean(pLua, 0);
     }
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "bOperator");
-	(u->ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
-	lua_rawset(L, iTable);
+	lua_pushliteral(pLua, "bOperator");
+	(pUser->m_ui32BoolBits & User::BIT_OPERATOR) == User::BIT_OPERATOR ? lua_pushboolean(pLua, 1) : lua_pushboolean(pLua, 0);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "bUserCommand");
-	(u->ui32SupportBits & User::SUPPORTBIT_USERCOMMAND) == User::SUPPORTBIT_USERCOMMAND ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
-	lua_rawset(L, iTable);
+	lua_pushliteral(pLua, "bUserCommand");
+	(pUser->m_ui32SupportBits & User::SUPPORTBIT_USERCOMMAND) == User::SUPPORTBIT_USERCOMMAND ? lua_pushboolean(pLua, 1) : lua_pushboolean(pLua, 0);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "bQuickList");
-	(u->ui32SupportBits & User::SUPPORTBIT_QUICKLIST) == User::SUPPORTBIT_QUICKLIST ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
-	lua_rawset(L, iTable);
+	lua_pushliteral(pLua, "bQuickList");
+	(pUser->m_ui32SupportBits & User::SUPPORTBIT_QUICKLIST) == User::SUPPORTBIT_QUICKLIST ? lua_pushboolean(pLua, 1) : lua_pushboolean(pLua, 0);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "bSuspiciousTag");
-	(u->ui32BoolBits & User::BIT_HAVE_BADTAG) == User::BIT_HAVE_BADTAG ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
-	lua_rawset(L, iTable);
+	lua_pushliteral(pLua, "bSuspiciousTag");
+	(pUser->m_ui32BoolBits & User::BIT_HAVE_BADTAG) == User::BIT_HAVE_BADTAG ? lua_pushboolean(pLua, 1) : lua_pushboolean(pLua, 0);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "iShareSize");
+	lua_pushliteral(pLua, "iShareSize");
 #if LUA_VERSION_NUM < 503
-	lua_pushnumber(L, (double)u->ui64SharedSize);
+	lua_pushnumber(pLua, (double)pUser->m_ui64SharedSize);
 #else
-	lua_pushinteger(L, u->ui64SharedSize);
+	lua_pushinteger(pLua, pUser->m_ui64SharedSize);
 #endif
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "iHubs");
+	lua_pushliteral(pLua, "iHubs");
 #if LUA_VERSION_NUM < 503
-	lua_pushnumber(L, u->Hubs);
+	lua_pushnumber(pLua, pUser->Hubs);
 #else
-	lua_pushinteger(L, u->Hubs);
+	lua_pushinteger(pLua, pUser->m_ui32Hubs);
 #endif
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "iNormalHubs");
+	lua_pushliteral(pLua, "iNormalHubs");
 #if LUA_VERSION_NUM < 503
-	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushnumber(L, u->iNormalHubs);
+	(pUser->m_ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(pLua) : lua_pushnumber(pLua, pUser->m_ui32NormalHubs);
 #else
-	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushinteger(L, u->iNormalHubs);
+	(pUser->m_ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(pLua) : lua_pushinteger(pLua, pUser->m_ui32NormalHubs);
 #endif
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
     
-	lua_pushliteral(L, "iRegHubs");
+	lua_pushliteral(pLua, "iRegHubs");
 #if LUA_VERSION_NUM < 503
-	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushnumber(L, u->iRegHubs);
+	(pUser->m_ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(pLua) : lua_pushnumber(pLua, pUser->m_ui32RegHubs);
 #else
-	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushinteger(L, u->iRegHubs);
+	(pUser->m_ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(pLua) : lua_pushinteger(pLua, pUser->m_ui32RegHubs);
 #endif
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
     
-	lua_pushliteral(L, "iOpHubs");
+	lua_pushliteral(pLua, "iOpHubs");
 #if LUA_VERSION_NUM < 503
-	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushnumber(L, u->iOpHubs);
+	(pUser->m_ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(pLua) : lua_pushnumber(pLua, pUser->m_ui32OpHubs);
 #else
-	(u->ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(L) : lua_pushinteger(L, u->iOpHubs);
+	(pUser->m_ui32BoolBits & User::BIT_OLDHUBSTAG) == User::BIT_OLDHUBSTAG ? lua_pushnil(pLua) : lua_pushinteger(pLua, pUser->m_ui32OpHubs);
 #endif
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "iSlots");
+	lua_pushliteral(pLua, "iSlots");
 #if LUA_VERSION_NUM < 503
-	lua_pushnumber(L, u->Slots);
+	lua_pushnumber(pLua, pUser->m_ui32Slots);
 #else
-	lua_pushinteger(L, u->Slots);
+	lua_pushinteger(pLua, pUser->m_ui32Slots);
 #endif
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "iLlimit");
+	lua_pushliteral(pLua, "iLlimit");
 #if LUA_VERSION_NUM < 503
-	lua_pushnumber(L, u->LLimit);
+	lua_pushnumber(pLua, pUser->m_ui32LLimit);
 #else
-	lua_pushinteger(L, u->LLimit);
+	lua_pushinteger(pLua, pUser->m_ui32LLimit);
 #endif
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "iDefloodWarns");
+	lua_pushliteral(pLua, "iDefloodWarns");
 #if LUA_VERSION_NUM < 503
-	lua_pushnumber(L, u->iDefloodWarnings);
+	lua_pushnumber(pLua, pUser->m_ui32DefloodWarnings);
 #else
-	lua_pushinteger(L, u->iDefloodWarnings);
+	lua_pushinteger(pLua, pUser->m_ui32DefloodWarnings);
 #endif
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "iMagicByte");
+	lua_pushliteral(pLua, "iMagicByte");
 #if LUA_VERSION_NUM < 503
-	lua_pushnumber(L, u->ui8MagicByte);
+	lua_pushnumber(pLua, pUser->m_ui8MagicByte);
 #else
-	lua_pushinteger(L, u->ui8MagicByte);
+	lua_pushinteger(pLua, pUser->m_ui8MagicByte);
 #endif
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "iLoginTime");
+	lua_pushliteral(pLua, "iLoginTime");
 #if LUA_VERSION_NUM < 503
-	lua_pushnumber(L, (double)u->tLoginTime);
+	lua_pushnumber(pLua, (double)pUser->m_tLoginTime);
 #else
-	lua_pushinteger(L, u->tLoginTime);
+	lua_pushinteger(pLua, pUser->m_tLoginTime);
 #endif
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-	lua_pushliteral(L, "sMac");
+	lua_pushliteral(pLua, "sMac");
     char sMac[18];
-    if(GetMacAddress(u->sIP, sMac) == true) {
-        lua_pushlstring(L, sMac, 17);
+    if(GetMacAddress(pUser->m_sIP, sMac) == true) {
+        lua_pushlstring(pLua, sMac, 17);
     } else {
-        lua_pushnil(L);
+        lua_pushnil(pLua);
     }
-	lua_rawset(L, iTable);
+	lua_rawset(pLua, iTable);
 
-    lua_pushliteral(L, "bDescriptionChanged");
-    (u->ui32InfoBits & User::INFOBIT_DESCRIPTION_CHANGED) == User::INFOBIT_DESCRIPTION_CHANGED ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
-    lua_rawset(L, iTable);
+    lua_pushliteral(pLua, "bDescriptionChanged");
+    (pUser->m_ui32InfoBits & User::INFOBIT_DESCRIPTION_CHANGED) == User::INFOBIT_DESCRIPTION_CHANGED ? lua_pushboolean(pLua, 1) : lua_pushboolean(pLua, 0);
+    lua_rawset(pLua, iTable);
 
-    lua_pushliteral(L, "bTagChanged");
-    (u->ui32InfoBits & User::INFOBIT_TAG_CHANGED) == User::INFOBIT_TAG_CHANGED ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
-    lua_rawset(L, iTable);
+    lua_pushliteral(pLua, "bTagChanged");
+    (pUser->m_ui32InfoBits & User::INFOBIT_TAG_CHANGED) == User::INFOBIT_TAG_CHANGED ? lua_pushboolean(pLua, 1) : lua_pushboolean(pLua, 0);
+    lua_rawset(pLua, iTable);
 
-    lua_pushliteral(L, "bConnectionChanged");
-    (u->ui32InfoBits & User::INFOBIT_CONNECTION_CHANGED) == User::INFOBIT_CONNECTION_CHANGED ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
-    lua_rawset(L, iTable);
+    lua_pushliteral(pLua, "bConnectionChanged");
+    (pUser->m_ui32InfoBits & User::INFOBIT_CONNECTION_CHANGED) == User::INFOBIT_CONNECTION_CHANGED ? lua_pushboolean(pLua, 1) : lua_pushboolean(pLua, 0);
+    lua_rawset(pLua, iTable);
 
-    lua_pushliteral(L, "bEmailChanged");
-    (u->ui32InfoBits & User::INFOBIT_EMAIL_CHANGED) == User::INFOBIT_EMAIL_CHANGED ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
-    lua_rawset(L, iTable);
+    lua_pushliteral(pLua, "bEmailChanged");
+    (pUser->m_ui32InfoBits & User::INFOBIT_EMAIL_CHANGED) == User::INFOBIT_EMAIL_CHANGED ? lua_pushboolean(pLua, 1) : lua_pushboolean(pLua, 0);
+    lua_rawset(pLua, iTable);
 
-    lua_pushliteral(L, "bShareChanged");
-    (u->ui32InfoBits & User::INFOBIT_SHARE_CHANGED) == User::INFOBIT_SHARE_CHANGED ? lua_pushboolean(L, 1) : lua_pushboolean(L, 0);
-    lua_rawset(L, iTable);
+    lua_pushliteral(pLua, "bShareChanged");
+    (pUser->m_ui32InfoBits & User::INFOBIT_SHARE_CHANGED) == User::INFOBIT_SHARE_CHANGED ? lua_pushboolean(pLua, 1) : lua_pushboolean(pLua, 0);
+    lua_rawset(pLua, iTable);
 
-    lua_pushliteral(L, "sScriptedDescriptionShort");
-    if(u->sChangedDescriptionShort != NULL) {
-		lua_pushlstring(L, u->sChangedDescriptionShort, u->ui8ChangedDescriptionShortLen);
+    lua_pushliteral(pLua, "sScriptedDescriptionShort");
+    if(pUser->m_sChangedDescriptionShort != NULL) {
+		lua_pushlstring(pLua, pUser->m_sChangedDescriptionShort, pUser->m_ui8ChangedDescriptionShortLen);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-    lua_rawset(L, iTable);
+    lua_rawset(pLua, iTable);
 
-    lua_pushliteral(L, "sScriptedDescriptionLong");
-    if(u->sChangedDescriptionLong != NULL) {
-		lua_pushlstring(L, u->sChangedDescriptionLong, u->ui8ChangedDescriptionLongLen);
+    lua_pushliteral(pLua, "sScriptedDescriptionLong");
+    if(pUser->m_sChangedDescriptionLong != NULL) {
+		lua_pushlstring(pLua, pUser->m_sChangedDescriptionLong, pUser->m_ui8ChangedDescriptionLongLen);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-    lua_rawset(L, iTable);
+    lua_rawset(pLua, iTable);
 
-    lua_pushliteral(L, "sScriptedTagShort");
-    if(u->sChangedTagShort != NULL) {
-		lua_pushlstring(L, u->sChangedTagShort, u->ui8ChangedTagShortLen);
+    lua_pushliteral(pLua, "sScriptedTagShort");
+    if(pUser->m_sChangedTagShort != NULL) {
+		lua_pushlstring(pLua, pUser->m_sChangedTagShort, pUser->m_ui8ChangedTagShortLen);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-    lua_rawset(L, iTable);
+    lua_rawset(pLua, iTable);
 
-    lua_pushliteral(L, "sScriptedTagLong");
-    if(u->sChangedTagLong != NULL) {
-		lua_pushlstring(L, u->sChangedTagLong, u->ui8ChangedTagLongLen);
+    lua_pushliteral(pLua, "sScriptedTagLong");
+    if(pUser->m_sChangedTagLong != NULL) {
+		lua_pushlstring(pLua, pUser->m_sChangedTagLong, pUser->m_ui8ChangedTagLongLen);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-    lua_rawset(L, iTable);
+    lua_rawset(pLua, iTable);
 
-    lua_pushliteral(L, "sScriptedConnectionShort");
-    if(u->sChangedConnectionShort != NULL) {
-		lua_pushlstring(L, u->sChangedConnectionShort, u->ui8ChangedConnectionShortLen);
+    lua_pushliteral(pLua, "sScriptedConnectionShort");
+    if(pUser->m_sChangedConnectionShort != NULL) {
+		lua_pushlstring(pLua, pUser->m_sChangedConnectionShort, pUser->m_ui8ChangedConnectionShortLen);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-    lua_rawset(L, iTable);
+    lua_rawset(pLua, iTable);
 
-    lua_pushliteral(L, "sScriptedConnectionLong");
-    if(u->sChangedConnectionLong != NULL) {
-		lua_pushlstring(L, u->sChangedConnectionLong, u->ui8ChangedConnectionLongLen);
+    lua_pushliteral(pLua, "sScriptedConnectionLong");
+    if(pUser->m_sChangedConnectionLong != NULL) {
+		lua_pushlstring(pLua, pUser->m_sChangedConnectionLong, pUser->m_ui8ChangedConnectionLongLen);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-    lua_rawset(L, iTable);
+    lua_rawset(pLua, iTable);
 
-    lua_pushliteral(L, "sScriptedEmailShort");
-    if(u->sChangedEmailShort != NULL) {
-		lua_pushlstring(L, u->sChangedEmailShort, u->ui8ChangedEmailShortLen);
+    lua_pushliteral(pLua, "sScriptedEmailShort");
+    if(pUser->m_sChangedEmailShort != NULL) {
+		lua_pushlstring(pLua, pUser->m_sChangedEmailShort, pUser->m_ui8ChangedEmailShortLen);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-    lua_rawset(L, iTable);
+    lua_rawset(pLua, iTable);
 
-    lua_pushliteral(L, "sScriptedEmailLong");
-    if(u->sChangedEmailLong != NULL) {
-		lua_pushlstring(L, u->sChangedEmailLong, u->ui8ChangedEmailLongLen);
+    lua_pushliteral(pLua, "sScriptedEmailLong");
+    if(pUser->m_sChangedEmailLong != NULL) {
+		lua_pushlstring(pLua, pUser->m_sChangedEmailLong, pUser->m_ui8ChangedEmailLongLen);
 	} else {
-		lua_pushnil(L);
+		lua_pushnil(pLua);
 	}
-    lua_rawset(L, iTable);
+    lua_rawset(pLua, iTable);
 
-    lua_pushliteral(L, "iScriptediShareSizeShort");
+    lua_pushliteral(pLua, "iScriptediShareSizeShort");
 #if LUA_VERSION_NUM < 503
-	lua_pushnumber(L, (double)u->ui64ChangedSharedSizeShort);
+	lua_pushnumber(pLua, (double)pUser->m_ui64ChangedSharedSizeShort);
 #else
-    lua_pushinteger(L, u->ui64ChangedSharedSizeShort);
+    lua_pushinteger(pLua, pUser->m_ui64ChangedSharedSizeShort);
 #endif
-    lua_rawset(L, iTable);
+    lua_rawset(pLua, iTable);
 
-    lua_pushliteral(L, "iScriptediShareSizeLong");
+    lua_pushliteral(pLua, "iScriptediShareSizeLong");
 #if LUA_VERSION_NUM < 503
-	lua_pushnumber(L, (double)u->ui64ChangedSharedSizeLong);
+	lua_pushnumber(pLua, (double)pUser->m_ui64ChangedSharedSizeLong);
 #else
-    lua_pushinteger(L, u->ui64ChangedSharedSizeLong);
+    lua_pushinteger(pLua, pUser->m_ui64ChangedSharedSizeLong);
 #endif
-    lua_rawset(L, iTable);
+    lua_rawset(pLua, iTable);
 
-    lua_pushliteral(L, "tIPs");
-    lua_newtable(L);
+    lua_pushliteral(pLua, "tIPs");
+    lua_newtable(pLua);
 
-    int t = lua_gettop(L);
+    int t = lua_gettop(pLua);
 
 #if LUA_VERSION_NUM < 503
-	lua_pushnumber(L, 1);
+	lua_pushnumber(pLua, 1);
 #else
-	lua_pushinteger(L, 1);
+	lua_pushinteger(pLua, 1);
 #endif
-	lua_pushlstring(L, u->sIP, u->ui8IpLen);
-	lua_rawset(L, t);
+	lua_pushlstring(pLua, pUser->m_sIP, pUser->m_ui8IpLen);
+	lua_rawset(pLua, t);
 
-    if(u->sIPv4[0] != '\0') {
+    if(pUser->m_sIPv4[0] != '\0') {
 #if LUA_VERSION_NUM < 503
-		lua_pushnumber(L, 2);
+		lua_pushnumber(pLua, 2);
 #else
-        lua_pushinteger(L, 2);
+        lua_pushinteger(pLua, 2);
 #endif
-        lua_pushlstring(L, u->sIPv4, u->ui8IPv4Len);
-        lua_rawset(L, t);
+        lua_pushlstring(pLua, pUser->m_sIPv4, pUser->m_ui8IPv4Len);
+        lua_rawset(pLua, t);
     }
 
-    lua_rawset(L, iTable);
+    lua_rawset(pLua, iTable);
 }
 //------------------------------------------------------------------------------
 
-User * ScriptGetUser(lua_State * L, const int &iTop, const char * sFunction) {
-    lua_pushliteral(L, "uptr");
-    lua_gettable(L, 1);
+User * ScriptGetUser(lua_State * pLua, const int iTop, const char * sFunction) {
+    lua_pushliteral(pLua, "uptr");
+    lua_gettable(pLua, 1);
 
-    if(lua_gettop(L) != iTop+1 || lua_type(L, iTop+1) != LUA_TLIGHTUSERDATA) {
-        luaL_error(L, "bad argument #1 to '%s' (it's not user table)", sFunction);
+    if(lua_gettop(pLua) != iTop+1 || lua_type(pLua, iTop+1) != LUA_TLIGHTUSERDATA) {
+        luaL_error(pLua, "bad argument #1 to '%s' (it's not user table)", sFunction);
         return NULL;
     }
 
-    User *u = reinterpret_cast<User *>(lua_touserdata(L, iTop+1));
+    User *u = reinterpret_cast<User *>(lua_touserdata(pLua, iTop+1));
                 
     if(u == NULL) {
         return NULL;
     }
 
-	if(u != clsScriptManager::mPtr->pActualUser) {
-        lua_pushliteral(L, "sNick");
-        lua_gettable(L, 1);
+	if(u != ScriptManager::m_Ptr->m_pActualUser) {
+        lua_pushliteral(pLua, "sNick");
+        lua_gettable(pLua, 1);
 
-        if(lua_gettop(L) != iTop+2 || lua_type(L, iTop+2) != LUA_TSTRING) {
-            luaL_error(L, "bad argument #1 to '%s' (it's not user table)", sFunction);
+        if(lua_gettop(pLua) != iTop+2 || lua_type(pLua, iTop+2) != LUA_TSTRING) {
+            luaL_error(pLua, "bad argument #1 to '%s' (it's not user table)", sFunction);
             return NULL;
         }
     
         size_t szNickLen;
-        char * sNick = (char *)lua_tolstring(L, iTop+2, &szNickLen);
+        char * sNick = (char *)lua_tolstring(pLua, iTop+2, &szNickLen);
 
-		if(u != clsHashManager::mPtr->FindUser(sNick, szNickLen)) {
+		if(u != HashManager::m_Ptr->FindUser(sNick, szNickLen)) {
             return NULL;
         }
     }
@@ -1159,60 +1159,60 @@ User * ScriptGetUser(lua_State * L, const int &iTop, const char * sFunction) {
 }
 //------------------------------------------------------------------------------
 
-void ScriptError(Script * cur) {
+void ScriptError(Script * pScript) {
 	size_t szLen = 0;
-	char * stmp = (char*)lua_tolstring(cur->pLUA, -1, &szLen);
+	char * stmp = (char*)lua_tolstring(pScript->m_pLua, -1, &szLen);
 
 	string sMsg(stmp, szLen);
 
 #ifdef _BUILD_GUI
-    RichEditAppendText(clsMainWindowPageScripts::mPtr->hWndPageItems[clsMainWindowPageScripts::REDT_SCRIPTS_ERRORS],
-        (string(clsLanguageManager::mPtr->sTexts[LAN_SYNTAX], (size_t)clsLanguageManager::mPtr->ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
+    RichEditAppendText(MainWindowPageScripts::m_Ptr->m_hWndPageItems[MainWindowPageScripts::REDT_SCRIPTS_ERRORS],
+        (string(LanguageManager::m_Ptr->m_sTexts[LAN_SYNTAX], (size_t)LanguageManager::m_Ptr->m_ui16TextsLens[LAN_SYNTAX]) + " " + sMsg).c_str());
 #endif
 
-	clsUdpDebug::mPtr->BroadcastFormat("[LUA] %s", sMsg.c_str());
+	UdpDebug::m_Ptr->BroadcastFormat("[LUA] %s", sMsg.c_str());
 
-    if(clsSettingManager::mPtr->bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true) {
-        AppendLog(sMsg, true);
+    if(SettingManager::m_Ptr->m_bBools[SETBOOL_LOG_SCRIPT_ERRORS] == true) {
+        AppendLog(sMsg.c_str(), true);
     }
 
-	if((((cur->ui16Functions & Script::ONERROR) == Script::ONERROR) == true && ScriptOnError(cur, stmp, szLen) == false) ||
-        clsSettingManager::mPtr->bBools[SETBOOL_STOP_SCRIPT_ON_ERROR] == true) {
+	if((((pScript->m_ui16Functions & Script::ONERROR) == Script::ONERROR) == true && ScriptOnError(pScript, stmp, szLen) == false) ||
+        SettingManager::m_Ptr->m_bBools[SETBOOL_STOP_SCRIPT_ON_ERROR] == true) {
         // PPK ... stop buggy script ;)
-		clsEventQueue::mPtr->AddNormal(clsEventQueue::EVENT_STOPSCRIPT, cur->sName);
+		EventQueue::m_Ptr->AddNormal(EventQueue::EVENT_STOPSCRIPT, pScript->m_sName);
     }
 }
 //------------------------------------------------------------------------------
 
 #if defined(_WIN32) && !defined(_WIN_IOT)
-    void ScriptOnTimer(const UINT_PTR &uiTimerId) {
+    void ScriptOnTimer(const UINT_PTR uiTimerId) {
 #else
 	void ScriptOnTimer(const uint64_t &ui64ActualMillis) {
 #endif
 	lua_State * pLuaState = NULL;
 
     ScriptTimer * pCurTmr = NULL,
-        * pNextTmr = clsScriptManager::mPtr->pTimerListS;
+        * pNextTmr = ScriptManager::m_Ptr->m_pTimerListS;
         
     while(pNextTmr != NULL) {
         pCurTmr = pNextTmr;
-        pNextTmr = pCurTmr->pNext;
+        pNextTmr = pCurTmr->m_pNext;
 
 #if defined(_WIN32) && !defined(_WIN_IOT)
-        if(pCurTmr->uiTimerId == uiTimerId) {
+        if(pCurTmr->m_uiTimerId == uiTimerId) {
 #else
-		while((ui64ActualMillis - pCurTmr->ui64LastTick) >= pCurTmr->ui64Interval) {
-			pCurTmr->ui64LastTick += pCurTmr->ui64Interval;
+		while((pCurTmr->m_ui64LastTick < ui64ActualMillis) && (ui64ActualMillis - pCurTmr->m_ui64LastTick) >= pCurTmr->m_ui64Interval) {
+			pCurTmr->m_ui64LastTick += pCurTmr->m_ui64Interval;
 #endif
-            lua_pushcfunction(pCurTmr->pLua, ScriptTraceback);
-            int iTraceback = lua_gettop(pCurTmr->pLua);
+            lua_pushcfunction(pCurTmr->m_pLua, ScriptTraceback);
+            int iTraceback = lua_gettop(pCurTmr->m_pLua);
 
-            if(pCurTmr->sFunctionName != NULL) {
-				lua_getglobal(pCurTmr->pLua, pCurTmr->sFunctionName);
-				int i = lua_gettop(pCurTmr->pLua);
+            if(pCurTmr->m_sFunctionName != NULL) {
+				lua_getglobal(pCurTmr->m_pLua, pCurTmr->m_sFunctionName);
+				int i = lua_gettop(pCurTmr->m_pLua);
 
-				if(lua_isfunction(pCurTmr->pLua, i) == 0) {
-					lua_settop(pCurTmr->pLua, 0);
+				if(lua_isfunction(pCurTmr->m_pLua, i) == 0) {
+					lua_settop(pCurTmr->m_pLua, 0);
 #if defined(_WIN32) && !defined(_WIN_IOT)
 				    return;
 #else
@@ -1220,32 +1220,34 @@ void ScriptError(Script * cur) {
 #endif
 				}
 			} else {
-                lua_rawgeti(pCurTmr->pLua, LUA_REGISTRYINDEX, pCurTmr->iFunctionRef);
+                lua_rawgeti(pCurTmr->m_pLua, LUA_REGISTRYINDEX, pCurTmr->m_iFunctionRef);
             }
 
-			clsScriptManager::mPtr->pActualUser = NULL;
+			ScriptManager::m_Ptr->m_pActualUser = NULL;
 
-			lua_checkstack(pCurTmr->pLua, 1); // we need 1 empty slots in stack, check it to be sure
+			lua_checkstack(pCurTmr->m_pLua, 1); // we need 1 empty slots in stack, check it to be sure
 
 #if defined(_WIN32) && !defined(_WIN_IOT)
-            lua_pushlightuserdata(pCurTmr->pLua, (void *)uiTimerId);
+            lua_pushlightuserdata(pCurTmr->m_pLua, (void *)uiTimerId);
 #else
-			lua_pushlightuserdata(pCurTmr->pLua, (void *)pCurTmr);
+			lua_pushlightuserdata(pCurTmr->m_pLua, (void *)pCurTmr);
 #endif
 
-			pLuaState = pCurTmr->pLua; // For case when timer will be removed in OnTimer
+			pLuaState = pCurTmr->m_pLua; // For case when timer will be removed in OnTimer
 	
 			// 1 passed parameters, 0 returned
-			if(lua_pcall(pCurTmr->pLua, 1, 0, iTraceback) != 0) {
-				ScriptError(clsScriptManager::mPtr->FindScript(pCurTmr->pLua));
+			if(lua_pcall(pCurTmr->m_pLua, 1, 0, iTraceback) != 0) {
+				ScriptError(ScriptManager::m_Ptr->FindScript(pCurTmr->m_pLua));
+
+				lua_settop(pCurTmr->m_pLua, 0);
 #if defined(_WIN32) && !defined(_WIN_IOT)
 				return;
 #else
 				if(pNextTmr == NULL) {
-					if(clsScriptManager::mPtr->pTimerListE != pCurTmr) {
+					if(ScriptManager::m_Ptr->m_pTimerListE != pCurTmr) {
 						break;
 					}
-				} else if(pNextTmr->pPrev != pCurTmr) {
+				} else if(pNextTmr->m_pPrev != pCurTmr) {
 					break;
 				}
 
@@ -1259,10 +1261,10 @@ void ScriptError(Script * cur) {
 			return;
 #else
 			if(pNextTmr == NULL) {
-				if(clsScriptManager::mPtr->pTimerListE != pCurTmr) {
+				if(ScriptManager::m_Ptr->m_pTimerListE != pCurTmr) {
 					break;
 				}
-			} else if(pNextTmr->pPrev != pCurTmr) {
+			} else if(pNextTmr->m_pPrev != pCurTmr) {
 				break;
 			}
 
@@ -1274,35 +1276,35 @@ void ScriptError(Script * cur) {
 }
 //------------------------------------------------------------------------------
 
-int ScriptTraceback(lua_State *L) {
+int ScriptTraceback(lua_State * pLua) {
 #if LUA_VERSION_NUM > 501
-    const char * sMsg = lua_tostring(L, 1);
+    const char * sMsg = lua_tostring(pLua, 1);
     if(sMsg != NULL) {
-        luaL_traceback(L, L, sMsg, 1);
+        luaL_traceback(pLua, pLua, sMsg, 1);
         return 1;
     }
 
     return 0;
 #else
-    if(!lua_isstring(L, 1)) {
+    if(!lua_isstring(pLua, 1)) {
         return 1;
     }
 
-    lua_getfield(L, LUA_GLOBALSINDEX, "debug");
-    if(!lua_istable(L, -1)) {
-        lua_pop(L, 1);
+    lua_getfield(pLua, LUA_GLOBALSINDEX, "debug");
+    if(!lua_istable(pLua, -1)) {
+        lua_pop(pLua, 1);
         return 1;
     }
 
-    lua_getfield(L, -1, "traceback");
-    if(lua_isfunction(L, -1) == 0) {
-        lua_pop(L, 2);
+    lua_getfield(pLua, -1, "traceback");
+    if(lua_isfunction(pLua, -1) == 0) {
+        lua_pop(pLua, 2);
         return 1;
     }
 
-    lua_pushvalue(L, 1);
-    lua_pushinteger(L, 2);
-    lua_call(L, 2, 1);
+    lua_pushvalue(pLua, 1);
+    lua_pushinteger(pLua, 2);
+    lua_call(pLua, 2, 1);
     return 1;
 #endif
 }

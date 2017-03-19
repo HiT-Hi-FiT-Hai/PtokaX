@@ -2,7 +2,7 @@
  * PtokaX - hub server for Direct Connect peer to peer network.
 
  * Copyright (C) 2002-2005  Ptaczek, Ptaczek at PtokaX dot org
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -24,27 +24,27 @@
 struct User;
 //---------------------------------------------------------------------------
 
-class clsUdpDebug {
+class UdpDebug {
 private:
-	char * sDebugBuffer, * sDebugHead;
+	char * m_sDebugBuffer, * m_sDebugHead;
 
     struct UdpDbgItem {
-    	sockaddr_storage sas_to;
+    	sockaddr_storage m_sasTo;
 
-		UdpDbgItem * pPrev, * pNext;
+		UdpDbgItem * m_pPrev, * m_pNext;
 
-        char * sNick;
+        char * m_sNick;
 #ifdef _WIN32
-        SOCKET s;
+        SOCKET m_Socket;
 #else
-		int s;
+		int m_Socket;
 #endif
 
-        int sas_len;
+        int m_sasLen;
 
-        uint32_t ui32Hash;
+        uint32_t m_ui32Hash;
 
-        bool bIsScript, bAllData;
+        bool m_bIsScript, m_bAllData;
 
         UdpDbgItem();
         ~UdpDbgItem();
@@ -53,27 +53,27 @@ private:
         const UdpDbgItem& operator=(const UdpDbgItem&);
     };
 
-    clsUdpDebug(const clsUdpDebug&);
-    const clsUdpDebug& operator=(const clsUdpDebug&);
+    UdpDebug(const UdpDebug&);
+    const UdpDebug& operator=(const UdpDebug&);
 
 	void CreateBuffer();
 	void DeleteBuffer();
 public:
-    static clsUdpDebug * mPtr;
+    static UdpDebug * m_Ptr;
 
-    UdpDbgItem * pDbgItemList;
+    UdpDbgItem * m_pDbgItemList;
 
-	clsUdpDebug();
-	~clsUdpDebug();
+	UdpDebug();
+	~UdpDebug();
 
-	void Broadcast(const char * msg, const size_t &szLen) const;
+	void Broadcast(const char * sMsg, const size_t szLen) const;
     void BroadcastFormat(const char * sFormatMsg, ...) const;
-	bool New(User * pUser, const uint16_t &ui16Port);
-	bool New(char * sIP, const uint16_t &ui16Port, const bool &bAllData, char * sScriptName);
+	bool New(User * pUser, const uint16_t ui16Port);
+	bool New(char * sIP, const uint16_t ui16Port, const bool bAllData, char * sScriptName);
 	bool Remove(User * pUser);
 	void Remove(char * sScriptName);
-	bool CheckUdpSub(User * pUser, bool bSndMess = false) const;
-	void Send(const char * sScriptName, char * sMsg, const size_t &szLen) const;
+	bool CheckUdpSub(User * pUser, const bool bSendMsg = false) const;
+	void Send(const char * sScriptName, char * sMsg, const size_t szLen) const;
 	void Cleanup();
 	void UpdateHubName();
 };

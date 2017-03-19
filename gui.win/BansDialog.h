@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -23,11 +23,11 @@
 struct BanItem;
 //------------------------------------------------------------------------------
 
-class clsBansDialog {
+class BansDialog {
 public:
-    static clsBansDialog * mPtr;
+    static BansDialog * m_Ptr;
 
-    HWND hWndWindowItems[8];
+    HWND m_hWndWindowItems[8];
 
     enum enmWindowItems {
         WINDOW_HANDLE,
@@ -40,8 +40,8 @@ public:
         BTN_CLEAR_PERM_BANS
     };
 
-    clsBansDialog();
-    ~clsBansDialog();
+    BansDialog();
+    ~BansDialog();
 
     static LRESULT CALLBACK StaticBansDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
     static int CompareBans(const void * pItem, const void * pOtherItem);
@@ -52,19 +52,19 @@ public:
 	void AddBan(const BanItem * pBan);
 	void RemoveBan(const BanItem * pBan);
 private:
-    string sFilterString;
+    string m_sFilterString;
 
-    int iFilterColumn, iSortColumn;
+    int m_iFilterColumn, m_iSortColumn;
 
-    bool bSortAscending;
+    bool m_bSortAscending;
 
-    clsBansDialog(const clsBansDialog&);
-    const clsBansDialog& operator=(const clsBansDialog&);
+    BansDialog(const BansDialog&) = delete;
+    const BansDialog& operator=(const BansDialog&) = delete;
 
     LRESULT BansDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     void AddAllBans();
-    void OnColumnClick(const LPNMLISTVIEW &pListView);
+    void OnColumnClick(const LPNMLISTVIEW pListView);
     void RemoveBans();
     void OnContextMenu(HWND hWindow, LPARAM lParam);
     bool FilterBan(const BanItem * pBan);

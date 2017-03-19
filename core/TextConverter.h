@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -24,21 +24,21 @@
 class TextConverter {
 private:
 #ifndef _WIN32
-	iconv_t iconvUtfCheck;
-	iconv_t iconvAsciiToUtf;
+	iconv_t m_iconvUtfCheck;
+	iconv_t m_iconvAsciiToUtf;
 #endif
 
-	bool CheckUtf8Validity(char * sInput, const uint8_t &ui8InputLen, char * sOutput, const uint8_t &ui8OutputSize);
+	bool CheckUtf8Validity(char * sInput, const uint8_t ui8InputLen, char * sOutput, const uint8_t ui8OutputSize);
 
     TextConverter(const TextConverter&);
     const TextConverter& operator=(const TextConverter&);
 public:
-    static TextConverter * mPtr;
+    static TextConverter * m_Ptr;
 
 	TextConverter();
 	~TextConverter();
 
-	size_t CheckUtf8AndConvert(char * sInput, const uint8_t &ui8InputLen, char * sOutput, const uint8_t &ui8OutputSize);
+	size_t CheckUtf8AndConvert(char * sInput, const uint8_t ui8InputLen, char * sOutput, const uint8_t ui8OutputSize);
 };
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

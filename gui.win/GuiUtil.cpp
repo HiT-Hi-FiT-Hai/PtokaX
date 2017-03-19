@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -30,24 +30,30 @@
 #include "Resources.h"
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-int ScaleGui(const int &iValue) {
-    return (int)(iValue * clsGuiSettingManager::fScaleFactor);
+    enum enmMenuItems {
+		IDC_COPY = 100,
+		IDC_SELECT_ALL,
+		IDC_CLEAR_ALL
+    };
+
+int ScaleGui(const int iValue) {
+    return (int)(iValue * GuiSettingManager::m_fScaleFactor);
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-int ScaleGuiDefaultsOnly(const int &iValue) {
-    if(clsGuiSettingManager::mPtr->i32Integers[iValue] == clsGuiSettingManager::mPtr->GetDefaultInteger(iValue)) {
-        return (int)(clsGuiSettingManager::mPtr->i32Integers[iValue] * clsGuiSettingManager::fScaleFactor);
+int ScaleGuiDefaultsOnly(const int iValue) {
+    if(GuiSettingManager::m_Ptr->m_i32Integers[iValue] == GuiSettingManager::m_Ptr->GetDefaultInteger(iValue)) {
+        return (int)(GuiSettingManager::m_Ptr->m_i32Integers[iValue] * GuiSettingManager::m_fScaleFactor);
     } else {
-        return clsGuiSettingManager::mPtr->i32Integers[iValue];
+        return GuiSettingManager::m_Ptr->m_i32Integers[iValue];
     }
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void RichEditOpenLink(const HWND &hRichEdit, const ENLINK * pEnLink) {
-    TCHAR * sURL = new (std::nothrow) TCHAR[(pEnLink->chrg.cpMax - pEnLink->chrg.cpMin)+1];
+void RichEditOpenLink(const HWND hRichEdit, const ENLINK * pEnLink) {
+    char * sURL = new (std::nothrow) char[(pEnLink->chrg.cpMax - pEnLink->chrg.cpMin)+1];
 
-    if(sURL == NULL) {
+    if(sURL == nullptr) {
         return;
     }
 
@@ -58,20 +64,20 @@ void RichEditOpenLink(const HWND &hRichEdit, const ENLINK * pEnLink) {
 
     ::SendMessage(hRichEdit, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
 
-    ::ShellExecute(NULL, NULL, sURL, NULL, NULL, SW_SHOWNORMAL);
+    ::ShellExecute(nullptr, nullptr, sURL, nullptr, nullptr, SW_SHOWNORMAL);
 
     delete[] sURL;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void RichEditPopupMenu(const HWND &hRichEdit, const HWND &hParent, const LPARAM &lParam) {
+void RichEditPopupMenu(const HWND hRichEdit, const HWND hParent, const LPARAM lParam) {
     HMENU hMenu = ::CreatePopupMenu();
 
-    ::AppendMenu(hMenu, MF_STRING, IDC_COPY, clsLanguageManager::mPtr->sTexts[LAN_MENU_COPY]);
-    ::AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
-    ::AppendMenu(hMenu, MF_STRING, IDC_SELECT_ALL, clsLanguageManager::mPtr->sTexts[LAN_MENU_SELECT_ALL]);
-    ::AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
-    ::AppendMenu(hMenu, MF_STRING, IDC_CLEAR_ALL, clsLanguageManager::mPtr->sTexts[LAN_CLEAR_ALL]);
+    ::AppendMenu(hMenu, MF_STRING, IDC_COPY, LanguageManager::m_Ptr->m_sTexts[LAN_MENU_COPY]);
+    ::AppendMenu(hMenu, MF_SEPARATOR, 0, nullptr);
+    ::AppendMenu(hMenu, MF_STRING, IDC_SELECT_ALL, LanguageManager::m_Ptr->m_sTexts[LAN_MENU_SELECT_ALL]);
+    ::AppendMenu(hMenu, MF_SEPARATOR, 0, nullptr);
+    ::AppendMenu(hMenu, MF_STRING, IDC_CLEAR_ALL, LanguageManager::m_Ptr->m_sTexts[LAN_CLEAR_ALL]);
 
     ::SetMenuDefaultItem(hMenu, IDC_CLEAR_ALL, FALSE);
 
@@ -100,13 +106,13 @@ void RichEditPopupMenu(const HWND &hRichEdit, const HWND &hParent, const LPARAM 
         iY = pt.y;
     }
 
-    ::TrackPopupMenuEx(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, iX, iY, hParent, NULL);
+    ::TrackPopupMenuEx(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, iX, iY, hParent, nullptr);
 
     ::DestroyMenu(hMenu);
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-bool RichEditCheckMenuCommands(const HWND &hRichEdit, const WORD &wID) {
+bool RichEditCheckMenuCommands(const HWND hRichEdit, const WORD wID) {
     switch(wID) {
         case IDC_COPY:
             ::SendMessage(hRichEdit, WM_COPY, 0, 0);
@@ -125,11 +131,11 @@ bool RichEditCheckMenuCommands(const HWND &hRichEdit, const WORD &wID) {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void RichEditAppendText(const HWND &hRichEdit, const char * sText, const bool &bWithTime/* = true*/) {
+void RichEditAppendText(const HWND hRichEdit, const char * sText, const bool bWithTime/* = true*/) {
     char msg[128];
 
     if(bWithTime == true) {
-        time_t acc_time = time(NULL);
+        time_t acc_time = time(nullptr);
         struct tm *tm = localtime(&acc_time);
 
         strftime(msg, 128, "\n[%X] ", tm);
@@ -157,11 +163,11 @@ void RichEditAppendText(const HWND &hRichEdit, const char * sText, const bool &b
     cr.cpMax = lOldSelEnd;
     ::SendMessage(hRichEdit, EM_EXSETSEL, 0, (LPARAM)&cr);
 
-    ::SendMessage(hRichEdit, WM_VSCROLL, SB_BOTTOM, NULL);
+    ::SendMessage(hRichEdit, WM_VSCROLL, SB_BOTTOM, 0);
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-int ListViewGetInsertPosition(const HWND &hListView, const void * pItem, const bool &bSortAscending, int (*pCompareFunc)(const void * pItem, const void * pOtherItem)) {
+int ListViewGetInsertPosition(const HWND hListView, const void * pItem, const bool bSortAscending, int (*pCompareFunc)(const void * pItem, const void * pOtherItem)) {
 	int iHighLim = (int)::SendMessage(hListView, LVM_GETITEMCOUNT, 0, 0) - 1;
 
 	if(iHighLim == -1) {
@@ -170,7 +176,7 @@ int ListViewGetInsertPosition(const HWND &hListView, const void * pItem, const b
 
     int iCmpRes = 0, iLowLim = 0, iInsertPos = 0;
 
-    void * pOtherItem = NULL;
+    void * pOtherItem = nullptr;
 
     while(iLowLim <= iHighLim) {
         iInsertPos = (iLowLim + iHighLim) / 2;
@@ -201,7 +207,7 @@ int ListViewGetInsertPosition(const HWND &hListView, const void * pItem, const b
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void * ListViewGetItem(const HWND &hListView, const int &iPos) {
+void * ListViewGetItem(const HWND hListView, const int iPos) {
 	LVITEM lvItem = { 0 };
 	lvItem.mask = LVIF_PARAM;
 	lvItem.iItem = iPos;
@@ -212,7 +218,7 @@ void * ListViewGetItem(const HWND &hListView, const int &iPos) {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void ListViewUpdateArrow(const HWND &hListView, const bool &bAscending, const int &iSortColumn) {
+void ListViewUpdateArrow(const HWND hListView, const bool bAscending, const int iSortColumn) {
 	HWND hHeader = (HWND)::SendMessage(hListView, LVM_GETHEADER, 0, 0);
 	const int iItemCount = (int)::SendMessage(hHeader, HDM_GETITEMCOUNT, 0, 0);
 
@@ -234,7 +240,7 @@ void ListViewUpdateArrow(const HWND &hListView, const bool &bAscending, const in
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-int ListViewGetItemPosition(const HWND &hListView, void * pItem) {
+int ListViewGetItemPosition(const HWND hListView, void * pItem) {
 	LVFINDINFO lvFindInfo = { 0 };
     lvFindInfo.flags = LVFI_PARAM;
     lvFindInfo.lParam = (LPARAM)pItem;
@@ -243,7 +249,7 @@ int ListViewGetItemPosition(const HWND &hListView, void * pItem) {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void ListViewGetMenuPos(const HWND &hListView, int &iX, int &iY) {
+void ListViewGetMenuPos(const HWND hListView, int &iX, int &iY) {
     // -1, -1 is menu created by key. We need few tricks to show menu on correct position ;o)
     if(iX == -1 && iY == -1) {
         int iSel = (int)::SendMessage(hListView, LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
@@ -273,7 +279,7 @@ void ListViewGetMenuPos(const HWND &hListView, int &iX, int &iY) {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void ListViewSelectFirstItem(const HWND &hListView) {
+void ListViewSelectFirstItem(const HWND hListView) {
     if((int)::SendMessage(hListView, LVM_GETITEMCOUNT, 0, 0) != 0) {
         LVITEM lvItem = { 0 };
         lvItem.mask = LVIF_STATE;
@@ -295,11 +301,11 @@ static LRESULT WantTabProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, W
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 LRESULT CALLBACK TabsProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    return WantTabProc(hWnd, uMsg, wParam, lParam, clsGuiSettingManager::wpOldTabsProc);
+    return WantTabProc(hWnd, uMsg, wParam, lParam, GuiSettingManager::m_wpOldTabsProc);
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 LRESULT CALLBACK TreeProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    return WantTabProc(hWnd, uMsg, wParam, lParam, clsGuiSettingManager::wpOldTreeProc);
+    return WantTabProc(hWnd, uMsg, wParam, lParam, GuiSettingManager::m_wpOldTreeProc);
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

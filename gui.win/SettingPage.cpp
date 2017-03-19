@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -32,18 +32,18 @@
 //---------------------------------------------------------------------------
 static ATOM atomSettingPage = 0;
 //---------------------------------------------------------------------------
-int SettingPage::iFullGB = 462 - 5;
-int SettingPage::iFullEDT = 462 - 21;
-int SettingPage::iGBinGB = 462 - 15;
-int SettingPage::iGBinGBEDT = 462 - 31;
-int SettingPage::iOneCheckGB = 17 + 16 + 8;
-int SettingPage::iTwoChecksGB = 17 + (2 * 16) + 3 + 8;
-int SettingPage::iOneLineTwoGroupGB = 17 + 23 + (2 * clsGuiSettingManager::iOneLineGB) + 7;
-int SettingPage::iTwoLineGB = 17 + (2 * 23) + 13;
-int SettingPage::iThreeLineGB = 17 + (3 * 23) + 18;
+int SettingPage::m_iFullGB = 462 - 5;
+int SettingPage::m_iFullEDT = 462 - 21;
+int SettingPage::m_iGBinGB = 462 - 15;
+int SettingPage::m_iGBinGBEDT = 462 - 31;
+int SettingPage::m_iOneCheckGB = 17 + 16 + 8;
+int SettingPage::m_iTwoChecksGB = 17 + (2 * 16) + 3 + 8;
+int SettingPage::m_iOneLineTwoGroupGB = 17 + 23 + (2 * GuiSettingManager::m_iOneLineGB) + 7;
+int SettingPage::m_iTwoLineGB = 17 + (2 * 23) + 13;
+int SettingPage::m_iThreeLineGB = 17 + (3 * 23) + 18;
 //---------------------------------------------------------------------------
 
-SettingPage::SettingPage() : m_hWnd(NULL), bCreated(false) {
+SettingPage::SettingPage() : m_hWnd(nullptr), m_bCreated(false) {
     // ...
 }
 //---------------------------------------------------------------------------
@@ -51,7 +51,7 @@ SettingPage::SettingPage() : m_hWnd(NULL), bCreated(false) {
 LRESULT CALLBACK SettingPage::StaticSettingPageProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     SettingPage * pSettingPage = (SettingPage *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
-	if(pSettingPage == NULL) {
+	if(pSettingPage == nullptr) {
 		return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
@@ -67,7 +67,7 @@ void SettingPage::CreateHWND(HWND hOwner) {
         m_wc.lpfnWndProc = ::DefWindowProc;
         m_wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
         m_wc.lpszClassName = "PtokaX_SettingPage";
-        m_wc.hInstance = clsServerManager::hInstance;
+        m_wc.hInstance = ServerManager::m_hInstance;
         m_wc.hCursor = ::LoadCursor(m_wc.hInstance, IDC_ARROW);
         m_wc.style = CS_HREDRAW | CS_VREDRAW;
 
@@ -77,11 +77,11 @@ void SettingPage::CreateHWND(HWND hOwner) {
     RECT rcParent = { 0 };
     ::GetClientRect(hOwner, &rcParent);
 
-    m_hWnd = ::CreateWindowEx(WS_EX_CONTROLPARENT, MAKEINTATOM(atomSettingPage), "", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-        ScaleGui(154) + 10, 0, rcParent.right-(ScaleGui(154) + 10), rcParent.bottom, hOwner, NULL, clsServerManager::hInstance, NULL);
+    m_hWnd = ::CreateWindowEx(WS_EX_CONTROLPARENT, MAKEINTATOM(atomSettingPage), nullptr, WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+        ScaleGui(154) + 10, 0, rcParent.right-(ScaleGui(154) + 10), rcParent.bottom, hOwner, nullptr, ServerManager::m_hInstance, nullptr);
 
-    if(m_hWnd != NULL) {
-        bCreated = true;
+    if(m_hWnd != nullptr) {
+		m_bCreated = true;
 
         ::SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
         ::SetWindowLongPtr(m_hWnd, GWLP_WNDPROC, (LONG_PTR)StaticSettingPageProc);
@@ -141,7 +141,7 @@ void SettingPage::RemovePipes(HWND hWnd) {
 }
 //---------------------------------------------------------------------------
 
-void SettingPage::MinMaxCheck(HWND hWnd, const int &iMin, const int &iMax) {
+void SettingPage::MinMaxCheck(HWND hWnd, const int iMin, const int iMax) {
     char buf[6];
     ::GetWindowText(hWnd, buf, 6);
 
@@ -163,25 +163,24 @@ void SettingPage::MinMaxCheck(HWND hWnd, const int &iMin, const int &iMax) {
 }
 //---------------------------------------------------------------------------
 
-void SettingPage::AddUpDown(HWND &hWnd, const int &iX, const int &iY, const int &iWidth, const int &iHeight, const LPARAM &lpRange, const WPARAM &wpBuddy,
-    const LPARAM &lpPos) {
-    hWnd = ::CreateWindowEx(0, UPDOWN_CLASS, "", WS_CHILD | WS_VISIBLE | UDS_ARROWKEYS | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, iX, iY, iWidth, iHeight, m_hWnd, NULL, clsServerManager::hInstance, NULL);
+void SettingPage::AddUpDown(HWND &hWnd, const int iX, const int iY, const int iWidth, const int iHeight, const LPARAM lpRange, const WPARAM wpBuddy, const LPARAM lpPos) {
+    hWnd = ::CreateWindowEx(0, UPDOWN_CLASS, nullptr, WS_CHILD | WS_VISIBLE | UDS_ARROWKEYS | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, iX, iY, iWidth, iHeight, m_hWnd, nullptr, ServerManager::m_hInstance, nullptr);
     ::SendMessage(hWnd, UDM_SETRANGE, 0, lpRange);
     ::SendMessage(hWnd, UDM_SETBUDDY, wpBuddy, 0);
     ::SendMessage(hWnd, UDM_SETPOS, 0, lpPos);
 }
 //---------------------------------------------------------------------------
 
-void SettingPage::AddToolTip(const HWND &hWnd, char * sTipText) const {
-    HWND hWndTooltip = CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS, "", TTS_NOPREFIX | TTS_ALWAYSTIP | TTS_BALLOON, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-        hWnd, NULL, clsServerManager::hInstance, NULL);
+void SettingPage::AddToolTip(HWND &hWnd, char * sTipText) const {
+    HWND hWndTooltip = CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS, nullptr, TTS_NOPREFIX | TTS_ALWAYSTIP | TTS_BALLOON, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+        hWnd, nullptr, ServerManager::m_hInstance, nullptr);
 
     TOOLINFO ti = { 0 };
 	ti.cbSize = sizeof(TOOLINFO);
 	ti.uFlags = TTF_SUBCLASS | TTF_IDISHWND;
 	ti.hwnd = m_hWnd;
 	ti.uId = (UINT_PTR)hWnd;
-	ti.hinst = clsServerManager::hInstance;
+	ti.hinst = ServerManager::m_hInstance;
 	ti.lpszText = sTipText;
 
     ::SendMessage(hWndTooltip, TTM_ADDTOOL, 0, (LPARAM)&ti);
@@ -194,10 +193,10 @@ LRESULT SettingWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, WN
         return DLGC_WANTTAB;
     } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
         if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
-            ::SetFocus(clsSettingDialog::mPtr->hWndWindowItems[clsSettingDialog::TV_TREE]);
+            ::SetFocus(SettingDialog::m_Ptr->m_hWndWindowItems[SettingDialog::TV_TREE]);
             return 0;
         } else {
-			::SetFocus(::GetNextDlgTabItem(clsSettingDialog::mPtr->hWndWindowItems[clsSettingDialog::WINDOW_HANDLE], hWnd, TRUE));
+			::SetFocus(::GetNextDlgTabItem(SettingDialog::m_Ptr->m_hWndWindowItems[SettingDialog::WINDOW_HANDLE], hWnd, TRUE));
             return 0;
         }
     }
@@ -207,19 +206,19 @@ LRESULT SettingWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, WN
 //---------------------------------------------------------------------------
 
 LRESULT CALLBACK ButtonProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    return SettingWindowProc(hWnd, uMsg, wParam, lParam, clsGuiSettingManager::wpOldButtonProc);
+    return SettingWindowProc(hWnd, uMsg, wParam, lParam, GuiSettingManager::m_wpOldButtonProc);
 }
 
 //------------------------------------------------------------------------------
 
 LRESULT CALLBACK EditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    return SettingWindowProc(hWnd, uMsg, wParam, lParam, clsGuiSettingManager::wpOldEditProc);
+    return SettingWindowProc(hWnd, uMsg, wParam, lParam, GuiSettingManager::m_wpOldEditProc);
 }
 
 //------------------------------------------------------------------------------
 
 LRESULT CALLBACK NumberEditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    return SettingWindowProc(hWnd, uMsg, wParam, lParam, clsGuiSettingManager::wpOldNumberEditProc);
+    return SettingWindowProc(hWnd, uMsg, wParam, lParam, GuiSettingManager::m_wpOldNumberEditProc);
 }
 
 //------------------------------------------------------------------------------

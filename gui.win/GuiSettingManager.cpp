@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -29,33 +29,33 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "../core/PXBReader.h"
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-clsGuiSettingManager * clsGuiSettingManager::mPtr = NULL;
+GuiSettingManager * GuiSettingManager::m_Ptr = nullptr;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-float clsGuiSettingManager::fScaleFactor = 1.0;
-int clsGuiSettingManager::iGroupBoxMargin = 17;
-int clsGuiSettingManager::iCheckHeight = 16;
-int clsGuiSettingManager::iEditHeight = 23;
-int clsGuiSettingManager::iTextHeight = 15;
-int clsGuiSettingManager::iUpDownWidth = 17;
-int clsGuiSettingManager::iOneLineGB = 17 + 23 + 8;
-int clsGuiSettingManager::iOneLineOneChecksGB = 17 + 16 + 23 + 12;
-int clsGuiSettingManager::iOneLineTwoChecksGB = 17 + (2 * 16) + 23 + 15;
-HFONT clsGuiSettingManager::hFont = NULL;
-HCURSOR clsGuiSettingManager::hArrowCursor = NULL;
-HCURSOR clsGuiSettingManager::hVerticalCursor = NULL;
-WNDPROC clsGuiSettingManager::wpOldButtonProc = NULL;
-WNDPROC clsGuiSettingManager::wpOldEditProc = NULL;
-WNDPROC clsGuiSettingManager::wpOldListViewProc = NULL;
-WNDPROC clsGuiSettingManager::wpOldMultiRichEditProc = NULL;
-WNDPROC clsGuiSettingManager::wpOldNumberEditProc = NULL;
-WNDPROC clsGuiSettingManager::wpOldTabsProc = NULL;
-WNDPROC clsGuiSettingManager::wpOldTreeProc = NULL;
+float GuiSettingManager::m_fScaleFactor = 1.0;
+int GuiSettingManager::m_iGroupBoxMargin = 17;
+int GuiSettingManager::m_iCheckHeight = 16;
+int GuiSettingManager::m_iEditHeight = 23;
+int GuiSettingManager::m_iTextHeight = 15;
+int GuiSettingManager::m_iUpDownWidth = 17;
+int GuiSettingManager::m_iOneLineGB = 17 + 23 + 8;
+int GuiSettingManager::m_iOneLineOneChecksGB = 17 + 16 + 23 + 12;
+int GuiSettingManager::m_iOneLineTwoChecksGB = 17 + (2 * 16) + 23 + 15;
+HFONT GuiSettingManager::m_hFont = nullptr;
+HCURSOR GuiSettingManager::m_hArrowCursor = nullptr;
+HCURSOR GuiSettingManager::m_hVerticalCursor = nullptr;
+WNDPROC GuiSettingManager::m_wpOldButtonProc = nullptr;
+WNDPROC GuiSettingManager::m_wpOldEditProc = nullptr;
+WNDPROC GuiSettingManager::m_wpOldListViewProc = nullptr;
+WNDPROC GuiSettingManager::m_wpOldMultiRichEditProc = nullptr;
+WNDPROC GuiSettingManager::m_wpOldNumberEditProc = nullptr;
+WNDPROC GuiSettingManager::m_wpOldTabsProc = nullptr;
+WNDPROC GuiSettingManager::m_wpOldTreeProc = nullptr;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 static const char sPtokaXGUISettings[] = "PtokaX GUI Settings";
 static const size_t szPtokaXGUISettingsLen = sizeof("PtokaX GUI Settings")-1;
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-clsGuiSettingManager::clsGuiSettingManager(void) {
+GuiSettingManager::GuiSettingManager(void) {
     // Read default bools
     for(size_t szi = 0; szi < GUISETBOOL_IDS_END; szi++) {
         SetBool(szi, GuiSetBoolDef[szi]);
@@ -71,16 +71,16 @@ clsGuiSettingManager::clsGuiSettingManager(void) {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-clsGuiSettingManager::~clsGuiSettingManager(void) {
+GuiSettingManager::~GuiSettingManager(void) {
     // ...
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void clsGuiSettingManager::Load() {
+void GuiSettingManager::Load() {
     PXBReader pxbSettings;
 
     // Open setting file
-    if(pxbSettings.OpenFileRead((clsServerManager::sPath + "\\cfg\\GuiSettigs.pxb").c_str(), 2) == false) {
+    if(pxbSettings.OpenFileRead((ServerManager::m_sPath + "\\cfg\\GuiSettigs.pxb").c_str(), 2) == false) {
         return;
     }
 
@@ -92,12 +92,12 @@ void clsGuiSettingManager::Load() {
     }
 
     // Check header if we have correct file
-    if(pxbSettings.ui16ItemLengths[0] != szPtokaXGUISettingsLen || strncmp((char *)pxbSettings.pItemDatas[0], sPtokaXGUISettings, szPtokaXGUISettingsLen) != 0) {
+    if(pxbSettings.m_ui16ItemLengths[0] != szPtokaXGUISettingsLen || strncmp((char *)pxbSettings.m_pItemDatas[0], sPtokaXGUISettings, szPtokaXGUISettingsLen) != 0) {
         return;
     }
 
     {
-        uint32_t ui32FileVersion = ntohl(*((uint32_t *)(pxbSettings.pItemDatas[1])));
+        uint32_t ui32FileVersion = ntohl(*((uint32_t *)(pxbSettings.m_pItemDatas[1])));
 
         if(ui32FileVersion < 1) {
             return;
@@ -113,14 +113,14 @@ void clsGuiSettingManager::Load() {
 
     while(bSuccess == true) {
         for(szi = 0; szi < GUISETBOOL_IDS_END; szi++) {
-            if(pxbSettings.ui16ItemLengths[0] == strlen(GuiSetBoolStr[szi]) && strncmp((char *)pxbSettings.pItemDatas[0], GuiSetBoolStr[szi], pxbSettings.ui16ItemLengths[0]) == 0) {
-                SetBool(szi, ((char *)pxbSettings.pItemDatas[1])[0] == '0' ? false : true);
+            if(pxbSettings.m_ui16ItemLengths[0] == strlen(GuiSetBoolStr[szi]) && strncmp((char *)pxbSettings.m_pItemDatas[0], GuiSetBoolStr[szi], pxbSettings.m_ui16ItemLengths[0]) == 0) {
+                SetBool(szi, ((char *)pxbSettings.m_pItemDatas[1])[0] == '0' ? false : true);
             }
         }
 
         for(szi = 0; szi < GUISETINT_IDS_END; szi++) {
-            if(pxbSettings.ui16ItemLengths[0] == strlen(GuiSetIntegerStr[szi]) && strncmp((char *)pxbSettings.pItemDatas[0], GuiSetIntegerStr[szi], pxbSettings.ui16ItemLengths[0]) == 0) {
-                SetInteger(szi, ntohl(*((uint32_t *)(pxbSettings.pItemDatas[1]))));
+            if(pxbSettings.m_ui16ItemLengths[0] == strlen(GuiSetIntegerStr[szi]) && strncmp((char *)pxbSettings.m_pItemDatas[0], GuiSetIntegerStr[szi], pxbSettings.m_ui16ItemLengths[0]) == 0) {
+                SetInteger(szi, ntohl(*((uint32_t *)(pxbSettings.m_pItemDatas[1]))));
             }
         }
 
@@ -129,71 +129,71 @@ void clsGuiSettingManager::Load() {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void clsGuiSettingManager::Save() const {
+void GuiSettingManager::Save() const {
     PXBReader pxbSettings;
 
     // Open setting file
-    if(pxbSettings.OpenFileSave((clsServerManager::sPath + "\\cfg\\GuiSettigs.pxb").c_str(), 2) == false) {
+    if(pxbSettings.OpenFileSave((ServerManager::m_sPath + "\\cfg\\GuiSettigs.pxb").c_str(), 2) == false) {
         return;
     }
 
     // Write file header
-    pxbSettings.sItemIdentifiers[0] = 'F';
-    pxbSettings.sItemIdentifiers[1] = 'I';
-    pxbSettings.ui16ItemLengths[0] = (uint16_t)szPtokaXGUISettingsLen;
-    pxbSettings.pItemDatas[0] = (void *)sPtokaXGUISettings;
-    pxbSettings.ui8ItemValues[0] = PXBReader::PXB_STRING;
+    pxbSettings.m_sItemIdentifiers[0] = 'F';
+    pxbSettings.m_sItemIdentifiers[1] = 'I';
+    pxbSettings.m_ui16ItemLengths[0] = (uint16_t)szPtokaXGUISettingsLen;
+    pxbSettings.m_pItemDatas[0] = (void *)sPtokaXGUISettings;
+    pxbSettings.m_ui8ItemValues[0] = PXBReader::PXB_STRING;
 
-    pxbSettings.sItemIdentifiers[2] = 'F';
-    pxbSettings.sItemIdentifiers[3] = 'V';
-    pxbSettings.ui16ItemLengths[1] = 4;
+    pxbSettings.m_sItemIdentifiers[2] = 'F';
+    pxbSettings.m_sItemIdentifiers[3] = 'V';
+    pxbSettings.m_ui16ItemLengths[1] = 4;
     uint32_t ui32Version = 1;
-    pxbSettings.pItemDatas[1] = (void *)&ui32Version;
-    pxbSettings.ui8ItemValues[1] = PXBReader::PXB_FOUR_BYTES;
+    pxbSettings.m_pItemDatas[1] = (void *)&ui32Version;
+    pxbSettings.m_ui8ItemValues[1] = PXBReader::PXB_FOUR_BYTES;
 
     if(pxbSettings.WriteNextItem(szPtokaXGUISettingsLen+4, 2) == false) {
         return;
     }
 
-    pxbSettings.sItemIdentifiers[0] = 'S';
-    pxbSettings.sItemIdentifiers[1] = 'I';
-    pxbSettings.sItemIdentifiers[2] = 'S';
-    pxbSettings.sItemIdentifiers[3] = 'V';
+    pxbSettings.m_sItemIdentifiers[0] = 'S';
+    pxbSettings.m_sItemIdentifiers[1] = 'I';
+    pxbSettings.m_sItemIdentifiers[2] = 'S';
+    pxbSettings.m_sItemIdentifiers[3] = 'V';
 
     for(size_t szi = 0; szi < GUISETBOOL_IDS_END; szi++) {
         // Don't save setting with default value
-        if(bBools[szi] == GuiSetBoolDef[szi]) {
+        if(m_bBools[szi] == GuiSetBoolDef[szi]) {
             continue;
         }
 
-        pxbSettings.ui16ItemLengths[0] = (uint16_t)strlen(GuiSetBoolStr[szi]);
-        pxbSettings.pItemDatas[0] = (void *)GuiSetBoolStr[szi];
-        pxbSettings.ui8ItemValues[0] = PXBReader::PXB_STRING;
+        pxbSettings.m_ui16ItemLengths[0] = (uint16_t)strlen(GuiSetBoolStr[szi]);
+        pxbSettings.m_pItemDatas[0] = (void *)GuiSetBoolStr[szi];
+        pxbSettings.m_ui8ItemValues[0] = PXBReader::PXB_STRING;
 
-        pxbSettings.ui16ItemLengths[1] = 1;
-        pxbSettings.pItemDatas[1] = (bBools[szi] == true ? (void *)1 : 0);
-        pxbSettings.ui8ItemValues[1] = PXBReader::PXB_BYTE;
+        pxbSettings.m_ui16ItemLengths[1] = 1;
+        pxbSettings.m_pItemDatas[1] = (m_bBools[szi] == true ? (void *)1 : 0);
+        pxbSettings.m_ui8ItemValues[1] = PXBReader::PXB_BYTE;
 
-        if(pxbSettings.WriteNextItem(pxbSettings.ui16ItemLengths[0] + pxbSettings.ui16ItemLengths[1], 2) == false) {
+        if(pxbSettings.WriteNextItem(pxbSettings.m_ui16ItemLengths[0] + pxbSettings.m_ui16ItemLengths[1], 2) == false) {
             break;
         }
     }
 
     for(size_t szi = 0; szi < GUISETINT_IDS_END; szi++) {
         // Don't save setting with default value
-        if(i32Integers[szi] == GuiSetIntegerDef[szi]) {
+        if(m_i32Integers[szi] == GuiSetIntegerDef[szi]) {
             continue;
         }
 
-        pxbSettings.ui16ItemLengths[0] = (uint16_t)strlen(GuiSetIntegerStr[szi]);
-        pxbSettings.pItemDatas[0] = (void *)GuiSetIntegerStr[szi];
-        pxbSettings.ui8ItemValues[0] = PXBReader::PXB_STRING;
+        pxbSettings.m_ui16ItemLengths[0] = (uint16_t)strlen(GuiSetIntegerStr[szi]);
+        pxbSettings.m_pItemDatas[0] = (void *)GuiSetIntegerStr[szi];
+        pxbSettings.m_ui8ItemValues[0] = PXBReader::PXB_STRING;
 
-        pxbSettings.ui16ItemLengths[1] = 4;
-        pxbSettings.pItemDatas[1] = (void *)&i32Integers[szi];
-        pxbSettings.ui8ItemValues[1] = PXBReader::PXB_FOUR_BYTES;
+        pxbSettings.m_ui16ItemLengths[1] = 4;
+        pxbSettings.m_pItemDatas[1] = (void *)&m_i32Integers[szi];
+        pxbSettings.m_ui8ItemValues[1] = PXBReader::PXB_FOUR_BYTES;
 
-        if(pxbSettings.WriteNextItem(pxbSettings.ui16ItemLengths[0] + pxbSettings.ui16ItemLengths[1], 2) == false) {
+        if(pxbSettings.WriteNextItem(pxbSettings.m_ui16ItemLengths[0] + pxbSettings.m_ui16ItemLengths[1], 2) == false) {
             break;
         }
     }
@@ -202,30 +202,30 @@ void clsGuiSettingManager::Save() const {
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-bool clsGuiSettingManager::GetDefaultBool(const size_t &szBoolId) {
+bool GuiSettingManager::GetDefaultBool(const size_t szBoolId) {
     return GuiSetBoolDef[szBoolId];
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-int32_t clsGuiSettingManager::GetDefaultInteger(const size_t &szIntegerId) {
-    return GuiSetIntegerDef[szIntegerId];;
+int32_t GuiSettingManager::GetDefaultInteger(const size_t szIntegerId) {
+    return GuiSetIntegerDef[szIntegerId];
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void clsGuiSettingManager::SetBool(const size_t &szBoolId, const bool &bValue) {
-    if(bBools[szBoolId] == bValue) {
+void GuiSettingManager::SetBool(const size_t szBoolId, const bool bValue) {
+    if(m_bBools[szBoolId] == bValue) {
         return;
     }
 
-    bBools[szBoolId] = bValue;
+	m_bBools[szBoolId] = bValue;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void clsGuiSettingManager::SetInteger(const size_t &szIntegerId, const int32_t &i32Value) {
-    if(i32Value < 0 || i32Integers[szIntegerId] == i32Value) {
+void GuiSettingManager::SetInteger(const size_t szIntegerId, const int32_t i32Value) {
+    if(i32Value < 0 || m_i32Integers[szIntegerId] == i32Value) {
         return;
     }
 
-    i32Integers[szIntegerId] = i32Value;
+	m_i32Integers[szIntegerId] = i32Value;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

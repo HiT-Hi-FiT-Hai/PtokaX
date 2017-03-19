@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -23,14 +23,14 @@
 
 class LineDialog {
 public:
-    explicit LineDialog(void (*pOnOkFunction)(char * Line, const int &iLen));
+    explicit LineDialog(void (*pOnOkFunction)(char * sLine, const int iLen));
     ~LineDialog();
 
     static LRESULT CALLBACK StaticLineDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	void DoModal(HWND hWndParent, char * Caption, char * Line);
+	void DoModal(HWND hWndParent, char * sCaption, char * sLine);
 private:
-    HWND hWndWindowItems[5];
+    HWND m_hWndWindowItems[5];
 
     enum enmWindowItems {
         WINDOW_HANDLE,
@@ -40,8 +40,8 @@ private:
         BTN_CANCEL
     };
 
-    LineDialog(const LineDialog&);
-    const LineDialog& operator=(const LineDialog&);
+    LineDialog(const LineDialog&) = delete;
+    const LineDialog& operator=(const LineDialog&) = delete;
 
     LRESULT LineDialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

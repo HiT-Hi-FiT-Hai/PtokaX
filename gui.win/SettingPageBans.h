@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -25,7 +25,7 @@
 
 class SettingPageBans : public SettingPage {
 public:
-    bool bUpdateTempBanRedirAddress, bUpdatePermBanRedirAddress;
+    bool m_bUpdateTempBanRedirAddress, m_bUpdatePermBanRedirAddress;
 
     SettingPageBans();
     ~SettingPageBans() { };
@@ -43,7 +43,7 @@ public:
     char * GetPageName();
     void FocusLastItem();
 private:
-    HWND hWndPageItems[27];
+    HWND m_hWndPageItems[27];
     
     enum enmPageItems {
         GB_DEFAULT_TEMPBAN_TIME,
@@ -75,8 +75,8 @@ private:
         BTN_REPORT_3X_BAD_PASS
     };
 
-    SettingPageBans(const SettingPageBans&);
-    const SettingPageBans& operator=(const SettingPageBans&);
+    SettingPageBans(const SettingPageBans&) = delete;
+    const SettingPageBans& operator=(const SettingPageBans&) = delete;
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

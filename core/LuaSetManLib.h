@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -22,9 +22,9 @@
 //------------------------------------------------------------------------------
 
 #if LUA_VERSION_NUM > 501
-    int RegSetMan(lua_State *L);
+    int RegSetMan(lua_State * pLua);
 #else
-    void RegSetMan(lua_State * L);
+    void RegSetMan(lua_State * pLua);
 #endif
 //------------------------------------------------------------------------------
 

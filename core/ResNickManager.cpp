@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -28,26 +28,26 @@
 	#pragma hdrstop
 #endif
 //---------------------------------------------------------------------------
-clsReservedNicksManager * clsReservedNicksManager::mPtr = NULL;
+ReservedNicksManager * ReservedNicksManager::m_Ptr = NULL;
 //---------------------------------------------------------------------------
 
-clsReservedNicksManager::ReservedNick::ReservedNick() : pPrev(NULL), pNext(NULL), sNick(NULL), ui32Hash(0), bFromScript(false) {
+ReservedNicksManager::ReservedNick::ReservedNick() : m_pPrev(NULL), m_pNext(NULL), m_sNick(NULL), m_ui32Hash(0), m_bFromScript(false) {
 	// ...
 }
 //---------------------------------------------------------------------------
 
-clsReservedNicksManager::ReservedNick::~ReservedNick() {
+ReservedNicksManager::ReservedNick::~ReservedNick() {
 #ifdef _WIN32
-	if(sNick != NULL && HeapFree(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)sNick) == 0) {
-        AppendDebugLog("%s - [MEM] Cannot deallocate sNick in clsReservedNicksManager::ReservedNick::~ReservedNick\n");
+	if(m_sNick != NULL && HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)m_sNick) == 0) {
+        AppendDebugLog("%s - [MEM] Cannot deallocate m_sNick in ReservedNicksManager::ReservedNick::~ReservedNick\n");
     }
 #else
-	free(sNick);
+	free(m_sNick);
 #endif
 }
 //---------------------------------------------------------------------------
 
-clsReservedNicksManager::ReservedNick * clsReservedNicksManager::ReservedNick::CreateReservedNick(const char * sNewNick, uint32_t ui32NickHash) {
+ReservedNicksManager::ReservedNick * ReservedNicksManager::ReservedNick::CreateReservedNick(const char * sNewNick, const uint32_t ui32NickHash) {
     ReservedNick * pReservedNick = new (std::nothrow) ReservedNick();
 
     if(pReservedNick == NULL) {
@@ -58,73 +58,76 @@ clsReservedNicksManager::ReservedNick * clsReservedNicksManager::ReservedNick::C
 
     size_t szNickLen = strlen(sNewNick);
 #ifdef _WIN32
-    pReservedNick->sNick = (char *)HeapAlloc(clsServerManager::hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
+    pReservedNick->m_sNick = (char *)HeapAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, szNickLen+1);
 #else
-	pReservedNick->sNick = (char *)malloc(szNickLen+1);
+	pReservedNick->m_sNick = (char *)malloc(szNickLen+1);
 #endif
-    if(pReservedNick->sNick == NULL) {
+    if(pReservedNick->m_sNick == NULL) {
         AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes in ReservedNick::CreateReservedNick\n", (uint64_t)(szNickLen+1));
 
         delete pReservedNick;
         return NULL;
     }
-    memcpy(pReservedNick->sNick, sNewNick, szNickLen);
-    pReservedNick->sNick[szNickLen] = '\0';
+    memcpy(pReservedNick->m_sNick, sNewNick, szNickLen);
+    pReservedNick->m_sNick[szNickLen] = '\0';
 
-	pReservedNick->ui32Hash = ui32NickHash;
+	pReservedNick->m_ui32Hash = ui32NickHash;
 
     return pReservedNick;
 }
 //---------------------------------------------------------------------------
 
-void clsReservedNicksManager::Load() {
+void ReservedNicksManager::Load() {
 #ifdef _WIN32
-	FILE * fReservedNicks = fopen((clsServerManager::sPath + "\\cfg\\ReservedNicks.pxt").c_str(), "rt");
+	FILE * fReservedNicks = fopen((ServerManager::m_sPath + "\\cfg\\ReservedNicks.pxt").c_str(), "rt");
 #else
-	FILE * fReservedNicks = fopen((clsServerManager::sPath + "/cfg/ReservedNicks.pxt").c_str(), "rt");
+	FILE * fReservedNicks = fopen((ServerManager::m_sPath + "/cfg/ReservedNicks.pxt").c_str(), "rt");
 #endif
     if(fReservedNicks == NULL) {
+    	int iMsgLen = snprintf(ServerManager::m_pGlobalBuffer, ServerManager::m_szGlobalBufferSize, "Error loading file ReservedNicks.pxt %s (%d)", 
 #ifdef _WIN32
-        int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "Error loading file ReservedNicks.pxt %s (%d)", WSErrorStr(errno), errno);
+        	WSErrorStr(errno), errno);
 #else
-		int imsgLen = sprintf(clsServerManager::pGlobalBuffer, "Error loading file ReservedNicks.pxt %s (%d)", ErrnoStr(errno), errno);
+			ErrnoStr(errno), errno);
 #endif
-		CheckSprintf(imsgLen, clsServerManager::szGlobalBufferSize, "clsReservedNicksManager::Load");
+		if(iMsgLen > 0) {
 #ifdef _BUILD_GUI
-		::MessageBox(NULL, clsServerManager::pGlobalBuffer, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
+			::MessageBox(NULL, ServerManager::m_pGlobalBuffer, g_sPtokaXTitle, MB_OK | MB_ICONERROR);
 #else
-		AppendLog(clsServerManager::pGlobalBuffer);
+			AppendLog(ServerManager::m_pGlobalBuffer);
 #endif
+		}
+
         exit(EXIT_FAILURE);
     }
 
 	size_t szLen = 0;
 
-	while(fgets(clsServerManager::pGlobalBuffer, (int)clsServerManager::szGlobalBufferSize, fReservedNicks) != NULL) {
-		if(clsServerManager::pGlobalBuffer[0] == '#' || clsServerManager::pGlobalBuffer[0] == '\n') {
+	while(fgets(ServerManager::m_pGlobalBuffer, (int)ServerManager::m_szGlobalBufferSize, fReservedNicks) != NULL) {
+		if(ServerManager::m_pGlobalBuffer[0] == '#' || ServerManager::m_pGlobalBuffer[0] == '\n') {
 			continue;
 		}
 
-		szLen = strlen(clsServerManager::pGlobalBuffer)-1;
+		szLen = strlen(ServerManager::m_pGlobalBuffer)-1;
 
-		clsServerManager::pGlobalBuffer[szLen] = '\0';
+		ServerManager::m_pGlobalBuffer[szLen] = '\0';
 
-		if(clsServerManager::pGlobalBuffer[0] == '\0') {
+		if(ServerManager::m_pGlobalBuffer[0] == '\0') {
 			continue;
 		}
 
-		AddReservedNick(clsServerManager::pGlobalBuffer);
+		AddReservedNick(ServerManager::m_pGlobalBuffer);
 	}
 
     fclose(fReservedNicks);
 }
 //---------------------------------------------------------------------------
 
-void clsReservedNicksManager::Save() const {
+void ReservedNicksManager::Save() const {
 #ifdef _WIN32
-    FILE * fReservedNicks = fopen((clsServerManager::sPath + "\\cfg\\ReservedNicks.pxt").c_str(), "wb");
+    FILE * fReservedNicks = fopen((ServerManager::m_sPath + "\\cfg\\ReservedNicks.pxt").c_str(), "wb");
 #else
-	FILE * fReservedNicks = fopen((clsServerManager::sPath + "/cfg/ReservedNicks.pxt").c_str(), "wb");
+	FILE * fReservedNicks = fopen((ServerManager::m_sPath + "/cfg/ReservedNicks.pxt").c_str(), "wb");
 #endif
     if(fReservedNicks == NULL) {
     	return;
@@ -134,26 +137,26 @@ void clsReservedNicksManager::Save() const {
     fwrite(sPtokaXResNickFile, 1, sizeof(sPtokaXResNickFile)-1, fReservedNicks);
 
     ReservedNick * pCur = NULL,
-        * pNext = pReservedNicks;
+        * pNext = m_pReservedNicks;
 
     while(pNext != NULL) {
         pCur = pNext;
-        pNext = pCur->pNext;
+        pNext = pCur->m_pNext;
 
-		fprintf(fReservedNicks, "%s\n", pCur->sNick);
+		fprintf(fReservedNicks, "%s\n", pCur->m_sNick);
     }
 
 	fclose(fReservedNicks);
 }
 //---------------------------------------------------------------------------
 
-void clsReservedNicksManager::LoadXML() {
+void ReservedNicksManager::LoadXML() {
 	TiXmlDocument doc;
 
 #ifdef _WIN32
-	if(doc.LoadFile((clsServerManager::sPath+"\\cfg\\ReservedNicks.xml").c_str()) == true) {
+	if(doc.LoadFile((ServerManager::m_sPath+"\\cfg\\ReservedNicks.xml").c_str()) == true) {
 #else
-	if(doc.LoadFile((clsServerManager::sPath+"/cfg/ReservedNicks.xml").c_str()) == true) {
+	if(doc.LoadFile((ServerManager::m_sPath+"/cfg/ReservedNicks.xml").c_str()) == true) {
 #endif
 		TiXmlHandle cfg(&doc);
 		TiXmlNode * reservednicks = cfg.FirstChild("ReservedNicks").Node();
@@ -175,19 +178,19 @@ void clsReservedNicksManager::LoadXML() {
 }
 //---------------------------------------------------------------------------
 
-clsReservedNicksManager::clsReservedNicksManager() : pReservedNicks(NULL) {
+ReservedNicksManager::ReservedNicksManager() : m_pReservedNicks(NULL) {
 #ifdef _WIN32
-    if(FileExist((clsServerManager::sPath + "\\cfg\\ReservedNicks.pxt").c_str()) == true) {
+    if(FileExist((ServerManager::m_sPath + "\\cfg\\ReservedNicks.pxt").c_str()) == true) {
 #else
-    if(FileExist((clsServerManager::sPath + "/cfg/ReservedNicks.pxt").c_str()) == true) {
+    if(FileExist((ServerManager::m_sPath + "/cfg/ReservedNicks.pxt").c_str()) == true) {
 #endif
         Load();
 
         return;
 #ifdef _WIN32
-    } else if(FileExist((clsServerManager::sPath + "\\cfg\\ReservedNicks.xml").c_str()) == true) {
+    } else if(FileExist((ServerManager::m_sPath + "\\cfg\\ReservedNicks.xml").c_str()) == true) {
 #else
-    } else if(FileExist((clsServerManager::sPath + "/cfg/ReservedNicks.xml").c_str()) == true) {
+    } else if(FileExist((ServerManager::m_sPath + "/cfg/ReservedNicks.xml").c_str()) == true) {
 #endif
         LoadXML();
 
@@ -203,15 +206,15 @@ clsReservedNicksManager::clsReservedNicksManager() : pReservedNicks(NULL) {
 }
 //---------------------------------------------------------------------------
 	
-clsReservedNicksManager::~clsReservedNicksManager() {
+ReservedNicksManager::~ReservedNicksManager() {
 	Save();
 
     ReservedNick * cur = NULL,
-        * next = pReservedNicks;
+        * next = m_pReservedNicks;
 
     while(next != NULL) {
         cur = next;
-        next = cur->pNext;
+        next = cur->m_pNext;
 
         delete cur;
     }
@@ -219,15 +222,15 @@ clsReservedNicksManager::~clsReservedNicksManager() {
 //---------------------------------------------------------------------------
 
 // Check for reserved nicks true = reserved
-bool clsReservedNicksManager::CheckReserved(const char * sNick, const uint32_t &hash) const {
+bool ReservedNicksManager::CheckReserved(const char * sNick, const uint32_t ui32Hash) const {
     ReservedNick * cur = NULL,
-        * next = pReservedNicks;
+        * next = m_pReservedNicks;
 
     while(next != NULL) {
         cur = next;
-        next = cur->pNext;
+        next = cur->m_pNext;
 
-		if(cur->ui32Hash == hash && strcasecmp(cur->sNick, sNick) == 0) {
+		if(cur->m_ui32Hash == ui32Hash && strcasecmp(cur->m_sNick, sNick) == 0) {
             return true;
         }
     }
@@ -236,56 +239,56 @@ bool clsReservedNicksManager::CheckReserved(const char * sNick, const uint32_t &
 }
 //---------------------------------------------------------------------------
 
-void clsReservedNicksManager::AddReservedNick(const char * sNick, const bool &bFromScript/* = false*/) {
-    uint32_t ulHash = HashNick(sNick, strlen(sNick));
+void ReservedNicksManager::AddReservedNick(const char * sNick, const bool bFromScript/* = false*/) {
+    uint32_t ui32Hash = HashNick(sNick, strlen(sNick));
 
-    if(CheckReserved(sNick, ulHash) == false) {
-        ReservedNick * pNewNick = ReservedNick::CreateReservedNick(sNick, ulHash);
+    if(CheckReserved(sNick, ui32Hash) == false) {
+        ReservedNick * pNewNick = ReservedNick::CreateReservedNick(sNick, ui32Hash);
         if(pNewNick == NULL) {
-			AppendDebugLog("%s - [MEM] Cannot allocate pNewNick in clsReservedNicksManager::AddReservedNick\n");
+			AppendDebugLog("%s - [MEM] Cannot allocate pNewNick in ReservedNicksManager::AddReservedNick\n");
         	return;
         }
 
-        if(pReservedNicks == NULL) {
-            pReservedNicks = pNewNick;
+        if(m_pReservedNicks == NULL) {
+			m_pReservedNicks = pNewNick;
         } else {
-            pReservedNicks->pPrev = pNewNick;
-            pNewNick->pNext = pReservedNicks;
-            pReservedNicks = pNewNick;
+			m_pReservedNicks->m_pPrev = pNewNick;
+            pNewNick->m_pNext = m_pReservedNicks;
+			m_pReservedNicks = pNewNick;
         }
 
-        pNewNick->bFromScript = bFromScript;
+        pNewNick->m_bFromScript = bFromScript;
     }
 }
 //---------------------------------------------------------------------------
 
-void clsReservedNicksManager::DelReservedNick(char * sNick, const bool &bFromScript/* = false*/) {
-    uint32_t hash = HashNick(sNick, strlen(sNick));
+void ReservedNicksManager::DelReservedNick(char * sNick, const bool bFromScript/* = false*/) {
+    uint32_t ui32Hash = HashNick(sNick, strlen(sNick));
 
     ReservedNick * cur = NULL,
-        * next = pReservedNicks;
+        * next = m_pReservedNicks;
 
     while(next != NULL) {
         cur = next;
-        next = cur->pNext;
+        next = cur->m_pNext;
 
-        if(cur->ui32Hash == hash && strcmp(cur->sNick, sNick) == 0) {
-            if(bFromScript == true && cur->bFromScript == false) {
+        if(cur->m_ui32Hash == ui32Hash && strcmp(cur->m_sNick, sNick) == 0) {
+            if(bFromScript == true && cur->m_bFromScript == false) {
                 continue;
             }
 
-            if(cur->pPrev == NULL) {
-                if(cur->pNext == NULL) {
-                    pReservedNicks = NULL;
+            if(cur->m_pPrev == NULL) {
+                if(cur->m_pNext == NULL) {
+					m_pReservedNicks = NULL;
                 } else {
-                    cur->pNext->pPrev = NULL;
-                    pReservedNicks = cur->pNext;
+                    cur->m_pNext->m_pPrev = NULL;
+					m_pReservedNicks = cur->m_pNext;
                 }
-            } else if(cur->pNext == NULL) {
-                cur->pPrev->pNext = NULL;
+            } else if(cur->m_pNext == NULL) {
+                cur->m_pPrev->m_pNext = NULL;
             } else {
-                cur->pPrev->pNext = cur->pNext;
-                cur->pNext->pPrev = cur->pPrev;
+                cur->m_pPrev->m_pNext = cur->m_pNext;
+                cur->m_pNext->m_pPrev = cur->m_pPrev;
             }
 
             delete cur;

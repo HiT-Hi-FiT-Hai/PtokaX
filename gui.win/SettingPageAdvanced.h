@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -25,7 +25,7 @@
 
 class SettingPageAdvanced : public SettingPage {
 public:
-    bool bUpdateSysTray, bUpdateScripting;
+    bool m_bUpdateSysTray, m_bUpdateScripting;
 
     SettingPageAdvanced();
     ~SettingPageAdvanced() { };
@@ -44,9 +44,9 @@ public:
     void FocusLastItem();
 private:
 #if defined(_WITH_SQLITE) || defined(_WITH_POSTGRES) || defined(_WITH_MYSQL)
-	HWND hWndPageItems[26];
+	HWND m_hWndPageItems[26];
 #else
-    HWND hWndPageItems[21];
+    HWND m_hWndPageItems[21];
 #endif
     
     enum enmPageItems {
@@ -80,8 +80,8 @@ private:
 #endif
     };
 
-    SettingPageAdvanced(const SettingPageAdvanced&);
-    const SettingPageAdvanced& operator=(const SettingPageAdvanced&);
+    SettingPageAdvanced(const SettingPageAdvanced&) = delete;
+    const SettingPageAdvanced& operator=(const SettingPageAdvanced&) = delete;
 
     LRESULT SettingPageProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

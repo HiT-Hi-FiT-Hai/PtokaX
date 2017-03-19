@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -24,32 +24,33 @@ struct lua_State;
 struct Script;
 struct ScriptTimer;
 struct User;
+struct DcCommand;
 //------------------------------------------------------------------------------
 
-class clsScriptManager {
+class ScriptManager {
 private:
-	Script * pRunningScriptE;
+	Script * m_pRunningScriptE;
 
-    clsScriptManager(const clsScriptManager&);
-    const clsScriptManager& operator=(const clsScriptManager&);
+    ScriptManager(const ScriptManager&);
+    const ScriptManager& operator=(const ScriptManager&);
 
-	void AddRunningScript(Script * curScript);
-	void RemoveRunningScript(Script * curScript);
+	void AddRunningScript(Script * pScript);
+	void RemoveRunningScript(Script * pScript);
 
 	void LoadXML();
 public:
-    static clsScriptManager * mPtr;
+    static ScriptManager * m_Ptr;
 
-    Script * pRunningScriptS;
+    Script * m_pRunningScriptS;
 
-    Script ** ppScriptTable;
-	User * pActualUser;
+    Script ** m_ppScriptTable;
+	User * m_pActualUser;
 
-	ScriptTimer * pTimerListS, * pTimerListE;
+	ScriptTimer * m_pTimerListS, * m_pTimerListE;
 
-    uint8_t ui8ScriptCount, ui8BotsCount;
+    uint8_t m_ui8ScriptCount, m_ui8BotsCount;
 
-    bool bMoved;
+    bool m_bMoved;
 
     enum LuaArrivals {
         CHAT_ARRIVAL,
@@ -75,8 +76,8 @@ public:
         UNKNOWN_ARRIVAL
     };
     
-    clsScriptManager();
-    ~clsScriptManager();
+    ScriptManager();
+    ~ScriptManager();
     
     void Start();
     void Stop();
@@ -89,25 +90,25 @@ public:
     void Restart();
 
     Script * FindScript(char * sName);
-    Script * FindScript(lua_State * L);
+    Script * FindScript(lua_State * pLua);
     uint8_t FindScriptIdx(char * sName);
 
-	bool AddScript(char * sName, const bool &bEnabled, const bool &bNew);
+	bool AddScript(char * sName, const bool bEnabled, const bool bNew);
 
-	bool StartScript(Script * curScript, const bool &bEnable);
-	void StopScript(Script * curScript, const bool &bDisable);
+	bool StartScript(Script * pScript, const bool bEnable);
+	void StopScript(Script * pScript, const bool bDisable);
 
-	void MoveScript(const uint8_t &ui8ScriptPosInTbl, const bool &bUp);
+	void MoveScript(const uint8_t ui8ScriptPosInTbl, const bool bUp);
 
-    void DeleteScript(const uint8_t &ui8ScriptPosInTbl);
+    void DeleteScript(const uint8_t ui8ScriptPosInTbl);
 
     void OnStartup();
-    void OnExit(bool bForce = false);
-    bool Arrival(User * u, char * sData, const size_t &szLen, const unsigned char &uiType);
-    bool UserConnected(User * u);
-	void UserDisconnected(User * u, Script * pScript = NULL);
+    void OnExit(const bool bForce = false);
+    bool Arrival(DcCommand * pDcCommand, const uint8_t ui8Type);
+    bool UserConnected(User * pUser);
+	void UserDisconnected(User * pUser, Script * pScript = NULL);
 
-    void PrepareMove(lua_State * L);
+    void PrepareMove(lua_State * pLua);
 };
 //------------------------------------------------------------------------------
 

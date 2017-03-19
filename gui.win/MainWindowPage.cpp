@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -33,7 +33,7 @@
 static ATOM atomMainWindowPage = 0;
 //---------------------------------------------------------------------------
 
-MainWindowPage::MainWindowPage() : m_hWnd(NULL) {
+MainWindowPage::MainWindowPage() : m_hWnd(nullptr) {
     // ...
 }
 //---------------------------------------------------------------------------
@@ -41,7 +41,7 @@ MainWindowPage::MainWindowPage() : m_hWnd(NULL) {
 LRESULT CALLBACK MainWindowPage::StaticMainWindowPageProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     MainWindowPage * pMainWindowPage = (MainWindowPage *)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
-	if(pMainWindowPage == NULL) {
+	if(pMainWindowPage == nullptr) {
 		return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
@@ -57,7 +57,7 @@ void MainWindowPage::CreateHWND(HWND hOwner) {
         m_wc.lpfnWndProc = ::DefWindowProc;
         m_wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
         m_wc.lpszClassName = "PtokaX_MainWindowPage";
-        m_wc.hInstance = clsServerManager::hInstance;
+        m_wc.hInstance = ServerManager::m_hInstance;
         m_wc.hCursor = ::LoadCursor(m_wc.hInstance, IDC_ARROW);
         m_wc.style = CS_HREDRAW | CS_VREDRAW;
 
@@ -67,10 +67,10 @@ void MainWindowPage::CreateHWND(HWND hOwner) {
     RECT rcMain;
     ::GetClientRect(hOwner, &rcMain);
 
-    m_hWnd = ::CreateWindowEx(WS_EX_CONTROLPARENT, MAKEINTATOM(atomMainWindowPage), "", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-        0, clsGuiSettingManager::iEditHeight + 1, rcMain.right, rcMain.bottom - (clsGuiSettingManager::iEditHeight + 1), hOwner, NULL, clsServerManager::hInstance, NULL);
+    m_hWnd = ::CreateWindowEx(WS_EX_CONTROLPARENT, MAKEINTATOM(atomMainWindowPage), nullptr, WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
+        0, GuiSettingManager::m_iEditHeight + 1, rcMain.right, rcMain.bottom - (GuiSettingManager::m_iEditHeight + 1), hOwner, nullptr, ServerManager::m_hInstance, nullptr);
 
-    if(m_hWnd != NULL) {
+    if(m_hWnd != nullptr) {
         ::SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
         ::SetWindowLongPtr(m_hWnd, GWLP_WNDPROC, (LONG_PTR)StaticMainWindowPageProc);
     }
@@ -82,10 +82,10 @@ LRESULT FirstItemProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, WNDPRO
         return DLGC_WANTTAB;
     } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
         if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
-            ::SetFocus(::GetNextDlgTabItem(clsMainWindow::mPtr->m_hWnd, hWnd, FALSE));
+            ::SetFocus(::GetNextDlgTabItem(MainWindow::m_Ptr->m_hWnd, hWnd, FALSE));
             return 0;
         } else {
-			::SetFocus(clsMainWindow::mPtr->hWndWindowItems[clsMainWindow::TC_TABS]);
+			::SetFocus(MainWindow::m_Ptr->m_hWndWindowItems[MainWindow::TC_TABS]);
             return 0;
         }
     }
@@ -95,7 +95,7 @@ LRESULT FirstItemProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, WNDPRO
 //---------------------------------------------------------------------------
 
 LRESULT CALLBACK FirstButtonProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    return FirstItemProc(hWnd, uMsg, wParam, lParam, clsGuiSettingManager::wpOldButtonProc);
+    return FirstItemProc(hWnd, uMsg, wParam, lParam, GuiSettingManager::m_wpOldButtonProc);
 }
 //------------------------------------------------------------------------------
 
@@ -104,10 +104,10 @@ LRESULT LastItemProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, WNDPROC
         return DLGC_WANTTAB;
     } else if(uMsg == WM_CHAR && wParam == VK_TAB) {
         if((::GetKeyState(VK_SHIFT) & 0x8000) == 0) {
-            ::SetFocus(clsMainWindow::mPtr->hWndWindowItems[clsMainWindow::TC_TABS]);
+            ::SetFocus(MainWindow::m_Ptr->m_hWndWindowItems[MainWindow::TC_TABS]);
             return 0;
         } else {
-			::SetFocus(::GetNextDlgTabItem(clsMainWindow::mPtr->m_hWnd, hWnd, TRUE));
+			::SetFocus(::GetNextDlgTabItem(MainWindow::m_Ptr->m_hWnd, hWnd, TRUE));
             return 0;
         }
     }
@@ -117,7 +117,7 @@ LRESULT LastItemProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, WNDPROC
 //---------------------------------------------------------------------------
 
 LRESULT CALLBACK LastButtonProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    return LastItemProc(hWnd, uMsg, wParam, lParam, clsGuiSettingManager::wpOldButtonProc);
+    return LastItemProc(hWnd, uMsg, wParam, lParam, GuiSettingManager::m_wpOldButtonProc);
 }
 
 //------------------------------------------------------------------------------

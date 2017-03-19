@@ -1,7 +1,7 @@
 /*
  * PtokaX - hub server for Direct Connect peer to peer network.
 
- * Copyright (C) 2004-2015  Petr Kozelka, PPK at PtokaX dot org
+ * Copyright (C) 2004-2017  Petr Kozelka, PPK at PtokaX dot org
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3
@@ -21,7 +21,7 @@
 #define LanguageStringsH
 //---------------------------------------------------------------------------
 
-const char* LangStr[] = {
+const char * LangStr[] = {
     "This hub is running",
     "Hub name",
     "MOTD (message of the day)",
@@ -669,8 +669,6 @@ const char* LangStr[] = {
     "More more deflood", 
     "MyINFO length limit", 
     "Your client send incorrect IP", 
-    "in connection request, your real IP is", 
-    "in search request, your real IP is", 
     "ConnectToMe", 
     "No ConnectToMe deflood", 
     "Please don't flood with ConnectToMe", 
@@ -802,6 +800,7 @@ const char* LangStr[] = {
 	"Remove records older than (days)",
 	"You can use SQL Wildcards",
 	"unlimited", 
+	"Your client send incorrect IP or Port in command",
 };
 //---------------------------------------------------------------------------
 
