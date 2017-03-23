@@ -323,7 +323,7 @@ static int GetMinShare(lua_State * pLua) {
     }
 
 #if LUA_VERSION_NUM < 503
-	lua_pushnumber(pLua, (double)SettingManager::m_Ptr->ui64MinShare);
+	lua_pushnumber(pLua, (double)SettingManager::m_Ptr->m_ui64MinShare);
 #else
     lua_pushinteger(pLua, SettingManager::m_Ptr->m_ui64MinShare);
 #endif
@@ -396,7 +396,7 @@ static int GetMaxShare(lua_State * pLua) {
     }
 
 #if LUA_VERSION_NUM < 503
-	lua_pushnumber(pLua, (double)SettingManager::m_Ptr->ui64MaxShare);
+	lua_pushnumber(pLua, (double)SettingManager::m_Ptr->m_ui64MaxShare);
 #else
     lua_pushinteger(pLua, SettingManager::m_Ptr->m_ui64MaxShare);
 #endif

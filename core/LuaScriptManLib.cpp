@@ -112,7 +112,7 @@ static int GetScripts(lua_State * pLua) {
 		lua_pushliteral(pLua, "iMemUsage");
 		ScriptManager::m_Ptr->m_ppScriptTable[ui8i]->m_pLua == NULL ? lua_pushnil(pLua) :
 #if LUA_VERSION_NUM < 503
-			lua_pushnumber(pLua, lua_gc(ScriptManager::m_Ptr->ppScriptTable[ui8i]->m_pLua, LUA_GCCOUNT, 0));
+			lua_pushnumber(pLua, lua_gc(ScriptManager::m_Ptr->m_ppScriptTable[ui8i]->m_pLua, LUA_GCCOUNT, 0));
 #else
             lua_pushinteger(pLua, lua_gc(ScriptManager::m_Ptr->m_ppScriptTable[ui8i]->m_pLua, LUA_GCCOUNT, 0));
 #endif

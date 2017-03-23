@@ -917,7 +917,7 @@ void ScriptPushUserExtended(lua_State * pLua, User * pUser, const int iTable) {
 
 	lua_pushliteral(pLua, "iHubs");
 #if LUA_VERSION_NUM < 503
-	lua_pushnumber(pLua, pUser->Hubs);
+	lua_pushnumber(pLua, pUser->m_ui32Hubs);
 #else
 	lua_pushinteger(pLua, pUser->m_ui32Hubs);
 #endif
