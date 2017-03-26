@@ -784,11 +784,12 @@ bool HubCommands::TempBanIp(ChatCommand * pChatCommand, const bool bFull) {
             if(ui8Part == 1) {
                 sCmdParts[2] = pChatCommand->m_sCommand+pChatCommand->m_ui32CommandLen+1;
 				ui16CmdPartsLen[2] = (uint16_t)(pChatCommand->m_ui32CommandLen-ui32i-1);
-                break;
+
+				break;
             }
 
 			ui8Part++;
-            sCmdParts[ui8Part] = pChatCommand->m_sCommand+pChatCommand->m_ui32CommandLen+1;
+            sCmdParts[ui8Part] = pChatCommand->m_sCommand+ui32i+1;
         }
     }
 
