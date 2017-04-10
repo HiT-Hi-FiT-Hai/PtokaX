@@ -903,7 +903,7 @@ bool User::MakeLock() {
 		m_pSendBuf = pOldBuf;
 		m_ui32BoolBits |= BIT_ERROR;
 
-		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes in User::MakeLock\n", (uint64_t)szAllignLen);
+		AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes in User::MakeLock\n", szAllignLen);
 
         return false;
     }
@@ -1042,7 +1042,7 @@ bool User::DoRecv() {
 			m_ui32BoolBits |= BIT_ERROR;
             Close();
 
-			AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes for pRecvBuf in User::DoRecv\n", (uint64_t)szAllignLen);
+			AppendDebugLogFormat("[MEM] Cannot (re)allocate %zu bytes for pRecvBuf in User::DoRecv\n", szAllignLen);
 
 			return false;
 		}
@@ -1271,12 +1271,12 @@ bool User::PutInSendBuf(const char * sText, const size_t szTxtLen) {
 						m_ui32BoolBits |= BIT_ERROR;
                         Close();
 
-                        UdpDebug::m_Ptr->BroadcastFormat("[SYS] %s (%s) SendBuffer overflow (AL:%" PRIu64 "[SL:%u|NL:%" PRIu64 "|FL:%" PRIu64 "]/ML:%" PRIu64 "). User disconnected.", 
-							m_sNick, m_sIP, (uint64_t)szAllignLen, m_ui32SendBufDataLen, (uint64_t)szTxtLen, (uint64_t)(m_pSendBufHead-m_pSendBuf), (uint64_t)szMaxBufLen);
+                        UdpDebug::m_Ptr->BroadcastFormat("[SYS] %s (%s) SendBuffer overflow (AL:%zu[SL:%u|NL:%zu|FL:%zu]/ML:%zu). User disconnected.", 
+							m_sNick, m_sIP, szAllignLen, m_ui32SendBufDataLen, szTxtLen, m_pSendBufHead-m_pSendBuf, szMaxBufLen);
                         return false;
                     } else {
-    				    UdpDebug::m_Ptr->BroadcastFormat("[SYS] %s (%s) SendBuffer overflow (AL:%" PRIu64 "[SL:%u|NL:%" PRIu64 "|FL:%" PRIu64 "]/ML:%" PRIu64 "). Buffer cleared - user stays online.", 
-							m_sNick, m_sIP, (uint64_t)szAllignLen, m_ui32SendBufDataLen, (uint64_t)szTxtLen, (uint64_t)(m_pSendBufHead-m_pSendBuf), (uint64_t)szMaxBufLen);
+    				    UdpDebug::m_Ptr->BroadcastFormat("[SYS] %s (%s) SendBuffer overflow (AL:%zu[SL:%u|NL:%zu|FL:%zu]/ML:%zu). Buffer cleared - user stays online.", 
+							m_sNick, m_sIP, szAllignLen, m_ui32SendBufDataLen, szTxtLen, m_pSendBufHead-m_pSendBuf, szMaxBufLen);
                     }
 
                     // we want to keep the slow user online
@@ -1326,7 +1326,7 @@ bool User::PutInSendBuf(const char * sText, const size_t szTxtLen) {
 						m_ui32BoolBits |= BIT_ERROR;
                         Close();
 
-                        AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in User::PutInSendBuf-keepslow\n", (uint64_t)szAllignLen);
+                        AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes in User::PutInSendBuf-keepslow\n", szAllignLen);
 
                         return false;
                     }
@@ -1366,7 +1366,7 @@ bool User::PutInSendBuf(const char * sText, const size_t szTxtLen) {
 			m_ui32BoolBits |= BIT_ERROR;
             Close();
 
-			AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes for new pSendBuf in User::PutInSendBuf\n", (uint64_t)szAllignLen);
+			AppendDebugLogFormat("[MEM] Cannot (re)allocate %zu bytes for new pSendBuf in User::PutInSendBuf\n", szAllignLen);
 
         	return false;
         }
@@ -1696,7 +1696,7 @@ void User::SetVersion(char * sVersion) {
         m_ui32BoolBits |= BIT_ERROR;
         Close();
 
-		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sVersion in User::SetVersion\n", (uint64_t)(szLen+1));
+		AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sVersion in User::SetVersion\n", szLen+1);
 
         return;
     }   
@@ -1725,7 +1725,7 @@ void User::SetLastChat(char * sData, const size_t szLen) {
         m_ui32BoolBits |= BIT_ERROR;
         Close();
 
-		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sLastChat in User::SetLastChat\n", (uint64_t)(szLen+1));
+		AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sLastChat in User::SetLastChat\n", szLen+1);
 
         return;
     }   
@@ -1759,7 +1759,7 @@ void User::SetLastPM(char * sData, const size_t szLen) {
         m_ui32BoolBits |= BIT_ERROR;
         Close();
 
-		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sLastPM in User::SetLastPM\n", (uint64_t)(szLen+1));
+		AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sLastPM in User::SetLastPM\n", szLen+1);
 
         return;
     }
@@ -1794,7 +1794,7 @@ void User::SetLastSearch(char * sData, const size_t szLen) {
         m_ui32BoolBits |= BIT_ERROR;
         Close();
 
-        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sLastSearch in User::SetLastSearch\n", (uint64_t)(szLen+1));
+        AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sLastSearch in User::SetLastSearch\n", szLen+1);
 
         return;
     }   
@@ -1838,7 +1838,7 @@ void User::SetBuffer(char * sKickMsg, size_t szLen/* = 0*/) {
 			m_ui32BoolBits |= BIT_ERROR;
             Close();
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pBuffer in User::SetBuffer\n", (uint64_t)(szLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for pBuffer in User::SetBuffer\n", szLen+1);
 
             return;
         }
@@ -2706,7 +2706,7 @@ void User::AddPrcsdCmd(const uint8_t ui8Type, char * sCommand, const size_t szCo
 					m_ui32BoolBits |= BIT_ERROR;
                     Close();
 
-					AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in User::AddPrcsdCmd\n", (uint64_t)(cur->m_ui32Len+szCommandLen+1));
+					AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes in User::AddPrcsdCmd\n", cur->m_ui32Len+szCommandLen+1);
 
                     return;
                 }
@@ -2737,7 +2737,7 @@ void User::AddPrcsdCmd(const uint8_t ui8Type, char * sCommand, const size_t szCo
 			m_ui32BoolBits |= BIT_ERROR;
             Close();
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sCommand in User::AddPrcsdCmd\n", (uint64_t)(szCommandLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for sCommand in User::AddPrcsdCmd\n", szCommandLen+1);
 
             delete pNewToCmd;
 
@@ -2812,7 +2812,7 @@ void User::AddPrcsdCmd(const uint8_t ui8Type, char * sCommand, const size_t szCo
 		m_ui32BoolBits |= BIT_ERROR;
         Close();
 
-		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sCommand in User::AddPrcsdCmd1\n", (uint64_t)(szCommandLen+1));
+		AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for sCommand in User::AddPrcsdCmd1\n", szCommandLen+1);
 
         delete pNewcmd;
 
@@ -2863,7 +2863,7 @@ char * User::SetUserInfo(char * sOldData, uint8_t &ui8OldDataLen, char * sNewDat
         sOldData = (char *)malloc(szNewDataLen+1);
 #endif
         if(sOldData == NULL) {
-            AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes in User::SetUserInfo\n", (uint64_t)(szNewDataLen+1));
+            AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes in User::SetUserInfo\n", szNewDataLen+1);
             return sOldData;
         }
 

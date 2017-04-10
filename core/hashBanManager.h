@@ -162,7 +162,7 @@ public:
     char BanIp(User * pUser, char * sIp, char * sReason, char * sBy, const bool bFull);
     bool NickBan(User * pUser, char * sNick, char * sReason, char * sBy);
     
-    void TempBan(User * pUser, const char * sReason, char * sBy, const uint32_t ui32Minutes, const time_t &tExpiretime, const bool bFull);
+    void TempBan(User * pUser, const char * sReason, char * sBy, const uint32_t ui32Minutes, const time_t &tExpireTime, const bool bFull);
     char TempBanIp(User * pUser, char * sIp, char * sReason, char * sBy, const uint32_t ui32Minutes, const time_t &tExpireTime, const bool bFull);
     bool NickTempBan(User * pUser, char * sNick, char * sReason, char * sBy, const uint32_t ui32Minutes, const time_t &tExpireTime);
     

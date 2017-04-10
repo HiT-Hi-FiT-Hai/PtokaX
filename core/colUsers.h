@@ -86,7 +86,7 @@ public:
     void Add2OpList(User * pUser);
     void DelFromNickList(char * sNick, const bool bIsOp);
     void DelFromOpList(char * sNick);
-    void SendChat2All(User * pUser, char * sData, const size_t szChatLen, void * pToUser);
+    void SendChat2All(User * pUser, char * sData, const size_t szChatLen, void * pQueueItem);
 	void Add2MyInfos(User * pUser);
 	void DelFromMyInfos(User * pUser);
     void Add2MyInfosTag(User * pUser);

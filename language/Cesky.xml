@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1252" standalone="yes" ?>
-<Language Name="Èeština" Author="Petr &apos;PPK&apos; Kozelka" Version="0.5.2.0 build 524">
+<Language Name="Èeština" Author="Petr &apos;PPK&apos; Kozelka" Version="0.5.2.1 build 553">
     <String Name="ThisHubIsRunning">Tento hub pohání</String>
     <String Name="HubName">Jméno hubu</String>
     <String Name="MOTD(motd)">MOTD (zpráva dne)</String>
@@ -647,8 +647,6 @@
     <String Name="MoreMoreDeflood">Více více defloodu</String>
     <String Name="MyINFOLengthLimit">Limit délky MyINFO</String>
     <String Name="YourClientSendIncorrectIP">Váš klient poslal nesprávnou IP</String>
-    <String Name="InCTMReqRealIPIs">v pøíkazu na spojení, vaše správná IP je</String>
-    <String Name="InSearchReqRealIPIs">v pøíkazu na vyhledávání, vaše správná IP je</String>
     <String Name="ConnectToMe">ConnectToMe</String>
     <String Name="NoCTMDeflood">Žádný ConnectToMe deflood</String>
     <String Name="PleaseDontFloodWithCTM">Prosím nefloodujte s ConnectToMe</String>
@@ -780,4 +778,5 @@
     <String Name="RemoveOldRecords">Odebrat záznamy starší než (dny)</String>
     <String Name="YouCanUseSQLWildcards">Mùžete použít SQL Wildcards</String>
     <String Name="Unlimited">bez limitu</String>
+    <String Name="YourClientSendIncorrectIpPortInCmd">Váš klient poslal nesprávnou IP nebo Port v pøíkazu</String>
 </Language>

@@ -92,7 +92,7 @@ RegUser * RegUser::CreateReg(char * sRegNick, const size_t szRegNickLen, char * 
 	pReg->m_sNick = (char *)malloc(szRegNickLen+1);
 #endif
     if(pReg->m_sNick == NULL) {
-        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sNick in RegUser::RegUser\n", (uint64_t)(szRegNickLen+1));
+        AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sNick in RegUser::RegUser\n", szRegNickLen+1);
 
         delete pReg;
         return NULL;
@@ -121,7 +121,7 @@ RegUser * RegUser::CreateReg(char * sRegNick, const size_t szRegNickLen, char * 
         pReg->m_sPass = (char *)malloc(szRegPassLen+1);
 #endif
         if(pReg->m_sPass == NULL) {
-            AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sPass in RegUser::RegUser\n", (uint64_t)(szRegPassLen+1));
+            AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sPass in RegUser::RegUser\n", szRegPassLen+1);
 
             delete pReg;
             return NULL;
@@ -149,7 +149,7 @@ bool RegUser::UpdatePassword(char * sNewPass, const size_t szNewLen) {
             if(m_sPass == NULL) {
 				m_ui8PassHash = (uint8_t *)sOldBuf;
 
-                AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes for m_ui8PassHash->sPass in RegUser::UpdatePassword\n", (uint64_t)(szNewLen+1));
+                AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes for m_ui8PassHash->sPass in RegUser::UpdatePassword\n", szNewLen+1);
 
                 return false;
             }
@@ -167,7 +167,7 @@ bool RegUser::UpdatePassword(char * sNewPass, const size_t szNewLen) {
             if(m_sPass == NULL) {
 				m_sPass = sOldPass;
 
-                AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes for m_sPass in RegUser::UpdatePassword\n", (uint64_t)(szNewLen+1));
+                AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes for m_sPass in RegUser::UpdatePassword\n", szNewLen+1);
 
                 return false;
             }

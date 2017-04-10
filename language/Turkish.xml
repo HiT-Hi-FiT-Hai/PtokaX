@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<Language Name="Turkish Language" Author="zapman" Version="0.5.1.0 build 499">
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<Language Name="Turkish Language" Author="zapman" Version="0.5.2.1 build 524">
     <String Name="ThisHubIsRunning">Hub şu sürümü çalıştırıyor:</String>
     <String Name="HubName">Hub ismi</String>
     <String Name="MOTD(motd)">MOTD (günün mesajı)</String>
@@ -778,4 +778,6 @@
     <String Name="DatabaseSupport">Veritabanı desteği (kullanıcı ve IP verilerini depolamaya yarar)</String>
     <String Name="EnableDatabase">Veritabanını etkinleştir</String>
     <String Name="RemoveOldRecords">Şu kadar günden eski kayıtları kaldır</String>
+    <String Name="YouCanUseSQLWildcards">SQL jokerlerini kullanabilirsiniz</String>
+    <String Name="Unlimited">sınırsız</String>
 </Language>

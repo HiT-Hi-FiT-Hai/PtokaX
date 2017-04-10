@@ -249,7 +249,7 @@ void GlobalDataQueue::AddQueueItem(char * sCommand1, const size_t szLen1, char *
     if(pNewItem->m_pCommand1 == NULL) {
         delete pNewItem;
 
-		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pNewItem->m_pCommand1 in GlobalDataQueue::AddQueueItem\n", (uint64_t)(szLen1+1));
+		AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for pNewItem->m_pCommand1 in GlobalDataQueue::AddQueueItem\n", szLen1+1);
 
         return;
     }
@@ -275,7 +275,7 @@ void GlobalDataQueue::AddQueueItem(char * sCommand1, const size_t szLen1, char *
 #endif
             delete pNewItem;
 
-            AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pNewItem->m_pCommand2 in GlobalDataQueue::AddQueueItem\n", (uint64_t)(szLen2+1));
+            AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for pNewItem->m_pCommand2 in GlobalDataQueue::AddQueueItem\n", szLen2+1);
 
             return;
         }
@@ -325,7 +325,7 @@ void GlobalDataQueue::OpListStore(char * sNick) {
             if(m_OpListQueue.m_pBuffer == NULL) {
 				m_OpListQueue.m_pBuffer = pOldBuf;
 
-                AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in GlobalDataQueue::OpListStore\n", (uint64_t)szAllignLen);
+                AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes in GlobalDataQueue::OpListStore\n", szAllignLen);
 
                 return;
             }
@@ -365,7 +365,7 @@ void GlobalDataQueue::UserIPStore(User * pUser) {
             if(m_UserIPQueue.m_pBuffer == NULL) {
 				m_UserIPQueue.m_pBuffer = pOldBuf;
 
-				AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in GlobalDataQueue::UserIPStore\n", (uint64_t)szAllignLen);
+				AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes in GlobalDataQueue::UserIPStore\n", szAllignLen);
 
                 return;
             }
@@ -820,7 +820,7 @@ void GlobalDataQueue::ProcessSingleItems(User * pUser) const {
                     szWanted = szLen+pCur->m_szDataLen+pUser->m_ui8NickLen+13;
                     if(ServerManager::m_szGlobalBufferSize < szWanted) {
                         if(CheckAndResizeGlobalBuffer(szWanted) == false) {
-							AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in GlobalDataQueue::ProcessSingleItems\n", (uint64_t)Allign128K(szWanted));
+							AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes in GlobalDataQueue::ProcessSingleItems\n", Allign128K(szWanted));
                             break;
                         }
                     }
@@ -840,7 +840,7 @@ void GlobalDataQueue::ProcessSingleItems(User * pUser) const {
                         szWanted = szLen+pCur->m_szDataLen+pUser->m_ui8NickLen+13;
                         if(ServerManager::m_szGlobalBufferSize < szWanted) {
                             if(CheckAndResizeGlobalBuffer(szWanted) == false) {
-								AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in GlobalDataQueue::ProcessSingleItems1\n", (uint64_t)Allign128K(szWanted));
+								AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes in GlobalDataQueue::ProcessSingleItems1\n", Allign128K(szWanted));
 								break;
                             }
                         }
@@ -860,7 +860,7 @@ void GlobalDataQueue::ProcessSingleItems(User * pUser) const {
                         szWanted = szLen+pCur->m_szDataLen+pUser->m_ui8NickLen+13;
                         if(ServerManager::m_szGlobalBufferSize < szWanted) {
                             if(CheckAndResizeGlobalBuffer(szWanted) == false) {
-								AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in GlobalDataQueue::ProcessSingleItems2\n", (uint64_t)Allign128K(szWanted));
+								AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes in GlobalDataQueue::ProcessSingleItems2\n", Allign128K(szWanted));
                                 break;
                             }
                         }
@@ -880,7 +880,7 @@ void GlobalDataQueue::ProcessSingleItems(User * pUser) const {
                         szWanted = szLen+pCur->m_szDataLen;
                         if(ServerManager::m_szGlobalBufferSize < szWanted) {
                             if(CheckAndResizeGlobalBuffer(szWanted) == false) {
-								AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in GlobalDataQueue::ProcessSingleItems3\n", (uint64_t)Allign128K(szWanted));
+								AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes in GlobalDataQueue::ProcessSingleItems3\n", Allign128K(szWanted));
                                 break;
                             }
                         }
@@ -895,7 +895,7 @@ void GlobalDataQueue::ProcessSingleItems(User * pUser) const {
                         szWanted = szLen+pCur->m_szDataLen+pUser->m_ui8NickLen+13;
                         if(ServerManager::m_szGlobalBufferSize < szWanted) {
                             if(CheckAndResizeGlobalBuffer(szWanted) == false) {
-								AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in GlobalDataQueue::ProcessSingleItems4\n", (uint64_t)Allign128K(szWanted));
+								AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes in GlobalDataQueue::ProcessSingleItems4\n", Allign128K(szWanted));
                                 break;
                             }
                         }
@@ -940,7 +940,7 @@ void GlobalDataQueue::SingleItemStore(char * sData, const size_t szDataLen, User
         if(pNewItem->m_pData == NULL) {
             delete pNewItem;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes in GlobalDataQueue::SingleItemStore\n", (uint64_t)(szDataLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes in GlobalDataQueue::SingleItemStore\n", szDataLen+1);
 
             return;
         }
@@ -1050,7 +1050,7 @@ void GlobalDataQueue::AddDataToQueue(GlobalQueue & rQueue, char * sData, const s
         if(rQueue.m_pBuffer == NULL) {
             rQueue.m_pBuffer = pOldBuf;
 
-            AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in GlobalDataQueue::AddDataToQueue\n", (uint64_t)szAllignLen);
+            AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes in GlobalDataQueue::AddDataToQueue\n", szAllignLen);
             return;
         }
 
@@ -1135,7 +1135,7 @@ void GlobalDataQueue::FillBlankQueueItem(char * sCommand, const size_t szLen, vo
 	pQueueItem->m_pCommand1 = (char *)malloc(szLen+1);
 #endif
     if(pQueueItem->m_pCommand1 == NULL) {
-		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pNewItem->m_pCommand1 in GlobalDataQueue::FillBlankQueueItem\n", (uint64_t)(szLen+1));
+		AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for pNewItem->m_pCommand1 in GlobalDataQueue::FillBlankQueueItem\n", szLen+1);
 
         return;
     }

@@ -534,7 +534,7 @@ SetMan.tNumbers.MinShareUnits						-	Min share units. 0 = B, 1 = kB, 2 = MB, 3 =
 SetMan.tNumbers.MaxShareLimit						-	Max share limit. Max 9999.
 SetMan.tNumbers.MaxShareUnits						-	Max share units. 0 = B, 1 = kB, 2 = MB, 3 = GB, 4 = TB. Max 4.
 SetMan.tNumbers.MinSlotsLimit						-	Min slots limit.
-SetMan.tNumbers.MaxSlotsLimt						-	Max slots limit.
+SetMan.tNumbers.MaxSlotsLimit						-	Max slots limit.
 SetMan.tNumbers.HubSlotRatioHubs					-	Hubs for hub/slot ratio.
 SetMan.tNumbers.HubSlotRatioSlots					-	Slots for hub/slot ratio.
 SetMan.tNumbers.MaxHubsLimit						-	Max hubs limit.

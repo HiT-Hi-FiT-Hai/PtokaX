@@ -3353,7 +3353,7 @@ PrcsdUsrCmd * DcCommands::AddSearch(User * pUser, PrcsdUsrCmd * pCmdSearch, char
             pUser->m_ui32BoolBits |= User::BIT_ERROR;
             pUser->Close();
 
-			AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes for DcCommands::AddSearch1\n", (uint64_t)(pCmdSearch->m_ui32Len+szLen+1));
+			AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes for DcCommands::AddSearch1\n", pCmdSearch->m_ui32Len+szLen+1);
 
             return pCmdSearch;
         }
@@ -3387,7 +3387,7 @@ PrcsdUsrCmd * DcCommands::AddSearch(User * pUser, PrcsdUsrCmd * pCmdSearch, char
             pUser->m_ui32BoolBits |= User::BIT_ERROR;
             pUser->Close();
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for DcCommands::Search5\n", (uint64_t)(szLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for DcCommands::Search5\n", szLen+1);
 
             return NULL;
         }

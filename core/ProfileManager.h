@@ -42,7 +42,7 @@ private:
     ProfileManager(const ProfileManager&);
     const ProfileManager& operator=(const ProfileManager&);
 
-    ProfileItem * CreateProfile(const char * name);
+    ProfileItem * CreateProfile(const char * sName);
 
 	void Load();
     void LoadXML();

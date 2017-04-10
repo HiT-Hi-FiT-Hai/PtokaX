@@ -63,7 +63,7 @@ ReservedNicksManager::ReservedNick * ReservedNicksManager::ReservedNick::CreateR
 	pReservedNick->m_sNick = (char *)malloc(szNickLen+1);
 #endif
     if(pReservedNick->m_sNick == NULL) {
-        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes in ReservedNick::CreateReservedNick\n", (uint64_t)(szNickLen+1));
+        AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes in ReservedNick::CreateReservedNick\n", szNickLen+1);
 
         delete pReservedNick;
         return NULL;

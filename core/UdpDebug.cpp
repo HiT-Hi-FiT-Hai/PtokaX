@@ -303,7 +303,7 @@ bool UdpDebug::New(char * sIP, const uint16_t ui16Port, const bool bAllData, cha
 	pNewDbg->m_sNick = (char *)malloc(szNameLen+1);
 #endif
     if(pNewDbg->m_sNick == NULL) {
-		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sNick in UdpDebug::New\n", (uint64_t)(szNameLen+1));
+		AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sNick in UdpDebug::New\n", szNameLen+1);
 
         delete pNewDbg;
         return false;

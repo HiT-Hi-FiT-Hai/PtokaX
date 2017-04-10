@@ -76,7 +76,7 @@ public:
 	RegisterThread();
 	~RegisterThread();
 
-	void Setup(char * sAddresses, const uint16_t ui16AddrsLen);
+	void Setup(char * sListAddresses, const uint16_t ui16AddrsLen);
 	void Resume();
 	void Run();
 	void Close();

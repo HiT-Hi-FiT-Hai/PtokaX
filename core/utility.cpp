@@ -822,9 +822,9 @@ int GenerateRangeBanMessage(RangeBanItem * pRangeBan, const time_t &tAccTime) {
 }
 //---------------------------------------------------------------------------
 
-bool GenerateTempBanTime(const uint8_t ui8Multiplyer, const uint32_t ui32Time, time_t &tAcc_time, time_t &tBan_time) {
-    time(&tAcc_time);
-    struct tm *tm = localtime(&tAcc_time);
+bool GenerateTempBanTime(const uint8_t ui8Multiplyer, const uint32_t ui32Time, time_t &tAccTime, time_t &tBanTime) {
+    time(&tAccTime);
+    struct tm *tm = localtime(&tAccTime);
 
     switch(ui8Multiplyer) {
         case 'm':
@@ -851,9 +851,9 @@ bool GenerateTempBanTime(const uint8_t ui8Multiplyer, const uint32_t ui32Time, t
 
     tm->tm_isdst = -1;
 
-    tBan_time = mktime(tm);
+    tBanTime = mktime(tm);
 
-    if(tBan_time == (time_t)-1) {
+    if(tBanTime == (time_t)-1) {
         return false;
     }
 
@@ -1350,7 +1350,7 @@ bool CheckAndResizeGlobalBuffer(const size_t szWantedSize) {
     if(ServerManager::m_pGlobalBuffer == NULL) {
         ServerManager::m_pGlobalBuffer = sOldBuf;
 
-		AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in CheckAndResizeGlobalBuffer for ServerManager::m_pGlobalBuffer\n", (uint64_t)ServerManager::m_szGlobalBufferSize);
+		AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes in CheckAndResizeGlobalBuffer for ServerManager::m_pGlobalBuffer\n", ServerManager::m_szGlobalBufferSize);
 
         ServerManager::m_szGlobalBufferSize = szOldSize;
         return false;
@@ -1378,7 +1378,7 @@ void ReduceGlobalBuffer() {
     if(ServerManager::m_pGlobalBuffer == NULL) {
         ServerManager::m_pGlobalBuffer = sOldBuf;
 
-		AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes in ReduceGlobalBuffer for ServerManager::m_pGlobalBuffer\n", (uint64_t)ServerManager::m_szGlobalBufferSize);
+		AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes in ReduceGlobalBuffer for ServerManager::m_pGlobalBuffer\n", ServerManager::m_szGlobalBufferSize);
 
         ServerManager::m_szGlobalBufferSize = szOldSize;
         return;

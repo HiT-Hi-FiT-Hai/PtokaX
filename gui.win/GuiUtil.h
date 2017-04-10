@@ -33,7 +33,7 @@ void RichEditAppendText(const HWND hRichEdit, const char * sText, const bool bWi
 
 int ListViewGetInsertPosition(const HWND hListView, const void * pItem, const bool bSortAscending, int (*pCompareFunc)(const void * pItem, const void * pOtherItem));
 void * ListViewGetItem(const HWND hListView, const int iPos);
-void ListViewUpdateArrow(const HWND hListView, const bool isAscending, const int iSortColumn);
+void ListViewUpdateArrow(const HWND hListView, const bool bAscending, const int iSortColumn);
 int ListViewGetItemPosition(const HWND hListView, void * pItem);
 void ListViewGetMenuPos(const HWND hListView, int &iX, int &iY);
 void ListViewSelectFirstItem(const HWND hListView);

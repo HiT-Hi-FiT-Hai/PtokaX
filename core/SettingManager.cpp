@@ -121,7 +121,7 @@ SettingManager::~SettingManager(void) {
 
 #ifdef _WIN32
         if(HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)m_sTexts[szi]) == 0) {
-			AppendDebugLogFormat("[MEM] Cannot deallocate m_sTexts[%" PRIu64 "] in SettingManager::~SettingManager\n", (uint64_t)szi);
+			AppendDebugLogFormat("[MEM] Cannot deallocate m_sTexts[%zu] in SettingManager::~SettingManager\n", szi);
         }
 #else
 		free(m_sTexts[szi]);
@@ -135,7 +135,7 @@ SettingManager::~SettingManager(void) {
 
 #ifdef _WIN32
         if(HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)m_sPreTexts[szi]) == 0) {
-			AppendDebugLogFormat("[MEM] Cannot deallocate m_sPreTexts[%" PRIu64 "] in SettingManager::~SettingManager\n", (uint64_t)szi);
+			AppendDebugLogFormat("[MEM] Cannot deallocate m_sPreTexts[%zu] in SettingManager::~SettingManager\n", szi);
         }
 #else
 		free(m_sPreTexts[szi]);
@@ -1221,7 +1221,7 @@ void SettingManager::SetText(const size_t szTxtId, const char * sTxt, const size
         if(m_sTexts[szTxtId] != NULL) {
 #ifdef _WIN32
             if(HeapFree(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, (void *)m_sTexts[szTxtId]) == 0) {
-                AppendDebugLogFormat("[MEM] Cannot deallocate m_sTexts[%" PRIu64 "] in SettingManager::SetText\n", (uint64_t)(szTxtId));
+                AppendDebugLogFormat("[MEM] Cannot deallocate m_sTexts[%zu] in SettingManager::SetText\n", szTxtId);
             }
 #else
             free(m_sTexts[szTxtId]);
@@ -1243,7 +1243,7 @@ void SettingManager::SetText(const size_t szTxtId, const char * sTxt, const size
         if(m_sTexts[szTxtId] == NULL) {
 			m_sTexts[szTxtId] = sOldText;
 
-			AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::SetText\n", (uint64_t)(szLen+1));
+			AppendDebugLogFormat("[MEM] Cannot (re)allocate %zu bytes in SettingManager::SetText\n", szLen+1);
 
             if(szTxtId == SETTXT_HUB_NAME || szTxtId == SETTXT_HUB_ADDRESS || szTxtId == SETTXT_HUB_DESCRIPTION
 #ifdef _WITH_POSTGRES
@@ -1522,7 +1522,7 @@ void SettingManager::UpdateMOTD() {
     if(m_sPreTexts[SETPRETXT_MOTD] == NULL) {
 		m_sPreTexts[SETPRETXT_MOTD] = sOldMotd;
 
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::UpdateMOTD\n", (uint64_t)szNeededMem);
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %zu bytes in SettingManager::UpdateMOTD\n", szNeededMem);
 
         return;
     }
@@ -1568,7 +1568,7 @@ void SettingManager::UpdateHubNameWelcome() {
     if(m_sPreTexts[SETPRETXT_HUB_NAME_WLCM] == NULL) {
 		m_sPreTexts[SETPRETXT_HUB_NAME_WLCM] = sOldWelcome;
 
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::UpdateHubNameWelcome\n", (uint64_t)szNeededMem);
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %zu bytes in SettingManager::UpdateHubNameWelcome\n", szNeededMem);
 
         return;
     }
@@ -1614,7 +1614,7 @@ void SettingManager::UpdateHubName() {
     if(m_sPreTexts[SETPRETXT_HUB_NAME] == NULL) {
 		m_sPreTexts[SETPRETXT_HUB_NAME] = sOldHubName;
 
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::UpdateHubName\n", (uint64_t)szNeededMem);
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %zu bytes in SettingManager::UpdateHubName\n", szNeededMem);
 
         return;
     }
@@ -1676,7 +1676,7 @@ void SettingManager::UpdateRedirectAddress() {
     if(m_sPreTexts[SETPRETXT_REDIRECT_ADDRESS] == NULL) {
 		m_sPreTexts[SETPRETXT_REDIRECT_ADDRESS] = sOldRedirAddr;
 
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::UpdateRedirectAddress\n", (uint64_t)szNeededLen);
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %zu bytes in SettingManager::UpdateRedirectAddress\n", szNeededLen);
 
         return;
     }
@@ -1719,7 +1719,7 @@ void SettingManager::UpdateRegOnlyMessage() {
     if(m_sPreTexts[SETPRETXT_REG_ONLY_MSG] == NULL) {
 		m_sPreTexts[SETPRETXT_REG_ONLY_MSG] = sOldRegOnlyMsg;
 
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::UpdateRegOnlyMessage\n", (uint64_t)szNeededMem);
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %zu bytes in SettingManager::UpdateRegOnlyMessage\n", szNeededMem);
 
         return;
     }
@@ -1824,7 +1824,7 @@ void SettingManager::UpdateShareLimitMessage() {
     if(m_sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] == NULL) {
 		m_sPreTexts[SETPRETXT_SHARE_LIMIT_MSG] = sOldShareLimitMsg;
 
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::UpdateShareLimitMessage\n", (uint64_t)iMsgLen+1);
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %d bytes in SettingManager::UpdateShareLimitMessage\n", iMsgLen+1);
 
         return;
     }
@@ -1906,7 +1906,7 @@ void SettingManager::UpdateSlotsLimitMessage() {
     if(m_sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] == NULL) {
 		m_sPreTexts[SETPRETXT_SLOTS_LIMIT_MSG] = sOldSlotsLimitMsg;
 
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::UpdateSlotsLimitMessage\n", (uint64_t)iMsgLen+1);
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %d bytes in SettingManager::UpdateSlotsLimitMessage\n", iMsgLen+1);
 
         return;
     }
@@ -1987,7 +1987,7 @@ void SettingManager::UpdateHubSlotRatioMessage() {
     if(m_sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] == NULL) {
 		m_sPreTexts[SETPRETXT_HUB_SLOT_RATIO_MSG] = sOldHubSlotLimitMsg;
 
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::UpdateHubSlotRatioMessage\n", (uint64_t)iMsgLen+1);
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %d bytes in SettingManager::UpdateHubSlotRatioMessage\n", iMsgLen+1);
 
         return;
     }
@@ -2065,7 +2065,7 @@ void SettingManager::UpdateMaxHubsLimitMessage() {
     if(m_sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] == NULL) {
 		m_sPreTexts[SETPRETXT_MAX_HUBS_LIMIT_MSG] = sOldHubLimitMsg;
 
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::UpdateMaxHubsLimitMessage\n", (uint64_t)iMsgLen+1);
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %d bytes in SettingManager::UpdateMaxHubsLimitMessage\n", iMsgLen+1);
 
         return;
     }
@@ -2121,7 +2121,7 @@ void SettingManager::UpdateNoTagMessage() {
     if(m_sPreTexts[SETPRETXT_NO_TAG_MSG] == NULL) {
 		m_sPreTexts[SETPRETXT_NO_TAG_MSG] = sOldNoTagMsg;
 
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::UpdateNoTagMessage\n", (uint64_t)szNeededMem);
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %zu bytes in SettingManager::UpdateNoTagMessage\n", szNeededMem);
 
         return;
     }
@@ -2190,7 +2190,7 @@ void SettingManager::UpdateTempBanRedirAddress() {
     if(m_sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS] == NULL) {
 		m_sPreTexts[SETPRETXT_TEMP_BAN_REDIR_ADDRESS] = sOldTempBanRedirMsg;
 
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::UpdateTempBanRedirAddress\n", (uint64_t)szNeededMem);
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %zu bytes in SettingManager::UpdateTempBanRedirAddress\n", szNeededMem);
 
         return;
     }
@@ -2253,7 +2253,7 @@ void SettingManager::UpdatePermBanRedirAddress() {
     if(m_sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS] == NULL) {
 		m_sPreTexts[SETPRETXT_PERM_BAN_REDIR_ADDRESS] = sOldPermBanRedirMsg;
 
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::UpdatePermBanRedirAddress\n", (uint64_t)szNeededMem);
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %zu bytes in SettingManager::UpdatePermBanRedirAddress\n", szNeededMem);
 
         return;
     }
@@ -2346,7 +2346,7 @@ void SettingManager::UpdateNickLimitMessage() {
     if(m_sPreTexts[SETPRETXT_NICK_LIMIT_MSG] == NULL) {
 		m_sPreTexts[SETPRETXT_NICK_LIMIT_MSG] = sOldNickLimitMsg;
 
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::UpdateNickLimitMessage\n", (uint64_t)iMsgLen+1);
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %d bytes in SettingManager::UpdateNickLimitMessage\n", iMsgLen+1);
 
         return;
     }
@@ -2496,7 +2496,7 @@ void SettingManager::UpdateBot(const bool bNickChanged/* = true*/) {
     if(m_sPreTexts[SETPRETXT_HUB_BOT_MYINFO] == NULL) {
 		m_sPreTexts[SETPRETXT_HUB_BOT_MYINFO] = sOldHubBotMyinfoMsg;
 
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::UpdateBot\n", (uint64_t)szNeededMem);
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %zu bytes in SettingManager::UpdateBot\n", szNeededMem);
 
         return;
     }
@@ -2624,7 +2624,7 @@ void SettingManager::UpdateOpChat(const bool bNickChanged/* = true*/) {
     if(m_sPreTexts[SETPRETXT_OP_CHAT_HELLO] == NULL) {
 		m_sPreTexts[SETPRETXT_OP_CHAT_HELLO] = sOldOpChatHelloMsg;
 
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::UpdateOpChat\n", (uint64_t)szNeededMem);
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %zu bytes in SettingManager::UpdateOpChat\n", szNeededMem);
 
         return;
     }
@@ -2653,7 +2653,7 @@ void SettingManager::UpdateOpChat(const bool bNickChanged/* = true*/) {
     if(m_sPreTexts[SETPRETXT_OP_CHAT_MYINFO] == NULL) {
 		m_sPreTexts[SETPRETXT_OP_CHAT_MYINFO] = sOldOpChatMyInfoMsg;
 
-		AppendDebugLogFormat("[MEM] Cannot (re)allocate %" PRIu64 " bytes in SettingManager::UpdateOpChat1\n", (uint64_t)szNeededMem);
+		AppendDebugLogFormat("[MEM] Cannot (re)allocate %zu bytes in SettingManager::UpdateOpChat1\n", szNeededMem);
 
 		if(m_sPreTexts[SETPRETXT_OP_CHAT_MYINFO] == NULL) {
             exit(EXIT_FAILURE);

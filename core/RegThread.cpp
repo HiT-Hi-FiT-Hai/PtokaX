@@ -146,7 +146,7 @@ void RegisterThread::AddSock(char * sAddress, const size_t szLen) {
     if(pNewSock->m_sAddress == NULL) {
 		delete pNewSock;
 
-		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sAddress in RegisterThread::AddSock\n", (uint64_t)(szLen+1));
+		AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for sAddress in RegisterThread::AddSock\n", szLen+1);
 
         return;
     }
@@ -512,7 +512,7 @@ bool RegisterThread::Receive(RegSocket * pSock) {
         if(pSock->m_pRecvBuf == NULL) {
             free(oldbuf);
 
-			AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes for sRecvBuf in RegisterThread::Receive\n", (uint64_t)szAllignLen);
+			AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes for sRecvBuf in RegisterThread::Receive\n", szAllignLen);
 
             return false;
         }
@@ -730,7 +730,7 @@ void RegisterThread::Add2SendBuf(RegSocket * pSock, char * sData) {
     
     pSock->m_pSendBuf = (char *)malloc(szLen+1);
     if(pSock->m_pSendBuf == NULL) {
-        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sSendBuf in RegisterThread::Add2SendBuf\n", (uint64_t)(szLen+1));
+        AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for sSendBuf in RegisterThread::Add2SendBuf\n", szLen+1);
 
         return;
     }

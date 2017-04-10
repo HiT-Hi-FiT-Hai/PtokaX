@@ -38,7 +38,7 @@ struct ScriptBot {
     ScriptBot(const ScriptBot&);
     const ScriptBot& operator=(const ScriptBot&);
 
-    static ScriptBot * CreateScriptBot(char * sNick, const size_t szNickLen, char * sDescription, const size_t szDscrLen, char * sEmail, const size_t szEmailLen, const bool bOP);
+    static ScriptBot * CreateScriptBot(char * sBotNick, const size_t szNickLen, char * sDescription, const size_t szDscrLen, char * sEmail, const size_t szEmailLen, const bool bOP);
 };
 //------------------------------------------------------------------------------
 

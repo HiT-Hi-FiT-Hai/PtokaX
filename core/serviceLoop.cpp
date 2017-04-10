@@ -254,7 +254,7 @@ void ServiceLoop::AcceptUser(AcceptedSocket * pAccptSocket) {
         } else {
             bIPv6 = true;
 #if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
-            win_inet_ntop(&((struct sockaddr_in6 *)&AccptSocket->addr)->sin6_addr, sIP, 40);
+            win_inet_ntop(&((struct sockaddr_in6 *)&pAccptSocket->m_Addr)->sin6_addr, sIP, 40);
 #else
             inet_ntop(AF_INET6, &((struct sockaddr_in6 *)&pAccptSocket->m_Addr)->sin6_addr, sIP, 40);
 #endif
@@ -765,7 +765,7 @@ void ServiceLoop::ReceiveLoop() {
                         curUser->m_ui32BoolBits |= User::BIT_ERROR;
                         curUser->Close();
 
-						AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sLockUsrConn in ServiceLoop::ReceiveLoop\n", (uint64_t)(szNeededLen+1));
+						AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for sLockUsrConn in ServiceLoop::ReceiveLoop\n", szNeededLen+1);
 
                 		continue;
                     }

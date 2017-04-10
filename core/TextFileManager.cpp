@@ -105,7 +105,7 @@ bool TextFilesManager::ProcessTextFilesCmd(User * pUser, char * sCommand, const 
 			char * sMSG = (char *)malloc(szChatLen);
 #endif
             if(sMSG == NULL) {
-        		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sMsg in TextFilesManager::ProcessTextFilesCmd\n", (uint64_t)szChatLen);
+        		AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for sMsg in TextFilesManager::ProcessTextFilesCmd\n", szChatLen);
 
                 return true;
             }
@@ -200,9 +200,10 @@ void TextFilesManager::RefreshTextFiles() {
 					pNewTxtFile->m_sText[size] = '|';
 					pNewTxtFile->m_sText[size+1] = '\0';
 
-					pNewTxtFile->m_sCommand = (char *)HeapAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, strlen(textfile.name)-3);
+					size_t szFileName = strlen(textfile.name)-4;
+					pNewTxtFile->m_sCommand = (char *)HeapAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, szFileName+1);
 					if(pNewTxtFile->m_sCommand == NULL) {
-						AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sCommand in TextFilesManager::RefreshTextFiles\n", (uint64_t)(strlen(textfile.name)-3));
+						AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sCommand in TextFilesManager::RefreshTextFiles\n", szFileName+1);
 
 						fclose(f);
 						_findclose(hFile);
@@ -212,8 +213,8 @@ void TextFilesManager::RefreshTextFiles() {
 						return;
 					}
 
-					memcpy(pNewTxtFile->m_sCommand, textfile.name, strlen(textfile.name)-4);
-					pNewTxtFile->m_sCommand[strlen(textfile.name)-4] = '\0';
+					memcpy(pNewTxtFile->m_sCommand, textfile.name, szFileName);
+					pNewTxtFile->m_sCommand[szFileName] = '\0';
 
 					pNewTxtFile->m_pPrev = NULL;
 
@@ -282,9 +283,10 @@ void TextFilesManager::RefreshTextFiles() {
 				pNewTxtFile->m_sText[size] = '|';
                 pNewTxtFile->m_sText[size+1] = '\0';
 
-				pNewTxtFile->m_sCommand = (char *)malloc(strlen(p_dirent->d_name)-3);
+				size_t szFileName = strlen(p_dirent->d_name)-4;
+				pNewTxtFile->m_sCommand = (char *)malloc(szFileName+1);
 				if(pNewTxtFile->m_sCommand == NULL) {
-					AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sCommand in TextFilesManager::RefreshTextFiles\n", (uint64_t)(strlen(p_dirent->d_name)-3));
+					AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sCommand in TextFilesManager::RefreshTextFiles\n", szFileName+1);
 
 					fclose(f);
 					closedir(p_txtdir);
@@ -294,8 +296,8 @@ void TextFilesManager::RefreshTextFiles() {
                     return;
                 }
 
-                memcpy(pNewTxtFile->m_sCommand, p_dirent->d_name, strlen(p_dirent->d_name)-4);
-                pNewTxtFile->m_sCommand[strlen(p_dirent->d_name)-4] = '\0';
+                memcpy(pNewTxtFile->m_sCommand, p_dirent->d_name, szFileName);
+                pNewTxtFile->m_sCommand[szFileName] = '\0';
 
                 pNewTxtFile->m_pPrev = NULL;
 

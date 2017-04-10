@@ -1202,7 +1202,7 @@ void BanManager::Load() {
 				strcpy(pBan->m_sIp, inet_ntoa(ipv4addr));
     		} else {
 #if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
-            	win_inet_ntop(pBan->ui128IpHash, pBan->sIp, 40);
+            	win_inet_ntop(pBan->m_ui128IpHash, pBan->m_sIp, 40);
 #else
             	inet_ntop(AF_INET6, pBan->m_ui128IpHash, pBan->m_sIp, 40);
 #endif
@@ -1354,7 +1354,7 @@ void BanManager::Load() {
 			strcpy(pRangeBan->m_sIpFrom, inet_ntoa(ipv4addr));
     	} else {
 #if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
-            win_inet_ntop(pRangeBan->ui128FromIpHash, pRangeBan->sIpFrom, 40);
+            win_inet_ntop(pRangeBan->m_ui128FromIpHash, pRangeBan->m_sIpFrom, 40);
 #else
             inet_ntop(AF_INET6, pRangeBan->m_ui128FromIpHash, pRangeBan->m_sIpFrom, 40);
 #endif
@@ -1375,7 +1375,7 @@ void BanManager::Load() {
 			strcpy(pRangeBan->m_sIpTo, inet_ntoa(ipv4addr));
     	} else {
 #if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
-            win_inet_ntop(pRangeBan->ui128ToIpHash, pRangeBan->sIpTo, 40);
+            win_inet_ntop(pRangeBan->m_ui128ToIpHash, pRangeBan->m_sIpTo, 40);
 #else
             inet_ntop(AF_INET6, pRangeBan->m_ui128ToIpHash, pRangeBan->m_sIpTo, 40);
 #endif
@@ -1578,7 +1578,7 @@ void BanManager::LoadXML() {
 							Ban->m_sNick = (char *)malloc(szNickLen+1);
 #endif
                             if(Ban->m_sNick == NULL) {
-								AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sNick in BanManager::LoadXML\n", (uint64_t)(szNickLen+1));
+								AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sNick in BanManager::LoadXML\n", szNickLen+1);
 
                                 exit(EXIT_FAILURE);
                             }
@@ -1605,7 +1605,7 @@ void BanManager::LoadXML() {
 						Ban->m_sReason = (char *)malloc(szReasonLen+1);
 #endif
                         if(Ban->m_sReason == NULL) {
-							AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sReason in BanManager::LoadXML\n", (uint64_t)(szReasonLen+1));
+							AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sReason in BanManager::LoadXML\n", szReasonLen+1);
 
                             exit(EXIT_FAILURE);
                         }
@@ -1625,7 +1625,7 @@ void BanManager::LoadXML() {
 						Ban->m_sBy = (char *)malloc(szByLen+1);
 #endif
                         if(Ban->m_sBy == NULL) {
-                            AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sBy1 in BanManager::LoadXML\n", (uint64_t)(szByLen+1));
+                            AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sBy1 in BanManager::LoadXML\n", szByLen+1);
                             exit(EXIT_FAILURE);
                         }
 
@@ -1749,7 +1749,7 @@ void BanManager::LoadXML() {
 						RangeBan->m_sReason = (char *)malloc(szReasonLen+1);
 #endif
                         if(RangeBan->m_sReason == NULL) {
-							AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sReason3 in BanManager::LoadXML\n", (uint64_t)(szReasonLen+1));
+							AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sReason3 in BanManager::LoadXML\n", szReasonLen+1);
                             exit(EXIT_FAILURE);
                         }
 
@@ -1768,7 +1768,7 @@ void BanManager::LoadXML() {
 						RangeBan->m_sBy = (char *)malloc(szByLen+1);
 #endif
                         if(RangeBan->m_sBy == NULL) {
-							AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sBy3 in BanManager::LoadXML\n", (uint64_t)(szByLen+1));
+							AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sBy3 in BanManager::LoadXML\n", szByLen+1);
                             exit(EXIT_FAILURE);
                         }
 
@@ -2248,7 +2248,7 @@ void BanManager::Ban(User * pUser, const char * sReason, char * sBy, const bool 
         if(pBan->m_sReason == NULL) {
             delete pBan;
 
-            AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for sReason in BanManager::Ban\n", (uint64_t)(szReasonLen > 511 ? 512 : szReasonLen+1));
+            AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for sReason in BanManager::Ban\n", szReasonLen > 511 ? 512 : szReasonLen+1);
 
             return;
         }
@@ -2278,7 +2278,7 @@ void BanManager::Ban(User * pUser, const char * sReason, char * sBy, const bool 
         if(pBan->m_sBy == NULL) {
             delete pBan;
 
-            AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sBy in BanManager::Ban\n", (uint64_t)(szByLen+1));
+            AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sBy in BanManager::Ban\n", szByLen+1);
 
 			return;
         }   
@@ -2370,7 +2370,7 @@ char BanManager::BanIp(User * pUser, char * sIp, char * sReason, char * sBy, con
         if(pBan->m_sReason == NULL) {
             delete pBan;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sReason in BanManager::BanIp\n", (uint64_t)(szReasonLen > 511 ? 512 : szReasonLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sReason in BanManager::BanIp\n", szReasonLen > 511 ? 512 : szReasonLen+1);
 
             return 1;
         }
@@ -2400,7 +2400,7 @@ char BanManager::BanIp(User * pUser, char * sIp, char * sReason, char * sBy, con
         if(pBan->m_sBy == NULL) {
             delete pBan;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sBy in BanManager::BanIp\n", (uint64_t)(szByLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sBy in BanManager::BanIp\n", szByLen+1);
 
             return 1;
         }   
@@ -2452,7 +2452,7 @@ bool BanManager::NickBan(User * pUser, char * sNick, char * sReason, char * sBy)
         if(pBan->m_sNick == NULL) {
             delete pBan;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sNick in BanManager::NickBan\n", (uint64_t)(szNickLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sNick in BanManager::NickBan\n", szNickLen+1);
 
             return false;
         }
@@ -2525,7 +2525,7 @@ bool BanManager::NickBan(User * pUser, char * sNick, char * sReason, char * sBy)
         if(pBan->m_sReason == NULL) {
             delete pBan;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sReason in BanManager::NickBan\n", (uint64_t)(szReasonLen > 511 ? 512 : szReasonLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sReason in BanManager::NickBan\n", szReasonLen > 511 ? 512 : szReasonLen+1);
 
             return false;
         }   
@@ -2555,7 +2555,7 @@ bool BanManager::NickBan(User * pUser, char * sNick, char * sReason, char * sBy)
         if(pBan->m_sBy == NULL) {
             delete pBan;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sBy in BanManager::NickBan\n", (uint64_t)(szByLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sBy in BanManager::NickBan\n", szByLen+1);
 
             return false;
         }   
@@ -2615,7 +2615,7 @@ void BanManager::TempBan(User * pUser, const char * sReason, char * sBy, const u
         if(pBan->m_sNick == NULL) {
             delete pBan;
 
-            AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sNick in BanManager::TempBan\n", (uint64_t)(szNickLen+1));
+            AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sNick in BanManager::TempBan\n", szNickLen+1);
 
             return;
         }
@@ -2752,7 +2752,7 @@ void BanManager::TempBan(User * pUser, const char * sReason, char * sBy, const u
         if(pBan->m_sReason == NULL) {
             delete pBan;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sReason in BanManager::TempBan\n", (uint64_t)(szReasonLen > 511 ? 512 : szReasonLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sReason in BanManager::TempBan\n", szReasonLen > 511 ? 512 : szReasonLen+1);
 
             return;
         }   
@@ -2782,7 +2782,7 @@ void BanManager::TempBan(User * pUser, const char * sReason, char * sBy, const u
         if(pBan->m_sBy == NULL) {
             delete pBan;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sBy in BanManager::TempBan\n", (uint64_t)(szByLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sBy in BanManager::TempBan\n", szByLen+1);
 
             return;
         }   
@@ -2878,7 +2878,7 @@ char BanManager::TempBanIp(User * pUser, char * sIp, char * sReason, char * sBy,
         if(pBan->m_sReason == NULL) {
             delete pBan;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sReason in BanManager::TempBanIp\n", (uint64_t)(szReasonLen > 511 ? 512 : szReasonLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sReason in BanManager::TempBanIp\n", szReasonLen > 511 ? 512 : szReasonLen+1);
 
             return 1;
         }
@@ -2908,7 +2908,7 @@ char BanManager::TempBanIp(User * pUser, char * sIp, char * sReason, char * sBy,
         if(pBan->m_sBy == NULL) {
             delete pBan;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sBy in BanManager::TempBanIp\n", (uint64_t)(szByLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sBy in BanManager::TempBanIp\n", szByLen+1);
 
             return 1;
         }   
@@ -2960,7 +2960,7 @@ bool BanManager::NickTempBan(User * pUser, char * sNick, char * sReason, char * 
         if(pBan->m_sNick == NULL) {
             delete pBan;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sNick in BanManager::NickTempBan\n", (uint64_t)(szNickLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sNick in BanManager::NickTempBan\n", szNickLen+1);
 
             return false;
         }   
@@ -3047,7 +3047,7 @@ bool BanManager::NickTempBan(User * pUser, char * sNick, char * sReason, char * 
         if(pBan->m_sReason == NULL) {
             delete pBan;
 
-            AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sReason in BanManager::NickTempBan\n", (uint64_t)(szReasonLen > 511 ? 512 : szReasonLen+1));
+            AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sReason in BanManager::NickTempBan\n", szReasonLen > 511 ? 512 : szReasonLen+1);
 
             return false;
         }   
@@ -3077,7 +3077,7 @@ bool BanManager::NickTempBan(User * pUser, char * sNick, char * sReason, char * 
         if(pBan->m_sBy == NULL) {
             delete pBan;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sBy in BanManager::NickTempBan\n", (uint64_t)(szByLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sBy in BanManager::NickTempBan\n", szByLen+1);
 
             return false;
         }   
@@ -3343,7 +3343,7 @@ bool BanManager::RangeBan(char * sIpFrom, const uint8_t * ui128FromIpHash, char 
         if(pRangeBan->m_sReason == NULL) {
             delete pRangeBan;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sReason in BanManager::RangeBan\n", (uint64_t)(szReasonLen > 511 ? 512 : szReasonLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sReason in BanManager::RangeBan\n", szReasonLen > 511 ? 512 : szReasonLen+1);
 
             return false;
         }   
@@ -3373,7 +3373,7 @@ bool BanManager::RangeBan(char * sIpFrom, const uint8_t * ui128FromIpHash, char 
         if(pRangeBan->m_sBy == NULL) {
             delete pRangeBan;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sBy in BanManager::RangeBan\n", (uint64_t)(szByLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sBy in BanManager::RangeBan\n", szByLen+1);
 
             return false;
         }   
@@ -3463,7 +3463,7 @@ bool BanManager::RangeTempBan(char * sIpFrom, const uint8_t * ui128FromIpHash, c
         if(pRangeBan->m_sReason == NULL) {
             delete pRangeBan;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sReason in BanManager::RangeTempBan\n", (uint64_t)(szReasonLen > 511 ? 512 : szReasonLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sReason in BanManager::RangeTempBan\n", szReasonLen > 511 ? 512 : szReasonLen+1);
 
             return false;
         }   
@@ -3493,7 +3493,7 @@ bool BanManager::RangeTempBan(char * sIpFrom, const uint8_t * ui128FromIpHash, c
         if(pRangeBan->m_sBy == NULL) {
             delete pRangeBan;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for m_sBy in BanManager::RangeTempBan\n", (uint64_t)(szByLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for m_sBy in BanManager::RangeTempBan\n", szByLen+1);
 
             return false;
         }   

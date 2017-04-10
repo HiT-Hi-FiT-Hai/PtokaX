@@ -83,7 +83,7 @@ char * ZlibUtility::CreateZPipe(const char * sInData, const size_t szInDataSize,
 			m_szZbufferSize = szOldZbufferSize;
             ui32OutDataLen = 0;
 
-			AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes for m_pZbuffer in ZlibUtility::CreateZPipe\n", (uint64_t)m_szZbufferSize);
+			AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes for m_pZbuffer in ZlibUtility::CreateZPipe\n", m_szZbufferSize);
 
             return m_pZbuffer;
         }
@@ -149,7 +149,7 @@ char * ZlibUtility::CreateZPipe(char * sInData, const size_t szInDataSize, char 
 			m_szZbufferSize = szOldZbufferSize;
             szOutDataLen = 0;
 
-			AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes for m_pZbuffer in ZlibUtility::CreateZPipe\n", (uint64_t)m_szZbufferSize);
+			AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes for m_pZbuffer in ZlibUtility::CreateZPipe\n", m_szZbufferSize);
 
             return sOutData;
         }
@@ -205,7 +205,7 @@ char * ZlibUtility::CreateZPipe(char * sInData, const size_t szInDataSize, char 
             szOutDataSize = szOldOutDataSize;
             szOutDataLen = 0;
 
-			AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes for sOutData in ZlibUtility::CreateZPipe\n", (uint64_t)(szOutDataSize+1));
+			AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes for sOutData in ZlibUtility::CreateZPipe\n", szOutDataSize+1);
 
             return sOutData;
         }
@@ -238,7 +238,7 @@ char * ZlibUtility::CreateZPipe(char * sInData, const size_t szInDataSize, char 
 			m_szZbufferSize = szOldZbufferSize;
             ui32OutDataLen = 0;
 
-			AppendDebugLogFormat("[MEM] Cannot reallocate %" PRIu64 " bytes for m_pZbuffer in ZlibUtility::CreateZPipe\n", (uint64_t)m_szZbufferSize);
+			AppendDebugLogFormat("[MEM] Cannot reallocate %zu bytes for m_pZbuffer in ZlibUtility::CreateZPipe\n", m_szZbufferSize);
 
             return sOutData;
         }
@@ -295,7 +295,7 @@ char * ZlibUtility::CreateZPipe(char * sInData, const size_t szInDataSize, char 
             ui32OutDataSize = uiOldOutDataSize;
             ui32OutDataLen = 0;
 
-			AppendDebugLogFormat("[MEM] Cannot reallocate %u bytes for sOutData in ZlibUtility::CreateZPipe\n", (uint64_t)(ui32OutDataSize+1));
+			AppendDebugLogFormat("[MEM] Cannot reallocate %u bytes for sOutData in ZlibUtility::CreateZPipe\n", ui32OutDataSize+1);
 
             return sOutData;
         }

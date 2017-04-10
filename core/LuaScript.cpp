@@ -98,7 +98,7 @@ ScriptBot::~ScriptBot() {
 }
 //------------------------------------------------------------------------------
 
-ScriptBot * ScriptBot::CreateScriptBot(char * sBotNick, const size_t szNickLen, char * sDescription, const size_t szDscrLen, char * sEmail, const size_t szEmlLen, const bool bOP) {
+ScriptBot * ScriptBot::CreateScriptBot(char * sBotNick, const size_t szNickLen, char * sDescription, const size_t szDscrLen, char * sEmail, const size_t szEmailLen, const bool bOP) {
     ScriptBot * pScriptBot = new (std::nothrow) ScriptBot();
 
     if(pScriptBot == NULL) {
@@ -113,7 +113,7 @@ ScriptBot * ScriptBot::CreateScriptBot(char * sBotNick, const size_t szNickLen, 
 	pScriptBot->m_sNick = (char *)malloc(szNickLen+1);
 #endif
     if(pScriptBot->m_sNick == NULL) {
-		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pScriptBot->m_sNick in ScriptBot::CreateScriptBot\n", (uint64_t)(szNickLen+1));
+		AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for pScriptBot->m_sNick in ScriptBot::CreateScriptBot\n", szNickLen+1);
 
         delete pScriptBot;
 		return NULL;
@@ -123,7 +123,7 @@ ScriptBot * ScriptBot::CreateScriptBot(char * sBotNick, const size_t szNickLen, 
 
     pScriptBot->m_bIsOP = bOP;
 
-    size_t szWantLen = 24+szNickLen+szDscrLen+szEmlLen;
+    size_t szWantLen = 24+szNickLen+szDscrLen+szEmailLen;
 
 #ifdef _WIN32
     pScriptBot->m_sMyINFO = (char *)HeapAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, szWantLen);
@@ -131,7 +131,7 @@ ScriptBot * ScriptBot::CreateScriptBot(char * sBotNick, const size_t szNickLen, 
 	pScriptBot->m_sMyINFO = (char *)malloc(szWantLen);
 #endif
     if(pScriptBot->m_sMyINFO == NULL) {
-		AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pScriptBot->m_sMyINFO in ScriptBot::CreateScriptBot\n", (uint64_t)szWantLen);
+		AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for pScriptBot->m_sMyINFO in ScriptBot::CreateScriptBot\n", szWantLen);
 
         delete pScriptBot;
 		return NULL;
@@ -193,7 +193,7 @@ ScriptTimer * ScriptTimer::CreateScriptTimer(char * sFunctName, const size_t szL
             pScriptTimer->m_sFunctionName = (char *)malloc(szLen+1);
 #endif
             if(pScriptTimer->m_sFunctionName == NULL) {
-                AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pScriptTimer->m_sFunctionName in ScriptTimer::CreateScriptTimer\n", (uint64_t)(szLen+1));
+                AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for pScriptTimer->m_sFunctionName in ScriptTimer::CreateScriptTimer\n", szLen+1);
 
                 delete pScriptTimer;
                 return NULL;
@@ -242,7 +242,7 @@ Script::~Script() {
 }
 //------------------------------------------------------------------------------
 
-Script * Script::CreateScript(char * Name, const bool enabled) {
+Script * Script::CreateScript(char * sName, const bool enabled) {
     Script * pScript = new (std::nothrow) Script();
 
     if(pScript == NULL) {
@@ -252,17 +252,17 @@ Script * Script::CreateScript(char * Name, const bool enabled) {
     }
 
 #ifdef _WIN32
-	string ExtractedFilename(ExtractFileName(Name));
+	string ExtractedFilename(ExtractFileName(sName));
 	size_t szNameLen = ExtractedFilename.size();
 
     pScript->m_sName = (char *)HeapAlloc(ServerManager::m_hPtokaXHeap, HEAP_NO_SERIALIZE, szNameLen+1);
 #else
-    size_t szNameLen = strlen(Name);
+    size_t szNameLen = strlen(sName);
 
     pScript->m_sName = (char *)malloc(szNameLen+1);
 #endif
     if(pScript->m_sName == NULL) {
-        AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes in Script::CreateScript\n", (uint64_t)szNameLen+1);
+        AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes in Script::CreateScript\n", szNameLen+1);
 
         delete pScript;
         return NULL;
@@ -270,7 +270,7 @@ Script * Script::CreateScript(char * Name, const bool enabled) {
 #ifdef _WIN32
     memcpy(pScript->m_sName, ExtractedFilename.c_str(), ExtractedFilename.size());
 #else
-    memcpy(pScript->m_sName, Name, szNameLen);
+    memcpy(pScript->m_sName, sName, szNameLen);
 #endif
     pScript->m_sName[szNameLen] = '\0';
 
@@ -364,7 +364,7 @@ static void AddSettingIds(lua_State * pLua) {
 	};
 
 	const char * pNumbersNames[] = { "MaxUsers", "MinShareLimit", "MinShareUnits", "MaxShareLimit", "MaxShareUnits",
-		"MinSlotsLimit", "MaxSlotsLimt", "HubSlotRatioHubs", "HubSlotRatioSlots", "MaxHubsLimit",
+		"MinSlotsLimit", "MaxSlotsLimit", "HubSlotRatioHubs", "HubSlotRatioSlots", "MaxHubsLimit",
 		"NoTagOption", "LongMyinfoOption", "MaxChatLen", "MaxChatLines", "MaxPmLen",
 		"MaxPmLines", "DefaultTempBanTime", "MaxPasiveSr", "MyInfoDelay", "MainChatMessages",
 		"MainChatTime", "MainChatAction", "SameMainChatMessages", "SameMainChatTime", "SameMainChatAction",

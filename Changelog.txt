@@ -1,10 +1,12 @@
-﻿PtokaX DC hub software - Ptaczek/Frontline3k/aMutex (c) 2oo2/2oo3
+PtokaX DC hub software - Ptaczek/Frontline3k/aMutex (c) 2oo2/2oo3
 PtokaX DC hub software - Ptaczek/PPK (c) 2004/2005
-PtokaX DC hub software - PPK (c) 2006/2015
+PtokaX DC hub software - PPK (c) 2006/2017
 ------------------------------------------------------------------------------
 
 
 ----------------------------------------Next Release...---------------------------------------
+
+-------------------------------------0.5.2.2 11 April 2017-------------------------------------
 Added: Reconnect to database on connection failure or connection lost.
 Fixed: Compile for Windows 10 IoT.
 Fixed: Typo in server manager and resource leak in sqlite on exit (thx Pavel Pimenov for report).
@@ -18,6 +20,7 @@ Fixed: Empty password received from user was not checked properly and accepted a
 Fixed: Bandwidth waste, when IPv6 user send search request with IPv4 address.
 Fixed: Possible crash on hublist registration (thx Pavel Pimenov for report).
 Fixed: Bind to single IP caused bind to all addresses when IPv6 address was empty.
+Fixed: Typo in scripting interface. MaxSlotsLimt -> MaxSlotsLimit (thx Cęńoßy†ę for report).
 Changed: Log script errors is enabled by default for PtokaX versions without GUI.
 
 

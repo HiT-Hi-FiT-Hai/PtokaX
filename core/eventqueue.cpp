@@ -131,7 +131,7 @@ void EventQueue::AddNormal(const uint8_t ui8Id, char * sMsg) {
 		if(pNewEvent->m_sMsg == NULL) {
             delete pNewEvent;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pNewEvent->m_sMsg in EventQueue::AddNormal\n", (uint64_t)(szLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for pNewEvent->m_sMsg in EventQueue::AddNormal\n", szLen+1);
 
             return;
         }
@@ -171,7 +171,7 @@ void EventQueue::AddThread(const uint8_t ui8Id, char * sMsg, const sockaddr_stor
 		if(pNewEvent->m_sMsg == NULL) {
             delete pNewEvent;
 
-			AppendDebugLogFormat("[MEM] Cannot allocate %" PRIu64 " bytes for pNewEvent->m_sMsg in EventQueue::AddThread\n", (uint64_t)(szLen+1));
+			AppendDebugLogFormat("[MEM] Cannot allocate %zu bytes for pNewEvent->m_sMsg in EventQueue::AddThread\n", szLen+1);
 
             return;
         }

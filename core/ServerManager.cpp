@@ -1148,7 +1148,7 @@ bool ServerManager::ResolveHubAddress(const bool bSilent/* = false*/) {
                             }
                         } else if(next->ai_family == AF_INET6) {
 #if defined(_WIN32) && !defined(_WIN64) && !defined(_WIN_IOT)
-                            win_inet_ntop(&((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, sHubIP6, 40);
+                            win_inet_ntop(&((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, m_sHubIP6, 40);
 #else
                             inet_ntop(AF_INET6, &((struct sockaddr_in6 *)next->ai_addr)->sin6_addr, m_sHubIP6, 40);
 #endif
